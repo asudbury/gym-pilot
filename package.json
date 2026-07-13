@@ -8,6 +8,10 @@
   "scripts": {
     "dev:web": "npm --workspace apps/web run dev",
     "build:web": "npm --workspace apps/web run build",
-    "build": "npm run build:web"
+    "build": "npm run build:web",
+    "deploy:web": "npm --workspace apps/web run deploy"
+  },
+  "devDependencies": {
+    "gh-pages": "^6.3.0"
   }
 }

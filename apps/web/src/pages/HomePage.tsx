@@ -6,14 +6,8 @@ import { exercises, exercisesSchema, formatLabel } from '@gym-pilot/shared'
 import { PageCard } from '../components/PageCard'
 import { PageActionRow } from '../components/PageActionRow'
 import { PageLayout } from '../layouts/PageLayout'
-import { Heading1, Heading2 } from '../components/Typography'
+import { Heading2 } from '../components/Typography'
 import { appTokens } from '../styles/tokens'
-
-const quickStartTips = [
-  'Browse exercises from the library',
-  'Create assignments for clients or friends',
-  'Track progress notes for each exercise',
-]
 
 export function HomePage() {
   const [selectedCategory, setSelectedCategory] = useState('All')
