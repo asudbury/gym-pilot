@@ -86,7 +86,7 @@ export function HomePage() {
             </button>
           ))}
         </div>
-
+{/* 
         <div className="mt-4 flex flex-wrap items-center gap-3 border-t border-slate-200 pt-4">
           {equipment.map((item) => (
             <button
@@ -101,7 +101,7 @@ export function HomePage() {
               {item}
             </button>
           ))}
-        </div>
+        </div> */}
       </PageCard>
 
       <PageCard as="section">
@@ -119,30 +119,33 @@ export function HomePage() {
               key={exercise.id}
               className={`flex cursor-pointer gap-4 ${appTokens.surfaceSoft} p-4 shadow-sm transition hover:-translate-y-0.5 hover:border-slate-300 hover:shadow-md`}
             >
-              <Link to={`/exercise/${exercise.id}`} className="flex min-w-0 flex-1 gap-4">
-                <img src={getAssetUrl(exercise.image)} alt={exercise.name} className="h-24 w-24 shrink-0 rounded-2xl object-cover" />
-                <h3 className="text-lg font-semibold text-slate-900">{formatLabel(exercise.name)}</h3>
-                <ResponsiveVisibility visibleOn="desktop">
-                    <ExerciseMetaBadges
-                      values={[formatLabel(exercise.category), formatLabel(exercise.equipment)]}
-                      tones={['blue', 'orange']}
-                      className="mt-2"
-                      pillClassName="text-xs" />
-                </ResponsiveVisibility>
-
-            </Link><div className="flex shrink-0 flex-col gap-2 self-start">
-                <button
-                  type="button"
-                  onClick={(event) => {
-                    event.preventDefault()
-                    event.stopPropagation()
-                    void handleCopyUrl(exercise.id)
-                  } }
-                  className={getToneClass('white', 'px-3 py-2 text-sm font-medium')}
-                >
-                  {copiedId === exercise.id ? 'Copied!' : 'Copy URL'}
-                </button>
-              </div>
+              <Link to={`/exercise/${exercise.id}`} className="flex min-w-0 flex-1 flex-col gap-3">
+                <div className="min-w-0 flex-1">
+                  <h3 className="text-lg font-semibold text-slate-900">{formatLabel(exercise.name)}</h3>
+                  <ExerciseMetaBadges
+                    values={[formatLabel(exercise.category), formatLabel(exercise.equipment)]}
+                    tones={['blue', 'orange']}
+                    className="mt-2"
+                    pillClassName="text-xs"
+                  />
+                </div>
+                <img src={getAssetUrl(exercise.image)} alt={exercise.name}  />
+              </Link>
+              <ResponsiveVisibility visibleOn="desktop">
+                <div className="flex shrink-0 flex-col gap-2 self-start">
+                  <button
+                    type="button"
+                    onClick={(event) => {
+                      event.preventDefault()
+                      event.stopPropagation()
+                      void handleCopyUrl(exercise.id)
+                    }}
+                    className={getToneClass('white', 'px-3 py-2 text-sm font-medium')}
+                  >
+                    {copiedId === exercise.id ? 'Copied!' : 'Copy URL'}
+                  </button>
+                </div>
+              </ResponsiveVisibility>
             </div>
           ))}
         </div>
