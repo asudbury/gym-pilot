@@ -7,7 +7,7 @@ import { PageActionGroup } from './PageActionRow'
 import { PageActionRow } from './PageActionRow'
 import { YouTubeExerciseSearchButton } from './YouTubeExerciseSearchButton'
 import { Heading2 } from './Typography'
-import { appTokens } from '../styles/tokens'
+import { appTokens } from '../constants/tokens'
 import { formatLabel } from '@gym-pilot/shared'
 import type { PlanItem } from '@gym-pilot/types'
 
@@ -75,8 +75,8 @@ export function ExerciseDetailsCard({
       {expanded ? (
         <>
           <ExerciseImage mediaGif={exercise.gif_url} exerciseName={exercise.name} className="mt-6" />
-          <YouTubeExerciseSearchButton exerciseName={exercise.name} />
           <ExerciseSteps steps={exercise.instruction_steps.en} className="mt-8" />
+          <YouTubeExerciseSearchButton exerciseName={exercise.name} />
 
           {showNotesSection ? (
             <div className="mt-6">

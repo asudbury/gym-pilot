@@ -1,5 +1,5 @@
 import type { ComponentPropsWithoutRef, ElementType, ReactNode } from 'react'
-import { appTokens } from '../styles/tokens'
+import { appTokens } from '../constants/tokens'
 
 type PageCardProps<T extends ElementType = 'div'> = {
   as?: T

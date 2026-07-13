@@ -1,0 +1,5 @@
+export const HOME_FILTER_STORAGE_KEY = 'gym-pilot.home-filters'
+export const QUICK_LINKS_FAVORITES_STORAGE_KEY = 'gym-pilot.quick-links.favorites'
+export const QUICK_LINKS_RECENT_STORAGE_KEY = 'gym-pilot.quick-links.recent'
+export const QUICK_LINKS_SAVED_SEARCHES_STORAGE_KEY = 'gym-pilot.quick-links.saved-searches'
+export const ASSIGNMENTS_STORAGE_KEY = 'gym-pilot-assignments'

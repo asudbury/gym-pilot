@@ -1,7 +1,7 @@
 import { Link } from 'react-router-dom'
 import { Button } from '../components/Button'
 import { getToneClass } from '../components/toneClasses'
-import { appTokens } from '../styles/tokens'
+import { appTokens } from '../constants/tokens'
 import { usePlan } from '@gym-pilot/shared'
 import type { WeeklyDay } from '@gym-pilot/types'
 import { EmptyState } from '../components/EmptyState'

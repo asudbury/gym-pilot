@@ -16,6 +16,8 @@ export function ExerciseImage({
       <img
         src={getAssetUrl(mediaGif)}
         alt={`${exerciseName} demo gif`}
+        loading="lazy"
+        decoding="async"
         className="h-72 rounded-xl object-contain border border-slate-200 bg-slate-50 p-1"
       />
     </div>

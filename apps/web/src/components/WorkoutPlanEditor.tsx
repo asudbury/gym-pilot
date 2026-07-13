@@ -3,7 +3,7 @@ import type { PlanPart, PlanPartExerciseEntry, PlanPartWeek, WeeklyDay } from '@
 import { exercises, exercisesSchema, formatLabel } from '@gym-pilot/shared'
 import { Button } from './Button'
 import { ExerciseMetaBadges } from './ExerciseMetaBadges'
-import { appTokens } from '../styles/tokens'
+import { appTokens } from '../constants/tokens'
 
 type WorkoutPlanEditorProps = {
   value: PlanPart[]

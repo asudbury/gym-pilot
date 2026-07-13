@@ -9,5 +9,9 @@
     "dev:web": "npm --workspace apps/web run dev",
     "build:web": "npm --workspace apps/web run build",
     "build": "npm run build:web"
+  },
+  "dependencies": {
+    "@types/react-window": "^1.8.8",
+    "react-window": "^2.2.7"
   }
 }

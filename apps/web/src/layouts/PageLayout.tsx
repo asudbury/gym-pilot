@@ -1,6 +1,6 @@
 import { NavLink, useLocation } from 'react-router-dom'
 import type { ReactNode } from 'react'
-import { appTokens } from '../styles/tokens'
+import { appTokens } from '../constants/tokens'
 import { getToneClass } from '../components/toneClasses'
 
 type PageLayoutProps = {

@@ -19,8 +19,12 @@ type PlanContextValue = {
   deleteAssignment: (assignmentId: string) => void
 }
 
+type PlanProviderProps = {
+  children: ReactNode
+  storageKey?: string
+}
+
 const PlanContext = createContext<PlanContextValue | undefined>(undefined)
-const ASSIGNMENTS_STORAGE_KEY = 'gym-pilot-assignments'
 const persistence = new LocalStoragePersistence()
 
 function buildAssignmentSlug(personName: string, assignments: Assignment[]) {
@@ -56,8 +60,8 @@ function normalizeAssignment(assignment: Assignment): Assignment {
   }
 }
 
-function getStoredAssignments(): Assignment[] {
-  const stored = persistence.load<Assignment[]>(ASSIGNMENTS_STORAGE_KEY, [])
+function getStoredAssignments(storageKey: string): Assignment[] {
+  const stored = persistence.load<Assignment[]>(storageKey, [])
   if (!Array.isArray(stored)) {
     return []
   }
@@ -65,12 +69,12 @@ function getStoredAssignments(): Assignment[] {
   return stored.map((assignment) => normalizeAssignment(assignment))
 }
 
-export function PlanProvider({ children }: { children: ReactNode }) {
-  const [assignments, setAssignments] = useState<Assignment[]>(() => getStoredAssignments())
+export function PlanProvider({ children, storageKey = 'gym-pilot-assignments' }: PlanProviderProps) {
+  const [assignments, setAssignments] = useState<Assignment[]>(() => getStoredAssignments(storageKey))
 
   useEffect(() => {
-    persistence.save(ASSIGNMENTS_STORAGE_KEY, assignments)
-  }, [assignments])
+    persistence.save(storageKey, assignments)
+  }, [assignments, storageKey])
 
   const assignPlan = (personName: string, exerciseIds?: string[], assignedDays?: Record<string, WeeklyDay>) => {
     const trimmedName = personName.trim()
