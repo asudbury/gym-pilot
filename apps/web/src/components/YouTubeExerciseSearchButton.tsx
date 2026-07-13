@@ -1,4 +1,3 @@
-import { formatLabel } from '@gym-pilot/shared/src/utils'
 import { Button } from './Button'
 
 type YouTubeExerciseSearchButtonProps = {
@@ -22,7 +21,7 @@ export function YouTubeExerciseSearchButton({
       disabled={!exerciseName.trim()}
       className="mt-4 px-4 py-2"
     >
-      Search for '{formatLabel(exerciseName)}' exercise on YouTube
+      Search for on YouTube
     </Button>
   )
 }

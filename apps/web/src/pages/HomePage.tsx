@@ -1,6 +1,5 @@
 import { useMemo, useState } from 'react'
 import { Link } from 'react-router-dom'
-import { ExerciseMetaBadges } from '../components/ExerciseMetaBadges'
 import { getToneClass } from '../components/toneClasses'
 import { exercises, exercisesSchema, formatLabel } from '@gym-pilot/shared'
 import { PageCard } from '../components/PageCard'
@@ -9,6 +8,8 @@ import { PageLayout } from '../layouts/PageLayout'
 import { Heading2 } from '../components/Typography'
 import { appTokens } from '../styles/tokens'
 import { getAssetUrl } from '../utils/assetUrl'
+import { ExerciseMetaBadges } from '../components/ExerciseMetaBadges'
+import { ResponsiveVisibility } from '../components/ResponsiveVisibility'
 
 export function HomePage() {
   const [selectedCategory, setSelectedCategory] = useState('All')
@@ -120,24 +121,23 @@ export function HomePage() {
             >
               <Link to={`/exercise/${exercise.id}`} className="flex min-w-0 flex-1 gap-4">
                 <img src={getAssetUrl(exercise.image)} alt={exercise.name} className="h-24 w-24 shrink-0 rounded-2xl object-cover" />
-                <div className="min-w-0 flex-1">
-                  <h3 className="text-lg font-semibold text-slate-900">{formatLabel(exercise.name)}</h3>
-                  <ExerciseMetaBadges
-                    values={[formatLabel(exercise.category), formatLabel(exercise.equipment)]}
-                    tones={['blue', 'orange']}
-                    className="mt-2"
-                    pillClassName="text-xs"
-                  />
-                </div>
-              </Link>
-              <div className="flex shrink-0 flex-col gap-2 self-start">
+                <h3 className="text-lg font-semibold text-slate-900">{formatLabel(exercise.name)}</h3>
+                <ResponsiveVisibility visibleOn="desktop">
+                    <ExerciseMetaBadges
+                      values={[formatLabel(exercise.category), formatLabel(exercise.equipment)]}
+                      tones={['blue', 'orange']}
+                      className="mt-2"
+                      pillClassName="text-xs" />
+                </ResponsiveVisibility>
+
+            </Link><div className="flex shrink-0 flex-col gap-2 self-start">
                 <button
                   type="button"
                   onClick={(event) => {
                     event.preventDefault()
                     event.stopPropagation()
                     void handleCopyUrl(exercise.id)
-                  }}
+                  } }
                   className={getToneClass('white', 'px-3 py-2 text-sm font-medium')}
                 >
                   {copiedId === exercise.id ? 'Copied!' : 'Copy URL'}

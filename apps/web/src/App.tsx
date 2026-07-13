@@ -1,5 +1,6 @@
 import { NavLink, Route, Routes } from 'react-router-dom'
 import { getToneClass } from './components/toneClasses'
+import { ResponsiveVisibility } from './components/ResponsiveVisibility'
 import { usePlan } from '@gym-pilot/shared'
 import { ExercisePage } from './pages/ExercisePage'
 import { HomePage } from './pages/HomePage'
@@ -18,15 +19,24 @@ function App() {
             GymPilot
           </NavLink>
           <div className="flex flex-wrap gap-2">
-            <NavLink
-              to="/assignments"
-              className={getToneClass('default', 'px-4 py-2 text-sm font-medium')}
-            >
-              Assignments ({assignments.length})
-            </NavLink>
-            <NavLink to="/assignments/new" className={getToneClass('default', 'px-4 py-2 text-sm font-medium')}>
-              Create assignment
-            </NavLink>
+            <ResponsiveVisibility visibleOn="desktop">
+              <NavLink
+                to="/assignments"
+                className={getToneClass('default', 'px-4 py-2 text-sm font-medium')}
+              >
+                Assignments ({assignments.length})
+              </NavLink>
+            </ResponsiveVisibility>
+            <ResponsiveVisibility visibleOn="tablet">
+              <NavLink to="/assignments/new" className={getToneClass('default', 'px-4 py-2 text-sm font-medium')}>
+                Create assignment
+              </NavLink>
+            </ResponsiveVisibility>
+            <ResponsiveVisibility visibleOn="mobile">
+              <NavLink to="/assignments" className={getToneClass('default', 'px-4 py-2 text-sm font-medium')}>
+                Menu
+              </NavLink>
+            </ResponsiveVisibility>
           </div>
         </div>
       </nav>
