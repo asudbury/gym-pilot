@@ -8,6 +8,7 @@ import { PageActionRow } from '../components/PageActionRow'
 import { PageLayout } from '../layouts/PageLayout'
 import { Heading2 } from '../components/Typography'
 import { appTokens } from '../styles/tokens'
+import { getAssetUrl } from '../utils/assetUrl'
 
 export function HomePage() {
   const [selectedCategory, setSelectedCategory] = useState('All')
@@ -118,7 +119,7 @@ export function HomePage() {
               className={`flex cursor-pointer gap-4 ${appTokens.surfaceSoft} p-4 shadow-sm transition hover:-translate-y-0.5 hover:border-slate-300 hover:shadow-md`}
             >
               <Link to={`/exercise/${exercise.id}`} className="flex min-w-0 flex-1 gap-4">
-                <img src={`/${exercise.image}`} alt={exercise.name} className="h-24 w-24 shrink-0 rounded-2xl object-cover" />
+                <img src={getAssetUrl(exercise.image)} alt={exercise.name} className="h-24 w-24 shrink-0 rounded-2xl object-cover" />
                 <div className="min-w-0 flex-1">
                   <h3 className="text-lg font-semibold text-slate-900">{formatLabel(exercise.name)}</h3>
                   <ExerciseMetaBadges

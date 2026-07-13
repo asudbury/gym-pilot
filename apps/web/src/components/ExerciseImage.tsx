@@ -1,3 +1,5 @@
+import { getAssetUrl } from '../utils/assetUrl'
+
 type ExerciseImageProps = {
   mediaGif: string,
   exerciseName: string,
@@ -10,12 +12,12 @@ export function ExerciseImage({
   className,
 }: ExerciseImageProps) {
   return (
-        <div className={className ?? ''}>
-          <img
-            src={mediaGif.startsWith('/') ? mediaGif : `/${mediaGif}`}
-            alt={`${exerciseName} demo gif`}
-            className="h-72 rounded-xl object-contain border border-slate-200 bg-slate-50 p-1"
-          />
-        </div>
+    <div className={className ?? ''}>
+      <img
+        src={getAssetUrl(mediaGif)}
+        alt={`${exerciseName} demo gif`}
+        className="h-72 rounded-xl object-contain border border-slate-200 bg-slate-50 p-1"
+      />
+    </div>
   )
 }

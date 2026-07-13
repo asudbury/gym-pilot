@@ -21,7 +21,7 @@ export function ExercisePage() {
     return parsed.find((item) => item.id === id)
   }, [id])
 
-  const mediaGif = exercise ? `/${exercise.gif_url}` : ''
+  const mediaGif = exercise ? exercise.gif_url : ''
 
   const handleCopyUrl = async () => {
     try {
