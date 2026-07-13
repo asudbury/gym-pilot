@@ -14,10 +14,9 @@ import { ResponsiveVisibility } from '../components/ResponsiveVisibility'
 export function HomePage() {
   const [selectedCategory, setSelectedCategory] = useState('All')
   const [copiedId, setCopiedId] = useState<string | null>(null)
-  const [selectedEquipment, setSelectedEquipment] = useState('All')
   const [searchTerm, setSearchTerm] = useState('')
 
-  const { exerciseList, categories, equipment, totalExercises } = useMemo(() => {
+  const { exerciseList, categories, totalExercises } = useMemo(() => {
     const parsed = exercisesSchema.parse(exercises)
 
     return {
@@ -45,14 +44,13 @@ export function HomePage() {
 
     return exerciseList.filter((exercise) => {
       const matchesCategory = selectedCategory === 'All' || formatLabel(exercise.category) === selectedCategory
-      const matchesEquipment = selectedEquipment === 'All' || formatLabel(exercise.equipment) === selectedEquipment
       const matchesSearch =
         normalizedSearch.length === 0 ||
         [exercise.name, exercise.category, exercise.target, exercise.equipment].join(' ').toLowerCase().includes(normalizedSearch)
 
-      return matchesCategory && matchesEquipment && matchesSearch
+      return matchesCategory && matchesSearch
     })
-  }, [exerciseList, searchTerm, selectedCategory, selectedEquipment])
+  }, [exerciseList, searchTerm, selectedCategory])
 
   return (
     <PageLayout className="gap-6">
