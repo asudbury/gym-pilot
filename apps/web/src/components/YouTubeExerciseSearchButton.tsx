@@ -19,9 +19,10 @@ export function YouTubeExerciseSearchButton({
       onClick={handleClick}
       aria-label={`Search YouTube for ${exerciseName}`}
       disabled={!exerciseName.trim()}
-      className="mt-4 px-4 py-2"
+      className="mt-4 inline-flex items-center gap-2 px-4 py-2"
     >
-      Search for on YouTube
+      <span aria-hidden="true" className="text-lg">▶</span>
+      <span>Search for on YouTube</span>
     </Button>
   )
 }

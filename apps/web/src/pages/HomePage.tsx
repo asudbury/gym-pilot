@@ -7,9 +7,9 @@ import { PageActionRow } from '../components/PageActionRow'
 import { PageLayout } from '../layouts/PageLayout'
 import { Heading2 } from '../components/Typography'
 import { appTokens } from '../styles/tokens'
-import { getAssetUrl } from '../utils/assetUrl'
 import { ExerciseMetaBadges } from '../components/ExerciseMetaBadges'
 import { ResponsiveVisibility } from '../components/ResponsiveVisibility'
+import { ExerciseImage } from '../components/ExerciseImage'
 
 export function HomePage() {
   const [selectedCategory, setSelectedCategory] = useState('All')
@@ -106,47 +106,57 @@ export function HomePage() {
         <PageActionRow className="mb-5 border-b border-slate-200 pb-4">
           <div>
             <Heading2>Exercises</Heading2>
-            <p className="text-sm text-slate-600">Showing {filteredExercises.length} of {totalExercises} exercises.</p>
+            <p className="text-sm text-slate-600">
+              {searchTerm.trim() || selectedCategory !== 'All'
+                ? `Showing ${filteredExercises.length} of ${totalExercises} exercises.`
+                : 'Start typing or choose a category to reveal exercises.'}
+            </p>
           </div>
           <div className={appTokens.pill}>{selectedCategory !== 'All' ? `Category: ${selectedCategory}` : 'All categories'}</div>
         </PageActionRow>
 
-        <div className="grid gap-4 lg:grid-cols-2">
-          {filteredExercises.map((exercise) => (
-            <div
-              key={exercise.id}
-              className={`flex cursor-pointer gap-4 ${appTokens.surfaceSoft} p-4 shadow-sm transition hover:-translate-y-0.5 hover:border-slate-300 hover:shadow-md`}
-            >
-              <Link to={`/exercise/${exercise.id}`} className="flex min-w-0 flex-1 flex-col gap-3">
-                <div className="min-w-0 flex-1">
-                  <h3 className="text-lg font-semibold text-slate-900">{formatLabel(exercise.name)}</h3>
-                  <ExerciseMetaBadges
-                    values={[formatLabel(exercise.category), formatLabel(exercise.equipment)]}
-                    tones={['blue', 'orange']}
-                    className="mt-2"
-                    pillClassName="text-xs"
-                  />
-                </div>
-                <img src={getAssetUrl(exercise.image)} alt={exercise.name}  />
-              </Link>
-              <ResponsiveVisibility visibleOn="desktop">
-                <div className="flex shrink-0 flex-col gap-2 self-start">
-                  <button
-                    type="button"
-                    onClick={(event) => {
-                      event.preventDefault()
-                      event.stopPropagation()
-                      void handleCopyUrl(exercise.id)
-                    }}
-                    className={getToneClass('white', 'px-3 py-2 text-sm font-medium')}
-                  >
-                    {copiedId === exercise.id ? 'Copied!' : 'Copy URL'}
-                  </button>
-                </div>
-              </ResponsiveVisibility>
-            </div>
-          ))}
-        </div>
+        {searchTerm.trim() || selectedCategory !== 'All' ? (
+          <div className="grid gap-4 lg:grid-cols-2">
+            {filteredExercises.map((exercise) => (
+              <div
+                key={exercise.id}
+                className={`flex cursor-pointer gap-4 ${appTokens.surfaceSoft} p-4 shadow-sm transition hover:-translate-y-0.5 hover:border-slate-300 hover:shadow-md`}
+              >
+                <Link to={`/exercise/${exercise.id}`} className="flex min-w-0 flex-1 flex-col gap-3">
+                  <div className="min-w-0 flex-1">
+                    <h3 className="text-lg font-semibold text-slate-900">{formatLabel(exercise.name)}</h3>
+                    <ExerciseMetaBadges
+                      values={[formatLabel(exercise.category), formatLabel(exercise.equipment)]}
+                      tones={['blue', 'orange']}
+                      className="mt-2"
+                      pillClassName="text-xs"
+                    />
+                  </div>
+                  <ExerciseImage mediaGif={exercise.image} exerciseName={exercise.name} className="mt-6" />
+                </Link>
+                <ResponsiveVisibility visibleOn="desktop">
+                  <div className="flex shrink-0 flex-col gap-2 self-start">
+                    <button
+                      type="button"
+                      onClick={(event) => {
+                        event.preventDefault()
+                        event.stopPropagation()
+                        void handleCopyUrl(exercise.id)
+                      }}
+                      className={getToneClass('white', 'px-3 py-2 text-sm font-medium')}
+                    >
+                      {copiedId === exercise.id ? 'Copied!' : 'Copy URL'}
+                    </button>
+                  </div>
+                </ResponsiveVisibility>
+              </div>
+            ))}
+          </div>
+        ) : (
+          <div className="rounded-2xl border border-dashed border-slate-200 bg-slate-50 p-8 text-center text-sm text-slate-600">
+            Search by name or choose a category to see exercises.
+          </div>
+        )}
       </PageCard>
     </PageLayout>
   )
