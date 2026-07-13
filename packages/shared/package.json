@@ -1,0 +1,10 @@
+{
+  "name": "@gym-pilot/shared",
+  "version": "1.0.0",
+  "private": true,
+  "main": "./src/index.ts",
+  "type": "module",
+  "dependencies": {
+    "@gym-pilot/types": "1.0.0"
+  }
+}

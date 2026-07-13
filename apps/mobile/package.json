@@ -1,0 +1,1 @@
+{"name":"@gym-pilot/mobile","version":"1.0.0","private":true,"main":"./app/App.tsx","scripts":{"start":"echo \"Run this in a mobile environment\""}}
