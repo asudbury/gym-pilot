@@ -150,7 +150,7 @@ export function HomePage({ filters, onFiltersChange, onToggleFavoriteExercise, i
     return rows
   }, [filteredExercises, isLargeScreen])
 
-  const rowHeight = isLargeScreen ? 450 : 450
+  const rowHeight = isLargeScreen ? 560 : 520
   const listHeight = Math.min(1400, Math.max(760, exerciseRows.length * rowHeight))
 
   return (
@@ -286,53 +286,62 @@ export function HomePage({ filters, onFiltersChange, onToggleFavoriteExercise, i
                 const row = exerciseRows[index]
 
                 return (
-                  <div style={style} className="w-full px-1 py-4">
-                    <div className={`grid gap-4 md:gap-6 ${isLargeScreen ? 'lg:grid-cols-2' : 'grid-cols-1'}`}>
-                      {row.map((exercise) => (
-                        <div
-                          key={exercise.id}
-                          className={`flex h-full cursor-pointer gap-4 rounded-2xl ${appTokens.surfaceSoft} p-4 shadow-sm transition hover:-translate-y-0.5 hover:border-slate-300 hover:shadow-md`}
-                        >
-                          <Link to={`/exercise/${exercise.id}`} className="flex min-w-0 flex-1 flex-col gap-3">
-                            <div className="min-w-0 flex-1">
-                              <h3 className="text-lg font-semibold text-slate-900">{formatLabel(exercise.name)}</h3>
-                              <ExerciseMetaBadges
-                                values={[formatLabel(exercise.category), formatLabel(exercise.equipment)]}
-                                tones={['blue', 'orange']}
-                                className="mt-2"
-                                pillClassName="text-xs"
-                              />
-                            </div>
-                            <ExerciseImage mediaGif={exercise.image} exerciseName={exercise.name} className="mt-6" />
-                          </Link>
-                          <ResponsiveVisibility visibleOn="desktop">
-                            <div className="flex shrink-0 flex-col gap-2 self-start">
-                              <button
-                                type="button"
-                                onClick={(event) => {
-                                  event.preventDefault()
-                                  event.stopPropagation()
-                                  onToggleFavoriteExercise?.(exercise.id)
-                                }}
-                                className={getToneClass(isExerciseFavorite?.(exercise.id) ? 'emerald' : 'white', 'px-3 py-2 text-sm font-medium')}
-                              >
-                                {isExerciseFavorite?.(exercise.id) ? '★ Saved' : '☆ Save'}
-                              </button>
-                              <button
-                                type="button"
-                                onClick={(event) => {
-                                  event.preventDefault()
-                                  event.stopPropagation()
-                                  void handleCopyUrl(exercise.id)
-                                }}
-                                className={getToneClass('white', 'px-3 py-2 text-sm font-medium')}
-                              >
-                                {copiedId === exercise.id ? 'Copied!' : 'Copy URL'}
-                              </button>
-                            </div>
-                          </ResponsiveVisibility>
-                        </div>
-                      ))}
+                  <div style={style} className="w-full px-1 py-3">
+                    <div className={`grid items-start gap-4 md:gap-6 ${isLargeScreen ? 'lg:grid-cols-2' : 'grid-cols-1'}`}>
+                      {row.map((exercise) => {
+                        const position = filteredExercises.findIndex((item) => item.id === exercise.id) + 1
+
+                        return (
+                          <div
+                            key={exercise.id}
+                            className={`flex h-full cursor-pointer gap-4 rounded-2xl ${appTokens.surfaceSoft} p-4 shadow-sm transition hover:-translate-y-0.5 hover:border-slate-300 hover:shadow-md`}
+                          >
+                            <Link to={`/exercise/${exercise.id}`} className="flex min-w-0 flex-1 flex-col gap-3">
+                              <div className="min-w-0 flex-1">
+                                <div className="flex items-center gap-2">
+                                  <span className="inline-flex h-8 min-w-8 items-center justify-center rounded-full bg-slate-100 px-3 py-1.5 text-sm font-semibold leading-none text-slate-700">
+                                    {position}
+                                  </span>
+                                  <h3 className="text-base font-semibold leading-tight text-slate-900">{formatLabel(exercise.name)}</h3>
+                                </div>
+                                <ExerciseMetaBadges
+                                  values={[formatLabel(exercise.category), formatLabel(exercise.equipment)]}
+                                  tones={['blue', 'orange']}
+                                  className="mt-2"
+                                  pillClassName="text-xs"
+                                />
+                              </div>
+                              <ExerciseImage mediaGif={exercise.image} exerciseName={exercise.name} className="mt-6" />
+                            </Link>
+                            <ResponsiveVisibility visibleOn="desktop">
+                              <div className="flex shrink-0 flex-col gap-2 self-start">
+                                <button
+                                  type="button"
+                                  onClick={(event) => {
+                                    event.preventDefault()
+                                    event.stopPropagation()
+                                    onToggleFavoriteExercise?.(exercise.id)
+                                  }}
+                                  className={getToneClass(isExerciseFavorite?.(exercise.id) ? 'emerald' : 'white', 'px-3 py-2 text-sm font-medium')}
+                                >
+                                  {isExerciseFavorite?.(exercise.id) ? '★ Saved' : '☆ Save'}
+                                </button>
+                                <button
+                                  type="button"
+                                  onClick={(event) => {
+                                    event.preventDefault()
+                                    event.stopPropagation()
+                                    void handleCopyUrl(exercise.id)
+                                  }}
+                                  className={getToneClass('white', 'px-3 py-2 text-sm font-medium')}
+                                >
+                                  {copiedId === exercise.id ? 'Copied!' : 'Copy URL'}
+                                </button>
+                              </div>
+                            </ResponsiveVisibility>
+                          </div>
+                        )
+                      })}
                     </div>
                   </div>
                 )

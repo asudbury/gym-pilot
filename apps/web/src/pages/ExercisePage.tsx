@@ -12,7 +12,6 @@ import { PageActionGroup, PageActionRow } from '../components/PageActionRow'
 import { PageLayout } from '../layouts/PageLayout'
 import { Heading1, Paragraph } from '../components/Typography'
 import { ExerciseMetaBadges } from '../components/ExerciseMetaBadges'
-import { ResponsiveVisibility } from '../components/ResponsiveVisibility'
 
 type ExercisePageProps = {
   onToggleFavoriteExercise?: (exerciseId: string) => void
@@ -54,17 +53,17 @@ export function ExercisePage({ onToggleFavoriteExercise, isExerciseFavorite }: E
   return (
     <PageLayout className="max-w-6xl">
       <PageCard padding="spacious">
-        <PageActionRow>
-          <Heading1 className="mt-3">{formatLabel(exercise.name)}</Heading1>
-        </PageActionRow>
-        <ResponsiveVisibility visibleOn="desktop">
-          <div className="mt-2 flex flex-wrap items-center gap-2">
-            <ExerciseMetaBadges
-              values={[formatLabel(exercise.body_part), formatLabel(exercise.equipment), formatLabel(exercise.target)]}
-              tones={['blue', 'orange', 'default']}
-            />
+        <PageActionRow className="items-start gap-4 border-b-2 border-slate-200 pb-3">
+          <div className="min-w-0">
+            <Heading1 className="mt-0">{formatLabel(exercise.name)}</Heading1>
+            <div className="mt-3 flex flex-wrap items-center gap-2">
+              <ExerciseMetaBadges
+                values={[formatLabel(exercise.body_part), formatLabel(exercise.equipment), formatLabel(exercise.target)]}
+                tones={['blue', 'orange', 'default']}
+              />
+            </div>
           </div>
-        </ResponsiveVisibility>
+        </PageActionRow>
         <ExerciseImage mediaGif={mediaGif} exerciseName={exercise.name} className="mt-6" />
         <YouTubeExerciseSearchButton exerciseName={exercise.name} />
         <ExerciseSteps steps={exercise.instruction_steps.en} className="mt-8" />
