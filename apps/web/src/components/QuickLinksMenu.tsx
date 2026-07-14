@@ -20,6 +20,7 @@ type SavedSearch = {
 type HomeFilters = {
   searchTerm: string
   selectedCategory: string | null
+  showImages: boolean
 }
 
 type QuickLinksMenuProps = {
@@ -209,7 +210,7 @@ export function QuickLinksMenu({
 
   const handleApplySavedSearch = (savedSearch: SavedSearch) => {
     const normalizedSavedCategory = savedSearch.selectedCategory === 'All' || savedSearch.selectedCategory === '' ? null : savedSearch.selectedCategory
-    onHomeFiltersChange({ searchTerm: savedSearch.searchTerm, selectedCategory: normalizedSavedCategory })
+    onHomeFiltersChange({ searchTerm: savedSearch.searchTerm, selectedCategory: normalizedSavedCategory, showImages: homeFilters.showImages })
     navigate('/')
     setMenuOpen(false)
   }

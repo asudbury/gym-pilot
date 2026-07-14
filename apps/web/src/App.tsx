@@ -11,10 +11,12 @@ import { AssignmentDetailPage } from './pages/AssignmentDetailPage'
 import { AssignmentsPage } from './pages/AssignmentsPage'
 import { CreateAssignmentPage } from './pages/CreateAssignmentPage'
 import { QuickLinksMenu } from './components/QuickLinksMenu'
+import { getExercisePath } from './utils/exerciseRoute'
 
 type HomeFilters = {
   searchTerm: string
   selectedCategory: string | null
+  showImages: boolean
 }
 
 type QuickLink = {
@@ -36,6 +38,7 @@ function normalizeHomeFilters(filters: Partial<HomeFilters> | null | undefined):
   return {
     searchTerm: typeof filters?.searchTerm === 'string' ? filters.searchTerm : '',
     selectedCategory: selectedCategory === null || selectedCategory === '' || selectedCategory === 'All' ? null : typeof selectedCategory === 'string' ? selectedCategory : null,
+    showImages: typeof filters?.showImages === 'boolean' ? filters.showImages : true,
   }
 }
 
@@ -120,13 +123,13 @@ function App() {
   })
   const [homeFilters, setHomeFilters] = useState<HomeFilters>(() => {
     if (typeof window === 'undefined') {
-      return { searchTerm: '', selectedCategory: null }
+      return { searchTerm: '', selectedCategory: null, showImages: true }
     }
 
     const savedFilters = window.sessionStorage.getItem(HOME_FILTER_STORAGE_KEY)
 
     if (!savedFilters) {
-      return { searchTerm: '', selectedCategory: null }
+      return { searchTerm: '', selectedCategory: null, showImages: true }
     }
 
     try {
@@ -135,7 +138,7 @@ function App() {
       return normalizeHomeFilters(parsed)
     } catch {
       window.sessionStorage.removeItem(HOME_FILTER_STORAGE_KEY)
-      return { searchTerm: '', selectedCategory: null }
+      return { searchTerm: '', selectedCategory: null, showImages: true }
     }
   })
 
@@ -172,7 +175,7 @@ function App() {
     const favoriteLink: QuickLink = {
       id: `exercise-${exercise.id}`,
       label: formatLabel(exercise.name),
-      path: `/exercise/${exercise.id}`,
+      path: getExercisePath(exercise),
     }
 
     const alreadySaved = favorites.some((item) => item.path === favoriteLink.path)
@@ -189,7 +192,7 @@ function App() {
     const parsed = exercisesSchema.parse(exercises)
     const exercise = parsed.find((item) => item.id === exerciseId)
 
-    return Boolean(exercise && favorites.some((item) => item.path === `/exercise/${exercise.id}`))
+    return Boolean(exercise && favorites.some((item) => item.path === getExercisePath(exercise)))
   }
 
   return (
@@ -300,7 +303,7 @@ function App() {
 
       <Routes>
         <Route path="/" element={<HomePage filters={homeFilters} onFiltersChange={setHomeFilters} onToggleFavoriteExercise={handleToggleFavoriteExercise} isExerciseFavorite={isExerciseFavorite} />} />
-        <Route path="/exercise/:id" element={<ExercisePage onToggleFavoriteExercise={handleToggleFavoriteExercise} isExerciseFavorite={isExerciseFavorite} />} />
+        <Route path="/exercise/:slug" element={<ExercisePage onToggleFavoriteExercise={handleToggleFavoriteExercise} isExerciseFavorite={isExerciseFavorite} />} />
         <Route path="/assignments" element={<AssignmentsPage />} />
         <Route path="/assignments/new" element={<CreateAssignmentPage />} />
         <Route path="/assignments/:assignmentSlug" element={<AssignmentDetailPage />} />

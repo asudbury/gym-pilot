@@ -7,6 +7,7 @@ import { ExerciseSteps } from '../components/ExerciseSteps'
 import { YouTubeExerciseSearchButton } from '../components/YouTubeExerciseSearchButton'
 import { formatLabel } from '@gym-pilot/shared'
 import { exercises, exercisesSchema } from '@gym-pilot/shared'
+import { getExerciseSlug } from '../utils/exerciseRoute'
 import { PageCard } from '../components/PageCard'
 import { PageActionGroup, PageActionRow } from '../components/PageActionRow'
 import { PageLayout } from '../layouts/PageLayout'
@@ -19,13 +20,18 @@ type ExercisePageProps = {
 }
 
 export function ExercisePage({ onToggleFavoriteExercise, isExerciseFavorite }: ExercisePageProps) {
-  const { id } = useParams()
+  const { slug } = useParams()
   const [copied, setCopied] = useState(false)
 
   const exercise = useMemo(() => {
     const parsed = exercisesSchema.parse(exercises)
-    return parsed.find((item) => item.id === id)
-  }, [id])
+
+    if (!slug) {
+      return undefined
+    }
+
+    return parsed.find((item) => getExerciseSlug(item) === slug || item.id === slug)
+  }, [slug])
 
   const mediaGif = exercise ? exercise.gif_url : ''
 

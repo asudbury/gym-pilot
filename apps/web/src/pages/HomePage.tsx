@@ -12,10 +12,12 @@ import { ExerciseMetaBadges } from '../components/ExerciseMetaBadges'
 import { ResponsiveVisibility } from '../components/ResponsiveVisibility'
 import { ExerciseImage } from '../components/ExerciseImage'
 import { MIN_SEARCH_CHARS } from '../constants/home'
+import { getExercisePath } from '../utils/exerciseRoute'
 
 type HomeFilters = {
   searchTerm: string
   selectedCategory: string | null
+  showImages: boolean
 }
 
 type HomePageProps = {
@@ -29,8 +31,45 @@ type ExerciseListItem = (typeof exercises)[number]
 type ExerciseRow = ExerciseListItem[]
 type ExerciseRowProps = Record<string, never>
 
+type ExerciseActionButtonsProps = {
+  exerciseId: string
+  isFavorite: boolean
+  copiedId: string | null
+  onToggleFavoriteExercise?: (exerciseId: string) => void
+  onCopyUrl: (exerciseId: string) => Promise<void>
+}
+
 function normalizeCategory(category: string | null | undefined) {
-  return category === null || category === '' || category === 'All' ? null : category
+  return category === null || category === '' ? null : category
+}
+
+function ExerciseActionButtons({ exerciseId, isFavorite, copiedId, onToggleFavoriteExercise, onCopyUrl }: ExerciseActionButtonsProps) {
+  return (
+    <div className="flex shrink-0 flex-col gap-2 self-start">
+      <button
+        type="button"
+        onClick={(event) => {
+          event.preventDefault()
+          event.stopPropagation()
+          onToggleFavoriteExercise?.(exerciseId)
+        }}
+        className={getToneClass(isFavorite ? 'emerald' : 'white', 'px-3 py-2 text-sm font-medium')}
+      >
+        {isFavorite ? '★ Saved' : '☆ Save'}
+      </button>
+      <button
+        type="button"
+        onClick={(event) => {
+          event.preventDefault()
+          event.stopPropagation()
+          void onCopyUrl(exerciseId)
+        }}
+        className={getToneClass('white', 'px-3 py-2 text-sm font-medium')}
+      >
+        {copiedId === exerciseId ? 'Copied!' : 'Copy URL'}
+      </button>
+    </div>
+  )
 }
 
 export function HomePage({ filters, onFiltersChange, onToggleFavoriteExercise, isExerciseFavorite }: HomePageProps) {
@@ -38,6 +77,7 @@ export function HomePage({ filters, onFiltersChange, onToggleFavoriteExercise, i
   const [copiedId, setCopiedId] = useState<string | null>(null)
   const [draftSearchTerm, setDraftSearchTerm] = useState(filters.searchTerm)
   const [showSuggestions, setShowSuggestions] = useState(false)
+  const [showExerciseImages, setShowExerciseImages] = useState(filters.showImages)
   const [isLargeScreen, setIsLargeScreen] = useState(() => {
     if (typeof window === 'undefined') {
       return true
@@ -48,14 +88,19 @@ export function HomePage({ filters, onFiltersChange, onToggleFavoriteExercise, i
   const deferredSearchTerm = useDeferredValue(draftSearchTerm)
   const trimmedSearchTerm = draftSearchTerm.trim()
   const normalizedCategory = normalizeCategory(selectedCategory)
-  const hasCategoryFilter = normalizedCategory !== null
+  const hasExplicitAll = selectedCategory === 'All'
+  const hasCategoryFilter = normalizedCategory !== null || hasExplicitAll
   const hasSearchText = trimmedSearchTerm.length > 0
   const hasSearchThreshold = trimmedSearchTerm.length >= MIN_SEARCH_CHARS
-  const shouldShowResults = !hasSearchText || hasCategoryFilter || hasSearchThreshold
+  const shouldShowResults = hasCategoryFilter || (hasSearchText && hasSearchThreshold)
 
   useEffect(() => {
     setDraftSearchTerm(filters.searchTerm)
   }, [filters.searchTerm])
+
+  useEffect(() => {
+    setShowExerciseImages(filters.showImages)
+  }, [filters.showImages])
 
   useEffect(() => {
     if (typeof window === 'undefined') {
@@ -115,14 +160,14 @@ export function HomePage({ filters, onFiltersChange, onToggleFavoriteExercise, i
     const shouldApplySearch = normalizedSearch.length >= MIN_SEARCH_CHARS
 
     return exerciseList.filter((exercise) => {
-      const matchesCategory = normalizedCategory === null || formatLabel(exercise.category) === normalizedCategory
+      const matchesCategory = hasExplicitAll || normalizedCategory === null || formatLabel(exercise.category) === normalizedCategory
       const matchesSearch =
         !shouldApplySearch ||
         [exercise.name, exercise.category, exercise.target, exercise.equipment].join(' ').toLowerCase().includes(normalizedSearch)
 
       return matchesCategory && matchesSearch
     })
-  }, [exerciseList, deferredSearchTerm, normalizedCategory])
+  }, [exerciseList, deferredSearchTerm, hasExplicitAll, normalizedCategory])
 
   const searchSuggestions = useMemo(() => {
     const normalizedSearch = deferredSearchTerm.trim().toLowerCase()
@@ -150,8 +195,8 @@ export function HomePage({ filters, onFiltersChange, onToggleFavoriteExercise, i
     return rows
   }, [filteredExercises, isLargeScreen])
 
-  const rowHeight = isLargeScreen ? 560 : 520
-  const listHeight = Math.min(1400, Math.max(760, exerciseRows.length * rowHeight))
+  const rowHeight = showExerciseImages ? (isLargeScreen ? 560 : 520) : (isLargeScreen ? 200 : 170)
+  const listHeight = Math.min(1400, Math.max(320, exerciseRows.length * rowHeight))
 
   return (
     <PageLayout className="gap-6">
@@ -207,7 +252,7 @@ export function HomePage({ filters, onFiltersChange, onToggleFavoriteExercise, i
                       const nextSearchTerm = formatLabel(exercise.name)
                       setDraftSearchTerm(nextSearchTerm)
                       setShowSuggestions(false)
-                      onFiltersChange({ ...filters, searchTerm: nextSearchTerm, selectedCategory: null })
+                      onFiltersChange({ ...filters, searchTerm: nextSearchTerm, selectedCategory: null, showImages: showExerciseImages })
                     }}
                     className="flex items-center justify-between rounded-xl px-3 py-2 text-left text-sm text-slate-700 transition hover:bg-white hover:text-slate-900"
                   >
@@ -220,25 +265,37 @@ export function HomePage({ filters, onFiltersChange, onToggleFavoriteExercise, i
           )}
         </div>
 
-        <div className="flex flex-wrap items-center gap-3">
+        <div className="mt-4 flex flex-wrap items-center gap-3">
           {categories.map((category) => {
             const isAll = category === 'All'
-            const isSelected = isAll ? normalizedCategory === null : normalizedCategory === category
+            const isSelected = isAll ? selectedCategory === 'All' : normalizedCategory === category
 
             return (
               <button
                 key={category}
-                onClick={() => onFiltersChange({ ...filters, searchTerm: draftSearchTerm, selectedCategory: isAll ? null : category })}
-                className={`${
+                onClick={() => onFiltersChange({ ...filters, searchTerm: draftSearchTerm, selectedCategory: isAll ? 'All' : category, showImages: showExerciseImages })}
+                className={
                   isSelected
                     ? getToneClass('blue', 'px-4 py-2 text-sm font-medium transition')
                     : getToneClass('default', 'px-4 py-2 text-sm font-medium transition hover:bg-slate-200')
-                }`}
+                }
               >
                 {category}
               </button>
             )
           })}
+
+          <button
+            type="button"
+            onClick={() => {
+              const nextShowExerciseImages = !showExerciseImages
+              setShowExerciseImages(nextShowExerciseImages)
+              onFiltersChange({ ...filters, searchTerm: draftSearchTerm, selectedCategory, showImages: nextShowExerciseImages })
+            }}
+            className={showExerciseImages ? getToneClass('default', 'px-4 py-2 text-sm font-medium transition') : getToneClass('blue', 'px-4 py-2 text-sm font-medium transition')}
+          >
+            {showExerciseImages ? 'Hide images' : 'Show images'}
+          </button>
         </div>
 {/* 
         <div className="mt-4 flex flex-wrap items-center gap-3 border-t border-slate-200 pt-4">
@@ -286,17 +343,56 @@ export function HomePage({ filters, onFiltersChange, onToggleFavoriteExercise, i
                 const row = exerciseRows[index]
 
                 return (
-                  <div style={style} className="w-full px-1 py-3">
-                    <div className={`grid items-start gap-4 md:gap-6 ${isLargeScreen ? 'lg:grid-cols-2' : 'grid-cols-1'}`}>
+                  <div
+                    style={style}
+                    className={showExerciseImages ? 'w-full px-1 py-3' : 'w-full px-0 py-0'}
+                  >
+                    <div className={showExerciseImages ? `grid items-start gap-4 md:gap-6 ${isLargeScreen ? 'lg:grid-cols-2' : 'grid-cols-1'}` : `grid items-start gap-1 md:gap-1.5 ${isLargeScreen ? 'lg:grid-cols-2' : 'grid-cols-1'}`}>
                       {row.map((exercise) => {
                         const position = filteredExercises.findIndex((item) => item.id === exercise.id) + 1
+
+                        if (showExerciseImages) {
+                          return (
+                            <div
+                              key={exercise.id}
+                              className="flex h-full min-h-75 cursor-pointer gap-3 rounded-2xl border border-slate-200/70 bg-white/80 p-4 shadow-sm transition hover:-translate-y-0.5 hover:border-slate-300 hover:shadow-md"
+                            >
+                              <Link to={getExercisePath(exercise)} className="flex min-w-0 flex-1 flex-col gap-3">
+                                <div className="min-w-0 flex-1">
+                                  <div className="flex items-center gap-2">
+                                    <span className="inline-flex h-8 min-w-8 items-center justify-center rounded-full bg-slate-100 px-3 py-1.5 text-sm font-semibold leading-none text-slate-700">
+                                      {position}
+                                    </span>
+                                    <h3 className="text-base font-semibold leading-tight text-slate-900">{formatLabel(exercise.name)}</h3>
+                                  </div>
+                                  <ExerciseMetaBadges
+                                    values={[formatLabel(exercise.category), formatLabel(exercise.equipment)]}
+                                    tones={['blue', 'orange']}
+                                    className="mt-2"
+                                    pillClassName="text-xs"
+                                  />
+                                </div>
+                                <ExerciseImage mediaGif={exercise.image} exerciseName={exercise.name} className="mt-6" />
+                              </Link>
+                              <ResponsiveVisibility visibleOn="desktop">
+                                <ExerciseActionButtons
+                                  exerciseId={exercise.id}
+                                  isFavorite={Boolean(isExerciseFavorite?.(exercise.id))}
+                                  copiedId={copiedId}
+                                  onToggleFavoriteExercise={onToggleFavoriteExercise}
+                                  onCopyUrl={handleCopyUrl}
+                                />
+                              </ResponsiveVisibility>
+                            </div>
+                          )
+                        }
 
                         return (
                           <div
                             key={exercise.id}
-                            className={`flex h-full cursor-pointer gap-4 rounded-2xl ${appTokens.surfaceSoft} p-4 shadow-sm transition hover:-translate-y-0.5 hover:border-slate-300 hover:shadow-md`}
+                            className="flex h-full min-h-35 cursor-pointer gap-2 rounded-2xl border border-slate-200/70 bg-white/80 p-2 shadow-sm transition hover:-translate-y-0.5 hover:border-slate-300 hover:shadow-md"
                           >
-                            <Link to={`/exercise/${exercise.id}`} className="flex min-w-0 flex-1 flex-col gap-3">
+                            <Link to={getExercisePath(exercise)} className="flex min-w-0 flex-1 flex-col gap-2">
                               <div className="min-w-0 flex-1">
                                 <div className="flex items-center gap-2">
                                   <span className="inline-flex h-8 min-w-8 items-center justify-center rounded-full bg-slate-100 px-3 py-1.5 text-sm font-semibold leading-none text-slate-700">
@@ -307,37 +403,19 @@ export function HomePage({ filters, onFiltersChange, onToggleFavoriteExercise, i
                                 <ExerciseMetaBadges
                                   values={[formatLabel(exercise.category), formatLabel(exercise.equipment)]}
                                   tones={['blue', 'orange']}
-                                  className="mt-2"
+                                  className="mt-1"
                                   pillClassName="text-xs"
                                 />
                               </div>
-                              <ExerciseImage mediaGif={exercise.image} exerciseName={exercise.name} className="mt-6" />
                             </Link>
                             <ResponsiveVisibility visibleOn="desktop">
-                              <div className="flex shrink-0 flex-col gap-2 self-start">
-                                <button
-                                  type="button"
-                                  onClick={(event) => {
-                                    event.preventDefault()
-                                    event.stopPropagation()
-                                    onToggleFavoriteExercise?.(exercise.id)
-                                  }}
-                                  className={getToneClass(isExerciseFavorite?.(exercise.id) ? 'emerald' : 'white', 'px-3 py-2 text-sm font-medium')}
-                                >
-                                  {isExerciseFavorite?.(exercise.id) ? '★ Saved' : '☆ Save'}
-                                </button>
-                                <button
-                                  type="button"
-                                  onClick={(event) => {
-                                    event.preventDefault()
-                                    event.stopPropagation()
-                                    void handleCopyUrl(exercise.id)
-                                  }}
-                                  className={getToneClass('white', 'px-3 py-2 text-sm font-medium')}
-                                >
-                                  {copiedId === exercise.id ? 'Copied!' : 'Copy URL'}
-                                </button>
-                              </div>
+                              <ExerciseActionButtons
+                                exerciseId={exercise.id}
+                                isFavorite={Boolean(isExerciseFavorite?.(exercise.id))}
+                                copiedId={copiedId}
+                                onToggleFavoriteExercise={onToggleFavoriteExercise}
+                                onCopyUrl={handleCopyUrl}
+                              />
                             </ResponsiveVisibility>
                           </div>
                         )
@@ -349,9 +427,7 @@ export function HomePage({ filters, onFiltersChange, onToggleFavoriteExercise, i
             />
           </div>
         ) : (
-          <div className="rounded-2xl border border-dashed border-slate-200 bg-slate-50 p-8 text-center text-sm text-slate-600">
-            Search by name or choose a category to see exercises.
-          </div>
+         null
         )}
       </PageCard>
     </PageLayout>

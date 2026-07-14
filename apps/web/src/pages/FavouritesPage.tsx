@@ -8,6 +8,7 @@ import { getToneClass } from '../components/toneClasses'
 import { ExerciseImage } from '../components/ExerciseImage'
 import { ExerciseMetaBadges } from '../components/ExerciseMetaBadges'
 import { exercises, exercisesSchema, formatLabel } from '@gym-pilot/shared'
+import { getExercisePath } from '../utils/exerciseRoute'
 
 type QuickLink = {
   id: string
@@ -49,7 +50,7 @@ export function FavouritesPage({ favorites, onToggleFavoriteExercise, isExercise
           <div className="grid gap-4 lg:grid-cols-2">
             {favouriteExercises.map((exercise) => (
               <div key={exercise.id} className="flex gap-4 rounded-2xl border border-slate-200 bg-white p-4 shadow-sm">
-                <Link to={`/exercise/${exercise.id}`} className="flex min-w-0 flex-1 flex-col gap-3">
+                <Link to={getExercisePath(exercise)} className="flex min-w-0 flex-1 flex-col gap-3">
                   <div className="min-w-0 flex-1">
                     <h3 className="text-lg font-semibold text-slate-900">{formatLabel(exercise.name)}</h3>
                     <ExerciseMetaBadges
