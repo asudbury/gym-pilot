@@ -41,12 +41,12 @@ function getQuickLinkForPath(pathname: string, exerciseLookup: Map<string, { id:
     return { id: 'home', label: 'Home', path: '/' }
   }
 
-  if (pathname === '/assignments') {
-    return { id: 'assignments', label: 'Assignments', path: '/assignments' }
+  if (pathname === '/plans') {
+    return { id: 'plans', label: 'Plans', path: '/plans' }
   }
 
-  if (pathname === '/assignments/new') {
-    return { id: 'new-assignment', label: 'New assignment', path: '/assignments/new' }
+  if (pathname === '/plans/new') {
+    return { id: 'new-plan', label: 'New plan', path: '/plans/new' }
   }
 
   if (pathname.startsWith('/exercise/')) {
@@ -63,8 +63,8 @@ function getQuickLinkForPath(pathname: string, exerciseLookup: Map<string, { id:
       : { id: `exercise-${exerciseId}`, label: 'Exercise', path: pathname }
   }
 
-  if (pathname.startsWith('/assignments/')) {
-    return { id: pathname, label: 'Assignment', path: pathname }
+  if (pathname.startsWith('/plans/')) {
+    return { id: pathname, label: 'Plan', path: pathname }
   }
 
   return { id: pathname, label: pathname, path: pathname }

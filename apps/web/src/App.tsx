@@ -7,9 +7,9 @@ import { exercises, exercisesSchema, formatLabel, usePlan } from '@gym-pilot/sha
 import { HOME_FILTER_STORAGE_KEY, QUICK_LINKS_FAVORITES_STORAGE_KEY, QUICK_LINKS_RECENT_STORAGE_KEY, QUICK_LINKS_SAVED_SEARCHES_STORAGE_KEY } from './constants/storageKeys'
 import { ExercisePage } from './pages/ExercisePage'
 import { HomePage } from './pages/HomePage'
-import { AssignmentDetailPage } from './pages/AssignmentDetailPage'
-import { AssignmentsPage } from './pages/AssignmentsPage'
-import { CreateAssignmentPage } from './pages/CreateAssignmentPage'
+import { PlanDetailPage } from './pages/PlanDetailPage'
+import { PlansPage } from './pages/PlansPage'
+import { CreatePlanPage } from './pages/CreatePlanPage'
 import { QuickLinksMenu } from './components/QuickLinksMenu'
 import { getExercisePath } from './utils/exerciseRoute'
 
@@ -58,7 +58,7 @@ function ScrollToTop() {
 
 function App() {
   const { pathname } = useLocation()
-  const { assignments } = usePlan()
+  const { plans } = usePlan()
   const appVersion = webPackageJson.version || '0.0.0'
   const [favorites, setFavorites] = useState<QuickLink[]>(() => {
     if (typeof window === 'undefined') {
@@ -224,10 +224,10 @@ function App() {
                   onHomeFiltersChange={setHomeFilters}
                 />
                 <NavLink
-                  to="/assignments"
+                  to="/plans"
                   className={getToneClass('default', 'px-4 py-2 text-sm font-medium')}
                 >
-                  Assignments ({assignments.length})
+                  Plans ({plans.length})
                 </NavLink>
               </div>
             </ResponsiveVisibility>
@@ -253,11 +253,11 @@ function App() {
                         onSavedSearchesChange={setSavedSearches}
                         onHomeFiltersChange={setHomeFilters}
                       />
-                      <NavLink to="/assignments" onClick={() => setMobileMenuOpen(false)} className="rounded-xl px-3 py-2 text-sm font-medium text-slate-700 transition hover:bg-slate-50">
-                        Assignments ({assignments.length})
+                      <NavLink to="/plans" onClick={() => setMobileMenuOpen(false)} className="rounded-xl px-3 py-2 text-sm font-medium text-slate-700 transition hover:bg-slate-50">
+                        Plans ({plans.length})
                       </NavLink>
-                      <NavLink to="/assignments/new" onClick={() => setMobileMenuOpen(false)} className="rounded-xl px-3 py-2 text-sm font-medium text-slate-700 transition hover:bg-slate-50">
-                        Create assignment
+                      <NavLink to="/plans/new" onClick={() => setMobileMenuOpen(false)} className="rounded-xl px-3 py-2 text-sm font-medium text-slate-700 transition hover:bg-slate-50">
+                        Create plan
                       </NavLink>
                     </div>
                   </div>
@@ -286,11 +286,11 @@ function App() {
                         onSavedSearchesChange={setSavedSearches}
                         onHomeFiltersChange={setHomeFilters}
                       />
-                      <NavLink to="/assignments" onClick={() => setMobileMenuOpen(false)} className="rounded-xl px-3 py-2 text-sm font-medium text-slate-700 transition hover:bg-slate-50">
-                        Assignments ({assignments.length})
+                      <NavLink to="/plans" onClick={() => setMobileMenuOpen(false)} className="rounded-xl px-3 py-2 text-sm font-medium text-slate-700 transition hover:bg-slate-50">
+                        Plans ({plans.length})
                       </NavLink>
-                      <NavLink to="/assignments/new" onClick={() => setMobileMenuOpen(false)} className="rounded-xl px-3 py-2 text-sm font-medium text-slate-700 transition hover:bg-slate-50">
-                        Create assignment
+                      <NavLink to="/plans/new" onClick={() => setMobileMenuOpen(false)} className="rounded-xl px-3 py-2 text-sm font-medium text-slate-700 transition hover:bg-slate-50">
+                        Create plan
                       </NavLink>
                     </div>
                   </div>
@@ -304,9 +304,9 @@ function App() {
       <Routes>
         <Route path="/" element={<HomePage filters={homeFilters} onFiltersChange={setHomeFilters} onToggleFavoriteExercise={handleToggleFavoriteExercise} isExerciseFavorite={isExerciseFavorite} />} />
         <Route path="/exercise/:slug" element={<ExercisePage onToggleFavoriteExercise={handleToggleFavoriteExercise} isExerciseFavorite={isExerciseFavorite} />} />
-        <Route path="/assignments" element={<AssignmentsPage />} />
-        <Route path="/assignments/new" element={<CreateAssignmentPage />} />
-        <Route path="/assignments/:assignmentSlug" element={<AssignmentDetailPage />} />
+        <Route path="/plans" element={<PlansPage />} />
+        <Route path="/plans/new" element={<CreatePlanPage />} />
+        <Route path="/plans/:planSlug" element={<PlanDetailPage />} />
       </Routes>
     </div>
   )
