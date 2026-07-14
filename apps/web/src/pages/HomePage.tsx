@@ -150,7 +150,7 @@ export function HomePage({ filters, onFiltersChange, onToggleFavoriteExercise, i
     return rows
   }, [filteredExercises, isLargeScreen])
 
-  const rowHeight = isLargeScreen ? 620 : 520
+  const rowHeight = isLargeScreen ? 450 : 450
   const listHeight = Math.min(1400, Math.max(760, exerciseRows.length * rowHeight))
 
   return (
@@ -187,7 +187,7 @@ export function HomePage({ filters, onFiltersChange, onToggleFavoriteExercise, i
                   className="absolute inset-y-0 right-0 flex items-center pr-3 text-slate-400 transition hover:text-slate-600"
                   aria-label="Clear search"
                 >
-                  ✕
+                  Clear
                 </button>
               )}
             </div>

@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react'
 import { NavLink, Route, Routes, useLocation } from 'react-router-dom'
+import webPackageJson from '../package.json'
 import { getToneClass } from './components/toneClasses'
 import { ResponsiveVisibility } from './components/ResponsiveVisibility'
 import { exercises, exercisesSchema, formatLabel, usePlan } from '@gym-pilot/shared'
@@ -53,7 +54,9 @@ function ScrollToTop() {
 }
 
 function App() {
+  const { pathname } = useLocation()
   const { assignments } = usePlan()
+  const appVersion = webPackageJson.version || '0.0.0'
   const [favorites, setFavorites] = useState<QuickLink[]>(() => {
     if (typeof window === 'undefined') {
       return []
@@ -136,9 +139,15 @@ function App() {
     }
   })
 
+  const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
+
   useEffect(() => {
     window.sessionStorage.setItem(HOME_FILTER_STORAGE_KEY, JSON.stringify(normalizeHomeFilters(homeFilters)))
   }, [homeFilters])
+
+  useEffect(() => {
+    setMobileMenuOpen(false)
+  }, [pathname])
 
   useEffect(() => {
     window.localStorage.setItem(QUICK_LINKS_FAVORITES_STORAGE_KEY, JSON.stringify(favorites))
@@ -188,37 +197,102 @@ function App() {
       <ScrollToTop />
       <nav className="sticky top-0 z-30 border-b border-slate-200 bg-white/95 backdrop-blur">
         <div className="mx-auto flex max-w-6xl items-center justify-between px-4 py-4 sm:px-6 lg:px-8">
-          <NavLink to="/" className="text-lg font-semibold text-slate-900">
-            GymPilot
-          </NavLink>
+          <div className="flex flex-col">
+            <NavLink to="/" className="text-lg font-semibold text-slate-900">
+              GymPilot
+              {' '}  
+              <span className="text-[11px] font-medium tracking-[0.2em] text-slate-500">
+                {`(v${appVersion})`}
+              </span>
+            </NavLink>
+          </div>
           <div className="flex flex-wrap items-center gap-2">
-            <QuickLinksMenu
-              favorites={favorites}
-              recentItems={recentItems}
-              savedSearches={savedSearches}
-              homeFilters={homeFilters}
-              onFavoritesChange={setFavorites}
-              onRecentItemsChange={setRecentItems}
-              onSavedSearchesChange={setSavedSearches}
-              onHomeFiltersChange={setHomeFilters}
-            />
             <ResponsiveVisibility visibleOn="desktop">
-              <NavLink
-                to="/assignments"
-                className={getToneClass('default', 'px-4 py-2 text-sm font-medium')}
-              >
-                Assignments ({assignments.length})
-              </NavLink>
+              <div className="flex items-center gap-2">
+                <QuickLinksMenu
+                  favorites={favorites}
+                  recentItems={recentItems}
+                  savedSearches={savedSearches}
+                  homeFilters={homeFilters}
+                  variant="header"
+                  onFavoritesChange={setFavorites}
+                  onRecentItemsChange={setRecentItems}
+                  onSavedSearchesChange={setSavedSearches}
+                  onHomeFiltersChange={setHomeFilters}
+                />
+                <NavLink
+                  to="/assignments"
+                  className={getToneClass('default', 'px-4 py-2 text-sm font-medium')}
+                >
+                  Assignments ({assignments.length})
+                </NavLink>
+              </div>
             </ResponsiveVisibility>
             <ResponsiveVisibility visibleOn="tablet">
-              <NavLink to="/assignments/new" className={getToneClass('default', 'px-4 py-2 text-sm font-medium')}>
-                Create assignment
-              </NavLink>
+              <div className="relative">
+                <button
+                  type="button"
+                  onClick={() => setMobileMenuOpen((current) => !current)}
+                  className={getToneClass('default', 'px-4 py-2 text-sm font-medium')}
+                >
+                  Menu
+                </button>
+                {mobileMenuOpen && (
+                  <div className="absolute right-0 top-full mt-2 w-56 rounded-2xl border border-slate-200 bg-white p-3 shadow-xl">
+                    <div className="flex flex-col gap-2">
+                      <QuickLinksMenu
+                        favorites={favorites}
+                        recentItems={recentItems}
+                        savedSearches={savedSearches}
+                        homeFilters={homeFilters}
+                        onFavoritesChange={setFavorites}
+                        onRecentItemsChange={setRecentItems}
+                        onSavedSearchesChange={setSavedSearches}
+                        onHomeFiltersChange={setHomeFilters}
+                      />
+                      <NavLink to="/assignments" onClick={() => setMobileMenuOpen(false)} className="rounded-xl px-3 py-2 text-sm font-medium text-slate-700 transition hover:bg-slate-50">
+                        Assignments ({assignments.length})
+                      </NavLink>
+                      <NavLink to="/assignments/new" onClick={() => setMobileMenuOpen(false)} className="rounded-xl px-3 py-2 text-sm font-medium text-slate-700 transition hover:bg-slate-50">
+                        Create assignment
+                      </NavLink>
+                    </div>
+                  </div>
+                )}
+              </div>
             </ResponsiveVisibility>
             <ResponsiveVisibility visibleOn="mobile">
-              <NavLink to="/assignments" className={getToneClass('default', 'px-4 py-2 text-sm font-medium')}>
-                Menu
-              </NavLink>
+              <div className="relative">
+                <button
+                  type="button"
+                  onClick={() => setMobileMenuOpen((current) => !current)}
+                  className={getToneClass('default', 'px-4 py-2 text-sm font-medium')}
+                >
+                  Menu
+                </button>
+                {mobileMenuOpen && (
+                  <div className="absolute right-0 top-full mt-2 w-56 rounded-2xl border border-slate-200 bg-white p-3 shadow-xl">
+                    <div className="flex flex-col gap-2">
+                      <QuickLinksMenu
+                        favorites={favorites}
+                        recentItems={recentItems}
+                        savedSearches={savedSearches}
+                        homeFilters={homeFilters}
+                        onFavoritesChange={setFavorites}
+                        onRecentItemsChange={setRecentItems}
+                        onSavedSearchesChange={setSavedSearches}
+                        onHomeFiltersChange={setHomeFilters}
+                      />
+                      <NavLink to="/assignments" onClick={() => setMobileMenuOpen(false)} className="rounded-xl px-3 py-2 text-sm font-medium text-slate-700 transition hover:bg-slate-50">
+                        Assignments ({assignments.length})
+                      </NavLink>
+                      <NavLink to="/assignments/new" onClick={() => setMobileMenuOpen(false)} className="rounded-xl px-3 py-2 text-sm font-medium text-slate-700 transition hover:bg-slate-50">
+                        Create assignment
+                      </NavLink>
+                    </div>
+                  </div>
+                )}
+              </div>
             </ResponsiveVisibility>
           </div>
         </div>

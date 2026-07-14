@@ -27,6 +27,7 @@ type QuickLinksMenuProps = {
   recentItems: QuickLink[]
   savedSearches: SavedSearch[]
   homeFilters: HomeFilters
+  variant?: 'header' | 'menu'
   onFavoritesChange: (favorites: QuickLink[]) => void
   onRecentItemsChange: (recentItems: QuickLink[]) => void
   onSavedSearchesChange: (savedSearches: SavedSearch[]) => void
@@ -73,6 +74,7 @@ export function QuickLinksMenu({
   recentItems,
   savedSearches,
   homeFilters,
+  variant = 'menu',
   onFavoritesChange,
   onRecentItemsChange,
   onSavedSearchesChange,
@@ -220,13 +222,17 @@ export function QuickLinksMenu({
     onRecentItemsChange([])
   }
 
+  const triggerClassName = variant === 'header'
+    ? getToneClass('default', 'w-full px-4 py-2 text-left text-sm font-medium')
+    : `w-full cursor-pointer rounded-xl px-3 py-2 text-left text-sm font-medium transition ${menuOpen ? 'bg-slate-900 text-white' : 'text-slate-700 hover:bg-slate-50'}`
+
   return (
     <div className="relative">
       <button
         id="quick-links-trigger"
         type="button"
         onClick={() => setMenuOpen((current) => !current)}
-        className={getToneClass('default', 'px-4 py-2 text-sm font-medium')}
+        className={triggerClassName}
       >
         Quick links
       </button>
