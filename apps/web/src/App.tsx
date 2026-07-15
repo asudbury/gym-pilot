@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react'
-import { NavLink, Route, Routes, useLocation } from 'react-router-dom'
+import { NavLink, Route, Routes, useLocation, useNavigate } from 'react-router-dom'
 import webPackageJson from '../package.json'
 import { getToneClass } from './components/toneClasses'
 import { ResponsiveVisibility } from './components/ResponsiveVisibility'
@@ -9,11 +9,17 @@ import { ExercisePage } from './pages/ExercisePage'
 import { HomePage } from './pages/HomePage'
 import { PlanDetailPage } from './pages/PlanDetailPage'
 import { PlansPage } from './pages/PlansPage'
+import { AssignmentsPage } from './pages/AssignmentsPage'
 import { CreatePlanPage } from './pages/CreatePlanPage'
+import { CreateAssignmentPage } from './pages/CreateAssignmentPage'
 import { UsersPage } from './pages/UsersPage'
+import { AssignmentsManagerPage } from './pages/AssignmentsManagerPage'
 import { FavouriteLinksMenu } from './components/FavouriteLinksMenu'
 import { getExercisePath } from './utils/exerciseRouteUtils'
 import { formatLabel } from './utils/formatUtils'
+import { RequireAuth } from './auth/RequireAuth'
+import { LoginPage } from './pages/LoginPage'
+import { useAuth } from './auth/AuthContext'
 
 type HomeFilters = {
   searchTerm: string
@@ -53,7 +59,9 @@ function ScrollToTop() {
 
 function App() {
   const { pathname } = useLocation()
-  const { plans } = usePlan()
+  const navigate = useNavigate()
+  const { plans, users } = usePlan()
+  const { user, logout } = useAuth()
   const appVersion = webPackageJson.version || '0.0.0'
   const [favorites, setFavorites] = useState<QuickLink[]>(() => {
     if (typeof window === 'undefined') {
@@ -98,6 +106,9 @@ function App() {
   })
 
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
+  const defaultUserSlug = users.find((user) => typeof user.slug === 'string' && user.slug.trim() !== '')?.slug ?? ''
+  const assignmentsRoute = defaultUserSlug ? `/users/${defaultUserSlug}/assignments` : '/users'
+  const createAssignmentRoute = defaultUserSlug ? `/users/${defaultUserSlug}/assignments/create` : '/users'
 
   useEffect(() => {
     window.sessionStorage.setItem(HOME_FILTER_STORAGE_KEY, JSON.stringify(normalizeHomeFilters(homeFilters)))
@@ -167,7 +178,13 @@ function App() {
                   to="/plans"
                   className={getToneClass('default', 'px-4 py-2 text-sm font-medium')}
                 >
-                  Plans ({plans.length})
+                  Plans ({plans.filter((plan) => !plan.sourcePlanId).length})
+                </NavLink>
+                <NavLink
+                  to={assignmentsRoute}
+                  className={getToneClass('default', 'px-4 py-2 text-sm font-medium')}
+                >
+                  Assignments ({plans.filter((plan) => Boolean(plan.sourcePlanId)).length})
                 </NavLink>
                 <NavLink
                   to="/users"
@@ -175,6 +192,26 @@ function App() {
                 >
                   Users
                 </NavLink>
+                <NavLink
+                  to={createAssignmentRoute}
+                  className={getToneClass('default', 'px-4 py-2 text-sm font-medium')}
+                >
+                  Create assignment
+                </NavLink>
+                {/* <button
+                  type="button"
+                  onClick={() => {
+                    if (user) {
+                      logout()
+                      return
+                    }
+
+                    navigate('/login')
+                  }}
+                  className={getToneClass('default', 'px-4 py-2 text-sm font-medium')}
+                >
+                  {user ? 'Sign out' : 'Login'}
+                </button> */}
               </div>
             </ResponsiveVisibility>
             <ResponsiveVisibility visibleOn="tablet">
@@ -196,10 +233,16 @@ function App() {
                         onHomeFiltersChange={setHomeFilters}
                       />
                       <NavLink to="/plans" onClick={() => setMobileMenuOpen(false)} className="rounded-xl px-3 py-2 text-sm font-medium text-slate-700 transition hover:bg-slate-50">
-                        Plans ({plans.length})
+                        Plans ({plans.filter((plan) => !plan.sourcePlanId).length})
+                      </NavLink>
+                      <NavLink to="/assignments" onClick={() => setMobileMenuOpen(false)} className="rounded-xl px-3 py-2 text-sm font-medium text-slate-700 transition hover:bg-slate-50">
+                        Assignments ({plans.filter((plan) => Boolean(plan.sourcePlanId)).length})
                       </NavLink>
                       <NavLink to="/users" onClick={() => setMobileMenuOpen(false)} className="rounded-xl px-3 py-2 text-sm font-medium text-slate-700 transition hover:bg-slate-50">
                         Users
+                      </NavLink>
+                      <NavLink to={createAssignmentRoute} onClick={() => setMobileMenuOpen(false)} className="rounded-xl px-3 py-2 text-sm font-medium text-slate-700 transition hover:bg-slate-50">
+                        Create assignment
                       </NavLink>
                     </div>
                   </div>
@@ -225,10 +268,16 @@ function App() {
                         onHomeFiltersChange={setHomeFilters}
                       />
                       <NavLink to="/plans" onClick={() => setMobileMenuOpen(false)} className="rounded-xl px-3 py-2 text-sm font-medium text-slate-700 transition hover:bg-slate-50">
-                        Plans ({plans.length})
+                        Plans ({plans.filter((plan) => !plan.sourcePlanId).length})
+                      </NavLink>
+                      <NavLink to={assignmentsRoute} onClick={() => setMobileMenuOpen(false)} className="rounded-xl px-3 py-2 text-sm font-medium text-slate-700 transition hover:bg-slate-50">
+                        Assignments ({plans.filter((plan) => Boolean(plan.sourcePlanId)).length})
                       </NavLink>
                       <NavLink to="/users" onClick={() => setMobileMenuOpen(false)} className="rounded-xl px-3 py-2 text-sm font-medium text-slate-700 transition hover:bg-slate-50">
                         Users
+                      </NavLink>
+                      <NavLink to={createAssignmentRoute} onClick={() => setMobileMenuOpen(false)} className="rounded-xl px-3 py-2 text-sm font-medium text-slate-700 transition hover:bg-slate-50">
+                        Create assignment
                       </NavLink>
                     </div>
                   </div>
@@ -240,13 +289,22 @@ function App() {
       </nav>
 
       <Routes>
+        <Route path="/login" element={<LoginPage />} />
         <Route path="/" element={<HomePage filters={homeFilters} onFiltersChange={setHomeFilters} onToggleFavoriteExercise={handleToggleFavoriteExercise} isExerciseFavorite={isExerciseFavorite} />} />
         <Route path="/exercise/:slug" element={<ExercisePage onToggleFavoriteExercise={handleToggleFavoriteExercise} isExerciseFavorite={isExerciseFavorite} />} />
-        <Route path="/plans" element={<PlansPage />} />
-        <Route path="/users" element={<UsersPage />} />
-        <Route path="/plans/new" element={<CreatePlanPage />} />
-        <Route path="/plans/:planSlug/edit" element={<CreatePlanPage />} />
-        <Route path="/plans/:planSlug" element={<PlanDetailPage />} />
+        <Route element={<RequireAuth />}>
+          <Route path="/plans" element={<PlansPage />} />
+          <Route path="/assignments" element={<AssignmentsPage />} />
+          <Route path="/users/:userSlug/assignments" element={<AssignmentsPage />} />
+          <Route path="/users/:userSlug/assignments/create" element={<AssignmentsManagerPage />} />
+          <Route path="/users" element={<UsersPage />} />
+          <Route path="/plans/new" element={<CreatePlanPage />} />
+          <Route path="/plans/:planSlug/edit" element={<CreatePlanPage />} />
+          <Route path="/plans/:planSlug" element={<PlanDetailPage />} />
+          <Route path="/assignments/new" element={<CreateAssignmentPage />} />
+          <Route path="/users/:userSlug/assignments/:planSlug" element={<PlanDetailPage />} />
+          <Route path="/users/:userSlug/assignments/:planSlug/edit" element={<CreateAssignmentPage />} />
+        </Route>
       </Routes>
     </div>
   )

@@ -23,10 +23,13 @@ export type PlanItem = {
   note: string
 }
 
+export type UserRole = 'admin' | 'trainer' | 'user'
+
 export type User = {
   id: string
   name: string
   slug: string
+  role: UserRole
 }
 
 export type Plan = {
@@ -38,6 +41,7 @@ export type Plan = {
   assignedPeople?: string[]
   assignedUserIds?: string[]
   assignedUserId?: string
+  sourcePlanId?: string
   completedExercises?: Record<string, string>
   exercises: PlanItem[]
 }

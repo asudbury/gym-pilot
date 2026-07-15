@@ -4,7 +4,7 @@ import { AgGridReact } from 'ag-grid-react'
 import { AllCommunityModule, ModuleRegistry, provideGlobalGridOptions, type ColDef } from 'ag-grid-community'
 import 'ag-grid-community/styles/ag-grid.css'
 import 'ag-grid-community/styles/ag-theme-quartz.css'
-import { Link, useLocation, useNavigate, useParams } from 'react-router-dom'
+import { Link, useNavigate, useParams } from 'react-router-dom'
 import { Button } from '../components/Button'
 import { getToneClass } from '../components/toneClasses'
 import { exercises, usePlan } from '@gym-pilot/shared'
@@ -61,15 +61,12 @@ function sanitizeSheetName(value: string) {
   return cleaned || 'Sheet'
 }
 
-export function CreatePlanPage() {
-  const { createPlan, plans, updatePlan } = usePlan()
+export function CreateAssignmentPage() {
+  const { plans, updatePlan } = usePlan()
   const navigate = useNavigate()
-  const location = useLocation()
   const { planSlug } = useParams()
-  const planToEdit = useMemo(() => plans.find((item) => item.planSlug === planSlug), [plans, planSlug])
-  const isAssignmentRoute = location.pathname.includes('/assignments/')
-  const isEditMode = Boolean(planToEdit)
-  const [personNamesInput, setPersonNamesInput] = useState('')
+  const assignmentToEdit = useMemo(() => plans.find((item) => item.planSlug === planSlug), [plans, planSlug])
+  const isEditMode = Boolean(assignmentToEdit)
   const [selectedExerciseId, setSelectedExerciseId] = useState(exercises[0]?.id ?? '')
   const [selectedExerciseName, setSelectedExerciseName] = useState('')
   const [tabs, setTabs] = useState<PlanTab[]>(() => [createBlankTab('Day 1')])
@@ -108,8 +105,7 @@ export function CreatePlanPage() {
   }, [activeRows])
 
   useEffect(() => {
-    if (!planToEdit) {
-      setPersonNamesInput('')
+    if (!assignmentToEdit) {
       setSelectedExerciseId(exercises[0]?.id ?? '')
       setSelectedExerciseName('')
       const fallbackTab = createBlankTab('Day 1')
@@ -118,36 +114,23 @@ export function CreatePlanPage() {
       return
     }
 
-    setPersonNamesInput(planToEdit.planName)
     setSelectedExerciseId('')
     setSelectedExerciseName('')
     const nextTab = createBlankTab('Day 1')
-    nextTab.rows = planToEdit.exercises.map((exercise) => createBlankRow(exercise.id))
+    nextTab.rows = assignmentToEdit.exercises.map((exercise) => createBlankRow(exercise.id))
     setTabs([nextTab])
     setActiveTabId(nextTab.id)
-  }, [planToEdit])
+  }, [assignmentToEdit])
 
-  const handleAssignPlan = () => {
+  const handleSaveAssignment = () => {
     const selectedExerciseIds = tabs.flatMap((tab) => tab.rows.filter((row) => row.exerciseId).map((row) => row.exerciseId))
 
-    if (selectedExerciseIds.length === 0) {
+    if (selectedExerciseIds.length === 0 || !assignmentToEdit) {
       return
     }
 
-    const planName = personNamesInput.trim() || 'Untitled plan'
-
-    if (isEditMode && planToEdit) {
-      updatePlan(planToEdit.id, planName, selectedExerciseIds)
-      navigate(isAssignmentRoute ? `/users/${planToEdit.assignedUserId ?? 'user'}/assignments/${planToEdit.planSlug}` : `/plans/${planToEdit.planSlug}`)
-      return
-    }
-
-    createPlan(planName, selectedExerciseIds)
-    setPersonNamesInput('')
-    const resetTab = createBlankTab('Day 1')
-    setTabs([resetTab])
-    setActiveTabId(resetTab.id)
-    navigate(isAssignmentRoute ? '/users' : '/plans')
+    updatePlan(assignmentToEdit.id, assignmentToEdit.planName, selectedExerciseIds)
+    navigate(`/users/${assignmentToEdit.assignedUserId ?? 'user'}/assignments/${assignmentToEdit.planSlug}`)
   }
 
   const handleAddTab = () => {
@@ -257,7 +240,7 @@ export function CreatePlanPage() {
     workbook.created = new Date()
     workbook.modified = new Date()
 
-    const exportName = (personNamesInput.trim() || 'plan').replace(/[^a-z0-9]+/gi, '-').replace(/(^-|-$)/g, '') || 'plan'
+    const exportName = (assignmentToEdit?.planName || 'assignment').replace(/[^a-z0-9]+/gi, '-').replace(/(^-|-$)/g, '') || 'assignment'
 
     tabs.forEach((tab, index) => {
       const worksheet = workbook.addWorksheet(sanitizeSheetName(tab.title || `Day ${index + 1}`))
@@ -430,11 +413,11 @@ export function CreatePlanPage() {
       <PageCard>
         <div className="flex flex-wrap items-center justify-between gap-3">
           <div>
-            <Paragraph>Plans</Paragraph>
-            <Heading1 className="mt-2">{isAssignmentRoute ? (isEditMode ? 'Edit assignment' : 'Create a new assignment') : (isEditMode ? 'Edit plan' : 'Create a new plan')}</Heading1>
+            <Paragraph>Assignments</Paragraph>
+            <Heading1 className="mt-2">{isEditMode ? 'Edit assignment' : 'Create a new assignment'}</Heading1>
           </div>
-          <Link to="/plans" className={getToneClass('default', 'px-4 py-2 text-sm font-medium')}>
-            Back to plans
+          <Link to={`/users/${assignmentToEdit?.assignedUserId ?? 'user'}/assignments`} className={getToneClass('default', 'px-4 py-2 text-sm font-medium')}>
+            Back to assignments
           </Link>
         </div>
 
@@ -461,7 +444,7 @@ export function CreatePlanPage() {
                   <div className="flex flex-wrap items-end gap-3">
                     <div className="min-w-72 flex-1">
                       <ExerciseSearchPicker
-                        id="plan-exercise-search"
+                        id="assignment-exercise-search"
                         label="Exercise"
                         value={selectedExerciseName}
                         placeholder="Search exercises"
@@ -489,7 +472,7 @@ export function CreatePlanPage() {
                     <div className="flex flex-wrap items-end gap-3">
                       <div className="min-w-72 flex-1">
                         <ExerciseSearchPicker
-                          id="plan-exercise-search-fullscreen"
+                          id="assignment-exercise-search-fullscreen"
                           label="Exercise"
                           value={selectedExerciseName}
                           placeholder="Search exercises"
@@ -579,15 +562,8 @@ export function CreatePlanPage() {
               </div>
 
               <div className="flex flex-wrap items-end gap-3 rounded-2xl border border-slate-200 bg-slate-50 p-3">
-                <input
-                  type="text"
-                  value={personNamesInput}
-                  onChange={(event) => setPersonNamesInput(event.target.value)}
-                  placeholder="Plan name"
-                  className="min-w-56 rounded-full border border-slate-200 bg-white px-4 py-2 text-sm text-slate-700"
-                />
-                <Button tone="emerald" onClick={handleAssignPlan} className="px-4 py-2">
-                  {isAssignmentRoute ? (isEditMode ? 'Save assignment' : 'Create assignment') : (isEditMode ? 'Save changes' : 'Create plan')}
+                <Button tone="emerald" onClick={handleSaveAssignment} className="px-4 py-2" disabled={!assignmentToEdit}>
+                  {isEditMode ? 'Save assignment' : 'Create assignment'}
                 </Button>
               </div>
             </div>

@@ -1,5 +1,5 @@
 import { createContext, useContext, useEffect, useMemo, useState, type ReactNode } from 'react'
-import type { Plan, PlanItem, User, WeeklyDay } from '@gym-pilot/types'
+import type { Plan, PlanItem, User, UserRole, WeeklyDay } from '@gym-pilot/types'
 import type { Exercise } from './exerciseSchema'
 import { exercises } from './data'
 import { LocalStoragePersistence } from './storage'
@@ -20,7 +20,7 @@ type PlanContextValue = {
   assignUsersToPlan: (planId: string, assignedUserIds: string[]) => void
   updatePlanExercise: (planId: string, exerciseId: string, value: string) => void
   deletePlan: (planId: string) => void
-  createUser: (name: string) => User | undefined
+  createUser: (name: string, role?: UserRole) => User | undefined
   deleteUser: (userId: string) => void
 }
 
@@ -92,6 +92,25 @@ function buildUserSlug(name: string) {
     .replace(/(^-|-$)/g, '') || 'user'
 }
 
+function createPlanCopy(basePlan: Plan, user: User, plans: Plan[]): Plan {
+  const userPlanName = `${basePlan.planName || 'Untitled plan'} - ${user.name}`
+
+  return {
+    ...basePlan,
+    id: typeof crypto !== 'undefined' && 'randomUUID' in crypto ? crypto.randomUUID() : `${Date.now()}-${Math.random()}`,
+    planName: userPlanName,
+    planSlug: buildPlanSlug(userPlanName, plans),
+    personName: user.name,
+    personSlug: user.slug,
+    assignedPeople: [user.name],
+    assignedUserIds: [user.id],
+    assignedUserId: user.id,
+    sourcePlanId: basePlan.id,
+    completedExercises: {},
+    exercises: basePlan.exercises.map((exercise) => ({ ...exercise })),
+  }
+}
+
 export function PlanProvider({ children, storageKey = 'gym-pilot-plans' }: PlanProviderProps) {
   const [plans, setPlans] = useState<Plan[]>(() => getStoredPlans(storageKey))
   const [users, setUsers] = useState<User[]>(() => {
@@ -107,7 +126,7 @@ export function PlanProvider({ children, storageKey = 'gym-pilot-plans' }: PlanP
     persistence.save('gym-pilot-users', users)
   }, [users])
 
-  const createPlan = (planName: string, exerciseIds?: string[], assignedDays?: Record<string, WeeklyDay>, assignedUserIds?: string[]) => {
+  const createPlan = (planName: string, exerciseIds?: string[], assignedDays?: Record<string, WeeklyDay>) => {
     const trimmedName = planName.trim()
 
     if (!trimmedName) {
@@ -129,18 +148,15 @@ export function PlanProvider({ children, storageKey = 'gym-pilot-plans' }: PlanP
       return
     }
 
-    const resolvedAssignedUserIds = (assignedUserIds ?? []).filter((value) => typeof value === 'string' && value.trim() !== '')
-    const assignedUsers = users.filter((user) => resolvedAssignedUserIds.includes(user.id))
-
     const newPlan: Plan = {
       id: typeof crypto !== 'undefined' && 'randomUUID' in crypto ? crypto.randomUUID() : `${Date.now()}-${Math.random()}`,
       planName: trimmedName,
       planSlug: buildPlanSlug(trimmedName, plans),
-      personName: assignedUsers.length > 0 ? assignedUsers.map((user) => user.name).join(', ') : undefined,
-      personSlug: assignedUsers[0]?.slug,
-      assignedPeople: assignedUsers.length > 0 ? assignedUsers.map((user) => user.name) : undefined,
-      assignedUserIds: assignedUsers.length > 0 ? assignedUsers.map((user) => user.id) : undefined,
-      assignedUserId: assignedUsers[0]?.id,
+      personName: undefined,
+      personSlug: undefined,
+      assignedPeople: undefined,
+      assignedUserIds: undefined,
+      assignedUserId: undefined,
       completedExercises: {},
       exercises: selectedExercises,
     }
@@ -221,16 +237,21 @@ export function PlanProvider({ children, storageKey = 'gym-pilot-plans' }: PlanP
         }
 
         const nextSlug = buildPlanSlug(trimmedName, current.filter((item) => item.id !== planId))
+        const nextPersonName = assignedUsers.length > 0 ? assignedUsers.map((user) => user.name).join(', ') : plan.personName
+        const nextPersonSlug = assignedUsers[0]?.slug ?? plan.personSlug
+        const nextAssignedPeople = assignedUsers.length > 0 ? assignedUsers.map((user) => user.name) : plan.assignedPeople
+        const nextAssignedUserIds = assignedUsers.length > 0 ? assignedUsers.map((user) => user.id) : plan.assignedUserIds
+        const nextAssignedUserId = assignedUsers[0]?.id ?? plan.assignedUserId
 
         return {
           ...plan,
           planName: trimmedName,
           planSlug: nextSlug,
-          personName: assignedUsers.length > 0 ? assignedUsers.map((user) => user.name).join(', ') : plan.personName,
-          personSlug: assignedUsers[0]?.slug ?? plan.personSlug,
-          assignedPeople: assignedUsers.length > 0 ? assignedUsers.map((user) => user.name) : undefined,
-          assignedUserIds: assignedUsers.length > 0 ? assignedUsers.map((user) => user.id) : undefined,
-          assignedUserId: assignedUsers[0]?.id ?? plan.assignedUserId,
+          personName: nextPersonName,
+          personSlug: nextPersonSlug,
+          assignedPeople: nextAssignedPeople,
+          assignedUserIds: nextAssignedUserIds,
+          assignedUserId: nextAssignedUserId,
           exercises: selectedExercises,
         }
       }),
@@ -243,22 +264,43 @@ export function PlanProvider({ children, storageKey = 'gym-pilot-plans' }: PlanP
 
     const assignedUsers = users.filter((user) => resolvedAssignedUserIds.includes(user.id))
 
-    setPlans((current) =>
-      current.map((plan) => {
-        if (plan.id !== planId) {
-          return plan
+    setPlans((current) => {
+      const basePlan = current.find((plan) => plan.id === planId)
+
+      if (!basePlan) {
+        return current
+      }
+
+      const existingClones = current.filter((plan) => plan.sourcePlanId === planId)
+      const nextUserCopies: Plan[] = []
+
+      assignedUsers.forEach((user) => {
+        const existingClone = existingClones.find((plan) => (plan.assignedUserIds ?? []).includes(user.id))
+
+        if (existingClone) {
+          nextUserCopies.push({
+            ...existingClone,
+            planName: `${basePlan.planName || 'Untitled plan'} - ${user.name}`,
+            planSlug: buildPlanSlug(`${basePlan.planName || 'Untitled plan'} - ${user.name}`, [...current, ...nextUserCopies]),
+            personName: user.name,
+            personSlug: user.slug,
+            assignedPeople: [user.name],
+            assignedUserIds: [user.id],
+            assignedUserId: user.id,
+            sourcePlanId: basePlan.id,
+            completedExercises: existingClone.completedExercises ?? {},
+            exercises: existingClone.exercises.length > 0 ? existingClone.exercises.map((exercise) => ({ ...exercise })) : basePlan.exercises.map((exercise) => ({ ...exercise })),
+          })
+          return
         }
 
-        return {
-          ...plan,
-          personName: assignedUsers.length > 0 ? assignedUsers.map((user) => user.name).join(', ') : undefined,
-          personSlug: assignedUsers[0]?.slug ?? plan.personSlug,
-          assignedPeople: assignedUsers.length > 0 ? assignedUsers.map((user) => user.name) : undefined,
-          assignedUserIds: assignedUsers.length > 0 ? assignedUsers.map((user) => user.id) : undefined,
-          assignedUserId: assignedUsers[0]?.id ?? plan.assignedUserId,
-        }
-      }),
-    )
+        nextUserCopies.push(createPlanCopy(basePlan, user, [...current, ...nextUserCopies]))
+      })
+
+      const nextPlans = current.filter((plan) => plan.id === planId || plan.sourcePlanId !== planId)
+
+      return [...nextPlans, ...nextUserCopies]
+    })
   }
 
   const updatePlanExercise = (planId: string, exerciseId: string, value: string) => {
@@ -280,7 +322,7 @@ export function PlanProvider({ children, storageKey = 'gym-pilot-plans' }: PlanP
     setPlans((current) => current.filter((plan) => plan.id !== planId))
   }
 
-  const createUser = (name: string) => {
+  const createUser = (name: string, role: UserRole = 'user') => {
     const trimmedName = name.trim()
 
     if (!trimmedName) {
@@ -297,6 +339,7 @@ export function PlanProvider({ children, storageKey = 'gym-pilot-plans' }: PlanP
       id: typeof crypto !== 'undefined' && 'randomUUID' in crypto ? crypto.randomUUID() : `${Date.now()}-${Math.random()}`,
       name: trimmedName,
       slug: buildUserSlug(trimmedName),
+      role,
     }
 
     setUsers((current) => [...current, nextUser])

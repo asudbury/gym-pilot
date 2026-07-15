@@ -8,10 +8,11 @@ import { PageLayout } from '../layouts/PageLayout'
 
 export function PlansPage() {
   const { plans, deletePlan } = usePlan()
+  const basePlans = plans.filter((plan) => !plan.sourcePlanId)
 
   return (
     <PageLayout>
-      {plans.length === 0 ? (
+      {basePlans.length === 0 ? (
         <CallToAction
           title="No plans yet."
           description="Create a plan to track exercises and add notes for each one."
@@ -29,23 +30,23 @@ export function PlansPage() {
             </Link>
           </div>
           <div className="grid gap-4 md:grid-cols-2">
-        {plans.map((plan) => {
+        {basePlans.map((plan) => {
             return (
               <PageCard key={plan.id} padding="compact">
                 <div className="flex items-center justify-between gap-3">
                   <div>
                     <h2 className="text-xl font-semibold text-slate-900">{plan.planName || 'Untitled plan'}</h2>
-                    <p className="mt-1 text-sm text-slate-600">{plan.personName ? `Assigned to ${plan.personName}` : 'No user assigned'}</p>
+                    <p className="mt-1 text-sm text-slate-600">Base template</p>
                   </div>
                   <div className="flex items-center gap-2">
                     <Link
                       to={`/plans/${plan.planSlug ?? plan.id}`}
-                      className={getToneClass('white', 'px-3 py-1.5 text-sm')}
+                      className={getToneClass('default', 'px-3 py-1.5 text-sm')}
                     >
                       View
                     </Link>
                     <Link
-                        to={`/plans/${plan.planSlug ?? plan.id}/edit`}
+                      to={`/plans/${plan.planSlug ?? plan.id}/edit`}
                       className={getToneClass('default', 'px-3 py-1.5 text-sm')}
                     >
                       Update
