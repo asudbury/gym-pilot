@@ -1,32 +1,64 @@
-# React + TypeScript + Vite
+# Gym Pilot
 
-This template provides a minimal setup to get React working in Vite with HMR and some Oxlint rules.
+Gym Pilot is a multi-app fitness planning workspace built as a monorepo. The current focus is a web-based workout planner for creating, editing, and exporting training plans, with support for multiple tabs and Excel export.
 
-Currently, two official plugins are available:
+## What’s in this repo
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Oxc](https://oxc.rs)
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/)
+- Web app: a React + Vite experience for browsing exercises, creating plans, and exporting them
+- Mobile app: a placeholder app entry for future mobile development
+- Shared packages: reusable data, hooks, types, and plan state for the workspace
 
-## React Compiler
+## Key features
 
-The React Compiler is not enabled on this template because of its impact on dev & build performances. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
+- Browse and search exercises
+- Create and edit workout plans
+- Organise plans across multiple tabs
+- Export plan tabs to Excel workbooks using ExcelJS
+- Persist plans locally in the browser
 
-## Expanding the Oxlint configuration
+## Project structure
 
-If you are developing a production application, we recommend enabling type-aware lint rules by installing `oxlint-tsgolint` and editing `.oxlintrc.json`:
+- apps/web - main web application
+- apps/mobile - mobile app shell
+- packages/shared - shared data and plan context
+- packages/hooks - reusable hooks
+- packages/api - API layer scaffolding
+- packages/types - shared TypeScript types
 
-```json
-{
-  "$schema": "./node_modules/oxlint/configuration_schema.json",
-  "plugins": ["react", "typescript", "oxc"],
-  "options": {
-    "typeAware": true
-  },
-  "rules": {
-    "react/rules-of-hooks": "error",
-    "react/only-export-components": ["warn", { "allowConstantExport": true }]
-  }
-}
+## Getting started
+
+Install dependencies:
+
+```bash
+npm install
 ```
 
-See the [Oxlint rules documentation](https://oxc.rs/docs/guide/usage/linter/rules) for the full list of rules and categories.
+Run the web app locally:
+
+```bash
+npm run dev:web
+```
+
+Build the web app for production:
+
+```bash
+npm run build:web
+```
+
+## How to use the planner
+
+1. Open the web app and navigate to the plan builder.
+2. Search for exercises and add them to the active tab.
+3. Create additional tabs for different days or workout sections.
+4. Rename each tab to match your plan.
+5. Use the export button to download the full plan as an Excel workbook with one worksheet per tab.
+
+## Tech stack
+
+- React 19
+- TypeScript
+- Vite
+- Tailwind CSS
+- AG Grid
+- ExcelJS
+- React Router
