@@ -8,7 +8,7 @@ import { ExerciseDetailsCard } from '../components/ExerciseDetailsCard'
 
 export function PlanDetailPage() {
   const { planSlug } = useParams()
-  const { plans, updatePlanExercise } = usePlan()
+  const { plans } = usePlan()
 
   const plan = plans.find((item) => item.planSlug === planSlug)
 
@@ -30,33 +30,24 @@ export function PlanDetailPage() {
           <div>
             <Paragraph>Plan</Paragraph>
             <Heading1 className="mt-2">{plan.planName || 'Untitled plan'}</Heading1>
-            {plan.assignedPeople && plan.assignedPeople.length > 0 ? (
-              <p className="mt-2 text-sm text-slate-600">Assigned to: {plan.assignedPeople.join(', ')}</p>
-            ) : (
-              <p className="mt-2 text-sm text-slate-600">No people assigned yet</p>
-            )}
-            <p className="mt-2 text-sm text-slate-600">Reusable plan</p>
+            {plan.personName ? <p className="mt-2 text-sm text-slate-600">Assigned to {plan.personName}</p> : null}
           </div>
-          <Link to="/plans" className={getToneClass('default', 'px-4 py-2 text-sm font-medium')}>
-            Back to plans
-          </Link>
+          <div className="flex flex-wrap gap-2">
+            <Link to={`/plans/${plan.planSlug}/edit`} className={getToneClass('blue', 'px-4 py-2 text-sm font-medium')}>
+              Edit plan
+            </Link>
+            <Link to="/plans" className={getToneClass('default', 'px-4 py-2 text-sm font-medium')}>
+              Back to plans
+            </Link>
+          </div>
         </div>
-      </PageCard>
-
-      <PageCard>
-        <div className="space-y-4">
+        <div className="space-y-4 mt-6">
+          <h3><b>Exercises</b></h3>
           {plan.exercises.map((item) => (
             <div key={item.id} className="rounded-2xl border border-slate-200 p-4">
               <ExerciseDetailsCard
                 exercise={item}
-                expanded={true}
-                title={item.name}
-                noteLabel="Progress notes"
-                notePlaceholder="What did they do?"
-                noteRows={3}
-                notesValue={plan.completedExercises[item.id] ?? ''}
-                onNoteChange={(exerciseId, value) => updatePlanExercise(plan.id, exerciseId, value)}
-                showNotesSection={true}
+                expanded={false}
               />
             </div>
           ))}

@@ -1,5 +1,5 @@
 import { createContext, useContext, useEffect, useMemo, useState, type ReactNode } from 'react'
-import type { Plan, PlanItem, WeeklyDay } from '@gym-pilot/types'
+import type { Plan, PlanItem, User, WeeklyDay } from '@gym-pilot/types'
 import type { Exercise } from './exerciseSchema'
 import { exercises } from './data'
 import { LocalStoragePersistence } from './storage'
@@ -13,10 +13,15 @@ function createPlanItem(exercise: Exercise): PlanItem {
 
 type PlanContextValue = {
   plans: Plan[]
-  createPlan: (planName: string, exerciseIds?: string[], assignedDays?: Record<string, WeeklyDay>) => void
+  users: User[]
+  createPlan: (planName: string, exerciseIds?: string[], assignedDays?: Record<string, WeeklyDay>, assignedUserIds?: string[]) => void
   createPlanForPeople: (personInput: string | string[] | undefined, exerciseIds?: string[], assignedDays?: Record<string, WeeklyDay>) => void
+  updatePlan: (planId: string, planName: string, exerciseIds?: string[], assignedDays?: Record<string, WeeklyDay>, assignedUserIds?: string[]) => void
+  assignUsersToPlan: (planId: string, assignedUserIds: string[]) => void
   updatePlanExercise: (planId: string, exerciseId: string, value: string) => void
   deletePlan: (planId: string) => void
+  createUser: (name: string) => User | undefined
+  deleteUser: (userId: string) => void
 }
 
 type PlanProviderProps = {
@@ -63,6 +68,9 @@ function normalizePlan(plan: Plan): Plan {
         .replace(/[^a-z0-9]+/g, '-')
         .replace(/(^-|-$)/g, ''),
     assignedPeople: assignedPeople.length > 0 ? assignedPeople : undefined,
+    assignedUserIds: plan.assignedUserIds ?? (plan.assignedUserId ? [plan.assignedUserId] : undefined),
+    assignedUserId: plan.assignedUserId,
+    completedExercises: plan.completedExercises ?? {},
     exercises: plan.exercises ?? [],
   }
 }
@@ -76,14 +84,30 @@ function getStoredPlans(storageKey: string): Plan[] {
   return stored.map((plan) => normalizePlan(plan))
 }
 
+function buildUserSlug(name: string) {
+  return name
+    .toLowerCase()
+    .trim()
+    .replace(/[^a-z0-9]+/g, '-')
+    .replace(/(^-|-$)/g, '') || 'user'
+}
+
 export function PlanProvider({ children, storageKey = 'gym-pilot-plans' }: PlanProviderProps) {
   const [plans, setPlans] = useState<Plan[]>(() => getStoredPlans(storageKey))
+  const [users, setUsers] = useState<User[]>(() => {
+    const storedUsers = persistence.load<User[]>('gym-pilot-users', [])
+    return Array.isArray(storedUsers) ? storedUsers : []
+  })
 
   useEffect(() => {
     persistence.save(storageKey, plans)
   }, [plans, storageKey])
 
-  const createPlan = (planName: string, exerciseIds?: string[], assignedDays?: Record<string, WeeklyDay>) => {
+  useEffect(() => {
+    persistence.save('gym-pilot-users', users)
+  }, [users])
+
+  const createPlan = (planName: string, exerciseIds?: string[], assignedDays?: Record<string, WeeklyDay>, assignedUserIds?: string[]) => {
     const trimmedName = planName.trim()
 
     if (!trimmedName) {
@@ -105,12 +129,18 @@ export function PlanProvider({ children, storageKey = 'gym-pilot-plans' }: PlanP
       return
     }
 
+    const resolvedAssignedUserIds = (assignedUserIds ?? []).filter((value) => typeof value === 'string' && value.trim() !== '')
+    const assignedUsers = users.filter((user) => resolvedAssignedUserIds.includes(user.id))
+
     const newPlan: Plan = {
       id: typeof crypto !== 'undefined' && 'randomUUID' in crypto ? crypto.randomUUID() : `${Date.now()}-${Math.random()}`,
       planName: trimmedName,
       planSlug: buildPlanSlug(trimmedName, plans),
-      personName: undefined,
-      personSlug: undefined,
+      personName: assignedUsers.length > 0 ? assignedUsers.map((user) => user.name).join(', ') : undefined,
+      personSlug: assignedUsers[0]?.slug,
+      assignedPeople: assignedUsers.length > 0 ? assignedUsers.map((user) => user.name) : undefined,
+      assignedUserIds: assignedUsers.length > 0 ? assignedUsers.map((user) => user.id) : undefined,
+      assignedUserId: assignedUsers[0]?.id,
       completedExercises: {},
       exercises: selectedExercises,
     }
@@ -159,6 +189,78 @@ export function PlanProvider({ children, storageKey = 'gym-pilot-plans' }: PlanP
     setPlans((current) => [...current, newPlanItem])
   }
 
+  const updatePlan = (planId: string, planName: string, exerciseIds?: string[], assignedDays?: Record<string, WeeklyDay>, assignedUserIds?: string[]) => {
+    const trimmedName = planName.trim()
+
+    if (!trimmedName) {
+      return
+    }
+
+    const selectedExercises = (exerciseIds ?? [])
+      .map((exerciseId) => exercises.find((exercise) => exercise.id === exerciseId))
+      .filter((exercise): exercise is Exercise => Boolean(exercise))
+      .map((exercise) => {
+        const item = createPlanItem(exercise)
+        return {
+          ...item,
+          assignedDay: assignedDays?.[exercise.id],
+        }
+      })
+
+    if (selectedExercises.length === 0) {
+      return
+    }
+
+    const resolvedAssignedUserIds = (assignedUserIds ?? []).filter((value) => typeof value === 'string' && value.trim() !== '')
+    const assignedUsers = users.filter((user) => resolvedAssignedUserIds.includes(user.id))
+
+    setPlans((current) =>
+      current.map((plan) => {
+        if (plan.id !== planId) {
+          return plan
+        }
+
+        const nextSlug = buildPlanSlug(trimmedName, current.filter((item) => item.id !== planId))
+
+        return {
+          ...plan,
+          planName: trimmedName,
+          planSlug: nextSlug,
+          personName: assignedUsers.length > 0 ? assignedUsers.map((user) => user.name).join(', ') : plan.personName,
+          personSlug: assignedUsers[0]?.slug ?? plan.personSlug,
+          assignedPeople: assignedUsers.length > 0 ? assignedUsers.map((user) => user.name) : undefined,
+          assignedUserIds: assignedUsers.length > 0 ? assignedUsers.map((user) => user.id) : undefined,
+          assignedUserId: assignedUsers[0]?.id ?? plan.assignedUserId,
+          exercises: selectedExercises,
+        }
+      }),
+    )
+  }
+
+  const assignUsersToPlan = (planId: string, assignedUserIds: string[]) => {
+    const resolvedAssignedUserIds = (assignedUserIds ?? [])
+      .filter((value): value is string => typeof value === 'string' && value.trim() !== '')
+
+    const assignedUsers = users.filter((user) => resolvedAssignedUserIds.includes(user.id))
+
+    setPlans((current) =>
+      current.map((plan) => {
+        if (plan.id !== planId) {
+          return plan
+        }
+
+        return {
+          ...plan,
+          personName: assignedUsers.length > 0 ? assignedUsers.map((user) => user.name).join(', ') : undefined,
+          personSlug: assignedUsers[0]?.slug ?? plan.personSlug,
+          assignedPeople: assignedUsers.length > 0 ? assignedUsers.map((user) => user.name) : undefined,
+          assignedUserIds: assignedUsers.length > 0 ? assignedUsers.map((user) => user.id) : undefined,
+          assignedUserId: assignedUsers[0]?.id ?? plan.assignedUserId,
+        }
+      }),
+    )
+  }
+
   const updatePlanExercise = (planId: string, exerciseId: string, value: string) => {
     setPlans((current) =>
       current.map((plan) => {
@@ -178,15 +280,70 @@ export function PlanProvider({ children, storageKey = 'gym-pilot-plans' }: PlanP
     setPlans((current) => current.filter((plan) => plan.id !== planId))
   }
 
+  const createUser = (name: string) => {
+    const trimmedName = name.trim()
+
+    if (!trimmedName) {
+      return undefined
+    }
+
+    const duplicate = users.find((user) => user.name.toLowerCase() === trimmedName.toLowerCase())
+
+    if (duplicate) {
+      return duplicate
+    }
+
+    const nextUser: User = {
+      id: typeof crypto !== 'undefined' && 'randomUUID' in crypto ? crypto.randomUUID() : `${Date.now()}-${Math.random()}`,
+      name: trimmedName,
+      slug: buildUserSlug(trimmedName),
+    }
+
+    setUsers((current) => [...current, nextUser])
+    return nextUser
+  }
+
+  const deleteUser = (userId: string) => {
+    const trimmedUserId = userId.trim()
+
+    if (!trimmedUserId) {
+      return
+    }
+
+    const nextUsers = users.filter((user) => user.id !== trimmedUserId)
+
+    setUsers(nextUsers)
+    setPlans((current) =>
+      current.map((plan) => {
+        const nextAssignedUserIds = (plan.assignedUserIds ?? []).filter((id) => id !== trimmedUserId)
+        const assignedUsers = nextUsers.filter((user) => nextAssignedUserIds.includes(user.id))
+
+        return {
+          ...plan,
+          personName: assignedUsers.length > 0 ? assignedUsers.map((user) => user.name).join(', ') : undefined,
+          personSlug: assignedUsers[0]?.slug ?? plan.personSlug,
+          assignedPeople: assignedUsers.length > 0 ? assignedUsers.map((user) => user.name) : undefined,
+          assignedUserIds: assignedUsers.length > 0 ? assignedUsers.map((user) => user.id) : undefined,
+          assignedUserId: assignedUsers[0]?.id ?? plan.assignedUserId,
+        }
+      }),
+    )
+  }
+
   const value = useMemo<PlanContextValue>(
     () => ({
       plans,
+      users,
       createPlan,
       createPlanForPeople,
+      updatePlan,
+      assignUsersToPlan,
       updatePlanExercise,
       deletePlan,
+      createUser,
+      deleteUser,
     }),
-    [plans],
+    [plans, users],
   )
 
   return <PlanContext.Provider value={value}>{children}</PlanContext.Provider>

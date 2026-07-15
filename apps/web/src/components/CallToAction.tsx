@@ -1,14 +1,14 @@
 import type { ReactNode } from 'react'
 import { PageCard } from './PageCard'
 
-type EmptyStateProps = {
+type CallToActionProps = {
   title: string
   description?: ReactNode
   action?: ReactNode
   className?: string
 }
 
-export function EmptyState({ title, description, action, className = '' }: EmptyStateProps) {
+export function CallToAction({ title, description, action, className = '' }: CallToActionProps) {
   return (
     <PageCard padding="centered" className={className}>
       <p className="text-lg font-semibold text-slate-900">{title}</p>

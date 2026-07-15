@@ -2,7 +2,7 @@ import { Link } from 'react-router-dom'
 import { Button } from '../components/Button'
 import { getToneClass } from '../components/toneClasses'
 import { usePlan } from '@gym-pilot/shared'
-import { EmptyState } from '../components/EmptyState'
+import { CallToAction } from '../components/CallToAction'
 import { PageCard } from '../components/PageCard'
 import { PageLayout } from '../layouts/PageLayout'
 
@@ -12,7 +12,7 @@ export function PlansPage() {
   return (
     <PageLayout>
       {plans.length === 0 ? (
-        <EmptyState
+        <CallToAction
           title="No plans yet."
           description="Create a plan to track exercises and add notes for each one."
           action={
@@ -27,8 +27,17 @@ export function PlansPage() {
             return (
               <PageCard key={plan.id} padding="compact">
                 <div className="flex items-center justify-between gap-3">
-                  <h2 className="text-xl font-semibold text-slate-900">{plan.planName || 'Untitled plan'}</h2>
+                  <div>
+                    <h2 className="text-xl font-semibold text-slate-900">{plan.planName || 'Untitled plan'}</h2>
+                    <p className="mt-1 text-sm text-slate-600">{plan.personName ? `Assigned to ${plan.personName}` : 'No user assigned'}</p>
+                  </div>
                   <div className="flex items-center gap-2">
+                    <Link
+                      to="/users"
+                      className={getToneClass('default', 'px-3 py-1.5 text-sm')}
+                    >
+                      Manage users
+                    </Link>
                     <Link
                       to={`/plans/${plan.planSlug ?? plan.id}`}
                       className={getToneClass('white', 'px-3 py-1.5 text-sm')}

@@ -3,15 +3,17 @@ import { NavLink, Route, Routes, useLocation } from 'react-router-dom'
 import webPackageJson from '../package.json'
 import { getToneClass } from './components/toneClasses'
 import { ResponsiveVisibility } from './components/ResponsiveVisibility'
-import { exercises, exercisesSchema, formatLabel, usePlan } from '@gym-pilot/shared'
-import { HOME_FILTER_STORAGE_KEY, QUICK_LINKS_FAVORITES_STORAGE_KEY, QUICK_LINKS_RECENT_STORAGE_KEY, QUICK_LINKS_SAVED_SEARCHES_STORAGE_KEY } from './constants/storageKeys'
+import { exercises, exercisesSchema, usePlan } from '@gym-pilot/shared'
+import { HOME_FILTER_STORAGE_KEY, QUICK_LINKS_FAVORITES_STORAGE_KEY } from './constants/storageKeys'
 import { ExercisePage } from './pages/ExercisePage'
 import { HomePage } from './pages/HomePage'
 import { PlanDetailPage } from './pages/PlanDetailPage'
 import { PlansPage } from './pages/PlansPage'
 import { CreatePlanPage } from './pages/CreatePlanPage'
-import { QuickLinksMenu } from './components/QuickLinksMenu'
-import { getExercisePath } from './utils/exerciseRoute'
+import { UsersPage } from './pages/UsersPage'
+import { FavouriteLinksMenu } from './components/FavouriteLinksMenu'
+import { getExercisePath } from './utils/exerciseRouteUtils'
+import { formatLabel } from './utils/formatUtils'
 
 type HomeFilters = {
   searchTerm: string
@@ -23,13 +25,6 @@ type QuickLink = {
   id: string
   label: string
   path: string
-}
-
-type SavedSearch = {
-  id: string
-  label: string
-  searchTerm: string
-  selectedCategory: string | null
 }
 
 function normalizeHomeFilters(filters: Partial<HomeFilters> | null | undefined): HomeFilters {
@@ -81,46 +76,6 @@ function App() {
       return []
     }
   })
-  const [recentItems, setRecentItems] = useState<QuickLink[]>(() => {
-    if (typeof window === 'undefined') {
-      return []
-    }
-
-    const raw = window.localStorage.getItem(QUICK_LINKS_RECENT_STORAGE_KEY)
-
-    if (!raw) {
-      return []
-    }
-
-    try {
-      const parsed = JSON.parse(raw) as QuickLink[]
-      return Array.isArray(parsed) ? parsed.filter((item) => typeof item?.label === 'string' && typeof item?.path === 'string') : []
-    } catch {
-      window.localStorage.removeItem(QUICK_LINKS_RECENT_STORAGE_KEY)
-      return []
-    }
-  })
-  const [savedSearches, setSavedSearches] = useState<SavedSearch[]>(() => {
-    if (typeof window === 'undefined') {
-      return []
-    }
-
-    const raw = window.localStorage.getItem(QUICK_LINKS_SAVED_SEARCHES_STORAGE_KEY)
-
-    if (!raw) {
-      return []
-    }
-
-    try {
-      const parsed = JSON.parse(raw) as SavedSearch[]
-      return Array.isArray(parsed)
-        ? parsed.filter((item) => typeof item?.label === 'string' && typeof item?.searchTerm === 'string')
-        : []
-    } catch {
-      window.localStorage.removeItem(QUICK_LINKS_SAVED_SEARCHES_STORAGE_KEY)
-      return []
-    }
-  })
   const [homeFilters, setHomeFilters] = useState<HomeFilters>(() => {
     if (typeof window === 'undefined') {
       return { searchTerm: '', selectedCategory: null, showImages: true }
@@ -152,17 +107,6 @@ function App() {
     setMobileMenuOpen(false)
   }, [pathname])
 
-  useEffect(() => {
-    window.localStorage.setItem(QUICK_LINKS_FAVORITES_STORAGE_KEY, JSON.stringify(favorites))
-  }, [favorites])
-
-  useEffect(() => {
-    window.localStorage.setItem(QUICK_LINKS_RECENT_STORAGE_KEY, JSON.stringify(recentItems))
-  }, [recentItems])
-
-  useEffect(() => {
-    window.localStorage.setItem(QUICK_LINKS_SAVED_SEARCHES_STORAGE_KEY, JSON.stringify(savedSearches))
-  }, [savedSearches])
 
   const handleToggleFavoriteExercise = (exerciseId: string) => {
     const parsed = exercisesSchema.parse(exercises)
@@ -212,15 +156,11 @@ function App() {
           <div className="flex flex-wrap items-center gap-2">
             <ResponsiveVisibility visibleOn="desktop">
               <div className="flex items-center gap-2">
-                <QuickLinksMenu
+                <FavouriteLinksMenu
                   favorites={favorites}
-                  recentItems={recentItems}
-                  savedSearches={savedSearches}
                   homeFilters={homeFilters}
                   variant="header"
                   onFavoritesChange={setFavorites}
-                  onRecentItemsChange={setRecentItems}
-                  onSavedSearchesChange={setSavedSearches}
                   onHomeFiltersChange={setHomeFilters}
                 />
                 <NavLink
@@ -228,6 +168,12 @@ function App() {
                   className={getToneClass('default', 'px-4 py-2 text-sm font-medium')}
                 >
                   Plans ({plans.length})
+                </NavLink>
+                <NavLink
+                  to="/users"
+                  className={getToneClass('default', 'px-4 py-2 text-sm font-medium')}
+                >
+                  Users
                 </NavLink>
               </div>
             </ResponsiveVisibility>
@@ -243,18 +189,17 @@ function App() {
                 {mobileMenuOpen && (
                   <div className="absolute right-0 top-full mt-2 w-56 rounded-2xl border border-slate-200 bg-white p-3 shadow-xl">
                     <div className="flex flex-col gap-2">
-                      <QuickLinksMenu
+                      <FavouriteLinksMenu
                         favorites={favorites}
-                        recentItems={recentItems}
-                        savedSearches={savedSearches}
                         homeFilters={homeFilters}
                         onFavoritesChange={setFavorites}
-                        onRecentItemsChange={setRecentItems}
-                        onSavedSearchesChange={setSavedSearches}
                         onHomeFiltersChange={setHomeFilters}
                       />
                       <NavLink to="/plans" onClick={() => setMobileMenuOpen(false)} className="rounded-xl px-3 py-2 text-sm font-medium text-slate-700 transition hover:bg-slate-50">
                         Plans ({plans.length})
+                      </NavLink>
+                      <NavLink to="/users" onClick={() => setMobileMenuOpen(false)} className="rounded-xl px-3 py-2 text-sm font-medium text-slate-700 transition hover:bg-slate-50">
+                        Users
                       </NavLink>
                       <NavLink to="/plans/new" onClick={() => setMobileMenuOpen(false)} className="rounded-xl px-3 py-2 text-sm font-medium text-slate-700 transition hover:bg-slate-50">
                         Create plan
@@ -276,18 +221,17 @@ function App() {
                 {mobileMenuOpen && (
                   <div className="absolute right-0 top-full mt-2 w-56 rounded-2xl border border-slate-200 bg-white p-3 shadow-xl">
                     <div className="flex flex-col gap-2">
-                      <QuickLinksMenu
+                      <FavouriteLinksMenu
                         favorites={favorites}
-                        recentItems={recentItems}
-                        savedSearches={savedSearches}
                         homeFilters={homeFilters}
                         onFavoritesChange={setFavorites}
-                        onRecentItemsChange={setRecentItems}
-                        onSavedSearchesChange={setSavedSearches}
                         onHomeFiltersChange={setHomeFilters}
                       />
                       <NavLink to="/plans" onClick={() => setMobileMenuOpen(false)} className="rounded-xl px-3 py-2 text-sm font-medium text-slate-700 transition hover:bg-slate-50">
                         Plans ({plans.length})
+                      </NavLink>
+                      <NavLink to="/users" onClick={() => setMobileMenuOpen(false)} className="rounded-xl px-3 py-2 text-sm font-medium text-slate-700 transition hover:bg-slate-50">
+                        Users
                       </NavLink>
                       <NavLink to="/plans/new" onClick={() => setMobileMenuOpen(false)} className="rounded-xl px-3 py-2 text-sm font-medium text-slate-700 transition hover:bg-slate-50">
                         Create plan
@@ -305,7 +249,9 @@ function App() {
         <Route path="/" element={<HomePage filters={homeFilters} onFiltersChange={setHomeFilters} onToggleFavoriteExercise={handleToggleFavoriteExercise} isExerciseFavorite={isExerciseFavorite} />} />
         <Route path="/exercise/:slug" element={<ExercisePage onToggleFavoriteExercise={handleToggleFavoriteExercise} isExerciseFavorite={isExerciseFavorite} />} />
         <Route path="/plans" element={<PlansPage />} />
+        <Route path="/users" element={<UsersPage />} />
         <Route path="/plans/new" element={<CreatePlanPage />} />
+        <Route path="/plans/:planSlug/edit" element={<CreatePlanPage />} />
         <Route path="/plans/:planSlug" element={<PlanDetailPage />} />
       </Routes>
     </div>

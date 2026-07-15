@@ -2,7 +2,7 @@ import { useDeferredValue, useEffect, useMemo, useState } from 'react'
 import { Link } from 'react-router-dom'
 import { List, type RowComponentProps } from 'react-window'
 import { getToneClass } from '../components/toneClasses'
-import { exercises, exercisesSchema, formatLabel } from '@gym-pilot/shared'
+import { exercises, exercisesSchema  } from '@gym-pilot/shared'
 import { PageCard } from '../components/PageCard'
 import { PageActionRow } from '../components/PageActionRow'
 import { PageLayout } from '../layouts/PageLayout'
@@ -12,7 +12,9 @@ import { ExerciseMetaBadges } from '../components/ExerciseMetaBadges'
 import { ResponsiveVisibility } from '../components/ResponsiveVisibility'
 import { ExerciseImage } from '../components/ExerciseImage'
 import { MIN_SEARCH_CHARS } from '../constants/home'
-import { getExercisePath } from '../utils/exerciseRoute'
+import { getExercisePath } from '../utils/exerciseRouteUtils'
+import { ExerciseSearchPicker } from '../components/ExerciseSearchPicker'
+import { formatLabel } from '../utils/formatUtils'
 
 type HomeFilters = {
   searchTerm: string
@@ -53,9 +55,9 @@ function ExerciseActionButtons({ exerciseId, isFavorite, copiedId, onToggleFavor
           event.stopPropagation()
           onToggleFavoriteExercise?.(exerciseId)
         }}
-        className={getToneClass(isFavorite ? 'emerald' : 'white', 'px-3 py-2 text-sm font-medium')}
+        className={getToneClass(isFavorite ? 'blue' : 'white', 'px-3 py-2 text-sm font-medium')}
       >
-        {isFavorite ? '★ Saved' : '☆ Save'}
+        {isFavorite ? '★ Favourited' : '☆ Favourite'}
       </button>
       <button
         type="button"
@@ -76,7 +78,6 @@ export function HomePage({ filters, onFiltersChange, onToggleFavoriteExercise, i
   const { selectedCategory } = filters
   const [copiedId, setCopiedId] = useState<string | null>(null)
   const [draftSearchTerm, setDraftSearchTerm] = useState(filters.searchTerm)
-  const [showSuggestions, setShowSuggestions] = useState(false)
   const [showExerciseImages, setShowExerciseImages] = useState(filters.showImages)
   const [isLargeScreen, setIsLargeScreen] = useState(() => {
     if (typeof window === 'undefined') {
@@ -169,21 +170,6 @@ export function HomePage({ filters, onFiltersChange, onToggleFavoriteExercise, i
     })
   }, [exerciseList, deferredSearchTerm, hasExplicitAll, normalizedCategory])
 
-  const searchSuggestions = useMemo(() => {
-    const normalizedSearch = deferredSearchTerm.trim().toLowerCase()
-
-    if (!normalizedSearch || normalizedSearch.length < MIN_SEARCH_CHARS) {
-      return []
-    }
-
-    return exerciseList
-      .filter((exercise) => {
-        const searchableText = [exercise.name, exercise.category, exercise.target, exercise.equipment].join(' ').toLowerCase()
-        return searchableText.includes(normalizedSearch)
-      })
-      .slice(0, 6)
-  }, [exerciseList, deferredSearchTerm])
-
   const exerciseRows = useMemo(() => {
     const columns = isLargeScreen ? 2 : 1
     const rows: ExerciseRow[] = []
@@ -202,67 +188,17 @@ export function HomePage({ filters, onFiltersChange, onToggleFavoriteExercise, i
     <PageLayout className="gap-6">
       <PageCard as="section">
         <div className="mb-5">
-          <label className="mb-2 block text-sm font-medium text-slate-700" htmlFor="exercise-search">
-            Search exercises
-          </label>
-          <div className="flex items-center gap-2">
-            <div className="relative flex-1">
-              <input
-                id="exercise-search"
-                type="text"
-                value={draftSearchTerm}
-                onChange={(event) => {
-                  setDraftSearchTerm(event.target.value)
-                  if (event.target.value.trim().length >= MIN_SEARCH_CHARS) {
-                    setShowSuggestions(true)
-                  } else {
-                    setShowSuggestions(false)
-                  }
-                }}
-                placeholder="Try abs, chest, cable..."
-                className={`${appTokens.input} pr-10 outline-none ring-0 focus:border-slate-400`}
-              />
-              {draftSearchTerm && (
-                <button
-                  type="button"
-                  onClick={() => {
-                    setDraftSearchTerm('')
-                    setShowSuggestions(false)
-                  }}
-                  className="absolute inset-y-0 right-0 flex items-center pr-3 text-slate-400 transition hover:text-slate-600"
-                  aria-label="Clear search"
-                >
-                  Clear
-                </button>
-              )}
-            </div>
-          </div>
-
-          {showSuggestions && searchSuggestions.length > 0 && hasSearchThreshold && (
-            <div className="mt-3 rounded-2xl border border-slate-200 bg-slate-50 p-2 shadow-sm">
-              <p className="mb-2 px-2 text-xs font-semibold uppercase tracking-wide text-slate-500">
-                Suggestions
-              </p>
-              <div className="flex flex-col gap-1">
-                {searchSuggestions.map((exercise) => (
-                  <button
-                    key={exercise.id}
-                    type="button"
-                    onClick={() => {
-                      const nextSearchTerm = formatLabel(exercise.name)
-                      setDraftSearchTerm(nextSearchTerm)
-                      setShowSuggestions(false)
-                      onFiltersChange({ ...filters, searchTerm: nextSearchTerm, selectedCategory: null, showImages: showExerciseImages })
-                    }}
-                    className="flex items-center justify-between rounded-xl px-3 py-2 text-left text-sm text-slate-700 transition hover:bg-white hover:text-slate-900"
-                  >
-                    <span className="font-medium">{formatLabel(exercise.name)}</span>
-                    <span className="text-xs text-slate-500">{formatLabel(exercise.category)}</span>
-                  </button>
-                ))}
-              </div>
-            </div>
-          )}
+          <ExerciseSearchPicker
+            id="exercise-search"
+            value={draftSearchTerm}
+            onChange={(nextValue) => {
+              setDraftSearchTerm(nextValue)
+            }}
+            onSelectExercise={(exercise) => {
+              const nextSearchTerm = formatLabel(exercise.name)
+              onFiltersChange({ ...filters, searchTerm: nextSearchTerm, selectedCategory: null, showImages: showExerciseImages })
+            }}
+          />
         </div>
 
         <div className="mt-4 flex flex-wrap items-center gap-3">
@@ -327,7 +263,7 @@ export function HomePage({ filters, onFiltersChange, onToggleFavoriteExercise, i
                   : 'Start typing or choose a category to reveal exercises.'}
             </p>
           </div>
-          <div className={appTokens.pill}>{normalizedCategory ? `Category: ${normalizedCategory}` : 'All categories'}</div>
+          <div className={appTokens.pill}>{normalizedCategory ? `Category: ${normalizedCategory}` : ''}</div>
         </PageActionRow>
 
         {shouldShowResults ? (

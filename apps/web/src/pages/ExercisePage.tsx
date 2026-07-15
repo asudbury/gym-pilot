@@ -5,14 +5,14 @@ import { getToneClass } from '../components/toneClasses'
 import { ExerciseImage } from '../components/ExerciseImage'
 import { ExerciseSteps } from '../components/ExerciseSteps'
 import { YouTubeExerciseSearchButton } from '../components/YouTubeExerciseSearchButton'
-import { formatLabel } from '@gym-pilot/shared'
 import { exercises, exercisesSchema } from '@gym-pilot/shared'
-import { getExerciseSlug } from '../utils/exerciseRoute'
+import { getExerciseSlug } from '../utils/exerciseRouteUtils'
 import { PageCard } from '../components/PageCard'
 import { PageActionGroup, PageActionRow } from '../components/PageActionRow'
 import { PageLayout } from '../layouts/PageLayout'
 import { Heading1, Paragraph } from '../components/Typography'
 import { ExerciseMetaBadges } from '../components/ExerciseMetaBadges'
+import { formatLabel } from '../utils/formatUtils'
 
 type ExercisePageProps = {
   onToggleFavoriteExercise?: (exerciseId: string) => void
@@ -77,7 +77,7 @@ export function ExercisePage({ onToggleFavoriteExercise, isExerciseFavorite }: E
           <button
             type="button"
             onClick={() => onToggleFavoriteExercise?.(exercise.id)}
-            className={getToneClass(isExerciseFavorite?.(exercise.id) ? 'emerald' : 'default', 'cursor-pointer px-4 py-2 text-sm font-medium')}
+            className={getToneClass(isExerciseFavorite?.(exercise.id) ? 'blue' : 'default', 'cursor-pointer px-4 py-2 text-sm font-medium')}
           >
             {isExerciseFavorite?.(exercise.id) ? 'Added to Favourites' : 'Add to Favourites'}
           </button>
