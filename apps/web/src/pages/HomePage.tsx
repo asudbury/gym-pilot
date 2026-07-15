@@ -201,25 +201,46 @@ export function HomePage({ filters, onFiltersChange, onToggleFavoriteExercise, i
           />
         </div>
 
-        <div className="mt-4 flex flex-col gap-2 sm:flex-row sm:flex-wrap sm:items-center">
-          {categories.map((category) => {
-            const isAll = category === 'All'
-            const isSelected = isAll ? selectedCategory === 'All' : normalizedCategory === category
+        <div className="mt-4 flex flex-col gap-2">
+          <div className="sm:hidden">
+            <select
+              value={selectedCategory ?? ''}
+              onChange={(event) => {
+                const nextCategory = event.target.value
+                onFiltersChange({ ...filters, searchTerm: draftSearchTerm, selectedCategory: nextCategory === '' ? null : nextCategory === 'All' ? 'All' : nextCategory, showImages: showExerciseImages })
+              }}
+              className="w-full rounded-full border border-slate-200 bg-white px-4 py-2 text-sm text-slate-700"
+            >
+              <option value="">No category selected</option>
+              <option value="All">All categories</option>
+              {categories.filter((category) => category !== 'All').map((category) => (
+                <option key={category} value={category}>
+                  {category}
+                </option>
+              ))}
+            </select>
+          </div>
 
-            return (
-              <button
-                key={category}
-                onClick={() => onFiltersChange({ ...filters, searchTerm: draftSearchTerm, selectedCategory: isAll ? 'All' : category, showImages: showExerciseImages })}
-                className={
-                  isSelected
-                    ? getToneClass('blue', 'px-4 py-2 text-sm font-medium transition')
-                    : getToneClass('default', 'px-4 py-2 text-sm font-medium transition hover:bg-slate-200')
-                }
-              >
-                {category}
-              </button>
-            )
-          })}
+          <div className="hidden sm:flex sm:flex-wrap sm:items-center sm:gap-2">
+            {categories.map((category) => {
+              const isAll = category === 'All'
+              const isSelected = isAll ? selectedCategory === 'All' : normalizedCategory === category
+
+              return (
+                <button
+                  key={category}
+                  onClick={() => onFiltersChange({ ...filters, searchTerm: draftSearchTerm, selectedCategory: isAll ? 'All' : category, showImages: showExerciseImages })}
+                  className={
+                    isSelected
+                      ? getToneClass('blue', 'px-4 py-2 text-sm font-medium transition')
+                      : getToneClass('default', 'px-4 py-2 text-sm font-medium transition hover:bg-slate-200')
+                  }
+                >
+                  {category}
+                </button>
+              )
+            })}
+          </div>
 
           <button
             type="button"
@@ -228,7 +249,7 @@ export function HomePage({ filters, onFiltersChange, onToggleFavoriteExercise, i
               setShowExerciseImages(nextShowExerciseImages)
               onFiltersChange({ ...filters, searchTerm: draftSearchTerm, selectedCategory, showImages: nextShowExerciseImages })
             }}
-            className={showExerciseImages ? getToneClass('default', 'px-4 py-2 text-sm font-medium transition') : getToneClass('blue', 'px-4 py-2 text-sm font-medium transition')}
+            className={showExerciseImages ? getToneClass('default', 'px-4 py-2 text-sm font-medium transition hover:bg-slate-200') : getToneClass('blue', 'px-4 py-2 text-sm font-medium transition')}
           >
             {showExerciseImages ? 'Hide images' : 'Show images'}
           </button>
