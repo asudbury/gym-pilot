@@ -1,7 +1,7 @@
 import { useEffect, useMemo, useState } from 'react'
 import ExcelJS from 'exceljs'
 import { AgGridReact } from 'ag-grid-react'
-import { AllCommunityModule, ModuleRegistry, type ColDef } from 'ag-grid-community'
+import { AllCommunityModule, ModuleRegistry, provideGlobalGridOptions, type ColDef } from 'ag-grid-community'
 import 'ag-grid-community/styles/ag-grid.css'
 import 'ag-grid-community/styles/ag-theme-quartz.css'
 import { Link, useNavigate, useParams } from 'react-router-dom'
@@ -17,6 +17,7 @@ import { getExercisePath } from '../utils/exerciseRouteUtils'
 import { formatLabel } from '../utils/formatUtils'
 
 ModuleRegistry.registerModules([AllCommunityModule])
+provideGlobalGridOptions({ theme: 'legacy' })
 
 interface PlanGridRow {
   id: string
@@ -570,6 +571,7 @@ export function CreatePlanPage() {
                     rowHeight={56}
                     headerHeight={44}
                     animateRows={true}
+                    theme="legacy"
                   />
                 </div>
               </div>
