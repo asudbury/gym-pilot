@@ -16,14 +16,20 @@ export function PlansPage() {
           title="No plans yet."
           description="Create a plan to track exercises and add notes for each one."
           action={
-            <Link to="/plans/new" className={getToneClass('blue', 'px-4 py-2 text-sm font-medium')}>
-              Create plan
+            <Link to="/plans/new" className={getToneClass('blue', 'inline-flex items-center rounded-lg px-4 py-2 text-sm font-medium')}>
+              Create a new plan
             </Link>
           }
         />
       ) : (
-        <div className="grid gap-4 md:grid-cols-2">
-          {plans.map((plan) => {
+        <>
+          <div className="mb-4">
+            <Link to="/plans/new" className={getToneClass('blue', 'inline-flex items-center rounded-lg px-4 py-2 text-sm font-medium')}>
+              Create a new plan
+            </Link>
+          </div>
+          <div className="grid gap-4 md:grid-cols-2">
+        {plans.map((plan) => {
             return (
               <PageCard key={plan.id} padding="compact">
                 <div className="flex items-center justify-between gap-3">
@@ -33,16 +39,16 @@ export function PlansPage() {
                   </div>
                   <div className="flex items-center gap-2">
                     <Link
-                      to="/users"
-                      className={getToneClass('default', 'px-3 py-1.5 text-sm')}
-                    >
-                      Manage users
-                    </Link>
-                    <Link
                       to={`/plans/${plan.planSlug ?? plan.id}`}
                       className={getToneClass('white', 'px-3 py-1.5 text-sm')}
                     >
-                      Open
+                      View
+                    </Link>
+                    <Link
+                        to={`/plans/${plan.planSlug ?? plan.id}/edit`}
+                      className={getToneClass('default', 'px-3 py-1.5 text-sm')}
+                    >
+                      Update
                     </Link>
                     <Button tone="rose" onClick={() => deletePlan(plan.id)}>
                       Remove
@@ -53,6 +59,7 @@ export function PlansPage() {
             )
           })}
         </div>
+        </>
       )}
     </PageLayout>
   )

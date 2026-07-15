@@ -1,3 +1,5 @@
+import { safeJsonParse } from './utils'
+
 export interface IPersistenceStore {
   load<T>(key: string, fallback: T): T
   save<T>(key: string, value: T): void
@@ -20,17 +22,7 @@ export class LocalStoragePersistence implements IPersistenceStore {
   }
 
   load<T>(key: string, fallback: T): T {
-    const raw = this.storage?.getItem(key)
-
-    if (raw === null || raw === undefined) {
-      return fallback
-    }
-
-    try {
-      return JSON.parse(raw) as T
-    } catch {
-      return fallback
-    }
+    return safeJsonParse<T>(this.storage?.getItem(key), fallback)
   }
 
   save<T>(key: string, value: T): void {

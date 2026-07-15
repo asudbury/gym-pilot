@@ -201,9 +201,6 @@ function App() {
                       <NavLink to="/users" onClick={() => setMobileMenuOpen(false)} className="rounded-xl px-3 py-2 text-sm font-medium text-slate-700 transition hover:bg-slate-50">
                         Users
                       </NavLink>
-                      <NavLink to="/plans/new" onClick={() => setMobileMenuOpen(false)} className="rounded-xl px-3 py-2 text-sm font-medium text-slate-700 transition hover:bg-slate-50">
-                        Create plan
-                      </NavLink>
                     </div>
                   </div>
                 )}
@@ -232,9 +229,6 @@ function App() {
                       </NavLink>
                       <NavLink to="/users" onClick={() => setMobileMenuOpen(false)} className="rounded-xl px-3 py-2 text-sm font-medium text-slate-700 transition hover:bg-slate-50">
                         Users
-                      </NavLink>
-                      <NavLink to="/plans/new" onClick={() => setMobileMenuOpen(false)} className="rounded-xl px-3 py-2 text-sm font-medium text-slate-700 transition hover:bg-slate-50">
-                        Create plan
                       </NavLink>
                     </div>
                   </div>

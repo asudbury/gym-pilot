@@ -2,7 +2,7 @@ import type { ReactNode } from 'react'
 import { PageCard } from './PageCard'
 
 type CallToActionProps = {
-  title: string
+  title?: string
   description?: ReactNode
   action?: ReactNode
   className?: string
@@ -11,7 +11,7 @@ type CallToActionProps = {
 export function CallToAction({ title, description, action, className = '' }: CallToActionProps) {
   return (
     <PageCard padding="centered" className={className}>
-      <p className="text-lg font-semibold text-slate-900">{title}</p>
+      {title ? <p className="text-lg font-semibold text-slate-900">{title}</p> : null}
       {description ? (
         <div className="mt-2 text-sm text-slate-600">{description}</div>
       ) : null}

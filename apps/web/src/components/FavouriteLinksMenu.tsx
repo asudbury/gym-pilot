@@ -1,7 +1,7 @@
 import { useEffect, useMemo, useState } from 'react'
 import { useLocation, useNavigate } from 'react-router-dom'
 import { getToneClass } from './toneClasses'
-import { exercises, exercisesSchema } from '@gym-pilot/shared'
+import { classNames, exercises, exercisesSchema } from '@gym-pilot/shared'
 import { formatLabel } from '../utils/formatUtils'
 import { QUICK_LINKS_FAVORITES_STORAGE_KEY } from '../constants/storageKeys'
 
@@ -162,9 +162,14 @@ export function FavouriteLinksMenu({
     setMenuOpen(false)
   }
 
-  const triggerClassName = variant === 'header'
-    ? getToneClass('default', 'w-full px-4 py-2 text-left text-sm font-medium')
-    : `w-full cursor-pointer rounded-xl px-3 py-2 text-left text-sm font-medium transition ${menuOpen ? 'bg-slate-900 text-white' : 'text-slate-700 hover:bg-slate-50'}`
+  const triggerClassName = classNames(
+    variant === 'header'
+      ? getToneClass('default', 'w-full px-4 py-2 text-left text-sm font-medium')
+      : classNames(
+        'w-full cursor-pointer rounded-xl px-3 py-2 text-left text-sm font-medium transition',
+        menuOpen ? 'bg-slate-900 text-white' : 'text-slate-700 hover:bg-slate-50',
+      ),
+  )
 
   return (
     <div className="relative">
