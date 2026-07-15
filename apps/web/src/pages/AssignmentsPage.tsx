@@ -25,7 +25,7 @@ export function AssignmentsPage() {
         </PageCard>
       ) : (
         <>
-          <div className="mb-4 flex flex-wrap items-center justify-between gap-3">
+          <div className="mb-4 flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
             <div>
               <h1 className="text-2xl font-semibold text-slate-900">Assignments</h1>
               <p className="mt-1 text-sm text-slate-600">Each assignment is its own editable copy for an individual user.</p>
@@ -37,19 +37,19 @@ export function AssignmentsPage() {
           <div className="grid gap-4 md:grid-cols-2">
             {assignments.map((plan) => (
               <PageCard key={plan.id} padding="compact">
-                <div className="flex items-center justify-between gap-3">
+                <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
                   <div>
                     <h2 className="text-xl font-semibold text-slate-900">{plan.planName || 'Untitled assignment'}</h2>
                     <p className="mt-1 text-sm text-slate-600">{plan.personName ? `Assigned to ${plan.personName}` : 'No user assigned'}</p>
                   </div>
-                  <div className="flex items-center gap-2">
-                    <Link to={`/users/${plan.assignedUserId ?? 'user'}/assignments/${plan.planSlug ?? plan.id}`} className={getToneClass('default', 'px-3 py-1.5 text-sm')}>
+                  <div className="flex flex-col gap-2 sm:flex-row sm:items-center">
+                    <Link to={`/users/${plan.assignedUserId ?? 'user'}/assignments/${plan.planSlug ?? plan.id}`} className={getToneClass('default', 'px-3 py-1.5 text-sm text-center')}>
                       View
                     </Link>
-                    <Link to={`/users/${plan.assignedUserId ?? 'user'}/assignments/${plan.planSlug ?? plan.id}/edit`} className={getToneClass('default', 'px-3 py-1.5 text-sm')}>
+                    <Link to={`/users/${plan.assignedUserId ?? 'user'}/assignments/${plan.planSlug ?? plan.id}/edit`} className={getToneClass('default', 'px-3 py-1.5 text-sm text-center')}>
                       Update
                     </Link>
-                    <Button tone="rose" onClick={() => deletePlan(plan.id)}>
+                    <Button tone="rose" onClick={() => deletePlan(plan.id)} className="px-3 py-1.5">
                       Remove
                     </Button>
                   </div>

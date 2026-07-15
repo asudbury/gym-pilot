@@ -27,27 +27,27 @@ export function UsersPage() {
   return (
     <PageLayout className="max-w-5xl">
       <PageCard>
-        <div className="flex flex-wrap items-center justify-between gap-3">
+        <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
           <div>
             <Paragraph>People</Paragraph>
             <Heading1 className="mt-2">Manage users</Heading1>
           </div>
         </div>
 
-        <div className="mt-6">
-          <div className="space-y-4 rounded-2xl border border-slate-200 bg-slate-50 p-4">
-            <div className="flex flex-wrap gap-2">
+        <div className="mt-4 sm:mt-6">
+          <div className="space-y-4 rounded-2xl border border-slate-200 bg-slate-50 p-3 sm:p-4">
+            <div className="flex flex-col gap-2 sm:flex-row sm:flex-wrap">
               <input
                 type="text"
                 value={newUserName}
                 onChange={(event) => setNewUserName(event.target.value)}
                 placeholder="Add a new user"
-                className="min-w-64 rounded-full border border-slate-200 bg-white px-4 py-2 text-sm text-slate-700"
+                className="w-full rounded-full border border-slate-200 bg-white px-4 py-2 text-sm text-slate-700 sm:min-w-64 sm:w-auto"
               />
               <select
                 value={newUserRole}
                 onChange={(event) => setNewUserRole(event.target.value as UserRole)}
-                className="rounded-full border border-slate-200 bg-white px-4 py-2 text-sm text-slate-700"
+                className="w-full rounded-full border border-slate-200 bg-white px-4 py-2 text-sm text-slate-700 sm:w-auto"
               >
                 <option value="admin">Admin</option>
                 <option value="trainer">Trainer</option>
@@ -63,7 +63,7 @@ export function UsersPage() {
             ) : (
               <div className="space-y-2">
                 {users.map((user) => (
-                  <div key={user.id} className="flex items-center justify-between rounded-2xl border border-slate-200 bg-white px-4 py-3">
+                  <div key={user.id} className="flex flex-col gap-3 rounded-2xl border border-slate-200 bg-white px-4 py-3 sm:flex-row sm:items-center sm:justify-between">
                     <div>
                       <span className="text-sm font-medium text-slate-800">{user.name}</span>
                       <p className="mt-1 text-xs uppercase tracking-[0.2em] text-slate-500">{user.role}</p>

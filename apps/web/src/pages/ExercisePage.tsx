@@ -73,7 +73,7 @@ export function ExercisePage({ onToggleFavoriteExercise, isExerciseFavorite }: E
         <ExerciseImage mediaGif={mediaGif} exerciseName={exercise.name} className="mt-6" />
         <YouTubeExerciseSearchButton exerciseName={exercise.name} />
         <ExerciseSteps steps={exercise.instruction_steps.en} className="mt-8" />
-        <PageActionGroup className="mt-6 justify-end">
+        <PageActionGroup className="mt-6 flex-col sm:flex-row sm:justify-end">
           <button
             type="button"
             onClick={() => onToggleFavoriteExercise?.(exercise.id)}

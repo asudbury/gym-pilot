@@ -411,7 +411,7 @@ export function CreateAssignmentPage() {
   return (
     <PageLayout>
       <PageCard>
-        <div className="flex flex-wrap items-center justify-between gap-3">
+        <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
           <div>
             <Paragraph>Assignments</Paragraph>
             <Heading1 className="mt-2">{isEditMode ? 'Edit assignment' : 'Create a new assignment'}</Heading1>
@@ -421,11 +421,11 @@ export function CreateAssignmentPage() {
           </Link>
         </div>
 
-        <div className="mt-6 space-y-6 rounded-2xl border border-slate-200 bg-slate-50 p-4">
-          <div className="rounded-2xl border border-slate-200 bg-white p-4">
+        <div className="mt-4 space-y-4 rounded-2xl border border-slate-200 bg-slate-50 p-3 sm:mt-6 sm:space-y-6 sm:p-4">
+          <div className="rounded-2xl border border-slate-200 bg-white p-3 sm:p-4">
             <div className="space-y-3">
-              <div className="flex flex-wrap items-center justify-between gap-3 rounded-2xl border border-slate-200 bg-slate-50 p-3">
-                <div className="flex flex-wrap items-center gap-2">
+              <div className="flex flex-col gap-2 rounded-2xl border border-slate-200 bg-slate-50 p-3 sm:flex-row sm:items-center sm:justify-between">
+                <div className="flex flex-col gap-2 sm:flex-row sm:items-center">
                   <Button tone="blue" onClick={handleExportToExcel} className="px-4 py-2">
                     Export Excel
                   </Button>
@@ -440,9 +440,9 @@ export function CreateAssignmentPage() {
               <p className="text-sm text-slate-600">Each tab is exported as a separate worksheet in a single workbook.</p>
 
               {!isFullscreen ? (
-                <div className="flex flex-wrap items-end justify-between gap-3 rounded-2xl border border-slate-200 bg-slate-50 p-3">
-                  <div className="flex flex-wrap items-end gap-3">
-                    <div className="min-w-72 flex-1">
+                <div className="flex flex-col gap-3 rounded-2xl border border-slate-200 bg-slate-50 p-3 sm:flex-row sm:items-end sm:justify-between">
+                  <div className="flex flex-col gap-3 sm:flex-row sm:items-end sm:gap-3">
+                    <div className="w-full min-w-0 sm:min-w-72 sm:flex-1">
                       <ExerciseSearchPicker
                         id="assignment-exercise-search"
                         label="Exercise"
@@ -466,11 +466,11 @@ export function CreateAssignmentPage() {
                 </div>
               ) : null}
 
-              <div className={isFullscreen ? 'fixed inset-3 z-50 flex flex-col overflow-hidden rounded-3xl border border-slate-300 bg-white shadow-2xl' : 'overflow-hidden rounded-2xl border border-slate-200 bg-white'}>
+              <div className={isFullscreen ? 'fixed inset-2 z-50 flex flex-col overflow-hidden rounded-2xl border border-slate-300 bg-white shadow-2xl sm:inset-3' : 'overflow-hidden rounded-2xl border border-slate-200 bg-white'}>
                 {isFullscreen ? (
-                  <div className="flex flex-wrap items-end justify-between gap-3 border-b border-slate-200 bg-slate-50 p-3">
-                    <div className="flex flex-wrap items-end gap-3">
-                      <div className="min-w-72 flex-1">
+                  <div className="flex flex-col gap-3 border-b border-slate-200 bg-slate-50 p-3 sm:flex-row sm:items-end sm:justify-between">
+                    <div className="flex flex-col gap-3 sm:flex-row sm:items-end sm:gap-3">
+                      <div className="w-full min-w-0 sm:min-w-72 sm:flex-1">
                         <ExerciseSearchPicker
                           id="assignment-exercise-search-fullscreen"
                           label="Exercise"
@@ -546,7 +546,7 @@ export function CreateAssignmentPage() {
                   </Button>
                 </div>
 
-                <div className={`ag-theme-quartz ${isFullscreen ? 'h-[calc(100vh-8rem)]' : 'h-105'} w-full`}>
+                <div className={`ag-theme-quartz ${isFullscreen ? 'h-[calc(100vh-8rem)]' : 'h-96 sm:h-105'} w-full`}>
                   <AgGridReact<PlanGridRow>
                     key={activeTab?.id}
                     rowData={activeRows}
@@ -561,7 +561,7 @@ export function CreateAssignmentPage() {
                 </div>
               </div>
 
-              <div className="flex flex-wrap items-end gap-3 rounded-2xl border border-slate-200 bg-slate-50 p-3">
+              <div className="flex flex-col gap-3 rounded-2xl border border-slate-200 bg-slate-50 p-3 sm:flex-row sm:items-end">
                 <Button tone="emerald" onClick={handleSaveAssignment} className="px-4 py-2" disabled={!assignmentToEdit}>
                   {isEditMode ? 'Save assignment' : 'Create assignment'}
                 </Button>

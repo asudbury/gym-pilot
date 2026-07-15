@@ -227,7 +227,7 @@ function App() {
                   Menu
                 </button>
                 {mobileMenuOpen && (
-                  <div className="absolute right-0 top-full mt-2 w-56 rounded-2xl border border-slate-200 bg-white p-3 shadow-xl">
+                  <div className="fixed inset-x-3 top-16 z-40 max-h-[min(75vh,32rem)] overflow-y-auto rounded-2xl border border-slate-200 bg-white p-3 shadow-xl sm:absolute sm:right-0 sm:left-auto sm:top-full sm:mt-2 sm:w-80 sm:max-w-[calc(100vw-2rem)]">
                     <div className="flex flex-col gap-2">
                       <FavouriteLinksMenu
                         favorites={favorites}
@@ -262,7 +262,7 @@ function App() {
                   Menu
                 </button>
                 {mobileMenuOpen && (
-                  <div className="absolute right-0 top-full mt-2 w-56 rounded-2xl border border-slate-200 bg-white p-3 shadow-xl">
+                  <div className="fixed inset-x-3 top-16 z-40 max-h-[min(75vh,32rem)] overflow-y-auto rounded-2xl border border-slate-200 bg-white p-3 shadow-xl sm:absolute sm:right-0 sm:left-auto sm:top-full sm:mt-2 sm:w-80 sm:max-w-[calc(100vw-2rem)]">
                     <div className="flex flex-col gap-2">
                       <FavouriteLinksMenu
                         favorites={favorites}

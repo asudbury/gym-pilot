@@ -6,11 +6,11 @@ type PageActionRowProps = {
 }
 
 export function PageActionRow({ children, className = '' }: PageActionRowProps) {
-  return <div className={`flex flex-wrap items-center justify-between gap-3 ${className}`.trim()}>{children}</div>
+  return <div className={`flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between ${className}`.trim()}>{children}</div>
 }
 
 export function PageActionGroup({ children, className = '' }: PageActionRowProps) {
-  return <div className={`flex flex-wrap gap-2 ${className}`.trim()}>{children}</div>
+  return <div className={`flex flex-col gap-2 sm:flex-row sm:flex-wrap ${className}`.trim()}>{children}</div>
 }
 
 export function ModalShell({ children, className = '' }: PageActionRowProps) {

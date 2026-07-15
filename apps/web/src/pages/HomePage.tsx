@@ -201,7 +201,7 @@ export function HomePage({ filters, onFiltersChange, onToggleFavoriteExercise, i
           />
         </div>
 
-        <div className="mt-4 flex flex-wrap items-center gap-3">
+        <div className="mt-4 flex flex-col gap-2 sm:flex-row sm:flex-wrap sm:items-center">
           {categories.map((category) => {
             const isAll = category === 'All'
             const isSelected = isAll ? selectedCategory === 'All' : normalizedCategory === category
@@ -263,7 +263,7 @@ export function HomePage({ filters, onFiltersChange, onToggleFavoriteExercise, i
                   : 'Start typing or choose a category to reveal exercises.'}
             </p>
           </div>
-          <div className={appTokens.pill}>{normalizedCategory ? `Category: ${normalizedCategory}` : ''}</div>
+          {normalizedCategory ? <div className={appTokens.pill}>Category: {normalizedCategory}</div> : null}
         </PageActionRow>
 
         {shouldShowResults ? (
