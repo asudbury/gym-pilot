@@ -61,6 +61,7 @@ function App() {
   const { pathname } = useLocation()
   const navigate = useNavigate()
   const { plans, users } = usePlan()
+  const SHOW_AUTH_BUTTON = false
   const { user, logout } = useAuth()
   const appVersion = webPackageJson.version || '0.0.0'
   const [favorites, setFavorites] = useState<QuickLink[]>(() => {
@@ -198,20 +199,22 @@ function App() {
                 >
                   Create assignment
                 </NavLink>
-                {/* <button
-                  type="button"
-                  onClick={() => {
-                    if (user) {
-                      logout()
-                      return
-                    }
+                {!SHOW_AUTH_BUTTON ? null : (
+                  <button
+                    type="button"
+                    onClick={() => {
+                      if (user) {
+                        logout()
+                        return
+                      }
 
-                    navigate('/login')
-                  }}
-                  className={getToneClass('default', 'px-4 py-2 text-sm font-medium')}
-                >
-                  {user ? 'Sign out' : 'Login'}
-                </button> */}
+                      navigate('/login')
+                    }}
+                    className={getToneClass('default', 'px-4 py-2 text-sm font-medium')}
+                  >
+                    {user ? 'Sign out' : 'Login'}
+                  </button>
+                )}
               </div>
             </ResponsiveVisibility>
             <ResponsiveVisibility visibleOn="tablet">
