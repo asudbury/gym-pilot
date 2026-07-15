@@ -5,10 +5,12 @@ import './index.css'
 import App from './App.tsx'
 import { PlanProvider } from '@gym-pilot/shared'
 import { PLANS_STORAGE_KEY } from './constants/storageKeys'
+import { GoogleAnalytics } from './components/GoogleAnalytics.tsx'
 
 createRoot(document.getElementById('root')!).render(
   <StrictMode>
     <HashRouter>
+      <GoogleAnalytics />
       <PlanProvider storageKey={PLANS_STORAGE_KEY}>
         <App />
       </PlanProvider>
