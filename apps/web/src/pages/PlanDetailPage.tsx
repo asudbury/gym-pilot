@@ -1,3 +1,4 @@
+import { useMemo } from 'react'
 import { Link, useParams } from 'react-router-dom'
 import { getToneClass } from '../components/toneClasses'
 import { usePlan } from '@gym-pilot/shared'
@@ -8,10 +9,13 @@ import { ExerciseDetailsCard } from '../components/ExerciseDetailsCard'
 
 export function PlanDetailPage() {
   const { planSlug } = useParams()
-  const { plans } = usePlan()
+  const { plans, assignments } = usePlan()
 
-  const plan = plans.find((item) => item.planSlug === planSlug)
-  const isAssignment = Boolean(plan?.sourcePlanId)
+  const plan = useMemo(() => {
+    return [...plans, ...assignments].find((item) => item.planSlug === planSlug)
+  }, [assignments, planSlug, plans])
+  const assignment = useMemo(() => assignments.find((item) => item.planSlug === planSlug), [assignments, planSlug])
+  const isAssignment = Boolean(assignment)
   const editPath = isAssignment ? `/users/${plan?.assignedUserId ?? 'user'}/assignments/${plan?.planSlug ?? planSlug}/edit` : `/plans/${plan?.planSlug ?? planSlug}/edit`
   const backPath = isAssignment ? `/users/${plan?.assignedUserId ?? 'user'}/assignments` : '/plans'
   const editLabel = isAssignment ? 'Edit assignment' : 'Edit plan'
@@ -35,7 +39,11 @@ export function PlanDetailPage() {
           <div>
             <Paragraph>Plan</Paragraph>
             <Heading1 className="mt-2">{plan.planName || 'Untitled plan'}</Heading1>
-            {plan.personName ? <p className="mt-2 text-sm text-slate-600">{isAssignment ? `Assignment for ${plan.personName}` : `Assigned to ${plan.personName}`}</p> : null}
+            {isAssignment ? (
+              <p className="mt-2 text-sm text-slate-600">{assignment?.assignedUserName ? `Assignment for ${assignment.assignedUserName}` : 'Assignment for a user'}</p>
+            ) : plan && 'personName' in plan && plan.personName ? (
+              <p className="mt-2 text-sm text-slate-600">{`Assigned to ${plan.personName}`}</p>
+            ) : null}
           </div>
           <div className="flex flex-wrap gap-2">
             <Link to={editPath} className={getToneClass('blue', 'px-4 py-2 text-sm font-medium')}>

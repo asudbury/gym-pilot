@@ -1,6 +1,6 @@
 import { createContext, useContext, useEffect, useMemo, useState, type ReactNode } from 'react'
 import type { User, UserRole } from '@gym-pilot/types'
-import { usePlan } from '@gym-pilot/shared'
+import { loadJsonRecord, saveJsonRecord, usePlan } from '@gym-pilot/shared'
 
 const SESSION_STORAGE_KEY = 'gym-pilot-auth-session'
 const BYPASS_STORAGE_KEY = 'gym-pilot-auth-bypass'
@@ -24,64 +24,56 @@ type AuthProviderProps = {
 
 const AuthContext = createContext<AuthContextValue | undefined>(undefined)
 
-function readStoredSession(): AuthUser | null {
-  if (typeof window === 'undefined') {
+async function readStoredSession(): Promise<AuthUser | null> {
+  const stored = await loadJsonRecord<Partial<AuthUser> | null>(SESSION_STORAGE_KEY, null)
+
+  if (!stored?.id || !stored?.name || !stored?.slug || !stored?.role) {
     return null
   }
 
-  const stored = window.localStorage.getItem(SESSION_STORAGE_KEY)
-
-  if (!stored) {
-    return null
-  }
-
-  try {
-    const parsed = JSON.parse(stored) as Partial<AuthUser>
-
-    if (!parsed?.id || !parsed?.name || !parsed?.slug || !parsed?.role) {
-      window.localStorage.removeItem(SESSION_STORAGE_KEY)
-      return null
-    }
-
-    return parsed as AuthUser
-  } catch {
-    window.localStorage.removeItem(SESSION_STORAGE_KEY)
-    return null
-  }
+  return stored as AuthUser
 }
 
-function readBypassFlag() {
-  if (typeof window === 'undefined') {
-    return false
-  }
-
-  return window.localStorage.getItem(BYPASS_STORAGE_KEY) === 'true'
+async function readBypassFlag(): Promise<boolean> {
+  return (await loadJsonRecord<boolean>(BYPASS_STORAGE_KEY, false))
 }
 
 export function AuthProvider({ children }: AuthProviderProps) {
   const { users } = usePlan()
-  const [user, setUser] = useState<AuthUser | null>(() => readStoredSession())
-  const [isBypassEnabled, setIsBypassEnabled] = useState(readBypassFlag)
+  const [user, setUser] = useState<AuthUser | null>(null)
+  const [isBypassEnabled, setIsBypassEnabled] = useState(false)
 
   useEffect(() => {
-    if (typeof window === 'undefined') {
-      return
-    }
+    let isActive = true
 
+    void readStoredSession().then((storedUser) => {
+      if (isActive) {
+        setUser(storedUser)
+      }
+    })
+
+    void readBypassFlag().then((storedFlag) => {
+      if (isActive) {
+        setIsBypassEnabled(storedFlag)
+      }
+    })
+
+    return () => {
+      isActive = false
+    }
+  }, [])
+
+  useEffect(() => {
     if (user) {
-      window.localStorage.setItem(SESSION_STORAGE_KEY, JSON.stringify(user))
+      void saveJsonRecord(SESSION_STORAGE_KEY, user)
       return
     }
 
-    window.localStorage.removeItem(SESSION_STORAGE_KEY)
+    void saveJsonRecord(SESSION_STORAGE_KEY, null)
   }, [user])
 
   useEffect(() => {
-    if (typeof window === 'undefined') {
-      return
-    }
-
-    window.localStorage.setItem(BYPASS_STORAGE_KEY, isBypassEnabled ? 'true' : 'false')
+    void saveJsonRecord(BYPASS_STORAGE_KEY, isBypassEnabled)
   }, [isBypassEnabled])
 
   const login = (userId: string) => {

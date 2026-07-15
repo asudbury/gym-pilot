@@ -42,6 +42,16 @@ export type Plan = {
   assignedUserIds?: string[]
   assignedUserId?: string
   sourcePlanId?: string
+  exercises: PlanItem[]
+}
+
+export type Assignment = {
+  id: string
+  planId: string
+  planName: string
+  planSlug: string
+  assignedUserId?: string
+  assignedUserName?: string
   completedExercises?: Record<string, string>
   exercises: PlanItem[]
 }

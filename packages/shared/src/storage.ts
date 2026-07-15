@@ -1,35 +1,21 @@
-import { safeJsonParse } from './utils'
+import { loadJsonRecord, removeJsonRecord, saveJsonRecord } from './dexie'
 
 export interface IPersistenceStore {
-  load<T>(key: string, fallback: T): T
-  save<T>(key: string, value: T): void
-  remove(key: string): void
+  load<T>(key: string, fallback: T): Promise<T>
+  save<T>(key: string, value: T): Promise<void>
+  remove(key: string): Promise<void>
 }
 
-function getDefaultStorage(): Storage | undefined {
-  if (typeof window === 'undefined') {
-    return undefined
+export class DexiePersistence implements IPersistenceStore {
+  async load<T>(key: string, fallback: T): Promise<T> {
+    return loadJsonRecord<T>(key, fallback)
   }
 
-  return window.localStorage
-}
-
-export class LocalStoragePersistence implements IPersistenceStore {
-  private readonly storage: Storage | undefined
-
-  constructor(storage?: Storage) {
-    this.storage = storage ?? getDefaultStorage()
+  async save<T>(key: string, value: T): Promise<void> {
+    await saveJsonRecord(key, value)
   }
 
-  load<T>(key: string, fallback: T): T {
-    return safeJsonParse<T>(this.storage?.getItem(key), fallback)
-  }
-
-  save<T>(key: string, value: T): void {
-    this.storage?.setItem(key, JSON.stringify(value))
-  }
-
-  remove(key: string): void {
-    this.storage?.removeItem(key)
+  async remove(key: string): Promise<void> {
+    await removeJsonRecord(key)
   }
 }

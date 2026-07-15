@@ -1,7 +1,7 @@
 import { useEffect, useMemo, useState } from 'react'
 import { useLocation, useNavigate } from 'react-router-dom'
 import { getToneClass } from './toneClasses'
-import { classNames, exercises, exercisesSchema } from '@gym-pilot/shared'
+import { classNames, exercises, exercisesSchema, saveJsonRecord } from '@gym-pilot/shared'
 import { formatLabel } from '../utils/formatUtils'
 import { QUICK_LINKS_FAVORITES_STORAGE_KEY } from '../constants/storageKeys'
 
@@ -78,7 +78,7 @@ export function FavouriteLinksMenu({
   const [menuOpen, setMenuOpen] = useState(false)
 
   useEffect(() => {
-    window.localStorage.setItem(QUICK_LINKS_FAVORITES_STORAGE_KEY, JSON.stringify(favorites))
+    void saveJsonRecord(QUICK_LINKS_FAVORITES_STORAGE_KEY, favorites)
   }, [favorites])
 
   useEffect(() => {

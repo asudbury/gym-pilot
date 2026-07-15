@@ -7,7 +7,7 @@ import 'ag-grid-community/styles/ag-theme-quartz.css'
 import { Link, useNavigate, useParams } from 'react-router-dom'
 import { Button } from '../components/Button'
 import { getToneClass } from '../components/toneClasses'
-import { exercises, usePlan } from '@gym-pilot/shared'
+import { exercises, loadJsonRecord, usePlan } from '@gym-pilot/shared'
 import { PageCard } from '../components/PageCard'
 import { PageLayout } from '../layouts/PageLayout'
 import { Heading1, Paragraph } from '../components/Typography'
@@ -62,10 +62,10 @@ function sanitizeSheetName(value: string) {
 }
 
 export function CreateAssignmentPage() {
-  const { plans, updatePlan } = usePlan()
+  const { assignments, updateAssignment } = usePlan()
   const navigate = useNavigate()
   const { planSlug } = useParams()
-  const assignmentToEdit = useMemo(() => plans.find((item) => item.planSlug === planSlug), [plans, planSlug])
+  const assignmentToEdit = useMemo(() => assignments.find((item) => item.planSlug === planSlug), [assignments, planSlug])
   const isEditMode = Boolean(assignmentToEdit)
   const [selectedExerciseId, setSelectedExerciseId] = useState(exercises[0]?.id ?? '')
   const [selectedExerciseName, setSelectedExerciseName] = useState('')
@@ -82,25 +82,34 @@ export function CreateAssignmentPage() {
     }
   }, [activeTabId, tabs])
 
+  const [favoriteExerciseIds, setFavoriteExerciseIds] = useState<string[]>([])
+
   const favoriteExercises = useMemo(() => {
-    if (typeof window === 'undefined') {
-      return []
-    }
+    const selectedExerciseIds = new Set(activeRows.filter((row) => row.exerciseId).map((row) => row.exerciseId))
 
-    try {
-      const raw = window.localStorage.getItem(QUICK_LINKS_FAVORITES_STORAGE_KEY)
+    return exercises.filter((exercise) => favoriteExerciseIds.includes(exercise.id) && !selectedExerciseIds.has(exercise.id))
+  }, [activeRows, favoriteExerciseIds])
 
-      if (!raw) {
-        return []
+  useEffect(() => {
+    let isActive = true
+
+    void loadJsonRecord<Array<{ path?: string }>>(QUICK_LINKS_FAVORITES_STORAGE_KEY, []).then((storedFavorites) => {
+      if (!isActive) {
+        return
       }
 
-      const parsed = JSON.parse(raw) as Array<{ label?: string; path?: string }>
-      const favoritePaths = new Set(parsed.filter((item) => typeof item?.path === 'string').map((item) => item.path))
+      const favoritePaths = new Set((storedFavorites ?? []).filter((item) => typeof item?.path === 'string').map((item) => item.path))
       const selectedExerciseIds = new Set(activeRows.filter((row) => row.exerciseId).map((row) => row.exerciseId))
 
-      return exercises.filter((exercise) => favoritePaths.has(getExercisePath(exercise)) && !selectedExerciseIds.has(exercise.id))
-    } catch {
-      return []
+      const ids = exercises
+        .filter((exercise) => favoritePaths.has(getExercisePath(exercise)) && !selectedExerciseIds.has(exercise.id))
+        .map((exercise) => exercise.id)
+
+      setFavoriteExerciseIds(ids)
+    })
+
+    return () => {
+      isActive = false
     }
   }, [activeRows])
 
@@ -129,7 +138,7 @@ export function CreateAssignmentPage() {
       return
     }
 
-    updatePlan(assignmentToEdit.id, assignmentToEdit.planName, selectedExerciseIds)
+    updateAssignment(assignmentToEdit.id, assignmentToEdit.planName, selectedExerciseIds)
     navigate(`/users/${assignmentToEdit.assignedUserId ?? 'user'}/assignments/${assignmentToEdit.planSlug}`)
   }
 

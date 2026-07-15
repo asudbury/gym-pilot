@@ -3,7 +3,7 @@ import { NavLink, Route, Routes, useLocation, useNavigate } from 'react-router-d
 import webPackageJson from '../package.json'
 import { getToneClass } from './components/toneClasses'
 import { ResponsiveVisibility } from './components/ResponsiveVisibility'
-import { exercises, exercisesSchema, usePlan } from '@gym-pilot/shared'
+import { exercises, exercisesSchema, loadJsonRecord, saveJsonRecord, usePlan } from '@gym-pilot/shared'
 import { HOME_FILTER_STORAGE_KEY, QUICK_LINKS_FAVORITES_STORAGE_KEY } from './constants/storageKeys'
 import { ExercisePage } from './pages/ExercisePage'
 import { HomePage } from './pages/HomePage'
@@ -12,14 +12,17 @@ import { PlansPage } from './pages/PlansPage'
 import { AssignmentsPage } from './pages/AssignmentsPage'
 import { CreatePlanPage } from './pages/CreatePlanPage'
 import { CreateAssignmentPage } from './pages/CreateAssignmentPage'
-import { UsersPage } from './pages/UsersPage'
 import { AssignmentsManagerPage } from './pages/AssignmentsManagerPage'
 import { FavouriteLinksMenu } from './components/FavouriteLinksMenu'
+import { buildNavigationMenuItems, NavigationMenuList } from './components/NavigationMenuList'
 import { getExercisePath } from './utils/exerciseRouteUtils'
 import { formatLabel } from './utils/formatUtils'
 import { RequireAuth } from './auth/RequireAuth'
 import { LoginPage } from './pages/LoginPage'
 import { useAuth } from './auth/AuthContext'
+import { AdminPage } from './pages/AdminPage'
+import { AdminUsersPage } from './pages/AdminUsersPage'
+import { AdminDatabasePage } from './pages/AdminDatabasePage'
 
 type HomeFilters = {
   searchTerm: string
@@ -60,31 +63,11 @@ function ScrollToTop() {
 function App() {
   const { pathname } = useLocation()
   const navigate = useNavigate()
-  const { plans, users } = usePlan()
+  const { plans, assignments, users } = usePlan()
   const SHOW_AUTH_BUTTON = false
   const { user, logout } = useAuth()
   const appVersion = webPackageJson.version || '0.0.0'
-  const [favorites, setFavorites] = useState<QuickLink[]>(() => {
-    if (typeof window === 'undefined') {
-      return []
-    }
-
-    const raw = window.localStorage.getItem(QUICK_LINKS_FAVORITES_STORAGE_KEY)
-
-    if (!raw) {
-      return []
-    }
-
-    try {
-      const parsed = JSON.parse(raw) as QuickLink[]
-      return Array.isArray(parsed)
-        ? sortQuickLinks(parsed.filter((item) => typeof item?.label === 'string' && typeof item?.path === 'string'))
-        : []
-    } catch {
-      window.localStorage.removeItem(QUICK_LINKS_FAVORITES_STORAGE_KEY)
-      return []
-    }
-  })
+  const [favorites, setFavorites] = useState<QuickLink[]>([])
   const [homeFilters, setHomeFilters] = useState<HomeFilters>(() => {
     if (typeof window === 'undefined') {
       return { searchTerm: '', selectedCategory: null, showImages: true }
@@ -109,7 +92,19 @@ function App() {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
   const defaultUserSlug = users.find((user) => typeof user.slug === 'string' && user.slug.trim() !== '')?.slug ?? ''
   const assignmentsRoute = defaultUserSlug ? `/users/${defaultUserSlug}/assignments` : '/users'
-  const createAssignmentRoute = defaultUserSlug ? `/users/${defaultUserSlug}/assignments/create` : '/users'
+  const createAssignmentRoute = '/assignments/create'
+
+  useEffect(() => {
+    void saveJsonRecord(QUICK_LINKS_FAVORITES_STORAGE_KEY, favorites)
+  }, [favorites])
+
+  useEffect(() => {
+    void loadJsonRecord<QuickLink[]>(QUICK_LINKS_FAVORITES_STORAGE_KEY, []).then((storedFavorites) => {
+      if (Array.isArray(storedFavorites)) {
+        setFavorites(sortQuickLinks(storedFavorites.filter((item) => typeof item?.label === 'string' && typeof item?.path === 'string')))
+      }
+    })
+  }, [])
 
   useEffect(() => {
     window.sessionStorage.setItem(HOME_FILTER_STORAGE_KEY, JSON.stringify(normalizeHomeFilters(homeFilters)))
@@ -151,6 +146,34 @@ function App() {
     return Boolean(exercise && favorites.some((item) => item.path === getExercisePath(exercise)))
   }
 
+  const plansCount = plans.filter((plan) => !plan.sourcePlanId).length
+  const desktopMenuItems = buildNavigationMenuItems({
+    plansCount,
+    assignmentsCount: assignments.length,
+    assignmentsPath: assignmentsRoute,
+    createAssignmentPath: createAssignmentRoute,
+    adminPath: '/admin',
+    itemClassName: getToneClass('default', 'px-4 py-2 text-sm font-medium'),
+  })
+  const tabletMenuItems = buildNavigationMenuItems({
+    plansCount,
+    assignmentsCount: assignments.length,
+    assignmentsPath: '/assignments',
+    createAssignmentPath: createAssignmentRoute,
+    adminPath: '/admin/users',
+    onItemClick: () => setMobileMenuOpen(false),
+    itemClassName: 'rounded-xl px-3 py-2 text-sm font-medium text-slate-700 transition hover:bg-slate-50',
+  })
+  const mobileMenuItems = buildNavigationMenuItems({
+    plansCount,
+    assignmentsCount: assignments.length,
+    assignmentsPath: assignmentsRoute,
+    createAssignmentPath: createAssignmentRoute,
+    adminPath: '/admin/users',
+    onItemClick: () => setMobileMenuOpen(false),
+    itemClassName: 'rounded-xl px-3 py-2 text-sm font-medium text-slate-700 transition hover:bg-slate-50',
+  })
+
   return (
     <div className="min-h-screen bg-slate-50">
       <ScrollToTop />
@@ -175,30 +198,10 @@ function App() {
                   onFavoritesChange={setFavorites}
                   onHomeFiltersChange={setHomeFilters}
                 />
-                <NavLink
-                  to="/plans"
-                  className={getToneClass('default', 'px-4 py-2 text-sm font-medium')}
-                >
-                  Plans ({plans.filter((plan) => !plan.sourcePlanId).length})
-                </NavLink>
-                <NavLink
-                  to={assignmentsRoute}
-                  className={getToneClass('default', 'px-4 py-2 text-sm font-medium')}
-                >
-                  Assignments ({plans.filter((plan) => Boolean(plan.sourcePlanId)).length})
-                </NavLink>
-                <NavLink
-                  to="/users"
-                  className={getToneClass('default', 'px-4 py-2 text-sm font-medium')}
-                >
-                  Users
-                </NavLink>
-                <NavLink
-                  to={createAssignmentRoute}
-                  className={getToneClass('default', 'px-4 py-2 text-sm font-medium')}
-                >
-                  Create assignment
-                </NavLink>
+                <NavigationMenuList
+                  className="flex items-center gap-2"
+                  items={desktopMenuItems}
+                />
                 {!SHOW_AUTH_BUTTON ? null : (
                   <button
                     type="button"
@@ -235,18 +238,10 @@ function App() {
                         onFavoritesChange={setFavorites}
                         onHomeFiltersChange={setHomeFilters}
                       />
-                      <NavLink to="/plans" onClick={() => setMobileMenuOpen(false)} className="rounded-xl px-3 py-2 text-sm font-medium text-slate-700 transition hover:bg-slate-50">
-                        Plans ({plans.filter((plan) => !plan.sourcePlanId).length})
-                      </NavLink>
-                      <NavLink to="/assignments" onClick={() => setMobileMenuOpen(false)} className="rounded-xl px-3 py-2 text-sm font-medium text-slate-700 transition hover:bg-slate-50">
-                        Assignments ({plans.filter((plan) => Boolean(plan.sourcePlanId)).length})
-                      </NavLink>
-                      <NavLink to="/users" onClick={() => setMobileMenuOpen(false)} className="rounded-xl px-3 py-2 text-sm font-medium text-slate-700 transition hover:bg-slate-50">
-                        Users
-                      </NavLink>
-                      <NavLink to={createAssignmentRoute} onClick={() => setMobileMenuOpen(false)} className="rounded-xl px-3 py-2 text-sm font-medium text-slate-700 transition hover:bg-slate-50">
-                        Create assignment
-                      </NavLink>
+                      <NavigationMenuList
+                        className="flex flex-col gap-2"
+                        items={tabletMenuItems}
+                      />
                     </div>
                   </div>
                 )}
@@ -270,18 +265,10 @@ function App() {
                         onFavoritesChange={setFavorites}
                         onHomeFiltersChange={setHomeFilters}
                       />
-                      <NavLink to="/plans" onClick={() => setMobileMenuOpen(false)} className="rounded-xl px-3 py-2 text-sm font-medium text-slate-700 transition hover:bg-slate-50">
-                        Plans ({plans.filter((plan) => !plan.sourcePlanId).length})
-                      </NavLink>
-                      <NavLink to={assignmentsRoute} onClick={() => setMobileMenuOpen(false)} className="rounded-xl px-3 py-2 text-sm font-medium text-slate-700 transition hover:bg-slate-50">
-                        Assignments ({plans.filter((plan) => Boolean(plan.sourcePlanId)).length})
-                      </NavLink>
-                      <NavLink to="/users" onClick={() => setMobileMenuOpen(false)} className="rounded-xl px-3 py-2 text-sm font-medium text-slate-700 transition hover:bg-slate-50">
-                        Users
-                      </NavLink>
-                      <NavLink to={createAssignmentRoute} onClick={() => setMobileMenuOpen(false)} className="rounded-xl px-3 py-2 text-sm font-medium text-slate-700 transition hover:bg-slate-50">
-                        Create assignment
-                      </NavLink>
+                      <NavigationMenuList
+                        className="flex flex-col gap-2"
+                        items={mobileMenuItems}
+                      />
                     </div>
                   </div>
                 )}
@@ -300,11 +287,16 @@ function App() {
           <Route path="/assignments" element={<AssignmentsPage />} />
           <Route path="/users/:userSlug/assignments" element={<AssignmentsPage />} />
           <Route path="/users/:userSlug/assignments/create" element={<AssignmentsManagerPage />} />
-          <Route path="/users" element={<UsersPage />} />
+          <Route element={<RequireAuth requiredRole="admin" />}>
+            <Route path="/admin" element={<AdminPage />} />
+            <Route path="/admin/users" element={<AdminUsersPage />} />
+            <Route path="/admin/database" element={<AdminDatabasePage />} />
+          </Route>
           <Route path="/plans/new" element={<CreatePlanPage />} />
           <Route path="/plans/:planSlug/edit" element={<CreatePlanPage />} />
           <Route path="/plans/:planSlug" element={<PlanDetailPage />} />
-          <Route path="/assignments/new" element={<CreateAssignmentPage />} />
+          <Route path="/assignments/create" element={<AssignmentsManagerPage />} />
+          <Route path="/assignments/new" element={<AssignmentsManagerPage />} />
           <Route path="/users/:userSlug/assignments/:planSlug" element={<PlanDetailPage />} />
           <Route path="/users/:userSlug/assignments/:planSlug/edit" element={<CreateAssignmentPage />} />
         </Route>

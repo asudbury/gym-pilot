@@ -1,8 +1,8 @@
 import { createContext, useContext, useEffect, useMemo, useState, type ReactNode } from 'react'
-import type { Plan, PlanItem, User, UserRole, WeeklyDay } from '@gym-pilot/types'
+import type { Assignment, Plan, PlanItem, User, UserRole, WeeklyDay } from '@gym-pilot/types'
 import type { Exercise } from './exerciseSchema'
 import { exercises } from './data'
-import { LocalStoragePersistence } from './storage'
+import { DexiePersistence } from './storage'
 
 function createPlanItem(exercise: Exercise): PlanItem {
   return {
@@ -13,13 +13,16 @@ function createPlanItem(exercise: Exercise): PlanItem {
 
 type PlanContextValue = {
   plans: Plan[]
+  assignments: Assignment[]
   users: User[]
   createPlan: (planName: string, exerciseIds?: string[], assignedDays?: Record<string, WeeklyDay>, assignedUserIds?: string[]) => void
   createPlanForPeople: (personInput: string | string[] | undefined, exerciseIds?: string[], assignedDays?: Record<string, WeeklyDay>) => void
   updatePlan: (planId: string, planName: string, exerciseIds?: string[], assignedDays?: Record<string, WeeklyDay>, assignedUserIds?: string[]) => void
   assignUsersToPlan: (planId: string, assignedUserIds: string[]) => void
+  updateAssignment: (assignmentId: string, planName: string, exerciseIds?: string[]) => void
   updatePlanExercise: (planId: string, exerciseId: string, value: string) => void
   deletePlan: (planId: string) => void
+  deleteAssignment: (assignmentId: string) => void
   createUser: (name: string, role?: UserRole) => User | undefined
   deleteUser: (userId: string) => void
 }
@@ -30,7 +33,7 @@ type PlanProviderProps = {
 }
 
 const PlanContext = createContext<PlanContextValue | undefined>(undefined)
-const persistence = new LocalStoragePersistence()
+const persistence = new DexiePersistence()
 
 function buildPlanSlug(name: string, plans: Plan[]) {
   const slugParts = [name]
@@ -70,18 +73,36 @@ function normalizePlan(plan: Plan): Plan {
     assignedPeople: assignedPeople.length > 0 ? assignedPeople : undefined,
     assignedUserIds: plan.assignedUserIds ?? (plan.assignedUserId ? [plan.assignedUserId] : undefined),
     assignedUserId: plan.assignedUserId,
-    completedExercises: plan.completedExercises ?? {},
     exercises: plan.exercises ?? [],
   }
 }
 
-function getStoredPlans(storageKey: string): Plan[] {
-  const stored = persistence.load<Plan[]>(storageKey, [])
+function normalizeAssignment(assignment: Assignment): Assignment {
+  return {
+    ...assignment,
+    completedExercises: assignment.completedExercises ?? {},
+    exercises: assignment.exercises ?? [],
+  }
+}
+
+async function getStoredPlans(storageKey: string): Promise<Plan[]> {
+  const stored = await persistence.load<Plan[]>(storageKey, [])
+
   if (!Array.isArray(stored)) {
     return []
   }
 
   return stored.map((plan) => normalizePlan(plan))
+}
+
+async function getStoredAssignments(): Promise<Assignment[]> {
+  const stored = await persistence.load<Assignment[]>('gym-pilot-assignments', [])
+
+  if (!Array.isArray(stored)) {
+    return []
+  }
+
+  return stored.map((assignment) => normalizeAssignment(assignment))
 }
 
 function buildUserSlug(name: string) {
@@ -92,38 +113,91 @@ function buildUserSlug(name: string) {
     .replace(/(^-|-$)/g, '') || 'user'
 }
 
-function createPlanCopy(basePlan: Plan, user: User, plans: Plan[]): Plan {
-  const userPlanName = `${basePlan.planName || 'Untitled plan'} - ${user.name}`
+function createAssignmentCopy(basePlan: Plan, user: User, plans: Plan[]): Assignment {
+  const assignmentName = `${basePlan.planName || 'Untitled plan'} - ${user.name}`
 
   return {
-    ...basePlan,
     id: typeof crypto !== 'undefined' && 'randomUUID' in crypto ? crypto.randomUUID() : `${Date.now()}-${Math.random()}`,
-    planName: userPlanName,
-    planSlug: buildPlanSlug(userPlanName, plans),
-    personName: user.name,
-    personSlug: user.slug,
-    assignedPeople: [user.name],
-    assignedUserIds: [user.id],
+    planId: basePlan.id,
+    planName: assignmentName,
+    planSlug: buildPlanSlug(assignmentName, plans),
     assignedUserId: user.id,
-    sourcePlanId: basePlan.id,
+    assignedUserName: user.name,
     completedExercises: {},
     exercises: basePlan.exercises.map((exercise) => ({ ...exercise })),
   }
 }
 
+function buildPlanItems(exerciseIds?: string[], assignedDays?: Record<string, WeeklyDay>) {
+  return (exerciseIds ?? [])
+    .map((exerciseId) => exercises.find((exercise) => exercise.id === exerciseId))
+    .filter((exercise): exercise is Exercise => Boolean(exercise))
+    .map((exercise) => {
+      const item = createPlanItem(exercise)
+      return {
+        ...item,
+        assignedDay: assignedDays?.[exercise.id],
+      }
+    })
+}
+
 export function PlanProvider({ children, storageKey = 'gym-pilot-plans' }: PlanProviderProps) {
-  const [plans, setPlans] = useState<Plan[]>(() => getStoredPlans(storageKey))
-  const [users, setUsers] = useState<User[]>(() => {
-    const storedUsers = persistence.load<User[]>('gym-pilot-users', [])
-    return Array.isArray(storedUsers) ? storedUsers : []
-  })
+  const [plans, setPlans] = useState<Plan[]>([])
+  const [assignments, setAssignments] = useState<Assignment[]>([])
+  const [users, setUsers] = useState<User[]>([])
 
   useEffect(() => {
-    persistence.save(storageKey, plans)
+    let isActive = true
+
+    void getStoredPlans(storageKey).then((storedPlans) => {
+      if (isActive) {
+        setPlans(storedPlans)
+      }
+    })
+
+    return () => {
+      isActive = false
+    }
+  }, [storageKey])
+
+  useEffect(() => {
+    let isActive = true
+
+    void getStoredAssignments().then((storedAssignments) => {
+      if (isActive) {
+        setAssignments(storedAssignments)
+      }
+    })
+
+    return () => {
+      isActive = false
+    }
+  }, [])
+
+  useEffect(() => {
+    let isActive = true
+
+    void persistence.load<User[]>('gym-pilot-users', []).then((storedUsers) => {
+      if (isActive) {
+        setUsers(Array.isArray(storedUsers) ? storedUsers : [])
+      }
+    })
+
+    return () => {
+      isActive = false
+    }
+  }, [])
+
+  useEffect(() => {
+    void persistence.save(storageKey, plans)
   }, [plans, storageKey])
 
   useEffect(() => {
-    persistence.save('gym-pilot-users', users)
+    void persistence.save('gym-pilot-assignments', assignments)
+  }, [assignments])
+
+  useEffect(() => {
+    void persistence.save('gym-pilot-users', users)
   }, [users])
 
   const createPlan = (planName: string, exerciseIds?: string[], assignedDays?: Record<string, WeeklyDay>) => {
@@ -157,7 +231,6 @@ export function PlanProvider({ children, storageKey = 'gym-pilot-plans' }: PlanP
       assignedPeople: undefined,
       assignedUserIds: undefined,
       assignedUserId: undefined,
-      completedExercises: {},
       exercises: selectedExercises,
     }
 
@@ -199,7 +272,6 @@ export function PlanProvider({ children, storageKey = 'gym-pilot-plans' }: PlanP
       planName: fallbackName,
       planSlug: buildPlanSlug(fallbackName, plans),
       exercises: selectedExercises,
-      completedExercises: {},
     }
 
     setPlans((current) => [...current, newPlanItem])
@@ -264,55 +336,73 @@ export function PlanProvider({ children, storageKey = 'gym-pilot-plans' }: PlanP
 
     const assignedUsers = users.filter((user) => resolvedAssignedUserIds.includes(user.id))
 
-    setPlans((current) => {
-      const basePlan = current.find((plan) => plan.id === planId)
+    setAssignments((current) => {
+      const basePlan = plans.find((plan) => plan.id === planId)
 
       if (!basePlan) {
         return current
       }
 
-      const existingClones = current.filter((plan) => plan.sourcePlanId === planId)
-      const nextUserCopies: Plan[] = []
+      const existingAssignments = current.filter((assignment) => assignment.planId === planId)
+      const nextAssignments: Assignment[] = []
 
       assignedUsers.forEach((user) => {
-        const existingClone = existingClones.find((plan) => (plan.assignedUserIds ?? []).includes(user.id))
+        const existingAssignment = existingAssignments.find((assignment) => assignment.assignedUserId === user.id)
 
-        if (existingClone) {
-          nextUserCopies.push({
-            ...existingClone,
+        if (existingAssignment) {
+          nextAssignments.push({
+            ...existingAssignment,
             planName: `${basePlan.planName || 'Untitled plan'} - ${user.name}`,
-            planSlug: buildPlanSlug(`${basePlan.planName || 'Untitled plan'} - ${user.name}`, [...current, ...nextUserCopies]),
-            personName: user.name,
-            personSlug: user.slug,
-            assignedPeople: [user.name],
-            assignedUserIds: [user.id],
-            assignedUserId: user.id,
-            sourcePlanId: basePlan.id,
-            completedExercises: existingClone.completedExercises ?? {},
-            exercises: existingClone.exercises.length > 0 ? existingClone.exercises.map((exercise) => ({ ...exercise })) : basePlan.exercises.map((exercise) => ({ ...exercise })),
+            planSlug: buildPlanSlug(`${basePlan.planName || 'Untitled plan'} - ${user.name}`, plans),
+            assignedUserName: user.name,
+            completedExercises: existingAssignment.completedExercises ?? {},
+            exercises: existingAssignment.exercises.length > 0 ? existingAssignment.exercises.map((exercise) => ({ ...exercise })) : basePlan.exercises.map((exercise) => ({ ...exercise })),
           })
           return
         }
 
-        nextUserCopies.push(createPlanCopy(basePlan, user, [...current, ...nextUserCopies]))
+        nextAssignments.push(createAssignmentCopy(basePlan, user, plans))
       })
 
-      const nextPlans = current.filter((plan) => plan.id === planId || plan.sourcePlanId !== planId)
-
-      return [...nextPlans, ...nextUserCopies]
+      return [...current.filter((assignment) => assignment.planId !== planId), ...nextAssignments]
     })
   }
 
-  const updatePlanExercise = (planId: string, exerciseId: string, value: string) => {
-    setPlans((current) =>
-      current.map((plan) => {
-        if (plan.id !== planId) {
-          return plan
+  const updateAssignment = (assignmentId: string, planName: string, exerciseIds?: string[]) => {
+    const trimmedName = planName.trim()
+
+    if (!trimmedName) {
+      return
+    }
+
+    const selectedExercises = buildPlanItems(exerciseIds)
+
+    setAssignments((current) =>
+      current.map((assignment) => {
+        if (assignment.id !== assignmentId) {
+          return assignment
         }
 
         return {
-          ...plan,
-          completedExercises: { ...plan.completedExercises, [exerciseId]: value },
+          ...assignment,
+          planName: trimmedName,
+          planSlug: buildPlanSlug(trimmedName, plans),
+          exercises: selectedExercises,
+        }
+      }),
+    )
+  }
+
+  const updatePlanExercise = (planId: string, exerciseId: string, value: string) => {
+    setAssignments((current) =>
+      current.map((assignment) => {
+        if (assignment.planId !== planId) {
+          return assignment
+        }
+
+        return {
+          ...assignment,
+          completedExercises: { ...(assignment.completedExercises ?? {}), [exerciseId]: value },
         }
       }),
     )
@@ -320,6 +410,11 @@ export function PlanProvider({ children, storageKey = 'gym-pilot-plans' }: PlanP
 
   const deletePlan = (planId: string) => {
     setPlans((current) => current.filter((plan) => plan.id !== planId))
+    setAssignments((current) => current.filter((assignment) => assignment.planId !== planId))
+  }
+
+  const deleteAssignment = (assignmentId: string) => {
+    setAssignments((current) => current.filter((assignment) => assignment.id !== assignmentId))
   }
 
   const createUser = (name: string, role: UserRole = 'user') => {
@@ -371,22 +466,26 @@ export function PlanProvider({ children, storageKey = 'gym-pilot-plans' }: PlanP
         }
       }),
     )
+    setAssignments((current) => current.filter((assignment) => assignment.assignedUserId !== trimmedUserId))
   }
 
   const value = useMemo<PlanContextValue>(
     () => ({
       plans,
+      assignments,
       users,
       createPlan,
       createPlanForPeople,
       updatePlan,
       assignUsersToPlan,
+      updateAssignment,
       updatePlanExercise,
       deletePlan,
+      deleteAssignment,
       createUser,
       deleteUser,
     }),
-    [plans, users],
+    [plans, assignments, users],
   )
 
   return <PlanContext.Provider value={value}>{children}</PlanContext.Provider>
