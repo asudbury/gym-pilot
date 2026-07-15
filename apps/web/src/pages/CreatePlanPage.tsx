@@ -12,7 +12,7 @@ import { PageCard } from '../components/PageCard'
 import { PageLayout } from '../layouts/PageLayout'
 import { Heading1, Paragraph } from '../components/Typography'
 import { ExerciseSearchPicker } from '../components/ExerciseSearchPicker'
-import { QUICK_LINKS_FAVORITES_STORAGE_KEY } from '../constants/storageKeys'
+import { FAVORITES_KEY } from '../constants/storageKeys'
 import { getExercisePath } from '../utils/exerciseRouteUtils'
 import { formatLabel } from '../utils/formatUtils'
 
@@ -96,7 +96,7 @@ export function CreatePlanPage() {
   useEffect(() => {
     let isActive = true
 
-    void loadJsonRecord<Array<{ path?: string }>>(QUICK_LINKS_FAVORITES_STORAGE_KEY, []).then((storedFavorites) => {
+    void loadJsonRecord<Array<{ path?: string }>>(FAVORITES_KEY, []).then((storedFavorites) => {
       if (!isActive) {
         return
       }

@@ -18,8 +18,8 @@ export function PlanDetailPage() {
   const isAssignment = Boolean(assignment)
   const editPath = isAssignment ? `/users/${plan?.assignedUserId ?? 'user'}/assignments/${plan?.planSlug ?? planSlug}/edit` : `/plans/${plan?.planSlug ?? planSlug}/edit`
   const backPath = isAssignment ? `/users/${plan?.assignedUserId ?? 'user'}/assignments` : '/plans'
-  const editLabel = isAssignment ? 'Edit assignment' : 'Edit plan'
-  const backLabel = isAssignment ? 'Back to assignments' : 'Back to plans'
+  const editLabel = 'Edit plan'
+  const backLabel = 'Back to plans'
 
   if (!plan) {
     return (

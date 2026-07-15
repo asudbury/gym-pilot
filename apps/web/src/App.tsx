@@ -4,7 +4,7 @@ import webPackageJson from '../package.json'
 import { getToneClass } from './components/toneClasses'
 import { ResponsiveVisibility } from './components/ResponsiveVisibility'
 import { exercises, exercisesSchema, loadJsonRecord, saveJsonRecord, usePlan } from '@gym-pilot/shared'
-import { HOME_FILTER_STORAGE_KEY, QUICK_LINKS_FAVORITES_STORAGE_KEY } from './constants/storageKeys'
+import { HOME_FILTER_KEY, FAVORITES_KEY } from './constants/storageKeys'
 import { ExercisePage } from './pages/ExercisePage'
 import { HomePage } from './pages/HomePage'
 import { PlanDetailPage } from './pages/PlanDetailPage'
@@ -63,7 +63,7 @@ function ScrollToTop() {
 function App() {
   const { pathname } = useLocation()
   const navigate = useNavigate()
-  const { plans, assignments, users } = usePlan()
+  const { plans, assignments } = usePlan()
   const SHOW_AUTH_BUTTON = false
   const { user, logout } = useAuth()
   const appVersion = webPackageJson.version || '0.0.0'
@@ -73,7 +73,7 @@ function App() {
       return { searchTerm: '', selectedCategory: null, showImages: true }
     }
 
-    const savedFilters = window.sessionStorage.getItem(HOME_FILTER_STORAGE_KEY)
+    const savedFilters = window.sessionStorage.getItem(HOME_FILTER_KEY)
 
     if (!savedFilters) {
       return { searchTerm: '', selectedCategory: null, showImages: true }
@@ -84,22 +84,19 @@ function App() {
 
       return normalizeHomeFilters(parsed)
     } catch {
-      window.sessionStorage.removeItem(HOME_FILTER_STORAGE_KEY)
+      window.sessionStorage.removeItem(HOME_FILTER_KEY)
       return { searchTerm: '', selectedCategory: null, showImages: true }
     }
   })
 
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
-  const defaultUserSlug = users.find((user) => typeof user.slug === 'string' && user.slug.trim() !== '')?.slug ?? ''
-  const assignmentsRoute = defaultUserSlug ? `/users/${defaultUserSlug}/assignments` : '/users'
-  const createAssignmentRoute = '/assignments/create'
 
   useEffect(() => {
-    void saveJsonRecord(QUICK_LINKS_FAVORITES_STORAGE_KEY, favorites)
+    void saveJsonRecord(FAVORITES_KEY, favorites)
   }, [favorites])
 
   useEffect(() => {
-    void loadJsonRecord<QuickLink[]>(QUICK_LINKS_FAVORITES_STORAGE_KEY, []).then((storedFavorites) => {
+    void loadJsonRecord<QuickLink[]>(FAVORITES_KEY, []).then((storedFavorites) => {
       if (Array.isArray(storedFavorites)) {
         setFavorites(sortQuickLinks(storedFavorites.filter((item) => typeof item?.label === 'string' && typeof item?.path === 'string')))
       }
@@ -107,7 +104,7 @@ function App() {
   }, [])
 
   useEffect(() => {
-    window.sessionStorage.setItem(HOME_FILTER_STORAGE_KEY, JSON.stringify(normalizeHomeFilters(homeFilters)))
+    window.sessionStorage.setItem(HOME_FILTER_KEY, JSON.stringify(normalizeHomeFilters(homeFilters)))
   }, [homeFilters])
 
   useEffect(() => {
@@ -150,26 +147,17 @@ function App() {
   const desktopMenuItems = buildNavigationMenuItems({
     plansCount,
     assignmentsCount: assignments.length,
-    assignmentsPath: assignmentsRoute,
-    createAssignmentPath: createAssignmentRoute,
-    adminPath: '/admin',
     itemClassName: getToneClass('default', 'px-4 py-2 text-sm font-medium'),
   })
   const tabletMenuItems = buildNavigationMenuItems({
     plansCount,
     assignmentsCount: assignments.length,
-    assignmentsPath: '/assignments',
-    createAssignmentPath: createAssignmentRoute,
-    adminPath: '/admin/users',
     onItemClick: () => setMobileMenuOpen(false),
     itemClassName: 'rounded-xl px-3 py-2 text-sm font-medium text-slate-700 transition hover:bg-slate-50',
   })
   const mobileMenuItems = buildNavigationMenuItems({
     plansCount,
     assignmentsCount: assignments.length,
-    assignmentsPath: assignmentsRoute,
-    createAssignmentPath: createAssignmentRoute,
-    adminPath: '/admin/users',
     onItemClick: () => setMobileMenuOpen(false),
     itemClassName: 'rounded-xl px-3 py-2 text-sm font-medium text-slate-700 transition hover:bg-slate-50',
   })

@@ -3,7 +3,7 @@ import { useLocation, useNavigate } from 'react-router-dom'
 import { getToneClass } from './toneClasses'
 import { classNames, exercises, exercisesSchema, saveJsonRecord } from '@gym-pilot/shared'
 import { formatLabel } from '../utils/formatUtils'
-import { QUICK_LINKS_FAVORITES_STORAGE_KEY } from '../constants/storageKeys'
+import { FAVORITES_KEY } from '../constants/storageKeys'
 
 type QuickLink = {
   id: string
@@ -78,7 +78,7 @@ export function FavouriteLinksMenu({
   const [menuOpen, setMenuOpen] = useState(false)
 
   useEffect(() => {
-    void saveJsonRecord(QUICK_LINKS_FAVORITES_STORAGE_KEY, favorites)
+    void saveJsonRecord(FAVORITES_KEY, favorites)
   }, [favorites])
 
   useEffect(() => {
@@ -180,9 +180,6 @@ export function FavouriteLinksMenu({
         className={triggerClassName}
       >
         <span>Favourites</span>
-        <span className="ml-2 inline-flex min-w-6 items-center justify-center rounded-full bg-slate-900/10 px-2 py-0.5 text-xs font-semibold text-slate-700">
-          {favorites.length}
-        </span>
       </button>
       {menuOpen && (
         <div id="quick-links-menu" className="fixed inset-x-3 top-16 z-40 max-h-[min(75vh,32rem)] overflow-y-auto rounded-2xl border border-slate-200 bg-white p-3 shadow-xl sm:absolute sm:right-0 sm:left-auto sm:top-full sm:mt-2 sm:w-80 sm:max-w-[calc(100vw-2rem)]">

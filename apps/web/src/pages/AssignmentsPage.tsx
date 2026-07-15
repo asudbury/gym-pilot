@@ -4,6 +4,7 @@ import { getToneClass } from '../components/toneClasses'
 import { usePlan } from '@gym-pilot/shared'
 import { PageCard } from '../components/PageCard'
 import { PageLayout } from '../layouts/PageLayout'
+import { CallToAction } from '../components/CallToAction'
 
 export function AssignmentsPage() {
   const { assignments, deleteAssignment } = usePlan()
@@ -11,17 +12,15 @@ export function AssignmentsPage() {
   return (
     <PageLayout>
       {assignments.length === 0 ? (
-        <PageCard padding="spacious">
-          <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-            <div>
-              <h1 className="text-2xl font-semibold text-slate-900">No assignments yet</h1>
-              <p className="mt-2 text-sm text-slate-600">Create assignments from the users screen to give each person their own editable plan copy.</p>
-            </div>
-            <Link to="/assignments/create" className={getToneClass('blue', 'inline-flex items-center rounded-lg px-4 py-2 text-sm font-medium')}>
-              Create assignment
+        <CallToAction
+          title="No assignments yet."
+          description="Create an assignment to track exercises and add notes for each one."
+          action={
+            <Link to="/assignments/new" className={getToneClass('blue', 'inline-flex items-center rounded-lg px-4 py-2 text-sm font-medium')}>
+              Create a new assignment
             </Link>
-          </div>
-        </PageCard>
+          }
+        />
       ) : (
         <>
           <div className="mb-4 flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">

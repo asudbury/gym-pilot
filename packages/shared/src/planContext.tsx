@@ -3,6 +3,7 @@ import type { Assignment, Plan, PlanItem, User, UserRole, WeeklyDay } from '@gym
 import type { Exercise } from './exerciseSchema'
 import { exercises } from './data'
 import { DexiePersistence } from './storage'
+import { ASSIGNMENTS_KEY } from '../../../apps/web/src/constants/storageKeys'
 
 function createPlanItem(exercise: Exercise): PlanItem {
   return {
@@ -96,7 +97,7 @@ async function getStoredPlans(storageKey: string): Promise<Plan[]> {
 }
 
 async function getStoredAssignments(): Promise<Assignment[]> {
-  const stored = await persistence.load<Assignment[]>('gym-pilot-assignments', [])
+  const stored = await persistence.load<Assignment[]>(ASSIGNMENTS_KEY, [])
 
   if (!Array.isArray(stored)) {
     return []
