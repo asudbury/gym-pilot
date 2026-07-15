@@ -13,7 +13,7 @@ export function AssignmentsPage() {
     <PageLayout>
       {assignments.length === 0 ? (
         <CallToAction
-          title="No assignments yet."
+          title="Manage assignments"
           description="Create an assignment to track exercises and add notes for each one."
           action={
             <Link to="/assignments/new" className={getToneClass('blue', 'inline-flex items-center rounded-lg px-4 py-2 text-sm font-medium')}>

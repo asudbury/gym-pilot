@@ -14,7 +14,7 @@ export function PlansPage() {
     <PageLayout>
       {basePlans.length === 0 ? (
         <CallToAction
-          title="No plans yet."
+          title="Manage plans"
           description="Create a plan to track exercises and add notes for each one."
           action={
             <Link to="/plans/new" className={getToneClass('blue', 'inline-flex items-center rounded-lg px-4 py-2 text-sm font-medium')}>
