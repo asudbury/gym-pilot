@@ -1,9 +1,9 @@
 import { useEffect, useMemo, useState } from 'react'
 import { Link } from 'react-router-dom'
-import { getToneClass } from '../components/toneClasses'
-import { PageCard } from '../components/PageCard'
-import { PageLayout } from '../layouts/PageLayout'
-import { Heading1, Paragraph } from '../components/Typography'
+import { getToneClass } from '../../components/toneClasses'
+import { PageCard } from '../../components/PageCard'
+import { PageLayout } from '../../layouts/PageLayout'
+import { Heading1, Paragraph } from '../../components/Typography'
 import { listJsonRecords } from '@gym-pilot/shared'
 
 export function AdminDatabasePage() {

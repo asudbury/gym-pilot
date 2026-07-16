@@ -20,9 +20,10 @@ import { formatLabel } from './utils/formatUtils'
 import { RequireAuth } from './auth/RequireAuth'
 import { LoginPage } from './pages/LoginPage'
 import { useAuth } from './auth/AuthContext'
-import { AdminPage } from './pages/AdminPage'
-import { AdminUsersPage } from './pages/AdminUsersPage'
-import { AdminDatabasePage } from './pages/AdminDatabasePage'
+import { AdminPage } from './pages/admin/AdminPage'
+import { AdminUsersPage } from './pages/admin/AdminUsersPage'
+import { AdminDatabasePage } from './pages/admin/AdminDatabasePage'
+import { AdminPreferences } from './pages/admin/AdminPreferences'
 
 type HomeFilters = {
   searchTerm: string
@@ -165,9 +166,9 @@ function App() {
   return (
     <div className="min-h-screen bg-slate-50">
       <ScrollToTop />
-      <nav className="sticky top-0 z-30 border-b border-slate-200 bg-white/95 backdrop-blur">
-        <div className="mx-auto flex max-w-6xl items-center justify-between px-4 py-4 sm:px-6 lg:px-8">
-          <div className="flex flex-col">
+      <nav className="sticky top-0 z-30 h-16 border-b border-slate-200 bg-white/95 backdrop-blur">
+        <div className="mx-auto flex h-full max-w-6xl items-center justify-between px-4 sm:px-6 lg:px-8">
+         <div className="flex flex-col">
             <NavLink to="/" className="text-lg font-semibold text-slate-900">
               GymPilot
               {' '}  
@@ -277,6 +278,7 @@ function App() {
           <Route path="/users/:userSlug/assignments/create" element={<AssignmentsManagerPage />} />
           <Route element={<RequireAuth requiredRole="admin" />}>
             <Route path="/admin" element={<AdminPage />} />
+            <Route path="/admin/preferences" element={<AdminPreferences />} />
             <Route path="/admin/users" element={<AdminUsersPage />} />
             <Route path="/admin/database" element={<AdminDatabasePage />} />
           </Route>
