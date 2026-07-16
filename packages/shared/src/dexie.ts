@@ -19,20 +19,72 @@ export class GymPilotDatabase extends Dexie {
 
 export const gymPilotDb = new GymPilotDatabase()
 
-export async function saveJsonRecord<T>(key: string, value: T) {
-  await gymPilotDb.records.put({ key, value: JSON.stringify(value) })
+const pendingWrites = new Map<string, Promise<void>>()
+
+async function ensureDbOpen() {
+  if (!gymPilotDb.isOpen()) {
+    await gymPilotDb.open()
+  }
 }
 
-export async function loadJsonRecord<T>(key: string, fallback: T): Promise<T> {
+gymPilotDb.on('blocked', () => {
+  console.warn('Dexie blocked')
+})
+
+gymPilotDb.on('versionchange', event => {
+  console.warn('Dexie version change', event)
+})
+
+gymPilotDb.on('close', () => {
+  console.warn('Dexie database closed')
+})
+
+export async function saveJsonRecord<T>(key: string, value: T) {
+  let json: string
+
+  try {
+    json = JSON.stringify(value)
+  } catch (error) {
+    console.error('Failed serialising record', key, error)
+    throw error
+  }
+
+  await ensureDbOpen()
+
+  const previousWrite = pendingWrites.get(key) ?? Promise.resolve()
+  const nextWrite = previousWrite
+    .catch(() => undefined)
+    .then(async () => {
+      await ensureDbOpen()
+      await gymPilotDb.records.put({
+        key,
+        value: json,
+      })
+    })
+
+  pendingWrites.set(key, nextWrite)
+  await nextWrite
+}
+
+export async function loadJsonRecord<T>(
+  key: string,
+  fallback: T
+): Promise<T> {
+  await ensureDbOpen()
+
   const record = await gymPilotDb.records.get(key)
 
   if (!record) {
+    console.warn('Missing IndexedDB record:', key)
     return fallback
   }
 
   try {
     return JSON.parse(record.value) as T
-  } catch {
+  } catch (error) {
+    console.error('Corrupt IndexedDB record:', key, error)
+    console.log('Raw value:', record.value)
+
     return fallback
   }
 }

@@ -5,16 +5,17 @@ import { AllCommunityModule, ModuleRegistry, provideGlobalGridOptions, type ColD
 import 'ag-grid-community/styles/ag-grid.css'
 import 'ag-grid-community/styles/ag-theme-quartz.css'
 import { Link, useLocation, useNavigate, useParams } from 'react-router-dom'
-import { Button } from '../components/Button'
-import { getToneClass } from '../components/toneClasses'
+import { Button } from '../../components/Button'
+import { getToneClass } from '../../components/toneClasses'
 import { exercises, loadJsonRecord, usePlan } from '@gym-pilot/shared'
-import { PageCard } from '../components/PageCard'
-import { PageLayout } from '../layouts/PageLayout'
-import { Heading1, Paragraph } from '../components/Typography'
-import { ExerciseSearchPicker } from '../components/ExerciseSearchPicker'
-import { FAVORITES_KEY } from '../constants/storageKeys'
-import { getExercisePath } from '../utils/exerciseRouteUtils'
-import { formatLabel } from '../utils/formatUtils'
+import type { PlanSession } from '@gym-pilot/types'
+import { PageCard } from '../../components/PageCard'
+import { PageLayout } from '../../layouts/PageLayout'
+import { Heading1, Paragraph } from '../../components/Typography'
+import { ExerciseSearchPicker } from '../../components/ExerciseSearchPicker'
+import { FAVORITES_KEY } from '../../constants/storageKeys'
+import { getExercisePath } from '../../utils/exerciseRouteUtils'
+import { formatLabel } from '../../utils/formatUtils'
 
 ModuleRegistry.registerModules([AllCommunityModule])
 provideGlobalGridOptions({ theme: 'legacy' })
@@ -54,6 +55,46 @@ function createBlankTab(title: string): PlanTab {
     title,
     rows: [],
   }
+}
+
+function buildPlanSessionsFromTabs(tabs: PlanTab[]): PlanSession[] {
+  return tabs.map((tab, index) => ({
+    id: tab.id,
+    title: tab.title.trim() || `Day ${index + 1}`,
+    planItems: tab.rows
+      .filter((row) => row.exerciseId)
+      .map((row) => {
+        const exercise = exercises.find((item) => item.id === row.exerciseId)
+
+        return {
+          id: row.exerciseId,
+          name: exercise?.name ?? row.exerciseId,
+          exercise_id: row.exerciseId,
+          exercise_name: exercise?.name ?? row.exerciseId,
+          reps: row.reps ?? '',
+          workingSets: row.workingSets ?? '',
+          notes: row.notes ?? '',
+        }
+      }),
+  }))
+}
+
+function buildTabsFromSessions(sessions: PlanSession[] | undefined): PlanTab[] {
+  if (!sessions || sessions.length === 0) {
+    return [createBlankTab('Day 1')]
+  }
+
+  return sessions.map((session, index) => {
+    const tab = createBlankTab(session.title?.trim() || `Day ${index + 1}`)
+    tab.rows = (session.planItems ?? []).map((item) => {
+      const row = createBlankRow(item.exercise_id || item.id)
+      row.notes = item.notes ?? ''
+      row.reps = item.reps ?? ''
+      row.workingSets = item.workingSets ?? ''
+      return row
+    })
+    return tab
+  })
 }
 
 function sanitizeSheetName(value: string) {
@@ -130,28 +171,27 @@ export function CreatePlanPage() {
     setPersonNamesInput(planToEdit.planName)
     setSelectedExerciseId('')
     setSelectedExerciseName('')
-    const nextTab = createBlankTab('Day 1')
-    nextTab.rows = planToEdit.exercises.map((exercise) => createBlankRow(exercise.id))
-    setTabs([nextTab])
-    setActiveTabId(nextTab.id)
+    const nextTabs = buildTabsFromSessions(planToEdit.planSessions)
+    setTabs(nextTabs)
+    setActiveTabId(nextTabs[0]?.id ?? null)
   }, [planToEdit])
 
   const handleAssignPlan = () => {
-    const selectedExerciseIds = tabs.flatMap((tab) => tab.rows.filter((row) => row.exerciseId).map((row) => row.exerciseId))
+    const planSessions = buildPlanSessionsFromTabs(tabs)
 
-    if (selectedExerciseIds.length === 0) {
+    if (!planSessions.some((session) => session.planItems.length > 0)) {
       return
     }
 
     const planName = personNamesInput.trim() || 'Untitled plan'
 
     if (isEditMode && planToEdit) {
-      updatePlan(planToEdit.id, planName, selectedExerciseIds)
-      navigate(isAssignmentRoute ? `/users/${planToEdit.assignedUserId ?? 'user'}/assignments/${planToEdit.planSlug}` : `/plans/${planToEdit.planSlug}`)
+      updatePlan(planToEdit.id, planName, planSessions)
+      navigate(isAssignmentRoute ? '/users' : `/plans/${planToEdit.planSlug}`)
       return
     }
 
-    createPlan(planName, selectedExerciseIds)
+    createPlan(planName, planSessions)
     setPersonNamesInput('')
     const resetTab = createBlankTab('Day 1')
     setTabs([resetTab])

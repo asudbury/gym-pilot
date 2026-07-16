@@ -1,4 +1,4 @@
-import { createContext, useContext, useEffect, useMemo, useState, type ReactNode } from 'react'
+import { createContext, useContext, useEffect, useMemo, useRef, useState, type ReactNode } from 'react'
 import type { User, UserRole } from '@gym-pilot/types'
 import { loadJsonRecord, saveJsonRecord, usePlan } from '@gym-pilot/shared'
 
@@ -35,28 +35,45 @@ async function readStoredSession(): Promise<AuthUser | null> {
 }
 
 async function readBypassFlag(): Promise<boolean> {
-  return (await loadJsonRecord<boolean>(BYPASS_STORAGE_KEY, false))
+  return loadJsonRecord<boolean>(BYPASS_STORAGE_KEY, false)
 }
 
 export function AuthProvider({ children }: AuthProviderProps) {
   const { users } = usePlan()
+
   const [user, setUser] = useState<AuthUser | null>(null)
   const [isBypassEnabled, setIsBypassEnabled] = useState(false)
+
+  const sessionHydrated = useRef(false)
+  const bypassHydrated = useRef(false)
 
   useEffect(() => {
     let isActive = true
 
-    void readStoredSession().then((storedUser) => {
-      if (isActive) {
-        setUser(storedUser)
-      }
-    })
+    async function loadSession() {
+      const storedUser = await readStoredSession()
 
-    void readBypassFlag().then((storedFlag) => {
-      if (isActive) {
-        setIsBypassEnabled(storedFlag)
+      if (!isActive) {
+        return
       }
-    })
+
+      setUser(storedUser)
+      sessionHydrated.current = true
+    }
+
+    async function loadBypass() {
+      const storedFlag = await readBypassFlag()
+
+      if (!isActive) {
+        return
+      }
+
+      setIsBypassEnabled(storedFlag)
+      bypassHydrated.current = true
+    }
+
+    void loadSession()
+    void loadBypass()
 
     return () => {
       isActive = false
@@ -64,15 +81,18 @@ export function AuthProvider({ children }: AuthProviderProps) {
   }, [])
 
   useEffect(() => {
-    if (user) {
-      void saveJsonRecord(SESSION_STORAGE_KEY, user)
+    if (!sessionHydrated.current) {
       return
     }
 
-    void saveJsonRecord(SESSION_STORAGE_KEY, null)
+    void saveJsonRecord(SESSION_STORAGE_KEY, user)
   }, [user])
 
   useEffect(() => {
+    if (!bypassHydrated.current) {
+      return
+    }
+
     void saveJsonRecord(BYPASS_STORAGE_KEY, isBypassEnabled)
   }, [isBypassEnabled])
 
@@ -89,11 +109,13 @@ export function AuthProvider({ children }: AuthProviderProps) {
       slug: selectedUser.slug,
       role: selectedUser.role,
     })
+
     return true
   }
 
   const enableBypass = () => {
     setIsBypassEnabled(true)
+
     setUser({
       id: 'mvp-bypass',
       name: 'MVP Admin',
@@ -125,7 +147,9 @@ export function AuthProvider({ children }: AuthProviderProps) {
       return true
     }
 
-    const requiredRoles = Array.isArray(requiredRole) ? requiredRole : [requiredRole]
+    const requiredRoles = Array.isArray(requiredRole)
+      ? requiredRole
+      : [requiredRole]
 
     return requiredRoles.includes(user.role)
   }
@@ -144,7 +168,11 @@ export function AuthProvider({ children }: AuthProviderProps) {
     [user, isBypassEnabled, users],
   )
 
-  return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>
+  return (
+    <AuthContext.Provider value={value}>
+      {children}
+    </AuthContext.Provider>
+  )
 }
 
 export function useAuth() {

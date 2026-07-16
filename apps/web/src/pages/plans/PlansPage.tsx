@@ -1,15 +1,15 @@
 import { Link } from 'react-router-dom'
-import { Button } from '../components/Button'
-import { getToneClass } from '../components/toneClasses'
+import { Button } from '../../components/Button'
+import { getToneClass } from '../../components/toneClasses'
 import { usePlan } from '@gym-pilot/shared'
-import { CallToAction } from '../components/CallToAction'
-import { PageCard } from '../components/PageCard'
-import { PageLayout } from '../layouts/PageLayout'
-import { PageCardLayout } from '../layouts/PageCardLayout'
+import { CallToAction } from '../../components/CallToAction'
+import { PageCard } from '../../components/PageCard'
+import { PageLayout } from '../../layouts/PageLayout'
+import { PageCardLayout } from '../../layouts/PageCardLayout'
 
 export function PlansPage() {
   const { plans, deletePlan } = usePlan()
-  const basePlans = plans.filter((plan) => !plan.sourcePlanId)
+  const basePlans = plans
 
   return (
     <PageLayout>

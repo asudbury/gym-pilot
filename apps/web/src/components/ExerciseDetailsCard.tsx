@@ -7,12 +7,11 @@ import { PageActionGroup } from './PageActionRow'
 import { PageActionRow } from './PageActionRow'
 import { YouTubeExerciseSearchButton } from './YouTubeExerciseSearchButton'
 import { Heading2 } from './Typography'
-import type { PlanItem } from '@gym-pilot/types'
+import type { Exercise } from '@gym-pilot/shared'
 import { formatLabel } from '../utils/formatUtils'
 
 type ExerciseDetailsCardProps = {
-  exercise: PlanItem
-  index?: number
+  exercise: Exercise
   expanded?: boolean
   onToggle?: (exerciseId: string) => void
   headerActions?: ReactNode
@@ -20,21 +19,32 @@ type ExerciseDetailsCardProps = {
   saveButtonLabel?: string
 }
 
+function isExerciseDetailsExercise(value: Exercise): value is Exercise {
+  return 'body_part' in value && 'equipment' in value && 'target' in value && 'gif_url' in value
+}
+
 export function ExerciseDetailsCard({
   exercise,
-  index,
   expanded = false,
   onToggle,
   headerActions,
-  title,
 }: ExerciseDetailsCardProps) {
-  const headingText = title ?? `${index !== undefined ? `${index + 1}. ` : ''}${formatLabel(exercise.name)}`
+
+  const exerciseDetails = isExerciseDetailsExercise(exercise) ? exercise : undefined
+
+  if (!exerciseDetails) {
+    return (
+      <div className="flex flex-col items-center justify-center gap-2 rounded-lg border border-slate-200 bg-slate-50 p-6 text-center">
+        <p className="text-sm text-slate-600">Exercise details are not available.</p>
+      </div>
+    )
+  }
 
   return (
     <>
       <PageActionRow>
         <div>
-          <Heading2>{formatLabel(headingText)}</Heading2>
+          <Heading2>{formatLabel(exerciseDetails?.name)}</Heading2>
         </div>
         <PageActionGroup>
           {onToggle ? (
@@ -46,21 +56,23 @@ export function ExerciseDetailsCard({
         </PageActionGroup>
       </PageActionRow>
 
-      <ExerciseMetaBadges
-        values={[
-          formatLabel(exercise.body_part),
-          formatLabel(exercise.equipment),
-          formatLabel(exercise.target),
-        ]}
-        tones={['blue', 'orange', 'default']}
-        className="mt-4"
-      />
+      {exerciseDetails ? (
+        <ExerciseMetaBadges
+          values={[
+            formatLabel(exerciseDetails.body_part),
+            formatLabel(exerciseDetails.equipment),
+            formatLabel(exerciseDetails.target),
+          ]}
+          tones={['blue', 'orange', 'default']}
+          className="mt-4"
+        />
+      ) : null}
 
-      {expanded ? (
+      {expanded && exerciseDetails ? (
         <>
-          <ExerciseImage mediaGif={exercise.gif_url} exerciseName={exercise.name} className="mt-6" />
-          <ExerciseSteps steps={exercise.instruction_steps.en} className="mt-8" />
-          <YouTubeExerciseSearchButton exerciseName={exercise.name} />
+          <ExerciseImage mediaGif={exerciseDetails.gif_url} exerciseName={exerciseDetails.name} className="mt-6" />
+          <ExerciseSteps steps={exerciseDetails.instruction_steps.en} className="mt-8" />
+          <YouTubeExerciseSearchButton exerciseName={exerciseDetails.name} />
         </>
       ) : null}
     </>

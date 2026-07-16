@@ -14,7 +14,7 @@ export function AssignmentsManagerPage() {
   const [selectedUserId, setSelectedUserId] = useState<string>('')
 
   const selectedPlan = useMemo(() => plans.find((plan) => plan.id === selectedPlanId), [plans, selectedPlanId])
-  const sourcePlans = useMemo(() => plans.filter((plan) => !plan.assignedUserId && !plan.personName), [plans])
+  const sourcePlans = useMemo(() => plans, [plans])
 
   const handleCreateAssignment = () => {
     if (!selectedPlanId || !selectedUserId) {

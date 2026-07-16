@@ -1,9 +1,8 @@
 import { useEffect, useMemo, useState } from 'react'
 import { useLocation, useNavigate } from 'react-router-dom'
 import { getToneClass } from './toneClasses'
-import { classNames, exercises, exercisesSchema, saveJsonRecord } from '@gym-pilot/shared'
+import { classNames, exercises, exercisesSchema } from '@gym-pilot/shared'
 import { formatLabel } from '../utils/formatUtils'
-import { FAVORITES_KEY } from '../constants/storageKeys'
 
 type QuickLink = {
   id: string
@@ -76,10 +75,6 @@ export function FavouriteLinksMenu({
   const location = useLocation()
   const navigate = useNavigate()
   const [menuOpen, setMenuOpen] = useState(false)
-
-  useEffect(() => {
-    void saveJsonRecord(FAVORITES_KEY, favorites)
-  }, [favorites])
 
   useEffect(() => {
     onMenuOpenChange?.(menuOpen)

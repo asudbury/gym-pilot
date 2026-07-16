@@ -50,14 +50,14 @@ export function AssignmentsPage() {
               <PageCard key={assignment.id} padding="compact">
                 <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
                   <div>
-                    <h2 className="text-xl font-semibold text-slate-900">{assignment.planName || 'Untitled assignment'}</h2>
+                    <h2 className="text-xl font-semibold text-slate-900">{assignment.assignmentName || 'Untitled assignment'}</h2>
                     <p className="mt-1 text-sm text-slate-600">{assignment.assignedUserName ? `Assigned to ${assignment.assignedUserName}` : 'No user assigned'}</p>
                   </div>
                   <div className="flex flex-col gap-2 sm:flex-row sm:items-center">
-                    <Link to={`/users/${assignment.assignedUserId ?? 'user'}/assignments/${assignment.planSlug ?? assignment.id}`} className={getToneClass('default', 'px-3 py-1.5 text-sm text-center')}>
+                    <Link to={`/users/${assignment.assignedUserId ?? 'user'}/assignments/${assignment.id}`} className={getToneClass('default', 'px-3 py-1.5 text-sm text-center')}>
                       View
                     </Link>
-                    <Link to={`/users/${assignment.assignedUserId ?? 'user'}/assignments/${assignment.planSlug ?? assignment.id}/edit`} className={getToneClass('default', 'px-3 py-1.5 text-sm text-center')}>
+                    <Link to={`/users/${assignment.assignedUserId ?? 'user'}/assignments/${assignment.id}/edit`} className={getToneClass('default', 'px-3 py-1.5 text-sm text-center')}>
                       Update
                     </Link>
                     <Button tone="rose" onClick={() => deleteAssignment(assignment.id)} className="px-3 py-1.5">

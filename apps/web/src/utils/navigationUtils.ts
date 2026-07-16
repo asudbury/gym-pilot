@@ -1,5 +1,12 @@
 import type { ReactNode } from 'react'
 
+export type NavigationMenuItemProps = {
+  to: string
+  children: ReactNode
+  onClick?: () => void
+  className?: string
+}
+
 export type NavigationMenuListItem = {
   to: string
   label: ReactNode

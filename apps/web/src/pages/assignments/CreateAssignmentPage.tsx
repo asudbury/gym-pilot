@@ -8,6 +8,7 @@ import { Link, useNavigate, useParams } from 'react-router-dom'
 import { Button } from '../../components/Button'
 import { getToneClass } from '../../components/toneClasses'
 import { exercises, loadJsonRecord, usePlan } from '@gym-pilot/shared'
+import type { PlanSession } from '@gym-pilot/types'
 import { PageCard } from '../../components/PageCard'
 import { PageLayout } from '../../layouts/PageLayout'
 import { Heading1, Paragraph } from '../../components/Typography'
@@ -56,6 +57,46 @@ function createBlankTab(title: string): PlanTab {
   }
 }
 
+function buildPlanSessionsFromTabs(tabs: PlanTab[]): PlanSession[] {
+  return tabs.map((tab, index) => ({
+    id: tab.id,
+    title: tab.title.trim() || `Day ${index + 1}`,
+    planItems: tab.rows
+      .filter((row) => row.exerciseId)
+      .map((row) => {
+        const exercise = exercises.find((item) => item.id === row.exerciseId)
+
+        return {
+          id: row.exerciseId,
+          name: exercise?.name ?? row.exerciseId,
+          exercise_id: row.exerciseId,
+          exercise_name: exercise?.name ?? row.exerciseId,
+          reps: row.reps ?? '',
+          workingSets: row.workingSets ?? '',
+          notes: row.notes ?? '',
+        }
+      }),
+  }))
+}
+
+// function buildTabsFromSessions(sessions: PlanSession[] | undefined): PlanTab[] {
+//   if (!sessions || sessions.length === 0) {
+//     return [createBlankTab('Day 1')]
+//   }
+
+//   return sessions.map((session, index) => {
+//     const tab = createBlankTab(session.title?.trim() || `Day ${index + 1}`)
+//     tab.rows = (session.planItems ?? []).map((item) => {
+//       const row = createBlankRow(item.exercise_id || item.id)
+//       row.notes = item.notes ?? ''
+//       row.reps = item.reps ?? ''
+//       row.workingSets = item.workingSets ?? ''
+//       return row
+//     })
+//     return tab
+//   })
+// }
+
 function sanitizeSheetName(value: string) {
   const cleaned = value.replace(/[\\/*?:\[\]]/g, '').trim().slice(0, 31)
   return cleaned || 'Sheet'
@@ -65,7 +106,7 @@ export function CreateAssignmentPage() {
   const { assignments, plans, users, updateAssignment, assignUsersToPlan } = usePlan()
   const navigate = useNavigate()
   const { planSlug } = useParams()
-  const assignmentToEdit = useMemo(() => assignments.find((item) => item.planSlug === planSlug), [assignments, planSlug])
+  const assignmentToEdit = useMemo(() => assignments.find((item) => item.id === planSlug), [assignments, planSlug])
   const isEditMode = Boolean(assignmentToEdit)
   const [selectedPlanId, setSelectedPlanId] = useState('')
   const [selectedUserId, setSelectedUserId] = useState('')
@@ -78,7 +119,7 @@ export function CreateAssignmentPage() {
   const activeTab = useMemo(() => tabs.find((tab) => tab.id === activeTabId) ?? tabs[0], [activeTabId, tabs])
   const activeRows = activeTab?.rows ?? []
   const selectedPlan = useMemo(() => plans.find((plan) => plan.id === selectedPlanId), [plans, selectedPlanId])
-  const sourcePlans = useMemo(() => plans.filter((plan) => !plan.assignedUserId && !plan.personName), [plans])
+  const sourcePlans = useMemo(() => plans, [plans])
  
   useEffect(() => {
     if (!activeTabId && tabs.length > 0) {
@@ -129,22 +170,21 @@ export function CreateAssignmentPage() {
 
     setSelectedExerciseId('')
     setSelectedExerciseName('')
-    const nextTab = createBlankTab('Day 1')
-    nextTab.rows = assignmentToEdit.exercises.map((exercise) => createBlankRow(exercise.id))
-    setTabs([nextTab])
-    setActiveTabId(nextTab.id)
+    ///const nextTabs = buildTabsFromSessions(assignmentToEdit)
+    ///setTabs(nextTabs)
+    ///setActiveTabId(nextTabs[0]?.id ?? null)
   }, [assignmentToEdit])
 
   const handleSaveAssignment = () => {
     if (isEditMode && assignmentToEdit) {
-      const selectedExerciseIds = tabs.flatMap((tab) => tab.rows.filter((row) => row.exerciseId).map((row) => row.exerciseId))
+      const planSessions = buildPlanSessionsFromTabs(tabs)
 
-      if (selectedExerciseIds.length === 0) {
+      if (!planSessions.some((session) => session.planItems.length > 0)) {
         return
       }
 
-      updateAssignment(assignmentToEdit.id, assignmentToEdit.planName, selectedExerciseIds)
-      navigate(`/users/${assignmentToEdit.assignedUserId ?? 'user'}/assignments/${assignmentToEdit.planSlug}`)
+      updateAssignment(assignmentToEdit.id, assignmentToEdit.id, planSessions)
+      navigate(`/users/${assignmentToEdit.assignedUserId ?? 'user'}/assignments/${assignmentToEdit.id}`)
       return
     }
 
@@ -263,7 +303,7 @@ export function CreateAssignmentPage() {
     workbook.created = new Date()
     workbook.modified = new Date()
 
-    const exportName = (assignmentToEdit?.planName || 'assignment').replace(/[^a-z0-9]+/gi, '-').replace(/(^-|-$)/g, '') || 'assignment'
+    const exportName = (assignmentToEdit?.id || 'assignment').replace(/[^a-z0-9]+/gi, '-').replace(/(^-|-$)/g, '') || 'assignment'
 
     tabs.forEach((tab, index) => {
       const worksheet = workbook.addWorksheet(sanitizeSheetName(tab.title || `Day ${index + 1}`))

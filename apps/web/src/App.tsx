@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import { Navigate, Route, Routes, useLocation, useNavigate } from 'react-router-dom'
 import webPackageJson from '../package.json'
 import { exercises, exercisesSchema, loadJsonRecord, saveJsonRecord, usePlan } from '@gym-pilot/shared'
@@ -6,10 +6,10 @@ import { getToneClass } from './components/toneClasses'
 import { HOME_FILTER_KEY, FAVORITES_KEY } from './constants/storageKeys'
 import { ExercisePage } from './pages/ExercisePage'
 import { HomePage } from './pages/HomePage'
-import { PlanDetailPage } from './pages/PlanDetailPage'
-import { PlansPage } from './pages/PlansPage'
+import { PlanDetailPage } from './pages/plans/PlanDetailPage'
+import { PlansPage } from './pages/plans/PlansPage'
 import { AssignmentsPage } from './pages/assignments/AssignmentsPage'
-import { CreatePlanPage } from './pages/CreatePlanPage'
+import { CreatePlanPage } from './pages/plans/CreatePlanPage'
 import { CreateAssignmentPage } from './pages/assignments/CreateAssignmentPage'
 import { AssignmentsManagerPage } from './pages/assignments/AssignmentsManagerPage'
 import { getExercisePath } from './utils/exerciseRouteUtils'
@@ -24,6 +24,7 @@ import { AdminDatabasePage } from './pages/admin/AdminDatabasePage'
 import { AdminPreferences } from './pages/admin/AdminPreferences'
 import { HelpPage } from './pages/help/HelpPage'
 import { buildNavigationMenuItems } from './utils/navigationUtils'
+import { AssignmentDetailPage } from './pages/assignments/AssignmentDetailPage'
 
 type HomeFilters = {
   searchTerm: string
@@ -69,6 +70,8 @@ function App() {
   const { user, logout } = useAuth()
   const appVersion = webPackageJson.version || '0.0.0'
   const [favorites, setFavorites] = useState<QuickLink[]>([])
+  const favoritesHydrated = useRef(false)
+
   const [homeFilters, setHomeFilters] = useState<HomeFilters>(() => {
     if (typeof window === 'undefined') {
       return { searchTerm: '', selectedCategory: null, showImages: true }
@@ -92,17 +95,49 @@ function App() {
 
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
 
-  useEffect(() => {
-    void saveJsonRecord(FAVORITES_KEY, favorites)
-  }, [favorites])
+useEffect(() => {
+  let cancelled = false
 
-  useEffect(() => {
-    void loadJsonRecord<QuickLink[]>(FAVORITES_KEY, []).then((storedFavorites) => {
-      if (Array.isArray(storedFavorites)) {
-        setFavorites(sortQuickLinks(storedFavorites.filter((item) => typeof item?.label === 'string' && typeof item?.path === 'string')))
-      }
-    })
-  }, [])
+  async function loadFavorites() {
+    const storedFavorites = await loadJsonRecord<QuickLink[]>(FAVORITES_KEY, [])
+
+    if (cancelled) {
+      return
+    }
+
+    if (Array.isArray(storedFavorites)) {
+      setFavorites(
+        sortQuickLinks(
+          storedFavorites.filter(
+            (item) =>
+              typeof item?.label === 'string' &&
+              typeof item?.path === 'string'
+          )
+        )
+      )
+    }
+
+    favoritesHydrated.current = true
+  }
+
+  void loadFavorites()
+
+  return () => {
+    cancelled = true
+  }
+}, [])
+
+
+useEffect(() => {
+  if (!favoritesHydrated.current) {
+    console.log('Skipping save - not hydrated')
+    return
+  }
+
+  console.log('Saving favorites', favorites)
+
+  void saveJsonRecord(FAVORITES_KEY, favorites)
+}, [favorites])
 
   useEffect(() => {
     window.sessionStorage.setItem(HOME_FILTER_KEY, JSON.stringify(normalizeHomeFilters(homeFilters)))
@@ -144,7 +179,7 @@ function App() {
     return Boolean(exercise && favorites.some((item) => item.path === getExercisePath(exercise)))
   }
 
-  const plansCount = plans.filter((plan) => !plan.sourcePlanId).length
+  const plansCount = plans.length
   const desktopMenuItems = buildNavigationMenuItems({
     plansCount,
     assignmentsCount: assignments.length,
@@ -212,7 +247,7 @@ function App() {
           <Route path="/assignments/create" element={<Navigate to="/assignments/new" replace />} />
           <Route path="/users/:userSlug/assignments/new" element={<AssignmentsManagerPage />} />
           <Route path="/users/:userSlug/assignments/create" element={<Navigate to="../new" replace />} />
-          <Route path="/users/:userSlug/assignments/:planSlug" element={<PlanDetailPage />} />
+          <Route path="/users/:userSlug/assignments/:planSlug" element={<AssignmentDetailPage />} />
           <Route path="/users/:userSlug/assignments/:planSlug/edit" element={<CreateAssignmentPage />} />
         </Route>
       </Routes>
@@ -221,3 +256,5 @@ function App() {
 }
 
 export default App
+
+

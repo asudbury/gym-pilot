@@ -9,18 +9,21 @@ import { PLANS_KEY } from './constants/storageKeys'
 import { GoogleAnalytics } from './components/GoogleAnalytics.tsx'
 import { AuthProvider } from './auth/AuthContext.tsx'
 import { queryClient } from './lib/queryClient'
+import { ErrorBoundary } from './components/ErrorBoundary.tsx'
 
 createRoot(document.getElementById('root')!).render(
   <StrictMode>
-    <QueryClientProvider client={queryClient}>
-      <HashRouter>
-        <GoogleAnalytics />
-        <PlanProvider storageKey={PLANS_KEY}>
-          <AuthProvider>
-            <App />
-          </AuthProvider>
-        </PlanProvider>
-      </HashRouter>
-    </QueryClientProvider>
+    <ErrorBoundary>
+        <QueryClientProvider client={queryClient}>
+        <HashRouter>
+          <GoogleAnalytics />
+          <PlanProvider storageKey={PLANS_KEY}>
+            <AuthProvider>
+              <App />
+            </AuthProvider>
+          </PlanProvider>
+        </HashRouter>
+      </QueryClientProvider>
+    </ErrorBoundary>
   </StrictMode>,
 )

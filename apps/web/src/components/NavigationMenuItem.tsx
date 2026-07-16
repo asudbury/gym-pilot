@@ -1,12 +1,5 @@
-import type { ReactNode } from 'react'
 import { NavLink } from 'react-router-dom'
-
-type NavigationMenuItemProps = {
-  to: string
-  children: ReactNode
-  onClick?: () => void
-  className?: string
-}
+import type { NavigationMenuItemProps } from '../utils/navigationUtils'
 
 export function NavigationMenuItem({ to, children, onClick, className }: NavigationMenuItemProps) {
   return (

@@ -1,3 +1,7 @@
+export function createUUID() {
+  return typeof crypto !== 'undefined' && 'randomUUID' in crypto ? crypto.randomUUID() : `${Date.now()}-${Math.random()}`
+}
+
 export function safeJsonParse<T>(value: string | null | undefined, fallback: T): T {
   if (value === null || value === undefined || value === '') {
     return fallback
