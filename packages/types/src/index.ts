@@ -23,7 +23,7 @@ export type PlanItem = {
   note: string
 }
 
-export type UserRole = 'admin' | 'trainer' | 'user'
+export type UserRole = 'admin' | 'trainer' | 'client' | 'guest'
 
 export type User = {
   id: string

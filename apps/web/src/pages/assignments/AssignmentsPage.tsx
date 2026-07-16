@@ -1,11 +1,11 @@
 import { Link } from 'react-router-dom'
-import { Button } from '../components/Button'
-import { getToneClass } from '../components/toneClasses'
+import { Button } from '../../components/Button'
+import { getToneClass } from '../../components/toneClasses'
 import { usePlan } from '@gym-pilot/shared'
-import { PageCard } from '../components/PageCard'
-import { PageLayout } from '../layouts/PageLayout'
-import { PageCardLayout } from '../layouts/PageCardLayout'
-import { CallToAction } from '../components/CallToAction'
+import { PageCard } from '../../components/PageCard'
+import { PageLayout } from '../../layouts/PageLayout'
+import { PageCardLayout } from '../../layouts/PageCardLayout'
+import { CallToAction } from '../../components/CallToAction'
 
 export function AssignmentsPage() {
   const { assignments, deleteAssignment } = usePlan()
@@ -39,7 +39,7 @@ export function AssignmentsPage() {
                 <h1 className="text-2xl font-semibold text-slate-900">Assignments</h1>
                 <p className="mt-1 text-sm text-slate-600">Each assignment is its own editable copy for an individual user.</p>
               </div>
-              <Link to="/assignments/create" className={getToneClass('blue', 'inline-flex items-center rounded-lg px-4 py-2 text-sm font-medium')}>
+              <Link to="/assignments/new" className={getToneClass('blue', 'inline-flex items-center rounded-lg px-4 py-2 text-sm font-medium')}>
                 Create assignment
               </Link>
             </div>

@@ -51,7 +51,7 @@ export const dataSchemaDocs = {
       { name: 'id', type: 'string', required: true },
       { name: 'name', type: 'string', required: true },
       { name: 'slug', type: 'string', required: true },
-      { name: 'role', type: 'admin | trainer | user', required: true },
+      { name: 'role', type: 'admin | trainer | client | guest', required: true },
     ],
   },
 } as const
@@ -70,7 +70,7 @@ export const dataSchemaSummary = [
     purpose: 'Stores user-specific assignment copies that reference a plan and own completion state.',
   },
   {
-    entity: 'User',
+    entity: 'User roles',
     purpose: 'Stores people who can be assigned to plans and given roles.',
   },
 ] as const

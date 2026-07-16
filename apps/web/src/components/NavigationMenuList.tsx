@@ -1,56 +1,5 @@
-import type { ReactNode } from 'react'
 import { NavigationMenuItem } from './NavigationMenuItem'
-
-export type NavigationMenuListItem = {
-  to: string
-  label: ReactNode
-  onClick?: () => void
-  className?: string
-}
-
-type NavigationMenuListProps = {
-  items: NavigationMenuListItem[]
-  className?: string
-}
-
-type BuildNavigationMenuItemsOptions = {
-  plansCount: number
-  assignmentsCount: number
-  onItemClick?: () => void
-  itemClassName?: string
-}
-
-export function buildNavigationMenuItems({
-  onItemClick,
-  itemClassName,
-}: BuildNavigationMenuItemsOptions): NavigationMenuListItem[] {
-  return [
-    {
-      to: '/plans',
-      label: 'Plans',
-      onClick: onItemClick,
-      className: itemClassName,
-    },
-    {
-      to: '/assignments',
-      label: 'Assignments',
-      onClick: onItemClick,
-      className: itemClassName,
-    },
-    {
-      to: '/admin',
-      label: 'Admin',
-      onClick: onItemClick,
-      className: itemClassName,
-    },
-    {
-      to: '/help',
-      label: 'Help',
-      onClick: onItemClick,
-      className: itemClassName,
-    },
-  ]
-}
+import type { NavigationMenuListProps  } from '../utils/navigationUtils'
 
 export function NavigationMenuList({ items, className }: NavigationMenuListProps) {
   return (

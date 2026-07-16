@@ -1,11 +1,11 @@
 import { useMemo, useState } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
-import { Button } from '../components/Button'
-import { getToneClass } from '../components/toneClasses'
+import { Button } from '../../components/Button'
+import { getToneClass } from '../../components/toneClasses'
 import { usePlan } from '@gym-pilot/shared'
-import { PageCard } from '../components/PageCard'
-import { PageLayout } from '../layouts/PageLayout'
-import { Heading1, Paragraph } from '../components/Typography'
+import { PageCard } from '../../components/PageCard'
+import { PageLayout } from '../../layouts/PageLayout'
+import { Heading1, Paragraph } from '../../components/Typography'
 
 export function AssignmentsManagerPage() {
   const { users, plans, assignUsersToPlan } = usePlan()

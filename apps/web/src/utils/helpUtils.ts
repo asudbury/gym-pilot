@@ -45,6 +45,17 @@ export const helpSections = [
       'The database view helps you inspect the current local records used by the app.',
     ],
   },
+  {
+    title: 'User roles',
+    items: [
+      'User roles define the permissions and access levels for different users within the app.',
+      "Roles defined are 'guest', 'trainer', 'client', 'admin'",
+      'Guests have limited access to view/search for exercises only',
+      'Trainers can create and manage plans and assignments',
+      'Clients can view and complete assignments (as well as view/search for exercises)',
+      'Admins have full access',
+    ],
+  },
 ]
 
 export default helpSections

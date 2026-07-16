@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react'
-import { Route, Routes, useLocation, useNavigate } from 'react-router-dom'
+import { Navigate, Route, Routes, useLocation, useNavigate } from 'react-router-dom'
 import webPackageJson from '../package.json'
 import { exercises, exercisesSchema, loadJsonRecord, saveJsonRecord, usePlan } from '@gym-pilot/shared'
 import { getToneClass } from './components/toneClasses'
@@ -8,11 +8,10 @@ import { ExercisePage } from './pages/ExercisePage'
 import { HomePage } from './pages/HomePage'
 import { PlanDetailPage } from './pages/PlanDetailPage'
 import { PlansPage } from './pages/PlansPage'
-import { AssignmentsPage } from './pages/AssignmentsPage'
+import { AssignmentsPage } from './pages/assignments/AssignmentsPage'
 import { CreatePlanPage } from './pages/CreatePlanPage'
-import { CreateAssignmentPage } from './pages/CreateAssignmentPage'
-import { AssignmentsManagerPage } from './pages/AssignmentsManagerPage'
-import { buildNavigationMenuItems } from './components/NavigationMenuList'
+import { CreateAssignmentPage } from './pages/assignments/CreateAssignmentPage'
+import { AssignmentsManagerPage } from './pages/assignments/AssignmentsManagerPage'
 import { getExercisePath } from './utils/exerciseRouteUtils'
 import { Header } from './components/Header'
 import { formatLabel } from './utils/formatUtils'
@@ -24,6 +23,7 @@ import { AdminUsersPage } from './pages/admin/AdminUsersPage'
 import { AdminDatabasePage } from './pages/admin/AdminDatabasePage'
 import { AdminPreferences } from './pages/admin/AdminPreferences'
 import { HelpPage } from './pages/help/HelpPage'
+import { buildNavigationMenuItems } from './utils/navigationUtils'
 
 type HomeFilters = {
   searchTerm: string
@@ -208,8 +208,10 @@ function App() {
           <Route path="/plans/:planSlug/edit" element={<CreatePlanPage />} />
           <Route path="/plans/:planSlug" element={<PlanDetailPage />} />
           <Route path="/help" element={<HelpPage />} />
-          <Route path="/assignments/create" element={<AssignmentsManagerPage />} />
           <Route path="/assignments/new" element={<AssignmentsManagerPage />} />
+          <Route path="/assignments/create" element={<Navigate to="/assignments/new" replace />} />
+          <Route path="/users/:userSlug/assignments/new" element={<AssignmentsManagerPage />} />
+          <Route path="/users/:userSlug/assignments/create" element={<Navigate to="../new" replace />} />
           <Route path="/users/:userSlug/assignments/:planSlug" element={<PlanDetailPage />} />
           <Route path="/users/:userSlug/assignments/:planSlug/edit" element={<CreateAssignmentPage />} />
         </Route>
