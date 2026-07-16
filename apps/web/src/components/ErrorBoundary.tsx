@@ -1,5 +1,5 @@
 import { Component } from 'react';
-import { logger } from '../utils/loggerUtils';
+import { logger } from '../utils/loggingUtils';
 
 export class ErrorBoundary extends Component<
   React.PropsWithChildren,

@@ -118,7 +118,6 @@ export function CreateAssignmentPage() {
 
   const activeTab = useMemo(() => tabs.find((tab) => tab.id === activeTabId) ?? tabs[0], [activeTabId, tabs])
   const activeRows = activeTab?.rows ?? []
-  const selectedPlan = useMemo(() => plans.find((plan) => plan.id === selectedPlanId), [plans, selectedPlanId])
   const sourcePlans = useMemo(() => plans, [plans])
  
   useEffect(() => {
@@ -520,13 +519,6 @@ export function CreateAssignmentPage() {
                   </select>
                 </label>
               </div>
-
-              {selectedPlan ? (
-                <div className="mt-4 rounded-2xl border border-slate-200 bg-slate-50 p-3 text-sm text-slate-600">
-                  <p className="font-medium text-slate-800">Ready to create</p>
-                  <p className="mt-1">This will create one assignment copy for the selected user from {selectedPlan.planName || 'the chosen base plan'}.</p>
-                </div>
-              ) : null}
             </div>
           ) : null}
 

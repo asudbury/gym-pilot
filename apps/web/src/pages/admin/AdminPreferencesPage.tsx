@@ -4,7 +4,7 @@ import { PageCard } from '../../components/PageCard'
 import { PageLayout } from '../../layouts/PageLayout'
 import { Heading1, Paragraph } from '../../components/Typography'
 
-export function AdminPreferences() {
+export function AdminPreferencesPage() {
   return (
     <PageLayout className="max-w-6xl">
       <PageCard>

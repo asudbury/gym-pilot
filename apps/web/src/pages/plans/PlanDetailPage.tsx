@@ -1,4 +1,4 @@
-import { useMemo, type JSXElementConstructor, type Key, type ReactElement, type ReactNode, type ReactPortal } from 'react'
+import { useMemo, useState, type JSXElementConstructor, type Key, type ReactElement, type ReactNode, type ReactPortal } from 'react'
 import { Link, useParams } from 'react-router-dom'
 import { getToneClass } from '../../components/toneClasses'
 import { exercises, usePlan } from '@gym-pilot/shared'
@@ -11,6 +11,7 @@ import { ExerciseDetailsCard } from '../../components/ExerciseDetailsCard'
 export function PlanDetailPage() {
   const { planSlug } = useParams()
   const { plans, assignments } = usePlan()
+  const [expandedExerciseIds, setExpandedExerciseIds] = useState<string[]>([])
 
   const plan = useMemo(() => plans.find((item) => item.planSlug === planSlug), [plans, planSlug])
 
@@ -20,6 +21,16 @@ export function PlanDetailPage() {
   const backPath = isAssignment ? `/users/${assignment?.assignedUserId ?? 'user'}/assignments` : '/plans'
   const editLabel = 'Edit plan'
   const backLabel = 'Back to plans'
+
+  const toggleExerciseExpanded = (exerciseId: string) => {
+    setExpandedExerciseIds((current) => {
+      if (current.includes(exerciseId)) {
+        return current.filter((item) => item !== exerciseId)
+      }
+
+      return [...current, exerciseId]
+    })
+  }
 
   if (!plan) {
     return (
@@ -51,11 +62,12 @@ export function PlanDetailPage() {
         </div>
         <div className="space-y-4 mt-6">
           <h3><b>Exercises</b></h3>
+
           {(plan.planSessions ?? []).map((session: { id: Key | null | undefined; title: string | number | bigint | boolean | ReactElement<unknown, string | JSXElementConstructor<any>> | Iterable<ReactNode> | ReactPortal | Promise<string | number | bigint | boolean | ReactPortal | ReactElement<unknown, string | JSXElementConstructor<any>> | Iterable<ReactNode> | null | undefined> | null | undefined; planItems: any }) => (
             <div key={session.id} className="rounded-2xl border border-slate-200 p-4">
               <h4 className="font-semibold text-slate-800">{session.title}</h4>
               <div className="mt-3 space-y-3">
-                {(session.planItems ?? []).map((item: { exercise_id: string; id: Key | null | undefined; exercise_name: string }) => {
+                {(session.planItems ?? []).map((item: { exercise_id: string; id: string; exercise_name: string }) => {
                   const resolvedExercise = exercises.find((
                     exercise) => exercise.id === item.exercise_id || exercise.id === item.id || exercise.name === item.exercise_name)
 
@@ -63,7 +75,8 @@ export function PlanDetailPage() {
                     <div key={item.id} className="rounded-xl border border-slate-100 p-3">
                       <ExerciseDetailsCard
                         exercise={resolvedExercise}
-                        expanded={false}
+                        expanded={expandedExerciseIds.includes(item.id)}
+                        onToggle={() => toggleExerciseExpanded(item.id)}
                       />
                     </div>
                   ) : null

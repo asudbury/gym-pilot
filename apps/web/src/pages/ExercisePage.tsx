@@ -13,6 +13,7 @@ import { PageLayout } from '../layouts/PageLayout'
 import { Heading1, Paragraph } from '../components/Typography'
 import { ExerciseMetaBadges } from '../components/ExerciseMetaBadges'
 import { formatLabel } from '../utils/formatUtils'
+import { logger } from '../utils/loggingUtils'
 
 type ExercisePageProps = {
   onToggleFavoriteExercise?: (exerciseId: string) => void
@@ -20,6 +21,9 @@ type ExercisePageProps = {
 }
 
 export function ExercisePage({ onToggleFavoriteExercise, isExerciseFavorite }: ExercisePageProps) {
+  
+  logger.debug('Rendering ExercisePage')
+  
   const { slug } = useParams()
   const [copied, setCopied] = useState(false)
 

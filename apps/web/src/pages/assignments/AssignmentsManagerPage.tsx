@@ -13,7 +13,6 @@ export function AssignmentsManagerPage() {
   const [selectedPlanId, setSelectedPlanId] = useState<string>('')
   const [selectedUserId, setSelectedUserId] = useState<string>('')
 
-  const selectedPlan = useMemo(() => plans.find((plan) => plan.id === selectedPlanId), [plans, selectedPlanId])
   const sourcePlans = useMemo(() => plans, [plans])
 
   const handleCreateAssignment = () => {
@@ -78,14 +77,6 @@ export function AssignmentsManagerPage() {
                 ))}
               </select>
             </label>
-
-            {selectedPlan ? (
-              <div className="rounded-2xl border border-slate-200 bg-slate-50 p-3 text-sm text-slate-600">
-                <p className="font-medium text-slate-800">Ready to create</p>
-                <p className="mt-1">This will create one assignment copy from {selectedPlan.planName || 'the selected base plan'}.</p>
-              </div>
-            ) : null}
-
             <Button tone="emerald" onClick={handleCreateAssignment} className="w-full justify-center px-4 py-2" disabled={!selectedPlanId || !selectedUserId}>
               Create assignment
             </Button>

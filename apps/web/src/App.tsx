@@ -21,10 +21,11 @@ import { useAuth } from './auth/AuthContext'
 import { AdminPage } from './pages/admin/AdminPage'
 import { AdminUsersPage } from './pages/admin/AdminUsersPage'
 import { AdminDatabasePage } from './pages/admin/AdminDatabasePage'
-import { AdminPreferences } from './pages/admin/AdminPreferences'
+import { AdminPreferencesPage } from './pages/admin/AdminPreferencesPage'
 import { HelpPage } from './pages/help/HelpPage'
 import { buildNavigationMenuItems } from './utils/navigationUtils'
 import { AssignmentDetailPage } from './pages/assignments/AssignmentDetailPage'
+import { logger } from './utils/loggingUtils'
 
 type HomeFilters = {
   searchTerm: string
@@ -99,6 +100,7 @@ useEffect(() => {
   let cancelled = false
 
   async function loadFavorites() {
+
     const storedFavorites = await loadJsonRecord<QuickLink[]>(FAVORITES_KEY, [])
 
     if (cancelled) {
@@ -130,7 +132,7 @@ useEffect(() => {
 
 useEffect(() => {
   if (!favoritesHydrated.current) {
-    console.log('Skipping save - not hydrated')
+    console.log('Skipping saving favourites - not hydrated')
     return
   }
 
@@ -149,6 +151,9 @@ useEffect(() => {
 
 
   const handleToggleFavoriteExercise = (exerciseId: string) => {
+    
+    logger.debug(`Toggling favorite exercise: ${exerciseId}`)
+    
     const parsed = exercisesSchema.parse(exercises)
     const exercise = parsed.find((item) => item.id === exerciseId)
 
@@ -235,7 +240,7 @@ useEffect(() => {
           <Route path="/users/:userSlug/assignments/create" element={<AssignmentsManagerPage />} />
           <Route element={<RequireAuth requiredRole="admin" />}>
             <Route path="/admin" element={<AdminPage />} />
-            <Route path="/admin/preferences" element={<AdminPreferences />} />
+            <Route path="/admin/preferences" element={<AdminPreferencesPage />} />
             <Route path="/admin/users" element={<AdminUsersPage />} />
             <Route path="/admin/database" element={<AdminDatabasePage />} />
           </Route>

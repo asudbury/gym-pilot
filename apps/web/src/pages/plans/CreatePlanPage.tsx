@@ -592,7 +592,7 @@ export function CreatePlanPage() {
                         onFocus={() => setActiveTabId(tab.id)}
                         onClick={() => setActiveTabId(tab.id)}
                         aria-label={`Rename tab ${tab.title}`}
-                        className="w-24 bg-transparent text-sm font-medium outline-none"
+                        className="w-20 min-w-0 max-w-24 bg-transparent text-sm font-medium outline-none sm:w-24"
                         placeholder="Tab name"
                       />
                       {tabs.length > 1 ? (
@@ -633,7 +633,7 @@ export function CreatePlanPage() {
                   value={personNamesInput}
                   onChange={(event) => setPersonNamesInput(event.target.value)}
                   placeholder="Plan name"
-                  className="w-full rounded-full border border-slate-200 bg-white px-4 py-2 text-sm text-slate-700 sm:min-w-56 sm:w-auto"
+                  className="w-full min-w-0 rounded-full border border-slate-200 bg-white px-4 py-2 text-sm text-slate-700 sm:min-w-56 sm:w-auto"
                 />
                 <Button tone="emerald" onClick={handleAssignPlan} className="px-4 py-2">
                   {isAssignmentRoute ? (isEditMode ? 'Save assignment' : 'Create assignment') : (isEditMode ? 'Save changes' : 'Create plan')}

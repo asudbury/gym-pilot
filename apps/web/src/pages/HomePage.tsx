@@ -15,6 +15,8 @@ import { MIN_SEARCH_CHARS } from '../constants/home'
 import { getExercisePath } from '../utils/exerciseRouteUtils'
 import { ExerciseSearchPicker } from '../components/ExerciseSearchPicker'
 import { formatLabel } from '../utils/formatUtils'
+import { copyExerciseLinkToClipboard } from '../utils/navigationUtils'
+import { logger } from '../utils/loggingUtils'
 
 type HomeFilters = {
   searchTerm: string
@@ -75,6 +77,9 @@ function ExerciseActionButtons({ exerciseId, isFavorite, copiedId, onToggleFavor
 }
 
 export function HomePage({ filters, onFiltersChange, onToggleFavoriteExercise, isExerciseFavorite }: HomePageProps) {
+  
+  logger.debug('Rendering HomePage with filters:', filters)
+  
   const { selectedCategory } = filters
   const [copiedId, setCopiedId] = useState<string | null>(null)
   const [draftSearchTerm, setDraftSearchTerm] = useState(filters.searchTerm)
@@ -145,10 +150,11 @@ export function HomePage({ filters, onFiltersChange, onToggleFavoriteExercise, i
   }, [])
 
   const handleCopyUrl = async (exerciseId: string) => {
-    const url = `${window.location.origin}/exercise/${exerciseId}`
 
+    logger.debug(`Copying URL for exercise: ${exerciseId}`)
+    
     try {
-      await navigator.clipboard.writeText(url)
+      copyExerciseLinkToClipboard(exerciseId)
       setCopiedId(exerciseId)
       window.setTimeout(() => setCopiedId((current) => (current === exerciseId ? null : current)), 1500)
     } catch {

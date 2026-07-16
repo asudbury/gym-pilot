@@ -4,6 +4,24 @@ import { loadJsonRecord, saveJsonRecord, usePlan } from '@gym-pilot/shared'
 
 const SESSION_STORAGE_KEY = 'gym-pilot-auth-session'
 const BYPASS_STORAGE_KEY = 'gym-pilot-auth-bypass'
+const CURRENT_USER_ID_STORAGE_KEY = 'gym-pilot-current-user-id'
+
+function isDummyAuthEnabled() {
+  return import.meta.env?.VITE_FEATURE_DUMMY_AUTH_ENABLED === 'true'
+}
+
+function getDummyAuthUser(): AuthUser | null {
+  if (!isDummyAuthEnabled()) {
+    return null
+  }
+
+  return {
+    id: import.meta.env?.VITE_DUMMY_AUTH_USER_ID || 'dummy-user',
+    name: import.meta.env?.VITE_DUMMY_AUTH_USER_NAME || 'Demo User',
+    slug: import.meta.env?.VITE_DUMMY_AUTH_USER_SLUG || 'dummy-user',
+    role: (import.meta.env?.VITE_DUMMY_AUTH_USER_ROLE as UserRole | undefined) || 'client',
+  }
+}
 
 type AuthUser = Pick<User, 'id' | 'name' | 'slug' | 'role'>
 
@@ -52,12 +70,20 @@ export function AuthProvider({ children }: AuthProviderProps) {
 
     async function loadSession() {
       const storedUser = await readStoredSession()
+      const dummyUser = getDummyAuthUser()
+      const resolvedUser = storedUser ?? dummyUser
 
       if (!isActive) {
         return
       }
 
-      setUser(storedUser)
+      if (resolvedUser) {
+        window.sessionStorage.setItem(CURRENT_USER_ID_STORAGE_KEY, resolvedUser.id)
+      } else {
+        window.sessionStorage.removeItem(CURRENT_USER_ID_STORAGE_KEY)
+      }
+
+      setUser(resolvedUser)
       sessionHydrated.current = true
     }
 
@@ -96,12 +122,19 @@ export function AuthProvider({ children }: AuthProviderProps) {
     void saveJsonRecord(BYPASS_STORAGE_KEY, isBypassEnabled)
   }, [isBypassEnabled])
 
+  const notifyAuthStateChanged = () => {
+    window.dispatchEvent(new Event('gym-pilot-auth-updated'))
+  }
+
   const login = (userId: string) => {
     const selectedUser = users.find((item) => item.id === userId)
 
     if (!selectedUser) {
       return false
     }
+
+    window.sessionStorage.setItem(CURRENT_USER_ID_STORAGE_KEY, selectedUser.id)
+    notifyAuthStateChanged()
 
     setUser({
       id: selectedUser.id,
@@ -114,6 +147,8 @@ export function AuthProvider({ children }: AuthProviderProps) {
   }
 
   const enableBypass = () => {
+    window.sessionStorage.setItem(CURRENT_USER_ID_STORAGE_KEY, 'mvp-bypass')
+    notifyAuthStateChanged()
     setIsBypassEnabled(true)
 
     setUser({
@@ -125,11 +160,15 @@ export function AuthProvider({ children }: AuthProviderProps) {
   }
 
   const disableBypass = () => {
+    window.sessionStorage.removeItem(CURRENT_USER_ID_STORAGE_KEY)
+    notifyAuthStateChanged()
     setIsBypassEnabled(false)
     setUser(null)
   }
 
   const logout = () => {
+    window.sessionStorage.removeItem(CURRENT_USER_ID_STORAGE_KEY)
+    notifyAuthStateChanged()
     setUser(null)
     setIsBypassEnabled(false)
   }

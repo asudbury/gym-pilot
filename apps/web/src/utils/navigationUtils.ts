@@ -57,3 +57,13 @@ export function buildNavigationMenuItems({
     },
   ]
 }
+
+export async function copyExerciseLinkToClipboard(exerciseId: string): Promise<void> {
+
+    const url = `${window.location.origin}/exercise/${exerciseId}`
+
+    try {
+      await navigator.clipboard.writeText(url)
+    } catch {
+    }
+}

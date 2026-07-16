@@ -48,7 +48,7 @@ export function ExerciseDetailsCard({
         </div>
         <PageActionGroup>
           {onToggle ? (
-            <Button tone="white" onClick={() => onToggle(exercise.id)} className="px-3 py-2">
+            <Button tone="default" onClick={() => onToggle(exercise.id)} className="px-3 py-2">
               {expanded ? 'Hide details' : 'Show details'}
             </Button>
           ) : null}

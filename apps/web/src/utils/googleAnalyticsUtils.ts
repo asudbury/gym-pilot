@@ -28,26 +28,6 @@ export const googleAnalytics = {
     event('login');
   },
 
-  favouritesClicked() {
-    event('favourites_clicked');
-  },
-
-  plansClicked() {
-    event('plans_clicked');
-  },
-
-  assignmentsClicked() {
-    event('assignments_clicked');
-  },
-
-  adminClicked() {
-    event('admin_clicked');
-  },
-
-  helpClicked() {
-    event('help_clicked');
-  },
-
   createWorkout(workoutId: string) {
     event('create_workout', {
       workout_id: workoutId,

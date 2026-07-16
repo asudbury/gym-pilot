@@ -18,4 +18,5 @@ export type Plan = {
   planName: string
   planSlug: string
   planSessions: PlanSession[]
+  createdByUserId?: string
 }
