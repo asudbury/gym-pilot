@@ -1,9 +1,8 @@
 import { useEffect, useState } from 'react'
-import { NavLink, Route, Routes, useLocation, useNavigate } from 'react-router-dom'
+import { Route, Routes, useLocation, useNavigate } from 'react-router-dom'
 import webPackageJson from '../package.json'
-import { getToneClass } from './components/toneClasses'
-import { ResponsiveVisibility } from './components/ResponsiveVisibility'
 import { exercises, exercisesSchema, loadJsonRecord, saveJsonRecord, usePlan } from '@gym-pilot/shared'
+import { getToneClass } from './components/toneClasses'
 import { HOME_FILTER_KEY, FAVORITES_KEY } from './constants/storageKeys'
 import { ExercisePage } from './pages/ExercisePage'
 import { HomePage } from './pages/HomePage'
@@ -13,9 +12,9 @@ import { AssignmentsPage } from './pages/AssignmentsPage'
 import { CreatePlanPage } from './pages/CreatePlanPage'
 import { CreateAssignmentPage } from './pages/CreateAssignmentPage'
 import { AssignmentsManagerPage } from './pages/AssignmentsManagerPage'
-import { FavouriteLinksMenu } from './components/FavouriteLinksMenu'
-import { buildNavigationMenuItems, NavigationMenuList } from './components/NavigationMenuList'
+import { buildNavigationMenuItems } from './components/NavigationMenuList'
 import { getExercisePath } from './utils/exerciseRouteUtils'
+import { Header } from './components/Header'
 import { formatLabel } from './utils/formatUtils'
 import { RequireAuth } from './auth/RequireAuth'
 import { LoginPage } from './pages/LoginPage'
@@ -24,6 +23,7 @@ import { AdminPage } from './pages/admin/AdminPage'
 import { AdminUsersPage } from './pages/admin/AdminUsersPage'
 import { AdminDatabasePage } from './pages/admin/AdminDatabasePage'
 import { AdminPreferences } from './pages/admin/AdminPreferences'
+import { HelpPage } from './pages/help/HelpPage'
 
 type HomeFilters = {
   searchTerm: string
@@ -166,106 +166,28 @@ function App() {
   return (
     <div className="min-h-screen bg-slate-50">
       <ScrollToTop />
-      <nav className="sticky top-0 z-30 h-16 border-b border-slate-200 bg-white/95 backdrop-blur">
-        <div className="mx-auto flex h-full max-w-6xl items-center justify-between px-4 sm:px-6 lg:px-8">
-         <div className="flex flex-col">
-            <NavLink to="/" className="text-lg font-semibold text-slate-900">
-              GymPilot
-              {' '}  
-              <span className="text-[11px] font-medium tracking-[0.2em] text-slate-500">
-                {`(v${appVersion})`}
-              </span>
-            </NavLink>
-          </div>
-          <div className="flex flex-wrap items-center gap-2">
-            <ResponsiveVisibility visibleOn="desktop">
-              <div className="flex items-center gap-2">
-                <FavouriteLinksMenu
-                  favorites={favorites}
-                  homeFilters={homeFilters}
-                  variant="header"
-                  onFavoritesChange={setFavorites}
-                  onHomeFiltersChange={setHomeFilters}
-                />
-                <NavigationMenuList
-                  className="flex items-center gap-2"
-                  items={desktopMenuItems}
-                />
-                {!SHOW_AUTH_BUTTON ? null : (
-                  <button
-                    type="button"
-                    onClick={() => {
-                      if (user) {
-                        logout()
-                        return
-                      }
+      <Header
+        appVersion={appVersion}
+        favorites={favorites}
+        homeFilters={homeFilters}
+        desktopMenuItems={desktopMenuItems}
+        tabletMenuItems={tabletMenuItems}
+        mobileMenuItems={mobileMenuItems}
+        showAuthButton={SHOW_AUTH_BUTTON}
+        user={user}
+        onFavoritesChange={setFavorites}
+        onHomeFiltersChange={setHomeFilters}
+        onAuthClick={() => {
+          if (user) {
+            logout()
+            return
+          }
 
-                      navigate('/login')
-                    }}
-                    className={getToneClass('default', 'px-4 py-2 text-sm font-medium')}
-                  >
-                    {user ? 'Sign out' : 'Login'}
-                  </button>
-                )}
-              </div>
-            </ResponsiveVisibility>
-            <ResponsiveVisibility visibleOn="tablet">
-              <div className="relative">
-                <button
-                  type="button"
-                  onClick={() => setMobileMenuOpen((current) => !current)}
-                  className={getToneClass('default', 'px-4 py-2 text-sm font-medium')}
-                >
-                  Menu
-                </button>
-                {mobileMenuOpen && (
-                  <div className="fixed inset-x-3 top-16 z-40 max-h-[min(75vh,32rem)] overflow-y-auto rounded-2xl border border-slate-200 bg-white p-3 shadow-xl sm:absolute sm:right-0 sm:left-auto sm:top-full sm:mt-2 sm:w-80 sm:max-w-[calc(100vw-2rem)]">
-                    <div className="flex flex-col gap-2">
-                      <FavouriteLinksMenu
-                        favorites={favorites}
-                        homeFilters={homeFilters}
-                        onFavoritesChange={setFavorites}
-                        onHomeFiltersChange={setHomeFilters}
-                      />
-                      <NavigationMenuList
-                        className="flex flex-col gap-2"
-                        items={tabletMenuItems}
-                      />
-                    </div>
-                  </div>
-                )}
-              </div>
-            </ResponsiveVisibility>
-            <ResponsiveVisibility visibleOn="mobile">
-              <div className="relative">
-                <button
-                  type="button"
-                  onClick={() => setMobileMenuOpen((current) => !current)}
-                  className={getToneClass('default', 'px-4 py-2 text-sm font-medium')}
-                >
-                  Menu
-                </button>
-                {mobileMenuOpen && (
-                  <div className="fixed inset-x-3 top-16 z-40 max-h-[min(75vh,32rem)] overflow-y-auto rounded-2xl border border-slate-200 bg-white p-3 shadow-xl sm:absolute sm:right-0 sm:left-auto sm:top-full sm:mt-2 sm:w-80 sm:max-w-[calc(100vw-2rem)]">
-                    <div className="flex flex-col gap-2">
-                      <FavouriteLinksMenu
-                        favorites={favorites}
-                        homeFilters={homeFilters}
-                        onFavoritesChange={setFavorites}
-                        onHomeFiltersChange={setHomeFilters}
-                      />
-                      <NavigationMenuList
-                        className="flex flex-col gap-2"
-                        items={mobileMenuItems}
-                      />
-                    </div>
-                  </div>
-                )}
-              </div>
-            </ResponsiveVisibility>
-          </div>
-        </div>
-      </nav>
+          navigate('/login')
+        }}
+        mobileMenuOpen={mobileMenuOpen}
+        onToggleMobileMenu={() => setMobileMenuOpen((current) => !current)}
+      />
 
       <Routes>
         <Route path="/login" element={<LoginPage />} />
@@ -285,6 +207,7 @@ function App() {
           <Route path="/plans/new" element={<CreatePlanPage />} />
           <Route path="/plans/:planSlug/edit" element={<CreatePlanPage />} />
           <Route path="/plans/:planSlug" element={<PlanDetailPage />} />
+          <Route path="/help" element={<HelpPage />} />
           <Route path="/assignments/create" element={<AssignmentsManagerPage />} />
           <Route path="/assignments/new" element={<AssignmentsManagerPage />} />
           <Route path="/users/:userSlug/assignments/:planSlug" element={<PlanDetailPage />} />

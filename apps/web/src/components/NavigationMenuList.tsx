@@ -43,6 +43,12 @@ export function buildNavigationMenuItems({
       onClick: onItemClick,
       className: itemClassName,
     },
+    {
+      to: '/help',
+      label: 'Help',
+      onClick: onItemClick,
+      className: itemClassName,
+    },
   ]
 }
 
