@@ -11,14 +11,14 @@ import type { UserRole } from '@gym-pilot/types'
 export function AdminUsersPage() {
   const { users, createUser, deleteUser } = usePlan()
   const [newUserName, setNewUserName] = useState('')
-  const [newUserRole, setNewUserRole] = useState<UserRole>('user')
+  const [newUserRole, setNewUserRole] = useState<UserRole>('client')
 
   const handleCreateUser = () => {
     const createdUser = createUser(newUserName, newUserRole)
 
     if (createdUser) {
       setNewUserName('')
-      setNewUserRole('user')
+      setNewUserRole('client')
     }
   }
 
@@ -51,7 +51,7 @@ export function AdminUsersPage() {
             >
               <option value="admin">Admin</option>
               <option value="trainer">Trainer</option>
-              <option value="user">User</option>
+              <option value="client">Client</option>
             </select>
             <Button tone="emerald" onClick={handleCreateUser} className="px-4 py-2">
               Add user

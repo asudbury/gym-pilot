@@ -418,7 +418,7 @@ export function PlanProvider({ children, storageKey = 'gym-pilot-plans' }: PlanP
     setAssignments((current) => current.filter((assignment) => assignment.id !== assignmentId))
   }
 
-  const createUser = (name: string, role: UserRole = 'user') => {
+  const createUser = (name: string, role: UserRole = 'client') => {
     const trimmedName = name.trim()
 
     if (!trimmedName) {
