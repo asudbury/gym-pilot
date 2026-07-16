@@ -4,6 +4,7 @@ import { getToneClass } from '../components/toneClasses'
 import { usePlan } from '@gym-pilot/shared'
 import { PageCard } from '../components/PageCard'
 import { PageLayout } from '../layouts/PageLayout'
+import { PageCardLayout } from '../layouts/PageCardLayout'
 import { CallToAction } from '../components/CallToAction'
 
 export function AssignmentsPage() {
@@ -12,26 +13,38 @@ export function AssignmentsPage() {
   return (
     <PageLayout>
       {assignments.length === 0 ? (
-        <CallToAction
-          title="Manage assignments"
-          description="Create an assignment to track exercises and add notes for each one."
-          action={
-            <Link to="/assignments/new" className={getToneClass('blue', 'inline-flex items-center rounded-lg px-4 py-2 text-sm font-medium')}>
-              Create a new assignment
-            </Link>
-          }
-        />
-      ) : (
-        <>
-          <div className="mb-4 flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
+        <PageCardLayout
+          title={
             <div>
               <h1 className="text-2xl font-semibold text-slate-900">Assignments</h1>
-              <p className="mt-1 text-sm text-slate-600">Each assignment is its own editable copy for an individual user.</p>
+              <p className="mt-1 text-sm text-slate-600">Create an assignment to track exercises and add notes for each one.</p>
             </div>
-            <Link to="/assignments/create" className={getToneClass('blue', 'inline-flex items-center rounded-lg px-4 py-2 text-sm font-medium')}>
-              Create assignment
-            </Link>
-          </div>
+          }
+        >
+          <CallToAction
+            title="Manage assignments"
+            description="Create an assignment to track exercises and add notes for each one."
+            action={
+              <Link to="/assignments/new" className={getToneClass('blue', 'inline-flex items-center rounded-lg px-4 py-2 text-sm font-medium')}>
+                Create a new assignment
+              </Link>
+            }
+          />
+        </PageCardLayout>
+      ) : (
+        <PageCardLayout
+          title={
+            <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
+              <div>
+                <h1 className="text-2xl font-semibold text-slate-900">Assignments</h1>
+                <p className="mt-1 text-sm text-slate-600">Each assignment is its own editable copy for an individual user.</p>
+              </div>
+              <Link to="/assignments/create" className={getToneClass('blue', 'inline-flex items-center rounded-lg px-4 py-2 text-sm font-medium')}>
+                Create assignment
+              </Link>
+            </div>
+          }
+        >
           <div className="grid gap-4 md:grid-cols-2">
             {assignments.map((assignment) => (
               <PageCard key={assignment.id} padding="compact">
@@ -55,7 +68,7 @@ export function AssignmentsPage() {
               </PageCard>
             ))}
           </div>
-        </>
+        </PageCardLayout>
       )}
     </PageLayout>
   )
