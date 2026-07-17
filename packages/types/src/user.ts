@@ -4,5 +4,7 @@ export type User = {
   id: string
   name: string
   slug: string
-  role: UserRole
+  role?: UserRole
+  roles: UserRole[]
+  trainerId?: string | null
 }

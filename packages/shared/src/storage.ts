@@ -9,14 +9,14 @@ import {
   loadSupabaseJsonRecord,
   removeSupabaseJsonRecord,
   saveSupabaseJsonRecord,
-} from './supabase'
+} from './gymPilotSupabase'
 
 export interface IPersistenceStore {
   load<T>(key: string, fallback: T): Promise<T>
   save<T>(key: string, value: T): Promise<void>
 }
 
-const LOCAL_ONLY_KEYS = new Set(['gym-pilot-auth-session', 'gym-pilot-auth-bypass', 'gym-pilot-users'])
+const LOCAL_ONLY_KEYS = new Set(['gym-pilot-auth-session', 'gym-pilot-auth-bypass'])
 
 function shouldUseSupabaseForKey(key: string) {
   if (LOCAL_ONLY_KEYS.has(key)) {

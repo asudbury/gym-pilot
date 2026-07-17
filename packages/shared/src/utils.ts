@@ -1,5 +1,14 @@
+import type { UserRole } from '@gym-pilot/types'
+
 export function createUUID() {
   return typeof crypto !== 'undefined' && 'randomUUID' in crypto ? crypto.randomUUID() : `${Date.now()}-${Math.random()}`
+}
+
+export function normalizeUserRoles(roles?: Array<UserRole | string> | null, fallbackRole?: UserRole): UserRole[] {
+  const normalizedRoles = (Array.isArray(roles) ? roles : fallbackRole ? [fallbackRole] : [])
+    .filter((role): role is UserRole => ['admin', 'trainer', 'client', 'guest'].includes(String(role) as UserRole))
+
+  return normalizedRoles.length > 0 ? normalizedRoles : fallbackRole ? [fallbackRole] : ['client']
 }
 
 export function safeJsonParse<T>(value: string | null | undefined, fallback: T): T {

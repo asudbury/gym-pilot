@@ -39,6 +39,7 @@ create table if not exists public.gym_pilot_profiles (
   id uuid primary key default gen_random_uuid(),
   user_id uuid references auth.users(id) on delete cascade not null unique,
   friendly_name text,
+  must_change_password boolean not null default false,
   created_at timestamptz not null default now(),
   updated_at timestamptz not null default now()
 );
@@ -62,6 +63,46 @@ begin
     for all
     using (auth.uid() = user_id)
     with check (auth.uid() = user_id);
+  end if;
+
+  if not exists (
+    select 1
+    from pg_policies
+    where schemaname = 'public'
+      and tablename = 'gym_pilot_profiles'
+      and policyname = 'Authenticated users can read all profiles'
+  ) then
+    create policy "Authenticated users can read all profiles"
+    on public.gym_pilot_profiles
+    for select
+    using (auth.role() = 'authenticated');
+  end if;
+
+  if not exists (
+    select 1
+    from pg_policies
+    where schemaname = 'public'
+      and tablename = 'gym_pilot_profiles'
+      and policyname = 'Authenticated users can insert profile rows'
+  ) then
+    create policy "Authenticated users can insert profile rows"
+    on public.gym_pilot_profiles
+    for insert
+    with check (auth.role() = 'authenticated');
+  end if;
+
+  if not exists (
+    select 1
+    from pg_policies
+    where schemaname = 'public'
+      and tablename = 'gym_pilot_profiles'
+      and policyname = 'Authenticated users can update profile rows'
+  ) then
+    create policy "Authenticated users can update profile rows"
+    on public.gym_pilot_profiles
+    for update
+    using (auth.role() = 'authenticated')
+    with check (auth.role() = 'authenticated');
   end if;
 end
 $$;

@@ -3,6 +3,8 @@ import { createUUID } from './utils'
 import type { Assignment, Plan, PlanItem, PlanSession, User, UserRole } from '@gym-pilot/types'
 import { DexiePersistence, listJsonRecords } from './storage'
 import { ASSIGNMENTS_KEY, PLANS_KEY } from '../../../apps/web/src/constants/storageKeys'
+import { listSupabaseProfiles } from './gymPilotSupabase'
+import { normalizeUserRoles } from './utils'
 
 type PlanContextValue = {
   plans: Plan[]
@@ -19,7 +21,7 @@ type PlanContextValue = {
   updatePlanExercise: (planId: string, exerciseId: string, value: string) => void
   deletePlan: (planId: string) => void
   deleteAssignment: (assignmentId: string) => void
-  createUser: (name: string, role?: UserRole) => User | undefined
+  createUser: (name: string, roles?: UserRole | UserRole[], trainerId?: string | null) => User | undefined
   deleteUser: (userId: string) => void
 }
 
@@ -31,13 +33,6 @@ type PlanProviderProps = {
 const PlanContext = createContext<PlanContextValue | undefined>(undefined)
 const persistence = new DexiePersistence()
 const CURRENT_USER_ID_STORAGE_KEY = 'gym-pilot-current-user-id'
-const DEMO_USERS_STORAGE_KEY = 'gym-pilot-demo-users-seeded'
-
-const DEFAULT_DEMO_USERS: Array<Omit<User, 'id'> & { id?: string }> = [
-  { id: 'demo-admin', name: 'Demo Admin', slug: 'demo-admin', role: 'admin' },
-  { id: 'demo-trainer', name: 'Demo Trainer', slug: 'demo-trainer', role: 'trainer' },
-  { id: 'demo-client', name: 'Demo Client', slug: 'demo-client', role: 'client' },
-]
 
 function buildPlanSlug(name: string, plans: Plan[]) {
   const slugParts = [name]
@@ -106,19 +101,31 @@ function getCurrentUserIdFromSessionStorage(): string | undefined {
   return currentUserId ? currentUserId : undefined
 }
 
-async function resolveCurrentUserContext(): Promise<{ id?: string; role?: UserRole }> {
+async function resolveCurrentUserContext(): Promise<{ id?: string; role?: UserRole; roles?: UserRole[] }> {
   const sessionUserId = getCurrentUserIdFromSessionStorage()
 
-  const storedSession = await persistence.load<Partial<{ id?: string; role?: UserRole }> | null>('gym-pilot-auth-session', null)
+  const storedSession = await persistence.load<Partial<{ id?: string; role?: UserRole; roles?: UserRole[] }> | null>('gym-pilot-auth-session', null)
   const resolvedUserId = sessionUserId?.trim() || storedSession?.id?.trim()
 
   if (!resolvedUserId) {
     return {}
   }
 
+  const storedRoles = Array.isArray(storedSession?.roles)
+    ? normalizeUserRoles(storedSession.roles)
+    : []
+  const fallbackRole = storedSession?.role && normalizeUserRoles([storedSession.role])[0]
+    ? storedSession.role
+    : resolvedUserId === 'mvp-bypass'
+      ? 'admin'
+      : undefined
+  const resolvedRoles = storedRoles.length > 0 ? storedRoles : fallbackRole ? [fallbackRole] : []
+  const primaryRole = resolvedRoles[0]
+
   return {
     id: resolvedUserId,
-    role: storedSession?.role ?? (resolvedUserId === 'mvp-bypass' ? 'admin' : undefined),
+    role: primaryRole,
+    roles: resolvedRoles,
   }
 }
 
@@ -175,19 +182,46 @@ function buildUserSlug(name: string) {
     .replace(/(^-|-$)/g, '') || 'user'
 }
 
-function filterUsersForViewer(users: User[], currentUserId?: string, currentUserRole?: UserRole): User[] {
+function userHasRole(user: Partial<User> | undefined, requiredRole: UserRole): boolean {
+  return normalizeUserRoles(user?.roles, user?.role).includes(requiredRole)
+}
+
+function resolveEffectiveUserRole(currentUserRole?: UserRole, currentUserRoles?: UserRole[]): UserRole | undefined {
+  if (currentUserRoles?.includes('admin')) {
+    return 'admin'
+  }
+
+  if (currentUserRoles?.includes('trainer')) {
+    return 'trainer'
+  }
+
+  if (currentUserRoles?.includes('client')) {
+    return 'client'
+  }
+
+  if (currentUserRoles?.includes('guest')) {
+    return 'guest'
+  }
+
+  return currentUserRole
+}
+
+function filterUsersForViewer(users: User[], currentUserId?: string, currentUserRole?: UserRole, currentUserRoles?: UserRole[]): User[] {
   const viewerId = currentUserId?.trim()
+  const effectiveRole = resolveEffectiveUserRole(currentUserRole, currentUserRoles)
 
-  if (!currentUserRole || currentUserRole === 'guest') {
+  if (!effectiveRole || effectiveRole === 'guest') {
     return users
   }
 
-  if (currentUserRole === 'admin') {
+  if (effectiveRole === 'admin') {
     return users
   }
 
-  if (currentUserRole === 'trainer') {
-    return users.filter((user) => user.role === 'client' || user.id === viewerId)
+  if (effectiveRole === 'trainer') {
+    const assignedClientIds = new Set(users.filter((user) => userHasRole(user, 'client') && user.trainerId === viewerId).map((user) => user.id))
+
+    return users.filter((user) => user.id === viewerId || assignedClientIds.has(user.id))
   }
 
   if (viewerId) {
@@ -197,20 +231,22 @@ function filterUsersForViewer(users: User[], currentUserId?: string, currentUser
   return []
 }
 
-function filterPlansForViewer(plans: Plan[], users: User[], currentUserId?: string, currentUserRole?: UserRole): Plan[] {
+function filterPlansForViewer(plans: Plan[], users: User[], currentUserId?: string, currentUserRole?: UserRole, currentUserRoles?: UserRole[]): Plan[] {
   const viewerId = currentUserId?.trim()
+  const effectiveRole = resolveEffectiveUserRole(currentUserRole, currentUserRoles)
 
-  if (!currentUserRole || currentUserRole === 'guest') {
+  if (!effectiveRole || effectiveRole === 'guest') {
     return plans
   }
 
-  if (currentUserRole === 'admin') {
+  if (effectiveRole === 'admin') {
     return plans
   }
 
-  const visibleUserIds = new Set(users.filter((user) => user.role === 'client').map((user) => user.id))
+  const visibleUserIds = new Set(users.filter((user) => userHasRole(user, 'client')).map((user) => user.id))
+  const assignedClientIds = new Set(users.filter((user) => userHasRole(user, 'client') && user.trainerId === viewerId).map((user) => user.id))
 
-  if (currentUserRole === 'trainer') {
+  if (effectiveRole === 'trainer') {
     return plans.filter((plan) => {
       const creatorId = plan.createdByUserId?.trim()
 
@@ -218,7 +254,7 @@ function filterPlansForViewer(plans: Plan[], users: User[], currentUserId?: stri
         return true
       }
 
-      return creatorId === viewerId || visibleUserIds.has(creatorId)
+      return creatorId === viewerId || assignedClientIds.has(creatorId) || visibleUserIds.has(creatorId)
     })
   }
 
@@ -229,24 +265,26 @@ function filterPlansForViewer(plans: Plan[], users: User[], currentUserId?: stri
   })
 }
 
-function filterAssignmentsForViewer(assignments: Assignment[], users: User[], currentUserId?: string, currentUserRole?: UserRole): Assignment[] {
+function filterAssignmentsForViewer(assignments: Assignment[], users: User[], currentUserId?: string, currentUserRole?: UserRole, currentUserRoles?: UserRole[]): Assignment[] {
   const viewerId = currentUserId?.trim()
+  const effectiveRole = resolveEffectiveUserRole(currentUserRole, currentUserRoles)
 
-  if (!currentUserRole || currentUserRole === 'guest') {
+  if (!effectiveRole || effectiveRole === 'guest') {
     return assignments
   }
 
-  if (currentUserRole === 'admin') {
+  if (effectiveRole === 'admin') {
     return assignments
   }
 
-  const visibleUserIds = new Set(users.filter((user) => user.role === 'client').map((user) => user.id))
+  const visibleUserIds = new Set(users.filter((user) => userHasRole(user, 'client')).map((user) => user.id))
+  const assignedClientIds = new Set(users.filter((user) => userHasRole(user, 'client') && user.trainerId === viewerId).map((user) => user.id))
 
-  if (currentUserRole === 'trainer') {
+  if (effectiveRole === 'trainer') {
     return assignments.filter((assignment) => {
       const assignedUserId = assignment.assignedUserId?.trim()
 
-      return Boolean(assignedUserId && (assignedUserId === viewerId || visibleUserIds.has(assignedUserId)))
+      return Boolean(assignedUserId && (assignedUserId === viewerId || assignedClientIds.has(assignedUserId) || visibleUserIds.has(assignedUserId)))
     })
   }
 
@@ -289,9 +327,9 @@ export function PlanProvider({ children, storageKey = PLANS_KEY }: PlanProviderP
   const [users, setUsers] = useState<User[]>([])
   const [plansHydrated, setPlansHydrated] = useState(false)
   const [assignmentsHydrated, setAssignmentsHydrated] = useState(false)
-  const [usersHydrated, setUsersHydrated] = useState(false)
   const [currentUserId, setCurrentUserId] = useState<string | undefined>(undefined)
   const [currentUserRole, setCurrentUserRole] = useState<UserRole | undefined>(undefined)
+  const [currentUserRoles, setCurrentUserRoles] = useState<UserRole[]>([])
 
   useEffect(() => {
     let isActive = true
@@ -302,6 +340,7 @@ export function PlanProvider({ children, storageKey = PLANS_KEY }: PlanProviderP
       if (isActive) {
         setCurrentUserId(resolvedUserContext.id)
         setCurrentUserRole(resolvedUserContext.role)
+        setCurrentUserRoles(resolvedUserContext.roles ?? [])
       }
     }
 
@@ -352,30 +391,42 @@ export function PlanProvider({ children, storageKey = PLANS_KEY }: PlanProviderP
   useEffect(() => {
     let isActive = true
 
-    void (async () => {
-      const storedUsers = await persistence.load<User[]>('gym-pilot-users', [])
-      const hasSeededUsers = await persistence.load<boolean>(DEMO_USERS_STORAGE_KEY, false)
+    const loadUsersFromSupabase = async () => {
+      const profiles = await listSupabaseProfiles()
 
       if (!isActive) {
         return
       }
 
-      const resolvedUsers = Array.isArray(storedUsers) && storedUsers.length > 0
-        ? storedUsers
-        : DEFAULT_DEMO_USERS.map((user) => ({ ...user, id: user.id ?? createUUID() }))
+      const resolvedUsers = profiles.map((profile) => {
+        const roles = normalizeUserRoles(profile.roles)
 
-      if (!hasSeededUsers && (!Array.isArray(storedUsers) || storedUsers.length === 0)) {
-        await persistence.save(DEMO_USERS_STORAGE_KEY, true)
-      }
+        return {
+          id: profile.user_id,
+          name: profile.friendly_name?.trim() || profile.user_id,
+          slug: buildUserSlug(profile.friendly_name?.trim() || profile.user_id),
+          role: (roles[0] ?? 'client') as UserRole,
+          roles,
+          trainerId: profile.trainer_id ?? null,
+        }
+      })
 
       setUsers(resolvedUsers)
-      setUsersHydrated(true)
-    })()
+    }
+
+    void loadUsersFromSupabase()
+
+    const handleAuthUpdate = () => {
+      void loadUsersFromSupabase()
+    }
+
+    window.addEventListener('gym-pilot-auth-updated', handleAuthUpdate)
 
     return () => {
       isActive = false
+      window.removeEventListener('gym-pilot-auth-updated', handleAuthUpdate)
     }
-  }, [])
+  }, [currentUserId, currentUserRole])
 
   useEffect(() => {
     if (!plansHydrated) {
@@ -396,15 +447,6 @@ export function PlanProvider({ children, storageKey = PLANS_KEY }: PlanProviderP
     console.log('[PlanContext] Saving assignments', { count: assignments.length })
     void persistence.save(ASSIGNMENTS_KEY, assignments)
   }, [assignments, assignmentsHydrated])
-
-  useEffect(() => {
-    if (!usersHydrated) {
-      return
-    }
-
-    console.log('[PlanContext] Saving users', { count: users.length })
-    void persistence.save('gym-pilot-users', users)
-  }, [users, usersHydrated])
 
   const createPlan = (planName: string, planSessions?: PlanSession[]) => {
     const trimmedName = planName.trim()
@@ -592,7 +634,7 @@ export function PlanProvider({ children, storageKey = PLANS_KEY }: PlanProviderP
     setAssignments((current) => current.filter((assignment) => assignment.id !== assignmentId))
   }
 
-  const createUser = (name: string, role: UserRole = 'client') => {
+  const createUser = (name: string, roles: UserRole | UserRole[] = 'client', trainerId?: string | null) => {
     const trimmedName = name.trim()
 
     if (!trimmedName) {
@@ -605,11 +647,17 @@ export function PlanProvider({ children, storageKey = PLANS_KEY }: PlanProviderP
       return duplicate
     }
 
+    const resolvedRoles: UserRole[] = normalizeUserRoles(Array.isArray(roles) ? roles : [roles])
+    const primaryRole: UserRole = resolvedRoles[0] ?? 'client'
+    const isClientUser = resolvedRoles.includes('client')
+
     const nextUser: User = {
       id: createUUID(),
       name: trimmedName,
       slug: buildUserSlug(trimmedName),
-      role,
+      role: primaryRole,
+      roles: resolvedRoles,
+      trainerId: isClientUser ? trainerId ?? null : null,
     }
 
     setUsers((current) => [...current, nextUser])
@@ -630,9 +678,9 @@ export function PlanProvider({ children, storageKey = PLANS_KEY }: PlanProviderP
     setAssignments((current) => current.filter((assignment) => assignment.assignedUserId !== trimmedUserId))
   }
 
-  const visiblePlans = useMemo(() => filterPlansForViewer(plans, users, currentUserId, currentUserRole), [plans, users, currentUserId, currentUserRole])
-  const visibleAssignments = useMemo(() => filterAssignmentsForViewer(assignments, users, currentUserId, currentUserRole), [assignments, users, currentUserId, currentUserRole])
-  const visibleUsers = useMemo(() => filterUsersForViewer(users, currentUserId, currentUserRole), [users, currentUserId, currentUserRole])
+  const visiblePlans = useMemo(() => filterPlansForViewer(plans, users, currentUserId, currentUserRole, currentUserRoles), [plans, users, currentUserId, currentUserRole, currentUserRoles])
+  const visibleAssignments = useMemo(() => filterAssignmentsForViewer(assignments, users, currentUserId, currentUserRole, currentUserRoles), [assignments, users, currentUserId, currentUserRole, currentUserRoles])
+  const visibleUsers = useMemo(() => filterUsersForViewer(users, currentUserId, currentUserRole, currentUserRoles), [users, currentUserId, currentUserRole, currentUserRoles])
 
   const value = useMemo<PlanContextValue>(
     () => ({

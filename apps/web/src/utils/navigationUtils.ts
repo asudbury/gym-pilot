@@ -49,14 +49,18 @@ export function buildNavigationMenuItems({
       ]
     : []
 
+  const adminItem: NavigationMenuListItem[] = isAuthenticated
+    ? [{
+        to: '/admin',
+        label: 'Admin',
+        onClick: onItemClick,
+        className: itemClassName,
+      }]
+    : []
+
   return [
     ...protectedItems,
-    {
-      to: '/admin',
-      label: 'Admin',
-      onClick: onItemClick,
-      className: itemClassName,
-    },
+    ...adminItem,
     {
       to: '/help',
       label: 'Help',

@@ -1,65 +1,132 @@
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
+import { useLocation, useNavigate } from 'react-router-dom'
 import { Button } from '../../components/Button'
-import { usePlan } from '@gym-pilot/shared'
-import type { UserRole } from '@gym-pilot/types'
+import { getSupabaseClient, listSupabaseAuthUsers } from '@gym-pilot/shared'
 import { AdminSectionShell } from '../../components/admin/AdminSectionShell'
+import { mapAdminProfileRows, type AdminProfileRow } from '../../utils/adminUtils'
 
 export function AdminUsersPage() {
-  const { users, createUser, deleteUser } = usePlan()
-  const [newUserName, setNewUserName] = useState('')
-  const [newUserRole, setNewUserRole] = useState<UserRole>('client')
+  const location = useLocation()
+  const navigate = useNavigate()
+  const [isLoadingSupabaseUsers, setIsLoadingSupabaseUsers] = useState(false)
+  const [supabaseUsersNotice, setSupabaseUsersNotice] = useState(
+    typeof (location.state as { statusMessage?: string } | undefined)?.statusMessage === 'string'
+      ? (location.state as { statusMessage?: string }).statusMessage
+      : '',
+  )
+  const [profileUsers, setProfileUsers] = useState<AdminProfileRow[]>([])
 
-  const handleCreateUser = () => {
-    const createdUser = createUser(newUserName, newUserRole)
+  const refreshSupabaseUsers = async () => {
+    setIsLoadingSupabaseUsers(true)
+    setSupabaseUsersNotice('')
 
-    if (createdUser) {
-      setNewUserName('')
-      setNewUserRole('client')
+    const client = getSupabaseClient()
+
+    if (!client) {
+      setSupabaseUsersNotice('Supabase is not configured for this session.')
+      setIsLoadingSupabaseUsers(false)
+      return
     }
+
+    const { data, error } = await client
+      .from('gym_pilot_profiles')
+      .select('user_id, friendly_name, roles, trainer_id, must_change_password')
+
+    const profileSelectionError = error && /trainer_id|does not exist|column .* does not exist/i.test(error.message)
+      ? null
+      : error
+
+    if (profileSelectionError) {
+      console.error('[AdminUsers] Could not load profile rows', profileSelectionError)
+      setSupabaseUsersNotice(`Could not load profile users: ${profileSelectionError.message}`)
+      setIsLoadingSupabaseUsers(false)
+      return
+    }
+
+    const fallbackSelection = profileSelectionError === null && error
+      ? await client.from('gym_pilot_profiles').select('user_id, friendly_name, roles, must_change_password')
+      : null
+
+    const resolvedData = fallbackSelection?.data ?? data
+    const resolvedError = fallbackSelection?.error ?? null
+
+    if (resolvedError) {
+      console.error('[AdminUsers] Could not load profile rows', resolvedError)
+      setSupabaseUsersNotice(`Could not load profile users: ${resolvedError.message}`)
+      setIsLoadingSupabaseUsers(false)
+      return
+    }
+
+    const authUsers = await listSupabaseAuthUsers()
+    const emailLookup = new Map(authUsers.map((user) => [user.id, user.email ?? null]))
+
+    const nextRows = mapAdminProfileRows(resolvedData ?? [], emailLookup)
+
+    setProfileUsers(nextRows)
+    setIsLoadingSupabaseUsers(false)
   }
 
+  useEffect(() => {
+    let isActive = true
+
+    void (async () => {
+      await refreshSupabaseUsers()
+
+      if (!isActive) {
+        return
+      }
+    })()
+
+    return () => {
+      isActive = false
+    }
+  }, [])
+
   return (
-    <AdminSectionShell title="Manage users" subtitle="Create and remove users" className="max-w-5xl">
+    <AdminSectionShell title="Manage users" subtitle="Review current users and set up profiles" className="max-w-5xl">
       <div className="space-y-4 rounded-2xl border border-slate-200 bg-slate-50 p-4">
-        <div className="flex flex-col gap-2 sm:flex-row sm:flex-wrap">
-          <input
-            type="text"
-            value={newUserName}
-            onChange={(event) => setNewUserName(event.target.value)}
-            placeholder="Add a new user"
-            className="w-full rounded-full border border-slate-200 bg-white px-4 py-2 text-sm text-slate-700 sm:min-w-64 sm:w-auto"
-          />
-          <select
-            value={newUserRole}
-            onChange={(event) => setNewUserRole(event.target.value as UserRole)}
-            className="w-full rounded-full border border-slate-200 bg-white px-4 py-2 text-sm text-slate-700 sm:w-auto"
-          >
-            <option value="admin">Admin</option>
-            <option value="trainer">Trainer</option>
-            <option value="client">Client</option>
-          </select>
-          <Button tone="emerald" onClick={handleCreateUser} className="px-4 py-2">
-            Add user
+        <div className="flex flex-wrap gap-2">
+          <Button tone="emerald" onClick={() => navigate('/admin/users/create')} className="px-4 py-2">
+            Create user
           </Button>
         </div>
 
-        {users.length === 0 ? (
-          <p className="text-sm text-slate-600">No users yet. Add someone to get started.</p>
-        ) : (
-          <div className="space-y-2">
-            {users.map((user) => (
-              <div key={user.id} className="flex flex-col gap-3 rounded-2xl border border-slate-200 bg-white px-4 py-3 sm:flex-row sm:items-center sm:justify-between">
-                <div>
-                  <span className="text-sm font-medium text-slate-800">{user.name}</span>
-                  <p className="mt-1 text-xs uppercase tracking-[0.2em] text-slate-500">{user.role}</p>
-                </div>
-                <Button tone="rose" onClick={() => deleteUser(user.id)} className="px-3 py-1.5">
-                  Delete
-                </Button>
-              </div>
-            ))}
+        <div className="rounded-2xl border border-slate-200 bg-white p-4">
+          <div className="flex items-center justify-between gap-2">
+            <h3 className="text-sm font-semibold text-slate-800">Current users</h3>
+            <span className="text-xs uppercase tracking-[0.2em] text-slate-500">
+              {isLoadingSupabaseUsers ? 'Loading…' : `${profileUsers.length} users`}
+            </span>
           </div>
-        )}
+
+          {supabaseUsersNotice ? (
+            <p className="mt-3 text-sm text-slate-600">{supabaseUsersNotice}</p>
+          ) : null}
+
+          {profileUsers.length === 0 ? (
+            <p className="mt-3 text-sm text-slate-600">No users yet. Add someone to get started.</p>
+          ) : (
+            <div className="mt-3 space-y-2">
+              {profileUsers.map((user) => (
+                <div key={user.id} className="flex flex-col gap-3 rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3 sm:flex-row sm:items-center sm:justify-between">
+                  <div className="min-w-0 flex-1">
+                    <p className="text-sm font-semibold text-slate-800">{user.name}</p>
+                    <p className="mt-1 text-sm text-slate-600">{user.email || 'No email available'}</p>
+                    <p className="mt-1 text-xs uppercase tracking-[0.2em] text-slate-500">{user.roles.length > 0 ? user.roles.join(', ') : 'No roles'}</p>
+                    {user.roles.includes('client') ? (
+                      <p className="mt-1 text-xs text-slate-500">
+                        Trainer: {user.trainerId ? profileUsers.find((candidate) => candidate.id === user.trainerId)?.name ?? 'Assigned trainer' : 'No trainer assigned'}
+                      </p>
+                    ) : null}
+                  </div>
+                  <Button tone="blue" onClick={() => navigate(`/admin/users/profiles/${user.id}`)} className="px-3 py-1.5">
+                    Update profile
+                  </Button>
+                </div>
+              ))}
+            </div>
+          )}
+        </div>
       </div>
     </AdminSectionShell>
   )

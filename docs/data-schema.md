@@ -55,7 +55,37 @@ Represents a person who can be assigned to plans and given a role.
 - id: string
 - name: string
 - slug: string
-- role: admin | trainer | user
+- role: admin | trainer | client | guest
+
+### Profile
+Stores optional profile metadata for the authenticated Supabase user.
+
+- id: string
+- user_id: string
+- friendly_name: string | null
+- created_at: string
+- updated_at: string
+
+### Favourite folder
+Groups favourite shortcuts for easier organisation.
+
+- id: string
+- user_id: string
+- name: string
+- created_at: string
+- updated_at: string
+
+### Favourite link
+Represents a saved navigation shortcut or exercise shortcut.
+
+- id: string
+- user_id: string
+- path: string
+- label: string
+- folder: string | null
+- folder_id: string | null
+- created_at: string
+- updated_at: string
 
 ## Storage model
 The app now has a local-first data layer based on Dexie and a query layer based on TanStack Query.
@@ -64,13 +94,15 @@ The app now has a local-first data layer based on Dexie and a query layer based 
 - TanStack Query is used for API-backed state and caching.
 
 ## Supabase schema
-The Supabase schema is now defined in a single migration file at [supabase/migrations/20260717120000_consolidated_gym_pilot_schema.sql](supabase/migrations/20260717120000_consolidated_gym_pilot_schema.sql).
+The current Supabase schema is defined across the consolidated migrations in [supabase/migrations/20260717120000_consolidated_gym_pilot_schema.sql](supabase/migrations/20260717120000_consolidated_gym_pilot_schema.sql), [supabase/migrations/20260717150000_consolidated_favourite_schema.sql](supabase/migrations/20260717150000_consolidated_favourite_schema.sql), and [supabase/migrations/20260717160000_add_assignment_plan_metadata.sql](supabase/migrations/20260717160000_add_assignment_plan_metadata.sql).
 
 ### Entity relationship overview
 ```mermaid
 erDiagram
     auth_users ||--o{ gym_pilot_app_state : owns
-    auth_users ||--o{ gym_pilot_favorites : owns
+    auth_users ||--o{ gym_pilot_profiles : owns
+    auth_users ||--o{ gym_pilot_favourite_folders : owns
+    auth_users ||--o{ gym_pilot_favourites : owns
     auth_users ||--o{ gym_pilot_plans : owns
     auth_users ||--o{ gym_pilot_assignments : creates
     gym_pilot_plans ||--o{ gym_pilot_assignments : uses
@@ -83,11 +115,29 @@ erDiagram
         timestamptz updated_at
     }
 
-    gym_pilot_favorites {
+    gym_pilot_profiles {
+        uuid id
+        uuid user_id
+        text friendly_name
+        timestamptz created_at
+        timestamptz updated_at
+    }
+
+    gym_pilot_favourite_folders {
+        uuid id
+        uuid user_id
+        text name
+        timestamptz created_at
+        timestamptz updated_at
+    }
+
+    gym_pilot_favourites {
         uuid id
         uuid user_id
         text path
         text label
+        text folder
+        uuid folder_id
         timestamptz created_at
         timestamptz updated_at
     }
@@ -118,9 +168,11 @@ erDiagram
 
 ### Notes
 - a shared app state table for user-scoped key/value persistence
-- a favorites table for saved exercise and link shortcuts
+- a profile table for friendly names and optional user metadata
+- a favourites table plus folders for saved exercise and link shortcuts
 - a plans table for plan templates
 - an assignments table for user-specific plan assignments
 - row-level security policies for authenticated users
+- auth metadata can mark a user as requiring a password change on next sign-in
 
-The earlier split migrations for app state, plans/assignments, and the app-state uniqueness constraint are now consolidated into this single migration.
+The schema is intentionally split across multiple migrations so the favourites and assignment metadata additions can be applied independently while remaining backward compatible.

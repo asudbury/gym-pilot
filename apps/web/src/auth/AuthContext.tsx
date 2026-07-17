@@ -1,6 +1,6 @@
 import { createContext, useContext, useEffect, useMemo, useRef, useState, type ReactNode } from 'react'
 import type { User, UserRole } from '@gym-pilot/types'
-import { getSupabaseClient, loadJsonRecord, loadSupabaseProfileName, saveJsonRecord, saveSupabaseProfileName, signOutFromSupabase, usePlan } from '@gym-pilot/shared'
+import { getSupabaseClient, loadJsonRecord, loadSupabaseProfileName, normalizeUserRoles, saveJsonRecord, saveSupabaseProfileName, signOutFromSupabase, usePlan } from '@gym-pilot/shared'
 
 const SESSION_STORAGE_KEY = 'gym-pilot-auth-session'
 const BYPASS_STORAGE_KEY = 'gym-pilot-auth-bypass'
@@ -8,7 +8,7 @@ const CURRENT_USER_ID_STORAGE_KEY = 'gym-pilot-current-user-id'
 const LOGOUT_PENDING_STORAGE_KEY = 'gym-pilot-auth-logout-pending'
 const THEME_STORAGE_KEY = 'gym-pilot-theme-preference'
 
-type AuthUser = Pick<User, 'id' | 'name' | 'slug' | 'role'>
+type AuthUser = Pick<User, 'id' | 'name' | 'slug' | 'role' | 'roles'> & { email?: string | null }
 
 type AuthContextValue = {
   user: AuthUser | null
@@ -33,7 +33,7 @@ const AuthContext = createContext<AuthContextValue | undefined>(undefined)
 async function readStoredSession(): Promise<AuthUser | null> {
   const stored = await loadJsonRecord<Partial<AuthUser> | null>(SESSION_STORAGE_KEY, null)
 
-  if (!stored?.id || !stored?.name || !stored?.slug || !stored?.role) {
+if (!stored?.id || !stored?.name || !stored?.slug) {
     return null
   }
 
@@ -44,7 +44,7 @@ async function readBypassFlag(): Promise<boolean> {
   return loadJsonRecord<boolean>(BYPASS_STORAGE_KEY, false)
 }
 
-async function resolveSupabaseAuthUser(): Promise<AuthUser | null> {
+async function resolveSupabaseAuthUser(users: User[] = []): Promise<AuthUser | null> {
   const client = getSupabaseClient()
 
   if (!client) {
@@ -68,14 +68,19 @@ async function resolveSupabaseAuthUser(): Promise<AuthUser | null> {
     const storedProfileName = await loadSupabaseProfileName()
     const displayName = storedProfileName || supabaseUser.user_metadata?.full_name || supabaseUser.user_metadata?.name || supabaseUser.email || 'Supabase user'
     const slug = displayName.toLowerCase().trim().replace(/[^a-z0-9]+/g, '-') || 'supabase-user'
+    const matchingProfileUser = users.find((user) => user.id === supabaseUser.id)
+    const resolvedRoles = normalizeUserRoles(matchingProfileUser?.roles, matchingProfileUser?.role)
+    const resolvedRole = (matchingProfileUser?.role ?? resolvedRoles[0] ?? 'client') as UserRole
 
     await saveSupabaseProfileName(displayName)
 
     return {
       id: supabaseUser.id,
-      name: displayName,
-      slug,
-      role: 'client',
+      name: matchingProfileUser?.name || displayName,
+      slug: matchingProfileUser?.slug || slug,
+      role: resolvedRole,
+      roles: resolvedRoles,
+      email: supabaseUser.email ?? null,
     }
   } catch (error) {
     console.warn('[Auth] Supabase session lookup failed', error)
@@ -141,7 +146,7 @@ export function AuthProvider({ children }: AuthProviderProps) {
         return
       }
 
-      const supabaseUser = await resolveSupabaseAuthUser()
+      const supabaseUser = await resolveSupabaseAuthUser(users)
 
       if (!isActive) {
         return
@@ -169,7 +174,7 @@ export function AuthProvider({ children }: AuthProviderProps) {
       isActive = false
       window.removeEventListener('gym-pilot-auth-updated', handleAuthStateChanged)
     }
-  }, [])
+  }, [users])
 
   useEffect(() => {
     if (!sessionHydrated.current) {
@@ -219,7 +224,9 @@ export function AuthProvider({ children }: AuthProviderProps) {
       id: selectedUser.id,
       name: selectedUser.name,
       slug: selectedUser.slug,
-      role: selectedUser.role,
+      role: selectedUser.role ?? (selectedUser.roles[0] ?? 'client'),
+      roles: selectedUser.roles,
+      email: null,
     })
 
     return true
@@ -236,6 +243,8 @@ export function AuthProvider({ children }: AuthProviderProps) {
       name: 'MVP Admin',
       slug: 'mvp-admin',
       role: 'admin',
+      roles: ['admin'],
+      email: null,
     })
   }
 
@@ -256,6 +265,9 @@ export function AuthProvider({ children }: AuthProviderProps) {
 
     void signOutFromSupabase().finally(() => {
       window.sessionStorage.removeItem(LOGOUT_PENDING_STORAGE_KEY)
+      if (typeof window !== 'undefined') {
+        window.location.assign('/')
+      }
     })
   }
 
@@ -297,7 +309,13 @@ export function AuthProvider({ children }: AuthProviderProps) {
       return false
     }
 
-    if (user.role === 'admin') {
+    const userRoles = Array.isArray(user.roles) && user.roles.length > 0
+      ? user.roles.filter((role): role is UserRole => ['admin', 'trainer', 'client', 'guest'].includes(role))
+      : user.role
+        ? [user.role]
+        : []
+
+    if (userRoles.includes('admin')) {
       return true
     }
 
@@ -305,7 +323,7 @@ export function AuthProvider({ children }: AuthProviderProps) {
       ? requiredRole
       : [requiredRole]
 
-    return requiredRoles.includes(user.role)
+    return requiredRoles.some((role) => userRoles.includes(role))
   }
 
   const value = useMemo<AuthContextValue>(

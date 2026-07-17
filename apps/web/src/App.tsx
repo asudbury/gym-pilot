@@ -17,9 +17,12 @@ import { Header } from './components/navigation/Header'
 import { formatLabel } from './utils/formatUtils'
 import { RequireAuth } from './auth/RequireAuth'
 import { LoginPage } from './pages/LoginPage'
+import { ResetPasswordPage } from './pages/ResetPasswordPage'
 import { useAuth } from './auth/AuthContext'
 import { AdminPage } from './pages/admin/AdminPage'
 import { AdminUsersPage } from './pages/admin/AdminUsersPage'
+import { AdminCreateUserPage } from './pages/admin/AdminCreateUserPage'
+import { AdminUserProfilesPage } from './pages/admin/AdminUserProfilesPage'
 import { AdminDatabasePage } from './pages/admin/AdminDatabasePage'
 import { AdminPreferencesPage } from './pages/admin/AdminPreferencesPage'
 import { HelpPage } from './pages/help/HelpPage'
@@ -282,6 +285,7 @@ useEffect(() => {
 
       <Routes>
         <Route path="/login" element={<LoginPage />} />
+        <Route path="/reset-password" element={<ResetPasswordPage />} />
         <Route path="/auth/callback" element={<LoginPage />} />
         <Route path="/" element={<HomePage filters={homeFilters} onFiltersChange={setHomeFilters} onToggleFavoriteExercise={handleToggleFavoriteExercise} isExerciseFavorite={isExerciseFavorite} />} />
         <Route path="/exercise/:slug" element={<ExercisePage onToggleFavoriteExercise={handleToggleFavoriteExercise} isExerciseFavorite={isExerciseFavorite} />} />
@@ -302,11 +306,13 @@ useEffect(() => {
             <Route path="/users/:userSlug/assignments/create" element={<Navigate to="../new" replace />} />
             <Route path="/users/:userSlug/assignments/:planSlug" element={<AssignmentDetailPage />} />
             <Route path="/users/:userSlug/assignments/:planSlug/edit" element={<CreateAssignmentPage />} />
-          </Route>
-          <Route element={<RequireAuth requiredRole="admin" />}>
             <Route path="/admin" element={<AdminPage />} />
             <Route path="/admin/preferences" element={<AdminPreferencesPage />} />
+          </Route>
+          <Route element={<RequireAuth requiredRole="admin" />}>
             <Route path="/admin/users" element={<AdminUsersPage />} />
+            <Route path="/admin/users/create" element={<AdminCreateUserPage />} />
+            <Route path="/admin/users/profiles/:userId" element={<AdminUserProfilesPage />} />
             <Route path="/admin/database" element={<AdminDatabasePage />} />
           </Route>
         </Route>
