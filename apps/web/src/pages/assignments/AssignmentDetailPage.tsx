@@ -1,4 +1,4 @@
-import { useMemo, type JSXElementConstructor, type Key, type ReactElement, type ReactNode, type ReactPortal } from 'react'
+import { useMemo, useState, type JSXElementConstructor, type Key, type ReactElement, type ReactNode, type ReactPortal } from 'react'
 import { Link, useParams } from 'react-router-dom'
 import { getToneClass } from '../../components/toneClasses'
 import { exercises, usePlan } from '@gym-pilot/shared'
@@ -11,6 +11,7 @@ import { ExerciseDetailsCard } from '../../components/ExerciseDetailsCard'
 export function AssignmentDetailPage() {
   const { planSlug } = useParams()
   const { plans, assignments } = usePlan()
+  const [expandedExerciseIds, setExpandedExerciseIds] = useState<string[]>([])
 
   const assignment = useMemo<Assignment | undefined>(() => assignments.find((item) => item.id === planSlug), [assignments, planSlug])
   const plan = useMemo(() => plans.find((item) => item.id === assignment?.planId), [plans, assignment?.planId])
@@ -19,6 +20,16 @@ export function AssignmentDetailPage() {
 
   const editPath = isAssignment ? `/users/${assignment?.assignedUserId ?? 'user'}/assignments/${assignment?.id ?? planSlug}/edit` : `/plans/${assignment?.id ?? planSlug}/edit`
   const backPath = isAssignment ? `/users/${assignment?.assignedUserId ?? 'user'}/assignments` : '/plans'
+
+  const toggleExerciseExpanded = (exerciseId: string) => {
+    setExpandedExerciseIds((current) => {
+      if (current.includes(exerciseId)) {
+        return current.filter((item) => item !== exerciseId)
+      }
+
+      return [...current, exerciseId]
+    })
+  }
 
   if (!assignment) {
     return (
@@ -65,7 +76,7 @@ export function AssignmentDetailPage() {
             <div key={session.id} className="rounded-2xl border border-slate-200 p-4">
               <h4 className="font-semibold text-slate-800">{session.title}</h4>
               <div className="mt-3 space-y-3">
-                {(session.planItems ?? []).map((item: { exercise_id: string; id: Key | null | undefined; exercise_name: string }) => {
+                {(session.planItems ?? []).map((item: { exercise_id: string; id: string; exercise_name: string }) => {
                   const resolvedExercise = exercises.find((
                     exercise) => exercise.id === item.exercise_id || exercise.id === item.id || exercise.name === item.exercise_name)
 
@@ -73,7 +84,8 @@ export function AssignmentDetailPage() {
                     <div key={item.id} className="rounded-xl border border-slate-100 p-3">
                       <ExerciseDetailsCard
                         exercise={resolvedExercise}
-                        expanded={false}
+                        expanded={expandedExerciseIds.includes(item.id)}
+                        onToggle={() => toggleExerciseExpanded(item.id)}
                       />
                     </div>
                   ) : null

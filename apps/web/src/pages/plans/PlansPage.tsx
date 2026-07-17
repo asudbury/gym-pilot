@@ -15,12 +15,9 @@ export function PlansPage() {
     <PageLayout>
       {basePlans.length === 0 ? (
         <PageCardLayout
-          title={
-            <div>
-              <h1 className="text-2xl font-semibold text-slate-900">Plans</h1>
-              <p className="mt-1 text-sm text-slate-600">Create a plan to track exercises and add notes for each one.</p>
-            </div>
-          }
+          title="Plans"
+          subtitle="Plans Dashboard"
+          description="Create a plan to track exercises and add notes for each one."
         >
           <CallToAction
             title="Manage plans"
@@ -34,16 +31,9 @@ export function PlansPage() {
         </PageCardLayout>
       ) : (
         <PageCardLayout
-          title={
-            <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
-              <div>
-                <h1 className="text-2xl font-semibold text-slate-900">Plans</h1>
-               </div>
-              <Link to="/plans/new" className={getToneClass('blue', 'inline-flex items-center rounded-lg px-4 py-2 text-sm font-medium')}>
-                Create a new plan
-              </Link>
-            </div>
-          }
+          title="Plans"
+          subtitle="Plans Dashboard"
+          description="Create a plan to track exercises and add notes for each one."
         >
           <div className="grid gap-4 md:grid-cols-2">
             {basePlans.map((plan) => {

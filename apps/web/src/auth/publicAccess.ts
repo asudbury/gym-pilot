@@ -1,4 +1,4 @@
-const PUBLIC_PATH_PREFIXES = ['/exercise/']
+const PUBLIC_PATH_PREFIXES = ['/exercise/', '/help']
 
 export function isPublicRoute(pathname: string) {
   if (!pathname) {

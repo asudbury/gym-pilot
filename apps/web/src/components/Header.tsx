@@ -40,6 +40,21 @@ export function Header({
   mobileMenuOpen,
   onToggleMobileMenu,
 }: HeaderProps) {
+  const headerUser = user && typeof user === 'object' && 'name' in user ? String((user as { name?: string }).name) : ''
+  const headerUserRole = user && typeof user === 'object' && 'role' in user ? String((user as { role?: string }).role) : ''
+  const showUserBadge = Boolean(headerUser)
+
+  const handleAuthAction = () => {
+    if (user) {
+      const confirmed = window.confirm('Are you sure you want to log out?')
+      if (!confirmed) {
+        return
+      }
+    }
+
+    onAuthClick()
+  }
+
   return (
     <nav className="sticky top-0 z-30 h-16 border-b border-slate-200 bg-white/95 backdrop-blur">
       <div className="mx-auto flex h-full max-w-6xl items-center justify-between px-4 sm:px-6 lg:px-8">
@@ -64,11 +79,17 @@ export function Header({
                 onHomeFiltersChange={onHomeFiltersChange}
               />
               <NavigationMenuList className="flex items-center gap-2" items={desktopMenuItems} />
-              {!showAuthButton ? null : (
-                <button type="button" onClick={onAuthClick} className={getToneClass('default', 'px-4 py-2 text-sm font-medium')}>
+              {showUserBadge ? (
+                <div className="rounded-full border border-slate-200 bg-slate-50 px-3 py-1 text-sm font-medium text-slate-700">
+                  <span>{headerUser}</span>
+                  {headerUserRole ? <span className="ml-2 text-xs uppercase tracking-wide text-slate-500">{headerUserRole}</span> : null}
+                </div>
+              ) : null}
+              {(showAuthButton || Boolean(user)) ? (
+                <button type="button" onClick={handleAuthAction} className={getToneClass('default', 'px-4 py-2 text-sm font-medium')}>
                   {user ? 'Sign out' : 'Login'}
                 </button>
-              )}
+              ) : null}
             </div>
           </ResponsiveVisibility>
 
@@ -87,6 +108,11 @@ export function Header({
                       onHomeFiltersChange={onHomeFiltersChange}
                     />
                     <NavigationMenuList className="flex flex-col gap-2" items={tabletMenuItems} />
+                    {(showAuthButton || Boolean(user)) ? (
+                      <button type="button" onClick={handleAuthAction} className="rounded-xl px-3 py-2 text-left text-sm font-medium text-slate-700 transition hover:bg-slate-50">
+                        {user ? 'Logout' : 'Login'}
+                      </button>
+                    ) : null}
                   </div>
                 </div>
               ) : null}
@@ -108,6 +134,11 @@ export function Header({
                       onHomeFiltersChange={onHomeFiltersChange}
                     />
                     <NavigationMenuList className="flex flex-col gap-2" items={mobileMenuItems} />
+                    {(showAuthButton || Boolean(user)) ? (
+                      <button type="button" onClick={handleAuthAction} className="rounded-xl px-3 py-2 text-left text-sm font-medium text-slate-700 transition hover:bg-slate-50">
+                        {user ? 'Logout' : 'Login'}
+                      </button>
+                    ) : null}
                   </div>
                 </div>
               ) : null}

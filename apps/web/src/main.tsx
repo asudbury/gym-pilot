@@ -10,6 +10,23 @@ import { GoogleAnalytics } from './components/GoogleAnalytics.tsx'
 import { AuthProvider } from './auth/AuthContext.tsx'
 import { queryClient } from './lib/queryClient'
 import { ErrorBoundary } from './components/ErrorBoundary.tsx'
+import { getSupabaseClient } from '@gym-pilot/shared'
+
+async function initializeSupabaseAuth() {
+  const client = getSupabaseClient()
+
+  if (!client) {
+    return
+  }
+
+  const { error } = await client.auth.getSession()
+
+  if (error) {
+    console.error('Supabase session initialization failed', error)
+  }
+}
+
+void initializeSupabaseAuth()
 
 createRoot(document.getElementById('root')!).render(
   <StrictMode>

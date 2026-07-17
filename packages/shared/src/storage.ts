@@ -27,12 +27,16 @@ export class DexiePersistence implements IPersistenceStore {
 }
 
 export async function loadJsonRecord<T>(key: string, fallback: T): Promise<T> {
+  console.log('[Storage] Loading record', { key, fallback })
+
   try {
     const localValue = await loadDexieJsonRecord<T>(key, fallback)
+    console.log('[Storage] Local IndexedDB value loaded', { key, localValue })
 
     if (isSupabasePersistenceEnabled()) {
       try {
         const remote = await loadSupabaseJsonRecord<T>(key)
+        console.log('[Storage] Supabase remote value loaded', { key, remote })
 
         if (remote.found && remote.value !== null) {
           return remote.value as T
@@ -63,11 +67,14 @@ export async function loadJsonRecord<T>(key: string, fallback: T): Promise<T> {
 }
 
 export async function saveJsonRecord<T>(key: string, value: T): Promise<void> {
+  console.log('[Storage] Saving record', { key, value })
   await saveDexieJsonRecord(key, value)
+  console.log('[Storage] IndexedDB save completed', { key })
 
   if (isSupabasePersistenceEnabled()) {
     try {
       await saveSupabaseJsonRecord(key, value)
+      console.log('[Storage] Supabase save completed', { key })
     } catch (error) {
       console.error('Supabase persistence save failed, local IndexedDB remains updated', key, error)
     }
@@ -75,15 +82,19 @@ export async function saveJsonRecord<T>(key: string, value: T): Promise<void> {
 }
 
 export async function removeJsonRecord(key: string): Promise<void> {
+  console.log('[Storage] Removing record', { key })
+
   if (isSupabasePersistenceEnabled()) {
     try {
       await removeSupabaseJsonRecord(key)
+      console.log('[Storage] Supabase remove completed', { key })
     } catch (error) {
       console.error('Supabase persistence remove failed', key, error)
     }
   }
 
   await removeDexieJsonRecord(key)
+  console.log('[Storage] IndexedDB remove completed', { key })
 }
 
 export async function listJsonRecords() {

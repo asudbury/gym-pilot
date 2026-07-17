@@ -69,6 +69,7 @@ export function AuthProvider({ children }: AuthProviderProps) {
     let isActive = true
 
     async function loadSession() {
+      console.log('[Auth] Hydrating session from persistence')
       const storedUser = await readStoredSession()
       const dummyUser = getDummyAuthUser()
       const resolvedUser = storedUser ?? dummyUser
@@ -76,6 +77,8 @@ export function AuthProvider({ children }: AuthProviderProps) {
       if (!isActive) {
         return
       }
+
+      console.log('[Auth] Resolved auth state', { storedUserPresent: Boolean(storedUser), dummyUserPresent: Boolean(dummyUser), resolvedUser })
 
       if (resolvedUser) {
         window.sessionStorage.setItem(CURRENT_USER_ID_STORAGE_KEY, resolvedUser.id)
@@ -111,6 +114,7 @@ export function AuthProvider({ children }: AuthProviderProps) {
       return
     }
 
+    console.log('[Auth] Persisting session state', { user })
     void saveJsonRecord(SESSION_STORAGE_KEY, user)
   }, [user])
 
@@ -119,6 +123,7 @@ export function AuthProvider({ children }: AuthProviderProps) {
       return
     }
 
+    console.log('[Auth] Persisting bypass state', { isBypassEnabled })
     void saveJsonRecord(BYPASS_STORAGE_KEY, isBypassEnabled)
   }, [isBypassEnabled])
 
@@ -127,6 +132,7 @@ export function AuthProvider({ children }: AuthProviderProps) {
   }
 
   const login = (userId: string) => {
+    console.log('[Auth] Login requested', { userId })
     const selectedUser = users.find((item) => item.id === userId)
 
     if (!selectedUser) {
@@ -135,6 +141,7 @@ export function AuthProvider({ children }: AuthProviderProps) {
 
     window.sessionStorage.setItem(CURRENT_USER_ID_STORAGE_KEY, selectedUser.id)
     notifyAuthStateChanged()
+    console.log('[Auth] Login succeeded', { selectedUser })
 
     setUser({
       id: selectedUser.id,
@@ -147,6 +154,7 @@ export function AuthProvider({ children }: AuthProviderProps) {
   }
 
   const enableBypass = () => {
+    console.log('[Auth] Bypass enabled')
     window.sessionStorage.setItem(CURRENT_USER_ID_STORAGE_KEY, 'mvp-bypass')
     notifyAuthStateChanged()
     setIsBypassEnabled(true)
@@ -160,6 +168,7 @@ export function AuthProvider({ children }: AuthProviderProps) {
   }
 
   const disableBypass = () => {
+    console.log('[Auth] Bypass disabled')
     window.sessionStorage.removeItem(CURRENT_USER_ID_STORAGE_KEY)
     notifyAuthStateChanged()
     setIsBypassEnabled(false)
@@ -167,6 +176,7 @@ export function AuthProvider({ children }: AuthProviderProps) {
   }
 
   const logout = () => {
+    console.log('[Auth] Logout requested')
     window.sessionStorage.removeItem(CURRENT_USER_ID_STORAGE_KEY)
     notifyAuthStateChanged()
     setUser(null)

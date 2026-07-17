@@ -14,12 +14,8 @@ export function AssignmentsPage() {
     <PageLayout>
       {assignments.length === 0 ? (
         <PageCardLayout
-          title={
-            <div>
-              <h1 className="text-2xl font-semibold text-slate-900">Assignments</h1>
-              <p className="mt-1 text-sm text-slate-600">Create an assignment to track exercises and add notes for each one.</p>
-            </div>
-          }
+          title="Assignments"
+          subtitle="Assignments Dashboard"
         >
           <CallToAction
             title="Manage assignments"
@@ -33,17 +29,9 @@ export function AssignmentsPage() {
         </PageCardLayout>
       ) : (
         <PageCardLayout
-          title={
-            <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
-              <div>
-                <h1 className="text-2xl font-semibold text-slate-900">Assignments</h1>
-                <p className="mt-1 text-sm text-slate-600">Each assignment is its own editable copy for an individual user.</p>
-              </div>
-              <Link to="/assignments/new" className={getToneClass('blue', 'inline-flex items-center rounded-lg px-4 py-2 text-sm font-medium')}>
-                Create assignment
-              </Link>
-            </div>
-          }
+          title='Assignments'
+          subtitle='Assignments Dashboard'
+          description='Each assignment is its own editable copy for an individual user.'
         >
           <div className="grid gap-4 md:grid-cols-2">
             {assignments.map((assignment) => (

@@ -1,18 +1,13 @@
 import { PageLayout } from '../../layouts/PageLayout'
 import { PageCardLayout } from '../../layouts/PageCardLayout'
-import { Heading1, Paragraph } from '../../components/Typography'
 import { helpSections } from '../../utils/helpUtils'
 
 export function HelpPage() {
   return (
     <PageLayout>
       <PageCardLayout
-        title={
-          <div>
-            <Paragraph>Support</Paragraph>
-            <Heading1 className="mt-2">How to use GymPilot</Heading1>
-          </div>
-        }
+        title="Help"
+        subtitle="How to use GymPilot"
       >
         <div className="flex flex-col gap-4">
           {helpSections.map((section) => (

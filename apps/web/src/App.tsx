@@ -1,7 +1,7 @@
 import { useEffect, useRef, useState } from 'react'
 import { Navigate, Route, Routes, useLocation, useNavigate } from 'react-router-dom'
 import webPackageJson from '../package.json'
-import { exercises, exercisesSchema, loadJsonRecord, saveJsonRecord, usePlan } from '@gym-pilot/shared'
+import { exercises, exercisesSchema, getSupabaseClient, loadJsonRecord, saveJsonRecord, usePlan } from '@gym-pilot/shared'
 import { getToneClass } from './components/toneClasses'
 import { HOME_FILTER_KEY, FAVORITES_KEY } from './constants/storageKeys'
 import { ExercisePage } from './pages/ExercisePage'
@@ -64,10 +64,10 @@ function ScrollToTop() {
 }
 
 function App() {
-  const { pathname } = useLocation()
+  const { pathname, search } = useLocation()
   const navigate = useNavigate()
   const { plans, assignments } = usePlan()
-  const SHOW_AUTH_BUTTON = false
+  const SHOW_AUTH_BUTTON = true
   const { user, logout } = useAuth()
   const appVersion = webPackageJson.version || '0.0.0'
   const [favorites, setFavorites] = useState<QuickLink[]>([])
@@ -144,6 +144,26 @@ useEffect(() => {
   useEffect(() => {
     window.sessionStorage.setItem(HOME_FILTER_KEY, JSON.stringify(normalizeHomeFilters(homeFilters)))
   }, [homeFilters])
+
+  useEffect(() => {
+    const client = getSupabaseClient()
+
+    if (!client || pathname !== '/auth/callback') {
+      return
+    }
+
+    console.log('[App] Handling Supabase auth callback', { pathname, search })
+
+    void client.auth.exchangeCodeForSession(window.location.href).then(({ error }) => {
+      if (error) {
+        console.error('Supabase auth callback failed', error)
+        return
+      }
+
+      console.log('[App] Supabase auth callback succeeded; redirecting home')
+      window.location.replace('/')
+    })
+  }, [pathname, search])
 
   useEffect(() => {
     setMobileMenuOpen(false)
@@ -231,6 +251,7 @@ useEffect(() => {
 
       <Routes>
         <Route path="/login" element={<LoginPage />} />
+        <Route path="/auth/callback" element={<LoginPage />} />
         <Route path="/" element={<HomePage filters={homeFilters} onFiltersChange={setHomeFilters} onToggleFavoriteExercise={handleToggleFavoriteExercise} isExerciseFavorite={isExerciseFavorite} />} />
         <Route path="/exercise/:slug" element={<ExercisePage onToggleFavoriteExercise={handleToggleFavoriteExercise} isExerciseFavorite={isExerciseFavorite} />} />
         <Route element={<RequireAuth />}>

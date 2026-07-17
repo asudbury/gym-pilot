@@ -8,7 +8,7 @@ type CallToActionProps = {
   className?: string
 }
 
-export function CallToAction({ title, description, action, className = '' }: CallToActionProps) {
+export function CallToAction({ title, description, action, className = ''}: CallToActionProps) {
   return (
     <PageCard padding="centered" className={className}>
       {title ? <p className="text-lg font-semibold text-slate-900">{title}</p> : null}

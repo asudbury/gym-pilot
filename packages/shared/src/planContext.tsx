@@ -255,6 +255,7 @@ export function PlanProvider({ children, storageKey = PLANS_KEY }: PlanProviderP
     }
 
     const scopedStorageKey = getScopedStorageKey(storageKey, currentUserId)
+    console.log('[PlanContext] Saving plans', { scopedStorageKey, count: plans.length })
 
     void persistence.save(scopedStorageKey, plans)
   }, [plans, plansHydrated, storageKey, currentUserId])
@@ -264,6 +265,7 @@ export function PlanProvider({ children, storageKey = PLANS_KEY }: PlanProviderP
       return
     }
 
+    console.log('[PlanContext] Saving assignments', { count: assignments.length })
     void persistence.save('gym-pilot-assignments', assignments)
   }, [assignments, assignmentsHydrated])
 
@@ -272,6 +274,7 @@ export function PlanProvider({ children, storageKey = PLANS_KEY }: PlanProviderP
       return
     }
 
+    console.log('[PlanContext] Saving users', { count: users.length })
     void persistence.save('gym-pilot-users', users)
   }, [users, usersHydrated])
 
