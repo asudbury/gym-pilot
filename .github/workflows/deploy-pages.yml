@@ -17,6 +17,7 @@ concurrency:
 jobs:
   build:
     runs-on: ubuntu-latest
+    environment: dev
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -29,6 +30,17 @@ jobs:
 
       - name: Install dependencies
         run: npm install
+
+      - name: Create web env file from GitHub Environment variables
+        run: |
+          mkdir -p apps/web
+          cat > apps/web/.env <<'EOF'
+          VITE_SUPABASE_URL=${{ vars.VITE_SUPABASE_URL }}
+          VITE_SUPABASE_ANON_KEY=${{ vars.VITE_SUPABASE_ANON_KEY }}
+          VITE_AUTH_PROTECTION_ENABLED=${{ vars.VITE_AUTH_PROTECTION_ENABLED || 'true' }}
+          VITE_FEATURE_SUPABASE_PERSISTENCE_ENABLED=${{ vars.VITE_FEATURE_SUPABASE_PERSISTENCE_ENABLED || 'true' }}
+          VITE_MIN_SEARCH_CHARS=${{ vars.VITE_MIN_SEARCH_CHARS || '3' }}
+          EOF
 
       - name: Build web app
         run: npm run build:web

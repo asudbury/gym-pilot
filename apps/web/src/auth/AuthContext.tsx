@@ -112,7 +112,7 @@ export function AuthProvider({ children }: AuthProviderProps) {
         return
       }
 
-      console.log('[Auth] Resolved auth state', { storedUserPresent: Boolean(storedUser), dummyUserPresent: Boolean(dummyUser), resolvedUser })
+      console.log('[Auth] Resolved auth state', { storedUserPresent: Boolean(storedUser), resolvedUser })
 
       if (resolvedUser) {
         window.sessionStorage.setItem(CURRENT_USER_ID_STORAGE_KEY, resolvedUser.id)
