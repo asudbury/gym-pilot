@@ -5,14 +5,37 @@ import { PageCard } from '../components/PageCard'
 import { Heading1 } from '../components/Typography'
 import { appTokens } from '../constants/tokens'
 
+const REMEMBERED_EMAIL_STORAGE_KEY = 'gym-pilot-remembered-email'
+
 export function LoginPage() {
   const navigate = useNavigate()
   const location = useLocation()
-  const [email, setEmail] = useState('')
+  const [email, setEmail] = useState(() => {
+    if (typeof window === 'undefined') {
+      return ''
+    }
+
+    return window.localStorage.getItem(REMEMBERED_EMAIL_STORAGE_KEY) ?? ''
+  })
   const [password, setPassword] = useState('')
   const [authMessage, setAuthMessage] = useState('')
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [isResetting, setIsResetting] = useState(false)
+
+  const rememberEmail = (value: string) => {
+    if (typeof window === 'undefined') {
+      return
+    }
+
+    const trimmedValue = value.trim()
+
+    if (trimmedValue) {
+      window.localStorage.setItem(REMEMBERED_EMAIL_STORAGE_KEY, trimmedValue)
+      return
+    }
+
+    window.localStorage.removeItem(REMEMBERED_EMAIL_STORAGE_KEY)
+  }
 
   const from = useMemo(() => {
     const state = location.state as { from?: { pathname?: string } } | null
@@ -33,6 +56,8 @@ export function LoginPage() {
       setAuthMessage(`Sign-in failed: ${response.error.message}`)
       return
     }
+
+    rememberEmail(email)
 
     const requiresPasswordChange = await loadSupabaseProfileFlag('must_change_password')
 
@@ -80,19 +105,21 @@ export function LoginPage() {
           </p>
         </div>
 
-        <form onSubmit={handlePasswordSignIn} className="mt-8 flex flex-col gap-4">
+        <form onSubmit={handlePasswordSignIn} className="mt-8 flex flex-col gap-4" autoComplete="on">
           <label className="flex flex-col gap-2 text-sm font-medium text-slate-700">
             <span>Email address</span>
             <input
               id="email"
-              name="email"
+              name="username"
               type="email"
               value={email}
               onChange={(event) => setEmail(event.target.value)}
-              autoComplete="email"
+              autoComplete="username"
               inputMode="email"
               autoCapitalize="none"
+              autoCorrect="off"
               spellCheck={false}
+              enterKeyHint="next"
               required
               className={`${appTokens.input} w-full`}
               placeholder="you@example.com"
@@ -108,6 +135,7 @@ export function LoginPage() {
               value={password}
               onChange={(event) => setPassword(event.target.value)}
               autoComplete="current-password"
+              enterKeyHint="done"
               required
               className={`${appTokens.input} w-full`}
               placeholder="Enter your password"
