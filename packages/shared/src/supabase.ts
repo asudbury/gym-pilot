@@ -225,7 +225,7 @@ export async function loadSupabaseJsonRecord<T>(key: string): Promise<SupabaseRe
 
   if (isFavoritesKey(key)) {
     const { data: folderRows, error: folderError } = await client
-      .from('gym_pilot_favorite_folders')
+      .from('gym_pilot_favourite_folders')
       .select('id,name')
       .eq('user_id', userId)
 
@@ -237,7 +237,7 @@ export async function loadSupabaseJsonRecord<T>(key: string): Promise<SupabaseRe
     const folderLookup = new Map((folderRows ?? []).map((row) => [row.id, row.name]))
 
     const { data, error } = await client
-      .from('gym_pilot_favorites')
+      .from('gym_pilot_favourites')
       .select('path,label,folder,folder_id')
       .eq('user_id', userId)
 
@@ -307,20 +307,20 @@ export async function saveSupabaseJsonRecord<T>(key: string, value: T) {
 
     const folderNames = Array.from(new Set(favorites.map((favorite) => normalizeFolderName(favorite.folder)).filter(Boolean)))
 
-    const { error: deleteFavoritesError } = await client.from('gym_pilot_favorites').delete().eq('user_id', userId)
+    const { error: deleteFavoritesError } = await client.from('gym_pilot_favourites').delete().eq('user_id', userId)
 
     if (deleteFavoritesError) {
       throw deleteFavoritesError
     }
 
-    const { error: deleteFoldersError } = await client.from('gym_pilot_favorite_folders').delete().eq('user_id', userId)
+    const { error: deleteFoldersError } = await client.from('gym_pilot_favourite_folders').delete().eq('user_id', userId)
 
     if (deleteFoldersError) {
       throw deleteFoldersError
     }
 
     const folderRows = folderNames.length > 0
-      ? await client.from('gym_pilot_favorite_folders').upsert(
+      ? await client.from('gym_pilot_favourite_folders').upsert(
         folderNames.map((name) => ({ user_id: userId, name })),
         { onConflict: 'user_id,name' },
       ).select('id,name')
@@ -333,7 +333,7 @@ export async function saveSupabaseJsonRecord<T>(key: string, value: T) {
     const folderLookup = new Map((folderRows.data ?? []).map((row) => [row.name, row.id]))
 
     if (favorites.length > 0) {
-      const { error: insertError } = await client.from('gym_pilot_favorites').insert(
+      const { error: insertError } = await client.from('gym_pilot_favourites').insert(
         favorites.map((favorite) => {
           const normalizedFolder = normalizeFolderName(favorite.folder)
 
@@ -382,13 +382,13 @@ export async function removeSupabaseJsonRecord(key: string) {
   }
 
   if (isFavoritesKey(key)) {
-    const { error: favoritesError } = await client.from('gym_pilot_favorites').delete().eq('user_id', userId)
+    const { error: favoritesError } = await client.from('gym_pilot_favourites').delete().eq('user_id', userId)
 
     if (favoritesError) {
       throw favoritesError
     }
 
-    const { error: foldersError } = await client.from('gym_pilot_favorite_folders').delete().eq('user_id', userId)
+    const { error: foldersError } = await client.from('gym_pilot_favourite_folders').delete().eq('user_id', userId)
 
     if (foldersError) {
       throw foldersError

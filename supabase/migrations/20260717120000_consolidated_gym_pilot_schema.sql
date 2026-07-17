@@ -73,7 +73,7 @@ begin
 end
 $$;
 
-create table if not exists public.gym_pilot_favorite_folders (
+create table if not exists public.gym_pilot_favourite_folders (
   id uuid primary key default gen_random_uuid(),
   user_id uuid references auth.users(id) on delete cascade not null,
   name text not null,
@@ -83,10 +83,10 @@ create table if not exists public.gym_pilot_favorite_folders (
   unique(user_id, name)
 );
 
-create index if not exists gym_pilot_favorite_folders_user_id_idx
-on public.gym_pilot_favorite_folders (user_id);
+create index if not exists gym_pilot_favourite_folders_user_id_idx
+on public.gym_pilot_favourite_folders (user_id);
 
-alter table public.gym_pilot_favorite_folders enable row level security;
+alter table public.gym_pilot_favourite_folders enable row level security;
 
 do $$
 begin
@@ -94,11 +94,11 @@ begin
     select 1
     from pg_policies
     where schemaname = 'public'
-      and tablename = 'gym_pilot_favorite_folders'
-      and policyname = 'Users can manage their own favorite folders'
+      and tablename = 'gym_pilot_favourite_folders'
+      and policyname = 'Users can manage their own favourite folders'
   ) then
-    create policy "Users can manage their own favorite folders"
-    on public.gym_pilot_favorite_folders
+    create policy "Users can manage their own favourite folders"
+    on public.gym_pilot_favourite_folders
     for all
     using (auth.uid() = user_id)
     with check (auth.uid() = user_id);
@@ -106,23 +106,23 @@ begin
 end
 $$;
 
-create table if not exists public.gym_pilot_favorites (
+create table if not exists public.gym_pilot_favourites (
   id uuid primary key default gen_random_uuid(),
   user_id uuid references auth.users(id) on delete cascade not null,
   path text not null,
   label text not null,
   folder text,
-  folder_id uuid references public.gym_pilot_favorite_folders(id) on delete set null,
+  folder_id uuid references public.gym_pilot_favourite_folders(id) on delete set null,
   created_at timestamptz not null default now(),
   updated_at timestamptz not null default now(),
 
   unique(user_id, path)
 );
 
-create index if not exists gym_pilot_favorites_user_id_idx
-on public.gym_pilot_favorites (user_id);
+create index if not exists gym_pilot_favourites_user_id_idx
+on public.gym_pilot_favourites (user_id);
 
-alter table public.gym_pilot_favorites enable row level security;
+alter table public.gym_pilot_favourites enable row level security;
 
 do $$
 begin
@@ -130,11 +130,11 @@ begin
     select 1
     from pg_policies
     where schemaname = 'public'
-      and tablename = 'gym_pilot_favorites'
-      and policyname = 'Users can manage their own favorites'
+      and tablename = 'gym_pilot_favourites'
+      and policyname = 'Users can manage their own favourites'
   ) then
-    create policy "Users can manage their own favorites"
-    on public.gym_pilot_favorites
+    create policy "Users can manage their own favourites"
+    on public.gym_pilot_favourites
     for all
     using (auth.uid() = user_id)
     with check (auth.uid() = user_id);
