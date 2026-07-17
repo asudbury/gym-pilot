@@ -16,6 +16,17 @@ export interface IPersistenceStore {
   save<T>(key: string, value: T): Promise<void>
 }
 
+const LOCAL_ONLY_KEYS = new Set(['gym-pilot-auth-session', 'gym-pilot-auth-bypass', 'gym-pilot-users'])
+
+function shouldUseSupabaseForKey(key: string) {
+  if (LOCAL_ONLY_KEYS.has(key)) {
+    console.log('[Storage] Skipping Supabase sync for local-only key', { key })
+    return false
+  }
+
+  return true
+}
+
 export class DexiePersistence implements IPersistenceStore {
   async load<T>(key: string, fallback: T): Promise<T> {
     return loadJsonRecord<T>(key, fallback)
@@ -33,7 +44,7 @@ export async function loadJsonRecord<T>(key: string, fallback: T): Promise<T> {
     const localValue = await loadDexieJsonRecord<T>(key, fallback)
     console.log('[Storage] Local IndexedDB value loaded', { key, localValue })
 
-    if (isSupabasePersistenceEnabled()) {
+    if (isSupabasePersistenceEnabled() && shouldUseSupabaseForKey(key)) {
       try {
         const remote = await loadSupabaseJsonRecord<T>(key)
         console.log('[Storage] Supabase remote value loaded', { key, remote })
@@ -50,7 +61,7 @@ export async function loadJsonRecord<T>(key: string, fallback: T): Promise<T> {
   } catch (error) {
     console.error('IndexedDB persistence load failed', key, error)
 
-    if (isSupabasePersistenceEnabled()) {
+    if (isSupabasePersistenceEnabled() && shouldUseSupabaseForKey(key)) {
       try {
         const remote = await loadSupabaseJsonRecord<T>(key)
 
@@ -71,7 +82,7 @@ export async function saveJsonRecord<T>(key: string, value: T): Promise<void> {
   await saveDexieJsonRecord(key, value)
   console.log('[Storage] IndexedDB save completed', { key })
 
-  if (isSupabasePersistenceEnabled()) {
+  if (isSupabasePersistenceEnabled() && shouldUseSupabaseForKey(key)) {
     try {
       await saveSupabaseJsonRecord(key, value)
       console.log('[Storage] Supabase save completed', { key })
@@ -84,7 +95,7 @@ export async function saveJsonRecord<T>(key: string, value: T): Promise<void> {
 export async function removeJsonRecord(key: string): Promise<void> {
   console.log('[Storage] Removing record', { key })
 
-  if (isSupabasePersistenceEnabled()) {
+  if (isSupabasePersistenceEnabled() && shouldUseSupabaseForKey(key)) {
     try {
       await removeSupabaseJsonRecord(key)
       console.log('[Storage] Supabase remove completed', { key })

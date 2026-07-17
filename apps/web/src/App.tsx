@@ -23,6 +23,7 @@ import { AdminUsersPage } from './pages/admin/AdminUsersPage'
 import { AdminDatabasePage } from './pages/admin/AdminDatabasePage'
 import { AdminPreferencesPage } from './pages/admin/AdminPreferencesPage'
 import { HelpPage } from './pages/help/HelpPage'
+import { FavouritesPage } from './pages/FavouritesPage'
 import { buildNavigationMenuItems } from './utils/navigationUtils'
 import { AssignmentDetailPage } from './pages/assignments/AssignmentDetailPage'
 import { logger } from './utils/loggingUtils'
@@ -37,6 +38,39 @@ type QuickLink = {
   id: string
   label: string
   path: string
+  folder?: string
+}
+
+type FavoritesStorageValue = {
+  favorites: QuickLink[]
+  folders: string[]
+}
+
+function normalizeFavoriteStorageValue(value: unknown): FavoritesStorageValue {
+  if (Array.isArray(value)) {
+    return {
+      favorites: value.filter((item): item is QuickLink => Boolean(item && typeof item === 'object' && typeof (item as QuickLink).path === 'string' && typeof (item as QuickLink).label === 'string')),
+      folders: [],
+    }
+  }
+
+  if (value && typeof value === 'object') {
+    const candidate = value as Partial<FavoritesStorageValue>
+    const folders = Array.isArray(candidate.folders)
+      ? candidate.folders.filter((folder): folder is string => typeof folder === 'string' && folder.trim().length > 0)
+      : []
+
+    const favorites = Array.isArray(candidate.favorites)
+      ? candidate.favorites.filter((item): item is QuickLink => Boolean(item && typeof item === 'object' && typeof (item as QuickLink).path === 'string' && typeof (item as QuickLink).label === 'string'))
+      : []
+
+    return {
+      favorites,
+      folders: Array.from(new Set(folders.map((folder) => folder.trim()))).sort((left, right) => left.localeCompare(right)),
+    }
+  }
+
+  return { favorites: [], folders: [] }
 }
 
 function normalizeHomeFilters(filters: Partial<HomeFilters> | null | undefined): HomeFilters {
@@ -71,6 +105,7 @@ function App() {
   const { user, logout } = useAuth()
   const appVersion = webPackageJson.version || '0.0.0'
   const [favorites, setFavorites] = useState<QuickLink[]>([])
+  const [folders, setFolders] = useState<string[]>([])
   const favoritesHydrated = useRef(false)
 
   const [homeFilters, setHomeFilters] = useState<HomeFilters>(() => {
@@ -100,25 +135,15 @@ useEffect(() => {
   let cancelled = false
 
   async function loadFavorites() {
-
-    const storedFavorites = await loadJsonRecord<QuickLink[]>(FAVORITES_KEY, [])
+    const storedValue = await loadJsonRecord<unknown>(FAVORITES_KEY, { favorites: [], folders: [] })
+    const normalizedValue = normalizeFavoriteStorageValue(storedValue)
 
     if (cancelled) {
       return
     }
 
-    if (Array.isArray(storedFavorites)) {
-      setFavorites(
-        sortQuickLinks(
-          storedFavorites.filter(
-            (item) =>
-              typeof item?.label === 'string' &&
-              typeof item?.path === 'string'
-          )
-        )
-      )
-    }
-
+    setFavorites(sortQuickLinks(normalizedValue.favorites))
+    setFolders(normalizedValue.folders)
     favoritesHydrated.current = true
   }
 
@@ -136,10 +161,10 @@ useEffect(() => {
     return
   }
 
-  console.log('Saving favorites', favorites)
+  console.log('Saving favorites', { favorites, folders })
 
-  void saveJsonRecord(FAVORITES_KEY, favorites)
-}, [favorites])
+  void saveJsonRecord(FAVORITES_KEY, { favorites, folders })
+}, [favorites, folders])
 
   useEffect(() => {
     window.sessionStorage.setItem(HOME_FILTER_KEY, JSON.stringify(normalizeHomeFilters(homeFilters)))
@@ -161,6 +186,7 @@ useEffect(() => {
       }
 
       console.log('[App] Supabase auth callback succeeded; redirecting home')
+      window.dispatchEvent(new Event('gym-pilot-auth-updated'))
       window.location.replace('/')
     })
   }, [pathname, search])
@@ -224,7 +250,7 @@ useEffect(() => {
   })
 
   return (
-    <div className="min-h-screen bg-slate-50">
+    <div className="min-h-screen bg-slate-50 text-slate-900 transition-colors dark:bg-slate-950 dark:text-slate-100">
       <ScrollToTop />
       <Header
         appVersion={appVersion}
@@ -235,6 +261,8 @@ useEffect(() => {
         mobileMenuItems={mobileMenuItems}
         showAuthButton={SHOW_AUTH_BUTTON}
         user={user}
+        folders={folders}
+        onFoldersChange={setFolders}
         onFavoritesChange={setFavorites}
         onHomeFiltersChange={setHomeFilters}
         onAuthClick={() => {
@@ -269,6 +297,7 @@ useEffect(() => {
           <Route path="/plans/:planSlug/edit" element={<CreatePlanPage />} />
           <Route path="/plans/:planSlug" element={<PlanDetailPage />} />
           <Route path="/help" element={<HelpPage />} />
+          <Route path="/favourites" element={<FavouritesPage favorites={favorites} folders={folders} onFoldersChange={setFolders} onFavoritesChange={setFavorites} />} />
           <Route path="/assignments/new" element={<AssignmentsManagerPage />} />
           <Route path="/assignments/create" element={<Navigate to="/assignments/new" replace />} />
           <Route path="/users/:userSlug/assignments/new" element={<AssignmentsManagerPage />} />

@@ -207,7 +207,7 @@ export function HomePage({ filters, onFiltersChange, onToggleFavoriteExercise, i
           />
         </div>
 
-        <div className="mt-4 flex flex-col gap-2">
+        <div className="mt-4 flex flex-col items-start gap-2">
           <div className="sm:hidden">
             <select
               value={selectedCategory ?? ''}
@@ -255,7 +255,7 @@ export function HomePage({ filters, onFiltersChange, onToggleFavoriteExercise, i
               setShowExerciseImages(nextShowExerciseImages)
               onFiltersChange({ ...filters, searchTerm: draftSearchTerm, selectedCategory, showImages: nextShowExerciseImages })
             }}
-            className={showExerciseImages ? getToneClass('default', 'px-4 py-2 text-sm font-medium transition hover:bg-slate-200') : getToneClass('blue', 'px-4 py-2 text-sm font-medium transition')}
+            className={showExerciseImages ? getToneClass('default', 'w-fit px-4 py-2 text-sm font-medium transition hover:bg-slate-200') : getToneClass('blue', 'w-fit px-4 py-2 text-sm font-medium transition')}
           >
             {showExerciseImages ? 'Hide images' : 'Show images'}
           </button>
@@ -318,15 +318,15 @@ export function HomePage({ filters, onFiltersChange, onToggleFavoriteExercise, i
                           return (
                             <div
                               key={exercise.id}
-                              className="flex h-full min-h-75 cursor-pointer gap-3 rounded-2xl border border-slate-200/70 bg-white/80 p-4 shadow-sm transition hover:-translate-y-0.5 hover:border-slate-300 hover:shadow-md"
+                              className="flex h-full min-h-75 cursor-pointer gap-3 rounded-2xl border border-slate-200/70 bg-white/80 p-4 shadow-sm transition hover:-translate-y-0.5 hover:border-slate-300 hover:shadow-md dark:border-slate-700 dark:bg-slate-900/90 dark:hover:border-slate-600"
                             >
                               <Link to={getExercisePath(exercise)} className="flex min-w-0 flex-1 flex-col gap-3">
                                 <div className="min-w-0 flex-1">
                                   <div className="flex items-center gap-2">
-                                    <span className="inline-flex h-8 min-w-8 items-center justify-center rounded-full bg-slate-100 px-3 py-1.5 text-sm font-semibold leading-none text-slate-700">
+                                    <span className="inline-flex h-8 min-w-8 items-center justify-center rounded-full bg-slate-100 px-3 py-1.5 text-sm font-semibold leading-none text-slate-700 dark:bg-slate-800 dark:text-slate-100">
                                       {position}
                                     </span>
-                                    <h3 className="text-base font-semibold leading-tight text-slate-900">{formatLabel(exercise.name)}</h3>
+                                    <h3 className="text-base font-semibold leading-tight text-slate-900 dark:text-slate-100">{formatLabel(exercise.name)}</h3>
                                   </div>
                                   <ExerciseMetaBadges
                                     values={[formatLabel(exercise.category), formatLabel(exercise.equipment)]}
@@ -353,15 +353,15 @@ export function HomePage({ filters, onFiltersChange, onToggleFavoriteExercise, i
                         return (
                           <div
                             key={exercise.id}
-                            className="flex h-full min-h-35 cursor-pointer gap-2 rounded-2xl border border-slate-200/70 bg-white/80 p-2 shadow-sm transition hover:-translate-y-0.5 hover:border-slate-300 hover:shadow-md"
+                            className="flex h-full min-h-35 cursor-pointer gap-2 rounded-2xl border border-slate-200/70 bg-white/80 p-2 shadow-sm transition hover:-translate-y-0.5 hover:border-slate-300 hover:shadow-md dark:border-slate-700 dark:bg-slate-900/90 dark:hover:border-slate-600"
                           >
                             <Link to={getExercisePath(exercise)} className="flex min-w-0 flex-1 flex-col gap-2">
                               <div className="min-w-0 flex-1">
                                 <div className="flex items-center gap-2">
-                                  <span className="inline-flex h-8 min-w-8 items-center justify-center rounded-full bg-slate-100 px-3 py-1.5 text-sm font-semibold leading-none text-slate-700">
+                                  <span className="inline-flex h-8 min-w-8 items-center justify-center rounded-full bg-slate-100 px-3 py-1.5 text-sm font-semibold leading-none text-slate-700 dark:bg-slate-800 dark:text-slate-100">
                                     {position}
                                   </span>
-                                  <h3 className="text-base font-semibold leading-tight text-slate-900">{formatLabel(exercise.name)}</h3>
+                                  <h3 className="text-base font-semibold leading-tight text-slate-900 dark:text-slate-100">{formatLabel(exercise.name)}</h3>
                                 </div>
                                 <ExerciseMetaBadges
                                   values={[formatLabel(exercise.category), formatLabel(exercise.equipment)]}

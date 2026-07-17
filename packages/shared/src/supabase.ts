@@ -8,9 +8,9 @@ let supabaseClient: SupabaseClient | null = null
 // These records are stored in the shared app_state table rather than the
 // domain-specific tables created for relational data.
 const SUPABASE_TABLE_BY_KEY: Record<string, string> = {
-  'gym-pilot-plans': 'gym_pilot_plans',
-  'gym-pilot-assignments': 'gym_pilot_assignments',
-  'gym-pilot-users': 'gym_pilot_users',
+  'gym-pilot-plans': DEFAULT_SUPABASE_TABLE,
+  'gym-pilot-assignments': DEFAULT_SUPABASE_TABLE,
+  'gym-pilot-users': DEFAULT_SUPABASE_TABLE,
 }
 
 function getSupabaseUrl() {
@@ -21,14 +21,10 @@ function getSupabaseAnonKey() {
   return import.meta.env?.VITE_SUPABASE_ANON_KEY as string | undefined
 }
 
-function isDummyAuthEnabled() {
-  return import.meta.env?.VITE_FEATURE_DUMMY_AUTH_ENABLED === 'true'
-}
 
 export function isSupabasePersistenceEnabled() {
   const enabledFlag = import.meta.env?.VITE_FEATURE_SUPABASE_PERSISTENCE_ENABLED
-
-  return enabledFlag === 'true' && !isDummyAuthEnabled() && Boolean(getSupabaseUrl()) && Boolean(getSupabaseAnonKey())
+  return enabledFlag === 'true' && Boolean(getSupabaseUrl()) && Boolean(getSupabaseAnonKey())
 }
 
 export function getSupabaseClient() {
@@ -75,32 +71,140 @@ export async function signInWithGoogle() {
   })
 }
 
+export async function signInWithPassword(email: string, password: string) {
+  console.log('[Supabase] Starting password sign-in')
+  const client = getSupabaseClient()
+
+  if (!client) {
+    console.error('[Supabase] Password sign-in skipped because client is unavailable')
+    return { error: new Error('Supabase client is not available') }
+  }
+
+  return client.auth.signInWithPassword({ email, password })
+}
+
+export async function signOutFromSupabase() {
+  console.log('[Supabase] Signing out')
+  const client = getSupabaseClient()
+
+  if (!client) {
+    return { error: null }
+  }
+
+  const { error } = await client.auth.signOut()
+
+  if (error) {
+    console.error('[Supabase] Sign-out failed', error)
+  }
+
+  return { error }
+}
+
+export async function loadSupabaseProfileName(): Promise<string | null> {
+  const client = getSupabaseClient()
+
+  if (!client) {
+    return null
+  }
+
+  const userId = await getAuthenticatedUserId(client)
+
+  if (!userId) {
+    return null
+  }
+
+  const { data, error } = await client
+    .from('gym_pilot_profiles')
+    .select('friendly_name')
+    .eq('user_id', userId)
+    .maybeSingle()
+
+  if (error) {
+    console.error('[Supabase] Could not load profile name', error)
+    return null
+  }
+
+  return data?.friendly_name?.trim() || null
+}
+
+export async function saveSupabaseProfileName(friendlyName: string | null) {
+  const client = getSupabaseClient()
+
+  if (!client) {
+    return
+  }
+
+  const userId = await getAuthenticatedUserId(client)
+
+  if (!userId) {
+    return
+  }
+
+  const normalizedName = friendlyName?.trim() ? friendlyName.trim() : null
+
+  const { error } = await client.from('gym_pilot_profiles').upsert(
+    { user_id: userId, friendly_name: normalizedName },
+    { onConflict: 'user_id' },
+  )
+
+  if (error) {
+    console.error('[Supabase] Could not save profile name', error)
+  }
+}
+
 type SupabaseRecordResponse<T> = {
   found: boolean
   value: T | null
 }
 
+type FavoriteLink = {
+  id?: string
+  label: string
+  path: string
+  folder?: string
+}
+
+function normalizeFolderName(value?: string) {
+  if (typeof value !== 'string') {
+    return ''
+  }
+
+  return value.trim()
+}
+
+function isFavoritesKey(key: string) {
+  return key === 'gym-pilot.favorites'
+}
+
 function getSupabaseTableName(key: string) {
+  if (isFavoritesKey(key)) {
+    return 'gym_pilot_favorites'
+  }
+
   return SUPABASE_TABLE_BY_KEY[key] ?? DEFAULT_SUPABASE_TABLE
 }
 
 async function getAuthenticatedUserId(client: SupabaseClient): Promise<string | null> {
-  if (isDummyAuthEnabled()) {
-    console.log('[Supabase] Dummy auth enabled; skipping authenticated user lookup')
-    return null
-  }
 
   try {
-    const { data: { user }, error } = await client.auth.getUser()
+    const { data: { session }, error } = await client.auth.getSession()
 
     if (error) {
-      console.warn('[Supabase] Could not resolve authenticated user', error)
+      console.warn('[Supabase] Could not resolve authenticated session', error)
       return null
     }
 
-    console.log('[Supabase] Resolved authenticated user', { userId: user?.id ?? null })
-    return user?.id ?? null
-  } catch {
+    const userId = session?.user?.id ?? null
+
+    if (!userId) {
+      console.log('[Supabase] No active session yet; skipping remote persistence work')
+      return null
+    }
+
+    console.log('[Supabase] Resolved authenticated user', { userId })
+    return userId
+  } catch (error) {
+    console.warn('[Supabase] Session lookup failed', error)
     return null
   }
 }
@@ -117,6 +221,45 @@ export async function loadSupabaseJsonRecord<T>(key: string): Promise<SupabaseRe
 
   if (!userId) {
     return { found: false, value: null }
+  }
+
+  if (isFavoritesKey(key)) {
+    const { data: folderRows, error: folderError } = await client
+      .from('gym_pilot_favorite_folders')
+      .select('id,name')
+      .eq('user_id', userId)
+
+    if (folderError) {
+      console.error('[Supabase] Remote favorite folders load failed', { key, error: folderError })
+      throw folderError
+    }
+
+    const folderLookup = new Map((folderRows ?? []).map((row) => [row.id, row.name]))
+
+    const { data, error } = await client
+      .from('gym_pilot_favorites')
+      .select('path,label,folder,folder_id')
+      .eq('user_id', userId)
+
+    if (error) {
+      console.error('[Supabase] Remote favorites load failed', { key, error })
+      throw error
+    }
+
+    const favorites = (data ?? []).map((row) => {
+      const folderName = row.folder_id ? folderLookup.get(row.folder_id) : undefined
+      const fallbackFolder = normalizeFolderName(row.folder)
+
+      return {
+        id: row.path,
+        label: row.label,
+        path: row.path,
+        folder: folderName ?? (fallbackFolder || undefined),
+      }
+    })
+
+    console.log('[Supabase] Remote favorites loaded', { key, favorites })
+    return { found: true, value: favorites as T }
   }
 
   const { data, error } = await client
@@ -157,6 +300,61 @@ export async function saveSupabaseJsonRecord<T>(key: string, value: T) {
     return
   }
 
+  if (isFavoritesKey(key)) {
+    const favorites = Array.isArray(value)
+      ? (value as FavoriteLink[]).filter((item): item is FavoriteLink => Boolean(item && typeof item === 'object' && typeof item.path === 'string' && typeof item.label === 'string'))
+      : []
+
+    const folderNames = Array.from(new Set(favorites.map((favorite) => normalizeFolderName(favorite.folder)).filter(Boolean)))
+
+    const { error: deleteFavoritesError } = await client.from('gym_pilot_favorites').delete().eq('user_id', userId)
+
+    if (deleteFavoritesError) {
+      throw deleteFavoritesError
+    }
+
+    const { error: deleteFoldersError } = await client.from('gym_pilot_favorite_folders').delete().eq('user_id', userId)
+
+    if (deleteFoldersError) {
+      throw deleteFoldersError
+    }
+
+    const folderRows = folderNames.length > 0
+      ? await client.from('gym_pilot_favorite_folders').upsert(
+        folderNames.map((name) => ({ user_id: userId, name })),
+        { onConflict: 'user_id,name' },
+      ).select('id,name')
+      : { data: [] as Array<{ id: string; name: string }>, error: null }
+
+    if (folderRows.error) {
+      throw folderRows.error
+    }
+
+    const folderLookup = new Map((folderRows.data ?? []).map((row) => [row.name, row.id]))
+
+    if (favorites.length > 0) {
+      const { error: insertError } = await client.from('gym_pilot_favorites').insert(
+        favorites.map((favorite) => {
+          const normalizedFolder = normalizeFolderName(favorite.folder)
+
+          return {
+            user_id: userId,
+            path: favorite.path,
+            label: favorite.label,
+            folder: normalizedFolder || null,
+            folder_id: normalizedFolder ? folderLookup.get(normalizedFolder) ?? null : null,
+          }
+        }),
+      )
+
+      if (insertError) {
+        throw insertError
+      }
+    }
+
+    return
+  }
+
   const json = JSON.stringify(value)
 
   const { error } = await client.from(getSupabaseTableName(key)).upsert(
@@ -180,6 +378,22 @@ export async function removeSupabaseJsonRecord(key: string) {
   const userId = await getAuthenticatedUserId(client)
 
   if (!userId) {
+    return
+  }
+
+  if (isFavoritesKey(key)) {
+    const { error: favoritesError } = await client.from('gym_pilot_favorites').delete().eq('user_id', userId)
+
+    if (favoritesError) {
+      throw favoritesError
+    }
+
+    const { error: foldersError } = await client.from('gym_pilot_favorite_folders').delete().eq('user_id', userId)
+
+    if (foldersError) {
+      throw foldersError
+    }
+
     return
   }
 

@@ -1,27 +1,12 @@
 import { createContext, useContext, useEffect, useMemo, useRef, useState, type ReactNode } from 'react'
 import type { User, UserRole } from '@gym-pilot/types'
-import { loadJsonRecord, saveJsonRecord, usePlan } from '@gym-pilot/shared'
+import { getSupabaseClient, loadJsonRecord, loadSupabaseProfileName, saveJsonRecord, saveSupabaseProfileName, signOutFromSupabase, usePlan } from '@gym-pilot/shared'
 
 const SESSION_STORAGE_KEY = 'gym-pilot-auth-session'
 const BYPASS_STORAGE_KEY = 'gym-pilot-auth-bypass'
 const CURRENT_USER_ID_STORAGE_KEY = 'gym-pilot-current-user-id'
-
-function isDummyAuthEnabled() {
-  return import.meta.env?.VITE_FEATURE_DUMMY_AUTH_ENABLED === 'true'
-}
-
-function getDummyAuthUser(): AuthUser | null {
-  if (!isDummyAuthEnabled()) {
-    return null
-  }
-
-  return {
-    id: import.meta.env?.VITE_DUMMY_AUTH_USER_ID || 'dummy-user',
-    name: import.meta.env?.VITE_DUMMY_AUTH_USER_NAME || 'Demo User',
-    slug: import.meta.env?.VITE_DUMMY_AUTH_USER_SLUG || 'dummy-user',
-    role: (import.meta.env?.VITE_DUMMY_AUTH_USER_ROLE as UserRole | undefined) || 'client',
-  }
-}
+const LOGOUT_PENDING_STORAGE_KEY = 'gym-pilot-auth-logout-pending'
+const THEME_STORAGE_KEY = 'gym-pilot-theme-preference'
 
 type AuthUser = Pick<User, 'id' | 'name' | 'slug' | 'role'>
 
@@ -29,10 +14,13 @@ type AuthContextValue = {
   user: AuthUser | null
   isAuthenticated: boolean
   isBypassEnabled: boolean
+  themePreference: 'light' | 'dark'
   login: (userId: string) => boolean
   enableBypass: () => void
   disableBypass: () => void
   logout: () => void
+  updateProfileName: (friendlyName: string) => Promise<void>
+  setThemePreference: (theme: 'light' | 'dark') => void
   hasAccess: (requiredRole: UserRole | UserRole[]) => boolean
 }
 
@@ -56,11 +44,58 @@ async function readBypassFlag(): Promise<boolean> {
   return loadJsonRecord<boolean>(BYPASS_STORAGE_KEY, false)
 }
 
+async function resolveSupabaseAuthUser(): Promise<AuthUser | null> {
+  const client = getSupabaseClient()
+
+  if (!client) {
+    return null
+  }
+
+  try {
+    const { data: { session }, error } = await client.auth.getSession()
+
+    if (error) {
+      console.warn('[Auth] Could not read Supabase session', error)
+      return null
+    }
+
+    const supabaseUser = session?.user
+
+    if (!supabaseUser) {
+      return null
+    }
+
+    const storedProfileName = await loadSupabaseProfileName()
+    const displayName = storedProfileName || supabaseUser.user_metadata?.full_name || supabaseUser.user_metadata?.name || supabaseUser.email || 'Supabase user'
+    const slug = displayName.toLowerCase().trim().replace(/[^a-z0-9]+/g, '-') || 'supabase-user'
+
+    await saveSupabaseProfileName(displayName)
+
+    return {
+      id: supabaseUser.id,
+      name: displayName,
+      slug,
+      role: 'client',
+    }
+  } catch (error) {
+    console.warn('[Auth] Supabase session lookup failed', error)
+    return null
+  }
+}
+
 export function AuthProvider({ children }: AuthProviderProps) {
   const { users } = usePlan()
 
   const [user, setUser] = useState<AuthUser | null>(null)
   const [isBypassEnabled, setIsBypassEnabled] = useState(false)
+  const [themePreference, setThemePreferenceState] = useState<'light' | 'dark'>(() => {
+    if (typeof window === 'undefined') {
+      return 'light'
+    }
+
+    const storedTheme = window.localStorage.getItem(THEME_STORAGE_KEY)
+    return storedTheme === 'dark' ? 'dark' : 'light'
+  })
 
   const sessionHydrated = useRef(false)
   const bypassHydrated = useRef(false)
@@ -71,8 +106,7 @@ export function AuthProvider({ children }: AuthProviderProps) {
     async function loadSession() {
       console.log('[Auth] Hydrating session from persistence')
       const storedUser = await readStoredSession()
-      const dummyUser = getDummyAuthUser()
-      const resolvedUser = storedUser ?? dummyUser
+      const resolvedUser = storedUser
 
       if (!isActive) {
         return
@@ -101,11 +135,39 @@ export function AuthProvider({ children }: AuthProviderProps) {
       bypassHydrated.current = true
     }
 
+    async function syncSupabaseSession() {
+      if (window.sessionStorage.getItem(LOGOUT_PENDING_STORAGE_KEY) === 'true') {
+        console.log('[Auth] Skipping Supabase session sync while logout is pending')
+        return
+      }
+
+      const supabaseUser = await resolveSupabaseAuthUser()
+
+      if (!isActive) {
+        return
+      }
+
+      if (supabaseUser) {
+        console.log('[Auth] Synced Supabase auth state', { user: supabaseUser })
+        setUser(supabaseUser)
+        setIsBypassEnabled(false)
+        window.sessionStorage.setItem(CURRENT_USER_ID_STORAGE_KEY, supabaseUser.id)
+      }
+    }
+
+    const handleAuthStateChanged = () => {
+      void syncSupabaseSession()
+    }
+
+    window.addEventListener('gym-pilot-auth-updated', handleAuthStateChanged)
+
     void loadSession()
     void loadBypass()
+    void syncSupabaseSession()
 
     return () => {
       isActive = false
+      window.removeEventListener('gym-pilot-auth-updated', handleAuthStateChanged)
     }
   }, [])
 
@@ -126,6 +188,16 @@ export function AuthProvider({ children }: AuthProviderProps) {
     console.log('[Auth] Persisting bypass state', { isBypassEnabled })
     void saveJsonRecord(BYPASS_STORAGE_KEY, isBypassEnabled)
   }, [isBypassEnabled])
+
+  useEffect(() => {
+    if (typeof document === 'undefined') {
+      return
+    }
+
+    document.documentElement.classList.toggle('dark', themePreference === 'dark')
+    document.documentElement.style.colorScheme = themePreference
+    window.localStorage.setItem(THEME_STORAGE_KEY, themePreference)
+  }, [themePreference])
 
   const notifyAuthStateChanged = () => {
     window.dispatchEvent(new Event('gym-pilot-auth-updated'))
@@ -177,10 +249,43 @@ export function AuthProvider({ children }: AuthProviderProps) {
 
   const logout = () => {
     console.log('[Auth] Logout requested')
+    window.sessionStorage.setItem(LOGOUT_PENDING_STORAGE_KEY, 'true')
     window.sessionStorage.removeItem(CURRENT_USER_ID_STORAGE_KEY)
-    notifyAuthStateChanged()
     setUser(null)
     setIsBypassEnabled(false)
+
+    void signOutFromSupabase().finally(() => {
+      window.sessionStorage.removeItem(LOGOUT_PENDING_STORAGE_KEY)
+    })
+  }
+
+  const updateProfileName = async (friendlyName: string) => {
+    const trimmedName = friendlyName.trim()
+
+    if (!user) {
+      return
+    }
+
+    const nextName = trimmedName || user.name
+    const slug = nextName.toLowerCase().trim().replace(/[^a-z0-9]+/g, '-') || 'user'
+
+    setUser((currentUser) => {
+      if (!currentUser) {
+        return currentUser
+      }
+
+      return {
+        ...currentUser,
+        name: nextName,
+        slug,
+      }
+    })
+
+    await saveSupabaseProfileName(nextName)
+  }
+
+  const setThemePreference = (theme: 'light' | 'dark') => {
+    setThemePreferenceState(theme)
   }
 
   const hasAccess = (requiredRole: UserRole | UserRole[]) => {
@@ -208,10 +313,13 @@ export function AuthProvider({ children }: AuthProviderProps) {
       user,
       isAuthenticated: isBypassEnabled || Boolean(user),
       isBypassEnabled,
+      themePreference,
       login,
       enableBypass,
       disableBypass,
       logout,
+      updateProfileName,
+      setThemePreference,
       hasAccess,
     }),
     [user, isBypassEnabled, users],

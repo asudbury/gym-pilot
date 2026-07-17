@@ -5,7 +5,7 @@ import { usePlan } from '@gym-pilot/shared'
 import { PageCard } from '../../components/PageCard'
 import { PageLayout } from '../../layouts/PageLayout'
 import { PageCardLayout } from '../../layouts/PageCardLayout'
-import { CallToAction } from '../../components/CallToAction'
+import { CallToAction } from '../../layouts/CallToAction'
 
 export function AssignmentsPage() {
   const { assignments, deleteAssignment } = usePlan()
@@ -17,6 +17,11 @@ export function AssignmentsPage() {
           title="Assignments"
           subtitle="Assignments Dashboard"
         >
+          <div className="flex justify-end">
+            <Link to="/assignments/new" className={getToneClass('blue', 'inline-flex items-center rounded-lg px-4 py-2 text-sm font-medium')}>
+              Create assignment
+            </Link>
+          </div>
           <CallToAction
             title="Manage assignments"
             description="Create an assignment to track exercises and add notes for each one."
@@ -33,6 +38,11 @@ export function AssignmentsPage() {
           subtitle='Assignments Dashboard'
           description='Each assignment is its own editable copy for an individual user.'
         >
+          <div className="flex justify-end">
+            <Link to="/assignments/new" className={getToneClass('blue', 'inline-flex items-center rounded-lg px-4 py-2 text-sm font-medium')}>
+              Create assignment
+            </Link>
+          </div>
           <div className="grid gap-4 md:grid-cols-2">
             {assignments.map((assignment) => (
               <PageCard key={assignment.id} padding="compact">

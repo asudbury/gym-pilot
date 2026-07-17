@@ -75,7 +75,6 @@ export async function loadJsonRecord<T>(
   const record = await gymPilotDb.records.get(key)
 
   if (!record) {
-    console.warn('Missing IndexedDB record:', key)
     return fallback
   }
 

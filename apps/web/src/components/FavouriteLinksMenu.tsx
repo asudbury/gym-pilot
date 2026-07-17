@@ -8,6 +8,7 @@ type QuickLink = {
   id: string
   label: string
   path: string
+  folder?: string
 }
 
 type SavedSearch = {
@@ -25,11 +26,58 @@ type HomeFilters = {
 
 type FavouriteLinksMenuProps = {
   favorites: QuickLink[]
+  folders: string[]
   homeFilters: HomeFilters
   variant?: 'header' | 'menu'
   onFavoritesChange: (favorites: QuickLink[]) => void
+  onFoldersChange: (folders: string[]) => void
   onHomeFiltersChange: (filters: HomeFilters) => void
   onMenuOpenChange?: (open: boolean) => void
+}
+
+function sortFavorites(items: QuickLink[]) {
+  return [...items].sort((left, right) => {
+    const leftLabel = left.label.toLowerCase()
+    const rightLabel = right.label.toLowerCase()
+
+    if (leftLabel < rightLabel) {
+      return -1
+    }
+
+    if (leftLabel > rightLabel) {
+      return 1
+    }
+
+    return left.path.localeCompare(right.path)
+  })
+}
+
+function normalizeFolderName(value: string) {
+  return value.trim()
+}
+
+function groupFavoritesByFolder(items: QuickLink[]) {
+  const groups = new Map<string, QuickLink[]>()
+
+  items.forEach((item) => {
+    const folderName = normalizeFolderName(item.folder ?? '') || 'No folder'
+    const currentItems = groups.get(folderName) ?? []
+
+    currentItems.push(item)
+    groups.set(folderName, currentItems)
+  })
+
+  return Array.from(groups.entries()).sort(([leftName], [rightName]) => {
+    if (leftName === 'Unfiled') {
+      return 1
+    }
+
+    if (rightName === 'Unfiled') {
+      return -1
+    }
+
+    return leftName.localeCompare(rightName)
+  })
 }
 
 function getQuickLinkForPath(pathname: string, exerciseLookup: Map<string, { id: string; name: string }>): QuickLink | null {
@@ -68,13 +116,17 @@ function getQuickLinkForPath(pathname: string, exerciseLookup: Map<string, { id:
 
 export function FavouriteLinksMenu({
   favorites,
+  folders,
   variant = 'menu',
   onFavoritesChange,
+  onFoldersChange,
   onMenuOpenChange,
 }: FavouriteLinksMenuProps) {
   const location = useLocation()
   const navigate = useNavigate()
   const [menuOpen, setMenuOpen] = useState(false)
+  const [selectedFolder, setSelectedFolder] = useState('')
+  const [newFolderName, setNewFolderName] = useState('')
 
   useEffect(() => {
     onMenuOpenChange?.(menuOpen)
@@ -128,20 +180,87 @@ export function FavouriteLinksMenu({
 
   const currentQuickLink = useMemo(() => getQuickLinkForPath(location.pathname, exerciseLookup), [exerciseLookup, location.pathname])
   const isCurrentPageFavorite = currentQuickLink ? favorites.some((item) => item.path === currentQuickLink.path) : false
+  const favoriteGroups = useMemo(() => {
+    const groups = groupFavoritesByFolder(favorites)
+    const folderGroups = folders.map((folderName) => [folderName, [] as QuickLink[]] as const)
+    const merged = new Map<string, QuickLink[]>(groups)
 
-  const handleToggleFavoriteLink = (link: QuickLink) => {
-    const alreadySaved = favorites.some((item) => item.path === link.path)
+    folderGroups.forEach(([folderName]) => {
+      if (!merged.has(folderName)) {
+        merged.set(folderName, [])
+      }
+    })
 
-    if (alreadySaved) {
-      onFavoritesChange(favorites.filter((item) => item.path !== link.path))
+    return Array.from(merged.entries()).sort(([leftName], [rightName]) => {
+      if (leftName === 'Unfiled') {
+        return 1
+      }
+
+      if (rightName === 'Unfiled') {
+        return -1
+      }
+
+      return leftName.localeCompare(rightName)
+    })
+  }, [favorites, folders])
+
+  const folderOptions = useMemo(() => {
+    const options = new Set<string>(folders)
+
+    favorites.forEach((item) => {
+      const folderName = normalizeFolderName(item.folder ?? '')
+
+      if (folderName) {
+        options.add(folderName)
+      }
+    })
+
+    return Array.from(options).sort((left, right) => left.localeCompare(right))
+  }, [favorites, folders])
+
+  useEffect(() => {
+    if (!menuOpen || !currentQuickLink) {
       return
     }
 
-    const nextFavorites = [...favorites, link]
-      .sort((left, right) => left.label.localeCompare(right.label, undefined, { sensitivity: 'base' }))
-      .slice(0, 8)
+    const existingFavorite = favorites.find((item) => item.path === currentQuickLink.path)
+    const folderName = normalizeFolderName(existingFavorite?.folder ?? '')
+
+    setSelectedFolder(folderName)
+  }, [currentQuickLink, favorites, menuOpen])
+
+  const handleCreateFolder = () => {
+    const folderName = normalizeFolderName(newFolderName)
+
+    if (!folderName) {
+      return
+    }
+
+    onFoldersChange(Array.from(new Set([...folders, folderName])).sort((left, right) => left.localeCompare(right)))
+    setSelectedFolder(folderName)
+    setNewFolderName('')
+  }
+
+  const handleUpdateFavoriteLink = (link: QuickLink, folderName?: string) => {
+    const normalizedFolder = normalizeFolderName(folderName ?? '') || undefined
+    const alreadySaved = favorites.some((item) => item.path === link.path)
+
+    if (alreadySaved) {
+      onFavoritesChange(
+        sortFavorites(
+          favorites.map((item) => (item.path === link.path ? { ...item, folder: normalizedFolder } : item)),
+        ),
+      )
+      return
+    }
+
+    const nextFavorites = sortFavorites([...favorites, { ...link, folder: normalizedFolder }]).slice(0, 12)
 
     onFavoritesChange(nextFavorites)
+  }
+
+  const handleRemoveFavoriteLink = (link: QuickLink) => {
+    onFavoritesChange(sortFavorites(favorites.filter((item) => item.path !== link.path)))
   }
 
   const handleToggleCurrentFavorite = () => {
@@ -149,11 +268,16 @@ export function FavouriteLinksMenu({
       return
     }
 
-    handleToggleFavoriteLink(currentQuickLink)
+    handleUpdateFavoriteLink(currentQuickLink, selectedFolder)
   }
 
   const handleOpenQuickLink = (link: QuickLink) => {
     navigate(link.path)
+    setMenuOpen(false)
+  }
+
+  const handleOpenFavouritesPage = () => {
+    navigate('/favourites')
     setMenuOpen(false)
   }
 
@@ -178,42 +302,93 @@ export function FavouriteLinksMenu({
       </button>
       {menuOpen && (
         <div id="quick-links-menu" className="fixed inset-x-3 top-16 z-40 max-h-[min(75vh,32rem)] overflow-y-auto rounded-2xl border border-slate-200 bg-white p-3 shadow-xl sm:absolute sm:right-0 sm:left-auto sm:top-full sm:mt-2 sm:w-80 sm:max-w-[calc(100vw-2rem)]">
-          <div className="mb-3 flex flex-col gap-2 border-b border-slate-100 pb-3 sm:flex-row sm:items-start sm:justify-between">
-            <div className="min-w-0">
-              <p className="text-sm font-semibold text-slate-900">Favourites</p>
+          <div className="mb-3 flex flex-col gap-2 border-b border-slate-100 pb-3">
+            <div className="flex items-start justify-between gap-2">
+              <div className="min-w-0">
+                <p className="text-sm font-semibold text-slate-900">Manage favourites</p>
+                <p className="mt-1 text-xs text-slate-500">Quick links for pages you use most often.</p>
+              </div>
+              <div className="flex flex-col gap-2 sm:items-end">
+                <label className="text-[11px] font-semibold uppercase tracking-wide text-slate-500">
+                  <span className="sr-only">Folder</span>
+                  <select
+                    value={selectedFolder}
+                    onChange={(event) => setSelectedFolder(event.target.value)}
+                    className="rounded-lg border border-slate-200 bg-white px-2.5 py-1.5 text-xs text-slate-700"
+                  >
+                    <option value="">No folder</option>
+                    {folderOptions.map((folderOption) => (
+                      <option key={folderOption} value={folderOption}>
+                        {folderOption}
+                      </option>
+                    ))}
+                  </select>
+                </label>
+                <div className="flex items-center gap-1">
+                  <input
+                    value={newFolderName}
+                    onChange={(event) => setNewFolderName(event.target.value)}
+                    placeholder="New folder"
+                    className="w-24 rounded-lg border border-slate-200 bg-white px-2 py-1.5 text-xs text-slate-700 outline-none"
+                  />
+                  <button
+                    type="button"
+                    onClick={handleCreateFolder}
+                    className="rounded-lg border border-slate-200 bg-white px-2 py-1.5 text-[11px] font-medium text-slate-700"
+                  >
+                    Add
+                  </button>
+                </div>
+                <button
+                  type="button"
+                  onClick={handleToggleCurrentFavorite}
+                  className={getToneClass('default', 'cursor-pointer px-3 py-1.5 text-xs font-medium')}
+                >
+                  {isCurrentPageFavorite ? 'Update' : 'Add current'}
+                </button>
+              </div>
             </div>
             <button
               type="button"
-              onClick={handleToggleCurrentFavorite}
-              className={getToneClass('default', 'cursor-pointer px-3 py-1.5 text-xs font-medium')}
+              onClick={handleOpenFavouritesPage}
+              className="w-fit text-left text-xs font-medium text-blue-700 transition hover:text-blue-800"
             >
-              {isCurrentPageFavorite ? 'Added' : 'Add'}
+              Open favourites page
             </button>
           </div>
 
           {favorites.length > 0 ? (
-            <div className="flex flex-col gap-2">
-              {favorites.map((item) => (
-                <div key={item.id} className="flex flex-col gap-2 sm:flex-row sm:items-center">
-                  <button
-                    type="button"
-                    onClick={() => handleOpenQuickLink(item)}
-                    className="w-full cursor-pointer rounded-xl border border-slate-200 px-3 py-2 text-left text-sm text-slate-700 transition hover:border-slate-300 hover:bg-slate-50 sm:flex-1"
-                  >
-                    {item.label}
-                  </button>
-                  <div className="flex items-center gap-2 self-end sm:self-auto">
-                    <button type="button" onClick={() => handleToggleFavoriteLink(item)} className="cursor-pointer rounded-lg border border-slate-200 px-2 py-2 text-xs text-slate-600" aria-label="Remove favorite">
-                      ✕
-                    </button>
+            <div className="flex flex-col gap-3">
+              {favoriteGroups.map(([folderName, items]) => (
+                <div key={folderName} className="rounded-xl border border-slate-200 bg-slate-50 p-2">
+                  <div className="mb-2 px-1 text-xs font-semibold tracking-wide text-slate-500">
+                    {folderName === 'No folder' ? 'No folder' : folderName}
+                  </div>
+                  <div className="ml-2 flex flex-col gap-2 border-l border-slate-200 pl-3">
+                    {items.map((item) => (
+                      <div key={item.id} className="flex flex-col gap-2 rounded-xl border border-slate-200 bg-white p-2 sm:flex-row sm:items-center">
+                        <button
+                          type="button"
+                          onClick={() => handleOpenQuickLink(item)}
+                          className="w-full cursor-pointer rounded-lg px-3 py-2 text-left text-sm text-slate-700 transition hover:bg-slate-50 hover:text-slate-900 sm:flex-1"
+                        >
+                          {item.label}
+                        </button>
+                        <div className="flex items-center gap-2 self-end sm:self-auto">
+                          <button type="button" onClick={() => handleRemoveFavoriteLink(item)} className="cursor-pointer rounded-lg border border-slate-200 bg-white px-2 py-2 text-xs text-slate-600" aria-label="Remove favorite">
+                            ✕
+                          </button>
+                        </div>
+                      </div>
+                    ))}
                   </div>
                 </div>
               ))}
             </div>
           ) : (
-            <p className="rounded-xl border border-dashed border-slate-200 px-3 py-2 text-sm text-slate-500">
+            <div className="rounded-xl border border-dashed border-slate-200 bg-slate-50 px-3 py-3 text-sm text-slate-500">
               Save a page to keep it here.
-            </p>
+            </div>
           )}
         </div>
       )}

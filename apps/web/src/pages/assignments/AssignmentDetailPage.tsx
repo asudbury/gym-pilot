@@ -15,6 +15,13 @@ export function AssignmentDetailPage() {
 
   const assignment = useMemo<Assignment | undefined>(() => assignments.find((item) => item.id === planSlug), [assignments, planSlug])
   const plan = useMemo(() => plans.find((item) => item.id === assignment?.planId), [plans, assignment?.planId])
+  const resolvedPlan = useMemo(() => ({
+    planName: assignment?.planName ?? plan?.planName ?? 'Untitled plan',
+    planSlug: assignment?.planSlug ?? plan?.planSlug ?? 'plan',
+    planSessions: (assignment?.planSessions && assignment.planSessions.length > 0)
+      ? assignment.planSessions
+      : (plan?.planSessions ?? []),
+  }), [assignment, plan])
 
   const isAssignment = Boolean(assignment)
 
@@ -42,7 +49,7 @@ export function AssignmentDetailPage() {
     )
   }
 
-  if (!plan) {
+  if (!resolvedPlan.planSessions.length) {
     return (
       <PageLayout className="max-w-4xl">
         <PageCard padding="spacious">
@@ -60,6 +67,7 @@ export function AssignmentDetailPage() {
           <div>
             <Paragraph>Assignment</Paragraph>
             <Heading1 className="mt-2">{assignment?.assignmentName ?? 'Untitled assignment'}</Heading1>
+          <p className="mt-2 text-sm text-slate-600">{resolvedPlan.planName}</p>
           </div>
           <div className="flex flex-wrap gap-2">
             <Link to={editPath} className={getToneClass('blue', 'px-4 py-2 text-sm font-medium')}>
@@ -72,7 +80,7 @@ export function AssignmentDetailPage() {
         </div>
         <div className="space-y-4 mt-6">
           <h3><b>Exercises</b></h3>
-          {(plan.planSessions ?? []).map((session: { id: Key | null | undefined; title: string | number | bigint | boolean | ReactElement<unknown, string | JSXElementConstructor<any>> | Iterable<ReactNode> | ReactPortal | Promise<string | number | bigint | boolean | ReactPortal | ReactElement<unknown, string | JSXElementConstructor<any>> | Iterable<ReactNode> | null | undefined> | null | undefined; planItems: any }) => (
+          {(resolvedPlan.planSessions ?? []).map((session: { id: Key | null | undefined; title: string | number | bigint | boolean | ReactElement<unknown, string | JSXElementConstructor<any>> | Iterable<ReactNode> | ReactPortal | Promise<string | number | bigint | boolean | ReactPortal | ReactElement<unknown, string | JSXElementConstructor<any>> | Iterable<ReactNode> | null | undefined> | null | undefined; planItems: any }) => (
             <div key={session.id} className="rounded-2xl border border-slate-200 p-4">
               <h4 className="font-semibold text-slate-800">{session.title}</h4>
               <div className="mt-3 space-y-3">

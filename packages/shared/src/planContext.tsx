@@ -28,6 +28,13 @@ type PlanProviderProps = {
 const PlanContext = createContext<PlanContextValue | undefined>(undefined)
 const persistence = new DexiePersistence()
 const CURRENT_USER_ID_STORAGE_KEY = 'gym-pilot-current-user-id'
+const DEMO_USERS_STORAGE_KEY = 'gym-pilot-demo-users-seeded'
+
+const DEFAULT_DEMO_USERS: Array<Omit<User, 'id'> & { id?: string }> = [
+  { id: 'demo-admin', name: 'Demo Admin', slug: 'demo-admin', role: 'admin' },
+  { id: 'demo-trainer', name: 'Demo Trainer', slug: 'demo-trainer', role: 'trainer' },
+  { id: 'demo-client', name: 'Demo Client', slug: 'demo-client', role: 'client' },
+]
 
 function buildPlanSlug(name: string, plans: Plan[]) {
   const slugParts = [name]
@@ -68,8 +75,20 @@ function normalizePlan(plan: Plan): Plan {
 }
 
 function normalizeAssignment(assignment: Assignment): Assignment {
+  const normalizedSessions = Array.isArray(assignment.planSessions) && assignment.planSessions.length > 0
+    ? assignment.planSessions.map((session) => ({
+        ...session,
+        id: session.id || createUUID(),
+        title: session.title?.trim() || 'Day 1',
+        planItems: Array.isArray(session.planItems) ? session.planItems.map((item) => normalizePlanItem(item)) : [],
+      }))
+    : []
+
   return {
     ...assignment,
+    planName: assignment.planName || 'Untitled plan',
+    planSlug: assignment.planSlug || buildPlanSlug(assignment.planName || 'Untitled plan', []),
+    planSessions: normalizedSessions,
     completedExercises: assignment.completedExercises ?? {},
   }
 }
@@ -164,6 +183,14 @@ function createAssignmentCopy(basePlan: Plan, user: User): Assignment {
     id: createUUID(),
     assignmentName: basePlan.planName + ' - ' + user.name,
     planId: basePlan.id,
+    planName: basePlan.planName,
+    planSlug: basePlan.planSlug,
+    planSessions: (basePlan.planSessions ?? []).map((session) => ({
+      ...session,
+      id: session.id || createUUID(),
+      title: session.title?.trim() || 'Day 1',
+      planItems: (session.planItems ?? []).map((item) => normalizePlanItem(item)),
+    })),
     assignedUserId: user.id,
     assignedUserName: user.name,
     completedExercises: {},
@@ -237,12 +264,25 @@ export function PlanProvider({ children, storageKey = PLANS_KEY }: PlanProviderP
   useEffect(() => {
     let isActive = true
 
-    void persistence.load<User[]>('gym-pilot-users', []).then((storedUsers) => {
-      if (isActive) {
-        setUsers(Array.isArray(storedUsers) ? storedUsers : [])
-        setUsersHydrated(true)
+    void (async () => {
+      const storedUsers = await persistence.load<User[]>('gym-pilot-users', [])
+      const hasSeededUsers = await persistence.load<boolean>(DEMO_USERS_STORAGE_KEY, false)
+
+      if (!isActive) {
+        return
       }
-    })
+
+      const resolvedUsers = Array.isArray(storedUsers) && storedUsers.length > 0
+        ? storedUsers
+        : DEFAULT_DEMO_USERS.map((user) => ({ ...user, id: user.id ?? createUUID() }))
+
+      if (!hasSeededUsers && (!Array.isArray(storedUsers) || storedUsers.length === 0)) {
+        await persistence.save(DEMO_USERS_STORAGE_KEY, true)
+      }
+
+      setUsers(resolvedUsers)
+      setUsersHydrated(true)
+    })()
 
     return () => {
       isActive = false
@@ -431,6 +471,7 @@ export function PlanProvider({ children, storageKey = PLANS_KEY }: PlanProviderP
 
         return {
           ...assignment,
+          assignmentName: assignment.assignmentName || trimmedName,
           planName: trimmedName,
           planSlug: buildPlanSlug(trimmedName, plans),
           planSessions: normalizedSessions,

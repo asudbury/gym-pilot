@@ -1,109 +1,93 @@
 import { useMemo, useState } from 'react'
 import { useNavigate, useLocation } from 'react-router-dom'
-import { useAuth } from '../auth/AuthContext'
-import { signInWithGoogle, usePlan } from '@gym-pilot/shared'
-import { AUTH_PROTECTION_ENABLED } from '../auth/config'
+import { signInWithPassword } from '@gym-pilot/shared'
+import { PageCard } from '../components/PageCard'
+import { Heading1 } from '../components/Typography'
+import { appTokens } from '../constants/tokens'
 
 export function LoginPage() {
-  const { users } = usePlan()
-  const { login, enableBypass, isBypassEnabled } = useAuth()
   const navigate = useNavigate()
   const location = useLocation()
-  const [selectedUserId, setSelectedUserId] = useState('')
+  const [email, setEmail] = useState('')
+  const [password, setPassword] = useState('')
   const [authMessage, setAuthMessage] = useState('')
+  const [isSubmitting, setIsSubmitting] = useState(false)
 
   const from = useMemo(() => {
     const state = location.state as { from?: { pathname?: string } } | null
     return state?.from?.pathname || '/'
   }, [location.state])
 
-  const handleLogin = () => {
-    console.log('[Login] Continuing with selected user', { selectedUserId, from })
+  const handlePasswordSignIn = async (event: React.FormEvent<HTMLFormElement>) => {
+    event.preventDefault()
+    setIsSubmitting(true)
+    setAuthMessage('')
 
-    if (!selectedUserId) {
+    const response = await signInWithPassword(email, password)
+
+    setIsSubmitting(false)
+
+    if (response.error) {
+      console.error('[Login] Password sign-in failed', response.error)
+      setAuthMessage(`Sign-in failed: ${response.error.message}`)
       return
     }
 
-    const success = login(selectedUserId)
-
-    if (success) {
-      navigate(from, { replace: true })
-    }
-  }
-
-  const handleBypass = () => {
-    console.log('[Login] Enabling MVP bypass')
-    enableBypass()
+    setAuthMessage('Signed in successfully.')
+    window.dispatchEvent(new Event('gym-pilot-auth-updated'))
     navigate(from, { replace: true })
   }
 
-  const handleSupabaseSignIn = async () => {
-    console.log('[Login] Starting Supabase Google sign-in')
-    setAuthMessage('')
-
-    const response = await signInWithGoogle()
-
-    if (response.error) {
-      console.error('[Login] Google sign-in failed', response.error)
-      setAuthMessage(`Google sign-in failed: ${response.error.message}`)
-      return
-    }
-
-    if (response.data?.url) {
-      console.log('[Login] Redirecting to Google OAuth', { url: response.data.url })
-      setAuthMessage('Redirecting to Google for sign-in...')
-      window.location.assign(response.data.url)
-      return
-    }
-
-    setAuthMessage('Google sign-in did not return a redirect URL.')
-  }
-
   return (
-    <div style={{ maxWidth: 420, margin: '3rem auto', padding: '1.5rem', background: 'white', borderRadius: '12px', boxShadow: '0 8px 24px rgba(0,0,0,0.08)' }}>
-      <h1>Sign in</h1>
-      <p>
-        {AUTH_PROTECTION_ENABLED
-          ? 'Select a user to continue, or sign in with Supabase below.'
-          : 'Authentication protection is currently disabled for MVP mode.'}
-      </p>
+    <div className={`${appTokens.pageShell} flex items-start justify-center`}>
+      <PageCard as="section" className="w-full max-w-xl self-start" padding="spacious">
+        <div className="flex flex-col gap-2">
+          <Heading1 as="h1">Welcome back</Heading1>
+          <p className="text-sm text-slate-600">
+            Login to continue to your plans, assignments, and preferences.
+          </p>
+        </div>
 
-      <label htmlFor="user-select" style={{ display: 'block', marginBottom: '0.5rem' }}>
-        User
-      </label>
-      <select
-        id="user-select"
-        value={selectedUserId}
-        onChange={(event) => setSelectedUserId(event.target.value)}
-        style={{ width: '100%', padding: '0.7rem', marginBottom: '1rem' }}
-      >
-        <option value="">Choose a user</option>
-        {users.map((user) => (
-          <option key={user.id} value={user.id}>
-            {user.name} ({user.role})
-          </option>
-        ))}
-      </select>
+        <form onSubmit={handlePasswordSignIn} className="mt-8 flex flex-col gap-4">
+          <label className="flex flex-col gap-2 text-sm font-medium text-slate-700">
+            <span>Email address</span>
+            <input
+              type="email"
+              value={email}
+              onChange={(event) => setEmail(event.target.value)}
+              required
+              className={`${appTokens.input} w-full`}
+              placeholder="you@example.com"
+            />
+          </label>
 
-      <button type="button" onClick={handleLogin} disabled={!selectedUserId} style={{ marginRight: '0.75rem' }}>
-        Continue
-      </button>
-      <button type="button" onClick={handleBypass}>
-        {isBypassEnabled ? 'Bypass already enabled' : 'Use MVP bypass'}
-      </button>
+          <label className="flex flex-col gap-2 text-sm font-medium text-slate-700">
+            <span>Password</span>
+            <input
+              type="password"
+              value={password}
+              onChange={(event) => setPassword(event.target.value)}
+              required
+              className={`${appTokens.input} w-full`}
+              placeholder="Enter your password"
+            />
+          </label>
 
-      <hr style={{ margin: '1.5rem 0' }} />
+          <button
+            type="submit"
+            disabled={isSubmitting}
+            className="rounded-full bg-blue-700 px-4 py-2.5 text-sm font-semibold text-white transition hover:bg-blue-800 disabled:cursor-not-allowed disabled:bg-slate-400"
+          >
+            {isSubmitting ? 'Logging in…' : 'Login'}
+          </button>
+        </form>
 
-      <h2 style={{ marginBottom: '0.75rem' }}>Supabase sign in</h2>
-      <p style={{ marginBottom: '1rem' }}>
-        Use Google to create a real Supabase session for persistence.
-      </p>
-
-      <button type="button" onClick={handleSupabaseSignIn} style={{ marginRight: '0.75rem' }}>
-        Continue with Google
-      </button>
-
-      {authMessage ? <p style={{ marginTop: '0.75rem' }}>{authMessage}</p> : null}
+        {authMessage ? (
+          <div className="mt-4 rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3 text-sm text-slate-600">
+            {authMessage}
+          </div>
+        ) : null}
+      </PageCard>
     </div>
   )
 }
