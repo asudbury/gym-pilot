@@ -1,11 +1,12 @@
 export const helpSections = [
-  // {
-  //   title: 'Getting started',
-  //   items: [
-  //     'Use the Home screen to browse exercises and save favorites for quicker access.',
-  //     'Create a base plan from the Plans area before assigning it to a user.',
-  //   ],
-  // },
+  {
+    title: 'Signing in and passwords',
+    items: [
+      'Sign in with your email and password to access your plans, assignments, and preferences.',
+      'If you forget your password, use the reset option on the login screen to receive a reset email.',
+      'If your account requires a password change, you will be taken to the password reset flow before continuing.',
+    ],
+  },
   {
     title: 'Searching and favourites',
     items: [
@@ -41,19 +42,21 @@ export const helpSections = [
   {
     title: 'Admin tools',
     items: [
-      'Use Admin to manage users, review stored data, and adjust preferences.',
+      'Use Admin to manage users, create new accounts, review stored data, and adjust preferences.',
+      'Admins can edit user profiles, assign roles, link trainers to clients, and manage password-change requirements.',
       'The database view helps you inspect the current local records used by the app.',
     ],
   },
   {
     title: 'User roles',
     items: [
-      'User roles define the permissions and access levels for different users within the app.',
-      "Roles defined are 'guest', 'trainer', 'client', 'admin'",
-      'Guests have limited access to view/search for exercises only',
-      'Trainers can create and manage plans and assignments',
-      'Clients can view and complete assignments (as well as view/search for exercises)',
-      'Admins have full access',
+      'User roles define permissions and access levels within the app.',
+      "Supported roles are 'guest', 'trainer', 'client', and 'admin'.",
+      'Users can have more than one role, so access can be tailored to their needs.',
+      'Guests have limited access to browse and search exercises.',
+      'Trainers can create and manage plans and assignments.',
+      'Clients can view and complete assignments, as well as browse and search exercises.',
+      'Admins have full access to administration features.',
     ],
   },
 ]
