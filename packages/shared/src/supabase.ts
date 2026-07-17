@@ -1,4 +1,5 @@
 import { createClient, type SupabaseClient } from '@supabase/supabase-js'
+import type { Assignment, Plan } from '@gym-pilot/types'
 
 const DEFAULT_SUPABASE_TABLE = 'gym_pilot_app_state'
 
@@ -8,8 +9,8 @@ let supabaseClient: SupabaseClient | null = null
 // These records are stored in the shared app_state table rather than the
 // domain-specific tables created for relational data.
 const SUPABASE_TABLE_BY_KEY: Record<string, string> = {
-  'gym-pilot-plans': DEFAULT_SUPABASE_TABLE,
-  'gym-pilot-assignments': DEFAULT_SUPABASE_TABLE,
+  'gym-pilot-plans': 'gym_pilot_plans',
+  'gym-pilot-assignments': 'gym_pilot_assignments',
   'gym-pilot-users': DEFAULT_SUPABASE_TABLE,
 }
 
@@ -24,7 +25,12 @@ function getSupabaseAnonKey() {
 
 export function isSupabasePersistenceEnabled() {
   const enabledFlag = import.meta.env?.VITE_FEATURE_SUPABASE_PERSISTENCE_ENABLED
-  return enabledFlag === 'true' && Boolean(getSupabaseUrl()) && Boolean(getSupabaseAnonKey())
+
+  if (enabledFlag === 'false') {
+    return false
+  }
+
+  return Boolean(getSupabaseUrl()) && Boolean(getSupabaseAnonKey())
 }
 
 export function getSupabaseClient() {
@@ -164,6 +170,11 @@ type FavoriteLink = {
   folder?: string
 }
 
+type FavoriteStorageValue = {
+  favorites: FavoriteLink[]
+  folders: string[]
+}
+
 function normalizeFolderName(value?: string) {
   if (typeof value !== 'string') {
     return ''
@@ -176,9 +187,35 @@ function isFavoritesKey(key: string) {
   return key === 'gym-pilot.favorites'
 }
 
+function normalizeFavoriteStorageValue(value: unknown): FavoriteStorageValue {
+  if (Array.isArray(value)) {
+    return {
+      favorites: value.filter((item): item is FavoriteLink => Boolean(item && typeof item === 'object' && typeof (item as FavoriteLink).path === 'string' && typeof (item as FavoriteLink).label === 'string')),
+      folders: [],
+    }
+  }
+
+  if (value && typeof value === 'object') {
+    const candidate = value as Partial<FavoriteStorageValue>
+    const folders = Array.isArray(candidate.folders)
+      ? candidate.folders.filter((folder): folder is string => typeof folder === 'string' && folder.trim().length > 0)
+      : []
+    const favorites = Array.isArray(candidate.favorites)
+      ? candidate.favorites.filter((item): item is FavoriteLink => Boolean(item && typeof item === 'object' && typeof (item as FavoriteLink).path === 'string' && typeof (item as FavoriteLink).label === 'string'))
+      : []
+
+    return {
+      favorites,
+      folders: Array.from(new Set(folders.map((folder) => folder.trim()))).sort((left, right) => left.localeCompare(right)),
+    }
+  }
+
+  return { favorites: [], folders: [] }
+}
+
 function getSupabaseTableName(key: string) {
   if (isFavoritesKey(key)) {
-    return 'gym_pilot_favorites'
+    return 'gym_pilot_favourites'
   }
 
   return SUPABASE_TABLE_BY_KEY[key] ?? DEFAULT_SUPABASE_TABLE
@@ -223,6 +260,54 @@ export async function loadSupabaseJsonRecord<T>(key: string): Promise<SupabaseRe
     return { found: false, value: null }
   }
 
+  if (key === 'gym-pilot-plans') {
+    const { data, error } = await client
+      .from('gym_pilot_plans')
+      .select('id, plan_name, plan_slug, plan_sessions, created_at, updated_at')
+      .eq('user_id', userId)
+
+    if (error) {
+      console.error('[Supabase] Remote plans load failed', { key, error })
+      throw error
+    }
+
+    const plans = (data ?? []).map((row) => ({
+      id: row.id,
+      planName: row.plan_name,
+      planSlug: row.plan_slug,
+      planSessions: Array.isArray(row.plan_sessions) ? row.plan_sessions : [],
+      createdByUserId: userId,
+    }))
+
+    return { found: true, value: plans as T }
+  }
+
+  if (key === 'gym-pilot-assignments') {
+    const { data, error } = await client
+      .from('gym_pilot_assignments')
+      .select('id, assignment_name, plan_id, plan_name, plan_slug, plan_items, assigned_user_id, assigned_user_name, completed_exercises')
+      .eq('user_id', userId)
+
+    if (error) {
+      console.error('[Supabase] Remote assignments load failed', { key, error })
+      throw error
+    }
+
+    const assignments = (data ?? []).map((row) => ({
+      id: row.id,
+      assignmentName: row.assignment_name,
+      planId: row.plan_id,
+      planName: row.plan_name ?? undefined,
+      planSlug: row.plan_slug ?? undefined,
+      planSessions: Array.isArray(row.plan_items) ? row.plan_items : [],
+      assignedUserId: row.assigned_user_id ?? undefined,
+      assignedUserName: row.assigned_user_name ?? undefined,
+      completedExercises: row.completed_exercises ?? {},
+    }))
+
+    return { found: true, value: assignments as T }
+  }
+
   if (isFavoritesKey(key)) {
     const { data: folderRows, error: folderError } = await client
       .from('gym_pilot_favourite_folders')
@@ -258,8 +343,12 @@ export async function loadSupabaseJsonRecord<T>(key: string): Promise<SupabaseRe
       }
     })
 
-    console.log('[Supabase] Remote favorites loaded', { key, favorites })
-    return { found: true, value: favorites as T }
+    const folders = Array.from(new Set((folderRows ?? []).map((row) => normalizeFolderName(row.name)).filter(Boolean))).sort((left, right) => left.localeCompare(right))
+
+    const payload: FavoriteStorageValue = { favorites, folders }
+
+    console.log('[Supabase] Remote favorites loaded', { key, favorites, folders })
+    return { found: true, value: payload as T }
   }
 
   const { data, error } = await client
@@ -300,12 +389,74 @@ export async function saveSupabaseJsonRecord<T>(key: string, value: T) {
     return
   }
 
-  if (isFavoritesKey(key)) {
-    const favorites = Array.isArray(value)
-      ? (value as FavoriteLink[]).filter((item): item is FavoriteLink => Boolean(item && typeof item === 'object' && typeof item.path === 'string' && typeof item.label === 'string'))
-      : []
+  if (key === 'gym-pilot-plans') {
+    const plans = Array.isArray(value) ? (value as Plan[]) : []
 
-    const folderNames = Array.from(new Set(favorites.map((favorite) => normalizeFolderName(favorite.folder)).filter(Boolean)))
+    const { error: deleteError } = await client.from('gym_pilot_plans').delete().eq('user_id', userId)
+
+    if (deleteError) {
+      throw deleteError
+    }
+
+    if (plans.length > 0) {
+      const { error: insertError } = await client.from('gym_pilot_plans').insert(
+        plans.map((plan) => ({
+          id: plan.id,
+          user_id: userId,
+          plan_name: plan.planName,
+          plan_slug: plan.planSlug,
+          plan_sessions: plan.planSessions ?? [],
+        })),
+      )
+
+      if (insertError) {
+        throw insertError
+      }
+    }
+
+    return
+  }
+
+  if (key === 'gym-pilot-assignments') {
+    const assignments = Array.isArray(value) ? (value as Assignment[]) : []
+
+    const { error: deleteError } = await client.from('gym_pilot_assignments').delete().eq('user_id', userId)
+
+    if (deleteError) {
+      throw deleteError
+    }
+
+    if (assignments.length > 0) {
+      const { error: insertError } = await client.from('gym_pilot_assignments').insert(
+        assignments.map((assignment) => ({
+          id: assignment.id,
+          user_id: userId,
+          plan_id: assignment.planId,
+          assignment_name: assignment.assignmentName,
+          assigned_user_id: assignment.assignedUserId ?? null,
+          assigned_user_name: assignment.assignedUserName ?? null,
+          completed_exercises: assignment.completedExercises ?? {},
+          plan_items: assignment.planSessions ?? [],
+          plan_name: assignment.planName ?? null,
+          plan_slug: assignment.planSlug ?? null,
+        })),
+      )
+
+      if (insertError) {
+        throw insertError
+      }
+    }
+
+    return
+  }
+
+  if (isFavoritesKey(key)) {
+    const normalizedValue = normalizeFavoriteStorageValue(value)
+    const favorites = normalizedValue.favorites
+    const folderNames = Array.from(new Set([
+      ...normalizedValue.folders,
+      ...favorites.map((favorite) => normalizeFolderName(favorite.folder)).filter(Boolean),
+    ]))
 
     const { error: deleteFavoritesError } = await client.from('gym_pilot_favourites').delete().eq('user_id', userId)
 

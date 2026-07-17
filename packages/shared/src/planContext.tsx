@@ -1,13 +1,16 @@
 import { createContext, useContext, useEffect, useMemo, useState, type ReactNode } from 'react'
 import { createUUID } from './utils'
 import type { Assignment, Plan, PlanItem, PlanSession, User, UserRole } from '@gym-pilot/types'
-import { DexiePersistence } from './storage'
+import { DexiePersistence, listJsonRecords } from './storage'
 import { ASSIGNMENTS_KEY, PLANS_KEY } from '../../../apps/web/src/constants/storageKeys'
 
 type PlanContextValue = {
   plans: Plan[]
   assignments: Assignment[]
   users: User[]
+  visiblePlans: Plan[]
+  visibleAssignments: Assignment[]
+  visibleUsers: User[]
   createPlan: (planName: string, planSessions?: PlanSession[]) => void
   createPlanForPeople: (personInput: string | string[] | undefined, planSessions?: PlanSession[]) => void
   updatePlan: (planId: string, planName: string, planSessions?: PlanSession[], assignedUserIds?: string[]) => void
@@ -103,20 +106,20 @@ function getCurrentUserIdFromSessionStorage(): string | undefined {
   return currentUserId ? currentUserId : undefined
 }
 
-async function resolveCurrentUserId(): Promise<string | undefined> {
+async function resolveCurrentUserContext(): Promise<{ id?: string; role?: UserRole }> {
   const sessionUserId = getCurrentUserIdFromSessionStorage()
 
-  if (sessionUserId) {
-    return sessionUserId
+  const storedSession = await persistence.load<Partial<{ id?: string; role?: UserRole }> | null>('gym-pilot-auth-session', null)
+  const resolvedUserId = sessionUserId?.trim() || storedSession?.id?.trim()
+
+  if (!resolvedUserId) {
+    return {}
   }
 
-  const storedSession = await persistence.load<Partial<{ id?: string }> | null>('gym-pilot-auth-session', null)
-
-  if (!storedSession?.id) {
-    return undefined
+  return {
+    id: resolvedUserId,
+    role: storedSession?.role ?? (resolvedUserId === 'mvp-bypass' ? 'admin' : undefined),
   }
-
-  return storedSession.id.trim()
 }
 
 function getScopedStorageKey(storageKey: string, ownerUserId?: string) {
@@ -125,28 +128,33 @@ function getScopedStorageKey(storageKey: string, ownerUserId?: string) {
   return effectiveUserId ? `${storageKey}:${effectiveUserId}` : `${storageKey}:anonymous`
 }
 
-async function getStoredPlans(storageKey: string, ownerUserId?: string): Promise<Plan[]> {
-  const scopedStorageKey = getScopedStorageKey(storageKey, ownerUserId)
-  const legacyStored = await persistence.load<Plan[]>(storageKey, [])
-  const scopedStored = await persistence.load<Plan[]>(scopedStorageKey, [])
+async function getStoredPlans(storageKey: string): Promise<Plan[]> {
+  const matchingKeys = new Set<string>([storageKey])
+  const storedRecords = await listJsonRecords()
 
-  const storedPlans = Array.isArray(scopedStored) && scopedStored.length > 0
-    ? scopedStored
-    : Array.isArray(legacyStored) && legacyStored.length > 0
-      ? legacyStored
-      : []
+  storedRecords.forEach((record) => {
+    if (typeof record.key === 'string' && (record.key === storageKey || record.key.startsWith(`${storageKey}:`))) {
+      matchingKeys.add(record.key)
+    }
+  })
+
+  const PlanCollections = await Promise.all([...matchingKeys].map((key) => persistence.load<Plan[]>(key, [])))
+  const storedPlans = PlanCollections.flatMap((collection) => (Array.isArray(collection) ? collection : []))
 
   if (!Array.isArray(storedPlans)) {
     return []
   }
 
   const normalizedPlans = storedPlans.map((plan) => normalizePlan(plan))
+  const uniquePlans = new Map<string, Plan>()
 
-  if (!ownerUserId) {
-    return normalizedPlans.filter((plan) => !plan.createdByUserId)
-  }
+  normalizedPlans.forEach((plan) => {
+    if (!uniquePlans.has(plan.id)) {
+      uniquePlans.set(plan.id, plan)
+    }
+  })
 
-  return normalizedPlans.filter((plan) => !plan.createdByUserId || plan.createdByUserId === ownerUserId)
+  return Array.from(uniquePlans.values())
 }
 
 async function getStoredAssignments(): Promise<Assignment[]> {
@@ -165,6 +173,84 @@ function buildUserSlug(name: string) {
     .trim()
     .replace(/[^a-z0-9]+/g, '-')
     .replace(/(^-|-$)/g, '') || 'user'
+}
+
+function filterUsersForViewer(users: User[], currentUserId?: string, currentUserRole?: UserRole): User[] {
+  const viewerId = currentUserId?.trim()
+
+  if (!currentUserRole || currentUserRole === 'guest') {
+    return users
+  }
+
+  if (currentUserRole === 'admin') {
+    return users
+  }
+
+  if (currentUserRole === 'trainer') {
+    return users.filter((user) => user.role === 'client' || user.id === viewerId)
+  }
+
+  if (viewerId) {
+    return users.filter((user) => user.id === viewerId)
+  }
+
+  return []
+}
+
+function filterPlansForViewer(plans: Plan[], users: User[], currentUserId?: string, currentUserRole?: UserRole): Plan[] {
+  const viewerId = currentUserId?.trim()
+
+  if (!currentUserRole || currentUserRole === 'guest') {
+    return plans
+  }
+
+  if (currentUserRole === 'admin') {
+    return plans
+  }
+
+  const visibleUserIds = new Set(users.filter((user) => user.role === 'client').map((user) => user.id))
+
+  if (currentUserRole === 'trainer') {
+    return plans.filter((plan) => {
+      const creatorId = plan.createdByUserId?.trim()
+
+      if (!creatorId) {
+        return true
+      }
+
+      return creatorId === viewerId || visibleUserIds.has(creatorId)
+    })
+  }
+
+  return plans.filter((plan) => {
+    const creatorId = plan.createdByUserId?.trim()
+
+    return !creatorId || creatorId === viewerId
+  })
+}
+
+function filterAssignmentsForViewer(assignments: Assignment[], users: User[], currentUserId?: string, currentUserRole?: UserRole): Assignment[] {
+  const viewerId = currentUserId?.trim()
+
+  if (!currentUserRole || currentUserRole === 'guest') {
+    return assignments
+  }
+
+  if (currentUserRole === 'admin') {
+    return assignments
+  }
+
+  const visibleUserIds = new Set(users.filter((user) => user.role === 'client').map((user) => user.id))
+
+  if (currentUserRole === 'trainer') {
+    return assignments.filter((assignment) => {
+      const assignedUserId = assignment.assignedUserId?.trim()
+
+      return Boolean(assignedUserId && (assignedUserId === viewerId || visibleUserIds.has(assignedUserId)))
+    })
+  }
+
+  return assignments.filter((assignment) => assignment.assignedUserId?.trim() === viewerId)
 }
 
 function normalizePlanItem(item: Partial<PlanItem> = {}): PlanItem {
@@ -205,22 +291,24 @@ export function PlanProvider({ children, storageKey = PLANS_KEY }: PlanProviderP
   const [assignmentsHydrated, setAssignmentsHydrated] = useState(false)
   const [usersHydrated, setUsersHydrated] = useState(false)
   const [currentUserId, setCurrentUserId] = useState<string | undefined>(undefined)
+  const [currentUserRole, setCurrentUserRole] = useState<UserRole | undefined>(undefined)
 
   useEffect(() => {
     let isActive = true
 
-    const syncCurrentUserId = async () => {
-      const resolvedUserId = await resolveCurrentUserId()
+    const syncCurrentUserContext = async () => {
+      const resolvedUserContext = await resolveCurrentUserContext()
 
       if (isActive) {
-        setCurrentUserId(resolvedUserId)
+        setCurrentUserId(resolvedUserContext.id)
+        setCurrentUserRole(resolvedUserContext.role)
       }
     }
 
-    void syncCurrentUserId()
+    void syncCurrentUserContext()
 
     const handleAuthUpdate = () => {
-      void syncCurrentUserId()
+      void syncCurrentUserContext()
     }
 
     window.addEventListener('gym-pilot-auth-updated', handleAuthUpdate)
@@ -234,7 +322,7 @@ export function PlanProvider({ children, storageKey = PLANS_KEY }: PlanProviderP
   useEffect(() => {
     let isActive = true
 
-    void getStoredPlans(storageKey, currentUserId).then((storedPlans) => {
+    void getStoredPlans(storageKey).then((storedPlans) => {
       if (isActive) {
         setPlans(storedPlans)
         setPlansHydrated(true)
@@ -244,7 +332,7 @@ export function PlanProvider({ children, storageKey = PLANS_KEY }: PlanProviderP
     return () => {
       isActive = false
     }
-  }, [storageKey, currentUserId])
+  }, [storageKey])
 
   useEffect(() => {
     let isActive = true
@@ -297,7 +385,7 @@ export function PlanProvider({ children, storageKey = PLANS_KEY }: PlanProviderP
     const scopedStorageKey = getScopedStorageKey(storageKey, currentUserId)
     console.log('[PlanContext] Saving plans', { scopedStorageKey, count: plans.length })
 
-    void persistence.save(scopedStorageKey, plans)
+    void persistence.save(PLANS_KEY, plans)
   }, [plans, plansHydrated, storageKey, currentUserId])
 
   useEffect(() => {
@@ -306,7 +394,7 @@ export function PlanProvider({ children, storageKey = PLANS_KEY }: PlanProviderP
     }
 
     console.log('[PlanContext] Saving assignments', { count: assignments.length })
-    void persistence.save('gym-pilot-assignments', assignments)
+    void persistence.save(ASSIGNMENTS_KEY, assignments)
   }, [assignments, assignmentsHydrated])
 
   useEffect(() => {
@@ -542,11 +630,18 @@ export function PlanProvider({ children, storageKey = PLANS_KEY }: PlanProviderP
     setAssignments((current) => current.filter((assignment) => assignment.assignedUserId !== trimmedUserId))
   }
 
+  const visiblePlans = useMemo(() => filterPlansForViewer(plans, users, currentUserId, currentUserRole), [plans, users, currentUserId, currentUserRole])
+  const visibleAssignments = useMemo(() => filterAssignmentsForViewer(assignments, users, currentUserId, currentUserRole), [assignments, users, currentUserId, currentUserRole])
+  const visibleUsers = useMemo(() => filterUsersForViewer(users, currentUserId, currentUserRole), [users, currentUserId, currentUserRole])
+
   const value = useMemo<PlanContextValue>(
     () => ({
       plans,
       assignments,
       users,
+      visiblePlans,
+      visibleAssignments,
+      visibleUsers,
       createPlan,
       createPlanForPeople,
       updatePlan,

@@ -8,11 +8,11 @@ import { PageCardLayout } from '../../layouts/PageCardLayout'
 import { CallToAction } from '../../layouts/CallToAction'
 
 export function AssignmentsPage() {
-  const { assignments, deleteAssignment } = usePlan()
+  const { visibleAssignments, deleteAssignment } = usePlan()
 
   return (
     <PageLayout>
-      {assignments.length === 0 ? (
+      {visibleAssignments.length === 0 ? (
         <PageCardLayout
           title="Assignments"
           subtitle="Assignments Dashboard"
@@ -44,7 +44,7 @@ export function AssignmentsPage() {
             </Link>
           </div>
           <div className="grid gap-4 md:grid-cols-2">
-            {assignments.map((assignment) => (
+            {visibleAssignments.map((assignment) => (
               <PageCard key={assignment.id} padding="compact">
                 <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
                   <div>

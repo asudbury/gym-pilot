@@ -8,8 +8,8 @@ import { PageLayout } from '../../layouts/PageLayout'
 import { PageCardLayout } from '../../layouts/PageCardLayout'
 
 export function PlansPage() {
-  const { plans, deletePlan } = usePlan()
-  const basePlans = plans
+  const { visiblePlans, deletePlan } = usePlan()
+  const basePlans = visiblePlans
 
   return (
     <PageLayout>
@@ -52,7 +52,7 @@ export function PlansPage() {
                   <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
                     <div>
                       <h2 className="text-xl font-semibold text-slate-900">{plan.planName || 'Untitled plan'}</h2>
-                      <p className="mt-1 text-sm text-slate-600">Base template</p>
+                      <p className="mt-1 text-sm text-slate-600">Base plan</p>
                     </div>
                     <div className="flex flex-col gap-2 sm:flex-row sm:items-center">
                       <Link

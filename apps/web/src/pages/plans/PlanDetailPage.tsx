@@ -10,12 +10,12 @@ import { ExerciseDetailsCard } from '../../components/ExerciseDetailsCard'
 
 export function PlanDetailPage() {
   const { planSlug } = useParams()
-  const { plans, assignments } = usePlan()
+  const { visiblePlans, visibleAssignments } = usePlan()
   const [expandedExerciseIds, setExpandedExerciseIds] = useState<string[]>([])
 
-  const plan = useMemo(() => plans.find((item) => item.planSlug === planSlug), [plans, planSlug])
+  const plan = useMemo(() => visiblePlans.find((item) => item.planSlug === planSlug), [visiblePlans, planSlug])
 
-  const assignment = useMemo<Assignment | undefined>(() => assignments.find((item) => item.id === planSlug), [assignments, planSlug])
+  const assignment = useMemo<Assignment | undefined>(() => visibleAssignments.find((item) => item.id === planSlug), [visibleAssignments, planSlug])
   const isAssignment = Boolean(assignment)
   const editPath = isAssignment ? `/users/${assignment?.assignedUserId ?? 'user'}/assignments/${assignment?.id ?? planSlug}/edit` : `/plans/${plan?.id ?? planSlug}/edit`
   const backPath = isAssignment ? `/users/${assignment?.assignedUserId ?? 'user'}/assignments` : '/plans'

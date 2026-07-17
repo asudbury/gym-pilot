@@ -103,7 +103,7 @@ function sanitizeSheetName(value: string) {
 }
 
 export function CreateAssignmentPage() {
-  const { assignments, plans, users, updateAssignment, assignUsersToPlan } = usePlan()
+  const { assignments, visiblePlans, visibleUsers, updateAssignment, assignUsersToPlan } = usePlan()
   const navigate = useNavigate()
   const { planSlug } = useParams()
   const assignmentToEdit = useMemo(() => assignments.find((item) => item.id === planSlug), [assignments, planSlug])
@@ -118,7 +118,7 @@ export function CreateAssignmentPage() {
 
   const activeTab = useMemo(() => tabs.find((tab) => tab.id === activeTabId) ?? tabs[0], [activeTabId, tabs])
   const activeRows = activeTab?.rows ?? []
-  const sourcePlans = useMemo(() => plans, [plans])
+  const sourcePlans = useMemo(() => visiblePlans, [visiblePlans])
  
   useEffect(() => {
     if (!activeTabId && tabs.length > 0) {
@@ -495,7 +495,7 @@ export function CreateAssignmentPage() {
                     className="w-full rounded-full border border-slate-200 bg-slate-50 px-4 py-2 text-sm text-slate-700"
                   >
                     <option value="">Select a user</option>
-                    {users.map((user) => (
+                    {visibleUsers.map((user) => (
                       <option key={user.id} value={user.id}>
                         {user.name}
                       </option>

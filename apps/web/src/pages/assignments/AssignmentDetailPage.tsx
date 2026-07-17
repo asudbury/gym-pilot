@@ -10,11 +10,11 @@ import { ExerciseDetailsCard } from '../../components/ExerciseDetailsCard'
 
 export function AssignmentDetailPage() {
   const { planSlug } = useParams()
-  const { plans, assignments } = usePlan()
+  const { visiblePlans, visibleAssignments } = usePlan()
   const [expandedExerciseIds, setExpandedExerciseIds] = useState<string[]>([])
 
-  const assignment = useMemo<Assignment | undefined>(() => assignments.find((item) => item.id === planSlug), [assignments, planSlug])
-  const plan = useMemo(() => plans.find((item) => item.id === assignment?.planId), [plans, assignment?.planId])
+  const assignment = useMemo<Assignment | undefined>(() => visibleAssignments.find((item) => item.id === planSlug), [visibleAssignments, planSlug])
+  const plan = useMemo(() => visiblePlans.find((item) => item.id === assignment?.planId), [visiblePlans, assignment?.planId])
   const resolvedPlan = useMemo(() => ({
     planName: assignment?.planName ?? plan?.planName ?? 'Untitled plan',
     planSlug: assignment?.planSlug ?? plan?.planSlug ?? 'plan',

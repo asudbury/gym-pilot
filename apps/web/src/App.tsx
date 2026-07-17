@@ -100,7 +100,7 @@ function ScrollToTop() {
 function App() {
   const { pathname, search } = useLocation()
   const navigate = useNavigate()
-  const { plans, assignments } = usePlan()
+  const { visiblePlans, visibleAssignments } = usePlan()
   const SHOW_AUTH_BUTTON = true
   const { user, logout } = useAuth()
   const appVersion = webPackageJson.version || '0.0.0'
@@ -230,21 +230,21 @@ useEffect(() => {
     return Boolean(exercise && favorites.some((item) => item.path === getExercisePath(exercise)))
   }
 
-  const plansCount = plans.length
+  const plansCount = visiblePlans.length
   const desktopMenuItems = buildNavigationMenuItems({
     plansCount,
-    assignmentsCount: assignments.length,
+    assignmentsCount: visibleAssignments.length,
     itemClassName: getToneClass('default', 'px-4 py-2 text-sm font-medium'),
   })
   const tabletMenuItems = buildNavigationMenuItems({
     plansCount,
-    assignmentsCount: assignments.length,
+    assignmentsCount: visibleAssignments.length,
     onItemClick: () => setMobileMenuOpen(false),
     itemClassName: 'rounded-xl px-3 py-2 text-sm font-medium text-slate-700 transition hover:bg-slate-50',
   })
   const mobileMenuItems = buildNavigationMenuItems({
     plansCount,
-    assignmentsCount: assignments.length,
+    assignmentsCount: visibleAssignments.length,
     onItemClick: () => setMobileMenuOpen(false),
     itemClassName: 'rounded-xl px-3 py-2 text-sm font-medium text-slate-700 transition hover:bg-slate-50',
   })
@@ -282,7 +282,7 @@ useEffect(() => {
         <Route path="/auth/callback" element={<LoginPage />} />
         <Route path="/" element={<HomePage filters={homeFilters} onFiltersChange={setHomeFilters} onToggleFavoriteExercise={handleToggleFavoriteExercise} isExerciseFavorite={isExerciseFavorite} />} />
         <Route path="/exercise/:slug" element={<ExercisePage onToggleFavoriteExercise={handleToggleFavoriteExercise} isExerciseFavorite={isExerciseFavorite} />} />
-        <Route element={<RequireAuth />}>
+        <Route>
           <Route path="/plans" element={<PlansPage />} />
           <Route path="/assignments" element={<AssignmentsPage />} />
           <Route path="/users/:userSlug/assignments" element={<AssignmentsPage />} />

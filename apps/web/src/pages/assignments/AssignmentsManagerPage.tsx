@@ -8,12 +8,12 @@ import { PageLayout } from '../../layouts/PageLayout'
 import { Heading1, Paragraph } from '../../components/Typography'
 
 export function AssignmentsManagerPage() {
-  const { users, plans, assignUsersToPlan } = usePlan()
+  const { visibleUsers, visiblePlans, assignUsersToPlan } = usePlan()
   const navigate = useNavigate()
   const [selectedPlanId, setSelectedPlanId] = useState<string>('')
   const [selectedUserId, setSelectedUserId] = useState<string>('')
 
-  const sourcePlans = useMemo(() => plans, [plans])
+  const sourcePlans = useMemo(() => visiblePlans, [visiblePlans])
 
   const handleCreateAssignment = () => {
     if (!selectedPlanId || !selectedUserId) {
@@ -54,7 +54,7 @@ export function AssignmentsManagerPage() {
                 className="w-full rounded-full border border-slate-200 bg-slate-50 px-4 py-2 text-sm text-slate-700"
               >
                 <option value="">Select a user</option>
-                {users.map((user) => (
+                {visibleUsers.map((user) => (
                   <option key={user.id} value={user.id}>
                     {user.name}
                   </option>
