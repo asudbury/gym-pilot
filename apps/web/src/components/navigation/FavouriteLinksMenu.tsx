@@ -1,15 +1,8 @@
 import { useEffect, useMemo, useState } from 'react'
 import { useLocation, useNavigate } from 'react-router-dom'
-import { getToneClass } from './toneClasses'
+import { getToneClass } from '../toneClasses'
 import { classNames, exercises, exercisesSchema } from '@gym-pilot/shared'
-import { formatLabel } from '../utils/formatUtils'
-
-type QuickLink = {
-  id: string
-  label: string
-  path: string
-  folder?: string
-}
+import { getQuickLinkForPath, groupFavoritesByFolder, normalizeFolderName, sortFavorites, type QuickLink } from '../../utils/favouriteUtils'
 
 type SavedSearch = {
   id: string
@@ -33,85 +26,6 @@ type FavouriteLinksMenuProps = {
   onFoldersChange: (folders: string[]) => void
   onHomeFiltersChange: (filters: HomeFilters) => void
   onMenuOpenChange?: (open: boolean) => void
-}
-
-function sortFavorites(items: QuickLink[]) {
-  return [...items].sort((left, right) => {
-    const leftLabel = left.label.toLowerCase()
-    const rightLabel = right.label.toLowerCase()
-
-    if (leftLabel < rightLabel) {
-      return -1
-    }
-
-    if (leftLabel > rightLabel) {
-      return 1
-    }
-
-    return left.path.localeCompare(right.path)
-  })
-}
-
-function normalizeFolderName(value: string) {
-  return value.trim()
-}
-
-function groupFavoritesByFolder(items: QuickLink[]) {
-  const groups = new Map<string, QuickLink[]>()
-
-  items.forEach((item) => {
-    const folderName = normalizeFolderName(item.folder ?? '') || 'No folder'
-    const currentItems = groups.get(folderName) ?? []
-
-    currentItems.push(item)
-    groups.set(folderName, currentItems)
-  })
-
-  return Array.from(groups.entries()).sort(([leftName], [rightName]) => {
-    if (leftName === 'Unfiled') {
-      return 1
-    }
-
-    if (rightName === 'Unfiled') {
-      return -1
-    }
-
-    return leftName.localeCompare(rightName)
-  })
-}
-
-function getQuickLinkForPath(pathname: string, exerciseLookup: Map<string, { id: string; name: string }>): QuickLink | null {
-  if (pathname === '/') {
-    return { id: 'home', label: 'Home', path: '/' }
-  }
-
-  if (pathname === '/plans') {
-    return { id: 'plans', label: 'Plans', path: '/plans' }
-  }
-
-  if (pathname === '/plans/new') {
-    return { id: 'new-plan', label: 'New plan', path: '/plans/new' }
-  }
-
-  if (pathname.startsWith('/exercise/')) {
-    const exerciseId = pathname.split('/').pop()
-
-    if (!exerciseId) {
-      return { id: 'exercise', label: 'Exercise', path: pathname }
-    }
-
-    const exercise = exerciseLookup.get(exerciseId)
-
-    return exercise
-      ? { id: `exercise-${exercise.id}`, label: formatLabel(exercise.name), path: pathname }
-      : { id: `exercise-${exerciseId}`, label: 'Exercise', path: pathname }
-  }
-
-  if (pathname.startsWith('/plans/')) {
-    return { id: pathname, label: 'Plan', path: pathname }
-  }
-
-  return { id: pathname, label: pathname, path: pathname }
 }
 
 export function FavouriteLinksMenu({
@@ -153,6 +67,18 @@ export function FavouriteLinksMenu({
       document.removeEventListener('mousedown', handleOutsideClick)
     }
   }, [menuOpen])
+
+  useEffect(() => {
+    const handleOpenRequest = () => {
+      setMenuOpen(true)
+    }
+
+    window.addEventListener('gym-pilot-open-favourites-menu', handleOpenRequest)
+
+    return () => {
+      window.removeEventListener('gym-pilot-open-favourites-menu', handleOpenRequest)
+    }
+  }, [])
 
   useEffect(() => {
     if (!menuOpen) {

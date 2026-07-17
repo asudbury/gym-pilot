@@ -19,11 +19,6 @@ export function PlansPage() {
           subtitle="Plans Dashboard"
           description="Create a plan to track exercises and add notes for each one."
         >
-          <div className="flex justify-end">
-            <Link to="/plans/new" className={getToneClass('blue', 'inline-flex items-center rounded-lg px-4 py-2 text-sm font-medium')}>
-              Create plan
-            </Link>
-          </div>
           <CallToAction
             title="Manage plans"
             description="Create a plan to track exercises and add notes for each one."
@@ -42,7 +37,7 @@ export function PlansPage() {
         >
           <div className="flex justify-end">
             <Link to="/plans/new" className={getToneClass('blue', 'inline-flex items-center rounded-lg px-4 py-2 text-sm font-medium')}>
-              Create plan
+              Create a new plan
             </Link>
           </div>
           <div className="grid gap-4 md:grid-cols-2">

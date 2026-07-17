@@ -1,8 +1,8 @@
 import { useDeferredValue, useEffect, useMemo, useState } from 'react'
 import { exercises } from '@gym-pilot/shared'
-import { formatLabel } from '../utils/formatUtils'
-import { MIN_SEARCH_CHARS } from '../constants/home'
-import { appTokens } from '../constants/tokens'
+import { formatLabel } from '../../utils/formatUtils'
+import { MIN_SEARCH_CHARS } from '../../constants/home'
+import { appTokens } from '../../constants/tokens'
 
 type ExerciseSearchFieldProps = {
   id?: string

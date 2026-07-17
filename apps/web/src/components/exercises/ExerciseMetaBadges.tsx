@@ -1,5 +1,5 @@
 import type { ReactNode } from 'react'
-import { getToneClass, type ToneName } from '../components/toneClasses'
+import { getToneClass, type ToneName } from '../toneClasses'
 
 export type BadgeTone = ToneName
 

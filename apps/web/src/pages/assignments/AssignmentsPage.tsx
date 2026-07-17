@@ -17,11 +17,6 @@ export function AssignmentsPage() {
           title="Assignments"
           subtitle="Assignments Dashboard"
         >
-          <div className="flex justify-end">
-            <Link to="/assignments/new" className={getToneClass('blue', 'inline-flex items-center rounded-lg px-4 py-2 text-sm font-medium')}>
-              Create assignment
-            </Link>
-          </div>
           <CallToAction
             title="Manage assignments"
             description="Create an assignment to track exercises and add notes for each one."
@@ -40,7 +35,7 @@ export function AssignmentsPage() {
         >
           <div className="flex justify-end">
             <Link to="/assignments/new" className={getToneClass('blue', 'inline-flex items-center rounded-lg px-4 py-2 text-sm font-medium')}>
-              Create assignment
+              Create a new assignment
             </Link>
           </div>
           <div className="grid gap-4 md:grid-cols-2">

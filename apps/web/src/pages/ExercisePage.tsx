@@ -2,16 +2,16 @@ import { useMemo, useState } from 'react'
 import { useParams } from 'react-router-dom'
 import { Button } from '../components/Button'
 import { getToneClass } from '../components/toneClasses'
-import { ExerciseImage } from '../components/ExerciseImage'
-import { ExerciseSteps } from '../components/ExerciseSteps'
-import { YouTubeExerciseSearchButton } from '../components/YouTubeExerciseSearchButton'
+import { ExerciseImage } from '../components/exercises/ExerciseImage'
+import { ExerciseSteps } from '../components/exercises/ExerciseSteps'
+import { YouTubeExerciseSearchButton } from '../components/exercises/YouTubeExerciseSearchButton'
 import { exercises, exercisesSchema } from '@gym-pilot/shared'
 import { getExerciseSlug } from '../utils/exerciseRouteUtils'
 import { PageCard } from '../components/PageCard'
 import { PageActionGroup, PageActionRow } from '../components/PageActionRow'
 import { PageLayout } from '../layouts/PageLayout'
 import { Heading1, Paragraph } from '../components/Typography'
-import { ExerciseMetaBadges } from '../components/ExerciseMetaBadges'
+import { ExerciseMetaBadges } from '../components/exercises/ExerciseMetaBadges'
 import { formatLabel } from '../utils/formatUtils'
 import { logger } from '../utils/loggingUtils'
 
@@ -49,6 +49,11 @@ export function ExercisePage({ onToggleFavoriteExercise, isExerciseFavorite }: E
     }
   }
 
+  const handleOpenFavouritePicker = () => {
+    onToggleFavoriteExercise?.(exercise?.id ?? '')
+    window.dispatchEvent(new Event('gym-pilot-open-favourites-menu'))
+  }
+
   if (!exercise) {
     return (
       <PageLayout className="max-w-3xl">
@@ -80,10 +85,10 @@ export function ExercisePage({ onToggleFavoriteExercise, isExerciseFavorite }: E
         <PageActionGroup className="mt-6 flex-col sm:flex-row sm:justify-end">
           <button
             type="button"
-            onClick={() => onToggleFavoriteExercise?.(exercise.id)}
+            onClick={handleOpenFavouritePicker}
             className={getToneClass(isExerciseFavorite?.(exercise.id) ? 'blue' : 'default', 'cursor-pointer px-4 py-2 text-sm font-medium')}
           >
-            {isExerciseFavorite?.(exercise.id) ? 'Added to Favourites' : 'Add to Favourites'}
+            {isExerciseFavorite?.(exercise.id) ? 'Manage favourite' : 'Add to Favourites'}
           </button>
           <Button tone="default" onClick={handleCopyUrl} className="px-4 py-2">
             {copied ? 'Copied!' : 'Copy URL'}

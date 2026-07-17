@@ -1,14 +1,14 @@
 import type { ReactNode } from 'react'
-import { Button } from './Button'
+import { Button } from '../Button'
 import { ExerciseImage } from './ExerciseImage'
 import { ExerciseMetaBadges } from './ExerciseMetaBadges'
 import { ExerciseSteps } from './ExerciseSteps'
-import { PageActionGroup } from './PageActionRow'
-import { PageActionRow } from './PageActionRow'
+import { PageActionGroup } from '../PageActionRow'
+import { PageActionRow } from '../PageActionRow'
 import { YouTubeExerciseSearchButton } from './YouTubeExerciseSearchButton'
-import { Heading2 } from './Typography'
+import { Heading2 } from '../Typography'
 import type { Exercise } from '@gym-pilot/shared'
-import { formatLabel } from '../utils/formatUtils'
+import { formatLabel } from '../../utils/formatUtils'
 
 type ExerciseDetailsCardProps = {
   exercise: Exercise

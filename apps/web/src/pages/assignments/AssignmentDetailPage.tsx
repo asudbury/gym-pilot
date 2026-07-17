@@ -6,7 +6,7 @@ import type { Assignment  } from '@gym-pilot/types'
 import { PageCard } from '../../components/PageCard'
 import { PageLayout } from '../../layouts/PageLayout'
 import { Heading1, Paragraph } from '../../components/Typography'
-import { ExerciseDetailsCard } from '../../components/ExerciseDetailsCard'
+import { ExerciseDetailsCard } from '../../components/exercises/ExerciseDetailsCard'
 
 export function AssignmentDetailPage() {
   const { planSlug } = useParams()

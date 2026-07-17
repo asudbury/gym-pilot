@@ -1,9 +1,9 @@
 import { NavLink } from 'react-router-dom'
 import { FavouriteLinksMenu } from './FavouriteLinksMenu'
 import { NavigationMenuList } from './NavigationMenuList'
-import type { NavigationMenuListItem } from '../utils/navigationUtils'
-import { ResponsiveVisibility } from './ResponsiveVisibility'
-import { getToneClass } from './toneClasses'
+import type { NavigationMenuListItem } from '../../utils/navigationUtils'
+import { ResponsiveVisibility } from '../ResponsiveVisibility'
+import { getToneClass } from '../toneClasses'
 
 type HeaderProps = {
   appVersion: string
@@ -46,7 +46,6 @@ export function Header({
 }: HeaderProps) {
   const headerUser = user && typeof user === 'object' && 'name' in user ? String((user as { name?: string }).name) : ''
   const headerUserEmail = user && typeof user === 'object' && 'email' in user ? String((user as { email?: string }).email) : ''
-  const headerUserRole = user && typeof user === 'object' && 'role' in user ? String((user as { role?: string }).role) : ''
   const headerUserLabel = headerUser || headerUserEmail || 'Signed in'
   const showUserBadge = Boolean(headerUser || headerUserEmail)
 
@@ -68,8 +67,7 @@ export function Header({
           {showUserBadge ? (
                 <div>
                   <span>{headerUserLabel}</span>
-                  {headerUserRole ? <span className="ml-2 text-xs uppercase tracking-wide text-slate-500 transition-colors dark:text-slate-400">{headerUserRole}</span> : null}
-                </div>
+               </div>
           ) : null}
         </div>
 

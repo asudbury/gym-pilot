@@ -1,10 +1,6 @@
 import { useEffect, useMemo, useState } from 'react'
-import { Link } from 'react-router-dom'
-import { getToneClass } from '../../components/toneClasses'
-import { PageCard } from '../../components/PageCard'
-import { PageLayout } from '../../layouts/PageLayout'
-import { Heading1, Paragraph } from '../../components/Typography'
 import { listJsonRecords } from '@gym-pilot/shared'
+import { AdminSectionShell } from '../../components/admin/AdminSectionShell'
 
 export function AdminDatabasePage() {
   const [databaseEntries, setDatabaseEntries] = useState<Array<{ key: string; value: unknown }>>([])
@@ -19,27 +15,15 @@ export function AdminDatabasePage() {
   })), [databaseEntries])
 
   return (
-    <PageLayout className="max-w-6xl">
-      <PageCard>
-        <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
-          <div>
-            <Paragraph>Admin</Paragraph>
-            <Heading1 className="mt-2">Database</Heading1>
+    <AdminSectionShell title="Database" subtitle="Inspect the stored JSON records" className="max-w-6xl">
+      <div className="space-y-3 rounded-2xl border border-slate-200 bg-slate-50 p-4">
+        {formattedEntries.map((entry) => (
+          <div key={entry.key} className="rounded-2xl border border-slate-200 bg-white p-3">
+            <p className="text-sm font-semibold text-slate-800">{entry.key}</p>
+            <pre className="mt-2 overflow-x-auto whitespace-pre-wrap text-xs text-slate-600">{String(entry.value)}</pre>
           </div>
-          <Link to="/admin" className={getToneClass('default', 'px-4 py-2 text-sm font-medium')}>
-            Back to admin
-          </Link>
-        </div>
-
-        <div className="mt-6 space-y-3 rounded-2xl border border-slate-200 bg-slate-50 p-4">
-          {formattedEntries.map((entry) => (
-            <div key={entry.key} className="rounded-2xl border border-slate-200 bg-white p-3">
-              <p className="text-sm font-semibold text-slate-800">{entry.key}</p>
-              <pre className="mt-2 overflow-x-auto whitespace-pre-wrap text-xs text-slate-600">{String(entry.value)}</pre>
-            </div>
-          ))}
-        </div>
-      </PageCard>
-    </PageLayout>
+        ))}
+      </div>
+    </AdminSectionShell>
   )
 }
