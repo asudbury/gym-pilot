@@ -234,17 +234,20 @@ useEffect(() => {
   const desktopMenuItems = buildNavigationMenuItems({
     plansCount,
     assignmentsCount: visibleAssignments.length,
+    isAuthenticated: Boolean(user),
     itemClassName: getToneClass('default', 'px-4 py-2 text-sm font-medium'),
   })
   const tabletMenuItems = buildNavigationMenuItems({
     plansCount,
     assignmentsCount: visibleAssignments.length,
+    isAuthenticated: Boolean(user),
     onItemClick: () => setMobileMenuOpen(false),
     itemClassName: 'rounded-xl px-3 py-2 text-sm font-medium text-slate-700 transition hover:bg-slate-50',
   })
   const mobileMenuItems = buildNavigationMenuItems({
     plansCount,
     assignmentsCount: visibleAssignments.length,
+    isAuthenticated: Boolean(user),
     onItemClick: () => setMobileMenuOpen(false),
     itemClassName: 'rounded-xl px-3 py-2 text-sm font-medium text-slate-700 transition hover:bg-slate-50',
   })
@@ -283,27 +286,29 @@ useEffect(() => {
         <Route path="/" element={<HomePage filters={homeFilters} onFiltersChange={setHomeFilters} onToggleFavoriteExercise={handleToggleFavoriteExercise} isExerciseFavorite={isExerciseFavorite} />} />
         <Route path="/exercise/:slug" element={<ExercisePage onToggleFavoriteExercise={handleToggleFavoriteExercise} isExerciseFavorite={isExerciseFavorite} />} />
         <Route>
-          <Route path="/plans" element={<PlansPage />} />
-          <Route path="/assignments" element={<AssignmentsPage />} />
-          <Route path="/users/:userSlug/assignments" element={<AssignmentsPage />} />
-          <Route path="/users/:userSlug/assignments/create" element={<AssignmentsManagerPage />} />
+          <Route path="/help" element={<HelpPage />} />
+          <Route path="/favourites" element={<FavouritesPage favorites={favorites} folders={folders} onFoldersChange={setFolders} onFavoritesChange={setFavorites} />} />
+          <Route element={<RequireAuth />}>
+            <Route path="/plans" element={<PlansPage />} />
+            <Route path="/assignments" element={<AssignmentsPage />} />
+            <Route path="/users/:userSlug/assignments" element={<AssignmentsPage />} />
+            <Route path="/users/:userSlug/assignments/create" element={<AssignmentsManagerPage />} />
+            <Route path="/plans/new" element={<CreatePlanPage />} />
+            <Route path="/plans/:planSlug/edit" element={<CreatePlanPage />} />
+            <Route path="/plans/:planSlug" element={<PlanDetailPage />} />
+            <Route path="/assignments/new" element={<AssignmentsManagerPage />} />
+            <Route path="/assignments/create" element={<Navigate to="/assignments/new" replace />} />
+            <Route path="/users/:userSlug/assignments/new" element={<AssignmentsManagerPage />} />
+            <Route path="/users/:userSlug/assignments/create" element={<Navigate to="../new" replace />} />
+            <Route path="/users/:userSlug/assignments/:planSlug" element={<AssignmentDetailPage />} />
+            <Route path="/users/:userSlug/assignments/:planSlug/edit" element={<CreateAssignmentPage />} />
+          </Route>
           <Route element={<RequireAuth requiredRole="admin" />}>
             <Route path="/admin" element={<AdminPage />} />
             <Route path="/admin/preferences" element={<AdminPreferencesPage />} />
             <Route path="/admin/users" element={<AdminUsersPage />} />
             <Route path="/admin/database" element={<AdminDatabasePage />} />
           </Route>
-          <Route path="/plans/new" element={<CreatePlanPage />} />
-          <Route path="/plans/:planSlug/edit" element={<CreatePlanPage />} />
-          <Route path="/plans/:planSlug" element={<PlanDetailPage />} />
-          <Route path="/help" element={<HelpPage />} />
-          <Route path="/favourites" element={<FavouritesPage favorites={favorites} folders={folders} onFoldersChange={setFolders} onFavoritesChange={setFavorites} />} />
-          <Route path="/assignments/new" element={<AssignmentsManagerPage />} />
-          <Route path="/assignments/create" element={<Navigate to="/assignments/new" replace />} />
-          <Route path="/users/:userSlug/assignments/new" element={<AssignmentsManagerPage />} />
-          <Route path="/users/:userSlug/assignments/create" element={<Navigate to="../new" replace />} />
-          <Route path="/users/:userSlug/assignments/:planSlug" element={<AssignmentDetailPage />} />
-          <Route path="/users/:userSlug/assignments/:planSlug/edit" element={<CreateAssignmentPage />} />
         </Route>
       </Routes>
     </div>

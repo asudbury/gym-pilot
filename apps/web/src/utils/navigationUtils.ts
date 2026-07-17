@@ -24,25 +24,33 @@ export type BuildNavigationMenuItemsOptions = {
   assignmentsCount: number
   onItemClick?: () => void
   itemClassName?: string
+  isAuthenticated?: boolean
 }
 
 export function buildNavigationMenuItems({
   onItemClick,
   itemClassName,
+  isAuthenticated = false,
 }: BuildNavigationMenuItemsOptions): NavigationMenuListItem[] {
+  const protectedItems: NavigationMenuListItem[] = isAuthenticated
+    ? [
+        {
+          to: '/plans',
+          label: 'Plans',
+          onClick: onItemClick,
+          className: itemClassName,
+        },
+        {
+          to: '/assignments',
+          label: 'Assignments',
+          onClick: onItemClick,
+          className: itemClassName,
+        },
+      ]
+    : []
+
   return [
-    {
-      to: '/plans',
-      label: 'Plans',
-      onClick: onItemClick,
-      className: itemClassName,
-    },
-    {
-      to: '/assignments',
-      label: 'Assignments',
-      onClick: onItemClick,
-      className: itemClassName,
-    },
+    ...protectedItems,
     {
       to: '/admin',
       label: 'Admin',
