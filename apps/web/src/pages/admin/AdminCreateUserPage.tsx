@@ -4,6 +4,8 @@ import { Button } from '../../components/Button'
 import { getSupabaseClient, logger, signUpWithPassword, usePlan } from '@gym-pilot/shared'
 import type { UserRole } from '@gym-pilot/types'
 import { AdminSectionShell } from '../../components/admin/AdminSectionShell'
+import { Panel } from '../../components/ui/Panel'
+import { SectionPanel } from '../../components/ui/SectionPanel'
 import { buildCreateUserProfilePayload, getCreateUserRoleOptions } from '../../features/admin/domain/createUser'
 
 type StatusMessageState = {
@@ -107,8 +109,8 @@ export function AdminCreateUserPage() {
       backLabel="Back to user admin"
       className="max-w-3xl"
     >
-      <div className="space-y-4 rounded-2xl border border-slate-200 bg-slate-50 p-4">
-        <div className="space-y-3 rounded-2xl border border-slate-200 bg-white p-4">
+      <SectionPanel>
+        <Panel className="space-y-3">
           <input
             value={newUserEmail}
             onChange={(event) => setNewUserEmail(event.target.value)}
@@ -181,8 +183,8 @@ export function AdminCreateUserPage() {
               {statusMessage.text}
             </p>
           ) : null}
-        </div>
-      </div>
+        </Panel>
+      </SectionPanel>
     </AdminSectionShell>
   )
 }

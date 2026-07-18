@@ -13,6 +13,30 @@ function readEnvValue(value: string | undefined) {
   return value?.trim() || undefined
 }
 
+function formatFriendlyTimestamp(buildDate: string, buildTime: string): string {
+  if (buildDate === 'Unknown' || buildTime === 'Unknown') {
+    return 'Unknown'
+  }
+
+  const dateValue = new Date(`${buildDate}T${buildTime.replace(/ UTC$/, '')}`)
+
+  if (Number.isNaN(dateValue.getTime())) {
+    return `${buildDate} ${buildTime}`
+  }
+
+  const day = dateValue.getDate()
+  const month = dateValue.toLocaleDateString('en-GB', { month: 'short' })
+  const year = dateValue.getFullYear()
+  const time = dateValue.toLocaleTimeString('en-GB', {
+    hour: '2-digit',
+    minute: '2-digit',
+    hour12: false,
+  })
+  const timezone = buildTime.includes('UTC') ? 'UTC' : ''
+
+  return `${day} ${month} ${year} at ${time}${timezone ? ` ${timezone}` : ''}`
+}
+
 export function getBuildMetadata(env: Record<string, string | undefined> = import.meta.env): BuildMetadata {
   const appVersion = readEnvValue(env.VITE_APP_VERSION) || webPackageJson.version || '0.0.0'
   const buildDate = readEnvValue(env.VITE_BUILD_DATE) || 'Unknown'
@@ -24,9 +48,7 @@ export function getBuildMetadata(env: Record<string, string | undefined> = impor
     appVersion,
     buildDate,
     buildTime,
-    buildTimestamp: buildDate === 'Unknown' || buildTime === 'Unknown'
-      ? 'Unknown'
-      : `${buildDate} ${buildTime}`,
+    buildTimestamp: formatFriendlyTimestamp(buildDate, buildTime),
     commitSha,
     branch,
   }

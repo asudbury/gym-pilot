@@ -3,6 +3,8 @@ import { useLocation, useNavigate } from 'react-router-dom'
 import { Button } from '../../components/Button'
 import { getSupabaseClient, listSupabaseAuthUsers, logger } from '@gym-pilot/shared'
 import { AdminSectionShell } from '../../components/admin/AdminSectionShell'
+import { Panel } from '../../components/ui/Panel'
+import { SectionPanel } from '../../components/ui/SectionPanel'
 import { mapAdminProfileRows, type AdminProfileRow } from '../../utils/adminUtils'
 
 export function AdminUsersPage() {
@@ -106,14 +108,14 @@ export function AdminUsersPage() {
 
   return (
     <AdminSectionShell title="Manage users" subtitle="Review current users and set up profiles" className="max-w-5xl">
-      <div className="space-y-4 rounded-2xl border border-slate-200 bg-slate-50 p-4">
+      <SectionPanel>
         <div className="flex flex-wrap gap-2">
           <Button tone="emerald" onClick={() => navigate('/admin/users/create')} className="px-4 py-2">
             Create user
           </Button>
         </div>
 
-        <div className="rounded-2xl border border-slate-200 bg-white p-4">
+        <Panel padding="md">
           <div className="flex items-center justify-between gap-2">
             <h3 className="text-sm font-semibold text-slate-800">Current users</h3>
             <span className="text-xs uppercase tracking-[0.2em] text-slate-500">
@@ -153,8 +155,8 @@ export function AdminUsersPage() {
               ))}
             </div>
           )}
-        </div>
-      </div>
+        </Panel>
+      </SectionPanel>
     </AdminSectionShell>
   )
 }

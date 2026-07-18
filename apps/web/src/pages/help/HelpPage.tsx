@@ -1,10 +1,14 @@
 import { PageLayout } from '../../layouts/PageLayout'
 import { PageCardLayout } from '../../layouts/PageCardLayout'
+import { Panel } from '../../components/ui/Panel'
+import { useAuth } from '../../auth/AuthContext'
 import { helpSections } from '../../utils/helpUtils'
 import { getBuildMetadata } from '../../utils/buildInfo'
 
 export function HelpPage() {
+  const { hasAccess } = useAuth()
   const buildMetadata = getBuildMetadata()
+  const isAdmin = hasAccess('admin')
 
   return (
     <PageLayout>
@@ -15,7 +19,7 @@ export function HelpPage() {
       >
         <div className="flex flex-col gap-4">
           {helpSections.map((section) => (
-            <div key={section.title} className="rounded-2xl border border-slate-200 bg-slate-50 p-4">
+            <Panel key={section.title} variant="muted" padding="md">
               <h2 className="text-lg font-semibold text-slate-900">{section.title}</h2>
               <ul className="mt-3 space-y-2 text-sm text-slate-600">
                 {section.items.map((item) => (
@@ -24,15 +28,17 @@ export function HelpPage() {
                   </li>
                 ))}
               </ul>
-            </div>
+            </Panel>
           ))}
 
-          <div className="rounded-2xl border border-slate-200 bg-white px-4 py-3 text-sm text-slate-500">
-            <p>App version: {buildMetadata.appVersion}</p>
-            <p className="mt-1">Build: {buildMetadata.buildTimestamp}</p>
-            <p className="mt-1">Commit: {buildMetadata.commitSha}</p>
-            <p className="mt-1">Branch: {buildMetadata.branch}</p>
-          </div>
+          {isAdmin ? (
+            <Panel variant="white" padding="md" className="text-sm text-slate-500">
+              <p>App version: {buildMetadata.appVersion}</p>
+              <p className="mt-1">Build: {buildMetadata.buildTimestamp}</p>
+              <p className="mt-1">Commit: {buildMetadata.commitSha}</p>
+              <p className="mt-1">Branch: {buildMetadata.branch}</p>
+            </Panel>
+          ) : null}
         </div>
       </PageCardLayout>
     </PageLayout>

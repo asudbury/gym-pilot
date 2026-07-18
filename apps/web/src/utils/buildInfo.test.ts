@@ -13,7 +13,7 @@ describe('getBuildMetadata', () => {
       appVersion: '1.2.3',
       buildDate: '2026-07-18',
       buildTime: '10:30:00 UTC',
-      buildTimestamp: '2026-07-18 10:30:00 UTC',
+      buildTimestamp: '18 Jul 2026 at 10:30 UTC',
       commitSha: 'abc1234',
       branch: 'main',
     })
