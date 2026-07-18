@@ -28,6 +28,7 @@ export function AdminDatabasePage() {
       title="Database"
       subtitle="Inspect the stored JSON records"
       className="max-w-6xl"
+      icon="database"
     >
       <div className="space-y-3 rounded-2xl border border-slate-200 bg-slate-50 p-4">
         {formattedEntries.map((entry) => (

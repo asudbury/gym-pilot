@@ -7,6 +7,7 @@ import { PageCard } from '../../components/PageCard'
 import { PageLayout } from '../../layouts/PageLayout'
 import { PageCardLayout } from '../../layouts/PageCardLayout'
 import { resolvePlanListViewModels } from '../../features/plans/domain/planList'
+import { DecorativeIcon } from '../../components/ui/DecorativeIcon'
 
 export function PlansPage() {
   const { visiblePlans, deletePlan } = usePlan()
@@ -45,7 +46,7 @@ export function PlansPage() {
           subtitle="Plans Dashboard"
           description={description}
         >
-          <div className="flex justify-end">
+         <div className="flex justify-end">
             <Link
               to="/plans/new"
               className={getToneClass(

@@ -4,6 +4,7 @@ import { Panel } from '../../components/ui/Panel'
 import { useAuth } from '../../auth/AuthContext'
 import { helpSections } from '../../utils/helpUtils'
 import { getBuildMetadata } from '../../utils/buildInfo'
+import { DecorativeIcon } from '../../components/ui/DecorativeIcon'
 
 export function HelpPage() {
   const { user, hasAccess } = useAuth()
@@ -118,7 +119,7 @@ export function HelpPage() {
         subtitle="How to use the app"
         description="Find answers to common questions and learn how to use the app effectively"
       >
-        <div className="flex flex-col gap-4">
+       <div className="flex flex-col gap-4">
           <Panel
             variant="white"
             padding="md"
@@ -182,8 +183,6 @@ export function HelpPage() {
             >
               <p>App version: {buildMetadata.appVersion}</p>
               <p className="mt-1">Build: {buildMetadata.buildTimestamp}</p>
-              <p className="mt-1">Commit: {buildMetadata.commitSha}</p>
-              <p className="mt-1">Branch: {buildMetadata.branch}</p>
             </Panel>
           ) : null}
         </div>

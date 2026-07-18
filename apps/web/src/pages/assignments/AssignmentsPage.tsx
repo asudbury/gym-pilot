@@ -7,6 +7,7 @@ import { PageLayout } from '../../layouts/PageLayout'
 import { PageCardLayout } from '../../layouts/PageCardLayout'
 import { CallToAction } from '../../layouts/CallToAction'
 import { resolveAssignmentListViewModels } from '../../features/plans/domain/planList'
+import { DecorativeIcon } from '../../components/ui/DecorativeIcon'
 
 export function AssignmentsPage() {
   const { visibleAssignments, deleteAssignment } = usePlan()
@@ -44,7 +45,7 @@ export function AssignmentsPage() {
           subtitle="Assignments Dashboard"
           description={description}
         >
-          <div className="flex justify-end">
+         <div className="flex justify-end">
             <Link
               to="/assignments/new"
               className={getToneClass(

@@ -5,6 +5,7 @@ import { useAuth } from '../auth/AuthContext'
 import { renderDashboardWidgets } from '../components/dashboard/dashboardLayouts'
 import { formatDashboardTimestamp } from '../utils/appUtils'
 import { resolveDashboardViewModel } from '../features/dashboard/domain/dashboardLayout'
+import { DecorativeIcon } from '../components/ui/DecorativeIcon'
 
 type DashboardPageProps = {
   userName?: string | null
@@ -42,22 +43,25 @@ export function DashboardPage({ userName }: DashboardPageProps) {
   return (
     <PageLayout className="gap-6">
       <PageCard as="section" className="space-y-6">
-        <div className="space-y-2">
-          <p className="text-sm font-semibold uppercase tracking-[0.24em] text-slate-500">
-            Dashboard
-          </p>
-          <h1 className="text-2xl font-semibold tracking-tight text-slate-900 sm:text-3xl dark:text-slate-100">
-            Welcome back, {displayName}
-          </h1>
-          <p className="max-w-2xl text-sm text-slate-600 dark:text-slate-300">
-            Choose the view that fits your role and jump back into your work
-            from one place.
-          </p>
-          {previousLoginLabel ? (
-            <p className="max-w-2xl text-sm text-slate-500 dark:text-slate-400">
-              Your last login: {previousLoginLabel}.
+        <div className="flex items-start gap-3">
+          <DecorativeIcon icon="grid" />
+          <div className="space-y-2">
+            <p className="text-sm font-semibold uppercase tracking-[0.24em] text-slate-500">
+              Dashboard
             </p>
-          ) : null}
+            <h1 className="text-2xl font-semibold tracking-tight text-slate-900 sm:text-3xl dark:text-slate-100">
+              Welcome back, {displayName}
+            </h1>
+            <p className="max-w-2xl text-sm text-slate-600 dark:text-slate-300">
+              Choose the view that fits your role and jump back into your work
+              from one place.
+            </p>
+            {previousLoginLabel ? (
+              <p className="max-w-2xl text-sm text-slate-500 dark:text-slate-400">
+                Your last login: {previousLoginLabel}.
+              </p>
+            ) : null}
+          </div>
         </div>
 
         {shouldShowRoleSelector ? (

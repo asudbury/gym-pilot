@@ -2,6 +2,7 @@ import { useEffect, useMemo, useState } from 'react'
 import { useAuth } from '../auth/AuthContext'
 import { PageCard } from '../components/PageCard'
 import { PageLayout } from '../layouts/PageLayout'
+import { DecorativeIcon } from '../components/ui/DecorativeIcon'
 import { loadVirginActiveClubs } from '../utils/virginActiveClubs'
 import {
   resolveTimetableViewModel,
@@ -382,13 +383,16 @@ export function TimetablePage() {
   return (
     <PageLayout className="max-w-6xl">
       <PageCard padding="spacious" className="space-y-6">
-        <div className="space-y-2">
-          <p className="text-sm font-medium uppercase tracking-[0.2em] text-slate-500">
-            Timetable
-          </p>
-          <h1 className="text-3xl font-semibold text-slate-900">
-            {gymBrandLabel} {gymNameLabel}
-          </h1>
+        <div className="flex items-start gap-3">
+          <DecorativeIcon icon="calendar" />
+          <div className="space-y-2">
+            <p className="text-sm font-medium uppercase tracking-[0.2em] text-slate-500">
+              Timetable
+            </p>
+            <h1 className="text-3xl font-semibold text-slate-900">
+              {gymBrandLabel} {gymNameLabel}
+            </h1>
+          </div>
         </div>
 
         {isLoading ? (

@@ -10,6 +10,7 @@ import {
   type QuickLink,
 } from '../utils/favouriteUtils'
 import { resolveFavouritesPageViewModel } from '../features/favourites/domain/favouritesPage'
+import { DecorativeIcon } from '../components/ui/DecorativeIcon'
 
 type FavouritesPageProps = {
   favorites: QuickLink[]
@@ -120,6 +121,17 @@ export function FavouritesPage({
         subtitle="Your saved shortcuts"
         description="Group favourite pages into folders so they are easier to manage."
       >
+        <div className="mb-4 flex items-start gap-3">
+          <DecorativeIcon icon="heart" />
+          <div>
+            <p className="text-sm font-semibold uppercase tracking-[0.24em] text-slate-500">
+              Saved shortcuts
+            </p>
+            <p className="text-sm text-slate-600 dark:text-slate-300">
+              Keep your most-used pages close at hand and sorted by folder.
+            </p>
+          </div>
+        </div>
         <div className="flex flex-col gap-4">
           <CreateFolderForm
             newFolderName={newFolderName}

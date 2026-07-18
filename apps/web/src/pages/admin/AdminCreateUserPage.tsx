@@ -165,6 +165,7 @@ export function AdminCreateUserPage() {
       backTo="/admin/users"
       backLabel="Back to user admin"
       className="max-w-3xl"
+      icon="user"
     >
       <SectionPanel>
         <Panel className="space-y-3">

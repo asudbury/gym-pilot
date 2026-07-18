@@ -7,6 +7,7 @@ import { logger } from '@gym-pilot/shared'
 import { ExerciseFilterPanel } from '../components/exercises/ExerciseFilterPanel'
 import { ExerciseResultsHeader } from '../components/exercises/ExerciseResultsHeader'
 import { ExerciseList } from '../components/exercises/ExerciseList'
+import { DecorativeIcon } from '../components/ui/DecorativeIcon'
 import {
   filterExercises,
   resolveHomeViewModel,
@@ -128,6 +129,17 @@ export function HomePage({
   return (
     <PageLayout className="gap-6">
       <PageCard as="section">
+        <div className="mb-4 flex items-start gap-3">
+          <DecorativeIcon icon="dumbbell" />
+          <div>
+            <p className="text-sm font-semibold uppercase tracking-[0.24em] text-slate-500">
+              Discover exercises
+            </p>
+            <p className="text-sm text-slate-600 dark:text-slate-300">
+              Browse by category or search for the movement you need.
+            </p>
+          </div>
+        </div>
         <ExerciseFilterPanel
           draftSearchTerm={draftSearchTerm}
           selectedCategory={selectedCategory}

@@ -5,6 +5,7 @@ import { getToneClass } from '../../components/toneClasses'
 import { PageCard } from '../../components/PageCard'
 import { PageLayout } from '../../layouts/PageLayout'
 import { Heading1, Paragraph } from '../../components/Typography'
+import { DecorativeIcon } from '../../components/ui/DecorativeIcon'
 import { appTokens } from '../../constants/tokens'
 
 export function AdminChangePasswordPage() {
@@ -56,9 +57,12 @@ export function AdminChangePasswordPage() {
     <PageLayout className="max-w-3xl">
       <PageCard padding="spacious">
         <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
-          <div>
-            <Paragraph>Account</Paragraph>
-            <Heading1 className="mt-2">Change password</Heading1>
+          <div className="flex items-start gap-3">
+            <DecorativeIcon icon="key" />
+            <div>
+              <Paragraph>Account</Paragraph>
+              <Heading1 className="mt-2">Change password</Heading1>
+            </div>
           </div>
           <Link
             to="/admin/preferences"

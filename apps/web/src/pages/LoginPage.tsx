@@ -18,6 +18,7 @@ import {
   readStoredRememberEmailPreference,
   readStoredRememberedEmail,
 } from '../features/auth/domain/loginPreferences'
+import { DecorativeIcon } from '../components/ui/DecorativeIcon'
 
 export function LoginPage() {
   const navigate = useNavigate()
@@ -165,8 +166,11 @@ export function LoginPage() {
         className="w-full max-w-xl self-start"
         padding="spacious"
       >
-        <div className="flex flex-col gap-2">
-          <Heading1 as="h1">Welcome to {appName}</Heading1>
+        <div className="flex items-start gap-3">
+          <DecorativeIcon icon="lock" />
+          <div className="flex flex-col gap-2">
+            <Heading1 as="h1">Welcome to {appName}</Heading1>
+          </div>
         </div>
 
         <form

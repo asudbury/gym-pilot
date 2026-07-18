@@ -5,6 +5,7 @@ import { getToneClass } from '../../components/toneClasses'
 import { PageCard } from '../../components/PageCard'
 import { PageLayout } from '../../layouts/PageLayout'
 import { Heading1, Paragraph } from '../../components/Typography'
+import { DecorativeIcon } from '../../components/ui/DecorativeIcon'
 import { useAuth } from '../../auth/AuthContext'
 import { appTokens } from '../../constants/tokens'
 import { getDisplayEmail, getDisplayRoles } from '../../features/admin/domain/adminUtils'
@@ -73,9 +74,12 @@ export function AdminPreferencesPage() {
     <PageLayout className="max-w-6xl">
       <PageCard padding="spacious">
         <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
-          <div>
-            <Paragraph>Admin</Paragraph>
-            <Heading1 className="mt-2">Preferences</Heading1>
+          <div className="flex items-start gap-3">
+            <DecorativeIcon icon="settings" />
+            <div>
+              <Paragraph>Admin</Paragraph>
+              <Heading1 className="mt-2">Preferences</Heading1>
+            </div>
           </div>
           <Link
             to="/admin"
