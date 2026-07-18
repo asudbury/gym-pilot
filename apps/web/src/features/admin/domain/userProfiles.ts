@@ -1,6 +1,6 @@
 import type { UserRole } from '@gym-pilot/types'
-import { getDisplayRoles } from '../../../utils/adminUtils'
-import type { AdminProfileRow } from '../../../utils/adminUtils'
+import { getDisplayRoles } from './adminUtils'
+import type { AdminProfileRow } from './adminUtils'
 
 export type AdminProfileRowLike = AdminProfileRow
 

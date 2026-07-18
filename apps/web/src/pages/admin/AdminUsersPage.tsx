@@ -12,7 +12,7 @@ import { SectionPanel } from '../../components/ui/SectionPanel'
 import {
   mapAdminProfileRows,
   type AdminProfileRow,
-} from '../../utils/adminUtils'
+} from '../../features/admin/domain/adminUtils'
 
 export function AdminUsersPage() {
   const location = useLocation()

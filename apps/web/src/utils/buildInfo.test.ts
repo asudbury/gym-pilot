@@ -21,6 +21,15 @@ describe('getBuildMetadata', () => {
     })
   })
 
+  it('formats the timestamp using UTC values', () => {
+    expect(
+      getBuildMetadata({
+        VITE_BUILD_DATE: '2026-07-18',
+        VITE_BUILD_TIME: '23:45:00 UTC',
+      }).buildTimestamp,
+    ).toBe('18 Jul 2026 at 23:45 UTC')
+  })
+
   it('falls back to the package version and unknown values when no metadata is injected', () => {
     const metadata = getBuildMetadata({})
 

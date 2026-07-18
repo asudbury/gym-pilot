@@ -1,7 +1,7 @@
 import { Link } from 'react-router-dom'
 import { CallToAction } from '../../layouts/CallToAction'
 import { getToneClass } from '../toneClasses'
-import { type AdminActionCard } from '../../utils/adminUtils'
+import { type AdminActionCard } from '../../features/admin/domain/adminUtils'
 
 type AdminPageCardsProps = {
   cards: AdminActionCard[]

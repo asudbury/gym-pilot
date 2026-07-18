@@ -7,7 +7,7 @@ import {
   listSupabaseAuthUsers,
   logger,
 } from '@gym-pilot/shared'
-import { getDisplayEmail } from '../../utils/adminUtils'
+import { getDisplayEmail } from '../../features/admin/domain/adminUtils'
 import {
   resolveUserActivityViewModel,
   type UserActivityProfileViewModel,

@@ -1,6 +1,6 @@
 import { PageLayout } from '../../layouts/PageLayout'
 import { PageCardLayout } from '../../layouts/PageCardLayout'
-import { adminCards } from '../../utils/adminUtils'
+import { adminCards } from '../../features/admin/domain/adminUtils'
 import { AdminPageCards } from '../../components/admin/AdminPageCards'
 
 export function AdminPage() {

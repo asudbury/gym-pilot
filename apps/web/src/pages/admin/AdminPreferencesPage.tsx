@@ -7,7 +7,7 @@ import { PageLayout } from '../../layouts/PageLayout'
 import { Heading1, Paragraph } from '../../components/Typography'
 import { useAuth } from '../../auth/AuthContext'
 import { appTokens } from '../../constants/tokens'
-import { getDisplayEmail, getDisplayRoles } from '../../utils/adminUtils'
+import { getDisplayEmail, getDisplayRoles } from '../../features/admin/domain/adminUtils'
 import { GymClubSelector } from '../../components/GymClubSelector'
 import { logger } from '@gym-pilot/shared'
 

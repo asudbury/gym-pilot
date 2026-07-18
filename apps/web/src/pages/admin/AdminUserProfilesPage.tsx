@@ -14,7 +14,7 @@ import {
   availableAdminRoles,
   getDisplayEmail,
   type AdminProfileRow,
-} from '../../utils/adminUtils'
+} from '../../features/admin/domain/adminUtils'
 import {
   createInitialProfileDraft,
   mapProfileRow,

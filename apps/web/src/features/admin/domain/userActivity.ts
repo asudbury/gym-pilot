@@ -1,4 +1,4 @@
-import { getDisplayEmail, getDisplayRoles } from '../../../utils/adminUtils'
+import { getDisplayEmail, getDisplayRoles } from './adminUtils'
 import type { UserRole } from '@gym-pilot/types'
 
 export type UserActivityRowViewModel = {

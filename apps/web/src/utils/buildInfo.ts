@@ -18,19 +18,21 @@ function formatFriendlyTimestamp(buildDate: string, buildTime: string): string {
     return 'Unknown'
   }
 
-  const dateValue = new Date(`${buildDate}T${buildTime.replace(/ UTC$/, '')}`)
+  const trimmedTime = buildTime.replace(/ UTC$/, '')
+  const dateValue = new Date(`${buildDate}T${trimmedTime}Z`)
 
   if (Number.isNaN(dateValue.getTime())) {
     return `${buildDate} ${buildTime}`
   }
 
-  const day = dateValue.getDate()
-  const month = dateValue.toLocaleDateString('en-GB', { month: 'short' })
-  const year = dateValue.getFullYear()
+  const day = dateValue.getUTCDate()
+  const month = dateValue.toLocaleDateString('en-GB', { month: 'short', timeZone: 'UTC' })
+  const year = dateValue.getUTCFullYear()
   const time = dateValue.toLocaleTimeString('en-GB', {
     hour: '2-digit',
     minute: '2-digit',
     hour12: false,
+    timeZone: 'UTC',
   })
   const timezone = buildTime.includes('UTC') ? 'UTC' : ''
 
