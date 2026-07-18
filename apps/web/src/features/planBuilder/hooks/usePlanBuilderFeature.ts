@@ -1,0 +1,338 @@
+import { useCallback, useEffect, useMemo, useState, type Dispatch, type SetStateAction } from 'react'
+import ExcelJS from 'exceljs'
+import { exercises, loadJsonRecord } from '@gym-pilot/shared'
+import { FAVORITES_KEY } from '../../../constants/storageKeys'
+import { buildFavoritePlanBuilderState } from '../domain/planBuilderFavorites'
+import {
+  buildPlanSessionsFromTabs,
+  buildTabsFromSessions,
+  createBlankRow,
+  createBlankTab,
+  createLinkRow,
+  sanitizeSheetName,
+  type PlanTab,
+} from '../../../utils/planBuilderUtils'
+import type { PlanSession } from '@gym-pilot/types'
+
+export type PlanBuilderFeatureState = {
+  tabs: PlanTab[]
+  activeTabId: string | null
+  selectedExerciseId: string
+  selectedExerciseName: string
+  favoriteExerciseIds: string[]
+  favoriteLinks: Array<{ id: string; label: string; path: string; folder?: string }>
+  isFullscreen: boolean
+  personNamesInput: string
+}
+
+export type PlanBuilderFeatureActions = {
+  setSelectedExerciseId: (value: string) => void
+  setSelectedExerciseName: (value: string) => void
+  setPersonNamesInput: (value: string) => void
+  setTabs: Dispatch<SetStateAction<PlanTab[]>>
+  setActiveTabId: (value: string | null) => void
+  setIsFullscreen: (value: boolean) => void
+  handleAddTab: () => void
+  handleRenameTab: (tabId: string, nextTitle: string) => void
+  handleRemoveTab: (tabId: string) => void
+  handleAddRow: (exerciseId?: string) => void
+  handleExerciseSelection: (exerciseId: string, exerciseName: string) => void
+  handleAddLinkRows: (links: Array<{ label: string; path: string }>) => void
+  handleRemoveRow: (rowId: string) => void
+  handleMoveRow: (rowId: string, direction: -1 | 1) => void
+  handleCellChange: (rowId: string, field: string, value: string) => void
+  handleExportToExcel: () => Promise<void>
+  buildPlanSessions: () => PlanSession[]
+  resetForCreate: () => void
+  hydrateFromPlan: (plan: { planSessions?: PlanSession[]; planName?: string } | null | undefined) => void
+}
+
+export function createPlanBuilderInitialState(existingSessions?: PlanSession[] | null) {
+  const initialTabs = buildTabsFromSessions(existingSessions ?? undefined)
+  return {
+    tabs: initialTabs,
+    activeTabId: initialTabs[0]?.id ?? null,
+    selectedExerciseId: exercises[0]?.id ?? '',
+    selectedExerciseName: '',
+    favoriteExerciseIds: [] as string[],
+    favoriteLinks: [] as Array<{ id: string; label: string; path: string; folder?: string }>,
+    isFullscreen: false,
+    personNamesInput: '',
+  }
+}
+
+export function usePlanBuilderFeature(existingSessions?: PlanSession[] | null) {
+  const initialState = useMemo(() => createPlanBuilderInitialState(existingSessions), [existingSessions])
+  const [tabs, setTabs] = useState<PlanTab[]>(initialState.tabs)
+  const [activeTabId, setActiveTabId] = useState<string | null>(initialState.activeTabId)
+  const [selectedExerciseId, setSelectedExerciseId] = useState(initialState.selectedExerciseId)
+  const [selectedExerciseName, setSelectedExerciseName] = useState(initialState.selectedExerciseName)
+  const [favoriteExerciseIds, setFavoriteExerciseIds] = useState<string[]>(initialState.favoriteExerciseIds)
+  const [favoriteLinks, setFavoriteLinks] = useState<Array<{ id: string; label: string; path: string; folder?: string }>>(initialState.favoriteLinks)
+  const [isFullscreen, setIsFullscreen] = useState(initialState.isFullscreen)
+  const [personNamesInput, setPersonNamesInput] = useState(initialState.personNamesInput)
+
+  const activeTab = useMemo(() => tabs.find((tab) => tab.id === activeTabId) ?? tabs[0], [activeTabId, tabs])
+  const activeRows = activeTab?.rows ?? []
+
+  const favoriteExercises = useMemo(() => {
+    const selectedExerciseIds = new Set(activeRows.filter((row) => row.exerciseId).map((row) => row.exerciseId))
+    return exercises.filter((exercise) => favoriteExerciseIds.includes(exercise.id) && !selectedExerciseIds.has(exercise.id))
+  }, [activeRows, favoriteExerciseIds])
+
+  useEffect(() => {
+    if (!activeTabId && tabs.length > 0) {
+      setActiveTabId(tabs[0].id)
+    }
+  }, [activeTabId, tabs])
+
+  useEffect(() => {
+    let cancelled = false
+
+    void loadJsonRecord<unknown>(FAVORITES_KEY, { favorites: [], folders: [] }).then((storedValue) => {
+      if (cancelled) {
+        return
+      }
+
+      const normalizedValue = storedValue && typeof storedValue === 'object'
+        ? storedValue as { favorites?: Array<{ id?: string; label?: string; path?: string; folder?: string }>; folders?: string[] }
+        : { favorites: [] as Array<{ id?: string; label?: string; path?: string; folder?: string }>, folders: [] as string[] }
+
+      const state = buildFavoritePlanBuilderState(normalizedValue, activeRows, exercises)
+      setFavoriteExerciseIds(state.favoriteExerciseIds)
+      setFavoriteLinks(state.favoriteLinks)
+    })
+
+    return () => {
+      cancelled = true
+    }
+  }, [activeRows])
+
+  useEffect(() => {
+    if (!isFullscreen) {
+      return
+    }
+
+    const handleKeyDown = (event: KeyboardEvent) => {
+      if (event.key === 'Escape') {
+        setIsFullscreen(false)
+      }
+    }
+
+    window.addEventListener('keydown', handleKeyDown)
+    return () => window.removeEventListener('keydown', handleKeyDown)
+  }, [isFullscreen])
+
+  const handleAddTab = useCallback(() => {
+    const nextTab = createBlankTab(`Day ${tabs.length + 1}`)
+    setTabs((current) => [...current, nextTab])
+    setActiveTabId(nextTab.id)
+  }, [tabs.length])
+
+  const handleRenameTab = useCallback((tabId: string, nextTitle: string) => {
+    const trimmedTitle = nextTitle.trim()
+
+    setTabs((current) => current.map((tab) => (tab.id === tabId ? { ...tab, title: trimmedTitle || 'Untitled tab' } : tab)))
+  }, [])
+
+  const handleRemoveTab = useCallback((tabId: string) => {
+    setTabs((current) => {
+      if (current.length <= 1) {
+        return current
+      }
+
+      const nextTabs = current.filter((tab) => tab.id !== tabId)
+      const removedTabWasActive = activeTabId === tabId
+
+      if (!removedTabWasActive) {
+        return nextTabs
+      }
+
+      setActiveTabId(nextTabs[0]?.id ?? null)
+      return nextTabs
+    })
+  }, [activeTabId])
+
+  const handleAddRow = useCallback((exerciseId = selectedExerciseId) => {
+    if (!exerciseId || !activeTabId) {
+      return
+    }
+
+    setTabs((current) => current.map((tab) => (tab.id === activeTabId ? { ...tab, rows: [...tab.rows, createBlankRow(exerciseId)] } : tab)))
+    setSelectedExerciseId('')
+    setSelectedExerciseName('')
+  }, [activeTabId, selectedExerciseId])
+
+  const handleExerciseSelection = useCallback((exerciseId: string, exerciseName: string) => {
+    setSelectedExerciseId(exerciseId)
+    setSelectedExerciseName(exerciseName)
+  }, [])
+
+  const handleAddLinkRows = useCallback((links: Array<{ label: string; path: string }>) => {
+    if (!activeTabId) {
+      return
+    }
+
+    const normalizedLinks = links
+      .map((link) => ({ label: link.label.trim(), path: link.path.trim() }))
+      .filter((link) => link.label && link.path)
+
+    if (normalizedLinks.length === 0) {
+      return
+    }
+
+    setTabs((current) => current.map((tab) => {
+      if (tab.id !== activeTabId) {
+        return tab
+      }
+
+      return {
+        ...tab,
+        rows: [...tab.rows, ...normalizedLinks.map((link) => createLinkRow(link.label, link.path))],
+      }
+    }))
+  }, [activeTabId])
+
+  const handleRemoveRow = useCallback((rowId: string) => {
+    if (!activeTabId) {
+      return
+    }
+
+    setTabs((current) => current.map((tab) => (tab.id === activeTabId ? { ...tab, rows: tab.rows.filter((row) => row.id !== rowId) } : tab)))
+  }, [activeTabId])
+
+  const handleMoveRow = useCallback((rowId: string, direction: -1 | 1) => {
+    if (!activeTabId) {
+      return
+    }
+
+    setTabs((current) => current.map((tab) => {
+      if (tab.id !== activeTabId) {
+        return tab
+      }
+
+      const index = tab.rows.findIndex((row) => row.id === rowId)
+
+      if (index < 0) {
+        return tab
+      }
+
+      const nextIndex = index + direction
+
+      if (nextIndex < 0 || nextIndex >= tab.rows.length) {
+        return tab
+      }
+
+      const updatedRows = [...tab.rows]
+      const [rowToMove] = updatedRows.splice(index, 1)
+      updatedRows.splice(nextIndex, 0, rowToMove)
+
+      return { ...tab, rows: updatedRows }
+    }))
+  }, [activeTabId])
+
+  const handleCellChange = useCallback((rowId: string, field: string, value: string) => {
+    if (!activeTabId) {
+      return
+    }
+
+    setTabs((current) => current.map((tab) => (tab.id === activeTabId ? { ...tab, rows: tab.rows.map((row) => (row.id === rowId ? { ...row, [field]: value } : row)) } : tab)))
+  }, [activeTabId])
+
+  const handleExportToExcel = useCallback(async () => {
+    if (typeof window === 'undefined') {
+      return
+    }
+
+    const workbook = new ExcelJS.Workbook()
+    workbook.creator = 'GymPilot'
+    workbook.lastModifiedBy = 'GymPilot'
+    workbook.created = new Date()
+    workbook.modified = new Date()
+
+    const exportName = (personNamesInput.trim() || 'plan').replace(/[^a-z0-9]+/gi, '-').replace(/(^-|-$)/g, '') || 'plan'
+
+    tabs.forEach((tab, index) => {
+      const worksheet = workbook.addWorksheet(sanitizeSheetName(tab.title || `Day ${index + 1}`))
+      worksheet.columns = [
+        { header: 'Exercise', key: 'exercise', width: 32 },
+        { header: 'Reps', key: 'reps', width: 14 },
+        { header: 'Working sets', key: 'workingSets', width: 16 },
+        { header: 'Notes', key: 'notes', width: 36 },
+      ]
+
+      tab.rows.forEach((row) => {
+        const exercise = exercises.find((item) => item.id === row.exerciseId)
+        worksheet.addRow({
+          exercise: exercise?.name ?? '',
+          reps: row.reps,
+          workingSets: row.workingSets,
+          notes: row.notes,
+        })
+      })
+    })
+
+    const buffer = await workbook.xlsx.writeBuffer()
+    const blob = new Blob([buffer], { type: 'application/vnd.openxmlformats-officedocument/spreadsheetml.sheet' })
+    const url = window.URL.createObjectURL(blob)
+    const link = document.createElement('a')
+    link.href = url
+    link.download = `${exportName}.xlsx`
+    document.body.appendChild(link)
+    link.click()
+    document.body.removeChild(link)
+    window.URL.revokeObjectURL(url)
+  }, [personNamesInput, tabs])
+
+  const buildPlanSessions = useCallback(() => buildPlanSessionsFromTabs(tabs), [tabs])
+
+  const resetForCreate = useCallback(() => {
+    setPersonNamesInput('')
+    setSelectedExerciseId(exercises[0]?.id ?? '')
+    setSelectedExerciseName('')
+    const resetTab = createBlankTab('Day 1')
+    setTabs([resetTab])
+    setActiveTabId(resetTab.id)
+  }, [])
+
+  const hydrateFromPlan = useCallback((plan: { planSessions?: PlanSession[]; planName?: string } | null | undefined) => {
+    setPersonNamesInput(plan?.planName ?? '')
+    setSelectedExerciseId('')
+    setSelectedExerciseName('')
+    const nextTabs = buildTabsFromSessions(plan?.planSessions)
+    setTabs(nextTabs)
+    setActiveTabId(nextTabs[0]?.id ?? null)
+  }, [])
+
+  return {
+    tabs,
+    setTabs,
+    activeTabId,
+    setActiveTabId,
+    selectedExerciseId,
+    setSelectedExerciseId,
+    selectedExerciseName,
+    setSelectedExerciseName,
+    favoriteExerciseIds,
+    favoriteLinks,
+    isFullscreen,
+    setIsFullscreen,
+    personNamesInput,
+    setPersonNamesInput,
+    favoriteExercises,
+    activeRows,
+    handleAddTab,
+    handleRenameTab,
+    handleRemoveTab,
+    handleAddRow,
+    handleExerciseSelection,
+    handleAddLinkRows,
+    handleRemoveRow,
+    handleMoveRow,
+    handleCellChange,
+    handleExportToExcel,
+    buildPlanSessions,
+    resetForCreate,
+    hydrateFromPlan,
+  }
+}

@@ -1,12 +1,13 @@
-import { useMemo, useState, type JSXElementConstructor, type Key, type ReactElement, type ReactNode, type ReactPortal } from 'react'
+import { useMemo, useState } from 'react'
 import { Link, useParams } from 'react-router-dom'
 import { getToneClass } from '../../components/toneClasses'
-import { exercises, usePlan } from '@gym-pilot/shared'
-import type { Assignment  } from '@gym-pilot/types'
+import { usePlan } from '@gym-pilot/shared'
+import type { Assignment } from '@gym-pilot/types'
 import { PageCard } from '../../components/PageCard'
 import { PageLayout } from '../../layouts/PageLayout'
 import { Heading1, Paragraph } from '../../components/Typography'
 import { ExerciseDetailsCard } from '../../components/exercises/ExerciseDetailsCard'
+import { resolveExerciseForPlanItem, resolvePlanDetailViewModel } from '../../features/plans/domain/planDetail'
 
 export function AssignmentDetailPage() {
   const { planSlug } = useParams()
@@ -15,18 +16,7 @@ export function AssignmentDetailPage() {
 
   const assignment = useMemo<Assignment | undefined>(() => visibleAssignments.find((item) => item.id === planSlug), [visibleAssignments, planSlug])
   const plan = useMemo(() => visiblePlans.find((item) => item.id === assignment?.planId), [visiblePlans, assignment?.planId])
-  const resolvedPlan = useMemo(() => ({
-    planName: assignment?.planName ?? plan?.planName ?? 'Untitled plan',
-    planSlug: assignment?.planSlug ?? plan?.planSlug ?? 'plan',
-    planSessions: (assignment?.planSessions && assignment.planSessions.length > 0)
-      ? assignment.planSessions
-      : (plan?.planSessions ?? []),
-  }), [assignment, plan])
-
-  const isAssignment = Boolean(assignment)
-
-  const editPath = isAssignment ? `/users/${assignment?.assignedUserId ?? 'user'}/assignments/${assignment?.id ?? planSlug}/edit` : `/plans/${assignment?.id ?? planSlug}/edit`
-  const backPath = isAssignment ? `/users/${assignment?.assignedUserId ?? 'user'}/assignments` : '/plans'
+  const viewModel = useMemo(() => resolvePlanDetailViewModel(plan, assignment, planSlug), [plan, assignment, planSlug])
 
   const toggleExerciseExpanded = (exerciseId: string) => {
     setExpandedExerciseIds((current) => {
@@ -49,7 +39,7 @@ export function AssignmentDetailPage() {
     )
   }
 
-  if (!resolvedPlan.planSessions.length) {
+  if (!viewModel.sessions.length) {
     return (
       <PageLayout className="max-w-4xl">
         <PageCard padding="spacious">
@@ -67,26 +57,25 @@ export function AssignmentDetailPage() {
           <div>
             <Paragraph>Assignment</Paragraph>
             <Heading1 className="mt-2">{assignment?.assignmentName ?? 'Untitled assignment'}</Heading1>
-          <p className="mt-2 text-sm text-slate-600">{resolvedPlan.planName}</p>
+          <p className="mt-2 text-sm text-slate-600">{viewModel.description}</p>
           </div>
           <div className="flex flex-wrap gap-2">
-            <Link to={editPath} className={getToneClass('blue', 'px-4 py-2 text-sm font-medium')}>
-             Edit assignment
+            <Link to={viewModel.editPath} className={getToneClass('blue', 'px-4 py-2 text-sm font-medium')}>
+             {viewModel.editLabel}
             </Link>
-            <Link to={backPath} className={getToneClass('default', 'px-4 py-2 text-sm font-medium')}>
-             Back to assignments
+            <Link to={viewModel.backPath} className={getToneClass('default', 'px-4 py-2 text-sm font-medium')}>
+             {viewModel.backLabel}
             </Link>
           </div>
         </div>
         <div className="space-y-4 mt-6">
           <h3><b>Exercises</b></h3>
-          {(resolvedPlan.planSessions ?? []).map((session: { id: Key | null | undefined; title: string | number | bigint | boolean | ReactElement<unknown, string | JSXElementConstructor<any>> | Iterable<ReactNode> | ReactPortal | Promise<string | number | bigint | boolean | ReactPortal | ReactElement<unknown, string | JSXElementConstructor<any>> | Iterable<ReactNode> | null | undefined> | null | undefined; planItems: any }) => (
+          {viewModel.sessions.map((session) => (
             <div key={session.id} className="rounded-2xl border border-slate-200 p-4">
               <h4 className="font-semibold text-slate-800">{session.title}</h4>
               <div className="mt-3 space-y-3">
-                {(session.planItems ?? []).map((item: { exercise_id: string; id: string; exercise_name: string }) => {
-                  const resolvedExercise = exercises.find((
-                    exercise) => exercise.id === item.exercise_id || exercise.id === item.id || exercise.name === item.exercise_name)
+                {session.planItems.map((item) => {
+                  const resolvedExercise = resolveExerciseForPlanItem(item)
 
                   return resolvedExercise ? (
                     <div key={item.id} className="rounded-xl border border-slate-100 p-3">

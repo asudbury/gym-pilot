@@ -3,6 +3,7 @@ import type { User, UserRole } from '@gym-pilot/types'
 import { logger } from '@gym-pilot/shared'
 import type { AuthUser } from '../domain/authTypes'
 import { hasAccessToRole, isUserAccessBlocked } from '../domain/authTypes'
+import { toAuthUser, toAuthUserFromBypass } from '../domain/authMapping'
 import { persistBypassFlag, persistSession, readBypassFlag, readStoredSession } from '../services/authStorage'
 import { resolveSupabaseAuthUser } from '../services/authSession'
 
@@ -60,21 +61,7 @@ export function useAuthModule(users: User[]) {
     }
 
     window.sessionStorage.setItem(CURRENT_USER_ID_STORAGE_KEY, selectedUser.id)
-    setUser({
-      id: selectedUser.id,
-      name: selectedUser.name,
-      slug: selectedUser.slug,
-      role: (selectedUser.role ?? (selectedUser.roles?.[0] ?? 'client')) as UserRole,
-      roles: (selectedUser.roles ?? []) as UserRole[],
-      trainerId: selectedUser.trainerId ?? null,
-      applicationName: selectedUser.applicationName ?? null,
-      gymBrand: selectedUser.gymBrand ?? null,
-      gymName: selectedUser.gymName ?? null,
-      accountTier: selectedUser.accountTier ?? null,
-      accessEndsAt: selectedUser.accessEndsAt ?? null,
-      isFrozen: selectedUser.isFrozen ?? false,
-      email: null,
-    })
+    setUser(toAuthUser(selectedUser))
 
     return true
   }, [users])
@@ -82,21 +69,7 @@ export function useAuthModule(users: User[]) {
   const enableBypass = useCallback(() => {
     window.sessionStorage.setItem(CURRENT_USER_ID_STORAGE_KEY, 'mvp-bypass')
     setIsBypassEnabled(true)
-    setUser({
-      id: 'mvp-bypass',
-      name: 'MVP Admin',
-      slug: 'mvp-admin',
-      role: 'admin',
-      roles: ['admin'],
-      trainerId: null,
-      applicationName: null,
-      gymBrand: null,
-      gymName: null,
-      accountTier: null,
-      accessEndsAt: null,
-      isFrozen: false,
-      email: null,
-    })
+    setUser(toAuthUserFromBypass())
   }, [])
 
   const disableBypass = useCallback(() => {
