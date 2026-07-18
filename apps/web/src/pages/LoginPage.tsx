@@ -122,7 +122,6 @@ export function LoginPage() {
       return
     }
 
-    setAuthMessage('Signed in successfully.')
     window.dispatchEvent(new Event('gym-pilot-auth-updated'))
     navigate(from, { replace: true })
   }

@@ -5,6 +5,11 @@ import { getSupabaseClient, signUpWithPassword, usePlan } from '@gym-pilot/share
 import type { UserRole } from '@gym-pilot/types'
 import { AdminSectionShell } from '../../components/admin/AdminSectionShell'
 
+type StatusMessageState = {
+  text: string
+  tone: 'success' | 'error'
+}
+
 export function AdminCreateUserPage() {
   const navigate = useNavigate()
   const { createUser, users } = usePlan()
@@ -13,28 +18,84 @@ export function AdminCreateUserPage() {
   const [tempPassword, setTempPassword] = useState('')
   const [newUserRoles, setNewUserRoles] = useState<UserRole[]>(['client'])
   const [selectedTrainerId, setSelectedTrainerId] = useState<string>('')
-  const [statusMessage, setStatusMessage] = useState('')
+  const [statusMessage, setStatusMessage] = useState<StatusMessageState | null>(null)
 
   const trainerOptions = useMemo(() => users.filter((user) => user.roles.includes('trainer')), [users])
 
   const handleCreateUser = async () => {
     const trimmedName = newUserName.trim()
-
-    if (!trimmedName) {
-      setStatusMessage('Please enter a valid email address.')
-      return
-    }
+    const resolvedDisplayName = trimmedName || newUserEmail.trim() || 'New user'
 
     if ((newUserEmail || tempPassword) && (!newUserEmail || !tempPassword)) {
-      setStatusMessage('Provide both an email address and a temporary password to create an auth-enabled user.')
+      setStatusMessage({ text: 'Provide both an email address and a temporary password to create an auth-enabled user.', tone: 'error' })
       return
     }
 
-    const createdUser = createUser(trimmedName, newUserRoles, newUserRoles.includes('client') ? selectedTrainerId || null : null)
+    const createdUser = createUser(resolvedDisplayName, newUserRoles, newUserRoles.includes('client') ? selectedTrainerId || null : null)
 
     if (!createdUser) {
-      setStatusMessage('Could not create the user locally.')
+      setStatusMessage({ text: 'Could not create the user locally.', tone: 'error' })
       return
+    }
+
+    if (newUserEmail && tempPassword) {
+      const response = await signUpWithPassword(newUserEmail.trim(), tempPassword, { passwordChangeRequired: true, persistSession: false })
+
+      if (response.error) {
+        console.error('[AdminCreateUser] Could not create Supabase auth user', response.error)
+        setTempPassword('')
+
+        const errorMessage = response.error.message?.includes('rate limit')
+          ? 'We could not create the account right now because Supabase is temporarily rate-limiting email sign-ups. Please try again in a few minutes.'
+          : `Could not create user: ${response.error.message}`
+
+        setStatusMessage({ text: errorMessage, tone: 'error' })
+        return
+      }
+
+      const client = getSupabaseClient({ persistSession: false, autoRefreshToken: false })
+
+      if (client && response.data?.user?.id) {
+        const signInResult = await client.auth.signInWithPassword({
+          email: newUserEmail.trim(),
+          password: tempPassword,
+        })
+
+        if (signInResult.error) {
+          console.error('[AdminCreateUser] Could not sign in the newly created user', signInResult.error)
+          setStatusMessage({ text: `Could not sign in the newly created user: ${signInResult.error.message}`, tone: 'error' })
+          return
+        }
+
+        const profilePayload = {
+          user_id: response.data.user.id,
+          friendly_name: resolvedDisplayName,
+          roles: newUserRoles,
+          trainer_id: newUserRoles.includes('client') ? selectedTrainerId || null : null,
+          must_change_password: true,
+        }
+
+        const { error: profileError } = await client.from('gym_pilot_profiles').upsert(profilePayload, { onConflict: 'user_id' })
+
+        if (profileError && /trainer_id|does not exist|column .* does not exist/i.test(profileError.message)) {
+          const { error: fallbackError } = await client.from('gym_pilot_profiles').upsert({
+            user_id: response.data.user.id,
+            friendly_name: resolvedDisplayName,
+            roles: newUserRoles,
+            must_change_password: true,
+          }, { onConflict: 'user_id' })
+
+          if (fallbackError) {
+            console.error('[AdminCreateUser] Could not create Supabase profile row', fallbackError)
+            setStatusMessage({ text: `Could not create the profile row: ${fallbackError.message}`, tone: 'error' })
+            return
+          }
+        } else if (profileError) {
+          console.error('[AdminCreateUser] Could not create Supabase profile row', profileError)
+          setStatusMessage({ text: `Could not create the profile row: ${profileError.message}`, tone: 'error' })
+          return
+        }
+      }
     }
 
     setNewUserName('')
@@ -42,41 +103,8 @@ export function AdminCreateUserPage() {
     setTempPassword('')
     setNewUserRoles(['client'])
     setSelectedTrainerId('')
-    setStatusMessage('User created successfully.')
+    setStatusMessage({ text: 'User created successfully.', tone: 'success' })
     navigate('/admin/users', { replace: true })
-
-    if (newUserEmail && tempPassword) {
-      const response = await signUpWithPassword(newUserEmail.trim(), tempPassword, { passwordChangeRequired: true })
-
-      if (response.error) {
-        console.error('[AdminCreateUser] Could not create Supabase auth user', response.error)
-      } else {
-        const client = getSupabaseClient()
-
-        if (client && response.data?.user?.id) {
-          const profilePayload = {
-            user_id: response.data.user.id,
-            friendly_name: trimmedName,
-            roles: newUserRoles,
-            trainer_id: newUserRoles.includes('client') ? selectedTrainerId || null : null,
-            must_change_password: true,
-          }
-
-          const { error: profileError } = await client.from('gym_pilot_profiles').upsert(profilePayload, { onConflict: 'user_id' })
-
-          if (profileError && /trainer_id|does not exist|column .* does not exist/i.test(profileError.message)) {
-            await client.from('gym_pilot_profiles').upsert({
-              user_id: response.data.user.id,
-              friendly_name: trimmedName,
-              roles: newUserRoles,
-              must_change_password: true,
-            }, { onConflict: 'user_id' })
-          } else if (profileError) {
-            console.error('[AdminCreateUser] Could not create Supabase profile row', profileError)
-          }
-        }
-      }
-    }
   }
 
   return (
@@ -105,7 +133,7 @@ export function AdminCreateUserPage() {
             type="text"
             value={newUserName}
             onChange={(event) => setNewUserName(event.target.value)}
-            placeholder="Display name"
+            placeholder="Display name (optional)"
             className="w-full rounded-full border border-slate-200 bg-white px-4 py-2 text-sm text-slate-700"
           />
 
@@ -156,7 +184,11 @@ export function AdminCreateUserPage() {
             Create user
           </Button>
 
-          {statusMessage ? <p className="text-sm text-slate-600">{statusMessage}</p> : null}
+          {statusMessage ? (
+            <p className={`text-sm ${statusMessage.tone === 'error' ? 'text-red-600' : 'text-slate-600'}`}>
+              {statusMessage.text}
+            </p>
+          ) : null}
         </div>
       </div>
     </AdminSectionShell>

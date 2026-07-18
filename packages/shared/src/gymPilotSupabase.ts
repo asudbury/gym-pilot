@@ -476,8 +476,6 @@ export async function saveSupabaseProfileLastLoggedIn(userId?: string) {
   }
 
   await recordSupabaseUserActivity('login', {
-    logged_in_at: nextLastLoggedInAt,
-    previous_last_logged_in_at: previousLastLoggedInAt,
   }, resolvedUserId)
 }
 

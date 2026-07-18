@@ -1,6 +1,7 @@
 import { createClient, type SupabaseClient } from '@supabase/supabase-js'
 
 let supabaseClient: SupabaseClient | null = null
+let supabaseClientNoPersist: SupabaseClient | null = null
 
 export type SupabaseAuthUser = {
   id: string
@@ -48,13 +49,22 @@ export function isSupabasePersistenceEnabled() {
   return Boolean(getSupabaseUrl()) && Boolean(getSupabaseAnonKey())
 }
 
-export function getSupabaseClient() {
+type SupabaseClientOptions = {
+  persistSession?: boolean
+  autoRefreshToken?: boolean
+}
+
+export function getSupabaseClient(options?: SupabaseClientOptions) {
   if (!isSupabasePersistenceEnabled()) {
     console.log('[Supabase] Persistence disabled or client unavailable')
     return null
   }
 
-  if (!supabaseClient) {
+  const shouldPersistSession = options?.persistSession ?? true
+  const shouldAutoRefreshToken = options?.autoRefreshToken ?? true
+  const targetClient = shouldPersistSession ? supabaseClient : supabaseClientNoPersist
+
+  if (!targetClient) {
     const url = getSupabaseUrl()
     const anonKey = getSupabaseAnonKey()
 
@@ -62,17 +72,26 @@ export function getSupabaseClient() {
       return null
     }
 
-    console.log('[Supabase] Creating client', { url })
-    supabaseClient = createClient(url, anonKey, {
+    console.log('[Supabase] Creating client', { url, persistSession: shouldPersistSession, autoRefreshToken: shouldAutoRefreshToken })
+
+    const nextClient = createClient(url, anonKey, {
       auth: {
-        persistSession: true,
-        autoRefreshToken: true,
+        persistSession: shouldPersistSession,
+        autoRefreshToken: shouldAutoRefreshToken,
         detectSessionInUrl: true,
       },
     })
+
+    if (shouldPersistSession) {
+      supabaseClient = nextClient
+    } else {
+      supabaseClientNoPersist = nextClient
+    }
+
+    return nextClient
   }
 
-  return supabaseClient
+  return targetClient
 }
 
 export async function signInWithGoogle() {
@@ -104,9 +123,9 @@ export async function signInWithPassword(email: string, password: string) {
   return client.auth.signInWithPassword({ email, password })
 }
 
-export async function signUpWithPassword(email: string, password: string, options?: { passwordChangeRequired?: boolean }) {
-  console.log('[Supabase] Creating password-based account', { email, passwordChangeRequired: options?.passwordChangeRequired })
-  const client = getSupabaseClient()
+export async function signUpWithPassword(email: string, password: string, options?: { passwordChangeRequired?: boolean; persistSession?: boolean }) {
+  console.log('[Supabase] Creating password-based account', { email, passwordChangeRequired: options?.passwordChangeRequired, persistSession: options?.persistSession })
+  const client = getSupabaseClient({ persistSession: options?.persistSession ?? false, autoRefreshToken: false })
 
   if (!client) {
     console.error('[Supabase] Account creation skipped because client is unavailable')
