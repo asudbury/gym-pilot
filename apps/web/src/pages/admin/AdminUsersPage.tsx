@@ -15,6 +15,7 @@ export function AdminUsersPage() {
       : '',
   )
   const [profileUsers, setProfileUsers] = useState<AdminProfileRow[]>([])
+  const [copiedUserId, setCopiedUserId] = useState<string | null>(null)
 
   const refreshSupabaseUsers = async () => {
     setIsLoadingSupabaseUsers(true)
@@ -82,6 +83,27 @@ export function AdminUsersPage() {
     }
   }, [])
 
+  const handleCopyInviteLink = async (user: AdminProfileRow) => {
+    const email = user.email?.trim()
+
+    if (!email) {
+      setSupabaseUsersNotice('This user does not have an email address to generate an invite link for.')
+      return
+    }
+
+    const basePath = import.meta.env.BASE_URL === '/' ? '' : import.meta.env.BASE_URL
+    const inviteUrl = new URL(`${window.location.origin}${basePath}#${encodeURIComponent('/login')}`)
+    inviteUrl.hash = `#/login?email=${encodeURIComponent(email)}`
+
+    try {
+      await navigator.clipboard.writeText(inviteUrl.toString())
+      setCopiedUserId(user.id)
+      window.setTimeout(() => setCopiedUserId((current) => (current === user.id ? null : current)), 1500)
+    } catch {
+      setSupabaseUsersNotice('Could not copy the invite link. Please try again.')
+    }
+  }
+
   return (
     <AdminSectionShell title="Manage users" subtitle="Review current users and set up profiles" className="max-w-5xl">
       <div className="space-y-4 rounded-2xl border border-slate-200 bg-slate-50 p-4">
@@ -119,9 +141,14 @@ export function AdminUsersPage() {
                       </p>
                     ) : null}
                   </div>
-                  <Button tone="blue" onClick={() => navigate(`/admin/users/profiles/${user.id}`)} className="px-3 py-1.5">
-                    Update profile
-                  </Button>
+                  <div className="flex flex-wrap items-center gap-2">
+                    <Button tone="emerald" onClick={() => void handleCopyInviteLink(user)} className="px-3 py-1.5">
+                      {copiedUserId === user.id ? 'Invite link copied' : 'Copy invite link'}
+                    </Button>
+                    <Button tone="blue" onClick={() => navigate(`/admin/users/profiles/${user.id}`)} className="px-3 py-1.5">
+                      Update profile
+                    </Button>
+                  </div>
                 </div>
               ))}
             </div>

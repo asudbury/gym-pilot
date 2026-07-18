@@ -1,5 +1,5 @@
-import { useMemo, useState } from 'react'
-import { useNavigate, useLocation } from 'react-router-dom'
+import { useEffect, useMemo, useState } from 'react'
+import { useNavigate, useLocation, useSearchParams } from 'react-router-dom'
 import { loadSupabaseProfileFlag, resetSupabasePassword, signInWithPassword } from '@gym-pilot/shared'
 import { PageCard } from '../components/PageCard'
 import { Heading1 } from '../components/Typography'
@@ -10,6 +10,7 @@ const REMEMBERED_EMAIL_STORAGE_KEY = 'gym-pilot-remembered-email'
 export function LoginPage() {
   const navigate = useNavigate()
   const location = useLocation()
+  const [searchParams] = useSearchParams()
   const [email, setEmail] = useState(() => {
     if (typeof window === 'undefined') {
       return ''
@@ -21,6 +22,20 @@ export function LoginPage() {
   const [authMessage, setAuthMessage] = useState('')
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [isResetting, setIsResetting] = useState(false)
+
+  const emailParam = useMemo(() => {
+    const rawValue = searchParams.get('email') || searchParams.get('emailAddress') || ''
+    return rawValue.trim()
+  }, [searchParams])
+
+  useEffect(() => {
+    if (emailParam) {
+      setEmail(emailParam)
+      if (typeof window !== 'undefined') {
+        window.localStorage.setItem(REMEMBERED_EMAIL_STORAGE_KEY, emailParam)
+      }
+    }
+  }, [emailParam])
 
   const rememberEmail = (value: string) => {
     if (typeof window === 'undefined') {
