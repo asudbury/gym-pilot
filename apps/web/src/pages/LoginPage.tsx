@@ -164,7 +164,13 @@ export function LoginPage() {
           <Heading1 as="h1">Welcome to {appName}</Heading1>
         </div>
 
-        <form onSubmit={handlePasswordSignIn} className="mt-8 flex flex-col gap-4" autoComplete="on">
+        <form
+          onSubmit={handlePasswordSignIn}
+          className="mt-8 flex flex-col gap-4"
+          autoComplete="on"
+          method="post"
+          action="/login"
+        >
           <label className="flex flex-col gap-2 text-sm font-medium text-slate-700">
             <span>Email address</span>
             <input
@@ -172,6 +178,7 @@ export function LoginPage() {
               name="email"
               type="email"
               value={email}
+              data-lpignore="true"
               onChange={(event) => setEmail(event.target.value)}
               autoComplete="email"
               inputMode="email"
@@ -192,6 +199,7 @@ export function LoginPage() {
               name="password"
               type="password"
               value={password}
+              data-lpignore="true"
               onChange={(event) => setPassword(event.target.value)}
               autoComplete="current-password"
               enterKeyHint="done"
