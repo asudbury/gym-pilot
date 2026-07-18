@@ -44,7 +44,7 @@ export function AdminUserActivityPage() {
     }
 
     const { data: profileData, error: profileError } = await client
-      .from('gym_pilot_profiles')
+      .from('gym_pilot_profile')
       .select('user_id, friendly_name, roles, last_logged_in_at, previous_last_logged_in_at')
       .eq('user_id', profileId)
       .maybeSingle()

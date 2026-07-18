@@ -32,7 +32,7 @@ export function AdminUsersPage() {
     }
 
     const { data, error } = await client
-      .from('gym_pilot_profiles')
+      .from('gym_pilot_profile')
       .select('user_id, friendly_name, roles, trainer_id, must_change_password')
 
     const profileSelectionError = error && /trainer_id|does not exist|column .* does not exist/i.test(error.message)
@@ -47,7 +47,7 @@ export function AdminUsersPage() {
     }
 
     const fallbackSelection = profileSelectionError === null && error
-      ? await client.from('gym_pilot_profiles').select('user_id, friendly_name, roles, must_change_password')
+      ? await client.from('gym_pilot_profile').select('user_id, friendly_name, roles, must_change_password')
       : null
 
     const resolvedData = fallbackSelection?.data ?? data

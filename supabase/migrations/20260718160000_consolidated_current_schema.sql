@@ -1,6 +1,5 @@
 -- Consolidated current Gym Pilot schema.
--- This single migration captures the current Supabase shape and is safe to run
--- against fresh databases and older environments that still have the earlier tables.
+-- This is the canonical Supabase migration for the current singular-table schema.
 
 create table if not exists public.gym_pilot_app_state (
   id uuid primary key default gen_random_uuid(),
@@ -35,7 +34,7 @@ $$;
 create unique index if not exists gym_pilot_app_state_user_id_key_idx
 on public.gym_pilot_app_state (user_id, key);
 
-create table if not exists public.gym_pilot_profiles (
+create table if not exists public.gym_pilot_profile (
   id uuid primary key default gen_random_uuid(),
   user_id uuid references auth.users(id) on delete cascade not null unique,
   friendly_name text,
@@ -46,7 +45,7 @@ create table if not exists public.gym_pilot_profiles (
   gym_brand text,
   gym_name text,
   gym_club_id bigint,
-  account_tier text not null default 'free' constraint gym_pilot_profiles_account_tier_check check (account_tier in ('free', 'bronze', 'silver', 'gold')),
+  account_tier text not null default 'free' constraint gym_pilot_profile_account_tier_check check (account_tier in ('free', 'bronze', 'silver', 'gold')),
   access_ends_at timestamptz,
   is_frozen boolean not null default false,
   last_logged_in_at timestamptz,
@@ -55,13 +54,13 @@ create table if not exists public.gym_pilot_profiles (
   updated_at timestamptz not null default now()
 );
 
-create index if not exists gym_pilot_profiles_user_id_idx
-on public.gym_pilot_profiles (user_id);
+create index if not exists gym_pilot_profile_user_id_idx
+on public.gym_pilot_profile (user_id);
 
-create index if not exists gym_pilot_profiles_last_logged_in_at_idx
-on public.gym_pilot_profiles (last_logged_in_at desc);
+create index if not exists gym_pilot_profile_last_logged_in_at_idx
+on public.gym_pilot_profile (last_logged_in_at desc);
 
-alter table public.gym_pilot_profiles enable row level security;
+alter table public.gym_pilot_profile enable row level security;
 
 do $$
 begin
@@ -69,11 +68,11 @@ begin
     select 1
     from pg_policies
     where schemaname = 'public'
-      and tablename = 'gym_pilot_profiles'
+      and tablename = 'gym_pilot_profile'
       and policyname = 'Users can manage their own profile'
   ) then
     create policy "Users can manage their own profile"
-    on public.gym_pilot_profiles
+    on public.gym_pilot_profile
     for all
     using (auth.uid() = user_id)
     with check (auth.uid() = user_id);
@@ -83,11 +82,11 @@ begin
     select 1
     from pg_policies
     where schemaname = 'public'
-      and tablename = 'gym_pilot_profiles'
+      and tablename = 'gym_pilot_profile'
       and policyname = 'Authenticated users can read all profiles'
   ) then
     create policy "Authenticated users can read all profiles"
-    on public.gym_pilot_profiles
+    on public.gym_pilot_profile
     for select
     using (auth.role() = 'authenticated');
   end if;
@@ -96,11 +95,11 @@ begin
     select 1
     from pg_policies
     where schemaname = 'public'
-      and tablename = 'gym_pilot_profiles'
+      and tablename = 'gym_pilot_profile'
       and policyname = 'Authenticated users can insert profile rows'
   ) then
     create policy "Authenticated users can insert profile rows"
-    on public.gym_pilot_profiles
+    on public.gym_pilot_profile
     for insert
     with check (auth.role() = 'authenticated');
   end if;
@@ -109,11 +108,11 @@ begin
     select 1
     from pg_policies
     where schemaname = 'public'
-      and tablename = 'gym_pilot_profiles'
+      and tablename = 'gym_pilot_profile'
       and policyname = 'Authenticated users can update profile rows'
   ) then
     create policy "Authenticated users can update profile rows"
-    on public.gym_pilot_profiles
+    on public.gym_pilot_profile
     for update
     using (auth.role() = 'authenticated')
     with check (auth.role() = 'authenticated');
@@ -121,7 +120,7 @@ begin
 end
 $$;
 
-create table if not exists public.gym_pilot_favourite_folders (
+create table if not exists public.gym_pilot_favourite_folder (
   id uuid primary key default gen_random_uuid(),
   user_id uuid references auth.users(id) on delete cascade not null,
   name text not null,
@@ -131,10 +130,10 @@ create table if not exists public.gym_pilot_favourite_folders (
   unique(user_id, name)
 );
 
-create index if not exists gym_pilot_favourite_folders_user_id_idx
-on public.gym_pilot_favourite_folders (user_id);
+create index if not exists gym_pilot_favourite_folder_user_id_idx
+on public.gym_pilot_favourite_folder (user_id);
 
-alter table public.gym_pilot_favourite_folders enable row level security;
+alter table public.gym_pilot_favourite_folder enable row level security;
 
 do $$
 begin
@@ -142,11 +141,11 @@ begin
     select 1
     from pg_policies
     where schemaname = 'public'
-      and tablename = 'gym_pilot_favourite_folders'
+      and tablename = 'gym_pilot_favourite_folder'
       and policyname = 'Users can manage their own favourite folders'
   ) then
     create policy "Users can manage their own favourite folders"
-    on public.gym_pilot_favourite_folders
+    on public.gym_pilot_favourite_folder
     for all
     using (auth.uid() = user_id)
     with check (auth.uid() = user_id);
@@ -154,26 +153,26 @@ begin
 end
 $$;
 
-create table if not exists public.gym_pilot_favourites (
+create table if not exists public.gym_pilot_favourite (
   id uuid primary key default gen_random_uuid(),
   user_id uuid references auth.users(id) on delete cascade not null,
   path text not null,
   label text not null,
   folder text,
-  folder_id uuid references public.gym_pilot_favourite_folders(id) on delete set null,
+  folder_id uuid references public.gym_pilot_favourite_folder(id) on delete set null,
   created_at timestamptz not null default now(),
   updated_at timestamptz not null default now(),
 
   unique(user_id, path)
 );
 
-create index if not exists gym_pilot_favourites_user_id_idx
-on public.gym_pilot_favourites (user_id);
+create index if not exists gym_pilot_favourite_user_id_idx
+on public.gym_pilot_favourite (user_id);
 
-create index if not exists gym_pilot_favourites_folder_id_idx
-on public.gym_pilot_favourites (folder_id);
+create index if not exists gym_pilot_favourite_folder_id_idx
+on public.gym_pilot_favourite (folder_id);
 
-alter table public.gym_pilot_favourites enable row level security;
+alter table public.gym_pilot_favourite enable row level security;
 
 do $$
 begin
@@ -181,11 +180,11 @@ begin
     select 1
     from pg_policies
     where schemaname = 'public'
-      and tablename = 'gym_pilot_favourites'
+      and tablename = 'gym_pilot_favourite'
       and policyname = 'Users can manage their own favourites'
   ) then
     create policy "Users can manage their own favourites"
-    on public.gym_pilot_favourites
+    on public.gym_pilot_favourite
     for all
     using (auth.uid() = user_id)
     with check (auth.uid() = user_id);
@@ -193,7 +192,7 @@ begin
 end
 $$;
 
-create table if not exists public.gym_pilot_plans (
+create table if not exists public.gym_pilot_plan (
   id uuid primary key default gen_random_uuid(),
   user_id uuid references auth.users(id) on delete cascade not null,
   plan_name text not null,
@@ -205,10 +204,10 @@ create table if not exists public.gym_pilot_plans (
   unique(user_id, plan_slug)
 );
 
-create index if not exists gym_pilot_plans_user_id_idx
-on public.gym_pilot_plans (user_id);
+create index if not exists gym_pilot_plan_user_id_idx
+on public.gym_pilot_plan (user_id);
 
-alter table public.gym_pilot_plans enable row level security;
+alter table public.gym_pilot_plan enable row level security;
 
 do $$
 begin
@@ -216,11 +215,11 @@ begin
     select 1
     from pg_policies
     where schemaname = 'public'
-      and tablename = 'gym_pilot_plans'
+      and tablename = 'gym_pilot_plan'
       and policyname = 'Users can manage their own plans'
   ) then
     create policy "Users can manage their own plans"
-    on public.gym_pilot_plans
+    on public.gym_pilot_plan
     for all
     using (auth.uid() = user_id)
     with check (auth.uid() = user_id);
@@ -228,10 +227,10 @@ begin
 end
 $$;
 
-create table if not exists public.gym_pilot_assignments (
+create table if not exists public.gym_pilot_assignment (
   id uuid primary key default gen_random_uuid(),
   user_id uuid references auth.users(id) on delete cascade not null,
-  plan_id uuid references public.gym_pilot_plans(id) on delete cascade not null,
+  plan_id uuid references public.gym_pilot_plan(id) on delete cascade not null,
   assignment_name text not null,
   assigned_user_id uuid references auth.users(id) on delete set null,
   assigned_user_name text,
@@ -241,16 +240,16 @@ create table if not exists public.gym_pilot_assignments (
   updated_at timestamptz not null default now()
 );
 
-create index if not exists gym_pilot_assignments_user_id_idx
-on public.gym_pilot_assignments (user_id);
+create index if not exists gym_pilot_assignment_user_id_idx
+on public.gym_pilot_assignment (user_id);
 
-create index if not exists gym_pilot_assignments_plan_id_idx
-on public.gym_pilot_assignments (plan_id);
+create index if not exists gym_pilot_assignment_plan_id_idx
+on public.gym_pilot_assignment (plan_id);
 
-create index if not exists gym_pilot_assignments_assigned_user_id_idx
-on public.gym_pilot_assignments (assigned_user_id);
+create index if not exists gym_pilot_assignment_assigned_user_id_idx
+on public.gym_pilot_assignment (assigned_user_id);
 
-alter table public.gym_pilot_assignments enable row level security;
+alter table public.gym_pilot_assignment enable row level security;
 
 do $$
 begin
@@ -258,11 +257,11 @@ begin
     select 1
     from pg_policies
     where schemaname = 'public'
-      and tablename = 'gym_pilot_assignments'
+      and tablename = 'gym_pilot_assignment'
       and policyname = 'Users can manage their own assignments'
   ) then
     create policy "Users can manage their own assignments"
-    on public.gym_pilot_assignments
+    on public.gym_pilot_assignment
     for all
     using (auth.uid() = user_id or auth.uid() = assigned_user_id)
     with check (auth.uid() = user_id or auth.uid() = assigned_user_id);
@@ -316,7 +315,7 @@ begin
       auth.uid() = user_id
       or exists (
         select 1
-        from public.gym_pilot_profiles as viewer_profile
+        from public.gym_pilot_profile as viewer_profile
         where viewer_profile.user_id = auth.uid()
           and exists (
             select 1
@@ -326,8 +325,8 @@ begin
       )
       or exists (
         select 1
-        from public.gym_pilot_profiles as viewer_profile
-        join public.gym_pilot_profiles as client_profile
+        from public.gym_pilot_profile as viewer_profile
+        join public.gym_pilot_profile as client_profile
           on client_profile.user_id = gym_pilot_user_activity.user_id
         where viewer_profile.user_id = auth.uid()
           and client_profile.trainer_id = auth.uid()
@@ -349,15 +348,15 @@ begin
     select 1
     from information_schema.tables
     where table_schema = 'public'
-      and table_name = 'gym_pilot_favorite_folders'
+      and table_name = 'gym_pilot_favourite_folder'
   )
   and not exists (
     select 1
     from information_schema.tables
     where table_schema = 'public'
-      and table_name = 'gym_pilot_favourite_folders'
+      and table_name = 'gym_pilot_favourite_folder'
   ) then
-    alter table public.gym_pilot_favorite_folders rename to gym_pilot_favourite_folders;
+    alter table public.gym_pilot_favourite_folder rename to gym_pilot_favourite_folder;
   end if;
 end
 $$;
@@ -368,15 +367,15 @@ begin
     select 1
     from information_schema.tables
     where table_schema = 'public'
-      and table_name = 'gym_pilot_favorites'
+      and table_name = 'gym_pilot_favourite'
   )
   and not exists (
     select 1
     from information_schema.tables
     where table_schema = 'public'
-      and table_name = 'gym_pilot_favourites'
+      and table_name = 'gym_pilot_favourite'
   ) then
-    alter table public.gym_pilot_favorites rename to gym_pilot_favourites;
+    alter table public.gym_pilot_favourite rename to gym_pilot_favourite;
   end if;
 end
 $$;

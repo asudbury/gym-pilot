@@ -29,8 +29,8 @@ const profileSnapshotCache = new Map<string, Promise<SupabaseProfileSnapshot>>()
 // These records are stored in the shared app_state table rather than the
 // domain-specific tables created for relational data.
 const SUPABASE_TABLE_BY_KEY: Record<string, string> = {
-  'gym-pilot-plans': 'gym_pilot_plans',
-  'gym-pilot-assignments': 'gym_pilot_assignments',
+  'gym-pilot-plans': 'gym_pilot_plan',
+  'gym-pilot-assignments': 'gym_pilot_assignment',
 }
 
 export function isSupabasePersistenceEnabled() {
@@ -94,7 +94,7 @@ function normalizeFavoriteStorageValue(value: unknown): FavoriteStorageValue {
 
 function getSupabaseTableName(key: string) {
   if (isFavoritesKey(key)) {
-    return 'gym_pilot_favourites'
+    return 'gym_pilot_favourite'
   }
 
   return SUPABASE_TABLE_BY_KEY[key] ?? DEFAULT_SUPABASE_TABLE
@@ -253,7 +253,7 @@ export async function loadSupabaseProfileSnapshot(userId?: string): Promise<Supa
 
   const requestPromise = (async () => {
     const { data, error } = await client
-      .from('gym_pilot_profiles')
+      .from('gym_pilot_profile')
       .select('friendly_name, application_name, gym_brand, gym_name, gym_club_id, account_tier, access_ends_at, is_frozen, last_logged_in_at, previous_last_logged_in_at, roles, trainer_id, must_change_password')
       .eq('user_id', resolvedUserId)
       .maybeSingle()
@@ -356,12 +356,12 @@ export async function listSupabaseProfiles(): Promise<SupabaseProfile[]> {
   }
 
   const { data, error } = await client
-    .from('gym_pilot_profiles')
+    .from('gym_pilot_profile')
     .select('id, user_id, friendly_name, application_name, gym_brand, gym_name, account_tier, access_ends_at, is_frozen, roles, trainer_id, must_change_password, created_at, updated_at')
 
   if (error && isMissingProfileColumnError(error, ['trainer_id', 'gym_brand'])) {
     const fallback = await client
-      .from('gym_pilot_profiles')
+      .from('gym_pilot_profile')
       .select('id, user_id, friendly_name, application_name, gym_name, account_tier, access_ends_at, is_frozen, roles, must_change_password, created_at, updated_at')
 
     if (fallback.error) {
@@ -396,13 +396,13 @@ export async function listSupabaseProfiles(): Promise<SupabaseProfile[]> {
   }>).filter((profile) => typeof profile.user_id === 'string').map(mapSupabaseProfile)
 
   if (!profiles.some((profile) => profile.user_id === userId)) {
-    const { error: upsertError } = await client.from('gym_pilot_profiles').upsert(
+    const { error: upsertError } = await client.from('gym_pilot_profile').upsert(
       { user_id: userId, friendly_name: null, application_name: null, gym_brand: null, roles: ['client'], trainer_id: null, must_change_password: false },
       { onConflict: 'user_id' },
     )
 
     if (upsertError && isMissingProfileColumnError(upsertError, ['trainer_id', 'gym_brand'])) {
-      const fallback = await client.from('gym_pilot_profiles').upsert(
+      const fallback = await client.from('gym_pilot_profile').upsert(
         { user_id: userId, friendly_name: null, application_name: null, roles: ['client'], must_change_password: false },
         { onConflict: 'user_id' },
       )
@@ -417,7 +417,7 @@ export async function listSupabaseProfiles(): Promise<SupabaseProfile[]> {
     }
 
     const { data: refreshedData, error: refreshError } = await client
-      .from('gym_pilot_profiles')
+      .from('gym_pilot_profile')
       .select('id, user_id, friendly_name, application_name, gym_brand, gym_name, account_tier, access_ends_at, is_frozen, roles, trainer_id, must_change_password, created_at, updated_at')
 
     if (refreshError) {
@@ -475,7 +475,7 @@ export async function saveSupabaseProfileName(friendlyName: string | null) {
 
   const normalizedName = friendlyName?.trim() ? friendlyName.trim() : null
 
-  const { error } = await client.from('gym_pilot_profiles').upsert(
+  const { error } = await client.from('gym_pilot_profile').upsert(
     { user_id: userId, friendly_name: normalizedName },
     { onConflict: 'user_id' },
   )
@@ -508,7 +508,7 @@ async function saveSupabaseProfileTextValue(fieldName: 'application_name' | 'gym
       })()
     : value?.trim() ? value.trim() : null
 
-  const { error } = await client.from('gym_pilot_profiles').upsert(
+  const { error } = await client.from('gym_pilot_profile').upsert(
     { user_id: resolvedUserId, [fieldName]: normalizedValue },
     { onConflict: 'user_id' },
   )
@@ -553,7 +553,7 @@ export async function saveSupabaseGymName(gymName: string | null, gymBrand?: str
     ? Number(normalizedGymName)
     : null
 
-  const { error } = await client.from('gym_pilot_profiles').upsert(
+  const { error } = await client.from('gym_pilot_profile').upsert(
     { user_id: resolvedUserId, gym_name: normalizedGymName, gym_club_id: normalizedClubId },
     { onConflict: 'user_id' },
   )
@@ -586,7 +586,7 @@ export async function saveSupabaseProfileAccessSettings(accountTier: string | nu
   const normalizedTier = normalizeProfileAccessTier(accountTier)
   const trimmedAccessEndsAt = typeof accessEndsAt === 'string' ? accessEndsAt.trim() : ''
 
-  const { error } = await client.from('gym_pilot_profiles').upsert(
+  const { error } = await client.from('gym_pilot_profile').upsert(
     { user_id: resolvedUserId, account_tier: normalizedTier, access_ends_at: trimmedAccessEndsAt || null, is_frozen: Boolean(isFrozen) },
     { onConflict: 'user_id' },
   )
@@ -612,7 +612,7 @@ export async function saveSupabaseProfileFlag(flag: 'must_change_password', valu
     return
   }
 
-  const { error } = await client.from('gym_pilot_profiles').upsert(
+  const { error } = await client.from('gym_pilot_profile').upsert(
     { user_id: resolvedUserId, [flag]: value },
     { onConflict: 'user_id' },
   )
@@ -639,7 +639,7 @@ export async function saveSupabaseProfileLastLoggedIn(userId?: string) {
   }
 
   const { data: existingProfile, error: loadError } = await client
-    .from('gym_pilot_profiles')
+    .from('gym_pilot_profile')
     .select('last_logged_in_at')
     .eq('user_id', resolvedUserId)
     .maybeSingle()
@@ -652,7 +652,7 @@ export async function saveSupabaseProfileLastLoggedIn(userId?: string) {
   const previousLastLoggedInAt = existingProfile?.last_logged_in_at ?? null
   const nextLastLoggedInAt = new Date().toISOString()
 
-  const { error } = await client.from('gym_pilot_profiles').upsert(
+  const { error } = await client.from('gym_pilot_profile').upsert(
     {
       user_id: resolvedUserId,
       last_logged_in_at: nextLastLoggedInAt,
@@ -688,7 +688,7 @@ export async function loadSupabaseJsonRecord<T>(key: string): Promise<SupabaseRe
 
   if (key === 'gym-pilot-plans') {
     const { data, error } = await client
-      .from('gym_pilot_plans')
+      .from('gym_pilot_plan')
       .select('id, plan_name, plan_slug, plan_sessions, created_at, updated_at')
       .eq('user_id', userId)
 
@@ -710,7 +710,7 @@ export async function loadSupabaseJsonRecord<T>(key: string): Promise<SupabaseRe
 
   if (key === 'gym-pilot-assignments') {
     const { data, error } = await client
-      .from('gym_pilot_assignments')
+      .from('gym_pilot_assignment')
       .select('id, assignment_name, plan_id, plan_name, plan_slug, plan_items, assigned_user_id, assigned_user_name, completed_exercises')
       .eq('user_id', userId)
 
@@ -736,7 +736,7 @@ export async function loadSupabaseJsonRecord<T>(key: string): Promise<SupabaseRe
 
   if (isFavoritesKey(key)) {
     const { data: folderRows, error: folderError } = await client
-      .from('gym_pilot_favourite_folders')
+      .from('gym_pilot_favourite_folder')
       .select('id,name')
       .eq('user_id', userId)
 
@@ -748,7 +748,7 @@ export async function loadSupabaseJsonRecord<T>(key: string): Promise<SupabaseRe
     const folderLookup = new Map((folderRows ?? []).map((row) => [row.id, row.name]))
 
     const { data, error } = await client
-      .from('gym_pilot_favourites')
+      .from('gym_pilot_favourite')
       .select('path,label,folder,folder_id')
       .eq('user_id', userId)
 
@@ -818,14 +818,14 @@ export async function saveSupabaseJsonRecord<T>(key: string, value: T) {
   if (key === 'gym-pilot-plans') {
     const plans = Array.isArray(value) ? (value as Plan[]) : []
 
-    const { error: deleteError } = await client.from('gym_pilot_plans').delete().eq('user_id', userId)
+    const { error: deleteError } = await client.from('gym_pilot_plan').delete().eq('user_id', userId)
 
     if (deleteError) {
       throw deleteError
     }
 
     if (plans.length > 0) {
-      const { error: insertError } = await client.from('gym_pilot_plans').insert(
+      const { error: insertError } = await client.from('gym_pilot_plan').insert(
         plans.map((plan) => ({
           id: plan.id,
           user_id: userId,
@@ -846,14 +846,14 @@ export async function saveSupabaseJsonRecord<T>(key: string, value: T) {
   if (key === 'gym-pilot-assignments') {
     const assignments = Array.isArray(value) ? (value as Assignment[]) : []
 
-    const { error: deleteError } = await client.from('gym_pilot_assignments').delete().eq('user_id', userId)
+    const { error: deleteError } = await client.from('gym_pilot_assignment').delete().eq('user_id', userId)
 
     if (deleteError) {
       throw deleteError
     }
 
     if (assignments.length > 0) {
-      const { error: insertError } = await client.from('gym_pilot_assignments').insert(
+      const { error: insertError } = await client.from('gym_pilot_assignment').insert(
         assignments.map((assignment) => ({
           id: assignment.id,
           user_id: userId,
@@ -884,20 +884,20 @@ export async function saveSupabaseJsonRecord<T>(key: string, value: T) {
       ...favorites.map((favorite) => normalizeFolderName(favorite.folder)).filter(Boolean),
     ]))
 
-    const { error: deleteFavoritesError } = await client.from('gym_pilot_favourites').delete().eq('user_id', userId)
+    const { error: deleteFavoritesError } = await client.from('gym_pilot_favourite').delete().eq('user_id', userId)
 
     if (deleteFavoritesError) {
       throw deleteFavoritesError
     }
 
-    const { error: deleteFoldersError } = await client.from('gym_pilot_favourite_folders').delete().eq('user_id', userId)
+    const { error: deleteFoldersError } = await client.from('gym_pilot_favourite_folder').delete().eq('user_id', userId)
 
     if (deleteFoldersError) {
       throw deleteFoldersError
     }
 
     const folderRows = folderNames.length > 0
-      ? await client.from('gym_pilot_favourite_folders').upsert(
+      ? await client.from('gym_pilot_favourite_folder').upsert(
         folderNames.map((name) => ({ user_id: userId, name })),
         { onConflict: 'user_id,name' },
       ).select('id,name')
@@ -910,7 +910,7 @@ export async function saveSupabaseJsonRecord<T>(key: string, value: T) {
     const folderLookup = new Map((folderRows.data ?? []).map((row) => [row.name, row.id]))
 
     if (favorites.length > 0) {
-      const { error: insertError } = await client.from('gym_pilot_favourites').insert(
+      const { error: insertError } = await client.from('gym_pilot_favourite').insert(
         favorites.map((favorite) => {
           const normalizedFolder = normalizeFolderName(favorite.folder)
 
@@ -959,13 +959,13 @@ export async function removeSupabaseJsonRecord(key: string) {
   }
 
   if (isFavoritesKey(key)) {
-    const { error: favoritesError } = await client.from('gym_pilot_favourites').delete().eq('user_id', userId)
+    const { error: favoritesError } = await client.from('gym_pilot_favourite').delete().eq('user_id', userId)
 
     if (favoritesError) {
       throw favoritesError
     }
 
-    const { error: foldersError } = await client.from('gym_pilot_favourite_folders').delete().eq('user_id', userId)
+    const { error: foldersError } = await client.from('gym_pilot_favourite_folder').delete().eq('user_id', userId)
 
     if (foldersError) {
       throw foldersError

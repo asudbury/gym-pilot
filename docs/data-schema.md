@@ -94,7 +94,7 @@ The app now has a local-first data layer based on Dexie and a query layer based 
 - TanStack Query is used for API-backed state and caching.
 
 ## Supabase schema
-The current Supabase schema is defined in the consolidated migration [supabase/migrations/20260718160000_consolidated_current_schema.sql](supabase/migrations/20260718160000_consolidated_current_schema.sql).
+The current Supabase schema is defined in the migrations folder [supabase/migrations](supabase/migrations).
 
 ### Supabase call inventory
 The shared Supabase helpers in [packages/shared/src/gymPilotSupabase.ts](packages/shared/src/gymPilotSupabase.ts) centralise the app's remote persistence and auth calls. When this surface changes, update this section and the Mermaid diagram below.
@@ -102,23 +102,23 @@ The shared Supabase helpers in [packages/shared/src/gymPilotSupabase.ts](package
 | Area | Current call patterns | Tables / resources |
 | --- | --- | --- |
 | Auth and session | `client.auth.getSession()`, `client.auth.signInWithOAuth()`, `client.auth.signInWithPassword()`, `client.auth.signUp()`, `client.auth.resetPasswordForEmail()`, `client.auth.updateUser()`, `client.auth.signOut()` | Supabase Auth users and session state |
-| Profiles and settings | `loadSupabaseProfileSnapshot()`, `saveSupabaseProfileName()`, `saveSupabaseApplicationName()`, `saveSupabaseGymBrand()`, `saveSupabaseGymName()`, `saveSupabaseProfileAccessSettings()`, `saveSupabaseProfileFlag()`, `saveSupabaseProfileLastLoggedIn()` | `gym_pilot_profiles` |
+| Profiles and settings | `loadSupabaseProfileSnapshot()`, `saveSupabaseProfileName()`, `saveSupabaseApplicationName()`, `saveSupabaseGymBrand()`, `saveSupabaseGymName()`, `saveSupabaseProfileAccessSettings()`, `saveSupabaseProfileFlag()`, `saveSupabaseProfileLastLoggedIn()` | `gym_pilot_profile` |
 | Key/value persistence | `loadSupabaseJsonRecord()`, `saveSupabaseJsonRecord()`, `removeSupabaseJsonRecord()` | `gym_pilot_app_state` plus table-specific rows for plans, assignments, favourites, and app state |
-| Plans and assignments | `select`, `insert`, `upsert`, `delete` against remote rows | `gym_pilot_plans`, `gym_pilot_assignments` |
-| Favourites and folders | `select`, `insert`, `upsert`, `delete` against remote rows | `gym_pilot_favourite_folders`, `gym_pilot_favourites` |
+| Plans and assignments | `select`, `insert`, `upsert`, `delete` against remote rows | `gym_pilot_plan`, `gym_pilot_assignment` |
+| Favourites and folders | `select`, `insert`, `upsert`, `delete` against remote rows | `gym_pilot_favourite_folder`, `gym_pilot_favourite` |
 | Activity logging | `recordSupabaseUserActivity()` uses `insert` into `gym_pilot_user_activity`; it skips inserts when the app is running on localhost-style hosts | `gym_pilot_user_activity` |
 
 ### Entity relationship overview
 ```mermaid
 erDiagram
     auth_users ||--o{ gym_pilot_app_state : owns
-    auth_users ||--o{ gym_pilot_profiles : owns
-    auth_users ||--o{ gym_pilot_favourite_folders : owns
-    auth_users ||--o{ gym_pilot_favourites : owns
-    auth_users ||--o{ gym_pilot_plans : owns
-    auth_users ||--o{ gym_pilot_assignments : creates
+    auth_users ||--o{ gym_pilot_profile : owns
+    auth_users ||--o{ gym_pilot_favourite_folder : owns
+    auth_users ||--o{ gym_pilot_favourite : owns
+    auth_users ||--o{ gym_pilot_plan : owns
+    auth_users ||--o{ gym_pilot_assignment : creates
     auth_users ||--o{ gym_pilot_user_activity : records
-    gym_pilot_plans ||--o{ gym_pilot_assignments : uses
+    gym_pilot_plan ||--o{ gym_pilot_assignment : uses
 
     gym_pilot_app_state {
         uuid id
@@ -128,7 +128,7 @@ erDiagram
         timestamptz updated_at
     }
 
-    gym_pilot_profiles {
+    gym_pilot_profile {
         uuid id
         uuid user_id
         text friendly_name
@@ -137,14 +137,18 @@ erDiagram
         uuid trainer_id
         text application_name
         text gym_brand
+        text gym_name
         bigint gym_club_id
+        text account_tier
+        timestamptz access_ends_at
+        boolean is_frozen
         timestamptz last_logged_in_at
         timestamptz previous_last_logged_in_at
         timestamptz created_at
         timestamptz updated_at
     }
 
-    gym_pilot_favourite_folders {
+    gym_pilot_favourite_folder {
         uuid id
         uuid user_id
         text name
@@ -152,7 +156,7 @@ erDiagram
         timestamptz updated_at
     }
 
-    gym_pilot_favourites {
+    gym_pilot_favourite {
         uuid id
         uuid user_id
         text path
@@ -163,7 +167,7 @@ erDiagram
         timestamptz updated_at
     }
 
-    gym_pilot_plans {
+    gym_pilot_plan {
         uuid id
         uuid user_id
         text plan_name
@@ -173,7 +177,7 @@ erDiagram
         timestamptz updated_at
     }
 
-    gym_pilot_assignments {
+    gym_pilot_assignment {
         uuid id
         uuid user_id
         uuid plan_id
@@ -203,5 +207,13 @@ erDiagram
 - an assignments table for user-specific plan assignments
 - row-level security policies for authenticated users
 - auth metadata can mark a user as requiring a password change on next sign-in
+
+### Client-side preference storage
+The app currently keeps UI preferences such as theme choice and the version banner visibility in browser storage rather than Supabase.
+
+- `gym-pilot-theme-preference` is stored in localStorage and controls the light/dark theme
+- `gym-pilot-show-version` is stored in localStorage and controls whether the build/version banner is shown
+
+These values are intentionally kept client-side because they are lightweight UI preferences rather than shared domain data. They are suitable for localStorage unless the product later decides that preferences should follow a user across devices or be managed as part of a broader profile experience.
 
 The schema is intentionally consolidated into a single migration so the profile, favourites, assignments, and activity tables can be applied together while remaining safe for existing environments.

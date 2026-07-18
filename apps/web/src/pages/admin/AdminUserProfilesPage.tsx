@@ -61,7 +61,7 @@ export function AdminUserProfilesPage() {
     }
 
     const { data, error } = await client
-      .from('gym_pilot_profiles')
+      .from('gym_pilot_profile')
       .select('user_id, friendly_name, roles, trainer_id, application_name, gym_brand, gym_club_id, account_tier, access_ends_at, is_frozen, must_change_password, last_logged_in_at, previous_last_logged_in_at')
 
     if (error) {
@@ -153,10 +153,10 @@ export function AdminUserProfilesPage() {
         must_change_password: draft.mustChangePassword,
       }
 
-      const { error } = await client.from('gym_pilot_profiles').upsert(profilePayload, { onConflict: 'user_id' })
+      const { error } = await client.from('gym_pilot_profile').upsert(profilePayload, { onConflict: 'user_id' })
 
       if (error && /trainer_id|does not exist|column .* does not exist/i.test(error.message)) {
-        const { error: fallbackError } = await client.from('gym_pilot_profiles').upsert(
+        const { error: fallbackError } = await client.from('gym_pilot_profile').upsert(
           {
             user_id: profile.id,
             friendly_name: trimmedName,

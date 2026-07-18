@@ -69,10 +69,10 @@ export function AdminCreateUserPage() {
           selectedTrainerId,
         })
 
-        const { error: profileError } = await client.from('gym_pilot_profiles').upsert(profilePayload, { onConflict: 'user_id' })
+        const { error: profileError } = await client.from('gym_pilot_profile').upsert(profilePayload, { onConflict: 'user_id' })
 
         if (profileError && /trainer_id|does not exist|column .* does not exist/i.test(profileError.message)) {
-          const { error: fallbackError } = await client.from('gym_pilot_profiles').upsert({
+          const { error: fallbackError } = await client.from('gym_pilot_profile').upsert({
             user_id: response.data.user.id,
             friendly_name: resolvedDisplayName,
             roles: newUserRoles,

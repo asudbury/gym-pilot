@@ -162,9 +162,6 @@ export function LoginPage() {
       <PageCard as="section" className="w-full max-w-xl self-start" padding="spacious">
         <div className="flex flex-col gap-2">
           <Heading1 as="h1">Welcome to {appName}</Heading1>
-          <p className="text-sm text-slate-600">
-            Log in to access your dashboard, exercises, plans, and assignments.
-          </p>
         </div>
 
         <form onSubmit={handlePasswordSignIn} className="mt-8 flex flex-col gap-4" autoComplete="on">

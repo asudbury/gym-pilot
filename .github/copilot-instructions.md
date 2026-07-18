@@ -38,6 +38,7 @@
 
 ## Supabase and documentation expectations
 - When changing Supabase tables, columns, relationships, or client-side calls, update the documentation in [docs/data-schema.md](docs/data-schema.md) and keep the Mermaid schema diagram in sync.
+- If the data model, persistence strategy, storage keys, or schema shape changes, update the relevant documentation immediately so the repo stays consistent.
 - Document the relevant Supabase call patterns and the target tables in the shared Supabase module so future changes are easy to audit.
 - If a change is environment-specific (for example, localhost-only behavior), note that clearly in the docs.
 
