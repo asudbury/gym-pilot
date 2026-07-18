@@ -58,7 +58,7 @@ export function Header({
   }
 
   return (
-    <nav className="sticky top-0 z-30 h-16 border-b border-slate-200 bg-white/95 text-slate-900 backdrop-blur transition-colors dark:border-slate-700 dark:bg-slate-950/95 dark:text-slate-100">
+    <nav className="sticky top-0 z-30 h-16 border-b border-white/60 bg-white/70 text-slate-900 shadow-[0_10px_30px_-18px_rgba(15,23,42,0.25)] backdrop-blur-xl transition-colors dark:border-slate-700/60 dark:bg-slate-950/70 dark:text-slate-100">
       <div className="mx-auto flex h-full max-w-6xl items-center justify-between px-4 sm:px-6 lg:px-8">
         <div className="flex flex-col">
           <NavLink to="/" className="text-lg font-semibold text-slate-900 transition-colors dark:text-slate-100">
@@ -105,7 +105,7 @@ export function Header({
                 Menu
               </button>
               {mobileMenuOpen ? (
-                <div className="fixed inset-x-3 top-16 z-40 max-h-[min(75vh,32rem)] overflow-y-auto rounded-2xl border border-slate-200 bg-white p-3 shadow-xl sm:absolute sm:right-0 sm:left-auto sm:top-full sm:mt-2 sm:w-80 sm:max-w-[calc(100vw-2rem)]">
+                <div className="fixed inset-x-3 top-16 z-40 max-h-[min(75vh,32rem)] overflow-y-auto rounded-2xl border border-white/70 bg-white/75 p-3 shadow-xl backdrop-blur-xl sm:absolute sm:right-0 sm:left-auto sm:top-full sm:mt-2 sm:w-80 sm:max-w-[calc(100vw-2rem)]">
                   <div className="flex flex-col gap-2">
                     <FavouriteLinksMenu
                       favorites={favorites}
@@ -135,7 +135,7 @@ export function Header({
                 Menu
               </button>
               {mobileMenuOpen ? (
-                <div className="fixed inset-x-3 top-16 z-40 max-h-[min(75vh,32rem)] overflow-y-auto rounded-2xl border border-slate-200 bg-white p-3 shadow-xl sm:absolute sm:right-0 sm:left-auto sm:top-full sm:mt-2 sm:w-80 sm:max-w-[calc(100vw-2rem)]">
+                <div className="fixed inset-x-3 top-16 z-40 max-h-[min(75vh,32rem)] overflow-y-auto rounded-2xl border border-white/70 bg-white/75 p-3 shadow-xl backdrop-blur-xl sm:absolute sm:right-0 sm:left-auto sm:top-full sm:mt-2 sm:w-80 sm:max-w-[calc(100vw-2rem)]">
                   <div className="flex flex-col gap-2">
                     <FavouriteLinksMenu
                       favorites={favorites}

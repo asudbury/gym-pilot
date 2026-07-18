@@ -33,14 +33,12 @@ export function FavouriteLinksMenu({
   folders,
   variant = 'menu',
   onFavoritesChange,
-  onFoldersChange,
   onMenuOpenChange,
 }: FavouriteLinksMenuProps) {
   const location = useLocation()
   const navigate = useNavigate()
   const [menuOpen, setMenuOpen] = useState(false)
   const [selectedFolder, setSelectedFolder] = useState('')
-  const [newFolderName, setNewFolderName] = useState('')
 
   useEffect(() => {
     onMenuOpenChange?.(menuOpen)
@@ -105,7 +103,6 @@ export function FavouriteLinksMenu({
   }, [])
 
   const currentQuickLink = useMemo(() => getQuickLinkForPath(location.pathname, exerciseLookup), [exerciseLookup, location.pathname])
-  const isCurrentPageFavorite = currentQuickLink ? favorites.some((item) => item.path === currentQuickLink.path) : false
   const favoriteGroups = useMemo(() => {
     const groups = groupFavoritesByFolder(favorites)
     const folderGroups = folders.map((folderName) => [folderName, [] as QuickLink[]] as const)
@@ -154,18 +151,6 @@ export function FavouriteLinksMenu({
 
     setSelectedFolder(folderName)
   }, [currentQuickLink, favorites, menuOpen])
-
-  const handleCreateFolder = () => {
-    const folderName = normalizeFolderName(newFolderName)
-
-    if (!folderName) {
-      return
-    }
-
-    onFoldersChange(Array.from(new Set([...folders, folderName])).sort((left, right) => left.localeCompare(right)))
-    setSelectedFolder(folderName)
-    setNewFolderName('')
-  }
 
   const handleUpdateFavoriteLink = (link: QuickLink, folderName?: string) => {
     const normalizedFolder = normalizeFolderName(folderName ?? '') || undefined

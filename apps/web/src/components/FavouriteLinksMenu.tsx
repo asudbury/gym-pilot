@@ -311,7 +311,7 @@ export function FavouriteLinksMenu({
                 </div>
               ))}
             </div>
-          )}
+          ) : null}
         </div>
       )}
     </div>

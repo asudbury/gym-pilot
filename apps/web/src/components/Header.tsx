@@ -1,6 +1,6 @@
 import { NavLink } from 'react-router-dom'
-import { FavouriteLinksMenu } from './FavouriteLinksMenu'
-import { NavigationMenuList } from './NavigationMenuList'
+import { FavouriteLinksMenu } from './navigation/FavouriteLinksMenu'
+import { NavigationMenuList } from './navigation/NavigationMenuList'
 import type { NavigationMenuListItem } from '../utils/navigationUtils'
 import { ResponsiveVisibility } from './ResponsiveVisibility'
 import { getToneClass } from './toneClasses'
