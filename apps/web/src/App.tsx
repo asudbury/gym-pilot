@@ -33,7 +33,7 @@ import { DashboardPage } from './pages/DashboardPage'
 import { TimetablePage } from './pages/TimetablePage'
 import { buildNavigationMenuItems } from './utils/navigationUtils'
 import { AssignmentDetailPage } from './pages/assignments/AssignmentDetailPage'
-import { logger } from './utils/loggingUtils'
+import { logger } from '@gym-pilot/shared'
 import { getHashHomeUrl, normalizeFavoriteStorageValue, normalizeHomeFilters, sortQuickLinks, type HomeFilters, type QuickLink } from './utils/appUtils'
 
 function ScrollToTop() {
@@ -106,11 +106,11 @@ useEffect(() => {
 
 useEffect(() => {
   if (!favoritesHydrated.current) {
-    console.log('Skipping saving favourites - not hydrated')
+    logger.info('Skipping saving favourites - not hydrated')
     return
   }
 
-  console.log('Saving favorites', { favorites, folders })
+  logger.info('Saving favorites', { favorites, folders })
 
   void saveJsonRecord(FAVORITES_KEY, { favorites, folders })
 }, [favorites, folders])
@@ -126,15 +126,15 @@ useEffect(() => {
       return
     }
 
-    console.log('[App] Handling Supabase auth callback', { pathname, search })
+    logger.info('[App] Handling Supabase auth callback', { pathname, search })
 
     void client.auth.exchangeCodeForSession(window.location.href).then(({ error }) => {
       if (error) {
-        console.error('Supabase auth callback failed', error)
+        logger.error('Supabase auth callback failed', error)
         return
       }
 
-      console.log('[App] Supabase auth callback succeeded; redirecting home')
+      logger.info('[App] Supabase auth callback succeeded; redirecting home')
       window.dispatchEvent(new Event('gym-pilot-auth-updated'))
       window.location.assign(getHashHomeUrl())
     })

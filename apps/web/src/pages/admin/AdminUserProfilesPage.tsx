@@ -1,7 +1,7 @@
 import { useEffect, useMemo, useState } from 'react'
 import { useNavigate, useParams } from 'react-router-dom'
 import { Button } from '../../components/Button'
-import { getSupabaseClient, listSupabaseAuthUsers, usePlan } from '@gym-pilot/shared'
+import { getSupabaseClient, listSupabaseAuthUsers, logger, usePlan } from '@gym-pilot/shared'
 import type { UserRole } from '@gym-pilot/types'
 import { AdminSectionShell } from '../../components/admin/AdminSectionShell'
 import { GymClubSelector } from '../../components/GymClubSelector'
@@ -78,7 +78,7 @@ export function AdminUserProfilesPage() {
       .select('user_id, friendly_name, roles, trainer_id, application_name, gym_brand, gym_club_id, account_tier, access_ends_at, is_frozen, must_change_password, last_logged_in_at, previous_last_logged_in_at')
 
     if (error) {
-      console.error('[AdminUserProfiles] Could not load profile rows', error)
+      logger.error('[AdminUserProfiles] Could not load profile rows', error)
       setStatusMessage(`Could not load profile users: ${error.message}`)
       return
     }
@@ -237,7 +237,7 @@ export function AdminUserProfilesPage() {
       setStatusMessage(`Profile updated for ${trimmedName}.`)
       navigate('/admin/users', { replace: true })
     } catch (error) {
-      console.error('[AdminUserProfiles] Could not save profile', error)
+      logger.error('[AdminUserProfiles] Could not save profile', error)
       setStatusMessage('Could not save the profile changes.')
     } finally {
       setSavingProfileId(null)

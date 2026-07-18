@@ -2,7 +2,7 @@ import { useEffect, useState } from 'react'
 import { useNavigate, useParams } from 'react-router-dom'
 import { Button } from '../../components/Button'
 import { AdminSectionShell } from '../../components/admin/AdminSectionShell'
-import { getSupabaseClient, listSupabaseAuthUsers } from '@gym-pilot/shared'
+import { getSupabaseClient, listSupabaseAuthUsers, logger } from '@gym-pilot/shared'
 import { getDisplayEmail, getDisplayRoles } from '../../utils/adminUtils'
 
 type UserActivityRow = {
@@ -65,7 +65,7 @@ export function AdminUserActivityPage() {
       .maybeSingle()
 
     if (profileError) {
-      console.error('[AdminUserActivity] Could not load profile summary', profileError)
+      logger.error('[AdminUserActivity] Could not load profile summary', profileError)
       setStatusMessage(`Could not load profile: ${profileError.message}`)
       setIsLoading(false)
       return
@@ -103,7 +103,7 @@ export function AdminUserActivityPage() {
       .limit(50)
 
     if (activityError) {
-      console.error('[AdminUserActivity] Could not load user activity', activityError)
+      logger.error('[AdminUserActivity] Could not load user activity', activityError)
       setStatusMessage(`Could not load activity: ${activityError.message}`)
       setActivityRows([])
       setIsLoading(false)

@@ -1,3 +1,5 @@
+import { logger } from '@gym-pilot/shared'
+
 export type VirginActiveClub = {
   clubId: number
   name: string
@@ -119,7 +121,7 @@ export async function loadVirginActiveClubs(): Promise<VirginActiveClub[]> {
           }
         }
       } catch (error) {
-        console.warn('[VirginActive] Could not load clubs from configured endpoint', error)
+        logger.warn('[VirginActive] Could not load clubs from configured endpoint', error)
       }
     }
 

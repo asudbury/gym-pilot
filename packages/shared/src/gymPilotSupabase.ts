@@ -1,5 +1,6 @@
 import type { Assignment, Plan, UserRole } from '@gym-pilot/types'
 import { getSupabaseClient, isSupabasePersistenceEnabled as isSupabasePersistenceEnabledBase } from './supabase'
+import { logger } from './logging'
 import { normalizeUserRoles } from './utils'
 
 const DEFAULT_SUPABASE_TABLE = 'gym_pilot_app_state'
@@ -194,21 +195,21 @@ async function getAuthenticatedUserId(client: ReturnType<typeof getSupabaseClien
     const { data: { session }, error } = await client.auth.getSession()
 
     if (error) {
-      console.warn('[Supabase] Could not resolve authenticated session', error)
+      logger.warn('[Supabase] Could not resolve authenticated session', error)
       return null
     }
 
     const userId = session?.user?.id ?? null
 
     if (!userId) {
-      console.log('[Supabase] No active session yet; skipping remote persistence work')
+      logger.info('[Supabase] No active session yet; skipping remote persistence work')
       return null
     }
 
-    console.log('[Supabase] Resolved authenticated user', { userId })
+    logger.info('[Supabase] Resolved authenticated user', { userId })
     return userId
   } catch (error) {
-    console.warn('[Supabase] Session lookup failed', error)
+    logger.warn('[Supabase] Session lookup failed', error)
     return null
   }
 }
@@ -262,7 +263,7 @@ export async function loadSupabaseProfileSnapshot(userId?: string): Promise<Supa
         return createEmptyProfileSnapshot()
       }
 
-      console.error('[Supabase] Could not load profile snapshot', error)
+      logger.error('[Supabase] Could not load profile snapshot', error)
       return createEmptyProfileSnapshot()
     }
 
@@ -364,7 +365,7 @@ export async function listSupabaseProfiles(): Promise<SupabaseProfile[]> {
       .select('id, user_id, friendly_name, application_name, gym_name, account_tier, access_ends_at, is_frozen, roles, must_change_password, created_at, updated_at')
 
     if (fallback.error) {
-      console.error('[Supabase] Could not load profiles', fallback.error)
+      logger.error('[Supabase] Could not load profiles', fallback.error)
       return []
     }
 
@@ -380,7 +381,7 @@ export async function listSupabaseProfiles(): Promise<SupabaseProfile[]> {
   }
 
   if (error) {
-    console.error('[Supabase] Could not load profiles', error)
+    logger.error('[Supabase] Could not load profiles', error)
     return []
   }
 
@@ -407,11 +408,11 @@ export async function listSupabaseProfiles(): Promise<SupabaseProfile[]> {
       )
 
       if (fallback.error) {
-        console.error('[Supabase] Could not create profile row for current user', fallback.error)
+        logger.error('[Supabase] Could not create profile row for current user', fallback.error)
         return profiles
       }
     } else if (upsertError) {
-      console.error('[Supabase] Could not create profile row for current user', upsertError)
+      logger.error('[Supabase] Could not create profile row for current user', upsertError)
       return profiles
     }
 
@@ -420,7 +421,7 @@ export async function listSupabaseProfiles(): Promise<SupabaseProfile[]> {
       .select('id, user_id, friendly_name, application_name, gym_brand, gym_name, account_tier, access_ends_at, is_frozen, roles, trainer_id, must_change_password, created_at, updated_at')
 
     if (refreshError) {
-      console.error('[Supabase] Could not reload profiles after creating the current user row', refreshError)
+      logger.error('[Supabase] Could not reload profiles after creating the current user row', refreshError)
       return profiles
     }
 
@@ -480,7 +481,7 @@ export async function saveSupabaseProfileName(friendlyName: string | null) {
   )
 
   if (error) {
-    console.error('[Supabase] Could not save profile name', error)
+    logger.error('[Supabase] Could not save profile name', error)
     return
   }
 
@@ -517,7 +518,7 @@ async function saveSupabaseProfileTextValue(fieldName: 'application_name' | 'gym
       return
     }
 
-    console.error(`[Supabase] Could not save profile field ${fieldName}`, error)
+    logger.error(`[Supabase] Could not save profile field ${fieldName}`, error)
     return
   }
 
@@ -562,7 +563,7 @@ export async function saveSupabaseGymName(gymName: string | null, gymBrand?: str
       return
     }
 
-    console.error('[Supabase] Could not save profile gym name', error)
+    logger.error('[Supabase] Could not save profile gym name', error)
     return
   }
 
@@ -591,7 +592,7 @@ export async function saveSupabaseProfileAccessSettings(accountTier: string | nu
   )
 
   if (error) {
-    console.error('[Supabase] Could not save profile access settings', error)
+    logger.error('[Supabase] Could not save profile access settings', error)
     return
   }
 
@@ -617,7 +618,7 @@ export async function saveSupabaseProfileFlag(flag: 'must_change_password', valu
   )
 
   if (error) {
-    console.error('[Supabase] Could not save profile flag', error)
+    logger.error('[Supabase] Could not save profile flag', error)
     return
   }
 
@@ -644,7 +645,7 @@ export async function saveSupabaseProfileLastLoggedIn(userId?: string) {
     .maybeSingle()
 
   if (loadError) {
-    console.error('[Supabase] Could not load existing profile login timestamp', loadError)
+    logger.error('[Supabase] Could not load existing profile login timestamp', loadError)
     return
   }
 
@@ -661,7 +662,7 @@ export async function saveSupabaseProfileLastLoggedIn(userId?: string) {
   )
 
   if (error) {
-    console.error('[Supabase] Could not save profile last logged in timestamp', error)
+    logger.error('[Supabase] Could not save profile last logged in timestamp', error)
     return
   }
 
@@ -672,7 +673,7 @@ export async function saveSupabaseProfileLastLoggedIn(userId?: string) {
 }
 
 export async function loadSupabaseJsonRecord<T>(key: string): Promise<SupabaseRecordResponse<T>> {
-  console.log('[Supabase] Loading remote record', { key })
+  logger.info('[Supabase] Loading remote record', { key })
   const client = getSupabaseClient()
 
   if (!client) {
@@ -692,7 +693,7 @@ export async function loadSupabaseJsonRecord<T>(key: string): Promise<SupabaseRe
       .eq('user_id', userId)
 
     if (error) {
-      console.error('[Supabase] Remote plans load failed', { key, error })
+      logger.error('[Supabase] Remote plans load failed', { key, error })
       throw error
     }
 
@@ -714,7 +715,7 @@ export async function loadSupabaseJsonRecord<T>(key: string): Promise<SupabaseRe
       .eq('user_id', userId)
 
     if (error) {
-      console.error('[Supabase] Remote assignments load failed', { key, error })
+      logger.error('[Supabase] Remote assignments load failed', { key, error })
       throw error
     }
 
@@ -740,7 +741,7 @@ export async function loadSupabaseJsonRecord<T>(key: string): Promise<SupabaseRe
       .eq('user_id', userId)
 
     if (folderError) {
-      console.error('[Supabase] Remote favorite folders load failed', { key, error: folderError })
+      logger.error('[Supabase] Remote favorite folders load failed', { key, error: folderError })
       throw folderError
     }
 
@@ -752,7 +753,7 @@ export async function loadSupabaseJsonRecord<T>(key: string): Promise<SupabaseRe
       .eq('user_id', userId)
 
     if (error) {
-      console.error('[Supabase] Remote favorites load failed', { key, error })
+      logger.error('[Supabase] Remote favorites load failed', { key, error })
       throw error
     }
 
@@ -772,7 +773,7 @@ export async function loadSupabaseJsonRecord<T>(key: string): Promise<SupabaseRe
 
     const payload: FavoriteStorageValue = { favorites, folders }
 
-    console.log('[Supabase] Remote favorites loaded', { key, favorites, folders })
+    logger.info('[Supabase] Remote favorites loaded', { key, favorites, folders })
     return { found: true, value: payload as T }
   }
 
@@ -784,16 +785,16 @@ export async function loadSupabaseJsonRecord<T>(key: string): Promise<SupabaseRe
     .maybeSingle()
 
   if (error) {
-    console.error('[Supabase] Remote record load failed', { key, error })
+    logger.error('[Supabase] Remote record load failed', { key, error })
     throw error
   }
 
   if (!data?.value) {
-    console.log('[Supabase] Remote record not found', { key })
+    logger.info('[Supabase] Remote record not found', { key })
     return { found: false, value: null }
   }
 
-  console.log('[Supabase] Remote record loaded', { key, value: data.value })
+  logger.info('[Supabase] Remote record loaded', { key, value: data.value })
   return {
     found: true,
     value: JSON.parse(data.value) as T,
@@ -801,7 +802,7 @@ export async function loadSupabaseJsonRecord<T>(key: string): Promise<SupabaseRe
 }
 
 export async function saveSupabaseJsonRecord<T>(key: string, value: T) {
-  console.log('[Supabase] Saving remote record', { key, value })
+  logger.info('[Supabase] Saving remote record', { key, value })
   const client = getSupabaseClient()
 
   if (!client) {
@@ -944,7 +945,7 @@ export async function saveSupabaseJsonRecord<T>(key: string, value: T) {
 }
 
 export async function removeSupabaseJsonRecord(key: string) {
-  console.log('[Supabase] Removing remote record', { key })
+  logger.info('[Supabase] Removing remote record', { key })
   const client = getSupabaseClient()
 
   if (!client) {
@@ -1000,6 +1001,6 @@ export async function recordSupabaseUserActivity(eventType: string, eventData: R
   })
 
   if (error) {
-    console.error('[Supabase] Could not record user activity', error)
+    logger.error('[Supabase] Could not record user activity', error)
   }
 }

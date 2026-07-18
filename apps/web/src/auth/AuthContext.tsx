@@ -1,6 +1,6 @@
 import { createContext, useContext, useEffect, useMemo, useRef, useState, type ReactNode } from 'react'
 import type { User, UserRole } from '@gym-pilot/types'
-import { getSupabaseClient, loadJsonRecord, loadSupabaseProfileAccessState, loadSupabaseProfileSnapshot, normalizeUserRoles, recordSupabaseUserActivity, saveJsonRecord, saveSupabaseApplicationName, saveSupabaseGymBrand, saveSupabaseGymName, saveSupabaseProfileName, saveSupabaseProfileLastLoggedIn, signOutFromSupabase, usePlan } from '@gym-pilot/shared'
+import { getSupabaseClient, loadJsonRecord, loadSupabaseProfileAccessState, loadSupabaseProfileSnapshot, logger, normalizeUserRoles, recordSupabaseUserActivity, saveJsonRecord, saveSupabaseApplicationName, saveSupabaseGymBrand, saveSupabaseGymName, saveSupabaseProfileName, saveSupabaseProfileLastLoggedIn, signOutFromSupabase, usePlan } from '@gym-pilot/shared'
 import { getHashHomeUrl } from '../utils/appUtils'
 
 const SESSION_STORAGE_KEY = 'gym-pilot-auth-session'
@@ -88,7 +88,7 @@ async function resolveSupabaseAuthUser(users: User[] = []): Promise<AuthUser | n
     const { data: { session }, error } = await client.auth.getSession()
 
     if (error) {
-      console.warn('[Auth] Could not read Supabase session', error)
+      logger.warn('[Auth] Could not read Supabase session', error)
       return null
     }
 
@@ -133,7 +133,7 @@ async function resolveSupabaseAuthUser(users: User[] = []): Promise<AuthUser | n
       previousLastLoggedInAt: profileSnapshot.previousLastLoggedInAt,
     }
   } catch (error) {
-    console.warn('[Auth] Supabase session lookup failed', error)
+    logger.warn('[Auth] Supabase session lookup failed', error)
     return null
   }
 }
@@ -167,7 +167,7 @@ export function AuthProvider({ children }: AuthProviderProps) {
     let isActive = true
 
     async function loadSession() {
-      console.log('[Auth] Hydrating session from persistence')
+      logger.info('[Auth] Hydrating session from persistence')
       const storedUser = await readStoredSession()
       const resolvedUser = storedUser
 
@@ -175,7 +175,7 @@ export function AuthProvider({ children }: AuthProviderProps) {
         return
       }
 
-      console.log('[Auth] Resolved auth state', { storedUserPresent: Boolean(storedUser), resolvedUser })
+      logger.info('[Auth] Resolved auth state', { storedUserPresent: Boolean(storedUser), resolvedUser })
 
       if (resolvedUser) {
         window.sessionStorage.setItem(CURRENT_USER_ID_STORAGE_KEY, resolvedUser.id)
@@ -200,7 +200,7 @@ export function AuthProvider({ children }: AuthProviderProps) {
 
     async function syncSupabaseSession() {
       if (window.sessionStorage.getItem(LOGOUT_PENDING_STORAGE_KEY) === 'true') {
-        console.log('[Auth] Skipping Supabase session sync while logout is pending')
+        logger.info('[Auth] Skipping Supabase session sync while logout is pending')
         return
       }
 
@@ -211,7 +211,7 @@ export function AuthProvider({ children }: AuthProviderProps) {
       }
 
       if (supabaseUser) {
-        console.log('[Auth] Synced Supabase auth state', { user: supabaseUser })
+        logger.info('[Auth] Synced Supabase auth state', { user: supabaseUser })
         setUser(supabaseUser)
         setIsBypassEnabled(false)
         window.sessionStorage.setItem(CURRENT_USER_ID_STORAGE_KEY, supabaseUser.id)
@@ -239,7 +239,7 @@ export function AuthProvider({ children }: AuthProviderProps) {
       return
     }
 
-    console.log('[Auth] Persisting session state', { user })
+    logger.info('[Auth] Persisting session state', { user })
     void saveJsonRecord(SESSION_STORAGE_KEY, user)
   }, [user])
 
@@ -248,7 +248,7 @@ export function AuthProvider({ children }: AuthProviderProps) {
       return
     }
 
-    console.log('[Auth] Persisting bypass state', { isBypassEnabled })
+    logger.info('[Auth] Persisting bypass state', { isBypassEnabled })
     void saveJsonRecord(BYPASS_STORAGE_KEY, isBypassEnabled)
   }, [isBypassEnabled])
 
@@ -275,7 +275,7 @@ export function AuthProvider({ children }: AuthProviderProps) {
   }
 
   const login = (userId: string) => {
-    console.log('[Auth] Login requested', { userId })
+    logger.info('[Auth] Login requested', { userId })
     const selectedUser = users.find((item) => item.id === userId)
 
     if (!selectedUser) {
@@ -284,7 +284,7 @@ export function AuthProvider({ children }: AuthProviderProps) {
 
     window.sessionStorage.setItem(CURRENT_USER_ID_STORAGE_KEY, selectedUser.id)
     notifyAuthStateChanged()
-    console.log('[Auth] Login succeeded', { selectedUser })
+    logger.info('[Auth] Login succeeded', { selectedUser })
 
     setUser({
       id: selectedUser.id,
@@ -306,7 +306,7 @@ export function AuthProvider({ children }: AuthProviderProps) {
   }
 
   const enableBypass = () => {
-    console.log('[Auth] Bypass enabled')
+    logger.info('[Auth] Bypass enabled')
     window.sessionStorage.setItem(CURRENT_USER_ID_STORAGE_KEY, 'mvp-bypass')
     notifyAuthStateChanged()
     setIsBypassEnabled(true)
@@ -329,7 +329,7 @@ export function AuthProvider({ children }: AuthProviderProps) {
   }
 
   const disableBypass = () => {
-    console.log('[Auth] Bypass disabled')
+    logger.info('[Auth] Bypass disabled')
     window.sessionStorage.removeItem(CURRENT_USER_ID_STORAGE_KEY)
     notifyAuthStateChanged()
     setIsBypassEnabled(false)
@@ -337,7 +337,7 @@ export function AuthProvider({ children }: AuthProviderProps) {
   }
 
   const logout = () => {
-    console.log('[Auth] Logout requested')
+    logger.info('[Auth] Logout requested')
     const currentUserId = user?.id
 
     window.sessionStorage.setItem(LOGOUT_PENDING_STORAGE_KEY, 'true')

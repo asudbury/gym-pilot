@@ -1,6 +1,6 @@
 import { useState } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
-import { changeSupabasePassword } from '@gym-pilot/shared'
+import { changeSupabasePassword, logger } from '@gym-pilot/shared'
 import { getToneClass } from '../../components/toneClasses'
 import { PageCard } from '../../components/PageCard'
 import { PageLayout } from '../../layouts/PageLayout'
@@ -41,7 +41,7 @@ export function AdminChangePasswordPage() {
       setStatusMessage('Password updated successfully.')
       navigate('/admin/preferences')
     } catch (error) {
-      console.error('[ChangePassword] Failed to update password', error)
+      logger.error('[ChangePassword] Failed to update password', error)
       const message = error instanceof Error ? error.message : 'Could not update the password right now.'
       setStatusMessage(message)
     } finally {

@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react'
 import { useLocation, useNavigate } from 'react-router-dom'
 import { Button } from '../../components/Button'
-import { getSupabaseClient, listSupabaseAuthUsers } from '@gym-pilot/shared'
+import { getSupabaseClient, listSupabaseAuthUsers, logger } from '@gym-pilot/shared'
 import { AdminSectionShell } from '../../components/admin/AdminSectionShell'
 import { mapAdminProfileRows, type AdminProfileRow } from '../../utils/adminUtils'
 
@@ -38,7 +38,7 @@ export function AdminUsersPage() {
       : error
 
     if (profileSelectionError) {
-      console.error('[AdminUsers] Could not load profile rows', profileSelectionError)
+      logger.error('[AdminUsers] Could not load profile rows', profileSelectionError)
       setSupabaseUsersNotice(`Could not load profile users: ${profileSelectionError.message}`)
       setIsLoadingSupabaseUsers(false)
       return
@@ -52,7 +52,7 @@ export function AdminUsersPage() {
     const resolvedError = fallbackSelection?.error ?? null
 
     if (resolvedError) {
-      console.error('[AdminUsers] Could not load profile rows', resolvedError)
+      logger.error('[AdminUsers] Could not load profile rows', resolvedError)
       setSupabaseUsersNotice(`Could not load profile users: ${resolvedError.message}`)
       setIsLoadingSupabaseUsers(false)
       return

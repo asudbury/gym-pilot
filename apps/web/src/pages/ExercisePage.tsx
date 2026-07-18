@@ -11,7 +11,7 @@ import { PageLayout } from '../layouts/PageLayout'
 import { Heading1, Paragraph } from '../components/Typography'
 import { ExerciseMetaBadges } from '../components/exercises/ExerciseMetaBadges'
 import { formatLabel } from '../utils/formatUtils'
-import { logger } from '../utils/loggingUtils'
+import { logger } from '@gym-pilot/shared'
 import { copyExerciseLinkToClipboard } from '../utils/navigationUtils'
 
 type ExercisePageProps = {

@@ -1,7 +1,7 @@
 import { useMemo, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { Button } from '../../components/Button'
-import { getSupabaseClient, signUpWithPassword, usePlan } from '@gym-pilot/shared'
+import { getSupabaseClient, logger, signUpWithPassword, usePlan } from '@gym-pilot/shared'
 import type { UserRole } from '@gym-pilot/types'
 import { AdminSectionShell } from '../../components/admin/AdminSectionShell'
 
@@ -44,7 +44,7 @@ export function AdminCreateUserPage() {
       const response = await signUpWithPassword(newUserEmail.trim() || resolvedDisplayName, tempPassword, { passwordChangeRequired: true, persistSession: false })
 
       if (response.error) {
-        console.error('[AdminCreateUser] Could not create Supabase auth user', response.error)
+        logger.error('[AdminCreateUser] Could not create Supabase auth user', response.error)
         setTempPassword('')
 
         const errorMessage = response.error.message?.includes('rate limit')
@@ -81,12 +81,12 @@ export function AdminCreateUserPage() {
           }, { onConflict: 'user_id' })
 
           if (fallbackError) {
-            console.error('[AdminCreateUser] Could not create Supabase profile row', fallbackError)
+            logger.error('[AdminCreateUser] Could not create Supabase profile row', fallbackError)
             setStatusMessage({ text: `Could not create the profile row: ${fallbackError.message}`, tone: 'error' })
             return
           }
         } else if (profileError) {
-          console.error('[AdminCreateUser] Could not create Supabase profile row', profileError)
+          logger.error('[AdminCreateUser] Could not create Supabase profile row', profileError)
           setStatusMessage({ text: `Could not create the profile row: ${profileError.message}`, tone: 'error' })
           return
         }

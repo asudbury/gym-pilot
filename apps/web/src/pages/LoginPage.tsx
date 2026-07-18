@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useState } from 'react'
 import { useNavigate, useLocation, useSearchParams } from 'react-router-dom'
-import { loadSupabaseProfileAccessState, loadSupabaseProfileFlag, resetSupabasePassword, signInWithPassword, signOutFromSupabase } from '@gym-pilot/shared'
+import { loadSupabaseProfileAccessState, loadSupabaseProfileFlag, logger, resetSupabasePassword, signInWithPassword, signOutFromSupabase } from '@gym-pilot/shared'
 import { PageCard } from '../components/PageCard'
 import { Heading1 } from '../components/Typography'
 import { appTokens } from '../constants/tokens'
@@ -106,7 +106,7 @@ export function LoginPage() {
     setIsSubmitting(false)
 
     if (response.error) {
-      console.error('[Login] Password sign-in failed', response.error)
+      logger.error('[Login] Password sign-in failed', response.error)
       setAuthMessage(`Sign-in failed: ${response.error.message}`)
       return
     }
@@ -149,7 +149,7 @@ export function LoginPage() {
     setIsResetting(false)
 
     if (response.error) {
-      console.error('[Login] Password reset failed', response.error)
+      logger.error('[Login] Password reset failed', response.error)
       setAuthMessage(`Could not send the reset email: ${response.error.message}`)
       return
     }

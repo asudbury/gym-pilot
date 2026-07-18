@@ -3,6 +3,7 @@ export * from './planContext'
 export * from './data'
 export * from './storage'
 export * from './schemaDocs'
+export * from './logging'
 export {
   getSupabaseClient,
   signInWithGoogle,

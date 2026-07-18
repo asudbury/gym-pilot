@@ -1,4 +1,5 @@
 import { createClient, type SupabaseClient } from '@supabase/supabase-js'
+import { logger } from './logging'
 
 let supabaseClient: SupabaseClient | null = null
 let supabaseClientNoPersist: SupabaseClient | null = null
@@ -56,7 +57,7 @@ type SupabaseClientOptions = {
 
 export function getSupabaseClient(options?: SupabaseClientOptions) {
   if (!isSupabasePersistenceEnabled()) {
-    console.log('[Supabase] Persistence disabled or client unavailable')
+    logger.info('[Supabase] Persistence disabled or client unavailable')
     return null
   }
 
@@ -72,7 +73,7 @@ export function getSupabaseClient(options?: SupabaseClientOptions) {
       return null
     }
 
-    console.log('[Supabase] Creating client', { url, persistSession: shouldPersistSession, autoRefreshToken: shouldAutoRefreshToken })
+    logger.info('[Supabase] Creating client', { url, persistSession: shouldPersistSession, autoRefreshToken: shouldAutoRefreshToken })
 
     const nextClient = createClient(url, anonKey, {
       auth: {
@@ -95,11 +96,11 @@ export function getSupabaseClient(options?: SupabaseClientOptions) {
 }
 
 export async function signInWithGoogle() {
-  console.log('[Supabase] Starting Google OAuth sign-in')
+  logger.info('[Supabase] Starting Google OAuth sign-in')
   const client = getSupabaseClient()
 
   if (!client) {
-    console.error('[Supabase] Google sign-in skipped because client is unavailable')
+    logger.error('[Supabase] Google sign-in skipped because client is unavailable')
     return { error: new Error('Supabase client is not available') }
   }
 
@@ -112,11 +113,11 @@ export async function signInWithGoogle() {
 }
 
 export async function signInWithPassword(email: string, password: string) {
-  console.log('[Supabase] Starting password sign-in')
+  logger.info('[Supabase] Starting password sign-in')
   const client = getSupabaseClient()
 
   if (!client) {
-    console.error('[Supabase] Password sign-in skipped because client is unavailable')
+    logger.error('[Supabase] Password sign-in skipped because client is unavailable')
     return { error: new Error('Supabase client is not available') }
   }
 
@@ -140,11 +141,11 @@ function normalizeAuthEmail(email: string) {
 
 export async function signUpWithPassword(email: string, password: string, options?: { passwordChangeRequired?: boolean; persistSession?: boolean }) {
   const normalizedEmail = normalizeAuthEmail(email)
-  console.log('[Supabase] Creating password-based account', { email: normalizedEmail, passwordChangeRequired: options?.passwordChangeRequired, persistSession: options?.persistSession })
+  logger.info('[Supabase] Creating password-based account', { email: normalizedEmail, passwordChangeRequired: options?.passwordChangeRequired, persistSession: options?.persistSession })
   const client = getSupabaseClient({ persistSession: options?.persistSession ?? false, autoRefreshToken: false })
 
   if (!client) {
-    console.error('[Supabase] Account creation skipped because client is unavailable')
+    logger.error('[Supabase] Account creation skipped because client is unavailable')
     return { error: new Error('Supabase client is not available') }
   }
 
@@ -170,7 +171,7 @@ async function getCurrentSessionSupabaseUser(): Promise<SupabaseAuthUser | null>
     const { data: { session }, error } = await client.auth.getSession()
 
     if (error) {
-      console.warn('[Supabase] Could not read current session for auth user lookup', error)
+      logger.warn('[Supabase] Could not read current session for auth user lookup', error)
       return null
     }
 
@@ -188,17 +189,17 @@ async function getCurrentSessionSupabaseUser(): Promise<SupabaseAuthUser | null>
       user_metadata: sessionUser.user_metadata ?? undefined,
     }
   } catch (error) {
-    console.warn('[Supabase] Session-based auth user lookup failed', error)
+    logger.warn('[Supabase] Session-based auth user lookup failed', error)
     return null
   }
 }
 
 export async function listSupabaseAuthUsers(): Promise<SupabaseAuthUser[]> {
-  console.log('[Supabase] Listing auth users')
+  logger.info('[Supabase] Listing auth users')
   const adminClient = getSupabaseAdminClient()
 
   if (!adminClient) {
-    console.warn('[Supabase] Admin client unavailable; using current session user as fallback for auth user lookup')
+    logger.warn('[Supabase] Admin client unavailable; using current session user as fallback for auth user lookup')
     const currentUser = await getCurrentSessionSupabaseUser()
     return currentUser ? [currentUser] : []
   }
@@ -206,7 +207,7 @@ export async function listSupabaseAuthUsers(): Promise<SupabaseAuthUser[]> {
   const { data, error } = await adminClient.auth.admin.listUsers()
 
   if (error) {
-    console.error('[Supabase] Could not list auth users', error)
+    logger.error('[Supabase] Could not list auth users', error)
     const currentUser = await getCurrentSessionSupabaseUser()
     return currentUser ? [currentUser] : []
   }
@@ -228,11 +229,11 @@ export async function listSupabaseAuthUsers(): Promise<SupabaseAuthUser[]> {
 }
 
 export async function resetSupabasePassword(email: string) {
-  console.log('[Supabase] Sending password reset email')
+  logger.info('[Supabase] Sending password reset email')
   const client = getSupabaseClient()
 
   if (!client) {
-    console.error('[Supabase] Password reset skipped because client is unavailable')
+    logger.error('[Supabase] Password reset skipped because client is unavailable')
     return { error: new Error('Supabase client is not available') }
   }
 
@@ -242,11 +243,11 @@ export async function resetSupabasePassword(email: string) {
 }
 
 export async function changeSupabasePassword(newPassword: string) {
-  console.log('[Supabase] Changing password for current user')
+  logger.info('[Supabase] Changing password for current user')
   const client = getSupabaseClient()
 
   if (!client) {
-    console.error('[Supabase] Password change skipped because client is unavailable')
+    logger.error('[Supabase] Password change skipped because client is unavailable')
     return { error: new Error('Supabase client is not available') }
   }
 
@@ -254,7 +255,7 @@ export async function changeSupabasePassword(newPassword: string) {
 }
 
 export async function signOutFromSupabase() {
-  console.log('[Supabase] Signing out')
+  logger.info('[Supabase] Signing out')
   const client = getSupabaseClient()
 
   if (!client) {
@@ -264,7 +265,7 @@ export async function signOutFromSupabase() {
   const { error } = await client.auth.signOut()
 
   if (error) {
-    console.error('[Supabase] Sign-out failed', error)
+    logger.error('[Supabase] Sign-out failed', error)
   }
 
   return { error }

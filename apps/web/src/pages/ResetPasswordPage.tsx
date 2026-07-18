@@ -3,7 +3,7 @@ import { useLocation, useNavigate, useSearchParams } from 'react-router-dom'
 import { PageCard } from '../components/PageCard'
 import { Heading1 } from '../components/Typography'
 import { appTokens } from '../constants/tokens'
-import { getSupabaseClient, saveSupabaseProfileFlag } from '@gym-pilot/shared'
+import { getSupabaseClient, logger, saveSupabaseProfileFlag } from '@gym-pilot/shared'
 
 export function ResetPasswordPage() {
   const navigate = useNavigate()
@@ -66,7 +66,7 @@ export function ResetPasswordPage() {
     }
 
     if (sessionError) {
-      console.error('[ResetPassword] Could not restore Supabase session', sessionError)
+      logger.error('[ResetPassword] Could not restore Supabase session', sessionError)
       setStatusMessage('The password reset link could not be used. Please request a new one or sign in again.')
       setIsSubmitting(false)
       return
@@ -77,7 +77,7 @@ export function ResetPasswordPage() {
     setIsSubmitting(false)
 
     if (updateError) {
-      console.error('[ResetPassword] Password update failed', updateError)
+      logger.error('[ResetPassword] Password update failed', updateError)
       setStatusMessage(updateError.message || 'Could not update your password.')
       return
     }

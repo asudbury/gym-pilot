@@ -9,6 +9,7 @@ import { useAuth } from '../../auth/AuthContext'
 import { appTokens } from '../../constants/tokens'
 import { getDisplayEmail, getDisplayRoles } from '../../utils/adminUtils'
 import { GymClubSelector } from '../../components/GymClubSelector'
+import { logger } from '@gym-pilot/shared'
 
 export function AdminPreferencesPage() {
   const { user, updateProfileName, updateApplicationName, updateGymBrand, updateGymName, themePreference, setThemePreference, showVersion, setShowVersion } = useAuth()
@@ -45,7 +46,7 @@ export function AdminPreferencesPage() {
       }
       navigate('/admin')
     } catch (error) {
-      console.error('[Preferences] Failed to save preferences', error)
+      logger.error('[Preferences] Failed to save preferences', error)
       const message = error instanceof Error ? error.message : 'Could not save the preferences right now.'
       setStatusMessage(message)
     } finally {

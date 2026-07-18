@@ -2,6 +2,7 @@ import { createContext, useContext, useEffect, useMemo, useState, type ReactNode
 import { createUUID } from './utils'
 import type { Assignment, Plan, PlanItem, PlanSession, User, UserRole } from '@gym-pilot/types'
 import { DexiePersistence, listJsonRecords } from './storage'
+import { logger } from './logging'
 import { ASSIGNMENTS_KEY, PLANS_KEY } from '../../../apps/web/src/constants/storageKeys'
 import { listSupabaseProfiles } from './gymPilotSupabase'
 import { normalizeUserRoles } from './utils'
@@ -437,7 +438,7 @@ export function PlanProvider({ children, storageKey = PLANS_KEY }: PlanProviderP
     }
 
     const scopedStorageKey = getScopedStorageKey(storageKey, currentUserId)
-    console.log('[PlanContext] Saving plans', { scopedStorageKey, count: plans.length })
+    logger.info('[PlanContext] Saving plans', { scopedStorageKey, count: plans.length })
 
     void persistence.save(PLANS_KEY, plans)
   }, [plans, plansHydrated, storageKey, currentUserId])
@@ -447,7 +448,7 @@ export function PlanProvider({ children, storageKey = PLANS_KEY }: PlanProviderP
       return
     }
 
-    console.log('[PlanContext] Saving assignments', { count: assignments.length })
+    logger.info('[PlanContext] Saving assignments', { count: assignments.length })
     void persistence.save(ASSIGNMENTS_KEY, assignments)
   }, [assignments, assignmentsHydrated])
 

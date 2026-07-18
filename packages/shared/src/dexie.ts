@@ -1,4 +1,5 @@
 import Dexie, { type Table } from 'dexie'
+import { logger } from './logging'
 
 type JsonRecord = {
   key: string
@@ -28,15 +29,15 @@ async function ensureDbOpen() {
 }
 
 gymPilotDb.on('blocked', () => {
-  console.warn('Dexie blocked')
+  logger.warn('Dexie blocked')
 })
 
 gymPilotDb.on('versionchange', event => {
-  console.warn('Dexie version change', event)
+  logger.warn('Dexie version change', event)
 })
 
 gymPilotDb.on('close', () => {
-  console.warn('Dexie database closed')
+  logger.warn('Dexie database closed')
 })
 
 export async function saveJsonRecord<T>(key: string, value: T) {
@@ -45,7 +46,7 @@ export async function saveJsonRecord<T>(key: string, value: T) {
   try {
     json = JSON.stringify(value)
   } catch (error) {
-    console.error('Failed serialising record', key, error)
+    logger.error('Failed serialising record', key, error)
     throw error
   }
 
@@ -81,8 +82,8 @@ export async function loadJsonRecord<T>(
   try {
     return JSON.parse(record.value) as T
   } catch (error) {
-    console.error('Corrupt IndexedDB record:', key, error)
-    console.log('Raw value:', record.value)
+    logger.error('Corrupt IndexedDB record:', key, error)
+    logger.info('Raw value:', record.value)
 
     return fallback
   }

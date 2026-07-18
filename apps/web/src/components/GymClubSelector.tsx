@@ -1,4 +1,5 @@
 import { useEffect, useId, useMemo, useState } from 'react'
+import { logger } from '@gym-pilot/shared'
 import {
   getFallbackVirginActiveClubs,
   loadVirginActiveClubs,
@@ -39,7 +40,7 @@ export function GymClubSelector({ value, onChange, className, placeholder, disab
           return
         }
 
-        console.warn('[GymClubSelector] Could not load clubs', error)
+        logger.warn('[GymClubSelector] Could not load clubs', error)
         setClubsError('Could not load the club list right now.')
       })
       .finally(() => {
