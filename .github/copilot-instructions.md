@@ -11,12 +11,14 @@
 - Prefer pure helpers for state transitions, view-model construction, normalization, validation, filtering, grouping, role resolution, and route selection so they can be tested independently from React.
 - Use shared packages under packages/ for cross-cutting types and data contracts whenever the logic is shared outside a single page.
 - Keep page-level components thin; they should orchestrate state and render views rather than contain domain logic inline.
+- Centralise shared persistence and storage orchestration behind repository-style abstractions in packages/shared so local-first and remote-backed flows remain consistent and testable.
 
 ## Preferred structure
 - Feature modules should follow this pattern when practical:
   - domain/ for pure helpers, view models, normalization, and mapping logic
   - hooks/ for stateful orchestration that is shared across pages/components
   - services/ for persistence or API access concerns
+- Shared persistence concerns should live in packages/shared, typically behind repository-style modules that expose a consistent interface for local and remote storage.
 - Page components should primarily:
   - read from hooks or feature modules
   - manage local UI state only when the state is view-specific
@@ -27,11 +29,17 @@
 - If a component or hook is doing data mapping, filtering, grouping, role resolution, route selection, or state transitions, move that logic into a helper in the relevant feature domain.
 - Treat hooks as orchestration layers: React state and effects stay in the hook, while reusable business rules live in pure functions that can be unit tested.
 - Preserve current user-facing behavior while improving testability and readability.
+- If persistence logic is shared across features, move it behind a repository-style abstraction in packages/shared before adding more ad-hoc storage calls.
 
 ## Testing expectations
 - Add or update tests for extracted helpers whenever behavior changes or new domain logic is introduced.
 - Prefer focused unit tests for domain helpers and view-model builders over brittle UI-only tests.
 - Keep tests close to the feature domain they cover.
+
+## Supabase and documentation expectations
+- When changing Supabase tables, columns, relationships, or client-side calls, update the documentation in [docs/data-schema.md](docs/data-schema.md) and keep the Mermaid schema diagram in sync.
+- Document the relevant Supabase call patterns and the target tables in the shared Supabase module so future changes are easy to audit.
+- If a change is environment-specific (for example, localhost-only behavior), note that clearly in the docs.
 
 ## TypeScript and React guidance
 - Use explicit types for shared data structures and helper return values.

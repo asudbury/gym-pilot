@@ -38,3 +38,4 @@ export {
   recordSupabaseUserActivity,
 } from './gymPilotSupabase'
 export * from './utils'
+export * from './repositories'

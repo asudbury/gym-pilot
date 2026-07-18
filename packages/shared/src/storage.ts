@@ -11,6 +11,7 @@ import {
   saveSupabaseJsonRecord,
 } from './gymPilotSupabase'
 import { logger } from './logging'
+import { createPersistenceRepository } from './repositories'
 
 export interface IPersistenceStore {
   load<T>(key: string, fallback: T): Promise<T>
@@ -38,77 +39,52 @@ export class DexiePersistence implements IPersistenceStore {
   }
 }
 
+const persistenceRepository = createPersistenceRepository({
+  loadLocal: async <T>(key: string, fallback: T) => {
+    logger.info('[Storage] Loading record', { key, fallback })
+    return loadDexieJsonRecord<T>(key, fallback)
+  },
+  saveLocal: async <T>(key: string, value: T) => {
+    logger.info('[Storage] Saving record', { key, value })
+    await saveDexieJsonRecord(key, value)
+    logger.info('[Storage] IndexedDB save completed', { key })
+  },
+  removeLocal: async (key: string) => {
+    logger.info('[Storage] Removing record', { key })
+    await removeDexieJsonRecord(key)
+    logger.info('[Storage] IndexedDB remove completed', { key })
+  },
+  listLocal: async () => listDexieJsonRecords(),
+  loadRemote: async <T>(key: string) => loadSupabaseJsonRecord<T>(key),
+  saveRemote: async <T>(key: string, value: T) => {
+    logger.info('[Storage] Supabase save completed', { key })
+    await saveSupabaseJsonRecord(key, value)
+  },
+  removeRemote: async (key: string) => {
+    await removeSupabaseJsonRecord(key)
+  },
+  isRemoteEnabled: () => isSupabasePersistenceEnabled(),
+  shouldUseRemoteForKey: (key: string) => shouldUseSupabaseForKey(key),
+})
+
 export async function loadJsonRecord<T>(key: string, fallback: T): Promise<T> {
-  logger.info('[Storage] Loading record', { key, fallback })
-
   try {
-    const localValue = await loadDexieJsonRecord<T>(key, fallback)
-    logger.info('[Storage] Local IndexedDB value loaded', { key, localValue })
-
-    if (isSupabasePersistenceEnabled() && shouldUseSupabaseForKey(key)) {
-      try {
-        const remote = await loadSupabaseJsonRecord<T>(key)
-        logger.info('[Storage] Supabase remote value loaded', { key, remote })
-
-        if (remote.found && remote.value !== null) {
-          return remote.value as T
-        }
-      } catch (error) {
-        logger.error('Supabase persistence load failed, using IndexedDB cache', key, error)
-      }
-    }
-
+    const localValue = await persistenceRepository.load<T>(key, fallback)
     return localValue
   } catch (error) {
-    logger.error('IndexedDB persistence load failed', key, error)
-
-    if (isSupabasePersistenceEnabled() && shouldUseSupabaseForKey(key)) {
-      try {
-        const remote = await loadSupabaseJsonRecord<T>(key)
-
-        if (remote.found && remote.value !== null) {
-          return remote.value as T
-        }
-      } catch (remoteError) {
-        logger.error('Supabase persistence load failed after IndexedDB error', key, remoteError)
-      }
-    }
-
+    logger.error('Persistence load failed', key, error)
     return fallback
   }
 }
 
 export async function saveJsonRecord<T>(key: string, value: T): Promise<void> {
-  logger.info('[Storage] Saving record', { key, value })
-  await saveDexieJsonRecord(key, value)
-  logger.info('[Storage] IndexedDB save completed', { key })
-
-  if (isSupabasePersistenceEnabled() && shouldUseSupabaseForKey(key)) {
-    try {
-      await saveSupabaseJsonRecord(key, value)
-      logger.info('[Storage] Supabase save completed', { key })
-    } catch (error) {
-      logger.error('Supabase persistence save failed, local IndexedDB remains updated', key, error)
-    }
-  }
+  await persistenceRepository.save(key, value)
 }
 
 export async function removeJsonRecord(key: string): Promise<void> {
-  logger.info('[Storage] Removing record', { key })
-
-  if (isSupabasePersistenceEnabled() && shouldUseSupabaseForKey(key)) {
-    try {
-      await removeSupabaseJsonRecord(key)
-      logger.info('[Storage] Supabase remove completed', { key })
-    } catch (error) {
-      logger.error('Supabase persistence remove failed', key, error)
-    }
-  }
-
-  await removeDexieJsonRecord(key)
-  logger.info('[Storage] IndexedDB remove completed', { key })
+  await persistenceRepository.remove(key)
 }
 
 export async function listJsonRecords() {
-  return listDexieJsonRecords()
+  return persistenceRepository.list()
 }

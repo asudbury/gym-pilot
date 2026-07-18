@@ -96,6 +96,18 @@ The app now has a local-first data layer based on Dexie and a query layer based 
 ## Supabase schema
 The current Supabase schema is defined in the consolidated migration [supabase/migrations/20260718160000_consolidated_current_schema.sql](supabase/migrations/20260718160000_consolidated_current_schema.sql).
 
+### Supabase call inventory
+The shared Supabase helpers in [packages/shared/src/gymPilotSupabase.ts](packages/shared/src/gymPilotSupabase.ts) centralise the app's remote persistence and auth calls. When this surface changes, update this section and the Mermaid diagram below.
+
+| Area | Current call patterns | Tables / resources |
+| --- | --- | --- |
+| Auth and session | `client.auth.getSession()`, `client.auth.signInWithOAuth()`, `client.auth.signInWithPassword()`, `client.auth.signUp()`, `client.auth.resetPasswordForEmail()`, `client.auth.updateUser()`, `client.auth.signOut()` | Supabase Auth users and session state |
+| Profiles and settings | `loadSupabaseProfileSnapshot()`, `saveSupabaseProfileName()`, `saveSupabaseApplicationName()`, `saveSupabaseGymBrand()`, `saveSupabaseGymName()`, `saveSupabaseProfileAccessSettings()`, `saveSupabaseProfileFlag()`, `saveSupabaseProfileLastLoggedIn()` | `gym_pilot_profiles` |
+| Key/value persistence | `loadSupabaseJsonRecord()`, `saveSupabaseJsonRecord()`, `removeSupabaseJsonRecord()` | `gym_pilot_app_state` plus table-specific rows for plans, assignments, favourites, and app state |
+| Plans and assignments | `select`, `insert`, `upsert`, `delete` against remote rows | `gym_pilot_plans`, `gym_pilot_assignments` |
+| Favourites and folders | `select`, `insert`, `upsert`, `delete` against remote rows | `gym_pilot_favourite_folders`, `gym_pilot_favourites` |
+| Activity logging | `recordSupabaseUserActivity()` uses `insert` into `gym_pilot_user_activity`; it skips inserts when the app is running on localhost-style hosts | `gym_pilot_user_activity` |
+
 ### Entity relationship overview
 ```mermaid
 erDiagram
