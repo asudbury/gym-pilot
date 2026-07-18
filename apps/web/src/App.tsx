@@ -1,9 +1,9 @@
-import { useEffect, useRef, useState } from 'react'
+import { useEffect, useState } from 'react'
 import { Navigate, Route, Routes, useLocation, useNavigate } from 'react-router-dom'
 import webPackageJson from '../package.json'
-import { exercises, exercisesSchema, getSupabaseClient, loadJsonRecord, saveJsonRecord, usePlan } from '@gym-pilot/shared'
+import { exercises, exercisesSchema, getSupabaseClient, usePlan } from '@gym-pilot/shared'
 import { getToneClass } from './components/toneClasses'
-import { HOME_FILTER_KEY, FAVORITES_KEY } from './constants/storageKeys'
+import { HOME_FILTER_KEY } from './constants/storageKeys'
 import { ExercisePage } from './pages/ExercisePage'
 import { HomePage } from './pages/HomePage'
 import { PlanDetailPage } from './pages/plans/PlanDetailPage'
@@ -34,7 +34,9 @@ import { TimetablePage } from './pages/TimetablePage'
 import { buildNavigationMenuItems } from './utils/navigationUtils'
 import { AssignmentDetailPage } from './pages/assignments/AssignmentDetailPage'
 import { logger } from '@gym-pilot/shared'
-import { getHashHomeUrl, normalizeFavoriteStorageValue, normalizeHomeFilters, sortQuickLinks, type HomeFilters, type QuickLink } from './utils/appUtils'
+import { getHashHomeUrl, normalizeHomeFilters, type HomeFilters } from './utils/appUtils'
+import { useFavoritesFeature } from './features/favorites/hooks/useFavoritesFeature'
+import { sortQuickLinks, type QuickLink } from './features/favorites/domain/quickLinks'
 
 function ScrollToTop() {
   const { pathname } = useLocation()
@@ -53,9 +55,7 @@ function App() {
   const SHOW_AUTH_BUTTON = true
   const { user, logout, showVersion } = useAuth()
   const appVersion = webPackageJson.version || '0.0.0'
-  const [favorites, setFavorites] = useState<QuickLink[]>([])
-  const [folders, setFolders] = useState<string[]>([])
-  const favoritesHydrated = useRef(false)
+  const { favorites, folders, setFavorites, setFolders } = useFavoritesFeature()
 
   const [homeFilters, setHomeFilters] = useState<HomeFilters>(() => {
     if (typeof window === 'undefined') {
@@ -79,41 +79,6 @@ function App() {
   })
 
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
-
-useEffect(() => {
-  let cancelled = false
-
-  async function loadFavorites() {
-    const storedValue = await loadJsonRecord<unknown>(FAVORITES_KEY, { favorites: [], folders: [] })
-    const normalizedValue = normalizeFavoriteStorageValue(storedValue)
-
-    if (cancelled) {
-      return
-    }
-
-    setFavorites(sortQuickLinks(normalizedValue.favorites))
-    setFolders(normalizedValue.folders)
-    favoritesHydrated.current = true
-  }
-
-  void loadFavorites()
-
-  return () => {
-    cancelled = true
-  }
-}, [])
-
-
-useEffect(() => {
-  if (!favoritesHydrated.current) {
-    logger.info('Skipping saving favourites - not hydrated')
-    return
-  }
-
-  logger.info('Saving favorites', { favorites, folders })
-
-  void saveJsonRecord(FAVORITES_KEY, { favorites, folders })
-}, [favorites, folders])
 
   useEffect(() => {
     window.sessionStorage.setItem(HOME_FILTER_KEY, JSON.stringify(normalizeHomeFilters(homeFilters)))

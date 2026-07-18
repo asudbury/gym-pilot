@@ -1,20 +1,16 @@
-import { createContext, useContext, useEffect, useMemo, useRef, useState, type ReactNode } from 'react'
-import type { User, UserRole } from '@gym-pilot/types'
-import { getSupabaseClient, loadJsonRecord, loadSupabaseProfileAccessState, loadSupabaseProfileSnapshot, logger, normalizeUserRoles, recordSupabaseUserActivity, saveJsonRecord, saveSupabaseApplicationName, saveSupabaseGymBrand, saveSupabaseGymName, saveSupabaseProfileName, saveSupabaseProfileLastLoggedIn, signOutFromSupabase, usePlan } from '@gym-pilot/shared'
+import { createContext, useContext, useEffect, useMemo, useState, type ReactNode } from 'react'
+import type { UserRole } from '@gym-pilot/types'
+import { logger, recordSupabaseUserActivity, signOutFromSupabase, usePlan } from '@gym-pilot/shared'
 import { getHashHomeUrl } from '../utils/appUtils'
+import { useAuthModule } from '../features/auth/hooks/useAuthModule'
+import type { AuthUser } from '../features/auth/domain/authTypes'
+import { isUserAccessBlocked } from '../features/auth/domain/authTypes'
+import { updateApplicationNameOnSupabase, updateGymBrandOnSupabase, updateGymNameOnSupabase, updateProfileNameOnSupabase } from '../features/auth/services/authSession'
 
-const SESSION_STORAGE_KEY = 'gym-pilot-auth-session'
-const BYPASS_STORAGE_KEY = 'gym-pilot-auth-bypass'
 const CURRENT_USER_ID_STORAGE_KEY = 'gym-pilot-current-user-id'
 const LOGOUT_PENDING_STORAGE_KEY = 'gym-pilot-auth-logout-pending'
 const THEME_STORAGE_KEY = 'gym-pilot-theme-preference'
 const SHOW_VERSION_STORAGE_KEY = 'gym-pilot-show-version'
-
-type AuthUser = Pick<User, 'id' | 'name' | 'slug' | 'role' | 'roles' | 'trainerId' | 'applicationName' | 'gymBrand' | 'gymName' | 'accountTier' | 'accessEndsAt' | 'isFrozen'> & {
-  email?: string | null
-  lastLoggedInAt?: string | null
-  previousLastLoggedInAt?: string | null
-}
 
 type AuthContextValue = {
   user: AuthUser | null
@@ -41,108 +37,23 @@ type AuthProviderProps = {
 
 const AuthContext = createContext<AuthContextValue | undefined>(undefined)
 
-function isUserAccessBlocked(user: AuthUser | null | undefined) {
-  if (!user) {
-    return false
-  }
-
-  if (user.isFrozen) {
-    return true
-  }
-
-  if (!user.accessEndsAt) {
-    return false
-  }
-
-  const parsedDate = new Date(user.accessEndsAt)
-
-  if (Number.isNaN(parsedDate.getTime())) {
-    return false
-  }
-
-  return parsedDate.getTime() <= Date.now()
-}
-
-async function readStoredSession(): Promise<AuthUser | null> {
-  const stored = await loadJsonRecord<Partial<AuthUser> | null>(SESSION_STORAGE_KEY, null)
-
-if (!stored?.id || !stored?.name || !stored?.slug) {
-    return null
-  }
-
-  return stored as AuthUser
-}
-
-async function readBypassFlag(): Promise<boolean> {
-  return loadJsonRecord<boolean>(BYPASS_STORAGE_KEY, false)
-}
-
-async function resolveSupabaseAuthUser(users: User[] = []): Promise<AuthUser | null> {
-  const client = getSupabaseClient()
-
-  if (!client) {
-    return null
-  }
-
-  try {
-    const { data: { session }, error } = await client.auth.getSession()
-
-    if (error) {
-      logger.warn('[Auth] Could not read Supabase session', error)
-      return null
-    }
-
-    const supabaseUser = session?.user
-
-    if (!supabaseUser) {
-      return null
-    }
-
-    const profileSnapshot = await loadSupabaseProfileSnapshot(supabaseUser.id)
-    const accessState = await loadSupabaseProfileAccessState(supabaseUser.id)
-    const matchingProfileUser = users.find((user) => user.id === supabaseUser.id)
-    const displayName = profileSnapshot.friendlyName || matchingProfileUser?.name || supabaseUser.user_metadata?.full_name || supabaseUser.user_metadata?.name || supabaseUser.email || 'Supabase user'
-    const slug = displayName.toLowerCase().trim().replace(/[^a-z0-9]+/g, '-') || 'supabase-user'
-    const resolvedRoles = normalizeUserRoles(matchingProfileUser?.roles, matchingProfileUser?.role)
-    const resolvedRole = (matchingProfileUser?.role ?? resolvedRoles[0] ?? 'client') as UserRole
-
-    if (accessState.isBlocked) {
-      await signOutFromSupabase()
-      return null
-    }
-
-    await saveSupabaseProfileName(displayName)
-    await saveSupabaseProfileLastLoggedIn(supabaseUser.id)
-    await recordSupabaseUserActivity('login', { email: supabaseUser.email ?? null }, supabaseUser.id)
-
-    return {
-      id: supabaseUser.id,
-      name: displayName,
-      slug: matchingProfileUser?.slug || slug,
-      role: resolvedRole,
-      roles: resolvedRoles,
-      trainerId: matchingProfileUser?.trainerId ?? null,
-      applicationName: profileSnapshot.applicationName ?? matchingProfileUser?.applicationName ?? null,
-      gymBrand: profileSnapshot.gymBrand ?? matchingProfileUser?.gymBrand ?? null,
-      gymName: profileSnapshot.gymName ?? matchingProfileUser?.gymName ?? null,
-      accountTier: profileSnapshot.accountTier ?? matchingProfileUser?.accountTier ?? null,
-      accessEndsAt: profileSnapshot.accessEndsAt ?? matchingProfileUser?.accessEndsAt ?? null,
-      isFrozen: profileSnapshot.isFrozen || matchingProfileUser?.isFrozen || false,
-      email: supabaseUser.email ?? null,
-      lastLoggedInAt: profileSnapshot.lastLoggedInAt,
-      previousLastLoggedInAt: profileSnapshot.previousLastLoggedInAt,
-    }
-  } catch (error) {
-    logger.warn('[Auth] Supabase session lookup failed', error)
-    return null
-  }
-}
 
 export function AuthProvider({ children }: AuthProviderProps) {
   const { users } = usePlan()
-
-  const [user, setUser] = useState<AuthUser | null>(null)
-  const [isBypassEnabled, setIsBypassEnabled] = useState(false)
+  const {
+    user,
+    setUser,
+    isBypassEnabled,
+    hydrateSession,
+    hydrateBypass,
+    refreshSupabaseSession,
+    persistAuthState,
+    persistBypassState,
+    login,
+    enableBypass,
+    disableBypass,
+    hasAccess,
+  } = useAuthModule(users)
   const [themePreference, setThemePreferenceState] = useState<'light' | 'dark'>(() => {
     if (typeof window === 'undefined') {
       return 'light'
@@ -160,97 +71,29 @@ export function AuthProvider({ children }: AuthProviderProps) {
     return storedShowVersion === null ? true : storedShowVersion === 'true'
   })
 
-  const sessionHydrated = useRef(false)
-  const bypassHydrated = useRef(false)
-
   useEffect(() => {
-    let isActive = true
-
-    async function loadSession() {
-      logger.info('[Auth] Hydrating session from persistence')
-      const storedUser = await readStoredSession()
-      const resolvedUser = storedUser
-
-      if (!isActive) {
-        return
-      }
-
-      logger.info('[Auth] Resolved auth state', { storedUserPresent: Boolean(storedUser), resolvedUser })
-
-      if (resolvedUser) {
-        window.sessionStorage.setItem(CURRENT_USER_ID_STORAGE_KEY, resolvedUser.id)
-      } else {
-        window.sessionStorage.removeItem(CURRENT_USER_ID_STORAGE_KEY)
-      }
-
-      setUser(resolvedUser)
-      sessionHydrated.current = true
-    }
-
-    async function loadBypass() {
-      const storedFlag = await readBypassFlag()
-
-      if (!isActive) {
-        return
-      }
-
-      setIsBypassEnabled(storedFlag)
-      bypassHydrated.current = true
-    }
-
-    async function syncSupabaseSession() {
-      if (window.sessionStorage.getItem(LOGOUT_PENDING_STORAGE_KEY) === 'true') {
-        logger.info('[Auth] Skipping Supabase session sync while logout is pending')
-        return
-      }
-
-      const supabaseUser = await resolveSupabaseAuthUser(users)
-
-      if (!isActive) {
-        return
-      }
-
-      if (supabaseUser) {
-        logger.info('[Auth] Synced Supabase auth state', { user: supabaseUser })
-        setUser(supabaseUser)
-        setIsBypassEnabled(false)
-        window.sessionStorage.setItem(CURRENT_USER_ID_STORAGE_KEY, supabaseUser.id)
-      }
-    }
-
     const handleAuthStateChanged = () => {
-      void syncSupabaseSession()
+      void refreshSupabaseSession()
     }
 
     window.addEventListener('gym-pilot-auth-updated', handleAuthStateChanged)
 
-    void loadSession()
-    void loadBypass()
-    void syncSupabaseSession()
+    void hydrateSession()
+    void hydrateBypass()
+    void refreshSupabaseSession()
 
     return () => {
-      isActive = false
       window.removeEventListener('gym-pilot-auth-updated', handleAuthStateChanged)
     }
-  }, [users])
+  }, [hydrateSession, hydrateBypass, refreshSupabaseSession])
 
   useEffect(() => {
-    if (!sessionHydrated.current) {
-      return
-    }
-
-    logger.info('[Auth] Persisting session state', { user })
-    void saveJsonRecord(SESSION_STORAGE_KEY, user)
-  }, [user])
+    void persistAuthState()
+  }, [persistAuthState])
 
   useEffect(() => {
-    if (!bypassHydrated.current) {
-      return
-    }
-
-    logger.info('[Auth] Persisting bypass state', { isBypassEnabled })
-    void saveJsonRecord(BYPASS_STORAGE_KEY, isBypassEnabled)
-  }, [isBypassEnabled])
+    void persistBypassState()
+  }, [persistBypassState])
 
   useEffect(() => {
     if (typeof document === 'undefined') {
@@ -274,66 +117,28 @@ export function AuthProvider({ children }: AuthProviderProps) {
     window.dispatchEvent(new Event('gym-pilot-auth-updated'))
   }
 
-  const login = (userId: string) => {
+  const handleLogin = (userId: string) => {
     logger.info('[Auth] Login requested', { userId })
-    const selectedUser = users.find((item) => item.id === userId)
+    const success = login(userId)
 
-    if (!selectedUser) {
-      return false
+    if (success) {
+      logger.info('[Auth] Login succeeded', { userId })
+      notifyAuthStateChanged()
     }
 
-    window.sessionStorage.setItem(CURRENT_USER_ID_STORAGE_KEY, selectedUser.id)
-    notifyAuthStateChanged()
-    logger.info('[Auth] Login succeeded', { selectedUser })
-
-    setUser({
-      id: selectedUser.id,
-      name: selectedUser.name,
-      slug: selectedUser.slug,
-      role: selectedUser.role ?? (selectedUser.roles[0] ?? 'client'),
-      roles: selectedUser.roles,
-      trainerId: selectedUser.trainerId ?? null,
-      applicationName: selectedUser.applicationName ?? null,
-      gymBrand: selectedUser.gymBrand ?? null,
-      gymName: selectedUser.gymName ?? null,
-      accountTier: selectedUser.accountTier ?? null,
-      accessEndsAt: selectedUser.accessEndsAt ?? null,
-      isFrozen: selectedUser.isFrozen ?? false,
-      email: null,
-    })
-
-    return true
+    return success
   }
 
-  const enableBypass = () => {
+  const handleEnableBypass = () => {
     logger.info('[Auth] Bypass enabled')
-    window.sessionStorage.setItem(CURRENT_USER_ID_STORAGE_KEY, 'mvp-bypass')
+    enableBypass()
     notifyAuthStateChanged()
-    setIsBypassEnabled(true)
-
-    setUser({
-      id: 'mvp-bypass',
-      name: 'MVP Admin',
-      slug: 'mvp-admin',
-      role: 'admin',
-      roles: ['admin'],
-      trainerId: null,
-      applicationName: null,
-      gymBrand: null,
-      gymName: null,
-      accountTier: null,
-      accessEndsAt: null,
-      isFrozen: false,
-      email: null,
-    })
   }
 
-  const disableBypass = () => {
+  const handleDisableBypass = () => {
     logger.info('[Auth] Bypass disabled')
-    window.sessionStorage.removeItem(CURRENT_USER_ID_STORAGE_KEY)
+    disableBypass()
     notifyAuthStateChanged()
-    setIsBypassEnabled(false)
-    setUser(null)
   }
 
   const logout = () => {
@@ -343,7 +148,7 @@ export function AuthProvider({ children }: AuthProviderProps) {
     window.sessionStorage.setItem(LOGOUT_PENDING_STORAGE_KEY, 'true')
     window.sessionStorage.removeItem(CURRENT_USER_ID_STORAGE_KEY)
     setUser(null)
-    setIsBypassEnabled(false)
+    disableBypass()
 
     if (currentUserId) {
       void recordSupabaseUserActivity('logout', {}, currentUserId)
@@ -379,7 +184,7 @@ export function AuthProvider({ children }: AuthProviderProps) {
       }
     })
 
-    await saveSupabaseProfileName(nextName || null)
+    await updateProfileNameOnSupabase(user, friendlyName)
     notifyAuthStateChanged()
   }
 
@@ -401,7 +206,7 @@ export function AuthProvider({ children }: AuthProviderProps) {
       }
     })
 
-    await saveSupabaseApplicationName(trimmedName || null)
+    await updateApplicationNameOnSupabase(user, applicationName)
     notifyAuthStateChanged()
   }
 
@@ -427,8 +232,10 @@ export function AuthProvider({ children }: AuthProviderProps) {
       }
     })
 
-    await saveSupabaseGymBrand(trimmedValue || null)
-    await saveSupabaseGymName(isVirginBrand ? previousGymName : null, trimmedValue || null)
+    await updateGymBrandOnSupabase(user, gymBrand)
+    if (isVirginBrand) {
+      await updateGymNameOnSupabase(user, previousGymName ?? '', gymBrand)
+    }
     notifyAuthStateChanged()
   }
 
@@ -452,7 +259,7 @@ export function AuthProvider({ children }: AuthProviderProps) {
       }
     })
 
-    await saveSupabaseGymName(isVirginBrand && trimmedValue ? trimmedValue : null, gymBrand ?? user.gymBrand ?? null)
+    await updateGymNameOnSupabase(user, gymName, gymBrand ?? user.gymBrand ?? null)
     notifyAuthStateChanged()
   }
 
@@ -464,32 +271,6 @@ export function AuthProvider({ children }: AuthProviderProps) {
     setShowVersionState(show)
   }
 
-  const hasAccess = (requiredRole: UserRole | UserRole[]) => {
-    if (isBypassEnabled) {
-      return true
-    }
-
-    if (!user || isUserAccessBlocked(user)) {
-      return false
-    }
-
-    const userRoles = Array.isArray(user.roles) && user.roles.length > 0
-      ? user.roles.filter((role): role is UserRole => ['admin', 'trainer', 'client', 'guest'].includes(role))
-      : user.role
-        ? [user.role]
-        : []
-
-    if (userRoles.includes('admin')) {
-      return true
-    }
-
-    const requiredRoles = Array.isArray(requiredRole)
-      ? requiredRole
-      : [requiredRole]
-
-    return requiredRoles.some((role) => userRoles.includes(role))
-  }
-
   const value = useMemo<AuthContextValue>(
     () => ({
       user,
@@ -497,9 +278,9 @@ export function AuthProvider({ children }: AuthProviderProps) {
       isBypassEnabled,
       themePreference,
       showVersion,
-      login,
-      enableBypass,
-      disableBypass,
+      login: handleLogin,
+      enableBypass: handleEnableBypass,
+      disableBypass: handleDisableBypass,
       logout,
       updateProfileName,
       updateApplicationName,

@@ -3,6 +3,7 @@ import { useLocation, useNavigate } from 'react-router-dom'
 import { getToneClass } from './toneClasses'
 import { classNames, exercises, exercisesSchema } from '@gym-pilot/shared'
 import { getQuickLinkForPath, groupFavoritesByFolder, normalizeFolderName, sortFavorites, type QuickLink } from '../utils/favouriteUtils'
+import { normalizeFolderName as normalizeFavoriteFolderName, sortQuickLinks } from '../features/favorites/domain/quickLinks'
 
 type SavedSearch = {
   id: string
@@ -156,7 +157,7 @@ export function FavouriteLinksMenu({
   }, [currentQuickLink, favorites, menuOpen])
 
   const handleCreateFolder = () => {
-    const folderName = normalizeFolderName(newFolderName)
+    const folderName = normalizeFavoriteFolderName(newFolderName)
 
     if (!folderName) {
       return
@@ -168,7 +169,7 @@ export function FavouriteLinksMenu({
   }
 
   const handleUpdateFavoriteLink = (link: QuickLink, folderName?: string) => {
-    const normalizedFolder = normalizeFolderName(folderName ?? '') || undefined
+    const normalizedFolder = normalizeFavoriteFolderName(folderName ?? '') || undefined
     const alreadySaved = favorites.some((item) => item.path === link.path)
 
     if (alreadySaved) {
@@ -180,13 +181,13 @@ export function FavouriteLinksMenu({
       return
     }
 
-    const nextFavorites = sortFavorites([...favorites, { ...link, folder: normalizedFolder }]).slice(0, 12)
+    const nextFavorites = sortQuickLinks([...favorites, { ...link, folder: normalizedFolder }]).slice(0, 12)
 
     onFavoritesChange(nextFavorites)
   }
 
   const handleRemoveFavoriteLink = (link: QuickLink) => {
-    onFavoritesChange(sortFavorites(favorites.filter((item) => item.path !== link.path)))
+    onFavoritesChange(sortQuickLinks(favorites.filter((item) => item.path !== link.path)))
   }
 
   const handleToggleCurrentFavorite = () => {
