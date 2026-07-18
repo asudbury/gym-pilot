@@ -1,4 +1,3 @@
-import { appTokens } from '../../constants/tokens'
 import { Heading2 } from '../Typography'
 import { MIN_SEARCH_CHARS } from '../../constants/home'
 
@@ -8,7 +7,6 @@ type ExerciseResultsHeaderProps = {
   shouldShowResults: boolean
   hasSearchText: boolean
   hasSearchThreshold: boolean
-  normalizedCategory: string | null
 }
 
 export function ExerciseResultsHeader({
@@ -17,7 +15,6 @@ export function ExerciseResultsHeader({
   shouldShowResults,
   hasSearchText,
   hasSearchThreshold,
-  normalizedCategory,
 }: ExerciseResultsHeaderProps) {
   return (
     <div className="mb-5 border-b border-slate-200 pb-4">
