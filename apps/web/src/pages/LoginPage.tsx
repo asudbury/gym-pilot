@@ -7,12 +7,21 @@ import { appTokens } from '../constants/tokens'
 import { useAuth } from '../auth/AuthContext'
 
 const REMEMBERED_EMAIL_STORAGE_KEY = 'gym-pilot-remembered-email'
+const REMEMBER_EMAIL_PREFERENCE_STORAGE_KEY = 'gym-pilot-remember-email-preference'
 
 export function LoginPage() {
   const navigate = useNavigate()
   const location = useLocation()
   const { user } = useAuth()
   const [searchParams] = useSearchParams()
+  const [shouldRememberEmail, setShouldRememberEmail] = useState(() => {
+    if (typeof window === 'undefined') {
+      return true
+    }
+
+    const storedPreference = window.localStorage.getItem(REMEMBER_EMAIL_PREFERENCE_STORAGE_KEY)
+    return storedPreference === null ? true : storedPreference === 'true'
+  })
   const [email, setEmail] = useState(() => {
     if (typeof window === 'undefined') {
       return ''
@@ -34,19 +43,45 @@ export function LoginPage() {
     if (emailParam) {
       setEmail(emailParam)
       if (typeof window !== 'undefined') {
-        window.localStorage.setItem(REMEMBERED_EMAIL_STORAGE_KEY, emailParam)
+        if (shouldRememberEmail) {
+          window.localStorage.setItem(REMEMBERED_EMAIL_STORAGE_KEY, emailParam)
+        } else {
+          window.localStorage.removeItem(REMEMBERED_EMAIL_STORAGE_KEY)
+        }
       }
     }
-  }, [emailParam])
+  }, [emailParam, shouldRememberEmail])
 
-  const rememberEmail = (value: string) => {
+  useEffect(() => {
+    if (typeof window === 'undefined') {
+      return
+    }
+
+    window.localStorage.setItem(REMEMBER_EMAIL_PREFERENCE_STORAGE_KEY, String(shouldRememberEmail))
+
+    if (!shouldRememberEmail) {
+      window.localStorage.removeItem(REMEMBERED_EMAIL_STORAGE_KEY)
+      return
+    }
+
+    const trimmedEmail = email.trim()
+
+    if (trimmedEmail) {
+      window.localStorage.setItem(REMEMBERED_EMAIL_STORAGE_KEY, trimmedEmail)
+      return
+    }
+
+    window.localStorage.removeItem(REMEMBERED_EMAIL_STORAGE_KEY)
+  }, [email, shouldRememberEmail])
+
+  const rememberEmail = (value: string, remember: boolean) => {
     if (typeof window === 'undefined') {
       return
     }
 
     const trimmedValue = value.trim()
 
-    if (trimmedValue) {
+    if (remember && trimmedValue) {
       window.localStorage.setItem(REMEMBERED_EMAIL_STORAGE_KEY, trimmedValue)
       return
     }
@@ -76,7 +111,7 @@ export function LoginPage() {
       return
     }
 
-    rememberEmail(email)
+    rememberEmail(email, shouldRememberEmail)
 
     const requiresPasswordChange = await loadSupabaseProfileFlag('must_change_password')
 
@@ -129,11 +164,11 @@ export function LoginPage() {
             <span>Email address</span>
             <input
               id="email"
-              name="username"
+              name="email"
               type="email"
               value={email}
               onChange={(event) => setEmail(event.target.value)}
-              autoComplete="username"
+              autoComplete="email"
               inputMode="email"
               autoCapitalize="none"
               autoCorrect="off"
@@ -159,6 +194,16 @@ export function LoginPage() {
               className={`${appTokens.input} w-full`}
               placeholder="Enter your password"
             />
+          </label>
+
+          <label className="flex items-center gap-2 text-sm font-medium text-slate-700">
+            <input
+              type="checkbox"
+              checked={shouldRememberEmail}
+              onChange={(event) => setShouldRememberEmail(event.target.checked)}
+              className="h-4 w-4 rounded border-slate-300 text-blue-700 focus:ring-blue-600"
+            />
+            <span>Remember this email on this device</span>
           </label>
 
           <button
