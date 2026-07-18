@@ -20,7 +20,7 @@
   },
   "dependencies": {
     "@tanstack/react-query": "^5.101.2",
-    "@types/react-window": "^1.8.8",
+    "@types/react-window": "^2.0.0",
     "dexie": "^4.4.4",
     "react-window": "^2.2.7"
   },
