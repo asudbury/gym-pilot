@@ -625,6 +625,18 @@ export async function saveSupabaseProfileFlag(flag: 'must_change_password', valu
   invalidateSupabaseProfileCache(resolvedUserId)
 }
 
+export function shouldRecordLoginActivity(previousLastLoggedInAt: string | null | undefined, nextLastLoggedInAt: string | null | undefined) {
+  if (!nextLastLoggedInAt) {
+    return false
+  }
+
+  if (!previousLastLoggedInAt) {
+    return true
+  }
+
+  return previousLastLoggedInAt !== nextLastLoggedInAt
+}
+
 export async function saveSupabaseProfileLastLoggedIn(userId?: string) {
   const client = getSupabaseClient()
 
@@ -651,6 +663,7 @@ export async function saveSupabaseProfileLastLoggedIn(userId?: string) {
 
   const previousLastLoggedInAt = existingProfile?.last_logged_in_at ?? null
   const nextLastLoggedInAt = new Date().toISOString()
+  const shouldRecord = shouldRecordLoginActivity(previousLastLoggedInAt, nextLastLoggedInAt)
 
   const { error } = await client.from('gym_pilot_profile').upsert(
     {
@@ -668,8 +681,9 @@ export async function saveSupabaseProfileLastLoggedIn(userId?: string) {
 
   invalidateSupabaseProfileCache(resolvedUserId)
 
-  await recordSupabaseUserActivity('login', {
-  }, resolvedUserId)
+  if (shouldRecord) {
+    await recordSupabaseUserActivity('login', {}, resolvedUserId)
+  }
 }
 
 export async function loadSupabaseJsonRecord<T>(key: string): Promise<SupabaseRecordResponse<T>> {
