@@ -32,7 +32,7 @@ import { DashboardPage } from './pages/DashboardPage'
 import { buildNavigationMenuItems } from './utils/navigationUtils'
 import { AssignmentDetailPage } from './pages/assignments/AssignmentDetailPage'
 import { logger } from './utils/loggingUtils'
-import { normalizeFavoriteStorageValue, normalizeHomeFilters, sortQuickLinks, type HomeFilters, type QuickLink } from './utils/appUtils'
+import { getHashHomeUrl, normalizeFavoriteStorageValue, normalizeHomeFilters, sortQuickLinks, type HomeFilters, type QuickLink } from './utils/appUtils'
 
 function ScrollToTop() {
   const { pathname } = useLocation()
@@ -134,7 +134,7 @@ useEffect(() => {
 
       console.log('[App] Supabase auth callback succeeded; redirecting home')
       window.dispatchEvent(new Event('gym-pilot-auth-updated'))
-      window.location.replace('/')
+      window.location.assign(getHashHomeUrl())
     })
   }, [pathname, search])
 

@@ -1,6 +1,7 @@
 import { createContext, useContext, useEffect, useMemo, useRef, useState, type ReactNode } from 'react'
 import type { User, UserRole } from '@gym-pilot/types'
 import { getSupabaseClient, loadJsonRecord, loadSupabaseApplicationName, loadSupabaseProfileLoginHistory, loadSupabaseProfileName, normalizeUserRoles, recordSupabaseUserActivity, saveJsonRecord, saveSupabaseApplicationName, saveSupabaseProfileName, saveSupabaseProfileLastLoggedIn, signOutFromSupabase, usePlan } from '@gym-pilot/shared'
+import { getHashHomeUrl } from '../utils/appUtils'
 
 const SESSION_STORAGE_KEY = 'gym-pilot-auth-session'
 const BYPASS_STORAGE_KEY = 'gym-pilot-auth-bypass'
@@ -308,7 +309,7 @@ export function AuthProvider({ children }: AuthProviderProps) {
     void signOutFromSupabase().finally(() => {
       window.sessionStorage.removeItem(LOGOUT_PENDING_STORAGE_KEY)
       if (typeof window !== 'undefined') {
-        window.location.assign('/')
+        window.location.assign(getHashHomeUrl())
       }
     })
   }
