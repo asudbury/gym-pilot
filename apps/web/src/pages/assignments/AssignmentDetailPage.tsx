@@ -2,20 +2,19 @@ import { useMemo, useState } from 'react'
 import { Link, useParams } from 'react-router-dom'
 import { getToneClass } from '../../components/toneClasses'
 import { usePlan } from '@gym-pilot/shared'
-import type { Assignment } from '@gym-pilot/types'
 import { PageCard } from '../../components/PageCard'
 import { PageLayout } from '../../layouts/PageLayout'
 import { Heading1, Paragraph } from '../../components/Typography'
 import { ExerciseDetailsCard } from '../../components/exercises/ExerciseDetailsCard'
 import { resolveExerciseForPlanItem, resolvePlanDetailViewModel } from '../../features/plans/domain/planDetail'
+import { resolveAssignmentRouteSelection } from '../../features/plans/domain/planRoute'
 
 export function AssignmentDetailPage() {
   const { planSlug } = useParams()
   const { visiblePlans, visibleAssignments } = usePlan()
   const [expandedExerciseIds, setExpandedExerciseIds] = useState<string[]>([])
 
-  const assignment = useMemo<Assignment | undefined>(() => visibleAssignments.find((item) => item.id === planSlug), [visibleAssignments, planSlug])
-  const plan = useMemo(() => visiblePlans.find((item) => item.id === assignment?.planId), [visiblePlans, assignment?.planId])
+  const { plan, assignment } = useMemo(() => resolveAssignmentRouteSelection(visiblePlans, visibleAssignments, planSlug), [visiblePlans, visibleAssignments, planSlug])
   const viewModel = useMemo(() => resolvePlanDetailViewModel(plan, assignment, planSlug), [plan, assignment, planSlug])
 
   const toggleExerciseExpanded = (exerciseId: string) => {

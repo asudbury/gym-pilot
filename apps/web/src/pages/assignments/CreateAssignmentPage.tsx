@@ -7,6 +7,7 @@ import { PageLayout } from '../../layouts/PageLayout'
 import { Heading1, Paragraph } from '../../components/Typography'
 import { PlanBuilderWorkspace } from '../../components/PlanBuilderWorkspace'
 import { usePlanBuilderFeature } from '../../features/planBuilder/hooks/usePlanBuilderFeature'
+import { hasBuilderContent, resolveCreateFlowViewModel } from '../../features/planBuilder/domain/createFlow'
 
 export function CreateAssignmentPage() {
   const { assignments, visiblePlans, visibleUsers, updateAssignment, assignUsersToPlan } = usePlan()
@@ -14,6 +15,10 @@ export function CreateAssignmentPage() {
   const { planSlug } = useParams()
   const assignmentToEdit = useMemo(() => assignments.find((item) => item.id === planSlug), [assignments, planSlug])
   const isEditMode = Boolean(assignmentToEdit)
+  const createFlowViewModel = useMemo(
+    () => resolveCreateFlowViewModel({ isAssignmentRoute: true, isEditMode }),
+    [isEditMode],
+  )
   const [selectedPlanId, setSelectedPlanId] = useState('')
   const [selectedUserId, setSelectedUserId] = useState('')
   const sourcePlans = useMemo(() => visiblePlans, [visiblePlans])
@@ -59,7 +64,7 @@ export function CreateAssignmentPage() {
     if (isEditMode && assignmentToEdit) {
       const planSessions = buildPlanSessions()
 
-      if (!planSessions.some((session) => session.planItems.length > 0)) {
+      if (!hasBuilderContent(planSessions)) {
         return
       }
 
@@ -82,7 +87,7 @@ export function CreateAssignmentPage() {
         <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
           <div>
             <Paragraph>Assignments</Paragraph>
-            <Heading1 className="mt-2">{isEditMode ? 'Edit assignment' : 'Create a new assignment'}</Heading1>
+            <Heading1 className="mt-2">{createFlowViewModel.title}</Heading1>
           </div>
           <Link to="/assignments" className={getToneClass('default', 'px-4 py-2 text-sm font-medium')}>
             Back to assignments
@@ -156,7 +161,7 @@ export function CreateAssignmentPage() {
             onRemoveRow={handleRemoveRow}
             onCellChange={handleCellChange}
             onSave={handleSaveAssignment}
-            saveLabel={isEditMode ? 'Save assignment' : 'Create assignment'}
+            saveLabel={createFlowViewModel.saveLabel}
             saveDisabled={isEditMode ? !assignmentToEdit : !selectedPlanId || !selectedUserId}
           />
         </div>

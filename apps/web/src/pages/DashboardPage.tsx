@@ -2,8 +2,9 @@ import { useEffect, useMemo, useState } from 'react'
 import { PageCard } from '../components/PageCard'
 import { PageLayout } from '../layouts/PageLayout'
 import { useAuth } from '../auth/AuthContext'
-import { getDashboardLayoutDefinitions, renderDashboardWidgets } from '../components/dashboard/dashboardLayouts'
+import { renderDashboardWidgets } from '../components/dashboard/dashboardLayouts'
 import { formatDashboardTimestamp } from '../utils/appUtils'
+import { resolveDashboardViewModel } from '../features/dashboard/domain/dashboardLayout'
 
 type DashboardPageProps = {
   userName?: string | null
@@ -13,20 +14,14 @@ export function DashboardPage({ userName }: DashboardPageProps) {
   const { user } = useAuth()
   const displayName = userName?.trim() || 'there'
   const previousLoginLabel = formatDashboardTimestamp(user?.previousLastLoggedInAt ?? null)
-  const availableRoles = useMemo(() => {
-    const roles = Array.isArray(user?.roles) && user?.roles.length ? user.roles : []
-    if (user?.role && !roles.includes(user.role)) {
-      roles.push(user.role)
-    }
-    return roles.filter(Boolean)
-  }, [user?.role, user?.roles])
-  const [selectedRole, setSelectedRole] = useState<string | null>(() => user?.role ?? availableRoles[0] ?? null)
+  const viewModel = useMemo(() => resolveDashboardViewModel(user?.role, user?.roles), [user?.role, user?.roles])
+  const [selectedRole, setSelectedRole] = useState<string | null>(() => user?.role ?? viewModel.availableRoles[0] ?? null)
 
-  const layouts = useMemo(() => getDashboardLayoutDefinitions(availableRoles as Array<'admin' | 'trainer' | 'client' | 'guest'>), [availableRoles])
-  const shouldShowRoleSelector = layouts.length > 1 && availableRoles.length > 1
+  const layouts = viewModel.layouts
+  const shouldShowRoleSelector = viewModel.shouldShowRoleSelector
   const selectedLayoutKey = selectedRole && layouts.some((layout) => layout.key === selectedRole)
     ? selectedRole
-    : layouts[0]?.key ?? 'default'
+    : viewModel.selectedLayoutKey
   const selectedLayout = layouts.find((layout) => layout.key === selectedLayoutKey) ?? layouts[0]
 
   useEffect(() => {

@@ -7,8 +7,9 @@ import { exercises } from '@gym-pilot/shared'
 import { Button } from './Button'
 import { ExerciseSearchPicker } from './exercises/ExerciseSearchPicker'
 import { formatLabel } from '../utils/formatUtils'
-import { normalizeFolderName, sortFavorites, type QuickLink } from '../utils/favouriteUtils'
+import { type QuickLink } from '../utils/favouriteUtils'
 import { type PlanGridRow, type PlanTab } from '../utils/planBuilderUtils'
+import { resolveFavoriteLinkGroups } from '../features/planBuilder/domain/builderWorkspace'
 
 ModuleRegistry.registerModules([AllCommunityModule])
 provideGlobalGridOptions({ theme: 'legacy' })
@@ -77,29 +78,7 @@ export function PlanBuilderWorkspace({
   const activeTab = useMemo(() => tabs.find((tab) => tab.id === activeTabId) ?? tabs[0], [activeTabId, tabs])
   const [isDropActive, setIsDropActive] = useState(false)
 
-  const groupedFavoriteLinks = useMemo(() => {
-    const sortedLinks = sortFavorites(favoriteLinks)
-    const groups = new Map<string, QuickLink[]>()
-    const folderNames = new Set<string>()
-
-    sortedLinks.forEach((link) => {
-      const folderName = normalizeFolderName(link.folder ?? '') || 'No folder'
-      folderNames.add(folderName)
-      groups.set(folderName, [...(groups.get(folderName) ?? []), link])
-    })
-
-    return Array.from(folderNames).sort((left, right) => {
-      if (left === 'No folder') {
-        return 1
-      }
-
-      if (right === 'No folder') {
-        return -1
-      }
-
-      return left.localeCompare(right)
-    }).map((folderName) => [folderName, groups.get(folderName) ?? []] as const)
-  }, [favoriteLinks])
+  const groupedFavoriteLinks = useMemo(() => resolveFavoriteLinkGroups(favoriteLinks), [favoriteLinks])
 
   const handleDropLinks = (event: DragEvent<HTMLDivElement>) => {
     event.preventDefault()
@@ -359,14 +338,14 @@ export function PlanBuilderWorkspace({
           {groupedFavoriteLinks.length > 0 ? (
             <div className="flex flex-wrap items-center gap-2 border-b border-slate-200 bg-slate-50 px-3 py-3">
               <span className="self-center text-sm font-medium text-slate-600">Favourite groups</span>
-              {groupedFavoriteLinks.map(([folderName, links]) => (
+              {groupedFavoriteLinks.map((group) => (
                 <button
-                  key={folderName}
+                  key={group.folderName}
                   type="button"
-                  onClick={() => onAddLinkRows?.(links.map((link) => ({ label: link.label, path: link.path })))}
+                  onClick={() => onAddLinkRows?.(group.links.map((link) => ({ label: link.label, path: link.path })))}
                   className="rounded-full border border-emerald-200 bg-emerald-50 px-3 py-1.5 text-sm font-medium text-emerald-700 transition hover:bg-emerald-100"
                 >
-                  {folderName}
+                  {group.folderName}
                 </button>
               ))}
             </div>

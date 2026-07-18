@@ -1,16 +1,11 @@
 import { createContext, useContext, useEffect, useMemo, useState, type ReactNode } from 'react'
 import type { UserRole } from '@gym-pilot/types'
-import { logger, recordSupabaseUserActivity, signOutFromSupabase, usePlan } from '@gym-pilot/shared'
+import { logger, usePlan } from '@gym-pilot/shared'
 import { getHashHomeUrl } from '../utils/appUtils'
 import { useAuthModule } from '../features/auth/hooks/useAuthModule'
 import type { AuthUser } from '../features/auth/domain/authTypes'
 import { isUserAccessBlocked } from '../features/auth/domain/authTypes'
-import { updateApplicationNameOnSupabase, updateGymBrandOnSupabase, updateGymNameOnSupabase, updateProfileNameOnSupabase } from '../features/auth/services/authSession'
-
-const CURRENT_USER_ID_STORAGE_KEY = 'gym-pilot-current-user-id'
-const LOGOUT_PENDING_STORAGE_KEY = 'gym-pilot-auth-logout-pending'
-const THEME_STORAGE_KEY = 'gym-pilot-theme-preference'
-const SHOW_VERSION_STORAGE_KEY = 'gym-pilot-show-version'
+import { persistShowVersion, persistThemePreference, readStoredShowVersion, readStoredThemePreference, type ThemePreference } from '../features/auth/domain/uiPreferences'
 
 type AuthContextValue = {
   user: AuthUser | null
@@ -42,7 +37,6 @@ export function AuthProvider({ children }: AuthProviderProps) {
   const { users } = usePlan()
   const {
     user,
-    setUser,
     isBypassEnabled,
     hydrateSession,
     hydrateBypass,
@@ -53,23 +47,14 @@ export function AuthProvider({ children }: AuthProviderProps) {
     enableBypass,
     disableBypass,
     hasAccess,
+    logout: logoutFromModule,
+    updateProfileName: updateProfileNameInModule,
+    updateApplicationName: updateApplicationNameInModule,
+    updateGymBrand: updateGymBrandInModule,
+    updateGymName: updateGymNameInModule,
   } = useAuthModule(users)
-  const [themePreference, setThemePreferenceState] = useState<'light' | 'dark'>(() => {
-    if (typeof window === 'undefined') {
-      return 'light'
-    }
-
-    const storedTheme = window.localStorage.getItem(THEME_STORAGE_KEY)
-    return storedTheme === 'dark' ? 'dark' : 'light'
-  })
-  const [showVersion, setShowVersionState] = useState<boolean>(() => {
-    if (typeof window === 'undefined') {
-      return true
-    }
-
-    const storedShowVersion = window.localStorage.getItem(SHOW_VERSION_STORAGE_KEY)
-    return storedShowVersion === null ? true : storedShowVersion === 'true'
-  })
+  const [themePreference, setThemePreferenceState] = useState<ThemePreference>(() => readStoredThemePreference())
+  const [showVersion, setShowVersionState] = useState<boolean>(() => readStoredShowVersion())
 
   useEffect(() => {
     const handleAuthStateChanged = () => {
@@ -102,7 +87,7 @@ export function AuthProvider({ children }: AuthProviderProps) {
 
     document.documentElement.classList.toggle('dark', themePreference === 'dark')
     document.documentElement.style.colorScheme = themePreference
-    window.localStorage.setItem(THEME_STORAGE_KEY, themePreference)
+    persistThemePreference(themePreference)
   }, [themePreference])
 
   useEffect(() => {
@@ -110,7 +95,7 @@ export function AuthProvider({ children }: AuthProviderProps) {
       return
     }
 
-    window.localStorage.setItem(SHOW_VERSION_STORAGE_KEY, showVersion ? 'true' : 'false')
+    persistShowVersion(showVersion)
   }, [showVersion])
 
   const notifyAuthStateChanged = () => {
@@ -143,123 +128,42 @@ export function AuthProvider({ children }: AuthProviderProps) {
 
   const logout = () => {
     logger.info('[Auth] Logout requested')
-    const currentUserId = user?.id
-
-    window.sessionStorage.setItem(LOGOUT_PENDING_STORAGE_KEY, 'true')
-    window.sessionStorage.removeItem(CURRENT_USER_ID_STORAGE_KEY)
-    setUser(null)
-    disableBypass()
-
-    if (currentUserId) {
-      void recordSupabaseUserActivity('logout', {}, currentUserId)
-    }
-
-    void signOutFromSupabase().finally(() => {
-      window.sessionStorage.removeItem(LOGOUT_PENDING_STORAGE_KEY)
-      if (typeof window !== 'undefined') {
-        window.location.assign(getHashHomeUrl())
-      }
-    })
+    void logoutFromModule(getHashHomeUrl())
   }
 
   const updateProfileName = async (friendlyName: string) => {
-    const trimmedName = friendlyName.trim()
-
     if (!user) {
       return
     }
 
-    const nextName = trimmedName
-    const slug = nextName.toLowerCase().trim().replace(/[^a-z0-9]+/g, '-') || 'user'
-
-    setUser((currentUser) => {
-      if (!currentUser) {
-        return currentUser
-      }
-
-      return {
-        ...currentUser,
-        name: nextName,
-        slug,
-      }
-    })
-
-    await updateProfileNameOnSupabase(user, friendlyName)
+    await updateProfileNameInModule(friendlyName)
     notifyAuthStateChanged()
   }
 
   const updateApplicationName = async (applicationName: string) => {
-    const trimmedName = applicationName.trim()
-
     if (!user) {
       return
     }
 
-    setUser((currentUser) => {
-      if (!currentUser) {
-        return currentUser
-      }
-
-      return {
-        ...currentUser,
-        applicationName: trimmedName || null,
-      }
-    })
-
-    await updateApplicationNameOnSupabase(user, applicationName)
+    await updateApplicationNameInModule(applicationName)
     notifyAuthStateChanged()
   }
 
   const updateGymBrand = async (gymBrand: string) => {
-    const trimmedValue = gymBrand.trim()
-
     if (!user) {
       return
     }
 
-    const previousGymName = user.gymName ?? null
-    const isVirginBrand = trimmedValue.toLowerCase() === 'virgin'
-
-    setUser((currentUser) => {
-      if (!currentUser) {
-        return currentUser
-      }
-
-      return {
-        ...currentUser,
-        gymBrand: trimmedValue || null,
-        gymName: isVirginBrand ? currentUser.gymName ?? previousGymName : null,
-      }
-    })
-
-    await updateGymBrandOnSupabase(user, gymBrand)
-    if (isVirginBrand) {
-      await updateGymNameOnSupabase(user, previousGymName ?? '', gymBrand)
-    }
+    await updateGymBrandInModule(gymBrand)
     notifyAuthStateChanged()
   }
 
   const updateGymName = async (gymName: string, gymBrand?: string | null) => {
-    const trimmedValue = gymName.trim()
-    const resolvedBrand = (gymBrand ?? user?.gymBrand ?? '').trim().toLowerCase()
-    const isVirginBrand = resolvedBrand === 'virgin'
-
     if (!user) {
       return
     }
 
-    setUser((currentUser) => {
-      if (!currentUser) {
-        return currentUser
-      }
-
-      return {
-        ...currentUser,
-        gymName: isVirginBrand && trimmedValue ? trimmedValue : null,
-      }
-    })
-
-    await updateGymNameOnSupabase(user, gymName, gymBrand ?? user.gymBrand ?? null)
+    await updateGymNameInModule(gymName, gymBrand)
     notifyAuthStateChanged()
   }
 

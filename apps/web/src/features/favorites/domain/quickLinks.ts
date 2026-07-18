@@ -76,3 +76,12 @@ export function sortQuickLinks(items: QuickLink[]) {
     return left.path.localeCompare(right.path)
   })
 }
+
+export function normalizeFavoritesState(value: unknown): FavoritesStorageValue {
+  const normalized = normalizeFavoriteStorageValue(value)
+
+  return {
+    favorites: sortQuickLinks(normalized.favorites),
+    folders: normalized.folders,
+  }
+}

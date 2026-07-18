@@ -7,6 +7,7 @@ import { PageLayout } from '../../layouts/PageLayout'
 import { Heading1, Paragraph } from '../../components/Typography'
 import { PlanBuilderWorkspace } from '../../components/PlanBuilderWorkspace'
 import { usePlanBuilderFeature } from '../../features/planBuilder/hooks/usePlanBuilderFeature'
+import { hasBuilderContent, resolveCreateFlowViewModel } from '../../features/planBuilder/domain/createFlow'
 
 export function CreatePlanPage() {
   const { createPlan, plans, updatePlan } = usePlan()
@@ -16,6 +17,10 @@ export function CreatePlanPage() {
   const planToEdit = useMemo(() => plans.find((item) => item.planSlug === planSlug), [plans, planSlug])
   const isAssignmentRoute = location.pathname.includes('/assignments/')
   const isEditMode = Boolean(planToEdit)
+  const createFlowViewModel = useMemo(
+    () => resolveCreateFlowViewModel({ isAssignmentRoute, isEditMode }),
+    [isAssignmentRoute, isEditMode],
+  )
 
   const {
     tabs,
@@ -59,7 +64,7 @@ export function CreatePlanPage() {
   const handleAssignPlan = () => {
     const planSessions = buildPlanSessions()
 
-    if (!planSessions.some((session) => session.planItems.length > 0)) {
+    if (!hasBuilderContent(planSessions)) {
       return
     }
 
@@ -82,7 +87,7 @@ export function CreatePlanPage() {
         <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
           <div>
             <Paragraph>Plans</Paragraph>
-            <Heading1 className="mt-2">{isAssignmentRoute ? (isEditMode ? 'Edit assignment' : 'Create a new assignment') : (isEditMode ? 'Edit plan' : 'Create a new plan')}</Heading1>
+            <Heading1 className="mt-2">{createFlowViewModel.title}</Heading1>
           </div>
           <Link to="/plans" className={getToneClass('default', 'px-4 py-2 text-sm font-medium')}>
             Back to plans
@@ -120,9 +125,9 @@ export function CreatePlanPage() {
             planNameValue={personNamesInput}
             onPlanNameChange={setPersonNamesInput}
             showPlanNameInput
-            planNamePlaceholder="Plan name"
+            planNamePlaceholder={createFlowViewModel.planNamePlaceholder}
             onSave={handleAssignPlan}
-            saveLabel={isAssignmentRoute ? (isEditMode ? 'Save assignment' : 'Create assignment') : (isEditMode ? 'Save changes' : 'Create plan')}
+            saveLabel={createFlowViewModel.saveLabel}
           />
         </div>
       </PageCard>

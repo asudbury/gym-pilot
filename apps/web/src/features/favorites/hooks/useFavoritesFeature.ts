@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react'
-import { sortQuickLinks, type QuickLink } from '../domain/quickLinks'
+import { normalizeFavoritesState, type QuickLink } from '../domain/quickLinks'
 import { loadFavoritesStorage, saveFavoritesStorage } from '../services/favoritesStorage'
 
 export function useFavoritesFeature() {
@@ -16,8 +16,9 @@ export function useFavoritesFeature() {
           return
         }
 
-        setFavorites(sortQuickLinks(storedValue.favorites))
-        setFolders(storedValue.folders)
+        const normalizedValue = normalizeFavoritesState(storedValue)
+        setFavorites(normalizedValue.favorites)
+        setFolders(normalizedValue.folders)
         setHydrated(true)
       })
       .catch(() => {

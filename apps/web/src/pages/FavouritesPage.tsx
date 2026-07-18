@@ -5,6 +5,7 @@ import { PageLayout } from '../layouts/PageLayout'
 import { CreateFolderForm } from '../components/CreateFolderForm'
 import { FavouriteFolderGroup } from '../components/FavouriteFolderGroup'
 import { normalizeFolderName, sortFavorites, type QuickLink } from '../utils/favouriteUtils'
+import { resolveFavoritesPageViewModel } from '../features/favorites/domain/favoritesPage'
 
 type FavouritesPageProps = {
   favorites: QuickLink[]
@@ -18,75 +19,9 @@ export function FavouritesPage({ favorites, folders, onFoldersChange, onFavorite
   const [newFolderName, setNewFolderName] = useState('')
   const [expandedFolders, setExpandedFolders] = useState<Record<string, boolean>>({})
 
-  const sortedFavorites = useMemo(() => sortFavorites(favorites), [favorites])
-
-  const folderOptions = useMemo(() => {
-    const names = new Set<string>(folders)
-
-    sortedFavorites.forEach((link) => {
-      const folderName = normalizeFolderName(link.folder ?? '')
-
-      if (folderName) {
-        names.add(folderName)
-      }
-    })
-
-    return Array.from(names).sort((left, right) => left.localeCompare(right))
-  }, [folders, sortedFavorites])
-
-  const groupedFavorites = useMemo(() => {
-    const folderNames = new Set<string>()
-    const hasUnfiledFavorites = sortedFavorites.some((link) => !normalizeFolderName(link.folder ?? ''))
-
-    folders.forEach((folderName) => {
-      const normalized = normalizeFolderName(folderName)
-
-      if (normalized) {
-        folderNames.add(normalized)
-      }
-    })
-
-    sortedFavorites.forEach((link) => {
-      const folderName = normalizeFolderName(link.folder ?? '')
-
-      if (folderName) {
-        folderNames.add(folderName)
-        return
-      }
-
-      if (hasUnfiledFavorites) {
-        folderNames.add('No folder')
-      }
-    })
-
-    const groups = new Map<string, QuickLink[]>()
-
-    Array.from(folderNames).forEach((folderName) => {
-      groups.set(folderName, [])
-    })
-
-    sortedFavorites.forEach((link) => {
-      const folderName = normalizeFolderName(link.folder ?? '') || 'No folder'
-
-      if (!groups.has(folderName)) {
-        groups.set(folderName, [])
-      }
-
-      groups.get(folderName)?.push(link)
-    })
-
-    return Array.from(groups.entries()).sort(([leftName], [rightName]) => {
-      if (leftName === 'No folder') {
-        return 1
-      }
-
-      if (rightName === 'No folder') {
-        return -1
-      }
-
-      return leftName.localeCompare(rightName)
-    })
-  }, [folders, sortedFavorites])
+  const viewModel = useMemo(() => resolveFavoritesPageViewModel(favorites, folders), [favorites, folders])
+  const folderOptions = viewModel.folderOptions
+  const groupedFavorites = viewModel.groupedFavorites
 
   const toggleFolder = (folderName: string) => {
     setExpandedFolders((current) => ({
