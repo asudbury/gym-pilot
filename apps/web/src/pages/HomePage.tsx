@@ -1,30 +1,19 @@
 import { useDeferredValue, useEffect, useMemo, useState } from 'react'
-import { exercises, exercisesSchema } from '@gym-pilot/shared'
 import { PageCard } from '../components/PageCard'
 import { PageLayout } from '../layouts/PageLayout'
 import { MIN_SEARCH_CHARS } from '../constants/home'
-import { formatLabel } from '../utils/formatUtils'
 import { copyExerciseLinkToClipboard } from '../utils/navigationUtils'
 import { logger } from '@gym-pilot/shared'
 import { ExerciseFilterPanel } from '../components/exercises/ExerciseFilterPanel'
 import { ExerciseResultsHeader } from '../components/exercises/ExerciseResultsHeader'
 import { ExerciseList } from '../components/exercises/ExerciseList'
-
-type HomeFilters = {
-  searchTerm: string
-  selectedCategory: string | null
-  showImages: boolean
-}
+import { filterExercises, resolveHomeViewModel, type HomeFilters } from '../features/home/domain/homeView'
 
 type HomePageProps = {
   filters: HomeFilters
   onFiltersChange: (filters: HomeFilters) => void
   onToggleFavoriteExercise?: (exerciseId: string) => void
   isExerciseFavorite?: (exerciseId: string) => boolean
-}
-
-function normalizeCategory(category: string | null | undefined) {
-  return category === null || category === '' ? null : category
 }
 
 export function HomePage({ filters, onFiltersChange, onToggleFavoriteExercise, isExerciseFavorite }: HomePageProps) {
@@ -44,12 +33,12 @@ export function HomePage({ filters, onFiltersChange, onToggleFavoriteExercise, i
   })
   const deferredSearchTerm = useDeferredValue(draftSearchTerm)
   const trimmedSearchTerm = draftSearchTerm.trim()
-  const normalizedCategory = normalizeCategory(selectedCategory)
-  const hasExplicitAll = selectedCategory === 'All'
-  const hasCategoryFilter = normalizedCategory !== null || hasExplicitAll
-  const hasSearchText = trimmedSearchTerm.length > 0
-  const hasSearchThreshold = trimmedSearchTerm.length >= MIN_SEARCH_CHARS
-  const shouldShowResults = hasCategoryFilter || (hasSearchText && hasSearchThreshold)
+  const viewModel = useMemo(() => resolveHomeViewModel(filters), [filters])
+  const normalizedCategory = viewModel.normalizedCategory
+  const hasExplicitAll = viewModel.hasExplicitAll
+  const hasSearchText = viewModel.hasSearchText
+  const hasSearchThreshold = viewModel.hasSearchThreshold
+  const shouldShowResults = viewModel.shouldShowResults
 
   useEffect(() => {
     setDraftSearchTerm(filters.searchTerm)
@@ -89,16 +78,7 @@ export function HomePage({ filters, onFiltersChange, onToggleFavoriteExercise, i
     return () => window.clearTimeout(timeoutId)
   }, [draftSearchTerm, filters, onFiltersChange, trimmedSearchTerm])
 
-  const { exerciseList, categories, totalExercises } = useMemo(() => {
-    const parsed = exercisesSchema.parse(exercises)
-
-    return {
-      exerciseList: parsed,
-      categories: ['All', ...Array.from(new Set(parsed.map((exercise) => formatLabel(exercise.category))))],
-      equipment: ['All', ...Array.from(new Set(parsed.map((exercise) => formatLabel(exercise.equipment))))],
-      totalExercises: parsed.length,
-    }
-  }, [])
+  const { exerciseList, categories, totalExercises } = viewModel
 
   const handleCopyUrl = async (exerciseId: string) => {
     logger.debug(`Copying URL for exercise: ${exerciseId}`)
@@ -113,18 +93,8 @@ export function HomePage({ filters, onFiltersChange, onToggleFavoriteExercise, i
   }
 
   const filteredExercises = useMemo(() => {
-    const normalizedSearch = deferredSearchTerm.trim().toLowerCase()
-    const shouldApplySearch = normalizedSearch.length >= MIN_SEARCH_CHARS
-
-    return exerciseList.filter((exercise) => {
-      const matchesCategory = hasExplicitAll || normalizedCategory === null || formatLabel(exercise.category) === normalizedCategory
-      const matchesSearch =
-        !shouldApplySearch ||
-        [exercise.name, exercise.category, exercise.target, exercise.equipment].join(' ').toLowerCase().includes(normalizedSearch)
-
-      return matchesCategory && matchesSearch
-    })
-  }, [exerciseList, deferredSearchTerm, hasExplicitAll, normalizedCategory])
+    return filterExercises(exerciseList, filters, normalizedCategory, hasExplicitAll, deferredSearchTerm)
+  }, [exerciseList, deferredSearchTerm, filters, hasExplicitAll, normalizedCategory])
 
   return (
     <PageLayout className="gap-6">

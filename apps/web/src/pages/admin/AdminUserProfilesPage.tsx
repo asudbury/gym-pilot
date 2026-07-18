@@ -5,21 +5,8 @@ import { getSupabaseClient, listSupabaseAuthUsers, logger, usePlan } from '@gym-
 import type { UserRole } from '@gym-pilot/types'
 import { AdminSectionShell } from '../../components/admin/AdminSectionShell'
 import { GymClubSelector } from '../../components/GymClubSelector'
-import { availableAdminRoles, getDisplayEmail, getDisplayRoles, type AdminProfileRow } from '../../utils/adminUtils'
-
-type ProfileDraft = {
-  name: string
-  applicationName: string
-  gymBrand: string
-  gymName: string
-  accountTier: string
-  accessEndsAt: string
-  isFrozen: boolean
-  showVersion: boolean
-  roles: UserRole[]
-  trainerId: string | null
-  mustChangePassword: boolean
-}
+import { availableAdminRoles, getDisplayEmail, type AdminProfileRow } from '../../utils/adminUtils'
+import { createInitialProfileDraft, mapProfileRow, resolveTrainerOptions, toggleRoleSelection, type ProfileDraft } from '../../features/admin/domain/userProfiles'
 
 const formatStoredTimestamp = (value?: string | null) => {
   if (!value) {
@@ -86,41 +73,14 @@ export function AdminUserProfilesPage() {
     const authUsers = await listSupabaseAuthUsers()
     const emailLookup = new Map(authUsers.map((user) => [user.id, user.email ?? null]))
 
-    const nextRows = (data ?? []).map((row) => ({
-      id: row.user_id,
-      name: typeof row.friendly_name === 'string' && row.friendly_name.trim() ? row.friendly_name.trim() : row.user_id,
-      roles: getDisplayRoles(row.roles),
-      applicationName: typeof row.application_name === 'string' ? row.application_name : null,
-      gymBrand: typeof row.gym_brand === 'string' ? row.gym_brand : null,
-      gymName: typeof row.gym_club_id === 'number' ? String(row.gym_club_id) : null,
-      accountTier: typeof row.account_tier === 'string' ? row.account_tier : 'free',
-      accessEndsAt: typeof row.access_ends_at === 'string' ? row.access_ends_at : null,
-      isFrozen: Boolean(row.is_frozen),
-      email: emailLookup.get(row.user_id) ?? null,
-      trainerId: typeof row.trainer_id === 'string' ? row.trainer_id : null,
-      mustChangePassword: Boolean(row.must_change_password),
-      lastLoggedInAt: typeof row.last_logged_in_at === 'string' ? row.last_logged_in_at : null,
-      previousLastLoggedInAt: typeof row.previous_last_logged_in_at === 'string' ? row.previous_last_logged_in_at : null,
-    }))
+    const nextRows = (data ?? []).map((row) => mapProfileRow(row, emailLookup))
 
     setProfileRows(nextRows)
     setDrafts((current) => {
       const nextDrafts: Record<string, ProfileDraft> = { ...current }
 
       nextRows.forEach((row) => {
-        nextDrafts[row.id] = {
-          name: row.name,
-          applicationName: row.applicationName ?? '',
-          gymBrand: row.gymBrand ?? '',
-          gymName: row.gymName ?? '',
-          accountTier: row.accountTier ?? 'free',
-          accessEndsAt: row.accessEndsAt ?? '',
-          isFrozen: row.isFrozen,
-          showVersion: true,
-          roles: [...row.roles],
-          trainerId: row.trainerId ?? null,
-          mustChangePassword: row.mustChangePassword,
-        }
+        nextDrafts[row.id] = createInitialProfileDraft(row)
       })
 
       return nextDrafts
@@ -135,21 +95,7 @@ export function AdminUserProfilesPage() {
 
   const userLookup = useMemo(() => new Map(users.map((user) => [user.id, user])), [users])
 
-  const getTrainerOptionsForProfile = (profile: AdminProfileRow) => {
-    const baseOptions = users.filter((user) => user.roles.includes('trainer'))
-
-    if (!profile.roles.includes('trainer')) {
-      return baseOptions
-    }
-
-    const alreadyHasSelfOption = baseOptions.some((trainer) => trainer.id === profile.id)
-
-    if (alreadyHasSelfOption) {
-      return baseOptions
-    }
-
-    return [{ id: profile.id, name: profile.name }, ...baseOptions]
-  }
+  const getTrainerOptionsForProfile = (profile: AdminProfileRow) => resolveTrainerOptions(profile as AdminProfileRow, users)
 
   const updateDraft = (profileId: string, patch: Partial<ProfileDraft>) => {
     setDrafts((current) => ({
@@ -292,12 +238,8 @@ export function AdminUserProfilesPage() {
                                       type="checkbox"
                                       checked={checked}
                                       onChange={() => {
-                                        const nextRoles = draft?.roles ?? profile.roles
-                                        const nextRoleSet = nextRoles.includes(role)
-                                          ? nextRoles.filter((value) => value !== role)
-                                          : [...nextRoles, role]
-
-                                        updateDraft(profile.id, { roles: nextRoleSet })
+                                        const nextRoles = (draft?.roles ?? profile.roles) as UserRole[]
+                                        updateDraft(profile.id, { roles: toggleRoleSelection(nextRoles, role) })
                                       }}
                                     />
                                     <span className="capitalize">{role}</span>

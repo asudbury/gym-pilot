@@ -3,23 +3,8 @@ import { useNavigate, useParams } from 'react-router-dom'
 import { Button } from '../../components/Button'
 import { AdminSectionShell } from '../../components/admin/AdminSectionShell'
 import { getSupabaseClient, listSupabaseAuthUsers, logger } from '@gym-pilot/shared'
-import { getDisplayEmail, getDisplayRoles } from '../../utils/adminUtils'
-
-type UserActivityRow = {
-  id: string
-  eventType: string
-  createdAt: string
-  eventData: Record<string, unknown>
-}
-
-type UserProfileSummary = {
-  id: string
-  name: string
-  email: string | null
-  roles: Array<'admin' | 'trainer' | 'client' | 'guest'>
-  lastLoggedInAt: string | null
-  previousLastLoggedInAt: string | null
-}
+import { getDisplayEmail } from '../../utils/adminUtils'
+import { resolveUserActivityViewModel, type UserActivityProfileViewModel, type UserActivityRowViewModel } from '../../features/admin/domain/userActivity'
 
 const formatStoredTimestamp = (value?: string | null) => {
   if (!value) {
@@ -41,8 +26,8 @@ const formatStoredTimestamp = (value?: string | null) => {
 export function AdminUserActivityPage() {
   const navigate = useNavigate()
   const { userId } = useParams<{ userId: string }>()
-  const [profile, setProfile] = useState<UserProfileSummary | null>(null)
-  const [activityRows, setActivityRows] = useState<UserActivityRow[]>([])
+  const [profile, setProfile] = useState<UserActivityProfileViewModel | null>(null)
+  const [activityRows, setActivityRows] = useState<UserActivityRowViewModel[]>([])
   const [statusMessage, setStatusMessage] = useState('')
   const [isLoading, setIsLoading] = useState(false)
 
@@ -74,18 +59,8 @@ export function AdminUserActivityPage() {
     const authUsers = await listSupabaseAuthUsers()
     const emailLookup = new Map(authUsers.map((item) => [item.id, item.email ?? null]))
 
-    const nextProfile: UserProfileSummary | null = profileData
-      ? {
-          id: profileData.user_id,
-          name: typeof profileData.friendly_name === 'string' && profileData.friendly_name.trim()
-            ? profileData.friendly_name.trim()
-            : profileData.user_id,
-          email: emailLookup.get(profileData.user_id) ?? null,
-          roles: getDisplayRoles(profileData.roles),
-          lastLoggedInAt: typeof profileData.last_logged_in_at === 'string' ? profileData.last_logged_in_at : null,
-          previousLastLoggedInAt: typeof profileData.previous_last_logged_in_at === 'string' ? profileData.previous_last_logged_in_at : null,
-        }
-      : null
+    const viewModel = resolveUserActivityViewModel(profileData, [], emailLookup)
+    const nextProfile = viewModel.profile
 
     setProfile(nextProfile)
 
@@ -110,14 +85,7 @@ export function AdminUserActivityPage() {
       return
     }
 
-    const nextActivityRows = (activityData ?? []).map((row) => ({
-      id: row.id,
-      eventType: typeof row.event_type === 'string' ? row.event_type : 'activity',
-      createdAt: typeof row.created_at === 'string' ? row.created_at : '',
-      eventData: (row.event_data && typeof row.event_data === 'object' && !Array.isArray(row.event_data))
-        ? row.event_data as Record<string, unknown>
-        : {},
-    }))
+    const nextActivityRows = resolveUserActivityViewModel(profileData, activityData ?? [], emailLookup).activityRows
 
     setActivityRows(nextActivityRows)
     setIsLoading(false)

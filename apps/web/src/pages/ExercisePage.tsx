@@ -4,7 +4,6 @@ import { ExerciseImage } from '../components/exercises/ExerciseImage'
 import { ExerciseSteps } from '../components/exercises/ExerciseSteps'
 import { YouTubeExerciseSearchButton } from '../components/exercises/YouTubeExerciseSearchButton'
 import { exercises, exercisesSchema } from '@gym-pilot/shared'
-import { getExerciseSlug } from '../utils/exerciseRouteUtils'
 import { PageCard } from '../components/PageCard'
 import { PageActionGroup, PageActionRow } from '../components/PageActionRow'
 import { PageLayout } from '../layouts/PageLayout'
@@ -13,6 +12,7 @@ import { ExerciseMetaBadges } from '../components/exercises/ExerciseMetaBadges'
 import { formatLabel } from '../utils/formatUtils'
 import { logger } from '@gym-pilot/shared'
 import { copyExerciseLinkToClipboard } from '../utils/navigationUtils'
+import { resolveExercisePageViewModel } from '../features/exercises/domain/exerciseView'
 
 type ExercisePageProps = {
   onToggleFavoriteExercise?: (exerciseId: string) => void
@@ -26,17 +26,13 @@ export function ExercisePage({ onToggleFavoriteExercise, isExerciseFavorite }: E
   const { slug } = useParams()
   const [copied, setCopied] = useState(false)
 
-  const exercise = useMemo(() => {
+  const viewModel = useMemo(() => {
     const parsed = exercisesSchema.parse(exercises)
-
-    if (!slug) {
-      return undefined
-    }
-
-    return parsed.find((item) => getExerciseSlug(item) === slug || item.id === slug)
+    return resolveExercisePageViewModel(slug, parsed)
   }, [slug])
 
-  const mediaGif = exercise ? exercise.gif_url : ''
+  const exercise = viewModel.exercise
+  const mediaGif = viewModel.mediaGif
 
   const handleCopyUrl = async () => {
     try {

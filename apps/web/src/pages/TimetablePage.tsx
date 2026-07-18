@@ -3,28 +3,7 @@ import { useAuth } from '../auth/AuthContext'
 import { PageCard } from '../components/PageCard'
 import { PageLayout } from '../layouts/PageLayout'
 import { loadVirginActiveClubs } from '../utils/virginActiveClubs'
-
-type TimetableSession = {
-  id?: number | string
-  classId?: number | string
-  className?: string | null
-  room?: string | null
-  status?: string | null
-  instructorId?: number | string | null
-  instructorName?: string | null
-  capacity?: number | null
-  booked?: number | null
-  waitlistCapacity?: number | null
-  waitlistCount?: number | null
-  startTime?: string | null
-  endTime?: string | null
-}
-
-type TimetableDayGroup = {
-  dateKey: string
-  label: string
-  sessions: TimetableSession[]
-}
+import { resolveTimetableViewModel, type TimetableSession } from '../features/timetable/domain/timetableView'
 
 const TIMETABLE_ENDPOINT = 'https://czasc5rowjxovhkdbd6p6jdtky0hnqas.lambda-url.eu-west-2.on.aws/'
 const timetableCache = new Map<string, Promise<TimetableSession[]>>()
@@ -331,64 +310,12 @@ export function TimetablePage() {
     }
   }, [clubId])
 
-  const groupedSessions = useMemo<TimetableDayGroup[]>(() => {
-    const groups = new Map<string, TimetableSession[]>()
-
-    sessions.forEach((session) => {
-      const startTime = session.startTime ?? ''
-      const parsed = new Date(startTime)
-      const dateKey = Number.isNaN(parsed.getTime()) ? 'unknown' : parsed.toISOString().slice(0, 10)
-      const existing = groups.get(dateKey) ?? []
-      existing.push(session)
-      groups.set(dateKey, existing)
-    })
-
-    return Array.from(groups.entries())
-      .sort(([leftKey], [rightKey]) => leftKey.localeCompare(rightKey))
-      .map(([dateKey, daySessions]) => ({
-        dateKey,
-        label: formatDateLabel(daySessions[0]?.startTime ?? null),
-        sessions: daySessions.sort((left, right) => {
-          const leftTime = left.startTime ?? ''
-          const rightTime = right.startTime ?? ''
-          const timeOrder = leftTime.localeCompare(rightTime)
-
-          if (timeOrder !== 0) {
-            return timeOrder
-          }
-
-          const leftName = (left.className ?? '').toLocaleLowerCase()
-          const rightName = (right.className ?? '').toLocaleLowerCase()
-          return leftName.localeCompare(rightName)
-        }),
-      }))
-  }, [sessions])
-
-  const instructorOptions = useMemo(() => {
-    const names = new Set<string>()
-
-    sessions.forEach((session) => {
-      if (session.instructorName?.trim()) {
-        names.add(session.instructorName.trim())
-      } else if (session.instructorId != null) {
-        names.add(String(session.instructorId))
-      }
-    })
-
-    return Array.from(names).sort((left, right) => left.localeCompare(right))
-  }, [sessions])
-
-  const classOptions = useMemo(() => {
-    const names = new Set<string>()
-
-    sessions.forEach((session) => {
-      if (session.className?.trim()) {
-        names.add(session.className.trim())
-      }
-    })
-
-    return Array.from(names).sort((left, right) => left.localeCompare(right))
-  }, [sessions])
+  const { groupedSessions, instructorOptions, classOptions, visibleSessions } = useMemo(() => resolveTimetableViewModel({
+    sessions,
+    activeDayKey,
+    activeInstructor,
+    activeClassName,
+  }), [activeClassName, activeDayKey, activeInstructor, sessions])
 
   useEffect(() => {
     if (!groupedSessions.length) {
@@ -408,47 +335,6 @@ export function TimetablePage() {
   const activeDayGroup = activeDayKey === 'all'
     ? null
     : (groupedSessions.find((dayGroup) => dayGroup.dateKey === activeDayKey) ?? groupedSessions[0] ?? null)
-
-  const visibleSessions = useMemo(() => {
-    if (!groupedSessions.length) {
-      return []
-    }
-
-    const candidateSessions = activeDayKey === 'all'
-      ? groupedSessions.flatMap((dayGroup) => dayGroup.sessions)
-      : (activeDayGroup?.sessions ?? [])
-
-    return candidateSessions.filter((session) => {
-      const matchesInstructor = activeInstructor === 'all'
-        ? true
-        : (() => {
-            const instructorName = session.instructorName?.trim() ?? ''
-            const instructorId = session.instructorId == null ? '' : String(session.instructorId)
-            return instructorName === activeInstructor || instructorId === activeInstructor
-          })()
-
-      const matchesClass = activeClassName === 'all'
-        ? true
-        : (() => {
-            const className = session.className?.trim() ?? ''
-            return className === activeClassName
-          })()
-
-      return matchesInstructor && matchesClass
-    }).sort((left, right) => {
-      const leftTime = left.startTime ?? ''
-      const rightTime = right.startTime ?? ''
-      const timeOrder = leftTime.localeCompare(rightTime)
-
-      if (timeOrder !== 0) {
-        return timeOrder
-      }
-
-      const leftName = (left.className ?? '').toLocaleLowerCase()
-      const rightName = (right.className ?? '').toLocaleLowerCase()
-      return leftName.localeCompare(rightName)
-    })
-  }, [activeDayGroup, activeDayKey, activeInstructor, activeClassName, groupedSessions])
 
   return (
     <PageLayout className="max-w-6xl">

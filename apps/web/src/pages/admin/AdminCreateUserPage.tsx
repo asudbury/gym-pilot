@@ -4,6 +4,7 @@ import { Button } from '../../components/Button'
 import { getSupabaseClient, logger, signUpWithPassword, usePlan } from '@gym-pilot/shared'
 import type { UserRole } from '@gym-pilot/types'
 import { AdminSectionShell } from '../../components/admin/AdminSectionShell'
+import { buildCreateUserProfilePayload, getCreateUserRoleOptions } from '../../features/admin/domain/createUser'
 
 type StatusMessageState = {
   text: string
@@ -21,6 +22,7 @@ export function AdminCreateUserPage() {
   const [statusMessage, setStatusMessage] = useState<StatusMessageState | null>(null)
 
   const trainerOptions = useMemo(() => users.filter((user) => user.roles.includes('trainer')), [users])
+  const roleOptions = useMemo(() => getCreateUserRoleOptions(), [])
 
   const handleCreateUser = async () => {
     const trimmedName = newUserName.trim()
@@ -58,17 +60,12 @@ export function AdminCreateUserPage() {
       const client = getSupabaseClient({ persistSession: false, autoRefreshToken: false })
 
       if (client && response.data?.user?.id) {
-        const profilePayload = {
-          user_id: response.data.user.id,
-          friendly_name: resolvedDisplayName,
+        const profilePayload = buildCreateUserProfilePayload({
+          userId: response.data.user.id,
+          displayName: resolvedDisplayName,
           roles: newUserRoles,
-          trainer_id: newUserRoles.includes('client') ? selectedTrainerId || null : null,
-          gym_brand: null,
-          account_tier: 'free',
-          access_ends_at: null,
-          is_frozen: false,
-          must_change_password: true,
-        }
+          selectedTrainerId,
+        })
 
         const { error: profileError } = await client.from('gym_pilot_profiles').upsert(profilePayload, { onConflict: 'user_id' })
 
@@ -133,7 +130,7 @@ export function AdminCreateUserPage() {
           />
 
           <div className="flex flex-wrap gap-2 rounded-full border border-slate-200 bg-white px-3 py-2 text-sm text-slate-700">
-            {(['admin', 'trainer', 'client'] as UserRole[]).map((role) => {
+            {roleOptions.map((role) => {
               const checked = newUserRoles.includes(role)
 
               return (
