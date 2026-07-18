@@ -1,42 +1,50 @@
 export const helpSections = [
   {
-    title: 'Signing in and passwords',
+    title: 'Getting started',
     items: [
-      'Sign in with your email and password to access your plans, assignments, and preferences.',
-      'If you forget your password, use the reset option on the login screen to receive a reset email.',
-      'If your account requires a password change, you will be taken to the password reset flow before continuing.',
+      'Sign in with your email and password to unlock your dashboard, plans, assignments, and saved favourites.',
+      'The dashboard gives you quick access to the main areas of the app based on your role, including exercises, plans, assignments, and timetable links.',
+      'Use the header menu to jump between the parts of the app you use most often.',
     ],
   },
   {
-    title: 'Searching and favourites',
+    title: 'Search, favourites, and quick links',
     items: [
-      'Use the search box on the Home page to quickly find exercises by name or type.',
-      'Tap the favourite button on an exercise card to save it for fast access later.',
-      'Your favourites appear in the header menu so you can jump straight back to the exercises you use most often.',
+      'Use the search box on the Home page to quickly find exercises by name, category, or type.',
+      'Tap the favourite button on an exercise card to save it for later, and organise favourites into folders if you want a cleaner view.',
+      'Pin quick links to pages you use most often so you can get back there in one click.',
     ],
   },
   {
-    title: 'Exercises',
+    title: 'Exercises and guidance',
     items: [
       'Open an exercise to view its details, instructions, and related information.',
-      'Use the YouTube search option to find videos for the exercise when you want extra guidance.',
-      'Each exercise also includes an animated GIF so you can see the movement clearly.',
+      'Use the YouTube search option to find videos and the animated GIF to see the movement clearly.',
       'You can copy the exercise URL to share a specific exercise with someone else.',
     ],
   },
   {
-    title: 'Plans',
+    title: 'Plans and plan building',
     items: [
       'Use Plans to build reusable workout templates with exercises, notes, and tabs.',
-      'Create a plan from scratch or edit an existing one before you assign it to someone.',
-      'Plans act as the shared base that can later be used to create individual assignments.',
+      'Create a plan from scratch or edit an existing one before assigning it to someone.',
+      'The plan builder lets you structure workouts across tabs, rename sections, and keep your content organised.',
     ],
   },
   {
-    title: 'Assignments',
+    title: 'Assignments and exports',
     items: [
       'Create a new assignment from the Assignments page and choose a user plus a base plan.',
       'Open an assignment to review, edit, or export it as an Excel workbook.',
+      'Exports make it easy to share a full plan or assignment with a client, trainer, or colleague.',
+    ],
+  },
+  {
+    title: 'Timetable',
+    items: [
+      'Use the Timetable section to check upcoming sessions for your selected gym club.',
+      'Filter by instructor or class to focus on the sessions that matter to you.',
+      'The timetable is useful for keeping track of classes and planning around them.',
     ],
   },
   {
