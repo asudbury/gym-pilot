@@ -12,6 +12,9 @@ type ProfileDraft = {
   applicationName: string
   gymBrand: string
   gymName: string
+  accountTier: string
+  accessEndsAt: string
+  isFrozen: boolean
   showVersion: boolean
   roles: UserRole[]
   trainerId: string | null
@@ -35,6 +38,22 @@ const formatStoredTimestamp = (value?: string | null) => {
   }).format(parsedDate)
 }
 
+const formatLocalDateTimeInputValue = (value?: string | null) => {
+  if (!value) {
+    return ''
+  }
+
+  const parsedDate = new Date(value)
+
+  if (Number.isNaN(parsedDate.getTime())) {
+    return ''
+  }
+
+  const offsetMinutes = parsedDate.getTimezoneOffset()
+  const localDate = new Date(parsedDate.getTime() - offsetMinutes * 60_000)
+  return localDate.toISOString().slice(0, 16)
+}
+
 export function AdminUserProfilesPage() {
   const navigate = useNavigate()
   const { userId } = useParams<{ userId: string }>()
@@ -56,7 +75,7 @@ export function AdminUserProfilesPage() {
 
     const { data, error } = await client
       .from('gym_pilot_profiles')
-      .select('user_id, friendly_name, roles, trainer_id, application_name, gym_brand, gym_name, gym_club_id, must_change_password, last_logged_in_at, previous_last_logged_in_at')
+      .select('user_id, friendly_name, roles, trainer_id, application_name, gym_brand, gym_club_id, account_tier, access_ends_at, is_frozen, must_change_password, last_logged_in_at, previous_last_logged_in_at')
 
     if (error) {
       console.error('[AdminUserProfiles] Could not load profile rows', error)
@@ -73,7 +92,10 @@ export function AdminUserProfilesPage() {
       roles: getDisplayRoles(row.roles),
       applicationName: typeof row.application_name === 'string' ? row.application_name : null,
       gymBrand: typeof row.gym_brand === 'string' ? row.gym_brand : null,
-      gymName: typeof row.gym_club_id === 'number' ? String(row.gym_club_id) : (typeof row.gym_name === 'string' ? row.gym_name : null),
+      gymName: typeof row.gym_club_id === 'number' ? String(row.gym_club_id) : null,
+      accountTier: typeof row.account_tier === 'string' ? row.account_tier : 'free',
+      accessEndsAt: typeof row.access_ends_at === 'string' ? row.access_ends_at : null,
+      isFrozen: Boolean(row.is_frozen),
       email: emailLookup.get(row.user_id) ?? null,
       trainerId: typeof row.trainer_id === 'string' ? row.trainer_id : null,
       mustChangePassword: Boolean(row.must_change_password),
@@ -91,6 +113,9 @@ export function AdminUserProfilesPage() {
           applicationName: row.applicationName ?? '',
           gymBrand: row.gymBrand ?? '',
           gymName: row.gymName ?? '',
+          accountTier: row.accountTier ?? 'free',
+          accessEndsAt: row.accessEndsAt ?? '',
+          isFrozen: row.isFrozen,
           showVersion: true,
           roles: [...row.roles],
           trainerId: row.trainerId ?? null,
@@ -134,6 +159,9 @@ export function AdminUserProfilesPage() {
         applicationName: current[profileId]?.applicationName ?? '',
         gymBrand: current[profileId]?.gymBrand ?? '',
         gymName: current[profileId]?.gymName ?? '',
+        accountTier: current[profileId]?.accountTier ?? 'free',
+        accessEndsAt: current[profileId]?.accessEndsAt ?? '',
+        isFrozen: current[profileId]?.isFrozen ?? false,
         showVersion: current[profileId]?.showVersion ?? true,
         roles: current[profileId]?.roles ?? [],
         trainerId: current[profileId]?.trainerId ?? null,
@@ -170,8 +198,10 @@ export function AdminUserProfilesPage() {
         friendly_name: trimmedName,
         application_name: draft.applicationName.trim() || null,
         gym_brand: draft.gymBrand.trim() || null,
-        gym_name: draft.gymName.trim() || null,
         gym_club_id: draft.gymName.trim() && /^\d+$/.test(draft.gymName.trim()) ? Number(draft.gymName.trim()) : null,
+        account_tier: draft.accountTier || 'free',
+        access_ends_at: draft.accessEndsAt ? new Date(draft.accessEndsAt).toISOString() : null,
+        is_frozen: draft.isFrozen,
         roles: draft.roles,
         trainer_id: draft.trainerId ?? null,
         must_change_password: draft.mustChangePassword,
@@ -186,8 +216,10 @@ export function AdminUserProfilesPage() {
             friendly_name: trimmedName,
             application_name: draft.applicationName.trim() || null,
             gym_brand: draft.gymBrand.trim() || null,
-            gym_name: draft.gymName.trim() || null,
             gym_club_id: draft.gymName.trim() && /^\d+$/.test(draft.gymName.trim()) ? Number(draft.gymName.trim()) : null,
+            account_tier: draft.accountTier || 'free',
+            access_ends_at: draft.accessEndsAt ? new Date(draft.accessEndsAt).toISOString() : null,
+            is_frozen: draft.isFrozen,
             roles: draft.roles,
             must_change_password: draft.mustChangePassword,
           },
@@ -325,6 +357,39 @@ export function AdminUserProfilesPage() {
                                 disabled={(draft?.gymBrand ?? '').trim().toLowerCase() !== 'virgin'}
                               />
                             </div>
+                          </label>
+
+                          <label className="mt-3 block text-sm font-medium text-slate-700">
+                            Account tier
+                            <select
+                              value={draft?.accountTier ?? 'free'}
+                              onChange={(event) => updateDraft(profile.id, { accountTier: event.target.value })}
+                              className="mt-1 w-full rounded-full border border-slate-200 bg-white px-3 py-2 text-sm text-slate-700"
+                            >
+                              <option value="free">Free</option>
+                              <option value="bronze">Bronze</option>
+                              <option value="silver">Silver</option>
+                              <option value="gold">Gold</option>
+                            </select>
+                          </label>
+
+                          <label className="mt-3 block text-sm font-medium text-slate-700">
+                            Access end date
+                            <input
+                              type="datetime-local"
+                              value={formatLocalDateTimeInputValue(draft?.accessEndsAt ?? '')}
+                              onChange={(event) => updateDraft(profile.id, { accessEndsAt: event.target.value })}
+                              className="mt-1 w-full rounded-full border border-slate-200 bg-white px-3 py-2 text-sm text-slate-700"
+                            />
+                          </label>
+
+                          <label className="mt-3 flex items-center gap-2 rounded-full border border-slate-200 bg-white px-3 py-2 text-sm font-medium text-slate-700">
+                            <input
+                              type="checkbox"
+                              checked={draft?.isFrozen ?? false}
+                              onChange={(event) => updateDraft(profile.id, { isFrozen: event.target.checked })}
+                            />
+                            <span>Freeze account</span>
                           </label>
 
                           <div className="mt-3 rounded-2xl border border-slate-200 bg-white p-3">

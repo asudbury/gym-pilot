@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useState } from 'react'
 import { useNavigate, useLocation, useSearchParams } from 'react-router-dom'
-import { loadSupabaseProfileFlag, resetSupabasePassword, signInWithPassword } from '@gym-pilot/shared'
+import { loadSupabaseProfileAccessState, loadSupabaseProfileFlag, resetSupabasePassword, signInWithPassword, signOutFromSupabase } from '@gym-pilot/shared'
 import { PageCard } from '../components/PageCard'
 import { Heading1 } from '../components/Typography'
 import { appTokens } from '../constants/tokens'
@@ -112,6 +112,15 @@ export function LoginPage() {
     }
 
     rememberEmail(email, shouldRememberEmail)
+
+    const accessState = await loadSupabaseProfileAccessState()
+
+    if (accessState.isBlocked) {
+      await signOutFromSupabase()
+      setAuthMessage('This account is frozen or its access has expired.')
+      window.dispatchEvent(new Event('gym-pilot-auth-updated'))
+      return
+    }
 
     const requiresPasswordChange = await loadSupabaseProfileFlag('must_change_password')
 

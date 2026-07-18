@@ -4,12 +4,17 @@ import { normalizeUserRoles } from './utils'
 
 const DEFAULT_SUPABASE_TABLE = 'gym_pilot_app_state'
 
+type SupabaseAccessTier = 'free' | 'bronze' | 'silver' | 'gold'
+
 type SupabaseProfileSnapshot = {
   friendlyName: string | null
   applicationName: string | null
   gymBrand: string | null
   gymName: string | null
   gymClubId: string | null
+  accountTier: SupabaseAccessTier
+  accessEndsAt: string | null
+  isFrozen: boolean
   lastLoggedInAt: string | null
   previousLastLoggedInAt: string | null
   mustChangePassword: boolean
@@ -98,6 +103,21 @@ function normalizeProfileRoles(roles: unknown): UserRole[] {
   return normalizeUserRoles(Array.isArray(roles) ? roles : undefined)
 }
 
+function normalizeProfileAccessTier(value: unknown): SupabaseAccessTier {
+  const normalizedValue = typeof value === 'string' ? value.trim().toLowerCase() : ''
+
+  switch (normalizedValue) {
+    case 'bronze':
+      return 'bronze'
+    case 'silver':
+      return 'silver'
+    case 'gold':
+      return 'gold'
+    default:
+      return 'free'
+  }
+}
+
 function createEmptyProfileSnapshot(): SupabaseProfileSnapshot {
   return {
     friendlyName: null,
@@ -105,6 +125,9 @@ function createEmptyProfileSnapshot(): SupabaseProfileSnapshot {
     gymBrand: null,
     gymName: null,
     gymClubId: null,
+    accountTier: 'free',
+    accessEndsAt: null,
+    isFrozen: false,
     lastLoggedInAt: null,
     previousLastLoggedInAt: null,
     mustChangePassword: false,
@@ -135,6 +158,9 @@ function mapSupabaseProfile(profile: {
   gym_brand?: string | null
   gym_name?: string | null
   gym_club_id?: number | null
+  account_tier?: string | null
+  access_ends_at?: string | null
+  is_frozen?: boolean | null
   roles?: unknown
   trainer_id?: string | null
   must_change_password: boolean
@@ -148,6 +174,9 @@ function mapSupabaseProfile(profile: {
     application_name: typeof profile.application_name === 'string' ? profile.application_name : null,
     gym_brand: typeof profile.gym_brand === 'string' ? profile.gym_brand : null,
     gym_name: typeof profile.gym_name === 'string' ? profile.gym_name : null,
+    account_tier: normalizeProfileAccessTier(profile.account_tier),
+    access_ends_at: typeof profile.access_ends_at === 'string' ? profile.access_ends_at : null,
+    is_frozen: Boolean(profile.is_frozen),
     roles: normalizeProfileRoles(profile.roles),
     trainer_id: typeof profile.trainer_id === 'string' ? profile.trainer_id : null,
     must_change_password: Boolean(profile.must_change_password),
@@ -191,6 +220,9 @@ export type SupabaseProfile = {
   application_name: string | null
   gym_brand: string | null
   gym_name: string | null
+  account_tier: SupabaseAccessTier
+  access_ends_at: string | null
+  is_frozen: boolean
   roles: UserRole[]
   trainer_id: string | null
   must_change_password: boolean
@@ -221,12 +253,12 @@ export async function loadSupabaseProfileSnapshot(userId?: string): Promise<Supa
   const requestPromise = (async () => {
     const { data, error } = await client
       .from('gym_pilot_profiles')
-      .select('friendly_name, application_name, gym_brand, gym_name, gym_club_id, last_logged_in_at, previous_last_logged_in_at, roles, trainer_id, must_change_password')
+      .select('friendly_name, application_name, gym_brand, gym_name, gym_club_id, account_tier, access_ends_at, is_frozen, last_logged_in_at, previous_last_logged_in_at, roles, trainer_id, must_change_password')
       .eq('user_id', resolvedUserId)
       .maybeSingle()
 
     if (error) {
-      if (isMissingProfileColumnError(error, ['friendly_name', 'application_name', 'gym_brand', 'gym_name', 'gym_club_id', 'last_logged_in_at', 'previous_last_logged_in_at', 'roles', 'trainer_id', 'must_change_password'])) {
+      if (isMissingProfileColumnError(error, ['friendly_name', 'application_name', 'gym_brand', 'gym_club_id', 'last_logged_in_at', 'previous_last_logged_in_at', 'roles', 'trainer_id', 'must_change_password'])) {
         return createEmptyProfileSnapshot()
       }
 
@@ -236,17 +268,20 @@ export async function loadSupabaseProfileSnapshot(userId?: string): Promise<Supa
 
     const profileData = data && typeof data === 'object' ? data as Record<string, unknown> : null
     const gymBrand = typeof profileData?.gym_brand === 'string' ? profileData.gym_brand.trim() || null : null
+    const gymName = typeof profileData?.gym_name === 'string' ? profileData.gym_name.trim() || null : null
     const gymClubId = typeof profileData?.gym_club_id === 'number' && Number.isFinite(profileData.gym_club_id)
       ? String(profileData.gym_club_id)
       : null
-    const isVirginBrand = gymBrand?.trim().toLowerCase() === 'virgin'
 
     return {
       friendlyName: typeof profileData?.friendly_name === 'string' ? profileData.friendly_name.trim() || null : null,
       applicationName: typeof profileData?.application_name === 'string' ? profileData.application_name.trim() || null : null,
       gymBrand,
-      gymName: isVirginBrand ? gymClubId : null,
+      gymName: gymName ?? gymClubId,
       gymClubId,
+      accountTier: normalizeProfileAccessTier(profileData?.account_tier),
+      accessEndsAt: typeof profileData?.access_ends_at === 'string' ? profileData.access_ends_at : null,
+      isFrozen: Boolean(profileData?.is_frozen),
       lastLoggedInAt: typeof profileData?.last_logged_in_at === 'string' ? profileData.last_logged_in_at : null,
       previousLastLoggedInAt: typeof profileData?.previous_last_logged_in_at === 'string' ? profileData.previous_last_logged_in_at : null,
       mustChangePassword: Boolean(profileData?.must_change_password),
@@ -262,6 +297,25 @@ export async function loadSupabaseProfileSnapshot(userId?: string): Promise<Supa
 export async function loadSupabaseProfileName(): Promise<string | null> {
   const snapshot = await loadSupabaseProfileSnapshot()
   return snapshot.friendlyName
+}
+
+export async function loadSupabaseProfileAccessState(userId?: string): Promise<{ accountTier: SupabaseAccessTier; accessEndsAt: string | null; isFrozen: boolean; isBlocked: boolean; blockReason: 'frozen' | 'expired' | null }> {
+  const snapshot = await loadSupabaseProfileSnapshot(userId)
+  const now = Date.now()
+
+  if (snapshot.isFrozen) {
+    return { accountTier: snapshot.accountTier, accessEndsAt: snapshot.accessEndsAt, isFrozen: snapshot.isFrozen, isBlocked: true, blockReason: 'frozen' }
+  }
+
+  if (snapshot.accessEndsAt) {
+    const accessEndsAt = new Date(snapshot.accessEndsAt)
+
+    if (!Number.isNaN(accessEndsAt.getTime()) && accessEndsAt.getTime() <= now) {
+      return { accountTier: snapshot.accountTier, accessEndsAt: snapshot.accessEndsAt, isFrozen: snapshot.isFrozen, isBlocked: true, blockReason: 'expired' }
+    }
+  }
+
+  return { accountTier: snapshot.accountTier, accessEndsAt: snapshot.accessEndsAt, isFrozen: snapshot.isFrozen, isBlocked: false, blockReason: null }
 }
 
 export async function loadSupabaseApplicationName(): Promise<string | null> {
@@ -302,12 +356,12 @@ export async function listSupabaseProfiles(): Promise<SupabaseProfile[]> {
 
   const { data, error } = await client
     .from('gym_pilot_profiles')
-    .select('id, user_id, friendly_name, application_name, gym_brand, gym_name, roles, trainer_id, must_change_password, created_at, updated_at')
+    .select('id, user_id, friendly_name, application_name, gym_brand, gym_name, account_tier, access_ends_at, is_frozen, roles, trainer_id, must_change_password, created_at, updated_at')
 
-  if (error && isMissingProfileColumnError(error, ['trainer_id', 'gym_brand', 'gym_name'])) {
+  if (error && isMissingProfileColumnError(error, ['trainer_id', 'gym_brand'])) {
     const fallback = await client
       .from('gym_pilot_profiles')
-      .select('id, user_id, friendly_name, application_name, roles, must_change_password, created_at, updated_at')
+      .select('id, user_id, friendly_name, application_name, gym_name, account_tier, access_ends_at, is_frozen, roles, must_change_password, created_at, updated_at')
 
     if (fallback.error) {
       console.error('[Supabase] Could not load profiles', fallback.error)
@@ -342,11 +396,11 @@ export async function listSupabaseProfiles(): Promise<SupabaseProfile[]> {
 
   if (!profiles.some((profile) => profile.user_id === userId)) {
     const { error: upsertError } = await client.from('gym_pilot_profiles').upsert(
-      { user_id: userId, friendly_name: null, application_name: null, gym_brand: null, gym_name: null, roles: ['client'], trainer_id: null, must_change_password: false },
+      { user_id: userId, friendly_name: null, application_name: null, gym_brand: null, roles: ['client'], trainer_id: null, must_change_password: false },
       { onConflict: 'user_id' },
     )
 
-    if (upsertError && isMissingProfileColumnError(upsertError, ['trainer_id', 'gym_brand', 'gym_name'])) {
+    if (upsertError && isMissingProfileColumnError(upsertError, ['trainer_id', 'gym_brand'])) {
       const fallback = await client.from('gym_pilot_profiles').upsert(
         { user_id: userId, friendly_name: null, application_name: null, roles: ['client'], must_change_password: false },
         { onConflict: 'user_id' },
@@ -363,7 +417,7 @@ export async function listSupabaseProfiles(): Promise<SupabaseProfile[]> {
 
     const { data: refreshedData, error: refreshError } = await client
       .from('gym_pilot_profiles')
-      .select('id, user_id, friendly_name, application_name, gym_brand, gym_name, roles, trainer_id, must_change_password, created_at, updated_at')
+      .select('id, user_id, friendly_name, application_name, gym_brand, gym_name, account_tier, access_ends_at, is_frozen, roles, trainer_id, must_change_password, created_at, updated_at')
 
     if (refreshError) {
       console.error('[Supabase] Could not reload profiles after creating the current user row', refreshError)
@@ -376,7 +430,6 @@ export async function listSupabaseProfiles(): Promise<SupabaseProfile[]> {
       friendly_name: typeof profile.friendly_name === 'string' ? profile.friendly_name : null,
       application_name: typeof profile.application_name === 'string' ? profile.application_name : null,
       gym_brand: typeof profile.gym_brand === 'string' ? profile.gym_brand : null,
-      gym_name: typeof profile.gym_name === 'string' ? profile.gym_name : null,
       roles: profile.roles,
       trainer_id: typeof profile.trainer_id === 'string' ? profile.trainer_id : null,
       must_change_password: Boolean(profile.must_change_password),
@@ -500,16 +553,45 @@ export async function saveSupabaseGymName(gymName: string | null, gymBrand?: str
     : null
 
   const { error } = await client.from('gym_pilot_profiles').upsert(
-    { user_id: resolvedUserId, gym_name: null, gym_club_id: normalizedClubId },
+    { user_id: resolvedUserId, gym_name: normalizedGymName, gym_club_id: normalizedClubId },
     { onConflict: 'user_id' },
   )
 
   if (error) {
-    if (isMissingProfileColumnError(error, ['gym_club_id'])) {
+    if (isMissingProfileColumnError(error, ['gym_name', 'gym_club_id'])) {
       return
     }
 
     console.error('[Supabase] Could not save profile gym name', error)
+    return
+  }
+
+  invalidateSupabaseProfileCache(resolvedUserId)
+}
+
+export async function saveSupabaseProfileAccessSettings(accountTier: string | null, accessEndsAt: string | null, isFrozen: boolean, userId?: string) {
+  const client = getSupabaseClient()
+
+  if (!client) {
+    return
+  }
+
+  const resolvedUserId = userId || await getAuthenticatedUserId(client)
+
+  if (!resolvedUserId) {
+    return
+  }
+
+  const normalizedTier = normalizeProfileAccessTier(accountTier)
+  const trimmedAccessEndsAt = typeof accessEndsAt === 'string' ? accessEndsAt.trim() : ''
+
+  const { error } = await client.from('gym_pilot_profiles').upsert(
+    { user_id: resolvedUserId, account_tier: normalizedTier, access_ends_at: trimmedAccessEndsAt || null, is_frozen: Boolean(isFrozen) },
+    { onConflict: 'user_id' },
+  )
+
+  if (error) {
+    console.error('[Supabase] Could not save profile access settings', error)
     return
   }
 

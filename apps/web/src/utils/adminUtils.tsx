@@ -10,6 +10,9 @@ export type AdminProfileRow = {
   trainerId?: string | null
   gymBrand?: string | null
   gymName?: string | null
+  accountTier?: string | null
+  accessEndsAt?: string | null
+  isFrozen: boolean
   mustChangePassword: boolean
   lastLoggedInAt?: string | null
   previousLastLoggedInAt?: string | null
@@ -60,7 +63,9 @@ export function mapAdminProfileRows(rows: Array<{
   trainer_id?: string | null
   application_name?: string | null
   gym_brand?: string | null
-  gym_name?: string | null
+  account_tier?: string | null
+  access_ends_at?: string | null
+  is_frozen?: boolean
   must_change_password?: boolean
   last_logged_in_at?: string | null
   previous_last_logged_in_at?: string | null
@@ -71,7 +76,10 @@ export function mapAdminProfileRows(rows: Array<{
     roles: getDisplayRoles(Array.isArray(row.roles) ? row.roles : undefined),
     applicationName: typeof row.application_name === 'string' ? row.application_name : null,
     gymBrand: typeof row.gym_brand === 'string' ? row.gym_brand : null,
-    gymName: typeof row.gym_name === 'string' ? row.gym_name : null,
+    gymName: null,
+    accountTier: typeof row.account_tier === 'string' ? row.account_tier : 'free',
+    accessEndsAt: typeof row.access_ends_at === 'string' ? row.access_ends_at : null,
+    isFrozen: Boolean(row.is_frozen),
     email: emailLookup.get(row.user_id) ?? null,
     trainerId: typeof row.trainer_id === 'string' ? row.trainer_id : null,
     mustChangePassword: Boolean(row.must_change_password),

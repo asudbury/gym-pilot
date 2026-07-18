@@ -124,6 +124,8 @@ erDiagram
         jsonb roles
         uuid trainer_id
         text application_name
+        text gym_brand
+        bigint gym_club_id
         timestamptz last_logged_in_at
         timestamptz previous_last_logged_in_at
         timestamptz created_at
@@ -183,7 +185,7 @@ erDiagram
 
 ### Notes
 - a shared app state table for user-scoped key/value persistence
-- a profile table for friendly names and optional user metadata
+- a profile table for friendly names, gym brand/club metadata, and optional user settings
 - a favourites table plus folders for saved exercise and link shortcuts
 - a plans table for plan templates
 - an assignments table for user-specific plan assignments

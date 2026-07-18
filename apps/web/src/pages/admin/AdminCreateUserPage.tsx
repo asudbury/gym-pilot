@@ -64,7 +64,9 @@ export function AdminCreateUserPage() {
           roles: newUserRoles,
           trainer_id: newUserRoles.includes('client') ? selectedTrainerId || null : null,
           gym_brand: null,
-          gym_name: null,
+          account_tier: 'free',
+          access_ends_at: null,
+          is_frozen: false,
           must_change_password: true,
         }
 

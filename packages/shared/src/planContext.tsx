@@ -410,7 +410,7 @@ export function PlanProvider({ children, storageKey = PLANS_KEY }: PlanProviderP
           trainerId: profile.trainer_id ?? null,
           applicationName: profile.application_name?.trim() || null,
           gymBrand: profile.gym_brand?.trim() || null,
-          gymName: profile.gym_name?.trim() || null,
+          gymName: null,
         }
       })
 

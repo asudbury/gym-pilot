@@ -1,6 +1,6 @@
 import { createContext, useContext, useEffect, useMemo, useRef, useState, type ReactNode } from 'react'
 import type { User, UserRole } from '@gym-pilot/types'
-import { getSupabaseClient, loadJsonRecord, loadSupabaseProfileSnapshot, normalizeUserRoles, recordSupabaseUserActivity, saveJsonRecord, saveSupabaseApplicationName, saveSupabaseGymBrand, saveSupabaseGymName, saveSupabaseProfileName, saveSupabaseProfileLastLoggedIn, signOutFromSupabase, usePlan } from '@gym-pilot/shared'
+import { getSupabaseClient, loadJsonRecord, loadSupabaseProfileAccessState, loadSupabaseProfileSnapshot, normalizeUserRoles, recordSupabaseUserActivity, saveJsonRecord, saveSupabaseApplicationName, saveSupabaseGymBrand, saveSupabaseGymName, saveSupabaseProfileName, saveSupabaseProfileLastLoggedIn, signOutFromSupabase, usePlan } from '@gym-pilot/shared'
 import { getHashHomeUrl } from '../utils/appUtils'
 
 const SESSION_STORAGE_KEY = 'gym-pilot-auth-session'
@@ -10,7 +10,7 @@ const LOGOUT_PENDING_STORAGE_KEY = 'gym-pilot-auth-logout-pending'
 const THEME_STORAGE_KEY = 'gym-pilot-theme-preference'
 const SHOW_VERSION_STORAGE_KEY = 'gym-pilot-show-version'
 
-type AuthUser = Pick<User, 'id' | 'name' | 'slug' | 'role' | 'roles' | 'trainerId' | 'applicationName' | 'gymBrand' | 'gymName'> & {
+type AuthUser = Pick<User, 'id' | 'name' | 'slug' | 'role' | 'roles' | 'trainerId' | 'applicationName' | 'gymBrand' | 'gymName' | 'accountTier' | 'accessEndsAt' | 'isFrozen'> & {
   email?: string | null
   lastLoggedInAt?: string | null
   previousLastLoggedInAt?: string | null
@@ -40,6 +40,28 @@ type AuthProviderProps = {
 }
 
 const AuthContext = createContext<AuthContextValue | undefined>(undefined)
+
+function isUserAccessBlocked(user: AuthUser | null | undefined) {
+  if (!user) {
+    return false
+  }
+
+  if (user.isFrozen) {
+    return true
+  }
+
+  if (!user.accessEndsAt) {
+    return false
+  }
+
+  const parsedDate = new Date(user.accessEndsAt)
+
+  if (Number.isNaN(parsedDate.getTime())) {
+    return false
+  }
+
+  return parsedDate.getTime() <= Date.now()
+}
 
 async function readStoredSession(): Promise<AuthUser | null> {
   const stored = await loadJsonRecord<Partial<AuthUser> | null>(SESSION_STORAGE_KEY, null)
@@ -77,11 +99,17 @@ async function resolveSupabaseAuthUser(users: User[] = []): Promise<AuthUser | n
     }
 
     const profileSnapshot = await loadSupabaseProfileSnapshot(supabaseUser.id)
+    const accessState = await loadSupabaseProfileAccessState(supabaseUser.id)
     const matchingProfileUser = users.find((user) => user.id === supabaseUser.id)
     const displayName = profileSnapshot.friendlyName || matchingProfileUser?.name || supabaseUser.user_metadata?.full_name || supabaseUser.user_metadata?.name || supabaseUser.email || 'Supabase user'
     const slug = displayName.toLowerCase().trim().replace(/[^a-z0-9]+/g, '-') || 'supabase-user'
     const resolvedRoles = normalizeUserRoles(matchingProfileUser?.roles, matchingProfileUser?.role)
     const resolvedRole = (matchingProfileUser?.role ?? resolvedRoles[0] ?? 'client') as UserRole
+
+    if (accessState.isBlocked) {
+      await signOutFromSupabase()
+      return null
+    }
 
     await saveSupabaseProfileName(displayName)
     await saveSupabaseProfileLastLoggedIn(supabaseUser.id)
@@ -97,6 +125,9 @@ async function resolveSupabaseAuthUser(users: User[] = []): Promise<AuthUser | n
       applicationName: profileSnapshot.applicationName ?? matchingProfileUser?.applicationName ?? null,
       gymBrand: profileSnapshot.gymBrand ?? matchingProfileUser?.gymBrand ?? null,
       gymName: profileSnapshot.gymName ?? matchingProfileUser?.gymName ?? null,
+      accountTier: profileSnapshot.accountTier ?? matchingProfileUser?.accountTier ?? null,
+      accessEndsAt: profileSnapshot.accessEndsAt ?? matchingProfileUser?.accessEndsAt ?? null,
+      isFrozen: profileSnapshot.isFrozen || matchingProfileUser?.isFrozen || false,
       email: supabaseUser.email ?? null,
       lastLoggedInAt: profileSnapshot.lastLoggedInAt,
       previousLastLoggedInAt: profileSnapshot.previousLastLoggedInAt,
@@ -265,6 +296,9 @@ export function AuthProvider({ children }: AuthProviderProps) {
       applicationName: selectedUser.applicationName ?? null,
       gymBrand: selectedUser.gymBrand ?? null,
       gymName: selectedUser.gymName ?? null,
+      accountTier: selectedUser.accountTier ?? null,
+      accessEndsAt: selectedUser.accessEndsAt ?? null,
+      isFrozen: selectedUser.isFrozen ?? false,
       email: null,
     })
 
@@ -287,6 +321,9 @@ export function AuthProvider({ children }: AuthProviderProps) {
       applicationName: null,
       gymBrand: null,
       gymName: null,
+      accountTier: null,
+      accessEndsAt: null,
+      isFrozen: false,
       email: null,
     })
   }
@@ -432,7 +469,7 @@ export function AuthProvider({ children }: AuthProviderProps) {
       return true
     }
 
-    if (!user) {
+    if (!user || isUserAccessBlocked(user)) {
       return false
     }
 
@@ -456,7 +493,7 @@ export function AuthProvider({ children }: AuthProviderProps) {
   const value = useMemo<AuthContextValue>(
     () => ({
       user,
-      isAuthenticated: isBypassEnabled || Boolean(user),
+      isAuthenticated: isBypassEnabled || Boolean(user && !isUserAccessBlocked(user)),
       isBypassEnabled,
       themePreference,
       showVersion,
