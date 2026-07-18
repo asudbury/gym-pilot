@@ -170,6 +170,7 @@ export function LoginPage() {
           autoComplete="on"
           method="post"
           action="/login"
+          data-form-type="login"
         >
           <label className="flex flex-col gap-2 text-sm font-medium text-slate-700">
             <span>Email address</span>
@@ -180,7 +181,7 @@ export function LoginPage() {
               value={email}
               data-lpignore="true"
               onChange={(event) => setEmail(event.target.value)}
-              autoComplete="email"
+              autoComplete="username"
               inputMode="email"
               autoCapitalize="none"
               autoCorrect="off"
