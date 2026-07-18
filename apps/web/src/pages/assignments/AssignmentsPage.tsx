@@ -7,7 +7,6 @@ import { PageLayout } from '../../layouts/PageLayout'
 import { PageCardLayout } from '../../layouts/PageCardLayout'
 import { CallToAction } from '../../layouts/CallToAction'
 import { resolveAssignmentListViewModels } from '../../features/plans/domain/planList'
-import { DecorativeIcon } from '../../components/ui/DecorativeIcon'
 
 export function AssignmentsPage() {
   const { visibleAssignments, deleteAssignment } = usePlan()

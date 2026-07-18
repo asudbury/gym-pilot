@@ -7,7 +7,6 @@ import { PageCard } from '../../components/PageCard'
 import { PageLayout } from '../../layouts/PageLayout'
 import { PageCardLayout } from '../../layouts/PageCardLayout'
 import { resolvePlanListViewModels } from '../../features/plans/domain/planList'
-import { DecorativeIcon } from '../../components/ui/DecorativeIcon'
 
 export function PlansPage() {
   const { visiblePlans, deletePlan } = usePlan()

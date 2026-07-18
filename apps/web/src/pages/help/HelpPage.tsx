@@ -4,7 +4,6 @@ import { Panel } from '../../components/ui/Panel'
 import { useAuth } from '../../auth/AuthContext'
 import { helpSections } from '../../utils/helpUtils'
 import { getBuildMetadata } from '../../utils/buildInfo'
-import { DecorativeIcon } from '../../components/ui/DecorativeIcon'
 
 export function HelpPage() {
   const { user, hasAccess } = useAuth()

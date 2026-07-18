@@ -25,7 +25,7 @@ function resolveLayoutIcon(title?: string, subtitle?: string) {
   }
 
   if (normalized.includes('assign')) {
-    return 'clipboard' as const
+    return 'tasks' as const
   }
 
   if (normalized.includes('favour')) {

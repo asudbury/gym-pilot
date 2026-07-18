@@ -7,6 +7,7 @@ type ExerciseResultsHeaderProps = {
   shouldShowResults: boolean
   hasSearchText: boolean
   hasSearchThreshold: boolean
+  normalizedCategory?: string | null
 }
 
 export function ExerciseResultsHeader({
@@ -15,6 +16,7 @@ export function ExerciseResultsHeader({
   shouldShowResults,
   hasSearchText,
   hasSearchThreshold,
+  normalizedCategory,
 }: ExerciseResultsHeaderProps) {
   return (
     <div className="mb-5 border-b border-slate-200 pb-4">
@@ -25,7 +27,9 @@ export function ExerciseResultsHeader({
             ? `Showing ${filteredExercisesCount} of ${totalExercises} exercises.`
             : hasSearchText && !hasSearchThreshold
               ? `Type at least ${MIN_SEARCH_CHARS} characters to search.`
-              : 'Start typing or choose a category to reveal exercises.'}
+              : normalizedCategory
+                ? `Viewing ${normalizedCategory}.`
+                : 'Start typing or choose a category to reveal exercises.'}
         </p>
       </div>
     </div>
