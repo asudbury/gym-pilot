@@ -12,9 +12,12 @@ import { PageCard } from '../components/PageCard'
 import { Heading1 } from '../components/Typography'
 import { appTokens } from '../constants/tokens'
 import { useAuth } from '../auth/AuthContext'
-
-const REMEMBERED_EMAIL_STORAGE_KEY = 'gym-pilot-remembered-email'
-const REMEMBER_EMAIL_PREFERENCE_STORAGE_KEY = 'gym-pilot-remember-email-preference'
+import {
+  persistRememberEmailPreference,
+  persistRememberedEmail,
+  readStoredRememberEmailPreference,
+  readStoredRememberedEmail,
+} from '../features/auth/domain/loginPreferences'
 
 export function LoginPage() {
   const navigate = useNavigate()
@@ -24,25 +27,11 @@ export function LoginPage() {
 
   const passwordRef = useRef<HTMLInputElement>(null)
 
-  const [shouldRememberEmail, setShouldRememberEmail] = useState(() => {
-    if (typeof window === 'undefined') {
-      return true
-    }
+  const [shouldRememberEmail, setShouldRememberEmail] = useState(() =>
+    readStoredRememberEmailPreference(),
+  )
 
-    const storedPreference = window.localStorage.getItem(
-      REMEMBER_EMAIL_PREFERENCE_STORAGE_KEY,
-    )
-
-    return storedPreference === null ? true : storedPreference === 'true'
-  })
-
-  const [email, setEmail] = useState(() => {
-    if (typeof window === 'undefined') {
-      return ''
-    }
-
-    return window.localStorage.getItem(REMEMBERED_EMAIL_STORAGE_KEY) ?? ''
-  })
+  const [email, setEmail] = useState(() => readStoredRememberedEmail())
 
   const [authMessage, setAuthMessage] = useState('')
   const [isSubmitting, setIsSubmitting] = useState(false)
@@ -60,72 +49,17 @@ export function LoginPage() {
   useEffect(() => {
     if (emailParam) {
       setEmail(emailParam)
-
-      if (typeof window !== 'undefined') {
-        if (shouldRememberEmail) {
-          window.localStorage.setItem(
-            REMEMBERED_EMAIL_STORAGE_KEY,
-            emailParam,
-          )
-        } else {
-          window.localStorage.removeItem(
-            REMEMBERED_EMAIL_STORAGE_KEY,
-          )
-        }
-      }
+      persistRememberedEmail(emailParam, shouldRememberEmail)
     }
   }, [emailParam, shouldRememberEmail])
 
   useEffect(() => {
-    if (typeof window === 'undefined') {
-      return
-    }
-
-    window.localStorage.setItem(
-      REMEMBER_EMAIL_PREFERENCE_STORAGE_KEY,
-      String(shouldRememberEmail),
-    )
-
-    if (!shouldRememberEmail) {
-      window.localStorage.removeItem(
-        REMEMBERED_EMAIL_STORAGE_KEY,
-      )
-      return
-    }
-
-    const trimmedEmail = email.trim()
-
-    if (trimmedEmail) {
-      window.localStorage.setItem(
-        REMEMBERED_EMAIL_STORAGE_KEY,
-        trimmedEmail,
-      )
-      return
-    }
-
-    window.localStorage.removeItem(
-      REMEMBERED_EMAIL_STORAGE_KEY,
-    )
+    persistRememberEmailPreference(shouldRememberEmail)
+    persistRememberedEmail(email, shouldRememberEmail)
   }, [email, shouldRememberEmail])
 
   const rememberEmail = (value: string, remember: boolean) => {
-    if (typeof window === 'undefined') {
-      return
-    }
-
-    const trimmedValue = value.trim()
-
-    if (remember && trimmedValue) {
-      window.localStorage.setItem(
-        REMEMBERED_EMAIL_STORAGE_KEY,
-        trimmedValue,
-      )
-      return
-    }
-
-    window.localStorage.removeItem(
-      REMEMBERED_EMAIL_STORAGE_KEY,
-    )
+    persistRememberedEmail(value, remember)
   }
 
   const from = useMemo(() => {
