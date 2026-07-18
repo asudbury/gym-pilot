@@ -85,6 +85,6 @@ export async function removeJsonRecord(key: string): Promise<void> {
   await persistenceRepository.remove(key)
 }
 
-export async function listJsonRecords() {
-  return persistenceRepository.list()
+export async function listJsonRecords(): Promise<Array<{ key: string; value: unknown }>> {
+  return persistenceRepository.list<Array<{ key: string; value: unknown }>>()
 }

@@ -1,7 +1,6 @@
-import { loadJsonRecord, saveJsonRecord } from '@gym-pilot/shared'
 import type { AuthUser } from '../domain/authTypes'
+import { loadAuthSessionWithRepository, saveAuthSessionWithRepository } from './authRepository'
 
-const SESSION_STORAGE_KEY = 'gym-pilot-auth-session'
 export const CURRENT_USER_ID_STORAGE_KEY = 'gym-pilot-current-user-id'
 export const LOGOUT_PENDING_STORAGE_KEY = 'gym-pilot-auth-logout-pending'
 
@@ -16,17 +15,11 @@ function getSessionStorage(): StorageLike | null {
 }
 
 export async function readStoredSession(): Promise<AuthUser | null> {
-  const stored = await loadJsonRecord<Partial<AuthUser> | null>(SESSION_STORAGE_KEY, null)
-
-  if (!stored?.id || !stored?.name || !stored?.slug) {
-    return null
-  }
-
-  return stored as AuthUser
+  return loadAuthSessionWithRepository()
 }
 
 export async function persistSession(user: AuthUser | null) {
-  await saveJsonRecord(SESSION_STORAGE_KEY, user)
+  await saveAuthSessionWithRepository(user)
 }
 
 export function readCurrentUserId(storage: StorageLike | null = getSessionStorage()) {

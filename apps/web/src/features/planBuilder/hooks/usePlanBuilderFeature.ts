@@ -1,8 +1,8 @@
 import { useCallback, useEffect, useMemo, useState, type Dispatch, type SetStateAction } from 'react'
 import ExcelJS from 'exceljs'
-import { exercises, loadJsonRecord } from '@gym-pilot/shared'
-import { FAVORITES_KEY } from '../../../constants/storageKeys'
+import { exercises } from '@gym-pilot/shared'
 import { buildFavoritePlanBuilderState } from '../domain/planBuilderFavorites'
+import { loadPlanBuilderFavoriteStorage } from '../services/planBuilderStorage'
 import { resolvePlanBuilderHydrationState, resolvePlanBuilderLinkRows, resolvePlanBuilderRemoveTabState, resolvePlanBuilderResetState, resolvePlanBuilderRowState, resolvePlanBuilderTabState, type PlanBuilderTransitionState } from '../domain/planBuilderTransitions'
 import {
   buildPlanSessionsFromTabs,
@@ -86,16 +86,12 @@ export function usePlanBuilderFeature(existingSessions?: PlanSession[] | null) {
   useEffect(() => {
     let cancelled = false
 
-    void loadJsonRecord<unknown>(FAVORITES_KEY, { favorites: [], folders: [] }).then((storedValue) => {
+    void loadPlanBuilderFavoriteStorage().then((storedValue) => {
       if (cancelled) {
         return
       }
 
-      const normalizedValue = storedValue && typeof storedValue === 'object'
-        ? storedValue as { favorites?: Array<{ id?: string; label?: string; path?: string; folder?: string }>; folders?: string[] }
-        : { favorites: [] as Array<{ id?: string; label?: string; path?: string; folder?: string }>, folders: [] as string[] }
-
-      const state = buildFavoritePlanBuilderState(normalizedValue, activeRows, exercises)
+      const state = buildFavoritePlanBuilderState(storedValue, activeRows, exercises)
       setFavoriteExerciseIds(state.favoriteExerciseIds)
       setFavoriteLinks(state.favoriteLinks)
     })

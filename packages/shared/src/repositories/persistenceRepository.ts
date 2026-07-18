@@ -15,14 +15,14 @@ export type PersistenceRepositoryDependencies<TLocalResponse = unknown> = {
   shouldUseRemoteForKey: (key: string) => boolean
 }
 
-export interface PersistenceRepository {
+export interface PersistenceRepository<TListResponse = unknown> {
   load<T>(key: string, fallback: T): Promise<T>
   save<T>(key: string, value: T): Promise<void>
   remove(key: string): Promise<void>
-  list(): Promise<unknown>
+  list<TResponse = TListResponse>(): Promise<TResponse>
 }
 
-export function createPersistenceRepository(dependencies: PersistenceRepositoryDependencies): PersistenceRepository {
+export function createPersistenceRepository<TListResponse = unknown>(dependencies: PersistenceRepositoryDependencies<TListResponse>): PersistenceRepository<TListResponse> {
   const { loadLocal, saveLocal, removeLocal, listLocal, loadRemote, saveRemote, removeRemote, isRemoteEnabled, shouldUseRemoteForKey } = dependencies
 
   return {
@@ -81,8 +81,8 @@ export function createPersistenceRepository(dependencies: PersistenceRepositoryD
 
       await removeLocal(key)
     },
-    async list() {
-      return listLocal()
+    async list<TResponse = unknown>(): Promise<TResponse> {
+      return listLocal() as unknown as Promise<TResponse>
     },
   }
 }

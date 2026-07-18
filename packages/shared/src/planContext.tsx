@@ -140,7 +140,7 @@ async function getStoredPlans(storageKey: string): Promise<Plan[]> {
   const matchingKeys = new Set<string>([storageKey])
   const storedRecords = await listJsonRecords()
 
-  storedRecords.forEach((record) => {
+  storedRecords.forEach((record: { key: string; value: unknown }) => {
     if (typeof record.key === 'string' && (record.key === storageKey || record.key.startsWith(`${storageKey}:`))) {
       matchingKeys.add(record.key)
     }
