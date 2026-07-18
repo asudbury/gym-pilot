@@ -3,12 +3,9 @@ import ExcelJS from 'exceljs'
 import { exercises, loadJsonRecord } from '@gym-pilot/shared'
 import { FAVORITES_KEY } from '../../../constants/storageKeys'
 import { buildFavoritePlanBuilderState } from '../domain/planBuilderFavorites'
+import { resolvePlanBuilderHydrationState, resolvePlanBuilderLinkRows, resolvePlanBuilderRemoveTabState, resolvePlanBuilderResetState, resolvePlanBuilderRowState, resolvePlanBuilderTabState, type PlanBuilderTransitionState } from '../domain/planBuilderTransitions'
 import {
   buildPlanSessionsFromTabs,
-  buildTabsFromSessions,
-  createBlankRow,
-  createBlankTab,
-  createLinkRow,
   sanitizeSheetName,
   type PlanTab,
 } from '../../../utils/planBuilderUtils'
@@ -48,16 +45,16 @@ export type PlanBuilderFeatureActions = {
 }
 
 export function createPlanBuilderInitialState(existingSessions?: PlanSession[] | null) {
-  const initialTabs = buildTabsFromSessions(existingSessions ?? undefined)
+  const initialState = resolvePlanBuilderHydrationState({ planSessions: existingSessions ?? undefined, planName: '' })
   return {
-    tabs: initialTabs,
-    activeTabId: initialTabs[0]?.id ?? null,
-    selectedExerciseId: exercises[0]?.id ?? '',
-    selectedExerciseName: '',
+    tabs: initialState.tabs,
+    activeTabId: initialState.activeTabId,
+    selectedExerciseId: initialState.selectedExerciseId,
+    selectedExerciseName: initialState.selectedExerciseName,
     favoriteExerciseIds: [] as string[],
     favoriteLinks: [] as Array<{ id: string; label: string; path: string; folder?: string }>,
     isFullscreen: false,
-    personNamesInput: '',
+    personNamesInput: initialState.personNamesInput,
   }
 }
 
@@ -124,10 +121,17 @@ export function usePlanBuilderFeature(existingSessions?: PlanSession[] | null) {
   }, [isFullscreen])
 
   const handleAddTab = useCallback(() => {
-    const nextTab = createBlankTab(`Day ${tabs.length + 1}`)
-    setTabs((current) => [...current, nextTab])
-    setActiveTabId(nextTab.id)
-  }, [tabs.length])
+    const nextState = resolvePlanBuilderTabState({
+      tabs,
+      activeTabId,
+      selectedExerciseId,
+      selectedExerciseName,
+      personNamesInput,
+    } as PlanBuilderTransitionState, `Day ${tabs.length + 1}`)
+
+    setTabs(nextState.tabs)
+    setActiveTabId(nextState.activeTabId)
+  }, [activeTabId, personNamesInput, selectedExerciseId, selectedExerciseName, tabs])
 
   const handleRenameTab = useCallback((tabId: string, nextTitle: string) => {
     const trimmedTitle = nextTitle.trim()
@@ -136,32 +140,37 @@ export function usePlanBuilderFeature(existingSessions?: PlanSession[] | null) {
   }, [])
 
   const handleRemoveTab = useCallback((tabId: string) => {
-    setTabs((current) => {
-      if (current.length <= 1) {
-        return current
-      }
+    const nextState = resolvePlanBuilderRemoveTabState({
+      tabs,
+      activeTabId,
+      selectedExerciseId,
+      selectedExerciseName,
+      personNamesInput,
+    } as PlanBuilderTransitionState, tabId)
 
-      const nextTabs = current.filter((tab) => tab.id !== tabId)
-      const removedTabWasActive = activeTabId === tabId
-
-      if (!removedTabWasActive) {
-        return nextTabs
-      }
-
-      setActiveTabId(nextTabs[0]?.id ?? null)
-      return nextTabs
-    })
-  }, [activeTabId])
+    setTabs(nextState.tabs)
+    if (nextState.activeTabId !== activeTabId) {
+      setActiveTabId(nextState.activeTabId)
+    }
+  }, [activeTabId, personNamesInput, selectedExerciseId, selectedExerciseName, tabs])
 
   const handleAddRow = useCallback((exerciseId = selectedExerciseId) => {
-    if (!exerciseId || !activeTabId) {
+    const nextState = resolvePlanBuilderRowState({
+      tabs,
+      activeTabId,
+      selectedExerciseId,
+      selectedExerciseName,
+      personNamesInput,
+    } as PlanBuilderTransitionState, exerciseId)
+
+    if (!nextState) {
       return
     }
 
-    setTabs((current) => current.map((tab) => (tab.id === activeTabId ? { ...tab, rows: [...tab.rows, createBlankRow(exerciseId)] } : tab)))
-    setSelectedExerciseId('')
-    setSelectedExerciseName('')
-  }, [activeTabId, selectedExerciseId])
+    setTabs(nextState.tabs)
+    setSelectedExerciseId(nextState.selectedExerciseId)
+    setSelectedExerciseName(nextState.selectedExerciseName)
+  }, [activeTabId, personNamesInput, selectedExerciseId, selectedExerciseName, tabs])
 
   const handleExerciseSelection = useCallback((exerciseId: string, exerciseName: string) => {
     setSelectedExerciseId(exerciseId)
@@ -173,11 +182,9 @@ export function usePlanBuilderFeature(existingSessions?: PlanSession[] | null) {
       return
     }
 
-    const normalizedLinks = links
-      .map((link) => ({ label: link.label.trim(), path: link.path.trim() }))
-      .filter((link) => link.label && link.path)
+    const normalizedRows = resolvePlanBuilderLinkRows(links, activeTabId)
 
-    if (normalizedLinks.length === 0) {
+    if (normalizedRows.length === 0) {
       return
     }
 
@@ -188,7 +195,7 @@ export function usePlanBuilderFeature(existingSessions?: PlanSession[] | null) {
 
       return {
         ...tab,
-        rows: [...tab.rows, ...normalizedLinks.map((link) => createLinkRow(link.label, link.path))],
+        rows: [...tab.rows, ...normalizedRows],
       }
     }))
   }, [activeTabId])
@@ -287,21 +294,21 @@ export function usePlanBuilderFeature(existingSessions?: PlanSession[] | null) {
   const buildPlanSessions = useCallback(() => buildPlanSessionsFromTabs(tabs), [tabs])
 
   const resetForCreate = useCallback(() => {
-    setPersonNamesInput('')
-    setSelectedExerciseId(exercises[0]?.id ?? '')
-    setSelectedExerciseName('')
-    const resetTab = createBlankTab('Day 1')
-    setTabs([resetTab])
-    setActiveTabId(resetTab.id)
+    const nextState = resolvePlanBuilderResetState()
+    setPersonNamesInput(nextState.personNamesInput)
+    setSelectedExerciseId(nextState.selectedExerciseId)
+    setSelectedExerciseName(nextState.selectedExerciseName)
+    setTabs(nextState.tabs)
+    setActiveTabId(nextState.activeTabId)
   }, [])
 
   const hydrateFromPlan = useCallback((plan: { planSessions?: PlanSession[]; planName?: string } | null | undefined) => {
-    setPersonNamesInput(plan?.planName ?? '')
-    setSelectedExerciseId('')
-    setSelectedExerciseName('')
-    const nextTabs = buildTabsFromSessions(plan?.planSessions)
-    setTabs(nextTabs)
-    setActiveTabId(nextTabs[0]?.id ?? null)
+    const nextState = resolvePlanBuilderHydrationState(plan)
+    setPersonNamesInput(nextState.personNamesInput)
+    setSelectedExerciseId(nextState.selectedExerciseId)
+    setSelectedExerciseName(nextState.selectedExerciseName)
+    setTabs(nextState.tabs)
+    setActiveTabId(nextState.activeTabId)
   }, [])
 
   return {

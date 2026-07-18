@@ -2,9 +2,8 @@ import { useCallback, useMemo, useState } from 'react'
 import type { User, UserRole } from '@gym-pilot/types'
 import { logger, recordSupabaseUserActivity, signOutFromSupabase } from '@gym-pilot/shared'
 import type { AuthUser } from '../domain/authTypes'
-import { hasAccessToRole } from '../domain/authTypes'
-import { toAuthUser, toAuthUserFromBypass } from '../domain/authMapping'
 import { resolveIsAuthenticated, resolvePersistedUserId } from '../domain/authState'
+import { resolveAuthAccessState, resolveAuthUserApplicationNameUpdate, resolveAuthUserGymBrandUpdate, resolveAuthUserGymNameUpdate, resolveAuthUserProfileNameUpdate, resolveBypassAuthUser, resolveLoginAuthUser } from '../domain/authTransitions'
 import { persistBypassFlag, persistCurrentUserId, persistLogoutPending, persistSession, readBypassFlag, readLogoutPending, readStoredSession } from '../services/authStorage'
 import { resolveSupabaseAuthUser, updateApplicationNameOnSupabase, updateGymBrandOnSupabase, updateGymNameOnSupabase, updateProfileNameOnSupabase } from '../services/authSession'
 
@@ -47,13 +46,12 @@ export function useAuthModule(users: User[]) {
   }, [isBypassEnabled])
 
   const login = useCallback((userId: string) => {
-    const selectedUser = users.find((item) => item.id === userId)
+    const nextUser = resolveLoginAuthUser(users, userId)
 
-    if (!selectedUser) {
+    if (!nextUser) {
       return false
     }
 
-    const nextUser = toAuthUser(selectedUser)
     persistCurrentUserId(resolvePersistedUserId(nextUser, false))
     setUser(nextUser)
 
@@ -61,7 +59,7 @@ export function useAuthModule(users: User[]) {
   }, [users])
 
   const enableBypass = useCallback(() => {
-    const nextUser = toAuthUserFromBypass()
+    const nextUser = resolveBypassAuthUser()
     persistCurrentUserId(resolvePersistedUserId(nextUser, true))
     setIsBypassEnabled(true)
     setUser(nextUser)
@@ -73,7 +71,10 @@ export function useAuthModule(users: User[]) {
     setUser(null)
   }, [])
 
-  const hasAccess = useCallback((requiredRole: UserRole | UserRole[]) => hasAccessToRole(user, requiredRole, isBypassEnabled), [user, isBypassEnabled])
+  const hasAccess = useCallback((requiredRole: UserRole | UserRole[]) => {
+    const accessState = resolveAuthAccessState(user, isBypassEnabled, requiredRole)
+    return accessState.hasAccess
+  }, [user, isBypassEnabled])
 
   const isAuthenticated = useMemo(() => resolveIsAuthenticated(user, isBypassEnabled), [user, isBypassEnabled])
 
@@ -98,100 +99,54 @@ export function useAuthModule(users: User[]) {
   }, [user])
 
   const updateProfileName = useCallback(async (friendlyName: string) => {
-    const trimmedName = friendlyName.trim()
+    const nextState = resolveAuthUserProfileNameUpdate(user, friendlyName)
 
-    if (!user) {
+    if (!nextState) {
       return
     }
 
-    const nextName = trimmedName
-    const slug = nextName.toLowerCase().trim().replace(/[^a-z0-9]+/g, '-') || 'user'
-
-    setUser((currentUser) => {
-      if (!currentUser) {
-        return currentUser
-      }
-
-      return {
-        ...currentUser,
-        name: nextName,
-        slug,
-      }
-    })
-
-    await updateProfileNameOnSupabase(user, friendlyName)
+    setUser(nextState.user)
+    persistCurrentUserId(nextState.persistedUserId)
+    await updateProfileNameOnSupabase(nextState.user, friendlyName)
   }, [user])
 
   const updateApplicationName = useCallback(async (applicationName: string) => {
-    const trimmedName = applicationName.trim()
+    const nextState = resolveAuthUserApplicationNameUpdate(user, applicationName)
 
-    if (!user) {
+    if (!nextState) {
       return
     }
 
-    setUser((currentUser) => {
-      if (!currentUser) {
-        return currentUser
-      }
-
-      return {
-        ...currentUser,
-        applicationName: trimmedName || null,
-      }
-    })
-
-    await updateApplicationNameOnSupabase(user, applicationName)
+    setUser(nextState.user)
+    persistCurrentUserId(nextState.persistedUserId)
+    await updateApplicationNameOnSupabase(nextState.user, applicationName)
   }, [user])
 
   const updateGymBrand = useCallback(async (gymBrand: string) => {
-    const trimmedValue = gymBrand.trim()
+    const nextState = resolveAuthUserGymBrandUpdate(user, gymBrand)
 
-    if (!user) {
+    if (!nextState) {
       return
     }
 
-    const previousGymName = user.gymName ?? null
-    const isVirginBrand = trimmedValue.toLowerCase() === 'virgin'
-
-    setUser((currentUser) => {
-      if (!currentUser) {
-        return currentUser
-      }
-
-      return {
-        ...currentUser,
-        gymBrand: trimmedValue || null,
-        gymName: isVirginBrand ? currentUser.gymName ?? previousGymName : null,
-      }
-    })
-
-    await updateGymBrandOnSupabase(user, gymBrand)
-    if (isVirginBrand) {
-      await updateGymNameOnSupabase(user, previousGymName ?? '', gymBrand)
+    setUser(nextState.user)
+    persistCurrentUserId(nextState.persistedUserId)
+    await updateGymBrandOnSupabase(nextState.user, gymBrand)
+    if (nextState.isVirginBrand) {
+      await updateGymNameOnSupabase(nextState.user, nextState.previousGymName ?? '', gymBrand)
     }
   }, [user])
 
   const updateGymName = useCallback(async (gymName: string, gymBrand?: string | null) => {
-    const trimmedValue = gymName.trim()
-    const resolvedBrand = (gymBrand ?? user?.gymBrand ?? '').trim().toLowerCase()
-    const isVirginBrand = resolvedBrand === 'virgin'
+    const nextState = resolveAuthUserGymNameUpdate(user, gymName, gymBrand)
 
-    if (!user) {
+    if (!nextState) {
       return
     }
 
-    setUser((currentUser) => {
-      if (!currentUser) {
-        return currentUser
-      }
-
-      return {
-        ...currentUser,
-        gymName: isVirginBrand && trimmedValue ? trimmedValue : null,
-      }
-    })
-
-    await updateGymNameOnSupabase(user, gymName, gymBrand ?? user.gymBrand ?? null)
+    setUser(nextState.user)
+    persistCurrentUserId(nextState.persistedUserId)
+    await updateGymNameOnSupabase(nextState.user, gymName, gymBrand ?? nextState.user.gymBrand ?? null)
   }, [user])
 
   return {

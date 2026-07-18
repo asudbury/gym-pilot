@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react'
-import { normalizeFavoritesState, type QuickLink } from '../domain/quickLinks'
+import { type QuickLink } from '../domain/quickLinks'
+import { resolveFavoritesHydrationState, resolveFavoritesPersistenceState } from '../domain/favoritesTransitions'
 import { loadFavoritesStorage, saveFavoritesStorage } from '../services/favoritesStorage'
 
 export function useFavoritesFeature() {
@@ -16,7 +17,7 @@ export function useFavoritesFeature() {
           return
         }
 
-        const normalizedValue = normalizeFavoritesState(storedValue)
+        const normalizedValue = resolveFavoritesHydrationState(storedValue)
         setFavorites(normalizedValue.favorites)
         setFolders(normalizedValue.folders)
         setHydrated(true)
@@ -39,7 +40,7 @@ export function useFavoritesFeature() {
       return
     }
 
-    void saveFavoritesStorage({ favorites, folders })
+    void saveFavoritesStorage(resolveFavoritesPersistenceState({ favorites, folders }))
   }, [favorites, folders, hydrated])
 
   return {
