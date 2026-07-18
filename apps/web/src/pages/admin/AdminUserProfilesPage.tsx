@@ -22,22 +22,14 @@ import {
   toggleRoleSelection,
   type ProfileDraft,
 } from '../../features/admin/domain/userProfiles'
+import { formatDashboardTimestamp } from '../../utils/appUtils'
 
 const formatStoredTimestamp = (value?: string | null) => {
   if (!value) {
     return 'Not recorded yet'
   }
 
-  const parsedDate = new Date(value)
-
-  if (Number.isNaN(parsedDate.getTime())) {
-    return 'Invalid date'
-  }
-
-  return new Intl.DateTimeFormat(undefined, {
-    dateStyle: 'medium',
-    timeStyle: 'short',
-  }).format(parsedDate)
+  return formatDashboardTimestamp(value) ?? 'Invalid date'
 }
 
 const formatLocalDateTimeInputValue = (value?: string | null) => {
