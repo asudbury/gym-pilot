@@ -23,6 +23,7 @@ import { AdminPage } from './pages/admin/AdminPage'
 import { AdminUsersPage } from './pages/admin/AdminUsersPage'
 import { AdminCreateUserPage } from './pages/admin/AdminCreateUserPage'
 import { AdminUserProfilesPage } from './pages/admin/AdminUserProfilesPage'
+import { AdminUserActivityPage } from './pages/admin/AdminUserActivityPage'
 import { AdminDatabasePage } from './pages/admin/AdminDatabasePage'
 import { AdminPreferencesPage } from './pages/admin/AdminPreferencesPage'
 import { HelpPage } from './pages/help/HelpPage'
@@ -31,65 +32,7 @@ import { DashboardPage } from './pages/DashboardPage'
 import { buildNavigationMenuItems } from './utils/navigationUtils'
 import { AssignmentDetailPage } from './pages/assignments/AssignmentDetailPage'
 import { logger } from './utils/loggingUtils'
-
-type HomeFilters = {
-  searchTerm: string
-  selectedCategory: string | null
-  showImages: boolean
-}
-
-type QuickLink = {
-  id: string
-  label: string
-  path: string
-  folder?: string
-}
-
-type FavoritesStorageValue = {
-  favorites: QuickLink[]
-  folders: string[]
-}
-
-function normalizeFavoriteStorageValue(value: unknown): FavoritesStorageValue {
-  if (Array.isArray(value)) {
-    return {
-      favorites: value.filter((item): item is QuickLink => Boolean(item && typeof item === 'object' && typeof (item as QuickLink).path === 'string' && typeof (item as QuickLink).label === 'string')),
-      folders: [],
-    }
-  }
-
-  if (value && typeof value === 'object') {
-    const candidate = value as Partial<FavoritesStorageValue>
-    const folders = Array.isArray(candidate.folders)
-      ? candidate.folders.filter((folder): folder is string => typeof folder === 'string' && folder.trim().length > 0)
-      : []
-
-    const favorites = Array.isArray(candidate.favorites)
-      ? candidate.favorites.filter((item): item is QuickLink => Boolean(item && typeof item === 'object' && typeof (item as QuickLink).path === 'string' && typeof (item as QuickLink).label === 'string'))
-      : []
-
-    return {
-      favorites,
-      folders: Array.from(new Set(folders.map((folder) => folder.trim()))).sort((left, right) => left.localeCompare(right)),
-    }
-  }
-
-  return { favorites: [], folders: [] }
-}
-
-function normalizeHomeFilters(filters: Partial<HomeFilters> | null | undefined): HomeFilters {
-  const selectedCategory = filters?.selectedCategory
-
-  return {
-    searchTerm: typeof filters?.searchTerm === 'string' ? filters.searchTerm : '',
-    selectedCategory: selectedCategory === null || selectedCategory === '' || selectedCategory === 'All' ? null : typeof selectedCategory === 'string' ? selectedCategory : null,
-    showImages: typeof filters?.showImages === 'boolean' ? filters.showImages : true,
-  }
-}
-
-function sortQuickLinks(items: QuickLink[]) {
-  return [...items].sort((left, right) => left.label.localeCompare(right.label, undefined, { sensitivity: 'base' }))
-}
+import { normalizeFavoriteStorageValue, normalizeHomeFilters, sortQuickLinks, type HomeFilters, type QuickLink } from './utils/appUtils'
 
 function ScrollToTop() {
   const { pathname } = useLocation()
@@ -245,7 +188,7 @@ useEffect(() => {
     ? users.find((candidate) => candidate.id === user.trainerId)
     : undefined
   const appName = isTrainer
-    ? (user?.applicationName?.trim() || user?.name?.trim() || 'GymPilot')
+    ? (user?.applicationName?.trim() || 'GymPilot')
     : (assignedTrainer && (assignedTrainer.applicationName?.trim() || assignedTrainer.name?.trim())
       ? (assignedTrainer.applicationName?.trim() || assignedTrainer.name?.trim())
       : 'GymPilot')
@@ -331,6 +274,7 @@ useEffect(() => {
             <Route path="/admin/users" element={<AdminUsersPage />} />
             <Route path="/admin/users/create" element={<AdminCreateUserPage />} />
             <Route path="/admin/users/profiles/:userId" element={<AdminUserProfilesPage />} />
+            <Route path="/admin/users/profiles/:userId/activity" element={<AdminUserActivityPage />} />
             <Route path="/admin/database" element={<AdminDatabasePage />} />
           </Route>
         </Route>

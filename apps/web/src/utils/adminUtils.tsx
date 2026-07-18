@@ -9,6 +9,8 @@ export type AdminProfileRow = {
   email?: string | null
   trainerId?: string | null
   mustChangePassword: boolean
+  lastLoggedInAt?: string | null
+  previousLastLoggedInAt?: string | null
 }
 
 export type AdminActionCard = {
@@ -56,6 +58,8 @@ export function mapAdminProfileRows(rows: Array<{
   trainer_id?: string | null
   application_name?: string | null
   must_change_password?: boolean
+  last_logged_in_at?: string | null
+  previous_last_logged_in_at?: string | null
 }>, emailLookup: Map<string, string | null>): AdminProfileRow[] {
   return rows.map((row) => ({
     id: row.user_id,
@@ -65,5 +69,7 @@ export function mapAdminProfileRows(rows: Array<{
     email: emailLookup.get(row.user_id) ?? null,
     trainerId: typeof row.trainer_id === 'string' ? row.trainer_id : null,
     mustChangePassword: Boolean(row.must_change_password),
+    lastLoggedInAt: typeof row.last_logged_in_at === 'string' ? row.last_logged_in_at : null,
+    previousLastLoggedInAt: typeof row.previous_last_logged_in_at === 'string' ? row.previous_last_logged_in_at : null,
   }))
 }

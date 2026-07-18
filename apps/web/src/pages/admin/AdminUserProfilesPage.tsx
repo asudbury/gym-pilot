@@ -15,6 +15,23 @@ type ProfileDraft = {
   mustChangePassword: boolean
 }
 
+const formatStoredTimestamp = (value?: string | null) => {
+  if (!value) {
+    return 'Not recorded yet'
+  }
+
+  const parsedDate = new Date(value)
+
+  if (Number.isNaN(parsedDate.getTime())) {
+    return 'Invalid date'
+  }
+
+  return new Intl.DateTimeFormat(undefined, {
+    dateStyle: 'medium',
+    timeStyle: 'short',
+  }).format(parsedDate)
+}
+
 export function AdminUserProfilesPage() {
   const navigate = useNavigate()
   const { userId } = useParams<{ userId: string }>()
@@ -36,7 +53,7 @@ export function AdminUserProfilesPage() {
 
     const { data, error } = await client
       .from('gym_pilot_profiles')
-      .select('user_id, friendly_name, roles, trainer_id, application_name, must_change_password')
+      .select('user_id, friendly_name, roles, trainer_id, application_name, must_change_password, last_logged_in_at, previous_last_logged_in_at')
 
     if (error) {
       console.error('[AdminUserProfiles] Could not load profile rows', error)
@@ -55,6 +72,8 @@ export function AdminUserProfilesPage() {
       email: emailLookup.get(row.user_id) ?? null,
       trainerId: typeof row.trainer_id === 'string' ? row.trainer_id : null,
       mustChangePassword: Boolean(row.must_change_password),
+      lastLoggedInAt: typeof row.last_logged_in_at === 'string' ? row.last_logged_in_at : null,
+      previousLastLoggedInAt: typeof row.previous_last_logged_in_at === 'string' ? row.previous_last_logged_in_at : null,
     }))
 
     setProfileRows(nextRows)
@@ -79,6 +98,8 @@ export function AdminUserProfilesPage() {
   useEffect(() => {
     void refreshProfiles()
   }, [])
+
+  const selectedProfile = profileRows.find((profile) => profile.id === userId) ?? profileRows[0]
 
   const userLookup = useMemo(() => new Map(users.map((user) => [user.id, user])), [users])
 
@@ -176,7 +197,6 @@ export function AdminUserProfilesPage() {
     }
   }
 
-  const selectedProfile = profileRows.find((profile) => profile.id === userId) ?? profileRows[0]
   const selectedTitle = selectedProfile ? `User profile: ${selectedProfile.name}` : 'User profile'
 
   return (
@@ -213,6 +233,33 @@ export function AdminUserProfilesPage() {
                             </p>
                           </label>
 
+                          <div className="mt-3 rounded-2xl border border-slate-200 bg-white p-3">
+                            <p className="text-sm font-medium text-slate-700">Roles</p>
+                            <div className="mt-2 flex flex-wrap gap-2">
+                              {availableAdminRoles.map((role) => {
+                                const checked = draft?.roles.includes(role) ?? profile.roles.includes(role)
+
+                                return (
+                                  <label key={role} className="flex items-center gap-2 rounded-full border border-slate-200 bg-slate-50 px-3 py-1.5 text-base font-medium text-slate-700">
+                                    <input
+                                      type="checkbox"
+                                      checked={checked}
+                                      onChange={() => {
+                                        const nextRoles = draft?.roles ?? profile.roles
+                                        const nextRoleSet = nextRoles.includes(role)
+                                          ? nextRoles.filter((value) => value !== role)
+                                          : [...nextRoles, role]
+
+                                        updateDraft(profile.id, { roles: nextRoleSet })
+                                      }}
+                                    />
+                                    <span className="capitalize">{role}</span>
+                                  </label>
+                                )
+                              })}
+                            </div>
+                          </div>
+
                           <label className="mt-3 block text-sm font-medium text-slate-700">
                             Display name
                             <input
@@ -234,6 +281,26 @@ export function AdminUserProfilesPage() {
                             />
                           </label>
 
+                          <div className="mt-3 rounded-2xl border border-slate-200 bg-white p-3">
+                            <p className="text-sm font-medium text-slate-700">Login activity</p>
+                            <div className="mt-2 space-y-1 text-sm text-slate-600">
+                              <p>
+                                <span className="font-medium text-slate-700">Last login:</span>{' '}
+                                {formatStoredTimestamp(profile.lastLoggedInAt)}
+                              </p>
+                              <p>
+                                <span className="font-medium text-slate-700">Previous login:</span>{' '}
+                                {formatStoredTimestamp(profile.previousLastLoggedInAt)}
+                              </p>
+                            </div>
+                          </div>
+
+                          <div className="mt-3 flex flex-wrap items-center gap-2">
+                            <Button tone="blue" onClick={() => navigate(`/admin/users/profiles/${profile.id}/activity`)} className="px-3 py-1.5">
+                              View activity
+                            </Button>
+                          </div>
+
                           <label className="mt-3 block text-sm font-medium text-slate-700">
                             Show app version
                             <div className="mt-2 flex gap-2">
@@ -253,30 +320,6 @@ export function AdminUserProfilesPage() {
                               </button>
                             </div>
                           </label>
-
-                          <div className="mt-3 flex flex-wrap gap-2 rounded-full border border-slate-200 bg-white px-3 py-2">
-                            {availableAdminRoles.map((role) => {
-                              const checked = draft?.roles.includes(role) ?? profile.roles.includes(role)
-
-                              return (
-                                <label key={role} className="flex items-center gap-1 text-sm text-slate-700">
-                                  <input
-                                    type="checkbox"
-                                    checked={checked}
-                                    onChange={() => {
-                                      const nextRoles = draft?.roles ?? profile.roles
-                                      const nextRoleSet = nextRoles.includes(role)
-                                        ? nextRoles.filter((value) => value !== role)
-                                        : [...nextRoles, role]
-
-                                      updateDraft(profile.id, { roles: nextRoleSet })
-                                    }}
-                                  />
-                                  <span className="capitalize">{role}</span>
-                                </label>
-                              )
-                            })}
-                          </div>
 
                           {(draft?.roles.includes('client') ?? profile.roles.includes('client')) ? (
                             <label className="mt-3 block text-sm font-medium text-slate-700">

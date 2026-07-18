@@ -1,48 +1,39 @@
-import { NavLink } from 'react-router-dom'
+import { useEffect, useMemo, useState } from 'react'
 import { PageCard } from '../components/PageCard'
 import { PageLayout } from '../layouts/PageLayout'
-import { getToneClass } from '../components/toneClasses'
+import { useAuth } from '../auth/AuthContext'
+import { getDashboardLayoutDefinitions, renderDashboardWidgets } from '../components/dashboard/dashboardLayouts'
+import { formatDashboardTimestamp } from '../utils/appUtils'
 
 type DashboardPageProps = {
   userName?: string | null
 }
 
-type DashboardCard = {
-  title: string
-  description: string
-  to: string
-  tone: 'blue' | 'default' | 'emerald'
-}
-
-const dashboardCards: DashboardCard[] = [
-  {
-    title: 'Exercises',
-    description: 'Browse exercises and favourite your go-tos.',
-    to: '/exercises',
-    tone: 'blue',
-  },
-  {
-    title: 'Plans',
-    description: 'Review your training plans and keep momentum.',
-    to: '/plans',
-    tone: 'default',
-  },
-  {
-    title: 'Assignments',
-    description: 'See the work assigned to you and stay on track.',
-    to: '/assignments',
-    tone: 'default',
-  },
-  {
-    title: 'Help',
-    description: 'Find guidance and support for the app.',
-    to: '/help',
-    tone: 'emerald',
-  },
-]
-
 export function DashboardPage({ userName }: DashboardPageProps) {
+  const { user } = useAuth()
   const displayName = userName?.trim() || 'there'
+  const previousLoginLabel = formatDashboardTimestamp(user?.previousLastLoggedInAt ?? null)
+  const availableRoles = useMemo(() => {
+    const roles = Array.isArray(user?.roles) && user?.roles.length ? user.roles : []
+    if (user?.role && !roles.includes(user.role)) {
+      roles.push(user.role)
+    }
+    return roles.filter(Boolean)
+  }, [user?.role, user?.roles])
+  const [selectedRole, setSelectedRole] = useState<string | null>(() => user?.role ?? availableRoles[0] ?? null)
+
+  const layouts = useMemo(() => getDashboardLayoutDefinitions(availableRoles as Array<'admin' | 'trainer' | 'client' | 'guest'>), [availableRoles])
+  const shouldShowRoleSelector = layouts.length > 1 && availableRoles.length > 1
+  const selectedLayoutKey = selectedRole && layouts.some((layout) => layout.key === selectedRole)
+    ? selectedRole
+    : layouts[0]?.key ?? 'default'
+  const selectedLayout = layouts.find((layout) => layout.key === selectedLayoutKey) ?? layouts[0]
+
+  useEffect(() => {
+    if (!layouts.some((layout) => layout.key === selectedRole)) {
+      setSelectedRole(layouts[0]?.key ?? null)
+    }
+  }, [layouts, selectedRole])
 
   return (
     <PageLayout className="gap-6">
@@ -51,24 +42,42 @@ export function DashboardPage({ userName }: DashboardPageProps) {
           <p className="text-sm font-semibold uppercase tracking-[0.24em] text-slate-500">Dashboard</p>
           <h1 className="text-3xl font-semibold tracking-tight text-slate-900 dark:text-slate-100">Welcome back, {displayName}</h1>
           <p className="max-w-2xl text-sm text-slate-600 dark:text-slate-300">
-            Jump back into your exercises, plans and assignments from one place.
+            Choose the view that fits your role and jump back into your work from one place.
           </p>
+          {previousLoginLabel ? (
+            <p className="max-w-2xl text-sm text-slate-500 dark:text-slate-400">
+              Your last login: {previousLoginLabel}.
+            </p>
+          ) : null}
         </div>
 
-        <div className="grid gap-4 md:grid-cols-2">
-          {dashboardCards.map((card) => (
-            <NavLink
-              key={card.to}
-              to={card.to}
-              className={getToneClass(card.tone, 'rounded-3xl border border-white/70 bg-white/70 p-5 text-left shadow-[0_12px_30px_-18px_rgba(15,23,42,0.24)] backdrop-blur-xl transition hover:-translate-y-0.5 hover:shadow-[0_16px_36px_-18px_rgba(15,23,42,0.28)]')}
-            >
-              <div className="space-y-2">
-                <h2 className="text-lg font-semibold text-slate-900 dark:text-slate-100">{card.title}</h2>
-                <p className="text-sm text-slate-600 dark:text-slate-300">{card.description}</p>
-              </div>
-            </NavLink>
-          ))}
-        </div>
+        {shouldShowRoleSelector ? (
+          <div className="flex flex-wrap gap-2">
+            {layouts.map((layout) => {
+              const isActive = selectedLayoutKey === layout.key
+              return (
+                <button
+                  key={layout.key}
+                  type="button"
+                  onClick={() => setSelectedRole(layout.key)}
+                  className={`rounded-full border px-3 py-1.5 text-sm font-medium transition ${isActive ? 'border-slate-900 bg-slate-900 text-white dark:border-slate-100 dark:bg-slate-100 dark:text-slate-950' : 'border-slate-300 bg-white text-slate-700 hover:bg-slate-100 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-200'}`}
+                >
+                  {layout.label}
+                </button>
+              )
+            })}
+          </div>
+        ) : null}
+
+        {selectedLayout ? (
+          <div className="space-y-2">
+            <div className="space-y-1">
+              <h2 className="text-xl font-semibold text-slate-900 dark:text-slate-100">{selectedLayout.title}</h2>
+              <p className="text-sm text-slate-600 dark:text-slate-300">{selectedLayout.description}</p>
+            </div>
+            {renderDashboardWidgets(layouts, selectedLayoutKey)}
+          </div>
+        ) : null}
       </PageCard>
     </PageLayout>
   )

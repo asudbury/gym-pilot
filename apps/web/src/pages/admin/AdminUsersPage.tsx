@@ -146,7 +146,7 @@ export function AdminUsersPage() {
                       {copiedUserId === user.id ? 'Invite link copied' : 'Copy invite link'}
                     </Button>
                     <Button tone="blue" onClick={() => navigate(`/admin/users/profiles/${user.id}`)} className="px-3 py-1.5">
-                      Update profile
+                      View profile
                     </Button>
                   </div>
                 </div>

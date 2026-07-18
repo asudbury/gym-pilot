@@ -1,6 +1,6 @@
 import { createContext, useContext, useEffect, useMemo, useRef, useState, type ReactNode } from 'react'
 import type { User, UserRole } from '@gym-pilot/types'
-import { getSupabaseClient, loadJsonRecord, loadSupabaseApplicationName, loadSupabaseProfileName, normalizeUserRoles, saveJsonRecord, saveSupabaseApplicationName, saveSupabaseProfileName, signOutFromSupabase, usePlan } from '@gym-pilot/shared'
+import { getSupabaseClient, loadJsonRecord, loadSupabaseApplicationName, loadSupabaseProfileLoginHistory, loadSupabaseProfileName, normalizeUserRoles, recordSupabaseUserActivity, saveJsonRecord, saveSupabaseApplicationName, saveSupabaseProfileName, saveSupabaseProfileLastLoggedIn, signOutFromSupabase, usePlan } from '@gym-pilot/shared'
 
 const SESSION_STORAGE_KEY = 'gym-pilot-auth-session'
 const BYPASS_STORAGE_KEY = 'gym-pilot-auth-bypass'
@@ -9,7 +9,11 @@ const LOGOUT_PENDING_STORAGE_KEY = 'gym-pilot-auth-logout-pending'
 const THEME_STORAGE_KEY = 'gym-pilot-theme-preference'
 const SHOW_VERSION_STORAGE_KEY = 'gym-pilot-show-version'
 
-type AuthUser = Pick<User, 'id' | 'name' | 'slug' | 'role' | 'roles' | 'trainerId' | 'applicationName'> & { email?: string | null }
+type AuthUser = Pick<User, 'id' | 'name' | 'slug' | 'role' | 'roles' | 'trainerId' | 'applicationName'> & {
+  email?: string | null
+  lastLoggedInAt?: string | null
+  previousLastLoggedInAt?: string | null
+}
 
 type AuthContextValue = {
   user: AuthUser | null
@@ -78,6 +82,9 @@ async function resolveSupabaseAuthUser(users: User[] = []): Promise<AuthUser | n
     const resolvedRole = (matchingProfileUser?.role ?? resolvedRoles[0] ?? 'client') as UserRole
 
     await saveSupabaseProfileName(displayName)
+    await saveSupabaseProfileLastLoggedIn(supabaseUser.id)
+    await recordSupabaseUserActivity('login', { email: supabaseUser.email ?? null }, supabaseUser.id)
+    const loginHistory = await loadSupabaseProfileLoginHistory()
 
     return {
       id: supabaseUser.id,
@@ -88,6 +95,8 @@ async function resolveSupabaseAuthUser(users: User[] = []): Promise<AuthUser | n
       trainerId: matchingProfileUser?.trainerId ?? null,
       applicationName: storedApplicationName ?? matchingProfileUser?.applicationName ?? null,
       email: supabaseUser.email ?? null,
+      lastLoggedInAt: loginHistory.lastLoggedInAt,
+      previousLastLoggedInAt: loginHistory.previousLastLoggedInAt,
     }
   } catch (error) {
     console.warn('[Auth] Supabase session lookup failed', error)
@@ -285,10 +294,16 @@ export function AuthProvider({ children }: AuthProviderProps) {
 
   const logout = () => {
     console.log('[Auth] Logout requested')
+    const currentUserId = user?.id
+
     window.sessionStorage.setItem(LOGOUT_PENDING_STORAGE_KEY, 'true')
     window.sessionStorage.removeItem(CURRENT_USER_ID_STORAGE_KEY)
     setUser(null)
     setIsBypassEnabled(false)
+
+    if (currentUserId) {
+      void recordSupabaseUserActivity('logout', {}, currentUserId)
+    }
 
     void signOutFromSupabase().finally(() => {
       window.sessionStorage.removeItem(LOGOUT_PENDING_STORAGE_KEY)

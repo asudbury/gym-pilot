@@ -17,13 +17,16 @@ export {
   isSupabasePersistenceEnabled,
   loadSupabaseProfileName,
   loadSupabaseApplicationName,
+  loadSupabaseProfileLoginHistory,
   listSupabaseProfiles,
   loadSupabaseProfileFlag,
   saveSupabaseProfileName,
   saveSupabaseApplicationName,
   saveSupabaseProfileFlag,
+  saveSupabaseProfileLastLoggedIn,
   loadSupabaseJsonRecord,
   saveSupabaseJsonRecord,
   removeSupabaseJsonRecord,
+  recordSupabaseUserActivity,
 } from './gymPilotSupabase'
 export * from './utils'

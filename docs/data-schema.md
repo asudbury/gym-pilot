@@ -94,7 +94,7 @@ The app now has a local-first data layer based on Dexie and a query layer based 
 - TanStack Query is used for API-backed state and caching.
 
 ## Supabase schema
-The current Supabase schema is defined across the consolidated migrations in [supabase/migrations/20260717120000_consolidated_gym_pilot_schema.sql](supabase/migrations/20260717120000_consolidated_gym_pilot_schema.sql), [supabase/migrations/20260717150000_consolidated_favourite_schema.sql](supabase/migrations/20260717150000_consolidated_favourite_schema.sql), and [supabase/migrations/20260717160000_add_assignment_plan_metadata.sql](supabase/migrations/20260717160000_add_assignment_plan_metadata.sql).
+The current Supabase schema is defined in the consolidated migration [supabase/migrations/20260718160000_consolidated_current_schema.sql](supabase/migrations/20260718160000_consolidated_current_schema.sql).
 
 ### Entity relationship overview
 ```mermaid
@@ -105,6 +105,7 @@ erDiagram
     auth_users ||--o{ gym_pilot_favourites : owns
     auth_users ||--o{ gym_pilot_plans : owns
     auth_users ||--o{ gym_pilot_assignments : creates
+    auth_users ||--o{ gym_pilot_user_activity : records
     gym_pilot_plans ||--o{ gym_pilot_assignments : uses
 
     gym_pilot_app_state {
@@ -119,6 +120,12 @@ erDiagram
         uuid id
         uuid user_id
         text friendly_name
+        boolean must_change_password
+        jsonb roles
+        uuid trainer_id
+        text application_name
+        timestamptz last_logged_in_at
+        timestamptz previous_last_logged_in_at
         timestamptz created_at
         timestamptz updated_at
     }
@@ -164,6 +171,14 @@ erDiagram
         timestamptz created_at
         timestamptz updated_at
     }
+
+    gym_pilot_user_activity {
+        uuid id
+        uuid user_id
+        text event_type
+        jsonb event_data
+        timestamptz created_at
+    }
 ```
 
 ### Notes
@@ -175,4 +190,4 @@ erDiagram
 - row-level security policies for authenticated users
 - auth metadata can mark a user as requiring a password change on next sign-in
 
-The schema is intentionally split across multiple migrations so the favourites and assignment metadata additions can be applied independently while remaining backward compatible.
+The schema is intentionally consolidated into a single migration so the profile, favourites, assignments, and activity tables can be applied together while remaining safe for existing environments.

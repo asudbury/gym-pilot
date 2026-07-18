@@ -205,6 +205,36 @@ export async function loadSupabaseApplicationName(): Promise<string | null> {
   return data?.application_name?.trim() || null
 }
 
+export async function loadSupabaseProfileLoginHistory(): Promise<{ lastLoggedInAt: string | null; previousLastLoggedInAt: string | null }> {
+  const client = getSupabaseClient()
+
+  if (!client) {
+    return { lastLoggedInAt: null, previousLastLoggedInAt: null }
+  }
+
+  const userId = await getAuthenticatedUserId(client)
+
+  if (!userId) {
+    return { lastLoggedInAt: null, previousLastLoggedInAt: null }
+  }
+
+  const { data, error } = await client
+    .from('gym_pilot_profiles')
+    .select('last_logged_in_at, previous_last_logged_in_at')
+    .eq('user_id', userId)
+    .maybeSingle()
+
+  if (error) {
+    console.error('[Supabase] Could not load profile login history', error)
+    return { lastLoggedInAt: null, previousLastLoggedInAt: null }
+  }
+
+  return {
+    lastLoggedInAt: typeof data?.last_logged_in_at === 'string' ? data.last_logged_in_at : null,
+    previousLastLoggedInAt: typeof data?.previous_last_logged_in_at === 'string' ? data.previous_last_logged_in_at : null,
+  }
+}
+
 export async function listSupabaseProfiles(): Promise<SupabaseProfile[]> {
   const client = getSupabaseClient()
 
@@ -402,6 +432,53 @@ export async function saveSupabaseProfileFlag(flag: 'must_change_password', valu
   if (error) {
     console.error('[Supabase] Could not save profile flag', error)
   }
+}
+
+export async function saveSupabaseProfileLastLoggedIn(userId?: string) {
+  const client = getSupabaseClient()
+
+  if (!client) {
+    return
+  }
+
+  const resolvedUserId = userId || await getAuthenticatedUserId(client)
+
+  if (!resolvedUserId) {
+    return
+  }
+
+  const { data: existingProfile, error: loadError } = await client
+    .from('gym_pilot_profiles')
+    .select('last_logged_in_at')
+    .eq('user_id', resolvedUserId)
+    .maybeSingle()
+
+  if (loadError) {
+    console.error('[Supabase] Could not load existing profile login timestamp', loadError)
+    return
+  }
+
+  const previousLastLoggedInAt = existingProfile?.last_logged_in_at ?? null
+  const nextLastLoggedInAt = new Date().toISOString()
+
+  const { error } = await client.from('gym_pilot_profiles').upsert(
+    {
+      user_id: resolvedUserId,
+      last_logged_in_at: nextLastLoggedInAt,
+      previous_last_logged_in_at: previousLastLoggedInAt,
+    },
+    { onConflict: 'user_id' },
+  )
+
+  if (error) {
+    console.error('[Supabase] Could not save profile last logged in timestamp', error)
+    return
+  }
+
+  await recordSupabaseUserActivity('login', {
+    logged_in_at: nextLastLoggedInAt,
+    previous_last_logged_in_at: previousLastLoggedInAt,
+  }, resolvedUserId)
 }
 
 export async function loadSupabaseJsonRecord<T>(key: string): Promise<SupabaseRecordResponse<T>> {
@@ -710,5 +787,29 @@ export async function removeSupabaseJsonRecord(key: string) {
 
   if (error) {
     throw error
+  }
+}
+
+export async function recordSupabaseUserActivity(eventType: string, eventData: Record<string, unknown> = {}, userId?: string) {
+  const client = getSupabaseClient()
+
+  if (!client) {
+    return
+  }
+
+  const resolvedUserId = userId || await getAuthenticatedUserId(client)
+
+  if (!resolvedUserId) {
+    return
+  }
+
+  const { error } = await client.from('gym_pilot_user_activity').insert({
+    user_id: resolvedUserId,
+    event_type: eventType,
+    event_data: eventData,
+  })
+
+  if (error) {
+    console.error('[Supabase] Could not record user activity', error)
   }
 }
