@@ -40,7 +40,7 @@ function ExerciseActionButtons({ exerciseId, isFavorite, copiedId, onToggleFavor
           onToggleFavoriteExercise?.(exerciseId)
           window.dispatchEvent(new Event('gym-pilot-open-favourites-menu'))
         }}
-        className="rounded-full border border-slate-200 bg-white px-3 py-2 text-sm font-medium text-slate-700"
+        className={`rounded-full border px-3 py-2 text-sm font-medium transition ${isFavorite ? 'border-emerald-200 bg-emerald-50 text-emerald-700' : 'border-slate-200 bg-white text-slate-700'}`}
       >
         {isFavorite ? '★ Favourited' : '☆ Favourite'}
       </button>
@@ -51,7 +51,7 @@ function ExerciseActionButtons({ exerciseId, isFavorite, copiedId, onToggleFavor
           event.stopPropagation()
           void onCopyUrl(exerciseId)
         }}
-        className="rounded-full border border-slate-200 bg-white px-3 py-2 text-sm font-medium text-slate-700"
+        className={`rounded-full border px-3 py-2 text-sm font-medium transition ${copiedId === exerciseId ? 'border-emerald-200 bg-emerald-50 text-emerald-700' : 'border-slate-200 bg-white text-slate-700'}`}
       >
         {copiedId === exerciseId ? 'Copied!' : 'Copy URL'}
       </button>

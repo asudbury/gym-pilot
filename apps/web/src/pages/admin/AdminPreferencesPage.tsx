@@ -11,9 +11,10 @@ import { appTokens } from '../../constants/tokens'
 import { getDisplayEmail, getDisplayRoles } from '../../utils/adminUtils'
 
 export function AdminPreferencesPage() {
-  const { user, updateProfileName, themePreference, setThemePreference } = useAuth()
+  const { user, updateProfileName, updateApplicationName, themePreference, setThemePreference, showVersion, setShowVersion } = useAuth()
   const navigate = useNavigate()
   const [friendlyName, setFriendlyName] = useState(user?.name ?? '')
+  const [applicationName, setApplicationName] = useState(user?.applicationName ?? '')
   const [newPassword, setNewPassword] = useState('')
   const [confirmPassword, setConfirmPassword] = useState('')
   const [isSaving, setIsSaving] = useState(false)
@@ -21,9 +22,13 @@ export function AdminPreferencesPage() {
 
   useEffect(() => {
     setFriendlyName(user?.name ?? '')
-  }, [user?.name])
+    setApplicationName(user?.applicationName ?? '')
+    setNewPassword('')
+    setConfirmPassword('')
+  }, [user?.name, user?.applicationName])
 
   const displayRoles = getDisplayRoles(user?.roles, user?.role)
+  const isTrainer = displayRoles.includes('trainer')
 
   const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault()
@@ -49,7 +54,10 @@ export function AdminPreferencesPage() {
         }
       }
 
-      await updateProfileName(friendlyName)
+      if (isTrainer) {
+        await updateProfileName(friendlyName)
+        await updateApplicationName(applicationName)
+      }
       setNewPassword('')
       setConfirmPassword('')
       navigate('/admin')
@@ -96,17 +104,38 @@ export function AdminPreferencesPage() {
             </p>
           </label>
 
-          <label className="flex flex-col gap-2 text-sm font-medium text-slate-700">
-            <p>Your display name</p>
-            <p className="mt-1 text-sm text-slate-400">This name is shown in the app header.</p>
-            <input
-              type="text"
-              value={friendlyName}
-              onChange={(event) => setFriendlyName(event.target.value)}
-              className={`${appTokens.input} w-full`}
-              placeholder="Enter a friendly name"
-            />
-          </label>
+          {isTrainer ? (
+            <>
+              <label className="flex flex-col gap-2 text-sm font-medium text-slate-700">
+                <p>Display name</p>
+                <p className="mt-1 text-sm text-slate-400">This name is used for your profile and visible identity in the app.</p>
+                <input
+                  type="text"
+                  value={friendlyName}
+                  onChange={(event) => setFriendlyName(event.target.value)}
+                  className={`${appTokens.input} w-full`}
+                  placeholder="Enter a display name"
+                />
+              </label>
+
+              <label className="flex flex-col gap-2 text-sm font-medium text-slate-700">
+                <p>Application name</p>
+                <p className="mt-1 text-sm text-slate-400">Set the name shown in the header for your trainer branding. Leave it blank to fall back to your display name or the default GymPilot branding.</p>
+                <input
+                  type="text"
+                  value={applicationName}
+                  onChange={(event) => setApplicationName(event.target.value)}
+                  className={`${appTokens.input} w-full`}
+                  placeholder="Enter a custom app name"
+                />
+              </label>
+            </>
+          ) : (
+            <div className="flex flex-col gap-2 rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3 text-sm text-slate-700">
+              <p className="font-medium">Trainer-only branding</p>
+              <p className="text-sm text-slate-400">This app-name setting is available only for trainer accounts.</p>
+            </div>
+          )}
 
           <label className="flex flex-col gap-2 text-sm font-medium text-slate-700">
             <p>Change password</p>
@@ -115,6 +144,7 @@ export function AdminPreferencesPage() {
               type="password"
               value={newPassword}
               onChange={(event) => setNewPassword(event.target.value)}
+              autoComplete="new-password"
               className={`${appTokens.input} w-full`}
               placeholder="New password"
             />
@@ -122,6 +152,7 @@ export function AdminPreferencesPage() {
               type="password"
               value={confirmPassword}
               onChange={(event) => setConfirmPassword(event.target.value)}
+              autoComplete="new-password"
               className={`${appTokens.input} w-full`}
               placeholder="Confirm new password"
             />
@@ -147,10 +178,31 @@ export function AdminPreferencesPage() {
               </button>
             </div>
           </label>
+
+          <label className="flex flex-col gap-2 text-sm font-medium text-slate-700">
+            <p>Show app version</p>
+            <p className="mt-1 text-sm text-slate-400">Toggle whether the version badge is shown in the header.</p>
+            <div className="mt-4 flex gap-3">
+              <button
+                type="button"
+                onClick={() => setShowVersion(true)}
+                className={`rounded-full px-4 py-2 text-sm font-medium transition ${showVersion ? 'bg-slate-900 text-white' : 'bg-white text-slate-700 border border-slate-200'}`}
+              >
+                Show
+              </button>
+              <button
+                type="button"
+                onClick={() => setShowVersion(false)}
+                className={`rounded-full px-4 py-2 text-sm font-medium transition ${!showVersion ? 'bg-slate-900 text-white' : 'bg-white text-slate-700 border border-slate-200'}`}
+              >
+                Hide
+              </button>
+            </div>
+          </label>
           <button
             type="submit"
             disabled={isSaving}
-            className="w-fit rounded-full bg-slate-900 px-4 py-2.5 text-sm font-semibold text-white transition hover:bg-slate-700 disabled:cursor-not-allowed disabled:bg-slate-400"
+            className={getToneClass('blue', 'w-fit rounded-full px-4 py-2.5 text-sm font-semibold text-white transition disabled:cursor-not-allowed disabled:bg-slate-400')}
           >
             {isSaving ? 'Saving…' : 'Save preferences'}
           </button>

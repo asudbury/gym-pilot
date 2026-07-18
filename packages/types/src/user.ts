@@ -7,4 +7,5 @@ export type User = {
   role?: UserRole
   roles: UserRole[]
   trainerId?: string | null
+  applicationName?: string | null
 }

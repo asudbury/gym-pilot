@@ -10,16 +10,18 @@ import { CallToAction } from '../../layouts/CallToAction'
 export function AssignmentsPage() {
   const { visibleAssignments, deleteAssignment } = usePlan()
 
+  const description = 'Create an assignment to track exercises and add notes for each one.'
+
   return (
     <PageLayout>
       {visibleAssignments.length === 0 ? (
         <PageCardLayout
           title="Assignments"
           subtitle="Assignments Dashboard"
+          description={description}
         >
           <CallToAction
             title="Manage assignments"
-            description="Create an assignment to track exercises and add notes for each one."
             action={
               <Link to="/assignments/new" className={getToneClass('blue', 'inline-flex items-center rounded-lg px-4 py-2 text-sm font-medium')}>
                 Create a new assignment
@@ -31,7 +33,7 @@ export function AssignmentsPage() {
         <PageCardLayout
           title='Assignments'
           subtitle='Assignments Dashboard'
-          description='Each assignment is its own editable copy for an individual user.'
+          description={description}
         >
           <div className="flex justify-end">
             <Link to="/assignments/new" className={getToneClass('blue', 'inline-flex items-center rounded-lg px-4 py-2 text-sm font-medium')}>

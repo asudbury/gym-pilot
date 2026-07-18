@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useState } from 'react'
-import { useParams } from 'react-router-dom'
+import { useNavigate, useParams } from 'react-router-dom'
 import { Button } from '../../components/Button'
 import { getSupabaseClient, listSupabaseAuthUsers, usePlan } from '@gym-pilot/shared'
 import type { UserRole } from '@gym-pilot/types'
@@ -8,40 +8,39 @@ import { availableAdminRoles, getDisplayEmail, getDisplayRoles, type AdminProfil
 
 type ProfileDraft = {
   name: string
+  applicationName: string
+  showVersion: boolean
   roles: UserRole[]
   trainerId: string | null
   mustChangePassword: boolean
 }
 
 export function AdminUserProfilesPage() {
+  const navigate = useNavigate()
   const { userId } = useParams<{ userId: string }>()
   const { users, deleteUser } = usePlan()
   const [profileRows, setProfileRows] = useState<AdminProfileRow[]>([])
   const [drafts, setDrafts] = useState<Record<string, ProfileDraft>>({})
   const [statusMessage, setStatusMessage] = useState('')
-  const [isLoading, setIsLoading] = useState(false)
   const [savingProfileId, setSavingProfileId] = useState<string | null>(null)
 
   const refreshProfiles = async () => {
-    setIsLoading(true)
     setStatusMessage('')
 
     const client = getSupabaseClient()
 
     if (!client) {
       setStatusMessage('Supabase is not configured for this session.')
-      setIsLoading(false)
       return
     }
 
     const { data, error } = await client
       .from('gym_pilot_profiles')
-      .select('user_id, friendly_name, roles, trainer_id, must_change_password')
+      .select('user_id, friendly_name, roles, trainer_id, application_name, must_change_password')
 
     if (error) {
       console.error('[AdminUserProfiles] Could not load profile rows', error)
       setStatusMessage(`Could not load profile users: ${error.message}`)
-      setIsLoading(false)
       return
     }
 
@@ -52,6 +51,7 @@ export function AdminUserProfilesPage() {
       id: row.user_id,
       name: typeof row.friendly_name === 'string' && row.friendly_name.trim() ? row.friendly_name.trim() : row.user_id,
       roles: getDisplayRoles(row.roles),
+      applicationName: typeof row.application_name === 'string' ? row.application_name : null,
       email: emailLookup.get(row.user_id) ?? null,
       trainerId: typeof row.trainer_id === 'string' ? row.trainer_id : null,
       mustChangePassword: Boolean(row.must_change_password),
@@ -64,6 +64,8 @@ export function AdminUserProfilesPage() {
       nextRows.forEach((row) => {
         nextDrafts[row.id] = {
           name: row.name,
+          applicationName: row.applicationName ?? '',
+          showVersion: true,
           roles: [...row.roles],
           trainerId: row.trainerId ?? null,
           mustChangePassword: row.mustChangePassword,
@@ -72,7 +74,6 @@ export function AdminUserProfilesPage() {
 
       return nextDrafts
     })
-    setIsLoading(false)
   }
 
   useEffect(() => {
@@ -80,13 +81,30 @@ export function AdminUserProfilesPage() {
   }, [])
 
   const userLookup = useMemo(() => new Map(users.map((user) => [user.id, user])), [users])
-  const trainerOptions = useMemo(() => users.filter((user) => user.roles.includes('trainer')), [users])
+
+  const getTrainerOptionsForProfile = (profile: AdminProfileRow) => {
+    const baseOptions = users.filter((user) => user.roles.includes('trainer'))
+
+    if (!profile.roles.includes('trainer')) {
+      return baseOptions
+    }
+
+    const alreadyHasSelfOption = baseOptions.some((trainer) => trainer.id === profile.id)
+
+    if (alreadyHasSelfOption) {
+      return baseOptions
+    }
+
+    return [{ id: profile.id, name: profile.name }, ...baseOptions]
+  }
 
   const updateDraft = (profileId: string, patch: Partial<ProfileDraft>) => {
     setDrafts((current) => ({
       ...current,
       [profileId]: {
         name: current[profileId]?.name ?? '',
+        applicationName: current[profileId]?.applicationName ?? '',
+        showVersion: current[profileId]?.showVersion ?? true,
         roles: current[profileId]?.roles ?? [],
         trainerId: current[profileId]?.trainerId ?? null,
         mustChangePassword: current[profileId]?.mustChangePassword ?? false,
@@ -120,6 +138,7 @@ export function AdminUserProfilesPage() {
       const profilePayload = {
         user_id: profile.id,
         friendly_name: trimmedName,
+        application_name: draft.applicationName.trim() || null,
         roles: draft.roles,
         trainer_id: draft.trainerId ?? null,
         must_change_password: draft.mustChangePassword,
@@ -132,6 +151,7 @@ export function AdminUserProfilesPage() {
           {
             user_id: profile.id,
             friendly_name: trimmedName,
+            application_name: draft.applicationName.trim() || null,
             roles: draft.roles,
             must_change_password: draft.mustChangePassword,
           },
@@ -147,6 +167,7 @@ export function AdminUserProfilesPage() {
 
       await refreshProfiles()
       setStatusMessage(`Profile updated for ${trimmedName}.`)
+      navigate('/admin/users', { replace: true })
     } catch (error) {
       console.error('[AdminUserProfiles] Could not save profile', error)
       setStatusMessage('Could not save the profile changes.')
@@ -172,19 +193,13 @@ export function AdminUserProfilesPage() {
         ) : null}
 
         <div className="rounded-2xl border border-slate-200 bg-white p-4">
-          <div className="flex items-center justify-between gap-2">
-            <h3 className="text-sm font-semibold text-slate-800">Profiles</h3>
-            <span className="text-xs uppercase tracking-[0.2em] text-slate-500">
-              {isLoading ? 'Loading…' : `${profileRows.length} profiles`}
-            </span>
-          </div>
-
           {profileRows.length === 0 ? (
             <p className="mt-3 text-sm text-slate-600">No profiles available yet.</p>
           ) : (
             <div className="mt-3 space-y-2">
               {profileRows.map((profile) => {
                 const draft = drafts[profile.id]
+                const trainerOptions = getTrainerOptionsForProfile(profile)
 
                 return (
                   <div key={profile.id} className="rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3">
@@ -206,6 +221,37 @@ export function AdminUserProfilesPage() {
                               onChange={(event) => updateDraft(profile.id, { name: event.target.value })}
                               className="mt-1 w-full rounded-full border border-slate-200 bg-white px-3 py-2 text-sm text-slate-700"
                             />
+                          </label>
+
+                          <label className="mt-3 block text-sm font-medium text-slate-700">
+                            Application name
+                            <input
+                              type="text"
+                              value={draft?.applicationName ?? ''}
+                              onChange={(event) => updateDraft(profile.id, { applicationName: event.target.value })}
+                              placeholder="Enter a custom app name"
+                              className="mt-1 w-full rounded-full border border-slate-200 bg-white px-3 py-2 text-sm text-slate-700"
+                            />
+                          </label>
+
+                          <label className="mt-3 block text-sm font-medium text-slate-700">
+                            Show app version
+                            <div className="mt-2 flex gap-2">
+                              <button
+                                type="button"
+                                onClick={() => updateDraft(profile.id, { showVersion: true })}
+                                className={`rounded-full px-3 py-1.5 text-sm font-medium transition ${draft?.showVersion ?? true ? 'bg-slate-900 text-white' : 'bg-white text-slate-700 border border-slate-200'}`}
+                              >
+                                Show
+                              </button>
+                              <button
+                                type="button"
+                                onClick={() => updateDraft(profile.id, { showVersion: false })}
+                                className={`rounded-full px-3 py-1.5 text-sm font-medium transition ${!(draft?.showVersion ?? true) ? 'bg-slate-900 text-white' : 'bg-white text-slate-700 border border-slate-200'}`}
+                              >
+                                Hide
+                              </button>
+                            </div>
                           </label>
 
                           <div className="mt-3 flex flex-wrap gap-2 rounded-full border border-slate-200 bg-white px-3 py-2">

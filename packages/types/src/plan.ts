@@ -5,6 +5,8 @@ export type PlanItem = {
   reps: string
   workingSets: string
   notes: string
+  link_label?: string
+  link_url?: string
 }
 
 export type PlanSession = {

@@ -1,4 +1,6 @@
 import type { ReactNode } from 'react'
+import { getExercisePath, getExerciseSlug } from './exerciseRouteUtils'
+import { exercises, exercisesSchema } from '@gym-pilot/shared'
 
 export type NavigationMenuItemProps = {
   to: string
@@ -71,11 +73,31 @@ export function buildNavigationMenuItems({
 }
 
 export async function copyExerciseLinkToClipboard(exerciseId: string): Promise<void> {
+  const parsedExercises = exercisesSchema.parse(exercises)
+  const exercise = parsedExercises.find((item) => item.id === exerciseId)
+  const slug = exercise ? getExerciseSlug(exercise) : exerciseId
+  const path = exercise ? getExercisePath(exercise) : `/exercise/${slug}`
+  const baseUrl = new URL(import.meta.env.BASE_URL || '/', window.location.origin)
+  baseUrl.hash = path
+  const shareUrl = baseUrl.toString()
 
-    const url = `${window.location.origin}/exercise/${exerciseId}`
-
+  if (typeof navigator !== 'undefined' && navigator.clipboard?.writeText) {
     try {
-      await navigator.clipboard.writeText(url)
+      await navigator.clipboard.writeText(shareUrl)
+      return
     } catch {
+      // Fall back to the legacy clipboard path below.
     }
+  }
+
+  const textArea = document.createElement('textarea')
+  textArea.value = shareUrl
+  textArea.setAttribute('readonly', '')
+  textArea.style.position = 'fixed'
+  textArea.style.top = '-9999px'
+  textArea.style.left = '-9999px'
+  document.body.appendChild(textArea)
+  textArea.select()
+  document.execCommand('copy')
+  document.body.removeChild(textArea)
 }

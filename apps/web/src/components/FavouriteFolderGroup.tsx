@@ -27,7 +27,15 @@ export function FavouriteFolderGroup({
   const isCollapsed = !isExpanded
 
   return (
-    <div className="rounded-2xl border border-slate-200 bg-white p-3 shadow-sm">
+    <div
+      className="rounded-2xl border border-slate-200 bg-white p-3 shadow-sm"
+      draggable
+      onDragStart={(event) => {
+        event.dataTransfer.effectAllowed = 'copy'
+        event.dataTransfer.setData('application/x-gym-pilot-links', JSON.stringify({ folderName, items }))
+        event.dataTransfer.setData('text/plain', JSON.stringify({ folderName, items }))
+      }}
+    >
       <div className="mb-3 flex items-center justify-between">
         <button type="button" onClick={() => onToggle(folderName)} className="flex items-center gap-2 text-left text-sm font-semibold tracking-wide text-slate-600">
           <span className="text-base text-slate-400">{isCollapsed ? '▶' : '▼'}</span>
@@ -46,7 +54,12 @@ export function FavouriteFolderGroup({
         <div className="ml-3 flex flex-col gap-2 border-l border-slate-200 pl-3">
           {items.map((link) => (
             <div key={link.id} className="flex flex-col gap-3 rounded-2xl border border-slate-200 bg-slate-50 p-3 sm:flex-row sm:items-center sm:justify-between">
-              <button type="button" onClick={() => onOpenLink(link)} className="flex-1 text-left">
+              <button type="button" onClick={() => onOpenLink(link)} className="flex-1 text-left" draggable onDragStart={(event) => {
+                event.stopPropagation()
+                event.dataTransfer.effectAllowed = 'copy'
+                event.dataTransfer.setData('application/x-gym-pilot-links', JSON.stringify([{ label: link.label, path: link.path }]))
+                event.dataTransfer.setData('text/plain', JSON.stringify([{ label: link.label, path: link.path }]))
+              }}>
                 <div className="text-sm font-semibold text-slate-900">{link.label}</div>
                 <div className="mt-1 text-xs text-slate-500">{link.path}</div>
               </button>

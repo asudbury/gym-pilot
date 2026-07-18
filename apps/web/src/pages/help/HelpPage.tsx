@@ -7,7 +7,8 @@ export function HelpPage() {
     <PageLayout>
       <PageCardLayout
         title="Help"
-        subtitle="How to use GymPilot"
+        subtitle="How to use the app"
+        description="Find answers to common questions and learn how to use the app effectively"
       >
         <div className="flex flex-col gap-4">
           {helpSections.map((section) => (

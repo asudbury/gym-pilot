@@ -1,4 +1,4 @@
-import { useMemo } from 'react'
+import { useMemo, useState, type DragEvent } from 'react'
 import { AgGridReact } from 'ag-grid-react'
 import { AllCommunityModule, ModuleRegistry, provideGlobalGridOptions, type ColDef } from 'ag-grid-community'
 import 'ag-grid-community/styles/ag-grid.css'
@@ -7,6 +7,7 @@ import { exercises } from '@gym-pilot/shared'
 import { Button } from './Button'
 import { ExerciseSearchPicker } from './exercises/ExerciseSearchPicker'
 import { formatLabel } from '../utils/formatUtils'
+import { normalizeFolderName, sortFavorites, type QuickLink } from '../utils/favouriteUtils'
 import { type PlanGridRow, type PlanTab } from '../utils/planBuilderUtils'
 
 ModuleRegistry.registerModules([AllCommunityModule])
@@ -17,12 +18,14 @@ export interface PlanBuilderWorkspaceProps {
   activeTabId: string | null
   activeRows: PlanGridRow[]
   favoriteExercises: Array<{ id: string; name: string }>
+  favoriteLinks?: QuickLink[]
   selectedExerciseName: string
   selectedExerciseId: string
   isFullscreen: boolean
   onToggleFullscreen: () => void
   onExportToExcel: () => void
   onExerciseSelection: (exerciseId: string, exerciseName: string) => void
+  onAddLinkRows?: (links: Array<{ label: string; path: string }>) => void
   onSearchChange?: (value: string) => void
   onActivateTab?: (tabId: string) => void
   onAddRow: (exerciseId?: string) => void
@@ -46,12 +49,14 @@ export function PlanBuilderWorkspace({
   activeTabId,
   activeRows,
   favoriteExercises,
+  favoriteLinks = [],
   selectedExerciseName,
   selectedExerciseId,
   isFullscreen,
   onToggleFullscreen,
   onExportToExcel,
   onExerciseSelection,
+  onAddLinkRows,
   onSearchChange,
   onActivateTab,
   onAddRow,
@@ -70,17 +75,72 @@ export function PlanBuilderWorkspace({
   saveDisabled = false,
 }: PlanBuilderWorkspaceProps) {
   const activeTab = useMemo(() => tabs.find((tab) => tab.id === activeTabId) ?? tabs[0], [activeTabId, tabs])
+  const [isDropActive, setIsDropActive] = useState(false)
+
+  const groupedFavoriteLinks = useMemo(() => {
+    const sortedLinks = sortFavorites(favoriteLinks)
+    const groups = new Map<string, QuickLink[]>()
+    const folderNames = new Set<string>()
+
+    sortedLinks.forEach((link) => {
+      const folderName = normalizeFolderName(link.folder ?? '') || 'No folder'
+      folderNames.add(folderName)
+      groups.set(folderName, [...(groups.get(folderName) ?? []), link])
+    })
+
+    return Array.from(folderNames).sort((left, right) => {
+      if (left === 'No folder') {
+        return 1
+      }
+
+      if (right === 'No folder') {
+        return -1
+      }
+
+      return left.localeCompare(right)
+    }).map((folderName) => [folderName, groups.get(folderName) ?? []] as const)
+  }, [favoriteLinks])
+
+  const handleDropLinks = (event: DragEvent<HTMLDivElement>) => {
+    event.preventDefault()
+    setIsDropActive(false)
+
+    const payload = event.dataTransfer.getData('application/x-gym-pilot-links') || event.dataTransfer.getData('text/plain')
+
+    if (!payload) {
+      return
+    }
+
+    try {
+      const parsed = JSON.parse(payload) as { items?: Array<{ label: string; path: string }> } | Array<{ label: string; path: string }>
+      const links = Array.isArray(parsed)
+        ? parsed
+        : Array.isArray(parsed?.items)
+          ? parsed.items
+          : []
+
+      onAddLinkRows?.(links.filter((item) => item && typeof item.label === 'string' && typeof item.path === 'string'))
+    } catch {
+      // Ignore invalid payloads.
+    }
+  }
 
   const columnDefs = useMemo<ColDef<PlanGridRow>[]>(() => {
     const defs: ColDef<PlanGridRow>[] = [
       {
-        headerName: 'Exercise',
+        headerName: 'Item',
         field: 'exerciseId',
         editable: false,
         flex: 2,
         minWidth: 220,
         cellClass: 'ag-cell-padding',
         valueFormatter: (params) => {
+          const row = params.data as PlanGridRow | undefined
+
+          if (row?.linkLabel?.trim()) {
+            return row.linkLabel
+          }
+
           const exercise = exercises.find((item) => item.id === params.value)
           return exercise?.name ?? ''
         },
@@ -176,7 +236,7 @@ export function PlanBuilderWorkspace({
               <button
                 type="button"
                 onClick={() => onRemoveRow(row.id)}
-                className="rounded-full border border-emerald-200 bg-emerald-50 px-3 py-1 text-[0.95rem] font-medium text-emerald-700 hover:bg-emerald-100"
+                className="rounded-full border border-rose-200 bg-rose-50 px-3 py-1 text-[0.95rem] font-medium text-rose-700 hover:bg-rose-100"
               >
                 Remove
               </button>
@@ -231,7 +291,22 @@ export function PlanBuilderWorkspace({
           </div>
         ) : null}
 
-        <div className={isFullscreen ? 'fixed inset-3 z-50 flex flex-col overflow-hidden rounded-3xl border border-slate-300 bg-white shadow-2xl' : 'overflow-hidden rounded-2xl border border-slate-200 bg-white'}>
+        <div
+          className={isFullscreen ? 'fixed inset-3 z-50 flex flex-col overflow-hidden rounded-3xl border border-slate-300 bg-white shadow-2xl' : `overflow-hidden rounded-2xl border ${isDropActive ? 'border-emerald-400 bg-emerald-50/70' : 'border-slate-200 bg-white'}`}
+          onDragEnter={(event) => {
+            event.preventDefault()
+            setIsDropActive(true)
+          }}
+          onDragOver={(event) => {
+            event.preventDefault()
+            setIsDropActive(true)
+          }}
+          onDragLeave={(event) => {
+            event.preventDefault()
+            setIsDropActive(false)
+          }}
+          onDrop={handleDropLinks}
+        >
           {isFullscreen ? (
             <div className="flex flex-col gap-3 border-b border-slate-200 bg-slate-50 p-3 sm:flex-row sm:items-end sm:justify-between">
               <div className="flex flex-col gap-3 sm:flex-row sm:items-end sm:gap-3">
@@ -259,6 +334,12 @@ export function PlanBuilderWorkspace({
             </div>
           ) : null}
 
+          {isDropActive ? (
+            <div className="border-b border-emerald-200 bg-emerald-50 px-3 py-2 text-sm font-medium text-emerald-700">
+              Drop favourite links here to add them to this plan.
+            </div>
+          ) : null}
+
           {favoriteExercises.length > 0 ? (
             <div className="flex flex-wrap gap-2 border-b border-slate-200 bg-slate-50 px-3 py-3">
               <span className="self-center text-sm font-medium text-slate-600">From favourites</span>
@@ -270,6 +351,22 @@ export function PlanBuilderWorkspace({
                   className="cursor-pointer rounded-full border px-3 py-1.5 text-sm font-medium"
                 >
                   {formatLabel(exercise.name)}
+                </button>
+              ))}
+            </div>
+          ) : null}
+
+          {groupedFavoriteLinks.length > 0 ? (
+            <div className="flex flex-wrap items-center gap-2 border-b border-slate-200 bg-slate-50 px-3 py-3">
+              <span className="self-center text-sm font-medium text-slate-600">Favourite groups</span>
+              {groupedFavoriteLinks.map(([folderName, links]) => (
+                <button
+                  key={folderName}
+                  type="button"
+                  onClick={() => onAddLinkRows?.(links.map((link) => ({ label: link.label, path: link.path })))}
+                  className="rounded-full border border-emerald-200 bg-emerald-50 px-3 py-1.5 text-sm font-medium text-emerald-700 transition hover:bg-emerald-100"
+                >
+                  {folderName}
                 </button>
               ))}
             </div>
@@ -308,7 +405,7 @@ export function PlanBuilderWorkspace({
             </Button>
           </div>
 
-          <div className={`ag-theme-quartz ${isFullscreen ? 'h-[calc(100vh-8rem)]' : 'h-96 sm:h-105'} w-full`}>
+          <div className={`ag-theme-quartz ${isFullscreen ? 'h-full' : 'h-96 sm:h-105'} w-full`}>
             <AgGridReact<PlanGridRow>
               key={activeTab?.id}
               rowData={activeRows}

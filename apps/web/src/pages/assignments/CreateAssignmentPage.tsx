@@ -213,8 +213,8 @@ export function CreateAssignmentPage() {
     }
 
     const workbook = new ExcelJS.Workbook()
-    workbook.creator = 'Gym Pilot'
-    workbook.lastModifiedBy = 'Gym Pilot'
+    workbook.creator = 'GymPilot'
+    workbook.lastModifiedBy = 'GymPilot'
     workbook.created = new Date()
     workbook.modified = new Date()
 

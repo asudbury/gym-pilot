@@ -7,6 +7,8 @@ export interface PlanGridRow {
   reps: string
   workingSets: string
   notes: string
+  linkLabel?: string
+  linkUrl?: string
   [key: string]: string | undefined
 }
 
@@ -30,6 +32,18 @@ export function createBlankRow(exerciseId = ''): PlanGridRow {
   }
 }
 
+export function createLinkRow(linkLabel = '', linkUrl = ''): PlanGridRow {
+  return {
+    id: createId(),
+    exerciseId: '',
+    reps: '',
+    workingSets: '',
+    notes: '',
+    linkLabel,
+    linkUrl,
+  }
+}
+
 export function createBlankTab(title: string): PlanTab {
   return {
     id: createId(),
@@ -43,18 +57,22 @@ export function buildPlanSessionsFromTabs(tabs: PlanTab[]): PlanSession[] {
     id: tab.id,
     title: tab.title.trim() || `Day ${index + 1}`,
     planItems: tab.rows
-      .filter((row) => row.exerciseId)
+      .filter((row) => row.exerciseId || row.linkUrl)
       .map((row) => {
         const exercise = exercises.find((item) => item.id === row.exerciseId)
+        const linkLabel = row.linkLabel?.trim()
+        const linkUrl = row.linkUrl?.trim()
 
         return {
-          id: row.exerciseId,
-          name: exercise?.name ?? row.exerciseId,
+          id: row.exerciseId || row.id,
+          name: exercise?.name ?? linkLabel ?? row.exerciseId ?? 'Link',
           exercise_id: row.exerciseId,
-          exercise_name: exercise?.name ?? row.exerciseId,
+          exercise_name: exercise?.name ?? linkLabel ?? row.exerciseId ?? 'Link',
           reps: row.reps ?? '',
           workingSets: row.workingSets ?? '',
-          notes: row.notes ?? '',
+          notes: linkUrl || (row.notes ?? ''),
+          link_label: linkLabel || undefined,
+          link_url: linkUrl || undefined,
         }
       }),
   }))
@@ -68,6 +86,14 @@ export function buildTabsFromSessions(sessions: PlanSession[] | undefined): Plan
   return sessions.map((session, index) => {
     const tab = createBlankTab(session.title?.trim() || `Day ${index + 1}`)
     tab.rows = (session.planItems ?? []).map((item) => {
+      if (item.link_url || item.link_label) {
+        const row = createLinkRow(item.link_label || item.exercise_name || 'Link', item.link_url || item.notes || '')
+        row.notes = item.notes ?? ''
+        row.reps = item.reps ?? ''
+        row.workingSets = item.workingSets ?? ''
+        return row
+      }
+
       const row = createBlankRow(item.exercise_id || item.id)
       row.notes = item.notes ?? ''
       row.reps = item.reps ?? ''

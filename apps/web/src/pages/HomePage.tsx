@@ -101,11 +101,10 @@ export function HomePage({ filters, onFiltersChange, onToggleFavoriteExercise, i
   }, [])
 
   const handleCopyUrl = async (exerciseId: string) => {
-
     logger.debug(`Copying URL for exercise: ${exerciseId}`)
-    
+
     try {
-      copyExerciseLinkToClipboard(exerciseId)
+      await copyExerciseLinkToClipboard(exerciseId)
       setCopiedId(exerciseId)
       window.setTimeout(() => setCopiedId((current) => (current === exerciseId ? null : current)), 1500)
     } catch {

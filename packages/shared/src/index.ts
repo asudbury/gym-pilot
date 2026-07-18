@@ -16,9 +16,11 @@ export {
 export {
   isSupabasePersistenceEnabled,
   loadSupabaseProfileName,
+  loadSupabaseApplicationName,
   listSupabaseProfiles,
   loadSupabaseProfileFlag,
   saveSupabaseProfileName,
+  saveSupabaseApplicationName,
   saveSupabaseProfileFlag,
   loadSupabaseJsonRecord,
   saveSupabaseJsonRecord,

@@ -14,6 +14,7 @@ import {
   buildTabsFromSessions,
   createBlankRow,
   createBlankTab,
+  createLinkRow,
   sanitizeSheetName,
   type PlanTab,
 } from '../../utils/planBuilderUtils'
@@ -43,6 +44,7 @@ export function CreatePlanPage() {
   }, [activeTabId, tabs])
 
   const [favoriteExerciseIds, setFavoriteExerciseIds] = useState<string[]>([])
+  const [favoriteLinks, setFavoriteLinks] = useState<Array<{ id: string; label: string; path: string; folder?: string }>>([])
 
   const favoriteExercises = useMemo(() => {
     const selectedExerciseIds = new Set(activeRows.filter((row) => row.exerciseId).map((row) => row.exerciseId))
@@ -53,12 +55,20 @@ export function CreatePlanPage() {
   useEffect(() => {
     let isActive = true
 
-    void loadJsonRecord<Array<{ path?: string }>>(FAVORITES_KEY, []).then((storedFavorites) => {
+    void loadJsonRecord<unknown>(FAVORITES_KEY, { favorites: [], folders: [] }).then((storedValue) => {
       if (!isActive) {
         return
       }
 
-      const favoritePaths = new Set((storedFavorites ?? []).filter((item) => typeof item?.path === 'string').map((item) => item.path))
+      const normalizedValue = storedValue && typeof storedValue === 'object'
+        ? storedValue as { favorites?: Array<{ id?: string; label?: string; path?: string; folder?: string }>; folders?: string[] }
+        : { favorites: [] as Array<{ id?: string; label?: string; path?: string; folder?: string }>, folders: [] as string[] }
+
+      const storedFavorites = Array.isArray(normalizedValue.favorites)
+        ? normalizedValue.favorites.filter((item): item is { id?: string; label?: string; path?: string; folder?: string } => Boolean(item && typeof item === 'object' && typeof item.path === 'string' && typeof item.label === 'string'))
+        : []
+
+      const favoritePaths = new Set(storedFavorites.filter((item) => typeof item?.path === 'string').map((item) => item.path))
       const selectedExerciseIds = new Set(activeRows.filter((row) => row.exerciseId).map((row) => row.exerciseId))
 
       const ids = exercises
@@ -66,6 +76,16 @@ export function CreatePlanPage() {
         .map((exercise) => exercise.id)
 
       setFavoriteExerciseIds(ids)
+      setFavoriteLinks(
+        storedFavorites
+          .filter((item): item is { id?: string; label: string; path: string; folder?: string } => typeof item?.path === 'string' && typeof item?.label === 'string')
+          .map((item) => ({
+            id: item.id || `${item.label}-${item.path}`,
+            label: item.label,
+            path: item.path,
+            folder: item.folder,
+          })),
+      )
     })
 
     return () => {
@@ -163,6 +183,33 @@ export function CreatePlanPage() {
     setSelectedExerciseName(exerciseName)
   }
 
+  const handleAddLinkRows = (links: Array<{ label: string; path: string }>) => {
+    if (!activeTabId) {
+      return
+    }
+
+    const normalizedLinks = links
+      .map((link) => ({ label: link.label.trim(), path: link.path.trim() }))
+      .filter((link) => link.label && link.path)
+
+    if (normalizedLinks.length === 0) {
+      return
+    }
+
+    setTabs((current) =>
+      current.map((tab) => {
+        if (tab.id !== activeTabId) {
+          return tab
+        }
+
+        return {
+          ...tab,
+          rows: [...tab.rows, ...normalizedLinks.map((link) => createLinkRow(link.label, link.path))],
+        }
+      }),
+    )
+  }
+
   const handleRemoveRow = (rowId: string) => {
     if (!activeTabId) {
       return
@@ -217,8 +264,8 @@ export function CreatePlanPage() {
     }
 
     const workbook = new ExcelJS.Workbook()
-    workbook.creator = 'Gym Pilot'
-    workbook.lastModifiedBy = 'Gym Pilot'
+    workbook.creator = 'GymPilot'
+    workbook.lastModifiedBy = 'GymPilot'
     workbook.created = new Date()
     workbook.modified = new Date()
 
@@ -297,6 +344,8 @@ export function CreatePlanPage() {
             onToggleFullscreen={() => setIsFullscreen((current) => !current)}
             onExportToExcel={handleExportToExcel}
             onExerciseSelection={handleExerciseSelection}
+            favoriteLinks={favoriteLinks}
+            onAddLinkRows={handleAddLinkRows}
             onSearchChange={(nextValue) => {
               setSelectedExerciseName(nextValue)
               if (!nextValue.trim()) {

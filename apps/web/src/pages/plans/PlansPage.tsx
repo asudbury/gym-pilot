@@ -11,17 +11,18 @@ export function PlansPage() {
   const { visiblePlans, deletePlan } = usePlan()
   const basePlans = visiblePlans
 
+  const description = 'Create a plan to assign to clients, or view and manage existing plans.'
+  
   return (
     <PageLayout>
       {basePlans.length === 0 ? (
         <PageCardLayout
           title="Plans"
           subtitle="Plans Dashboard"
-          description="Create a plan to track exercises and add notes for each one."
+          description={description}
         >
           <CallToAction
             title="Manage plans"
-            description="Create a plan to track exercises and add notes for each one."
             action={
               <Link to="/plans/new" className={getToneClass('blue', 'inline-flex items-center rounded-lg px-4 py-2 text-sm font-medium')}>
                 Create a new plan
@@ -33,7 +34,7 @@ export function PlansPage() {
         <PageCardLayout
           title="Plans"
           subtitle="Plans Dashboard"
-          description="Create a plan to track exercises and add notes for each one."
+          description={description}
         >
           <div className="flex justify-end">
             <Link to="/plans/new" className={getToneClass('blue', 'inline-flex items-center rounded-lg px-4 py-2 text-sm font-medium')}>

@@ -103,9 +103,9 @@ function ScrollToTop() {
 function App() {
   const { pathname, search } = useLocation()
   const navigate = useNavigate()
-  const { visiblePlans, visibleAssignments } = usePlan()
+  const { users, visiblePlans, visibleAssignments } = usePlan()
   const SHOW_AUTH_BUTTON = true
-  const { user, logout } = useAuth()
+  const { user, logout, showVersion } = useAuth()
   const appVersion = webPackageJson.version || '0.0.0'
   const [favorites, setFavorites] = useState<QuickLink[]>([])
   const [folders, setFolders] = useState<string[]>([])
@@ -234,6 +234,20 @@ useEffect(() => {
   }
 
   const plansCount = visiblePlans.length
+  const isTrainer = Boolean(
+    user && (user.role === 'trainer' || user.roles?.includes('trainer')),
+  )
+  const isClient = Boolean(
+    user && (user.role === 'client' || user.roles?.includes('client')),
+  )
+  const assignedTrainer = isClient && user?.trainerId
+    ? users.find((candidate) => candidate.id === user.trainerId)
+    : undefined
+  const appName = isTrainer
+    ? (user?.applicationName?.trim() || user?.name?.trim() || 'GymPilot')
+    : (assignedTrainer && (assignedTrainer.applicationName?.trim() || assignedTrainer.name?.trim())
+      ? (assignedTrainer.applicationName?.trim() || assignedTrainer.name?.trim())
+      : 'GymPilot')
   const desktopMenuItems = buildNavigationMenuItems({
     plansCount,
     assignmentsCount: visibleAssignments.length,
@@ -259,7 +273,9 @@ useEffect(() => {
     <div className="min-h-screen bg-slate-50 text-slate-900 transition-colors dark:bg-slate-950 dark:text-slate-100">
       <ScrollToTop />
       <Header
+        appName={appName}
         appVersion={appVersion}
+        showVersion={showVersion}
         favorites={favorites}
         homeFilters={homeFilters}
         desktopMenuItems={desktopMenuItems}

@@ -1,26 +1,30 @@
 import { createContext, useContext, useEffect, useMemo, useRef, useState, type ReactNode } from 'react'
 import type { User, UserRole } from '@gym-pilot/types'
-import { getSupabaseClient, loadJsonRecord, loadSupabaseProfileName, normalizeUserRoles, saveJsonRecord, saveSupabaseProfileName, signOutFromSupabase, usePlan } from '@gym-pilot/shared'
+import { getSupabaseClient, loadJsonRecord, loadSupabaseApplicationName, loadSupabaseProfileName, normalizeUserRoles, saveJsonRecord, saveSupabaseApplicationName, saveSupabaseProfileName, signOutFromSupabase, usePlan } from '@gym-pilot/shared'
 
 const SESSION_STORAGE_KEY = 'gym-pilot-auth-session'
 const BYPASS_STORAGE_KEY = 'gym-pilot-auth-bypass'
 const CURRENT_USER_ID_STORAGE_KEY = 'gym-pilot-current-user-id'
 const LOGOUT_PENDING_STORAGE_KEY = 'gym-pilot-auth-logout-pending'
 const THEME_STORAGE_KEY = 'gym-pilot-theme-preference'
+const SHOW_VERSION_STORAGE_KEY = 'gym-pilot-show-version'
 
-type AuthUser = Pick<User, 'id' | 'name' | 'slug' | 'role' | 'roles'> & { email?: string | null }
+type AuthUser = Pick<User, 'id' | 'name' | 'slug' | 'role' | 'roles' | 'trainerId' | 'applicationName'> & { email?: string | null }
 
 type AuthContextValue = {
   user: AuthUser | null
   isAuthenticated: boolean
   isBypassEnabled: boolean
   themePreference: 'light' | 'dark'
+  showVersion: boolean
   login: (userId: string) => boolean
   enableBypass: () => void
   disableBypass: () => void
   logout: () => void
   updateProfileName: (friendlyName: string) => Promise<void>
+  updateApplicationName: (applicationName: string) => Promise<void>
   setThemePreference: (theme: 'light' | 'dark') => void
+  setShowVersion: (show: boolean) => void
   hasAccess: (requiredRole: UserRole | UserRole[]) => boolean
 }
 
@@ -66,9 +70,10 @@ async function resolveSupabaseAuthUser(users: User[] = []): Promise<AuthUser | n
     }
 
     const storedProfileName = await loadSupabaseProfileName()
-    const displayName = storedProfileName || supabaseUser.user_metadata?.full_name || supabaseUser.user_metadata?.name || supabaseUser.email || 'Supabase user'
-    const slug = displayName.toLowerCase().trim().replace(/[^a-z0-9]+/g, '-') || 'supabase-user'
+    const storedApplicationName = await loadSupabaseApplicationName()
     const matchingProfileUser = users.find((user) => user.id === supabaseUser.id)
+    const displayName = storedProfileName || matchingProfileUser?.name || supabaseUser.user_metadata?.full_name || supabaseUser.user_metadata?.name || supabaseUser.email || 'Supabase user'
+    const slug = displayName.toLowerCase().trim().replace(/[^a-z0-9]+/g, '-') || 'supabase-user'
     const resolvedRoles = normalizeUserRoles(matchingProfileUser?.roles, matchingProfileUser?.role)
     const resolvedRole = (matchingProfileUser?.role ?? resolvedRoles[0] ?? 'client') as UserRole
 
@@ -76,10 +81,12 @@ async function resolveSupabaseAuthUser(users: User[] = []): Promise<AuthUser | n
 
     return {
       id: supabaseUser.id,
-      name: matchingProfileUser?.name || displayName,
+      name: displayName,
       slug: matchingProfileUser?.slug || slug,
       role: resolvedRole,
       roles: resolvedRoles,
+      trainerId: matchingProfileUser?.trainerId ?? null,
+      applicationName: storedApplicationName ?? matchingProfileUser?.applicationName ?? null,
       email: supabaseUser.email ?? null,
     }
   } catch (error) {
@@ -100,6 +107,14 @@ export function AuthProvider({ children }: AuthProviderProps) {
 
     const storedTheme = window.localStorage.getItem(THEME_STORAGE_KEY)
     return storedTheme === 'dark' ? 'dark' : 'light'
+  })
+  const [showVersion, setShowVersionState] = useState<boolean>(() => {
+    if (typeof window === 'undefined') {
+      return true
+    }
+
+    const storedShowVersion = window.localStorage.getItem(SHOW_VERSION_STORAGE_KEY)
+    return storedShowVersion === null ? true : storedShowVersion === 'true'
   })
 
   const sessionHydrated = useRef(false)
@@ -204,6 +219,14 @@ export function AuthProvider({ children }: AuthProviderProps) {
     window.localStorage.setItem(THEME_STORAGE_KEY, themePreference)
   }, [themePreference])
 
+  useEffect(() => {
+    if (typeof window === 'undefined') {
+      return
+    }
+
+    window.localStorage.setItem(SHOW_VERSION_STORAGE_KEY, showVersion ? 'true' : 'false')
+  }, [showVersion])
+
   const notifyAuthStateChanged = () => {
     window.dispatchEvent(new Event('gym-pilot-auth-updated'))
   }
@@ -226,6 +249,8 @@ export function AuthProvider({ children }: AuthProviderProps) {
       slug: selectedUser.slug,
       role: selectedUser.role ?? (selectedUser.roles[0] ?? 'client'),
       roles: selectedUser.roles,
+      trainerId: selectedUser.trainerId ?? null,
+      applicationName: selectedUser.applicationName ?? null,
       email: null,
     })
 
@@ -244,6 +269,8 @@ export function AuthProvider({ children }: AuthProviderProps) {
       slug: 'mvp-admin',
       role: 'admin',
       roles: ['admin'],
+      trainerId: null,
+      applicationName: null,
       email: null,
     })
   }
@@ -278,7 +305,7 @@ export function AuthProvider({ children }: AuthProviderProps) {
       return
     }
 
-    const nextName = trimmedName || user.name
+    const nextName = trimmedName
     const slug = nextName.toLowerCase().trim().replace(/[^a-z0-9]+/g, '-') || 'user'
 
     setUser((currentUser) => {
@@ -293,11 +320,38 @@ export function AuthProvider({ children }: AuthProviderProps) {
       }
     })
 
-    await saveSupabaseProfileName(nextName)
+    await saveSupabaseProfileName(nextName || null)
+    notifyAuthStateChanged()
+  }
+
+  const updateApplicationName = async (applicationName: string) => {
+    const trimmedName = applicationName.trim()
+
+    if (!user) {
+      return
+    }
+
+    setUser((currentUser) => {
+      if (!currentUser) {
+        return currentUser
+      }
+
+      return {
+        ...currentUser,
+        applicationName: trimmedName || null,
+      }
+    })
+
+    await saveSupabaseApplicationName(trimmedName || null)
+    notifyAuthStateChanged()
   }
 
   const setThemePreference = (theme: 'light' | 'dark') => {
     setThemePreferenceState(theme)
+  }
+
+  const setShowVersion = (show: boolean) => {
+    setShowVersionState(show)
   }
 
   const hasAccess = (requiredRole: UserRole | UserRole[]) => {
@@ -332,15 +386,18 @@ export function AuthProvider({ children }: AuthProviderProps) {
       isAuthenticated: isBypassEnabled || Boolean(user),
       isBypassEnabled,
       themePreference,
+      showVersion,
       login,
       enableBypass,
       disableBypass,
       logout,
       updateProfileName,
+      updateApplicationName,
       setThemePreference,
+      setShowVersion,
       hasAccess,
     }),
-    [user, isBypassEnabled, users],
+    [user, isBypassEnabled, themePreference, showVersion, users],
   )
 
   return (

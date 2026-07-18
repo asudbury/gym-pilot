@@ -1,14 +1,13 @@
 import { NavLink } from 'react-router-dom'
 import { FavouriteLinksMenu } from './FavouriteLinksMenu'
 import { NavigationMenuList } from './NavigationMenuList'
-import type { NavigationMenuListItem } from '../../utils/navigationUtils'
-import { ResponsiveVisibility } from '../ResponsiveVisibility'
-import { getToneClass } from '../toneClasses'
+import type { NavigationMenuListItem } from '../utils/navigationUtils'
+import { ResponsiveVisibility } from './ResponsiveVisibility'
+import { getToneClass } from './toneClasses'
 
 type HeaderProps = {
   appName: string
   appVersion: string
-  showVersion: boolean
   favorites: Array<{ id: string; label: string; path: string }>
   folders: string[]
   homeFilters: {
@@ -32,7 +31,6 @@ type HeaderProps = {
 export function Header({
   appName,
   appVersion,
-  showVersion,
   favorites,
   homeFilters,
   desktopMenuItems,
@@ -62,12 +60,11 @@ export function Header({
       <div className="mx-auto flex h-full max-w-6xl items-center justify-between px-4 sm:px-6 lg:px-8">
         <div className="flex flex-col">
           <NavLink to="/" className="text-lg font-semibold text-slate-900 transition-colors dark:text-slate-100">
-            <span>{appName}</span>
-            {showVersion ? (
-              <span className="ml-2 text-[11px] font-medium tracking-[0.2em] text-slate-500">
-                {`(v${appVersion})`}
-              </span>
-            ) : null}
+            {appName}
+            {' '}
+            <span className="text-[11px] font-medium tracking-[0.2em] text-slate-500">
+              {`(v${appVersion})`}
+            </span>
           </NavLink>
           {showUserBadge ? (
                 <div>

@@ -1,7 +1,5 @@
 import { useMemo, useState } from 'react'
 import { useParams } from 'react-router-dom'
-import { Button } from '../components/Button'
-import { getToneClass } from '../components/toneClasses'
 import { ExerciseImage } from '../components/exercises/ExerciseImage'
 import { ExerciseSteps } from '../components/exercises/ExerciseSteps'
 import { YouTubeExerciseSearchButton } from '../components/exercises/YouTubeExerciseSearchButton'
@@ -14,6 +12,7 @@ import { Heading1, Paragraph } from '../components/Typography'
 import { ExerciseMetaBadges } from '../components/exercises/ExerciseMetaBadges'
 import { formatLabel } from '../utils/formatUtils'
 import { logger } from '../utils/loggingUtils'
+import { copyExerciseLinkToClipboard } from '../utils/navigationUtils'
 
 type ExercisePageProps = {
   onToggleFavoriteExercise?: (exerciseId: string) => void
@@ -41,7 +40,11 @@ export function ExercisePage({ onToggleFavoriteExercise, isExerciseFavorite }: E
 
   const handleCopyUrl = async () => {
     try {
-      await navigator.clipboard.writeText(window.location.href)
+      if (!exercise?.id) {
+        return
+      }
+
+      await copyExerciseLinkToClipboard(exercise.id)
       setCopied(true)
       window.setTimeout(() => setCopied(false), 1500)
     } catch {
@@ -86,13 +89,21 @@ export function ExercisePage({ onToggleFavoriteExercise, isExerciseFavorite }: E
           <button
             type="button"
             onClick={handleOpenFavouritePicker}
-            className={getToneClass(isExerciseFavorite?.(exercise.id) ? 'blue' : 'default', 'cursor-pointer px-4 py-2 text-sm font-medium')}
+            className={isExerciseFavorite?.(exercise.id)
+              ? 'cursor-pointer rounded-full bg-emerald-600 px-4 py-2 text-sm font-medium text-white'
+              : 'cursor-pointer rounded-full bg-slate-100 px-4 py-2 text-sm font-medium text-slate-700 transition-colors dark:bg-slate-800 dark:text-slate-100'}
           >
             {isExerciseFavorite?.(exercise.id) ? 'Manage favourite' : 'Add to Favourites'}
           </button>
-          <Button tone="default" onClick={handleCopyUrl} className="px-4 py-2">
+          <button
+            type="button"
+            onClick={handleCopyUrl}
+            className={copied
+              ? 'cursor-pointer rounded-full bg-emerald-600 px-4 py-2 text-sm font-medium text-white'
+              : 'cursor-pointer rounded-full bg-slate-100 px-4 py-2 text-sm font-medium text-slate-700 transition-colors dark:bg-slate-800 dark:text-slate-100'}
+          >
             {copied ? 'Copied!' : 'Copy URL'}
-          </Button>
+          </button>
         </PageActionGroup>
       </PageCard>
     </PageLayout>

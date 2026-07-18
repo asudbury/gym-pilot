@@ -91,6 +91,7 @@ function mapSupabaseProfile(profile: {
   id: string
   user_id: string
   friendly_name: string | null
+  application_name?: string | null
   roles?: unknown
   trainer_id?: string | null
   must_change_password: boolean
@@ -101,6 +102,7 @@ function mapSupabaseProfile(profile: {
     id: profile.id,
     user_id: profile.user_id,
     friendly_name: typeof profile.friendly_name === 'string' ? profile.friendly_name : null,
+    application_name: typeof profile.application_name === 'string' ? profile.application_name : null,
     roles: normalizeProfileRoles(profile.roles),
     trainer_id: typeof profile.trainer_id === 'string' ? profile.trainer_id : null,
     must_change_password: Boolean(profile.must_change_password),
@@ -141,6 +143,7 @@ export type SupabaseProfile = {
   id: string
   user_id: string
   friendly_name: string | null
+  application_name: string | null
   roles: UserRole[]
   trainer_id: string | null
   must_change_password: boolean
@@ -175,6 +178,33 @@ export async function loadSupabaseProfileName(): Promise<string | null> {
   return data?.friendly_name?.trim() || null
 }
 
+export async function loadSupabaseApplicationName(): Promise<string | null> {
+  const client = getSupabaseClient()
+
+  if (!client) {
+    return null
+  }
+
+  const userId = await getAuthenticatedUserId(client)
+
+  if (!userId) {
+    return null
+  }
+
+  const { data, error } = await client
+    .from('gym_pilot_profiles')
+    .select('application_name')
+    .eq('user_id', userId)
+    .maybeSingle()
+
+  if (error) {
+    console.error('[Supabase] Could not load application name', error)
+    return null
+  }
+
+  return data?.application_name?.trim() || null
+}
+
 export async function listSupabaseProfiles(): Promise<SupabaseProfile[]> {
   const client = getSupabaseClient()
 
@@ -190,12 +220,12 @@ export async function listSupabaseProfiles(): Promise<SupabaseProfile[]> {
 
   const { data, error } = await client
     .from('gym_pilot_profiles')
-    .select('id, user_id, friendly_name, roles, trainer_id, must_change_password, created_at, updated_at')
+    .select('id, user_id, friendly_name, application_name, roles, trainer_id, must_change_password, created_at, updated_at')
 
   if (error && isMissingTrainerColumnError(error)) {
     const fallback = await client
       .from('gym_pilot_profiles')
-      .select('id, user_id, friendly_name, roles, must_change_password, created_at, updated_at')
+      .select('id, user_id, friendly_name, application_name, roles, must_change_password, created_at, updated_at')
 
     if (fallback.error) {
       console.error('[Supabase] Could not load profiles', fallback.error)
@@ -230,13 +260,13 @@ export async function listSupabaseProfiles(): Promise<SupabaseProfile[]> {
 
   if (!profiles.some((profile) => profile.user_id === userId)) {
     const { error: upsertError } = await client.from('gym_pilot_profiles').upsert(
-      { user_id: userId, friendly_name: null, roles: ['client'], trainer_id: null, must_change_password: false },
+      { user_id: userId, friendly_name: null, application_name: null, roles: ['client'], trainer_id: null, must_change_password: false },
       { onConflict: 'user_id' },
     )
 
     if (upsertError && isMissingTrainerColumnError(upsertError)) {
       const fallback = await client.from('gym_pilot_profiles').upsert(
-        { user_id: userId, friendly_name: null, roles: ['client'], must_change_password: false },
+        { user_id: userId, friendly_name: null, application_name: null, roles: ['client'], must_change_password: false },
         { onConflict: 'user_id' },
       )
 
@@ -251,7 +281,7 @@ export async function listSupabaseProfiles(): Promise<SupabaseProfile[]> {
 
     const { data: refreshedData, error: refreshError } = await client
       .from('gym_pilot_profiles')
-      .select('id, user_id, friendly_name, roles, trainer_id, must_change_password, created_at, updated_at')
+      .select('id, user_id, friendly_name, application_name, roles, trainer_id, must_change_password, created_at, updated_at')
 
     if (refreshError) {
       console.error('[Supabase] Could not reload profiles after creating the current user row', refreshError)
@@ -262,6 +292,7 @@ export async function listSupabaseProfiles(): Promise<SupabaseProfile[]> {
       id: profile.id,
       user_id: profile.user_id,
       friendly_name: typeof profile.friendly_name === 'string' ? profile.friendly_name : null,
+      application_name: typeof profile.application_name === 'string' ? profile.application_name : null,
       roles: profile.roles,
       trainer_id: typeof profile.trainer_id === 'string' ? profile.trainer_id : null,
       must_change_password: Boolean(profile.must_change_password),
@@ -322,6 +353,31 @@ export async function saveSupabaseProfileName(friendlyName: string | null) {
 
   if (error) {
     console.error('[Supabase] Could not save profile name', error)
+  }
+}
+
+export async function saveSupabaseApplicationName(applicationName: string | null) {
+  const client = getSupabaseClient()
+
+  if (!client) {
+    return
+  }
+
+  const userId = await getAuthenticatedUserId(client)
+
+  if (!userId) {
+    return
+  }
+
+  const normalizedName = applicationName?.trim() ? applicationName.trim() : null
+
+  const { error } = await client.from('gym_pilot_profiles').upsert(
+    { user_id: userId, application_name: normalizedName },
+    { onConflict: 'user_id' },
+  )
+
+  if (error) {
+    console.error('[Supabase] Could not save application name', error)
   }
 }
 

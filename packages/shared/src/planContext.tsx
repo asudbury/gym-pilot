@@ -408,6 +408,7 @@ export function PlanProvider({ children, storageKey = PLANS_KEY }: PlanProviderP
           role: (roles[0] ?? 'client') as UserRole,
           roles,
           trainerId: profile.trainer_id ?? null,
+          applicationName: profile.application_name?.trim() || null,
         }
       })
 

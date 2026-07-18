@@ -1,8 +1,8 @@
 import { useEffect, useMemo, useState } from 'react'
 import { useLocation, useNavigate } from 'react-router-dom'
-import { getToneClass } from '../toneClasses'
+import { getToneClass } from './toneClasses'
 import { classNames, exercises, exercisesSchema } from '@gym-pilot/shared'
-import { getQuickLinkForPath, groupFavoritesByFolder, normalizeFolderName, sortFavorites, type QuickLink } from '../../utils/favouriteUtils'
+import { getQuickLinkForPath, groupFavoritesByFolder, normalizeFolderName, sortFavorites, type QuickLink } from '../utils/favouriteUtils'
 
 type SavedSearch = {
   id: string
@@ -209,7 +209,7 @@ export function FavouriteLinksMenu({
 
   const triggerClassName = classNames(
     variant === 'header'
-      ? getToneClass('default', 'w-full px-4 py-2 text-left text-sm font-medium')
+      ? getToneClass('blue', 'w-full px-4 py-2 text-left text-sm font-medium')
       : classNames(
         'w-full cursor-pointer rounded-xl px-3 py-2 text-left text-sm font-medium transition',
         menuOpen ? 'bg-slate-900 text-white' : 'text-slate-700 hover:bg-slate-50',
@@ -232,6 +232,7 @@ export function FavouriteLinksMenu({
             <div className="flex items-start justify-between gap-2">
               <div className="min-w-0">
                 <p className="text-sm font-semibold text-slate-900">Manage favourites</p>
+                <p className="mt-1 text-xs text-slate-500">Quick links for pages you use most often.</p>
               </div>
               <div className="flex flex-col gap-2 sm:items-end">
                 <label className="text-[11px] font-semibold uppercase tracking-wide text-slate-500">
@@ -241,7 +242,7 @@ export function FavouriteLinksMenu({
                     onChange={(event) => setSelectedFolder(event.target.value)}
                     className="rounded-lg border border-slate-200 bg-white px-2.5 py-1.5 text-xs text-slate-700"
                   >
-                    <option value="">Select folder</option>
+                    <option value="">No folder</option>
                     {folderOptions.map((folderOption) => (
                       <option key={folderOption} value={folderOption}>
                         {folderOption}
@@ -249,20 +250,35 @@ export function FavouriteLinksMenu({
                     ))}
                   </select>
                 </label>
+                <div className="flex items-center gap-1">
+                  <input
+                    value={newFolderName}
+                    onChange={(event) => setNewFolderName(event.target.value)}
+                    placeholder="New folder"
+                    className="w-24 rounded-lg border border-slate-200 bg-white px-2 py-1.5 text-xs text-slate-700 outline-none"
+                  />
+                  <button
+                    type="button"
+                    onClick={handleCreateFolder}
+                    className="rounded-lg border border-slate-200 bg-white px-2 py-1.5 text-[11px] font-medium text-slate-700"
+                  >
+                    Add
+                  </button>
+                </div>
                 <button
                   type="button"
                   onClick={handleToggleCurrentFavorite}
-                  className={getToneClass('blue', 'cursor-pointer px-3 py-1.5 text-xs font-medium')}
+                  className={getToneClass('default', 'cursor-pointer px-3 py-1.5 text-xs font-medium')}
                 >
-                  Add to favourites
+                  {isCurrentPageFavorite ? 'Update' : 'Add to favorites'}
                 </button>
               </div>
             </div>
             <button
               type="button"
               onClick={handleOpenFavouritesPage}
-              className={getToneClass('default', 'w-fit cursor-pointer px-3 py-2 text-xs font-medium')}
-              >
+              className={getToneClass('blue', 'w-fit cursor-pointer px-3 py-2 text-xs font-medium')}
+            >
               Open favourites page
             </button>
           </div>
@@ -295,8 +311,6 @@ export function FavouriteLinksMenu({
                 </div>
               ))}
             </div>
-          ) : (
-            null
           )}
         </div>
       )}
