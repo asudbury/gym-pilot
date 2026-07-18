@@ -13,7 +13,7 @@
   },
   "dependencies": {
     "@gym-pilot/shared": "^1.0.0",
-    "ag-grid-community": "^36.0.0",
+    "ag-grid-community": "^36.0.1",
     "ag-grid-react": "^36.0.0",
     "exceljs": "^4.1.1",
     "react": "^19.2.7",
