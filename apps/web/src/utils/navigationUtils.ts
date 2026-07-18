@@ -54,6 +54,12 @@ export function buildNavigationMenuItems({
           onClick: onItemClick,
           className: itemClassName,
         },
+        {
+          to: '/timetable',
+          label: 'Timetable',
+          onClick: onItemClick,
+          className: itemClassName,
+        },
       ]
     : []
 

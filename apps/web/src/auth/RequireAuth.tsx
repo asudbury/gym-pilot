@@ -6,10 +6,11 @@ import { AUTH_PROTECTION_ENABLED } from './config'
 
 type RequireAuthProps = {
   requiredRole?: UserRole | UserRole[]
+  requireClubId?: boolean
 }
 
-export function RequireAuth({ requiredRole }: RequireAuthProps) {
-  const { isAuthenticated, hasAccess } = useAuth()
+export function RequireAuth({ requiredRole, requireClubId = false }: RequireAuthProps) {
+  const { isAuthenticated, hasAccess, user } = useAuth()
   const location = useLocation()
 
   if (!AUTH_PROTECTION_ENABLED) {
@@ -26,6 +27,14 @@ export function RequireAuth({ requiredRole }: RequireAuthProps) {
 
   if (requiredRole && !hasAccess(requiredRole)) {
     return <Navigate to="/" replace />
+  }
+
+  if (requireClubId) {
+    const hasStoredClubId = Boolean(user?.gymName?.trim())
+
+    if (!hasStoredClubId) {
+      return <Navigate to="/" replace />
+    }
   }
 
   return <Outlet />

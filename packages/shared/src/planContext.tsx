@@ -409,6 +409,8 @@ export function PlanProvider({ children, storageKey = PLANS_KEY }: PlanProviderP
           roles,
           trainerId: profile.trainer_id ?? null,
           applicationName: profile.application_name?.trim() || null,
+          gymBrand: profile.gym_brand?.trim() || null,
+          gymName: profile.gym_name?.trim() || null,
         }
       })
 
@@ -659,6 +661,9 @@ export function PlanProvider({ children, storageKey = PLANS_KEY }: PlanProviderP
       role: primaryRole,
       roles: resolvedRoles,
       trainerId: isClientUser ? trainerId ?? null : null,
+      applicationName: null,
+      gymBrand: null,
+      gymName: null,
     }
 
     setUsers((current) => [...current, nextUser])

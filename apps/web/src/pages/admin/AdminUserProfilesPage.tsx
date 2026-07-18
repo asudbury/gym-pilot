@@ -4,11 +4,14 @@ import { Button } from '../../components/Button'
 import { getSupabaseClient, listSupabaseAuthUsers, usePlan } from '@gym-pilot/shared'
 import type { UserRole } from '@gym-pilot/types'
 import { AdminSectionShell } from '../../components/admin/AdminSectionShell'
+import { GymClubSelector } from '../../components/GymClubSelector'
 import { availableAdminRoles, getDisplayEmail, getDisplayRoles, type AdminProfileRow } from '../../utils/adminUtils'
 
 type ProfileDraft = {
   name: string
   applicationName: string
+  gymBrand: string
+  gymName: string
   showVersion: boolean
   roles: UserRole[]
   trainerId: string | null
@@ -53,7 +56,7 @@ export function AdminUserProfilesPage() {
 
     const { data, error } = await client
       .from('gym_pilot_profiles')
-      .select('user_id, friendly_name, roles, trainer_id, application_name, must_change_password, last_logged_in_at, previous_last_logged_in_at')
+      .select('user_id, friendly_name, roles, trainer_id, application_name, gym_brand, gym_name, gym_club_id, must_change_password, last_logged_in_at, previous_last_logged_in_at')
 
     if (error) {
       console.error('[AdminUserProfiles] Could not load profile rows', error)
@@ -69,6 +72,8 @@ export function AdminUserProfilesPage() {
       name: typeof row.friendly_name === 'string' && row.friendly_name.trim() ? row.friendly_name.trim() : row.user_id,
       roles: getDisplayRoles(row.roles),
       applicationName: typeof row.application_name === 'string' ? row.application_name : null,
+      gymBrand: typeof row.gym_brand === 'string' ? row.gym_brand : null,
+      gymName: typeof row.gym_club_id === 'number' ? String(row.gym_club_id) : (typeof row.gym_name === 'string' ? row.gym_name : null),
       email: emailLookup.get(row.user_id) ?? null,
       trainerId: typeof row.trainer_id === 'string' ? row.trainer_id : null,
       mustChangePassword: Boolean(row.must_change_password),
@@ -84,6 +89,8 @@ export function AdminUserProfilesPage() {
         nextDrafts[row.id] = {
           name: row.name,
           applicationName: row.applicationName ?? '',
+          gymBrand: row.gymBrand ?? '',
+          gymName: row.gymName ?? '',
           showVersion: true,
           roles: [...row.roles],
           trainerId: row.trainerId ?? null,
@@ -125,6 +132,8 @@ export function AdminUserProfilesPage() {
       [profileId]: {
         name: current[profileId]?.name ?? '',
         applicationName: current[profileId]?.applicationName ?? '',
+        gymBrand: current[profileId]?.gymBrand ?? '',
+        gymName: current[profileId]?.gymName ?? '',
         showVersion: current[profileId]?.showVersion ?? true,
         roles: current[profileId]?.roles ?? [],
         trainerId: current[profileId]?.trainerId ?? null,
@@ -160,6 +169,9 @@ export function AdminUserProfilesPage() {
         user_id: profile.id,
         friendly_name: trimmedName,
         application_name: draft.applicationName.trim() || null,
+        gym_brand: draft.gymBrand.trim() || null,
+        gym_name: draft.gymName.trim() || null,
+        gym_club_id: draft.gymName.trim() && /^\d+$/.test(draft.gymName.trim()) ? Number(draft.gymName.trim()) : null,
         roles: draft.roles,
         trainer_id: draft.trainerId ?? null,
         must_change_password: draft.mustChangePassword,
@@ -173,6 +185,9 @@ export function AdminUserProfilesPage() {
             user_id: profile.id,
             friendly_name: trimmedName,
             application_name: draft.applicationName.trim() || null,
+            gym_brand: draft.gymBrand.trim() || null,
+            gym_name: draft.gymName.trim() || null,
+            gym_club_id: draft.gymName.trim() && /^\d+$/.test(draft.gymName.trim()) ? Number(draft.gymName.trim()) : null,
             roles: draft.roles,
             must_change_password: draft.mustChangePassword,
           },
@@ -279,6 +294,37 @@ export function AdminUserProfilesPage() {
                               placeholder="Enter a custom app name"
                               className="mt-1 w-full rounded-full border border-slate-200 bg-white px-3 py-2 text-sm text-slate-700"
                             />
+                          </label>
+
+                          <label className="mt-3 block text-sm font-medium text-slate-700">
+                            Gym brand
+                            <select
+                              value={draft?.gymBrand ?? ''}
+                              onChange={(event) => {
+                                const nextBrand = event.target.value
+                                updateDraft(profile.id, {
+                                  gymBrand: nextBrand,
+                                  gymName: nextBrand.trim().toLowerCase() === 'virgin' ? draft?.gymName ?? '' : '',
+                                })
+                              }}
+                              className="mt-1 w-full rounded-full border border-slate-200 bg-white px-3 py-2 text-sm text-slate-700"
+                            >
+                              <option value="">Select a brand</option>
+                              <option value="Virgin">Virgin</option>
+                            </select>
+                          </label>
+
+                          <label className="mt-3 block text-sm font-medium text-slate-700">
+                            Gym name
+                            <div className="mt-1">
+                              <GymClubSelector
+                                value={draft?.gymName ?? ''}
+                                onChange={(nextValue) => updateDraft(profile.id, { gymName: nextValue })}
+                                placeholder="Start typing a club name"
+                                className="w-full rounded-full border border-slate-200 bg-white px-3 py-2 text-sm text-slate-700"
+                                disabled={(draft?.gymBrand ?? '').trim().toLowerCase() !== 'virgin'}
+                              />
+                            </div>
                           </label>
 
                           <div className="mt-3 rounded-2xl border border-slate-200 bg-white p-3">

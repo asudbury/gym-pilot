@@ -8,6 +8,8 @@ export type AdminProfileRow = {
   roles: UserRole[]
   email?: string | null
   trainerId?: string | null
+  gymBrand?: string | null
+  gymName?: string | null
   mustChangePassword: boolean
   lastLoggedInAt?: string | null
   previousLastLoggedInAt?: string | null
@@ -57,6 +59,8 @@ export function mapAdminProfileRows(rows: Array<{
   roles?: unknown
   trainer_id?: string | null
   application_name?: string | null
+  gym_brand?: string | null
+  gym_name?: string | null
   must_change_password?: boolean
   last_logged_in_at?: string | null
   previous_last_logged_in_at?: string | null
@@ -66,6 +70,8 @@ export function mapAdminProfileRows(rows: Array<{
     name: typeof row.friendly_name === 'string' && row.friendly_name.trim() ? row.friendly_name.trim() : row.user_id,
     roles: getDisplayRoles(Array.isArray(row.roles) ? row.roles : undefined),
     applicationName: typeof row.application_name === 'string' ? row.application_name : null,
+    gymBrand: typeof row.gym_brand === 'string' ? row.gym_brand : null,
+    gymName: typeof row.gym_name === 'string' ? row.gym_name : null,
     email: emailLookup.get(row.user_id) ?? null,
     trainerId: typeof row.trainer_id === 'string' ? row.trainer_id : null,
     mustChangePassword: Boolean(row.must_change_password),

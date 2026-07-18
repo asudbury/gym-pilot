@@ -29,6 +29,7 @@ import { AdminPreferencesPage } from './pages/admin/AdminPreferencesPage'
 import { HelpPage } from './pages/help/HelpPage'
 import { FavouritesPage } from './pages/FavouritesPage'
 import { DashboardPage } from './pages/DashboardPage'
+import { TimetablePage } from './pages/TimetablePage'
 import { buildNavigationMenuItems } from './utils/navigationUtils'
 import { AssignmentDetailPage } from './pages/assignments/AssignmentDetailPage'
 import { logger } from './utils/loggingUtils'
@@ -255,6 +256,9 @@ useEffect(() => {
           <Route element={<RequireAuth />}>
             <Route path="/exercises" element={<HomePage filters={homeFilters} onFiltersChange={setHomeFilters} onToggleFavoriteExercise={handleToggleFavoriteExercise} isExerciseFavorite={isExerciseFavorite} />} />
             <Route path="/plans" element={<PlansPage />} />
+            <Route element={<RequireAuth requireClubId />}> 
+              <Route path="/timetable" element={<TimetablePage />} />
+            </Route>
             <Route path="/assignments" element={<AssignmentsPage />} />
             <Route path="/users/:userSlug/assignments" element={<AssignmentsPage />} />
             <Route path="/users/:userSlug/assignments/create" element={<AssignmentsManagerPage />} />

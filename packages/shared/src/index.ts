@@ -15,13 +15,18 @@ export {
 } from './supabase'
 export {
   isSupabasePersistenceEnabled,
+  loadSupabaseProfileSnapshot,
   loadSupabaseProfileName,
   loadSupabaseApplicationName,
+  loadSupabaseGymBrand,
+  loadSupabaseGymName,
   loadSupabaseProfileLoginHistory,
   listSupabaseProfiles,
   loadSupabaseProfileFlag,
   saveSupabaseProfileName,
   saveSupabaseApplicationName,
+  saveSupabaseGymBrand,
+  saveSupabaseGymName,
   saveSupabaseProfileFlag,
   saveSupabaseProfileLastLoggedIn,
   loadSupabaseJsonRecord,

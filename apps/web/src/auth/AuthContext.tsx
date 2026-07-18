@@ -1,6 +1,6 @@
 import { createContext, useContext, useEffect, useMemo, useRef, useState, type ReactNode } from 'react'
 import type { User, UserRole } from '@gym-pilot/types'
-import { getSupabaseClient, loadJsonRecord, loadSupabaseApplicationName, loadSupabaseProfileLoginHistory, loadSupabaseProfileName, normalizeUserRoles, recordSupabaseUserActivity, saveJsonRecord, saveSupabaseApplicationName, saveSupabaseProfileName, saveSupabaseProfileLastLoggedIn, signOutFromSupabase, usePlan } from '@gym-pilot/shared'
+import { getSupabaseClient, loadJsonRecord, loadSupabaseProfileSnapshot, normalizeUserRoles, recordSupabaseUserActivity, saveJsonRecord, saveSupabaseApplicationName, saveSupabaseGymBrand, saveSupabaseGymName, saveSupabaseProfileName, saveSupabaseProfileLastLoggedIn, signOutFromSupabase, usePlan } from '@gym-pilot/shared'
 import { getHashHomeUrl } from '../utils/appUtils'
 
 const SESSION_STORAGE_KEY = 'gym-pilot-auth-session'
@@ -10,7 +10,7 @@ const LOGOUT_PENDING_STORAGE_KEY = 'gym-pilot-auth-logout-pending'
 const THEME_STORAGE_KEY = 'gym-pilot-theme-preference'
 const SHOW_VERSION_STORAGE_KEY = 'gym-pilot-show-version'
 
-type AuthUser = Pick<User, 'id' | 'name' | 'slug' | 'role' | 'roles' | 'trainerId' | 'applicationName'> & {
+type AuthUser = Pick<User, 'id' | 'name' | 'slug' | 'role' | 'roles' | 'trainerId' | 'applicationName' | 'gymBrand' | 'gymName'> & {
   email?: string | null
   lastLoggedInAt?: string | null
   previousLastLoggedInAt?: string | null
@@ -28,6 +28,8 @@ type AuthContextValue = {
   logout: () => void
   updateProfileName: (friendlyName: string) => Promise<void>
   updateApplicationName: (applicationName: string) => Promise<void>
+  updateGymBrand: (gymBrand: string) => Promise<void>
+  updateGymName: (gymName: string, gymBrand?: string | null) => Promise<void>
   setThemePreference: (theme: 'light' | 'dark') => void
   setShowVersion: (show: boolean) => void
   hasAccess: (requiredRole: UserRole | UserRole[]) => boolean
@@ -74,10 +76,9 @@ async function resolveSupabaseAuthUser(users: User[] = []): Promise<AuthUser | n
       return null
     }
 
-    const storedProfileName = await loadSupabaseProfileName()
-    const storedApplicationName = await loadSupabaseApplicationName()
+    const profileSnapshot = await loadSupabaseProfileSnapshot(supabaseUser.id)
     const matchingProfileUser = users.find((user) => user.id === supabaseUser.id)
-    const displayName = storedProfileName || matchingProfileUser?.name || supabaseUser.user_metadata?.full_name || supabaseUser.user_metadata?.name || supabaseUser.email || 'Supabase user'
+    const displayName = profileSnapshot.friendlyName || matchingProfileUser?.name || supabaseUser.user_metadata?.full_name || supabaseUser.user_metadata?.name || supabaseUser.email || 'Supabase user'
     const slug = displayName.toLowerCase().trim().replace(/[^a-z0-9]+/g, '-') || 'supabase-user'
     const resolvedRoles = normalizeUserRoles(matchingProfileUser?.roles, matchingProfileUser?.role)
     const resolvedRole = (matchingProfileUser?.role ?? resolvedRoles[0] ?? 'client') as UserRole
@@ -85,7 +86,6 @@ async function resolveSupabaseAuthUser(users: User[] = []): Promise<AuthUser | n
     await saveSupabaseProfileName(displayName)
     await saveSupabaseProfileLastLoggedIn(supabaseUser.id)
     await recordSupabaseUserActivity('login', { email: supabaseUser.email ?? null }, supabaseUser.id)
-    const loginHistory = await loadSupabaseProfileLoginHistory()
 
     return {
       id: supabaseUser.id,
@@ -94,10 +94,12 @@ async function resolveSupabaseAuthUser(users: User[] = []): Promise<AuthUser | n
       role: resolvedRole,
       roles: resolvedRoles,
       trainerId: matchingProfileUser?.trainerId ?? null,
-      applicationName: storedApplicationName ?? matchingProfileUser?.applicationName ?? null,
+      applicationName: profileSnapshot.applicationName ?? matchingProfileUser?.applicationName ?? null,
+      gymBrand: profileSnapshot.gymBrand ?? matchingProfileUser?.gymBrand ?? null,
+      gymName: profileSnapshot.gymName ?? matchingProfileUser?.gymName ?? null,
       email: supabaseUser.email ?? null,
-      lastLoggedInAt: loginHistory.lastLoggedInAt,
-      previousLastLoggedInAt: loginHistory.previousLastLoggedInAt,
+      lastLoggedInAt: profileSnapshot.lastLoggedInAt,
+      previousLastLoggedInAt: profileSnapshot.previousLastLoggedInAt,
     }
   } catch (error) {
     console.warn('[Auth] Supabase session lookup failed', error)
@@ -261,6 +263,8 @@ export function AuthProvider({ children }: AuthProviderProps) {
       roles: selectedUser.roles,
       trainerId: selectedUser.trainerId ?? null,
       applicationName: selectedUser.applicationName ?? null,
+      gymBrand: selectedUser.gymBrand ?? null,
+      gymName: selectedUser.gymName ?? null,
       email: null,
     })
 
@@ -281,6 +285,8 @@ export function AuthProvider({ children }: AuthProviderProps) {
       roles: ['admin'],
       trainerId: null,
       applicationName: null,
+      gymBrand: null,
+      gymName: null,
       email: null,
     })
   }
@@ -362,6 +368,57 @@ export function AuthProvider({ children }: AuthProviderProps) {
     notifyAuthStateChanged()
   }
 
+  const updateGymBrand = async (gymBrand: string) => {
+    const trimmedValue = gymBrand.trim()
+
+    if (!user) {
+      return
+    }
+
+    const previousGymName = user.gymName ?? null
+    const isVirginBrand = trimmedValue.toLowerCase() === 'virgin'
+
+    setUser((currentUser) => {
+      if (!currentUser) {
+        return currentUser
+      }
+
+      return {
+        ...currentUser,
+        gymBrand: trimmedValue || null,
+        gymName: isVirginBrand ? currentUser.gymName ?? previousGymName : null,
+      }
+    })
+
+    await saveSupabaseGymBrand(trimmedValue || null)
+    await saveSupabaseGymName(isVirginBrand ? previousGymName : null, trimmedValue || null)
+    notifyAuthStateChanged()
+  }
+
+  const updateGymName = async (gymName: string, gymBrand?: string | null) => {
+    const trimmedValue = gymName.trim()
+    const resolvedBrand = (gymBrand ?? user?.gymBrand ?? '').trim().toLowerCase()
+    const isVirginBrand = resolvedBrand === 'virgin'
+
+    if (!user) {
+      return
+    }
+
+    setUser((currentUser) => {
+      if (!currentUser) {
+        return currentUser
+      }
+
+      return {
+        ...currentUser,
+        gymName: isVirginBrand && trimmedValue ? trimmedValue : null,
+      }
+    })
+
+    await saveSupabaseGymName(isVirginBrand && trimmedValue ? trimmedValue : null, gymBrand ?? user.gymBrand ?? null)
+    notifyAuthStateChanged()
+  }
+
   const setThemePreference = (theme: 'light' | 'dark') => {
     setThemePreferenceState(theme)
   }
@@ -409,6 +466,8 @@ export function AuthProvider({ children }: AuthProviderProps) {
       logout,
       updateProfileName,
       updateApplicationName,
+      updateGymBrand,
+      updateGymName,
       setThemePreference,
       setShowVersion,
       hasAccess,

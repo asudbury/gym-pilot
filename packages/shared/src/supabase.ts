@@ -123,8 +123,24 @@ export async function signInWithPassword(email: string, password: string) {
   return client.auth.signInWithPassword({ email, password })
 }
 
+function normalizeAuthEmail(email: string) {
+  const trimmedEmail = email?.trim().toLowerCase() ?? ''
+
+  if (!trimmedEmail) {
+    return 'user@gym-pilot.local'
+  }
+
+  if (trimmedEmail.includes('@')) {
+    return trimmedEmail
+  }
+
+  const safeBase = trimmedEmail.replace(/\s+/g, '.').replace(/[^a-z0-9._-]/g, '') || 'user'
+  return `${safeBase}@gym-pilot.local`
+}
+
 export async function signUpWithPassword(email: string, password: string, options?: { passwordChangeRequired?: boolean; persistSession?: boolean }) {
-  console.log('[Supabase] Creating password-based account', { email, passwordChangeRequired: options?.passwordChangeRequired, persistSession: options?.persistSession })
+  const normalizedEmail = normalizeAuthEmail(email)
+  console.log('[Supabase] Creating password-based account', { email: normalizedEmail, passwordChangeRequired: options?.passwordChangeRequired, persistSession: options?.persistSession })
   const client = getSupabaseClient({ persistSession: options?.persistSession ?? false, autoRefreshToken: false })
 
   if (!client) {
@@ -133,7 +149,7 @@ export async function signUpWithPassword(email: string, password: string, option
   }
 
   return client.auth.signUp({
-    email,
+    email: normalizedEmail,
     password,
     options: {
       data: {

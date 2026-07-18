@@ -9,12 +9,15 @@ import { Heading1, Paragraph } from '../../components/Typography'
 import { useAuth } from '../../auth/AuthContext'
 import { appTokens } from '../../constants/tokens'
 import { getDisplayEmail, getDisplayRoles } from '../../utils/adminUtils'
+import { GymClubSelector } from '../../components/GymClubSelector'
 
 export function AdminPreferencesPage() {
-  const { user, updateProfileName, updateApplicationName, themePreference, setThemePreference, showVersion, setShowVersion } = useAuth()
+  const { user, updateProfileName, updateApplicationName, updateGymBrand, updateGymName, themePreference, setThemePreference, showVersion, setShowVersion } = useAuth()
   const navigate = useNavigate()
   const [friendlyName, setFriendlyName] = useState(user?.name ?? '')
   const [applicationName, setApplicationName] = useState(user?.applicationName ?? '')
+  const [gymBrand, setGymBrand] = useState(user?.gymBrand ?? '')
+  const [gymName, setGymName] = useState(user?.gymName ?? '')
   const [newPassword, setNewPassword] = useState('')
   const [confirmPassword, setConfirmPassword] = useState('')
   const [isSaving, setIsSaving] = useState(false)
@@ -23,12 +26,15 @@ export function AdminPreferencesPage() {
   useEffect(() => {
     setFriendlyName(user?.name ?? '')
     setApplicationName(user?.applicationName ?? '')
+    setGymBrand(user?.gymBrand ?? '')
+    setGymName(user?.gymName ?? '')
     setNewPassword('')
     setConfirmPassword('')
-  }, [user?.name, user?.applicationName])
+  }, [user?.name, user?.applicationName, user?.gymBrand, user?.gymName])
 
   const displayRoles = getDisplayRoles(user?.roles, user?.role)
   const isTrainer = displayRoles.includes('trainer')
+  const isVirginGymBrand = (gymBrand || '').trim().toLowerCase() === 'virgin'
 
   const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault()
@@ -57,6 +63,8 @@ export function AdminPreferencesPage() {
       if (isTrainer) {
         await updateProfileName(friendlyName)
         await updateApplicationName(applicationName)
+        await updateGymBrand(gymBrand)
+        await updateGymName(gymName, gymBrand)
       }
       setNewPassword('')
       setConfirmPassword('')
@@ -127,6 +135,38 @@ export function AdminPreferencesPage() {
                   onChange={(event) => setApplicationName(event.target.value)}
                   className={`${appTokens.input} w-full`}
                   placeholder="Enter a custom app name"
+                />
+              </label>
+
+              <label className="flex flex-col gap-2 text-sm font-medium text-slate-700">
+                <p>Gym brand</p>
+                <p className="mt-1 text-sm text-slate-400">Select the gym brand from the approved list.</p>
+                <select
+                  value={gymBrand}
+                  onChange={(event) => {
+                    const nextBrand = event.target.value
+                    setGymBrand(nextBrand)
+
+                    if (nextBrand.trim().toLowerCase() !== 'virgin') {
+                      setGymName('')
+                    }
+                  }}
+                  className={`${appTokens.input} w-full`}
+                >
+                  <option value="">Select a brand</option>
+                  <option value="Virgin">Virgin</option>
+                </select>
+              </label>
+
+              <label className="flex flex-col gap-2 text-sm font-medium text-slate-700">
+                <p>Gym name</p>
+                <p className="mt-1 text-sm text-slate-400">Select the Virgin Active club. The value stored for the profile is the club ID.</p>
+                <GymClubSelector
+                  value={gymName}
+                  onChange={setGymName}
+                  className={`${appTokens.input} w-full`}
+                  placeholder="Start typing a club name"
+                  disabled={!isVirginGymBrand}
                 />
               </label>
             </>

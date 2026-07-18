@@ -26,8 +26,10 @@ export function AdminCreateUserPage() {
     const trimmedName = newUserName.trim()
     const resolvedDisplayName = trimmedName || newUserEmail.trim() || 'New user'
 
-    if ((newUserEmail || tempPassword) && (!newUserEmail || !tempPassword)) {
-      setStatusMessage({ text: 'Provide both an email address and a temporary password to create an auth-enabled user.', tone: 'error' })
+    const hasTemporaryPassword = tempPassword.trim().length > 0
+
+    if (hasTemporaryPassword && !tempPassword) {
+      setStatusMessage({ text: 'Provide a temporary password to create an auth-enabled user.', tone: 'error' })
       return
     }
 
@@ -38,8 +40,8 @@ export function AdminCreateUserPage() {
       return
     }
 
-    if (newUserEmail && tempPassword) {
-      const response = await signUpWithPassword(newUserEmail.trim(), tempPassword, { passwordChangeRequired: true, persistSession: false })
+    if (hasTemporaryPassword) {
+      const response = await signUpWithPassword(newUserEmail.trim() || resolvedDisplayName, tempPassword, { passwordChangeRequired: true, persistSession: false })
 
       if (response.error) {
         console.error('[AdminCreateUser] Could not create Supabase auth user', response.error)
@@ -56,22 +58,13 @@ export function AdminCreateUserPage() {
       const client = getSupabaseClient({ persistSession: false, autoRefreshToken: false })
 
       if (client && response.data?.user?.id) {
-        const signInResult = await client.auth.signInWithPassword({
-          email: newUserEmail.trim(),
-          password: tempPassword,
-        })
-
-        if (signInResult.error) {
-          console.error('[AdminCreateUser] Could not sign in the newly created user', signInResult.error)
-          setStatusMessage({ text: `Could not sign in the newly created user: ${signInResult.error.message}`, tone: 'error' })
-          return
-        }
-
         const profilePayload = {
           user_id: response.data.user.id,
           friendly_name: resolvedDisplayName,
           roles: newUserRoles,
           trainer_id: newUserRoles.includes('client') ? selectedTrainerId || null : null,
+          gym_brand: null,
+          gym_name: null,
           must_change_password: true,
         }
 
@@ -120,7 +113,7 @@ export function AdminCreateUserPage() {
           <input
             value={newUserEmail}
             onChange={(event) => setNewUserEmail(event.target.value)}
-            placeholder="Email address"
+            placeholder="Email address or login name"
             className="w-full rounded-full border border-slate-200 bg-white px-4 py-2 text-sm text-slate-700"
           />
           <input
