@@ -39,7 +39,7 @@ export function resolveAuthUserApplicationNameUpdate(user: AuthUser | null, appl
       ...user,
       applicationName: trimmedName || null,
     },
-    persistedUserId: resolvePersistedUserId(user, false),
+    persistedUserId: resolvePersistedUserId(user),
   }
 }
 
@@ -78,7 +78,7 @@ export function resolveAuthUserGymNameUpdate(user: AuthUser | null, gymName: str
       ...user,
       gymName: isVirginBrand && trimmedValue ? trimmedValue : null,
     },
-    persistedUserId: resolvePersistedUserId(user, false),
+    persistedUserId: resolvePersistedUserId(user),
   }
 }
 

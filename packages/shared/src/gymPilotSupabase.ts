@@ -981,7 +981,25 @@ export async function removeSupabaseJsonRecord(key: string) {
   }
 }
 
+export function isLocalhostHost(hostname?: string) {
+  if (!hostname) {
+    return false
+  }
+
+  return hostname === 'localhost' || hostname === '127.0.0.1' || hostname === '::1' || hostname === '[::1]' || hostname === '0.0.0.0' || hostname.endsWith('.localhost')
+}
+
+export function shouldRecordSupabaseUserActivity() {
+  const hostname = typeof window !== 'undefined' ? window.location.hostname : undefined
+  return !isLocalhostHost(hostname)
+}
+
 export async function recordSupabaseUserActivity(eventType: string, eventData: Record<string, unknown> = {}, userId?: string) {
+  if (!shouldRecordSupabaseUserActivity()) {
+    logger.info('[Supabase] Skipping user activity recording on localhost host')
+    return
+  }
+
   const client = getSupabaseClient()
 
   if (!client) {
