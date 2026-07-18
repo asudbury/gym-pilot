@@ -179,9 +179,8 @@ export function LoginPage() {
               name="email"
               type="email"
               value={email}
-              data-lpignore="true"
               onChange={(event) => setEmail(event.target.value)}
-              autoComplete="username"
+              autoComplete="email"
               inputMode="email"
               autoCapitalize="none"
               autoCorrect="off"
@@ -200,7 +199,6 @@ export function LoginPage() {
               name="password"
               type="password"
               value={password}
-              data-lpignore="true"
               onChange={(event) => setPassword(event.target.value)}
               autoComplete="current-password"
               enterKeyHint="done"
