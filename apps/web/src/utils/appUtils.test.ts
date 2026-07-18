@@ -17,4 +17,13 @@ describe('formatDashboardTimestamp', () => {
 
     expect(formatDashboardTimestamp(value)).toContain('Yesterday,')
   })
+
+  it('returns a relative day count for dates within the last seven days', () => {
+    const now = new Date()
+    const threeDaysAgo = new Date(now)
+    threeDaysAgo.setDate(now.getDate() - 3)
+    const value = new Date(threeDaysAgo.getFullYear(), threeDaysAgo.getMonth(), threeDaysAgo.getDate(), 9, 30).toISOString()
+
+    expect(formatDashboardTimestamp(value)).toBe('2 days ago')
+  })
 })

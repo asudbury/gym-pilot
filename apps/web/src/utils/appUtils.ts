@@ -108,6 +108,8 @@ export function formatDashboardTimestamp(value?: string | null) {
   const startOfToday = new Date(now.getFullYear(), now.getMonth(), now.getDate())
   const startOfYesterday = new Date(startOfToday)
   startOfYesterday.setDate(startOfYesterday.getDate() - 1)
+  const startOfSevenDaysAgo = new Date(startOfToday)
+  startOfSevenDaysAgo.setDate(startOfSevenDaysAgo.getDate() - 6)
 
   const formattedTime = new Intl.DateTimeFormat(undefined, {
     hour: 'numeric',
@@ -120,6 +122,13 @@ export function formatDashboardTimestamp(value?: string | null) {
 
   if (parsedDate >= startOfYesterday) {
     return `Yesterday, ${formattedTime}`
+  }
+
+  if (parsedDate >= startOfSevenDaysAgo) {
+    const dayDifference = Math.floor(
+      (startOfToday.getTime() - parsedDate.getTime()) / (24 * 60 * 60 * 1000),
+    )
+    return `${dayDifference} days ago`
   }
 
   return new Intl.DateTimeFormat(undefined, {
