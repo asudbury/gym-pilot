@@ -4,12 +4,14 @@ import { loadSupabaseProfileFlag, resetSupabasePassword, signInWithPassword } fr
 import { PageCard } from '../components/PageCard'
 import { Heading1 } from '../components/Typography'
 import { appTokens } from '../constants/tokens'
+import { useAuth } from '../auth/AuthContext'
 
 const REMEMBERED_EMAIL_STORAGE_KEY = 'gym-pilot-remembered-email'
 
 export function LoginPage() {
   const navigate = useNavigate()
   const location = useLocation()
+  const { user } = useAuth()
   const [searchParams] = useSearchParams()
   const [email, setEmail] = useState(() => {
     if (typeof window === 'undefined') {
@@ -56,6 +58,8 @@ export function LoginPage() {
     const state = location.state as { from?: { pathname?: string } } | null
     return state?.from?.pathname || '/'
   }, [location.state])
+
+  const appName = user?.applicationName?.trim() || user?.name?.trim() || 'GymPilot'
 
   const handlePasswordSignIn = async (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault()
@@ -114,9 +118,9 @@ export function LoginPage() {
     <div className={`${appTokens.pageShell} flex items-start justify-center`}>
       <PageCard as="section" className="w-full max-w-xl self-start" padding="spacious">
         <div className="flex flex-col gap-2">
-          <Heading1 as="h1">Welcome back</Heading1>
+          <Heading1 as="h1">Welcome to {appName}</Heading1>
           <p className="text-sm text-slate-600">
-            Login to continue to your plans, assignments, and preferences.
+            Log in to access your dashboard, exercises, plans, and assignments.
           </p>
         </div>
 

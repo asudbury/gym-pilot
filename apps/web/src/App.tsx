@@ -27,6 +27,7 @@ import { AdminDatabasePage } from './pages/admin/AdminDatabasePage'
 import { AdminPreferencesPage } from './pages/admin/AdminPreferencesPage'
 import { HelpPage } from './pages/help/HelpPage'
 import { FavouritesPage } from './pages/FavouritesPage'
+import { DashboardPage } from './pages/DashboardPage'
 import { buildNavigationMenuItems } from './utils/navigationUtils'
 import { AssignmentDetailPage } from './pages/assignments/AssignmentDetailPage'
 import { logger } from './utils/loggingUtils'
@@ -303,12 +304,13 @@ useEffect(() => {
         <Route path="/login" element={<LoginPage />} />
         <Route path="/reset-password" element={<ResetPasswordPage />} />
         <Route path="/auth/callback" element={<LoginPage />} />
-        <Route path="/" element={<HomePage filters={homeFilters} onFiltersChange={setHomeFilters} onToggleFavoriteExercise={handleToggleFavoriteExercise} isExerciseFavorite={isExerciseFavorite} />} />
+        <Route path="/" element={user ? <DashboardPage userName={user.name || user.email || null} /> : <HomePage filters={homeFilters} onFiltersChange={setHomeFilters} onToggleFavoriteExercise={handleToggleFavoriteExercise} isExerciseFavorite={isExerciseFavorite} />} />
         <Route path="/exercise/:slug" element={<ExercisePage onToggleFavoriteExercise={handleToggleFavoriteExercise} isExerciseFavorite={isExerciseFavorite} />} />
         <Route>
           <Route path="/help" element={<HelpPage />} />
           <Route path="/favourites" element={<FavouritesPage favorites={favorites} folders={folders} onFoldersChange={setFolders} onFavoritesChange={setFavorites} />} />
           <Route element={<RequireAuth />}>
+            <Route path="/exercises" element={<HomePage filters={homeFilters} onFiltersChange={setHomeFilters} onToggleFavoriteExercise={handleToggleFavoriteExercise} isExerciseFavorite={isExerciseFavorite} />} />
             <Route path="/plans" element={<PlansPage />} />
             <Route path="/assignments" element={<AssignmentsPage />} />
             <Route path="/users/:userSlug/assignments" element={<AssignmentsPage />} />

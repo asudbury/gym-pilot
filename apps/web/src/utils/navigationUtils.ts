@@ -37,6 +37,12 @@ export function buildNavigationMenuItems({
   const protectedItems: NavigationMenuListItem[] = isAuthenticated
     ? [
         {
+          to: '/exercises',
+          label: 'Exercises',
+          onClick: onItemClick,
+          className: itemClassName,
+        },
+        {
           to: '/plans',
           label: 'Plans',
           onClick: onItemClick,
