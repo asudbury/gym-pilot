@@ -1,5 +1,6 @@
 import type { ReactNode } from 'react'
 import { NavLink } from 'react-router-dom'
+import { CallToAction } from '../../layouts/CallToAction'
 import { getToneClass } from '../toneClasses'
 
 type DashboardWidgetProps = {
@@ -11,23 +12,35 @@ type DashboardWidgetProps = {
 }
 
 export function DashboardWidget({ title, description, to, tone = 'default', children }: DashboardWidgetProps) {
-  const content = (
-    <div className="space-y-2">
-      <h2 className="text-lg font-semibold text-slate-900 dark:text-slate-100">{title}</h2>
-      {description ? <p className="text-sm text-slate-600 dark:text-slate-300">{description}</p> : null}
-      {children ? <div className="pt-2">{children}</div> : null}
+  const action = to ? (
+    <NavLink
+      to={to}
+      className={getToneClass(tone === 'default' ? 'blue' : tone, 'inline-flex items-center rounded-lg px-4 py-2 text-sm font-medium')}
+    >
+      Open
+    </NavLink>
+  ) : null
+
+  const cardContent = (
+    <>
+      {description ? <div className="text-sm text-slate-600 dark:text-slate-300">{description}</div> : null}
+      {children ? <div className="mt-3">{children}</div> : null}
+    </>
+  )
+
+  const card = (
+    <div className="h-full transition hover:-translate-y-0.5 hover:shadow-sm">
+      <CallToAction title={title} description={cardContent} action={action} className="h-full" />
     </div>
   )
 
-  const baseClassName = getToneClass(tone, 'rounded-3xl border border-slate-200 bg-white p-5 text-left shadow-sm transition hover:-translate-y-0.5 hover:shadow-md')
-
   if (!to) {
-    return <div className={baseClassName}>{content}</div>
+    return card
   }
 
   return (
-    <NavLink to={to} className={baseClassName}>
-      {content}
-    </NavLink>
+    <div className="h-full">
+      {card}
+    </div>
   )
 }
