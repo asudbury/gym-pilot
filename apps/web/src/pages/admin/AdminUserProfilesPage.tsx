@@ -352,7 +352,7 @@ export function AdminUserProfilesPage() {
                               <GymClubSelector
                                 value={draft?.gymName ?? ''}
                                 onChange={(nextValue) => updateDraft(profile.id, { gymName: nextValue })}
-                                placeholder="Start typing a club name"
+                                placeholder="Select a club"
                                 className="w-full rounded-full border border-slate-200 bg-white px-3 py-2 text-sm text-slate-700"
                                 disabled={(draft?.gymBrand ?? '').trim().toLowerCase() !== 'virgin'}
                               />
@@ -418,14 +418,14 @@ export function AdminUserProfilesPage() {
                               <button
                                 type="button"
                                 onClick={() => updateDraft(profile.id, { showVersion: true })}
-                                className={`rounded-full px-3 py-1.5 text-sm font-medium transition ${draft?.showVersion ?? true ? 'bg-slate-900 text-white' : 'bg-white text-slate-700 border border-slate-200'}`}
+                                className={`cursor-pointer rounded-full px-3 py-1.5 text-sm font-medium transition ${draft?.showVersion ?? true ? 'bg-slate-900 text-white' : 'bg-white text-slate-700 border border-slate-200'}`}
                               >
                                 Show
                               </button>
                               <button
                                 type="button"
                                 onClick={() => updateDraft(profile.id, { showVersion: false })}
-                                className={`rounded-full px-3 py-1.5 text-sm font-medium transition ${!(draft?.showVersion ?? true) ? 'bg-slate-900 text-white' : 'bg-white text-slate-700 border border-slate-200'}`}
+                                className={`cursor-pointer rounded-full px-3 py-1.5 text-sm font-medium transition ${!(draft?.showVersion ?? true) ? 'bg-slate-900 text-white' : 'bg-white text-slate-700 border border-slate-200'}`}
                               >
                                 Hide
                               </button>

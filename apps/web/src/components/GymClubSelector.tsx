@@ -1,5 +1,10 @@
-import { useId, useMemo, useState } from 'react'
-import { loadVirginActiveClubs, type VirginActiveClub } from '../utils/virginActiveClubs'
+import { useEffect, useId, useMemo, useState } from 'react'
+import {
+  getFallbackVirginActiveClubs,
+  loadVirginActiveClubs,
+  resolveVirginActiveClubName,
+  type VirginActiveClub,
+} from '../utils/virginActiveClubs'
 
 type GymClubSelectorProps = {
   value: string
@@ -10,39 +15,53 @@ type GymClubSelectorProps = {
 }
 
 export function GymClubSelector({ value, onChange, className, placeholder, disabled = false }: GymClubSelectorProps) {
-  const [availableClubs, setAvailableClubs] = useState<VirginActiveClub[]>([])
+  const [availableClubs, setAvailableClubs] = useState<VirginActiveClub[]>(() => getFallbackVirginActiveClubs())
   const [isLoadingClubs, setIsLoadingClubs] = useState(false)
   const [clubsError, setClubsError] = useState<string | null>(null)
   const listId = useId()
 
-  const displayValue = useMemo(() => {
-    const trimmedValue = value?.trim() ?? ''
-
-    if (!trimmedValue) {
-      return ''
-    }
-
-    const matchingClub = availableClubs.find((club) => String(club.clubId) === trimmedValue)
-
-    return matchingClub?.name ?? trimmedValue
-  }, [availableClubs, value])
-
-  const handleFocus = async () => {
-    if (disabled || availableClubs.length > 0 || isLoadingClubs) {
-      return
-    }
+  useEffect(() => {
+    let isActive = true
 
     setIsLoadingClubs(true)
     setClubsError(null)
 
-    try {
-      const clubs = await loadVirginActiveClubs()
-      setAvailableClubs(clubs)
-    } catch (error) {
-      console.warn('[GymClubSelector] Could not load clubs', error)
-      setClubsError('Could not load the club list right now.')
-    } finally {
-      setIsLoadingClubs(false)
+    void loadVirginActiveClubs()
+      .then((clubs) => {
+        if (!isActive) {
+          return
+        }
+
+        setAvailableClubs(clubs)
+      })
+      .catch((error) => {
+        if (!isActive) {
+          return
+        }
+
+        console.warn('[GymClubSelector] Could not load clubs', error)
+        setClubsError('Could not load the club list right now.')
+      })
+      .finally(() => {
+        if (isActive) {
+          setIsLoadingClubs(false)
+        }
+      })
+
+    return () => {
+      isActive = false
+    }
+  }, [])
+
+  const displayValue = useMemo(() => resolveVirginActiveClubName(value, availableClubs), [availableClubs, value])
+
+  const handleFocus = () => {
+    if (disabled) {
+      return
+    }
+
+    if (availableClubs.length === 0 && !isLoadingClubs) {
+      setIsLoadingClubs(true)
     }
   }
 
@@ -60,7 +79,9 @@ export function GymClubSelector({ value, onChange, className, placeholder, disab
 
     const matchingClub = availableClubs.find((club) => club.name.trim().toLowerCase() === rawValue.toLowerCase())
 
-    onChange(matchingClub ? String(matchingClub.clubId) : '')
+    if (matchingClub) {
+      onChange(String(matchingClub.clubId))
+    }
   }
 
   return (

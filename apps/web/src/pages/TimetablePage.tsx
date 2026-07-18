@@ -2,6 +2,7 @@ import { useEffect, useMemo, useState } from 'react'
 import { useAuth } from '../auth/AuthContext'
 import { PageCard } from '../components/PageCard'
 import { PageLayout } from '../layouts/PageLayout'
+import { loadVirginActiveClubs } from '../utils/virginActiveClubs'
 
 type TimetableSession = {
   id?: number | string
@@ -213,11 +214,52 @@ export function TimetablePage() {
   const [activeDayKey, setActiveDayKey] = useState('')
   const [activeInstructor, setActiveInstructor] = useState('all')
   const [activeClassName, setActiveClassName] = useState('all')
+  const [resolvedClubName, setResolvedClubName] = useState<string | null>(null)
+
+  const rawGymBrand = user?.gymBrand?.trim() ?? ''
+  const rawGymName = user?.gymName?.trim() ?? ''
+  const isVirginBrand = rawGymBrand.toLowerCase() === 'virgin'
+  const gymBrandLabel = rawGymBrand || 'Brand not set'
+  const gymNameLabel = useMemo(() => {
+    if (!rawGymName) {
+      return 'Gym not selected'
+    }
+
+    if (isVirginBrand && /^\d+$/.test(rawGymName)) {
+      return resolvedClubName ?? rawGymName
+    }
+
+    return rawGymName
+  }, [isVirginBrand, rawGymName, resolvedClubName])
 
   const clubId = useMemo(() => {
     const storedClubId = user?.gymName?.trim() ?? ''
     return /^\d+$/.test(storedClubId) ? storedClubId : '60'
   }, [user?.gymName])
+
+  useEffect(() => {
+    let cancelled = false
+
+    if (!isVirginBrand || !/^\d+$/.test(rawGymName)) {
+      setResolvedClubName(null)
+      return () => {
+        cancelled = true
+      }
+    }
+
+    void loadVirginActiveClubs().then((clubs) => {
+      if (cancelled) {
+        return
+      }
+
+      const matchingClub = clubs.find((club) => String(club.clubId) === rawGymName)
+      setResolvedClubName(matchingClub?.name ?? rawGymName)
+    })
+
+    return () => {
+      cancelled = true
+    }
+  }, [isVirginBrand, rawGymName])
 
   useEffect(() => {
     let cancelled = false
@@ -413,8 +455,7 @@ export function TimetablePage() {
       <PageCard padding="spacious" className="space-y-6">
         <div className="space-y-2">
           <p className="text-sm font-medium uppercase tracking-[0.2em] text-slate-500">Timetable</p>
-          <h1 className="text-3xl font-semibold text-slate-900">Live class timetable</h1>
-          <p className="text-sm text-slate-600">The latest sessions are loaded directly from the provided Virgin Active timetable endpoint.</p>
+          <h1 className="text-3xl font-semibold text-slate-900">{gymBrandLabel} {gymNameLabel}</h1>
         </div>
 
         {isLoading ? (

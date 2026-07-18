@@ -26,6 +26,7 @@ import { AdminUserProfilesPage } from './pages/admin/AdminUserProfilesPage'
 import { AdminUserActivityPage } from './pages/admin/AdminUserActivityPage'
 import { AdminDatabasePage } from './pages/admin/AdminDatabasePage'
 import { AdminPreferencesPage } from './pages/admin/AdminPreferencesPage'
+import { AdminChangePasswordPage } from './pages/admin/AdminChangePasswordPage'
 import { HelpPage } from './pages/help/HelpPage'
 import { FavouritesPage } from './pages/FavouritesPage'
 import { DashboardPage } from './pages/DashboardPage'
@@ -141,7 +142,7 @@ useEffect(() => {
 
   useEffect(() => {
     setMobileMenuOpen(false)
-  }, [pathname])
+  }, [pathname, user?.id, user?.email])
 
 
   const handleToggleFavoriteExercise = (exerciseId: string) => {
@@ -233,6 +234,8 @@ useEffect(() => {
         onFavoritesChange={setFavorites}
         onHomeFiltersChange={setHomeFilters}
         onAuthClick={() => {
+          setMobileMenuOpen(false)
+
           if (user) {
             logout()
             return
@@ -273,6 +276,7 @@ useEffect(() => {
             <Route path="/users/:userSlug/assignments/:planSlug/edit" element={<CreateAssignmentPage />} />
             <Route path="/admin" element={<AdminPage />} />
             <Route path="/admin/preferences" element={<AdminPreferencesPage />} />
+            <Route path="/admin/change-password" element={<AdminChangePasswordPage />} />
           </Route>
           <Route element={<RequireAuth requiredRole="admin" />}>
             <Route path="/admin/users" element={<AdminUsersPage />} />

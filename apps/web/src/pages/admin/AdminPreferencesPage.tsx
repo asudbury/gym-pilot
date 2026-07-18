@@ -1,7 +1,6 @@
 import { useEffect, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { Link } from 'react-router-dom'
-import { changeSupabasePassword } from '@gym-pilot/shared'
 import { getToneClass } from '../../components/toneClasses'
 import { PageCard } from '../../components/PageCard'
 import { PageLayout } from '../../layouts/PageLayout'
@@ -18,8 +17,6 @@ export function AdminPreferencesPage() {
   const [applicationName, setApplicationName] = useState(user?.applicationName ?? '')
   const [gymBrand, setGymBrand] = useState(user?.gymBrand ?? '')
   const [gymName, setGymName] = useState(user?.gymName ?? '')
-  const [newPassword, setNewPassword] = useState('')
-  const [confirmPassword, setConfirmPassword] = useState('')
   const [isSaving, setIsSaving] = useState(false)
   const [statusMessage, setStatusMessage] = useState('')
 
@@ -28,8 +25,6 @@ export function AdminPreferencesPage() {
     setApplicationName(user?.applicationName ?? '')
     setGymBrand(user?.gymBrand ?? '')
     setGymName(user?.gymName ?? '')
-    setNewPassword('')
-    setConfirmPassword('')
   }, [user?.name, user?.applicationName, user?.gymBrand, user?.gymName])
 
   const displayRoles = getDisplayRoles(user?.roles, user?.role)
@@ -42,32 +37,12 @@ export function AdminPreferencesPage() {
     setStatusMessage('')
 
     try {
-      if (newPassword || confirmPassword) {
-        if (newPassword.length < 8) {
-          setStatusMessage('Password must be at least 8 characters long.')
-          return
-        }
-
-        if (newPassword !== confirmPassword) {
-          setStatusMessage('The new passwords do not match.')
-          return
-        }
-
-        const passwordResponse = await changeSupabasePassword(newPassword)
-
-        if (passwordResponse.error) {
-          throw passwordResponse.error
-        }
-      }
-
       if (isTrainer) {
         await updateProfileName(friendlyName)
         await updateApplicationName(applicationName)
         await updateGymBrand(gymBrand)
         await updateGymName(gymName, gymBrand)
       }
-      setNewPassword('')
-      setConfirmPassword('')
       navigate('/admin')
     } catch (error) {
       console.error('[Preferences] Failed to save preferences', error)
@@ -165,7 +140,7 @@ export function AdminPreferencesPage() {
                   value={gymName}
                   onChange={setGymName}
                   className={`${appTokens.input} w-full`}
-                  placeholder="Start typing a club name"
+                  placeholder="Select a club"
                   disabled={!isVirginGymBrand}
                 />
               </label>
@@ -177,26 +152,13 @@ export function AdminPreferencesPage() {
             </div>
           )}
 
-          <label className="flex flex-col gap-2 text-sm font-medium text-slate-700">
-            <p>Change password</p>
-            <p className="mt-1 text-sm text-slate-400">Enter a new password to update your Supabase account password.</p>
-            <input
-              type="password"
-              value={newPassword}
-              onChange={(event) => setNewPassword(event.target.value)}
-              autoComplete="new-password"
-              className={`${appTokens.input} w-full`}
-              placeholder="New password"
-            />
-            <input
-              type="password"
-              value={confirmPassword}
-              onChange={(event) => setConfirmPassword(event.target.value)}
-              autoComplete="new-password"
-              className={`${appTokens.input} w-full`}
-              placeholder="Confirm new password"
-            />
-          </label>
+          <div className="flex flex-col gap-2 rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3 text-sm text-slate-700">
+            <p className="font-medium">Change password</p>
+            <p className="mt-1 text-sm text-slate-400">Manage your account password from a dedicated screen.</p>
+            <Link to="/admin/change-password" className={getToneClass('default', 'mt-2 w-fit rounded-full px-4 py-2 text-sm font-medium')}>
+              Open password screen
+            </Link>
+          </div>
 
           <label className="flex flex-col gap-2 text-sm font-medium text-slate-700">
             <p>Theme preference</p>
@@ -205,14 +167,14 @@ export function AdminPreferencesPage() {
               <button
                 type="button"
                 onClick={() => setThemePreference('light')}
-                className={`rounded-full px-4 py-2 text-sm font-medium transition ${themePreference === 'light' ? 'bg-slate-900 text-white' : 'bg-white text-slate-700 border border-slate-200'}`}
+                className={`cursor-pointer rounded-full px-4 py-2 text-sm font-medium transition ${themePreference === 'light' ? 'bg-slate-900 text-white' : 'bg-white text-slate-700 border border-slate-200'}`}
               >
                 Light
               </button>
               <button
                 type="button"
                 onClick={() => setThemePreference('dark')}
-                className={`rounded-full px-4 py-2 text-sm font-medium transition ${themePreference === 'dark' ? 'bg-slate-900 text-white' : 'bg-white text-slate-700 border border-slate-200'}`}
+                className={`cursor-pointer rounded-full px-4 py-2 text-sm font-medium transition ${themePreference === 'dark' ? 'bg-slate-900 text-white' : 'bg-white text-slate-700 border border-slate-200'}`}
               >
                 Dark
               </button>
@@ -226,14 +188,14 @@ export function AdminPreferencesPage() {
               <button
                 type="button"
                 onClick={() => setShowVersion(true)}
-                className={`rounded-full px-4 py-2 text-sm font-medium transition ${showVersion ? 'bg-slate-900 text-white' : 'bg-white text-slate-700 border border-slate-200'}`}
+                className={`cursor-pointer rounded-full px-4 py-2 text-sm font-medium transition ${showVersion ? 'bg-slate-900 text-white' : 'bg-white text-slate-700 border border-slate-200'}`}
               >
                 Show
               </button>
               <button
                 type="button"
                 onClick={() => setShowVersion(false)}
-                className={`rounded-full px-4 py-2 text-sm font-medium transition ${!showVersion ? 'bg-slate-900 text-white' : 'bg-white text-slate-700 border border-slate-200'}`}
+                className={`cursor-pointer rounded-full px-4 py-2 text-sm font-medium transition ${!showVersion ? 'bg-slate-900 text-white' : 'bg-white text-slate-700 border border-slate-200'}`}
               >
                 Hide
               </button>
