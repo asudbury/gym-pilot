@@ -3,23 +3,17 @@ import type { User, UserRole } from '@gym-pilot/types'
 import { logger, recordSupabaseUserActivity, signOutFromSupabase } from '@gym-pilot/shared'
 import type { AuthUser } from '../domain/authTypes'
 import { resolveIsAuthenticated, resolvePersistedUserId } from '../domain/authState'
-import { resolveAuthAccessState, resolveAuthUserApplicationNameUpdate, resolveAuthUserGymBrandUpdate, resolveAuthUserGymNameUpdate, resolveAuthUserProfileNameUpdate, resolveBypassAuthUser, resolveLoginAuthUser } from '../domain/authTransitions'
-import { persistBypassFlag, persistCurrentUserId, persistLogoutPending, persistSession, readBypassFlag, readLogoutPending, readStoredSession } from '../services/authStorage'
+import { resolveAuthAccessState, resolveAuthUserApplicationNameUpdate, resolveAuthUserGymBrandUpdate, resolveAuthUserGymNameUpdate, resolveAuthUserProfileNameUpdate, resolveLoginAuthUser } from '../domain/authTransitions'
+import { persistCurrentUserId, persistLogoutPending, persistSession, readLogoutPending, readStoredSession } from '../services/authStorage'
 import { resolveSupabaseAuthUser, updateApplicationNameOnSupabase, updateGymBrandOnSupabase, updateGymNameOnSupabase, updateProfileNameOnSupabase } from '../services/authSession'
 
 export function useAuthModule(users: User[]) {
   const [user, setUser] = useState<AuthUser | null>(null)
-  const [isBypassEnabled, setIsBypassEnabled] = useState(false)
 
   const hydrateSession = useCallback(async () => {
     const storedUser = await readStoredSession()
     setUser(storedUser)
     persistCurrentUserId(storedUser?.id ?? null)
-  }, [])
-
-  const hydrateBypass = useCallback(async () => {
-    const storedFlag = await readBypassFlag()
-    setIsBypassEnabled(storedFlag)
   }, [])
 
   const refreshSupabaseSession = useCallback(async () => {
@@ -32,7 +26,6 @@ export function useAuthModule(users: User[]) {
 
     if (supabaseUser) {
       setUser(supabaseUser)
-      setIsBypassEnabled(false)
       persistCurrentUserId(supabaseUser.id)
     }
   }, [users])
@@ -41,10 +34,6 @@ export function useAuthModule(users: User[]) {
     await persistSession(user)
   }, [user])
 
-  const persistBypassState = useCallback(async () => {
-    await persistBypassFlag(isBypassEnabled)
-  }, [isBypassEnabled])
-
   const login = useCallback((userId: string) => {
     const nextUser = resolveLoginAuthUser(users, userId)
 
@@ -52,31 +41,18 @@ export function useAuthModule(users: User[]) {
       return false
     }
 
-    persistCurrentUserId(resolvePersistedUserId(nextUser, false))
+    persistCurrentUserId(resolvePersistedUserId(nextUser))
     setUser(nextUser)
 
     return true
   }, [users])
 
-  const enableBypass = useCallback(() => {
-    const nextUser = resolveBypassAuthUser()
-    persistCurrentUserId(resolvePersistedUserId(nextUser, true))
-    setIsBypassEnabled(true)
-    setUser(nextUser)
-  }, [])
-
-  const disableBypass = useCallback(() => {
-    persistCurrentUserId(resolvePersistedUserId(null, false))
-    setIsBypassEnabled(false)
-    setUser(null)
-  }, [])
-
   const hasAccess = useCallback((requiredRole: UserRole | UserRole[]) => {
-    const accessState = resolveAuthAccessState(user, isBypassEnabled, requiredRole)
+    const accessState = resolveAuthAccessState(user, requiredRole)
     return accessState.hasAccess
-  }, [user, isBypassEnabled])
+  }, [user])
 
-  const isAuthenticated = useMemo(() => resolveIsAuthenticated(user, isBypassEnabled), [user, isBypassEnabled])
+  const isAuthenticated = useMemo(() => resolveIsAuthenticated(user), [user])
 
   const logout = useCallback(async (redirectTo?: string) => {
     const currentUserId = user?.id
@@ -84,7 +60,6 @@ export function useAuthModule(users: User[]) {
     persistLogoutPending(true)
     persistCurrentUserId(null)
     setUser(null)
-    setIsBypassEnabled(false)
 
     if (currentUserId) {
       await recordSupabaseUserActivity('logout', {}, currentUserId)
@@ -153,15 +128,10 @@ export function useAuthModule(users: User[]) {
     user,
     setUser,
     isAuthenticated,
-    isBypassEnabled,
     hydrateSession,
-    hydrateBypass,
     refreshSupabaseSession,
     persistAuthState,
-    persistBypassState,
     login,
-    enableBypass,
-    disableBypass,
     hasAccess,
     logout,
     updateProfileName,

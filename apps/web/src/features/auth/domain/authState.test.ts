@@ -19,23 +19,19 @@ const baseUser: AuthUser = {
 }
 
 describe('resolveIsAuthenticated', () => {
-  it('returns true for an active user without bypass', () => {
-    expect(resolveIsAuthenticated(baseUser, false)).toBe(true)
-  })
-
-  it('returns true when bypass is enabled even without a user', () => {
-    expect(resolveIsAuthenticated(null, true)).toBe(true)
+  it('returns true for an active user', () => {
+    expect(resolveIsAuthenticated(baseUser)).toBe(true)
   })
 
   it('returns false for a blocked user', () => {
-    expect(resolveIsAuthenticated({ ...baseUser, isFrozen: true }, false)).toBe(false)
+    expect(resolveIsAuthenticated({ ...baseUser, isFrozen: true })).toBe(false)
   })
 
-  it('returns the bypass marker when bypass is enabled', () => {
-    expect(resolvePersistedUserId(null, true)).toBe('mvp-bypass')
+  it('returns null for a missing user', () => {
+    expect(resolvePersistedUserId(null)).toBeNull()
   })
 
   it('returns a user id when an active user is present', () => {
-    expect(resolvePersistedUserId(baseUser, false)).toBe(baseUser.id)
+    expect(resolvePersistedUserId(baseUser)).toBe(baseUser.id)
   })
 })

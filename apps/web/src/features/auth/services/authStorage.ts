@@ -2,7 +2,6 @@ import { loadJsonRecord, saveJsonRecord } from '@gym-pilot/shared'
 import type { AuthUser } from '../domain/authTypes'
 
 const SESSION_STORAGE_KEY = 'gym-pilot-auth-session'
-const BYPASS_STORAGE_KEY = 'gym-pilot-auth-bypass'
 export const CURRENT_USER_ID_STORAGE_KEY = 'gym-pilot-current-user-id'
 export const LOGOUT_PENDING_STORAGE_KEY = 'gym-pilot-auth-logout-pending'
 
@@ -26,16 +25,8 @@ export async function readStoredSession(): Promise<AuthUser | null> {
   return stored as AuthUser
 }
 
-export async function readBypassFlag(): Promise<boolean> {
-  return loadJsonRecord<boolean>(BYPASS_STORAGE_KEY, false)
-}
-
 export async function persistSession(user: AuthUser | null) {
   await saveJsonRecord(SESSION_STORAGE_KEY, user)
-}
-
-export async function persistBypassFlag(isEnabled: boolean) {
-  await saveJsonRecord(BYPASS_STORAGE_KEY, isEnabled)
 }
 
 export function readCurrentUserId(storage: StorageLike | null = getSessionStorage()) {

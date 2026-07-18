@@ -4,7 +4,7 @@ import {
   normalizeFolderName,
   sortQuickLinks,
   type QuickLink,
-} from '../src/features/favorites/domain/quickLinks'
+} from '../src/features/favourites/domain/quickLinks'
 
 describe('favorites domain helpers', () => {
   it('normalizes stored favorites and preserves folder ordering', () => {

@@ -1,16 +1,12 @@
 import type { User, UserRole } from '@gym-pilot/types'
 import type { AuthUser } from './authTypes'
 import { hasAccessToRole } from './authTypes'
-import { toAuthUser, toAuthUserFromBypass } from './authMapping'
+import { toAuthUser } from './authMapping'
 import { resolvePersistedUserId } from './authState'
 
 export function resolveLoginAuthUser(users: User[], userId: string) {
   const selectedUser = users.find((item) => item.id === userId)
   return selectedUser ? toAuthUser(selectedUser) : null
-}
-
-export function resolveBypassAuthUser() {
-  return toAuthUserFromBypass()
 }
 
 export function resolveAuthUserProfileNameUpdate(user: AuthUser | null, friendlyName: string) {
@@ -27,7 +23,7 @@ export function resolveAuthUserProfileNameUpdate(user: AuthUser | null, friendly
       name: trimmedName,
       slug,
     },
-    persistedUserId: resolvePersistedUserId(user, false),
+    persistedUserId: resolvePersistedUserId(user),
   }
 }
 
@@ -62,7 +58,7 @@ export function resolveAuthUserGymBrandUpdate(user: AuthUser | null, gymBrand: s
       gymBrand: trimmedValue || null,
       gymName: isVirginBrand ? user.gymName ?? previousGymName : null,
     },
-    persistedUserId: resolvePersistedUserId(user, false),
+    persistedUserId: resolvePersistedUserId(user),
     isVirginBrand,
     previousGymName,
   }
@@ -86,9 +82,9 @@ export function resolveAuthUserGymNameUpdate(user: AuthUser | null, gymName: str
   }
 }
 
-export function resolveAuthAccessState(user: AuthUser | null, isBypassEnabled: boolean, requiredRole: UserRole | UserRole[]) {
+export function resolveAuthAccessState(user: AuthUser | null, requiredRole: UserRole | UserRole[]) {
   return {
-    isAuthenticated: user !== null || isBypassEnabled,
-    hasAccess: hasAccessToRole(user, requiredRole, isBypassEnabled),
+    isAuthenticated: user !== null,
+    hasAccess: hasAccessToRole(user, requiredRole, false),
   }
 }

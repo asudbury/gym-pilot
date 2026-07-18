@@ -1,4 +1,4 @@
-import type { QuickLink } from '../../favorites/domain/quickLinks'
+import type { QuickLink } from '../../favourites/domain/quickLinks'
 import { getExercisePath } from '../../../utils/exerciseRouteUtils'
 
 export type FavoritePlanBuilderExercise = {

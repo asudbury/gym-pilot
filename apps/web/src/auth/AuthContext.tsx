@@ -10,12 +10,9 @@ import { persistShowVersion, persistThemePreference, readStoredShowVersion, read
 type AuthContextValue = {
   user: AuthUser | null
   isAuthenticated: boolean
-  isBypassEnabled: boolean
   themePreference: 'light' | 'dark'
   showVersion: boolean
   login: (userId: string) => boolean
-  enableBypass: () => void
-  disableBypass: () => void
   logout: () => void
   updateProfileName: (friendlyName: string) => Promise<void>
   updateApplicationName: (applicationName: string) => Promise<void>
@@ -37,15 +34,10 @@ export function AuthProvider({ children }: AuthProviderProps) {
   const { users } = usePlan()
   const {
     user,
-    isBypassEnabled,
     hydrateSession,
-    hydrateBypass,
     refreshSupabaseSession,
     persistAuthState,
-    persistBypassState,
     login,
-    enableBypass,
-    disableBypass,
     hasAccess,
     logout: logoutFromModule,
     updateProfileName: updateProfileNameInModule,
@@ -64,21 +56,16 @@ export function AuthProvider({ children }: AuthProviderProps) {
     window.addEventListener('gym-pilot-auth-updated', handleAuthStateChanged)
 
     void hydrateSession()
-    void hydrateBypass()
     void refreshSupabaseSession()
 
     return () => {
       window.removeEventListener('gym-pilot-auth-updated', handleAuthStateChanged)
     }
-  }, [hydrateSession, hydrateBypass, refreshSupabaseSession])
+  }, [hydrateSession, refreshSupabaseSession])
 
   useEffect(() => {
     void persistAuthState()
   }, [persistAuthState])
-
-  useEffect(() => {
-    void persistBypassState()
-  }, [persistBypassState])
 
   useEffect(() => {
     if (typeof document === 'undefined') {
@@ -112,18 +99,6 @@ export function AuthProvider({ children }: AuthProviderProps) {
     }
 
     return success
-  }
-
-  const handleEnableBypass = () => {
-    logger.info('[Auth] Bypass enabled')
-    enableBypass()
-    notifyAuthStateChanged()
-  }
-
-  const handleDisableBypass = () => {
-    logger.info('[Auth] Bypass disabled')
-    disableBypass()
-    notifyAuthStateChanged()
   }
 
   const logout = () => {
@@ -178,13 +153,10 @@ export function AuthProvider({ children }: AuthProviderProps) {
   const value = useMemo<AuthContextValue>(
     () => ({
       user,
-      isAuthenticated: isBypassEnabled || Boolean(user && !isUserAccessBlocked(user)),
-      isBypassEnabled,
+      isAuthenticated: Boolean(user && !isUserAccessBlocked(user)),
       themePreference,
       showVersion,
       login: handleLogin,
-      enableBypass: handleEnableBypass,
-      disableBypass: handleDisableBypass,
       logout,
       updateProfileName,
       updateApplicationName,
@@ -194,7 +166,7 @@ export function AuthProvider({ children }: AuthProviderProps) {
       setShowVersion,
       hasAccess,
     }),
-    [user, isBypassEnabled, themePreference, showVersion, users],
+    [user, themePreference, showVersion, users],
   )
 
   return (

@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest'
 import type { User } from '@gym-pilot/types'
-import { resolveAuthUserProfileNameUpdate, resolveBypassAuthUser, resolveLoginAuthUser } from './authTransitions'
+import { resolveAuthUserProfileNameUpdate, resolveLoginAuthUser } from './authTransitions'
 
 describe('authTransitions', () => {
   it('resolves a login user from the available users list', () => {
@@ -10,11 +10,10 @@ describe('authTransitions', () => {
     expect(user?.name).toBe('Ada')
   })
 
-  it('creates a bypass user and a slugged profile-name update', () => {
-    const bypassUser = resolveBypassAuthUser()
-    const nextState = resolveAuthUserProfileNameUpdate(bypassUser, ' New Name ')
+  it('creates a slugged profile-name update for an existing user', () => {
+    const user = { id: 'u2', name: 'Ada', slug: 'ada', role: 'client', roles: ['client'], applicationName: null, gymBrand: null, gymName: null, accountTier: null, accessEndsAt: null, isFrozen: false, trainerId: null } satisfies User
+    const nextState = resolveAuthUserProfileNameUpdate({ ...user, email: null }, ' New Name ')
 
-    expect(bypassUser.id).toBeTruthy()
     expect(nextState?.user.slug).toBe('new-name')
     expect(nextState?.user.name).toBe('New Name')
   })
