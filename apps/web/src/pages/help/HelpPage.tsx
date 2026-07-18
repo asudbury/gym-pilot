@@ -1,8 +1,11 @@
 import { PageLayout } from '../../layouts/PageLayout'
 import { PageCardLayout } from '../../layouts/PageCardLayout'
 import { helpSections } from '../../utils/helpUtils'
+import { getBuildMetadata } from '../../utils/buildInfo'
 
 export function HelpPage() {
+  const buildMetadata = getBuildMetadata()
+
   return (
     <PageLayout>
       <PageCardLayout
@@ -23,6 +26,13 @@ export function HelpPage() {
               </ul>
             </div>
           ))}
+
+          <div className="rounded-2xl border border-slate-200 bg-white px-4 py-3 text-sm text-slate-500">
+            <p>App version: {buildMetadata.appVersion}</p>
+            <p className="mt-1">Build: {buildMetadata.buildTimestamp}</p>
+            <p className="mt-1">Commit: {buildMetadata.commitSha}</p>
+            <p className="mt-1">Branch: {buildMetadata.branch}</p>
+          </div>
         </div>
       </PageCardLayout>
     </PageLayout>
