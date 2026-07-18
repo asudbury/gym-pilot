@@ -6,7 +6,12 @@ describe('buildFavoritePlanBuilderState', () => {
     const state = buildFavoritePlanBuilderState(
       {
         favorites: [
-          { id: '1', label: 'Alpha', path: '/exercise/alpha', folder: '  Zeta  ' },
+          {
+            id: '1',
+            label: 'Alpha',
+            path: '/exercise/alpha',
+            folder: '  Zeta  ',
+          },
           { id: '2', label: 'Beta', path: '/exercise/beta' },
         ],
         folders: ['Alpha'],

@@ -52,38 +52,54 @@ export function getDisplayEmail(email?: string | null): string {
   return email?.trim() ? email.trim() : 'No email available'
 }
 
-export function getDisplayRoles(roles?: Array<UserRole | string> | null, fallbackRole?: UserRole): UserRole[] {
+export function getDisplayRoles(
+  roles?: Array<UserRole | string> | null,
+  fallbackRole?: UserRole,
+): UserRole[] {
   return normalizeUserRoles(roles, fallbackRole)
 }
 
-export function mapAdminProfileRows(rows: Array<{
-  user_id: string
-  friendly_name: string | null
-  roles?: unknown
-  trainer_id?: string | null
-  application_name?: string | null
-  gym_brand?: string | null
-  account_tier?: string | null
-  access_ends_at?: string | null
-  is_frozen?: boolean
-  must_change_password?: boolean
-  last_logged_in_at?: string | null
-  previous_last_logged_in_at?: string | null
-}>, emailLookup: Map<string, string | null>): AdminProfileRow[] {
+export function mapAdminProfileRows(
+  rows: Array<{
+    user_id: string
+    friendly_name: string | null
+    roles?: unknown
+    trainer_id?: string | null
+    application_name?: string | null
+    gym_brand?: string | null
+    account_tier?: string | null
+    access_ends_at?: string | null
+    is_frozen?: boolean
+    must_change_password?: boolean
+    last_logged_in_at?: string | null
+    previous_last_logged_in_at?: string | null
+  }>,
+  emailLookup: Map<string, string | null>,
+): AdminProfileRow[] {
   return rows.map((row) => ({
     id: row.user_id,
-    name: typeof row.friendly_name === 'string' && row.friendly_name.trim() ? row.friendly_name.trim() : row.user_id,
+    name:
+      typeof row.friendly_name === 'string' && row.friendly_name.trim()
+        ? row.friendly_name.trim()
+        : row.user_id,
     roles: getDisplayRoles(Array.isArray(row.roles) ? row.roles : undefined),
-    applicationName: typeof row.application_name === 'string' ? row.application_name : null,
+    applicationName:
+      typeof row.application_name === 'string' ? row.application_name : null,
     gymBrand: typeof row.gym_brand === 'string' ? row.gym_brand : null,
     gymName: null,
-    accountTier: typeof row.account_tier === 'string' ? row.account_tier : 'free',
-    accessEndsAt: typeof row.access_ends_at === 'string' ? row.access_ends_at : null,
+    accountTier:
+      typeof row.account_tier === 'string' ? row.account_tier : 'free',
+    accessEndsAt:
+      typeof row.access_ends_at === 'string' ? row.access_ends_at : null,
     isFrozen: Boolean(row.is_frozen),
     email: emailLookup.get(row.user_id) ?? null,
     trainerId: typeof row.trainer_id === 'string' ? row.trainer_id : null,
     mustChangePassword: Boolean(row.must_change_password),
-    lastLoggedInAt: typeof row.last_logged_in_at === 'string' ? row.last_logged_in_at : null,
-    previousLastLoggedInAt: typeof row.previous_last_logged_in_at === 'string' ? row.previous_last_logged_in_at : null,
+    lastLoggedInAt:
+      typeof row.last_logged_in_at === 'string' ? row.last_logged_in_at : null,
+    previousLastLoggedInAt:
+      typeof row.previous_last_logged_in_at === 'string'
+        ? row.previous_last_logged_in_at
+        : null,
   }))
 }

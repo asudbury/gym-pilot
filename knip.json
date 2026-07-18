@@ -1,0 +1,24 @@
+{
+  "$schema": "https://unpkg.com/knip@latest/schema.json",
+  "entry": [
+    "apps/web/src/main.tsx",
+    "apps/web/src/App.tsx",
+    "packages/*/src/index.ts"
+  ],
+  "project": [
+    "apps/web/src/**/*.ts",
+    "apps/web/src/**/*.tsx",
+    "packages/*/src/**/*.ts",
+    "packages/*/src/**/*.tsx"
+  ],
+  "ignore": [
+    "apps/web/tests/**",
+    "apps/web/src/**/*.test.*",
+    "packages/**/dist/**"
+  ],
+  "ignoreDependencies": [
+    "@gym-pilot/shared",
+    "@tanstack/react-query",
+    "react-window"
+  ]
+}

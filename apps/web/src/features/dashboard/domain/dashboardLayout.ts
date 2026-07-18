@@ -20,10 +20,18 @@ export type DashboardViewModel = {
   selectedLayoutKey: string
 }
 
-export function resolveDashboardViewModel(userRole: string | undefined, userRoles: Array<string | undefined> | undefined): DashboardViewModel {
-  const normalizedRoles = Array.isArray(userRoles) && userRoles.length
-    ? userRoles.filter((role): role is UserRole => typeof role === 'string' && ['admin', 'trainer', 'client', 'guest'].includes(role))
-    : []
+export function resolveDashboardViewModel(
+  userRole: string | undefined,
+  userRoles: Array<string | undefined> | undefined,
+): DashboardViewModel {
+  const normalizedRoles =
+    Array.isArray(userRoles) && userRoles.length
+      ? userRoles.filter(
+          (role): role is UserRole =>
+            typeof role === 'string' &&
+            ['admin', 'trainer', 'client', 'guest'].includes(role),
+        )
+      : []
 
   if (userRole && !normalizedRoles.includes(userRole as UserRole)) {
     normalizedRoles.push(userRole as UserRole)
@@ -39,7 +47,9 @@ export function resolveDashboardViewModel(userRole: string | undefined, userRole
   }
 }
 
-export function getDashboardLayoutDefinitions(userRoles: UserRole[]): DashboardLayoutDefinition[] {
+export function getDashboardLayoutDefinitions(
+  userRoles: UserRole[],
+): DashboardLayoutDefinition[] {
   const roles = new Set(userRoles)
   const layouts: DashboardLayoutDefinition[] = []
 
@@ -48,12 +58,33 @@ export function getDashboardLayoutDefinitions(userRoles: UserRole[]): DashboardL
       key: 'admin',
       label: 'Admin',
       title: 'Admin workspace',
-      description: 'Manage users, access and app configuration from a central view.',
+      description:
+        'Manage users, access and app configuration from a central view.',
       widgets: [
-        { title: 'Client management', description: 'Create and maintain user records and role assignments.', to: '/admin/users', tone: 'blue' },
-        { title: 'Admin tools', description: 'Jump into the main admin experience.', to: '/admin', tone: 'default' },
-        { title: 'Database', description: 'Inspect the Supabase-backed data store.', to: '/admin/database', tone: 'default' },
-        { title: 'Preferences', description: 'Adjust application-wide preferences.', to: '/admin/preferences', tone: 'emerald' },
+        {
+          title: 'Client management',
+          description: 'Create and maintain user records and role assignments.',
+          to: '/admin/users',
+          tone: 'blue',
+        },
+        {
+          title: 'Admin tools',
+          description: 'Jump into the main admin experience.',
+          to: '/admin',
+          tone: 'default',
+        },
+        {
+          title: 'Database',
+          description: 'Inspect the Supabase-backed data store.',
+          to: '/admin/database',
+          tone: 'default',
+        },
+        {
+          title: 'Preferences',
+          description: 'Adjust application-wide preferences.',
+          to: '/admin/preferences',
+          tone: 'emerald',
+        },
       ],
     })
   }
@@ -63,12 +94,33 @@ export function getDashboardLayoutDefinitions(userRoles: UserRole[]): DashboardL
       key: 'trainer',
       label: 'Trainer',
       title: 'Trainer workspace',
-      description: 'Monitor your clients, plans and assignments from one place.',
+      description:
+        'Monitor your clients, plans and assignments from one place.',
       widgets: [
-        { title: 'Client assignments', description: 'Review work assigned to your clients.', to: '/assignments', tone: 'blue' },
-        { title: 'Plans', description: 'Share and review training plans.', to: '/plans', tone: 'default' },
-        { title: 'Exercises', description: 'Search the exercise library for your next session.', to: '/exercises', tone: 'default' },
-        { title: 'Help', description: 'Find support and guidance.', to: '/help', tone: 'emerald' },
+        {
+          title: 'Client assignments',
+          description: 'Review work assigned to your clients.',
+          to: '/assignments',
+          tone: 'blue',
+        },
+        {
+          title: 'Plans',
+          description: 'Share and review training plans.',
+          to: '/plans',
+          tone: 'default',
+        },
+        {
+          title: 'Exercises',
+          description: 'Search the exercise library for your next session.',
+          to: '/exercises',
+          tone: 'default',
+        },
+        {
+          title: 'Help',
+          description: 'Find support and guidance.',
+          to: '/help',
+          tone: 'emerald',
+        },
       ],
     })
   }
@@ -78,12 +130,33 @@ export function getDashboardLayoutDefinitions(userRoles: UserRole[]): DashboardL
       key: 'client',
       label: 'Client',
       title: 'Client workspace',
-      description: 'Jump back into your exercises, plans and assignments from one place.',
+      description:
+        'Jump back into your exercises, plans and assignments from one place.',
       widgets: [
-        { title: 'Exercises', description: 'Browse exercises and favourite your go-tos.', to: '/exercises', tone: 'blue' },
-        { title: 'Plans', description: 'Review your training plans and keep momentum.', to: '/plans', tone: 'default' },
-        { title: 'Assignments', description: 'See the work assigned to you and stay on track.', to: '/assignments', tone: 'default' },
-        { title: 'Help', description: 'Find guidance and support for the app.', to: '/help', tone: 'emerald' },
+        {
+          title: 'Exercises',
+          description: 'Browse exercises and favourite your go-tos.',
+          to: '/exercises',
+          tone: 'blue',
+        },
+        {
+          title: 'Plans',
+          description: 'Review your training plans and keep momentum.',
+          to: '/plans',
+          tone: 'default',
+        },
+        {
+          title: 'Assignments',
+          description: 'See the work assigned to you and stay on track.',
+          to: '/assignments',
+          tone: 'default',
+        },
+        {
+          title: 'Help',
+          description: 'Find guidance and support for the app.',
+          to: '/help',
+          tone: 'emerald',
+        },
       ],
     })
   }
@@ -95,8 +168,18 @@ export function getDashboardLayoutDefinitions(userRoles: UserRole[]): DashboardL
       title: 'Quick access',
       description: 'A simple starting point for your dashboard.',
       widgets: [
-        { title: 'Exercises', description: 'Browse the library.', to: '/exercises', tone: 'blue' },
-        { title: 'Help', description: 'Find support and guidance.', to: '/help', tone: 'default' },
+        {
+          title: 'Exercises',
+          description: 'Browse the library.',
+          to: '/exercises',
+          tone: 'blue',
+        },
+        {
+          title: 'Help',
+          description: 'Find support and guidance.',
+          to: '/help',
+          tone: 'default',
+        },
       ],
     })
   }

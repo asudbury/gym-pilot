@@ -20,7 +20,12 @@ type ExerciseDetailsCardProps = {
 }
 
 function isExerciseDetailsExercise(value: Exercise): value is Exercise {
-  return 'body_part' in value && 'equipment' in value && 'target' in value && 'gif_url' in value
+  return (
+    'body_part' in value &&
+    'equipment' in value &&
+    'target' in value &&
+    'gif_url' in value
+  )
 }
 
 export function ExerciseDetailsCard({
@@ -29,13 +34,16 @@ export function ExerciseDetailsCard({
   onToggle,
   headerActions,
 }: ExerciseDetailsCardProps) {
-
-  const exerciseDetails = isExerciseDetailsExercise(exercise) ? exercise : undefined
+  const exerciseDetails = isExerciseDetailsExercise(exercise)
+    ? exercise
+    : undefined
 
   if (!exerciseDetails) {
     return (
       <div className="flex flex-col items-center justify-center gap-2 rounded-lg border border-slate-200 bg-slate-50 p-6 text-center">
-        <p className="text-sm text-slate-600">Exercise details are not available.</p>
+        <p className="text-sm text-slate-600">
+          Exercise details are not available.
+        </p>
       </div>
     )
   }
@@ -48,7 +56,11 @@ export function ExerciseDetailsCard({
         </div>
         <PageActionGroup>
           {onToggle ? (
-            <Button tone="default" onClick={() => onToggle(exercise.id)} className="px-3 py-2">
+            <Button
+              tone="default"
+              onClick={() => onToggle(exercise.id)}
+              className="px-3 py-2"
+            >
               {expanded ? 'Hide details' : 'Show details'}
             </Button>
           ) : null}
@@ -70,8 +82,15 @@ export function ExerciseDetailsCard({
 
       {expanded && exerciseDetails ? (
         <>
-          <ExerciseImage mediaGif={exerciseDetails.gif_url} exerciseName={exerciseDetails.name} className="mt-6" />
-          <ExerciseSteps steps={exerciseDetails.instruction_steps.en} className="mt-8" />
+          <ExerciseImage
+            mediaGif={exerciseDetails.gif_url}
+            exerciseName={exerciseDetails.name}
+            className="mt-6"
+          />
+          <ExerciseSteps
+            steps={exerciseDetails.instruction_steps.en}
+            className="mt-8"
+          />
           <YouTubeExerciseSearchButton exerciseName={exerciseDetails.name} />
         </>
       ) : null}

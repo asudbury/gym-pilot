@@ -10,9 +10,16 @@ type PanelProps = HTMLAttributes<HTMLElement> & {
   padding?: PanelPadding
 }
 
-export function Panel({ children, className = '', variant = 'default', padding = 'md', ...props }: PanelProps) {
+export function Panel({
+  children,
+  className = '',
+  variant = 'default',
+  padding = 'md',
+  ...props
+}: PanelProps) {
   const variantClassName = variant === 'muted' ? 'bg-slate-50' : 'bg-white'
-  const paddingClassName = padding === 'sm' ? 'p-3' : padding === 'lg' ? 'p-5' : 'p-4'
+  const paddingClassName =
+    padding === 'sm' ? 'p-3' : padding === 'lg' ? 'p-5' : 'p-4'
 
   return (
     <div

@@ -1,5 +1,8 @@
 import { describe, expect, it } from 'vitest'
-import { buildCreateUserProfilePayload, getCreateUserRoleOptions } from './createUser'
+import {
+  buildCreateUserProfilePayload,
+  getCreateUserRoleOptions,
+} from './createUser'
 
 describe('createUser domain helpers', () => {
   it('provides the supported role options', () => {

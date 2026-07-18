@@ -1,5 +1,11 @@
-import { normalizeFavouritesState, type FavouritesStorageValue } from '../domain/quickLinks'
-import { loadFavouritesStorageWithRepository, saveFavouritesStorageWithRepository } from './favouritesRepository'
+import {
+  normalizeFavouritesState,
+  type FavouritesStorageValue,
+} from '../domain/quickLinks'
+import {
+  loadFavouritesStorageWithRepository,
+  saveFavouritesStorageWithRepository,
+} from './favouritesRepository'
 
 export async function loadFavouritesStorage(): Promise<FavouritesStorageValue> {
   const storedValue = await loadFavouritesStorageWithRepository()

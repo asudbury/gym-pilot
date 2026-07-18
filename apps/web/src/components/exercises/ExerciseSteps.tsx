@@ -1,12 +1,9 @@
 type ExerciseStepsProps = {
-  steps: string[],
+  steps: string[]
   className?: string
 }
 
-export function ExerciseSteps({
-  steps,
-  className,
-}: ExerciseStepsProps) {
+export function ExerciseSteps({ steps, className }: ExerciseStepsProps) {
   return (
     <ol className={`text-slate-600 ${className ?? ''}`}>
       {steps.map((step, index) => (

@@ -37,24 +37,44 @@ export function resolveHomeViewModel(filters: HomeFilters) {
 
   return {
     exerciseList: parsed as HomeExercise[],
-    categories: ['All', ...Array.from(new Set(parsed.map((exercise) => formatLabel(exercise.category))))],
+    categories: [
+      'All',
+      ...Array.from(
+        new Set(parsed.map((exercise) => formatLabel(exercise.category))),
+      ),
+    ],
     totalExercises: parsed.length,
     normalizedCategory: normalizedCategory ?? null,
     hasExplicitAll,
     hasCategoryFilter,
     hasSearchText,
     hasSearchThreshold,
-    shouldShowResults: hasCategoryFilter || (hasSearchText && hasSearchThreshold),
+    shouldShowResults:
+      hasCategoryFilter || (hasSearchText && hasSearchThreshold),
   } satisfies HomeViewModel
 }
 
-export function filterExercises(exerciseList: HomeViewModel['exerciseList'], _filters: HomeFilters, normalizedCategory: string | null, hasExplicitAll: boolean, deferredSearchTerm: string) {
+export function filterExercises(
+  exerciseList: HomeViewModel['exerciseList'],
+  _filters: HomeFilters,
+  normalizedCategory: string | null,
+  hasExplicitAll: boolean,
+  deferredSearchTerm: string,
+) {
   const normalizedSearch = deferredSearchTerm.trim().toLowerCase()
   const shouldApplySearch = normalizedSearch.length >= MIN_SEARCH_CHARS
 
   return exerciseList.filter((exercise) => {
-    const matchesCategory = hasExplicitAll || normalizedCategory === null || formatLabel(exercise.category) === normalizedCategory
-    const matchesSearch = !shouldApplySearch || [exercise.name, exercise.category, exercise.target, exercise.equipment].join(' ').toLowerCase().includes(normalizedSearch)
+    const matchesCategory =
+      hasExplicitAll ||
+      normalizedCategory === null ||
+      formatLabel(exercise.category) === normalizedCategory
+    const matchesSearch =
+      !shouldApplySearch ||
+      [exercise.name, exercise.category, exercise.target, exercise.equipment]
+        .join(' ')
+        .toLowerCase()
+        .includes(normalizedSearch)
 
     return matchesCategory && matchesSearch
   })

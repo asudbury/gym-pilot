@@ -1,7 +1,18 @@
 import { useEffect, useState } from 'react'
-import { Navigate, Route, Routes, useLocation, useNavigate } from 'react-router-dom'
+import {
+  Navigate,
+  Route,
+  Routes,
+  useLocation,
+  useNavigate,
+} from 'react-router-dom'
 import webPackageJson from '../package.json'
-import { exercises, exercisesSchema, getSupabaseClient, usePlan } from '@gym-pilot/shared'
+import {
+  exercises,
+  exercisesSchema,
+  getSupabaseClient,
+  usePlan,
+} from '@gym-pilot/shared'
 import { getToneClass } from './components/toneClasses'
 import { HOME_FILTER_KEY } from './constants/storageKeys'
 import { ExercisePage } from './pages/ExercisePage'
@@ -34,9 +45,16 @@ import { TimetablePage } from './pages/TimetablePage'
 import { buildNavigationMenuItems } from './utils/navigationUtils'
 import { AssignmentDetailPage } from './pages/assignments/AssignmentDetailPage'
 import { logger } from '@gym-pilot/shared'
-import { getHashHomeUrl, normalizeHomeFilters, type HomeFilters } from './utils/appUtils'
+import {
+  getHashHomeUrl,
+  normalizeHomeFilters,
+  type HomeFilters,
+} from './utils/appUtils'
 import { useFavouritesFeature } from './features/favourites/hooks/useFavouritesFeature'
-import { sortQuickLinks, type QuickLink } from './features/favourites/domain/quickLinks'
+import {
+  sortQuickLinks,
+  type QuickLink,
+} from './features/favourites/domain/quickLinks'
 
 function ScrollToTop() {
   const { pathname } = useLocation()
@@ -55,7 +73,8 @@ function App() {
   const SHOW_AUTH_BUTTON = true
   const { user, logout, showVersion } = useAuth()
   const appVersion = webPackageJson.version || '0.0.0'
-  const { favorites, folders, setFavorites, setFolders } = useFavouritesFeature()
+  const { favorites, folders, setFavorites, setFolders } =
+    useFavouritesFeature()
 
   const [homeFilters, setHomeFilters] = useState<HomeFilters>(() => {
     if (typeof window === 'undefined') {
@@ -81,7 +100,10 @@ function App() {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
 
   useEffect(() => {
-    window.sessionStorage.setItem(HOME_FILTER_KEY, JSON.stringify(normalizeHomeFilters(homeFilters)))
+    window.sessionStorage.setItem(
+      HOME_FILTER_KEY,
+      JSON.stringify(normalizeHomeFilters(homeFilters)),
+    )
   }, [homeFilters])
 
   useEffect(() => {
@@ -93,27 +115,27 @@ function App() {
 
     logger.info('[App] Handling Supabase auth callback', { pathname, search })
 
-    void client.auth.exchangeCodeForSession(window.location.href).then(({ error }) => {
-      if (error) {
-        logger.error('Supabase auth callback failed', error)
-        return
-      }
+    void client.auth
+      .exchangeCodeForSession(window.location.href)
+      .then(({ error }) => {
+        if (error) {
+          logger.error('Supabase auth callback failed', error)
+          return
+        }
 
-      logger.info('[App] Supabase auth callback succeeded; redirecting home')
-      window.dispatchEvent(new Event('gym-pilot-auth-updated'))
-      window.location.assign(getHashHomeUrl())
-    })
+        logger.info('[App] Supabase auth callback succeeded; redirecting home')
+        window.dispatchEvent(new Event('gym-pilot-auth-updated'))
+        window.location.assign(getHashHomeUrl())
+      })
   }, [pathname, search])
 
   useEffect(() => {
     setMobileMenuOpen(false)
   }, [pathname, user?.id, user?.email])
 
-
   const handleToggleFavoriteExercise = (exerciseId: string) => {
-    
     logger.debug(`Toggling favorite exercise: ${exerciseId}`)
-    
+
     const parsed = exercisesSchema.parse(exercises)
     const exercise = parsed.find((item) => item.id === exerciseId)
 
@@ -127,21 +149,32 @@ function App() {
       path: getExercisePath(exercise),
     }
 
-    const alreadySaved = favorites.some((item) => item.path === favoriteLink.path)
+    const alreadySaved = favorites.some(
+      (item) => item.path === favoriteLink.path,
+    )
 
     if (alreadySaved) {
-      setFavorites((current) => sortQuickLinks(current.filter((item) => item.path !== favoriteLink.path)))
+      setFavorites((current) =>
+        sortQuickLinks(
+          current.filter((item) => item.path !== favoriteLink.path),
+        ),
+      )
       return
     }
 
-    setFavorites((current) => sortQuickLinks([favoriteLink, ...current]).slice(0, 8))
+    setFavorites((current) =>
+      sortQuickLinks([favoriteLink, ...current]).slice(0, 8),
+    )
   }
 
   const isExerciseFavorite = (exerciseId: string) => {
     const parsed = exercisesSchema.parse(exercises)
     const exercise = parsed.find((item) => item.id === exerciseId)
 
-    return Boolean(exercise && favorites.some((item) => item.path === getExercisePath(exercise)))
+    return Boolean(
+      exercise &&
+      favorites.some((item) => item.path === getExercisePath(exercise)),
+    )
   }
 
   const plansCount = visiblePlans.length
@@ -151,14 +184,17 @@ function App() {
   const isClient = Boolean(
     user && (user.role === 'client' || user.roles?.includes('client')),
   )
-  const assignedTrainer = isClient && user?.trainerId
-    ? users.find((candidate) => candidate.id === user.trainerId)
-    : undefined
+  const assignedTrainer =
+    isClient && user?.trainerId
+      ? users.find((candidate) => candidate.id === user.trainerId)
+      : undefined
   const appName = isTrainer
-    ? (user?.applicationName?.trim() || 'GymPilot')
-    : (assignedTrainer && (assignedTrainer.applicationName?.trim() || assignedTrainer.name?.trim())
-      ? (assignedTrainer.applicationName?.trim() || assignedTrainer.name?.trim())
-      : 'GymPilot')
+    ? user?.applicationName?.trim() || 'GymPilot'
+    : assignedTrainer &&
+        (assignedTrainer.applicationName?.trim() ||
+          assignedTrainer.name?.trim())
+      ? assignedTrainer.applicationName?.trim() || assignedTrainer.name?.trim()
+      : 'GymPilot'
   const desktopMenuItems = buildNavigationMenuItems({
     plansCount,
     assignmentsCount: visibleAssignments.length,
@@ -170,14 +206,16 @@ function App() {
     assignmentsCount: visibleAssignments.length,
     isAuthenticated: Boolean(user),
     onItemClick: () => setMobileMenuOpen(false),
-    itemClassName: 'rounded-xl px-3 py-2 text-sm font-medium text-slate-700 transition hover:bg-slate-50',
+    itemClassName:
+      'rounded-xl px-3 py-2 text-sm font-medium text-slate-700 transition hover:bg-slate-50',
   })
   const mobileMenuItems = buildNavigationMenuItems({
     plansCount,
     assignmentsCount: visibleAssignments.length,
     isAuthenticated: Boolean(user),
     onItemClick: () => setMobileMenuOpen(false),
-    itemClassName: 'rounded-xl px-3 py-2 text-sm font-medium text-slate-700 transition hover:bg-slate-50',
+    itemClassName:
+      'rounded-xl px-3 py-2 text-sm font-medium text-slate-700 transition hover:bg-slate-50',
   })
 
   return (
@@ -216,38 +254,119 @@ function App() {
         <Route path="/login" element={<LoginPage />} />
         <Route path="/reset-password" element={<ResetPasswordPage />} />
         <Route path="/auth/callback" element={<LoginPage />} />
-        <Route path="/" element={user ? <DashboardPage userName={user.name || user.email || null} /> : <HomePage filters={homeFilters} onFiltersChange={setHomeFilters} onToggleFavoriteExercise={handleToggleFavoriteExercise} isExerciseFavorite={isExerciseFavorite} />} />
-        <Route path="/exercise/:slug" element={<ExercisePage onToggleFavoriteExercise={handleToggleFavoriteExercise} isExerciseFavorite={isExerciseFavorite} />} />
+        <Route
+          path="/"
+          element={
+            user ? (
+              <DashboardPage userName={user.name || user.email || null} />
+            ) : (
+              <HomePage
+                filters={homeFilters}
+                onFiltersChange={setHomeFilters}
+                onToggleFavoriteExercise={handleToggleFavoriteExercise}
+                isExerciseFavorite={isExerciseFavorite}
+              />
+            )
+          }
+        />
+        <Route
+          path="/exercise/:slug"
+          element={
+            <ExercisePage
+              onToggleFavoriteExercise={handleToggleFavoriteExercise}
+              isExerciseFavorite={isExerciseFavorite}
+            />
+          }
+        />
         <Route>
           <Route path="/help" element={<HelpPage />} />
-          <Route path="/favourites" element={<FavouritesPage favorites={favorites} folders={folders} onFoldersChange={setFolders} onFavoritesChange={setFavorites} />} />
+          <Route
+            path="/favourites"
+            element={
+              <FavouritesPage
+                favorites={favorites}
+                folders={folders}
+                onFoldersChange={setFolders}
+                onFavoritesChange={setFavorites}
+              />
+            }
+          />
           <Route element={<RequireAuth />}>
-            <Route path="/exercises" element={<HomePage filters={homeFilters} onFiltersChange={setHomeFilters} onToggleFavoriteExercise={handleToggleFavoriteExercise} isExerciseFavorite={isExerciseFavorite} />} />
+            <Route
+              path="/exercises"
+              element={
+                <HomePage
+                  filters={homeFilters}
+                  onFiltersChange={setHomeFilters}
+                  onToggleFavoriteExercise={handleToggleFavoriteExercise}
+                  isExerciseFavorite={isExerciseFavorite}
+                />
+              }
+            />
             <Route path="/plans" element={<PlansPage />} />
-            <Route element={<RequireAuth requireClubId />}> 
+            <Route element={<RequireAuth requireClubId />}>
               <Route path="/timetable" element={<TimetablePage />} />
             </Route>
             <Route path="/assignments" element={<AssignmentsPage />} />
-            <Route path="/users/:userSlug/assignments" element={<AssignmentsPage />} />
-            <Route path="/users/:userSlug/assignments/create" element={<AssignmentsManagerPage />} />
+            <Route
+              path="/users/:userSlug/assignments"
+              element={<AssignmentsPage />}
+            />
+            <Route
+              path="/users/:userSlug/assignments/create"
+              element={<AssignmentsManagerPage />}
+            />
             <Route path="/plans/new" element={<CreatePlanPage />} />
             <Route path="/plans/:planSlug/edit" element={<CreatePlanPage />} />
             <Route path="/plans/:planSlug" element={<PlanDetailPage />} />
-            <Route path="/assignments/new" element={<AssignmentsManagerPage />} />
-            <Route path="/assignments/create" element={<Navigate to="/assignments/new" replace />} />
-            <Route path="/users/:userSlug/assignments/new" element={<AssignmentsManagerPage />} />
-            <Route path="/users/:userSlug/assignments/create" element={<Navigate to="../new" replace />} />
-            <Route path="/users/:userSlug/assignments/:planSlug" element={<AssignmentDetailPage />} />
-            <Route path="/users/:userSlug/assignments/:planSlug/edit" element={<CreateAssignmentPage />} />
+            <Route
+              path="/assignments/new"
+              element={<AssignmentsManagerPage />}
+            />
+            <Route
+              path="/assignments/create"
+              element={<Navigate to="/assignments/new" replace />}
+            />
+            <Route
+              path="/users/:userSlug/assignments/new"
+              element={<AssignmentsManagerPage />}
+            />
+            <Route
+              path="/users/:userSlug/assignments/create"
+              element={<Navigate to="../new" replace />}
+            />
+            <Route
+              path="/users/:userSlug/assignments/:planSlug"
+              element={<AssignmentDetailPage />}
+            />
+            <Route
+              path="/users/:userSlug/assignments/:planSlug/edit"
+              element={<CreateAssignmentPage />}
+            />
             <Route path="/admin" element={<AdminPage />} />
-            <Route path="/admin/preferences" element={<AdminPreferencesPage />} />
-            <Route path="/admin/change-password" element={<AdminChangePasswordPage />} />
+            <Route
+              path="/admin/preferences"
+              element={<AdminPreferencesPage />}
+            />
+            <Route
+              path="/admin/change-password"
+              element={<AdminChangePasswordPage />}
+            />
           </Route>
           <Route element={<RequireAuth requiredRole="admin" />}>
             <Route path="/admin/users" element={<AdminUsersPage />} />
-            <Route path="/admin/users/create" element={<AdminCreateUserPage />} />
-            <Route path="/admin/users/profiles/:userId" element={<AdminUserProfilesPage />} />
-            <Route path="/admin/users/profiles/:userId/activity" element={<AdminUserActivityPage />} />
+            <Route
+              path="/admin/users/create"
+              element={<AdminCreateUserPage />}
+            />
+            <Route
+              path="/admin/users/profiles/:userId"
+              element={<AdminUserProfilesPage />}
+            />
+            <Route
+              path="/admin/users/profiles/:userId/activity"
+              element={<AdminUserActivityPage />}
+            />
             <Route path="/admin/database" element={<AdminDatabasePage />} />
           </Route>
         </Route>
@@ -257,5 +376,3 @@ function App() {
 }
 
 export default App
-
-

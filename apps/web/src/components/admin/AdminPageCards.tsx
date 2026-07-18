@@ -16,7 +16,13 @@ export function AdminPageCards({ cards }: AdminPageCardsProps) {
           title={card.title}
           description={card.description}
           action={
-            <Link to={card.href} className={getToneClass('blue', 'inline-flex items-center rounded-lg px-4 py-2 text-sm font-medium')}>
+            <Link
+              to={card.href}
+              className={getToneClass(
+                'blue',
+                'inline-flex items-center rounded-lg px-4 py-2 text-sm font-medium',
+              )}
+            >
               {card.label}
             </Link>
           }

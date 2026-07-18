@@ -32,7 +32,9 @@ export function ExerciseFilterPanel({
           id="exercise-search"
           value={draftSearchTerm}
           onChange={onSearchChange}
-          onSelectExercise={(exercise) => onSelectExercise(formatLabel(exercise.name))}
+          onSelectExercise={(exercise) =>
+            onSelectExercise(formatLabel(exercise.name))
+          }
         />
       </div>
 
@@ -40,23 +42,35 @@ export function ExerciseFilterPanel({
         <div className="sm:hidden">
           <select
             value={selectedCategory ?? ''}
-            onChange={(event) => onCategoryChange(event.target.value === '' ? null : event.target.value === 'All' ? 'All' : event.target.value)}
+            onChange={(event) =>
+              onCategoryChange(
+                event.target.value === ''
+                  ? null
+                  : event.target.value === 'All'
+                    ? 'All'
+                    : event.target.value,
+              )
+            }
             className="w-full rounded-full border border-slate-200 bg-white px-4 py-2 text-sm text-slate-700"
           >
             <option value="">No category selected</option>
             <option value="All">All categories</option>
-            {categories.filter((category) => category !== 'All').map((category) => (
-              <option key={category} value={category}>
-                {category}
-              </option>
-            ))}
+            {categories
+              .filter((category) => category !== 'All')
+              .map((category) => (
+                <option key={category} value={category}>
+                  {category}
+                </option>
+              ))}
           </select>
         </div>
 
         <div className="hidden sm:flex sm:flex-wrap sm:items-center sm:gap-2">
           {categories.map((category) => {
             const isAll = category === 'All'
-            const isSelected = isAll ? selectedCategory === 'All' : normalizedCategory === category
+            const isSelected = isAll
+              ? selectedCategory === 'All'
+              : normalizedCategory === category
 
             return (
               <button
@@ -64,8 +78,14 @@ export function ExerciseFilterPanel({
                 onClick={() => onCategoryChange(isAll ? 'All' : category)}
                 className={
                   isSelected
-                    ? getToneClass('blue', 'px-4 py-2 text-sm font-medium transition')
-                    : getToneClass('default', 'px-4 py-2 text-sm font-medium transition hover:bg-slate-200')
+                    ? getToneClass(
+                        'blue',
+                        'px-4 py-2 text-sm font-medium transition',
+                      )
+                    : getToneClass(
+                        'default',
+                        'px-4 py-2 text-sm font-medium transition hover:bg-slate-200',
+                      )
                 }
               >
                 {category}
@@ -77,7 +97,17 @@ export function ExerciseFilterPanel({
         <button
           type="button"
           onClick={onToggleImages}
-          className={showExerciseImages ? getToneClass('default', 'w-fit px-4 py-2 text-sm font-medium transition hover:bg-slate-200') : getToneClass('blue', 'w-fit px-4 py-2 text-sm font-medium transition')}
+          className={
+            showExerciseImages
+              ? getToneClass(
+                  'default',
+                  'w-fit px-4 py-2 text-sm font-medium transition hover:bg-slate-200',
+                )
+              : getToneClass(
+                  'blue',
+                  'w-fit px-4 py-2 text-sm font-medium transition',
+                )
+          }
         >
           {showExerciseImages ? 'Hide images' : 'Show images'}
         </button>

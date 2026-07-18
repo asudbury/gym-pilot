@@ -21,9 +21,10 @@ export function YouTubeExerciseSearchButton({
       disabled={!exerciseName.trim()}
       className="mt-4 inline-flex items-center gap-2 px-4 py-2"
     >
-      <span aria-hidden="true" className="text-lg">▶</span>
+      <span aria-hidden="true" className="text-lg">
+        ▶
+      </span>
       <span>Search for on YouTube</span>
     </Button>
   )
 }
-

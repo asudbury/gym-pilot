@@ -1,12 +1,20 @@
 import { useMemo, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { Button } from '../../components/Button'
-import { getSupabaseClient, logger, signUpWithPassword, usePlan } from '@gym-pilot/shared'
+import {
+  getSupabaseClient,
+  logger,
+  signUpWithPassword,
+  usePlan,
+} from '@gym-pilot/shared'
 import type { UserRole } from '@gym-pilot/types'
 import { AdminSectionShell } from '../../components/admin/AdminSectionShell'
 import { Panel } from '../../components/ui/Panel'
 import { SectionPanel } from '../../components/ui/SectionPanel'
-import { buildCreateUserProfilePayload, getCreateUserRoleOptions } from '../../features/admin/domain/createUser'
+import {
+  buildCreateUserProfilePayload,
+  getCreateUserRoleOptions,
+} from '../../features/admin/domain/createUser'
 
 type StatusMessageState = {
   text: string
@@ -21,9 +29,14 @@ export function AdminCreateUserPage() {
   const [tempPassword, setTempPassword] = useState('')
   const [newUserRoles, setNewUserRoles] = useState<UserRole[]>(['client'])
   const [selectedTrainerId, setSelectedTrainerId] = useState<string>('')
-  const [statusMessage, setStatusMessage] = useState<StatusMessageState | null>(null)
+  const [statusMessage, setStatusMessage] = useState<StatusMessageState | null>(
+    null,
+  )
 
-  const trainerOptions = useMemo(() => users.filter((user) => user.roles.includes('trainer')), [users])
+  const trainerOptions = useMemo(
+    () => users.filter((user) => user.roles.includes('trainer')),
+    [users],
+  )
   const roleOptions = useMemo(() => getCreateUserRoleOptions(), [])
 
   const handleCreateUser = async () => {
@@ -33,22 +46,39 @@ export function AdminCreateUserPage() {
     const hasTemporaryPassword = tempPassword.trim().length > 0
 
     if (hasTemporaryPassword && !tempPassword) {
-      setStatusMessage({ text: 'Provide a temporary password to create an auth-enabled user.', tone: 'error' })
+      setStatusMessage({
+        text: 'Provide a temporary password to create an auth-enabled user.',
+        tone: 'error',
+      })
       return
     }
 
-    const createdUser = createUser(resolvedDisplayName, newUserRoles, newUserRoles.includes('client') ? selectedTrainerId || null : null)
+    const createdUser = createUser(
+      resolvedDisplayName,
+      newUserRoles,
+      newUserRoles.includes('client') ? selectedTrainerId || null : null,
+    )
 
     if (!createdUser) {
-      setStatusMessage({ text: 'Could not create the user locally.', tone: 'error' })
+      setStatusMessage({
+        text: 'Could not create the user locally.',
+        tone: 'error',
+      })
       return
     }
 
     if (hasTemporaryPassword) {
-      const response = await signUpWithPassword(newUserEmail.trim() || resolvedDisplayName, tempPassword, { passwordChangeRequired: true, persistSession: false })
+      const response = await signUpWithPassword(
+        newUserEmail.trim() || resolvedDisplayName,
+        tempPassword,
+        { passwordChangeRequired: true, persistSession: false },
+      )
 
       if (response.error) {
-        logger.error('[AdminCreateUser] Could not create Supabase auth user', response.error)
+        logger.error(
+          '[AdminCreateUser] Could not create Supabase auth user',
+          response.error,
+        )
         setTempPassword('')
 
         const errorMessage = response.error.message?.includes('rate limit')
@@ -59,7 +89,10 @@ export function AdminCreateUserPage() {
         return
       }
 
-      const client = getSupabaseClient({ persistSession: false, autoRefreshToken: false })
+      const client = getSupabaseClient({
+        persistSession: false,
+        autoRefreshToken: false,
+      })
 
       if (client && response.data?.user?.id) {
         const profilePayload = buildCreateUserProfilePayload({
@@ -69,24 +102,48 @@ export function AdminCreateUserPage() {
           selectedTrainerId,
         })
 
-        const { error: profileError } = await client.from('gym_pilot_profile').upsert(profilePayload, { onConflict: 'user_id' })
+        const { error: profileError } = await client
+          .from('gym_pilot_profile')
+          .upsert(profilePayload, { onConflict: 'user_id' })
 
-        if (profileError && /trainer_id|does not exist|column .* does not exist/i.test(profileError.message)) {
-          const { error: fallbackError } = await client.from('gym_pilot_profile').upsert({
-            user_id: response.data.user.id,
-            friendly_name: resolvedDisplayName,
-            roles: newUserRoles,
-            must_change_password: true,
-          }, { onConflict: 'user_id' })
+        if (
+          profileError &&
+          /trainer_id|does not exist|column .* does not exist/i.test(
+            profileError.message,
+          )
+        ) {
+          const { error: fallbackError } = await client
+            .from('gym_pilot_profile')
+            .upsert(
+              {
+                user_id: response.data.user.id,
+                friendly_name: resolvedDisplayName,
+                roles: newUserRoles,
+                must_change_password: true,
+              },
+              { onConflict: 'user_id' },
+            )
 
           if (fallbackError) {
-            logger.error('[AdminCreateUser] Could not create Supabase profile row', fallbackError)
-            setStatusMessage({ text: `Could not create the profile row: ${fallbackError.message}`, tone: 'error' })
+            logger.error(
+              '[AdminCreateUser] Could not create Supabase profile row',
+              fallbackError,
+            )
+            setStatusMessage({
+              text: `Could not create the profile row: ${fallbackError.message}`,
+              tone: 'error',
+            })
             return
           }
         } else if (profileError) {
-          logger.error('[AdminCreateUser] Could not create Supabase profile row', profileError)
-          setStatusMessage({ text: `Could not create the profile row: ${profileError.message}`, tone: 'error' })
+          logger.error(
+            '[AdminCreateUser] Could not create Supabase profile row',
+            profileError,
+          )
+          setStatusMessage({
+            text: `Could not create the profile row: ${profileError.message}`,
+            tone: 'error',
+          })
           return
         }
       }
@@ -136,7 +193,10 @@ export function AdminCreateUserPage() {
               const checked = newUserRoles.includes(role)
 
               return (
-                <label key={role} className="flex items-center gap-1 rounded-full px-2 py-1">
+                <label
+                  key={role}
+                  className="flex items-center gap-1 rounded-full px-2 py-1"
+                >
                   <input
                     type="checkbox"
                     checked={checked}
@@ -174,12 +234,18 @@ export function AdminCreateUserPage() {
             </label>
           ) : null}
 
-          <Button tone="emerald" onClick={() => void handleCreateUser()} className="px-4 py-2">
+          <Button
+            tone="emerald"
+            onClick={() => void handleCreateUser()}
+            className="px-4 py-2"
+          >
             Create user
           </Button>
 
           {statusMessage ? (
-            <p className={`text-sm ${statusMessage.tone === 'error' ? 'text-red-600' : 'text-slate-600'}`}>
+            <p
+              className={`text-sm ${statusMessage.tone === 'error' ? 'text-red-600' : 'text-slate-600'}`}
+            >
               {statusMessage.text}
             </p>
           ) : null}

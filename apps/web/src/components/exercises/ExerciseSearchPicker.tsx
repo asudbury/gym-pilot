@@ -40,7 +40,10 @@ export function ExerciseSearchField({
 }: ExerciseSearchFieldProps) {
   return (
     <div className={className}>
-      <label className="mb-2 block text-sm font-medium text-slate-700" htmlFor={id}>
+      <label
+        className="mb-2 block text-sm font-medium text-slate-700"
+        htmlFor={id}
+      >
         {label}
       </label>
       <div className="relative flex-1">
@@ -67,14 +70,19 @@ export function ExerciseSearchField({
   )
 }
 
-export function ExerciseSearchSuggestions({ suggestions, onSelectExercise }: ExerciseSearchSuggestionsProps) {
+export function ExerciseSearchSuggestions({
+  suggestions,
+  onSelectExercise,
+}: ExerciseSearchSuggestionsProps) {
   if (suggestions.length === 0) {
     return null
   }
 
   return (
     <div className="mt-3 rounded-2xl border border-slate-200 bg-slate-50 p-2 shadow-sm">
-      <p className="mb-2 px-2 text-xs font-semibold uppercase tracking-wide text-slate-500">Suggestions</p>
+      <p className="mb-2 px-2 text-xs font-semibold uppercase tracking-wide text-slate-500">
+        Suggestions
+      </p>
       <div className="flex flex-col gap-1">
         {suggestions.map((exercise) => (
           <button
@@ -84,7 +92,9 @@ export function ExerciseSearchSuggestions({ suggestions, onSelectExercise }: Exe
             className="flex items-center justify-between rounded-xl px-3 py-2 text-left text-sm text-slate-700 transition hover:bg-white hover:text-slate-900"
           >
             <span className="font-medium">{formatLabel(exercise.name)}</span>
-            <span className="text-xs text-slate-500">{formatLabel(exercise.category)}</span>
+            <span className="text-xs text-slate-500">
+              {formatLabel(exercise.category)}
+            </span>
           </button>
         ))}
       </div>
@@ -121,7 +131,14 @@ export function ExerciseSearchPicker({
 
     return exercises
       .filter((exercise) => {
-        const searchableText = [exercise.name, exercise.category, exercise.target, exercise.equipment].join(' ').toLowerCase()
+        const searchableText = [
+          exercise.name,
+          exercise.category,
+          exercise.target,
+          exercise.equipment,
+        ]
+          .join(' ')
+          .toLowerCase()
         return searchableText.includes(normalizedSearch)
       })
       .slice(0, 6)
@@ -159,7 +176,10 @@ export function ExerciseSearchPicker({
       />
 
       {showSuggestions && suggestions.length > 0 && hasSearchThreshold && (
-        <ExerciseSearchSuggestions suggestions={suggestions} onSelectExercise={handleSelectExercise} />
+        <ExerciseSearchSuggestions
+          suggestions={suggestions}
+          onSelectExercise={handleSelectExercise}
+        />
       )}
     </div>
   )

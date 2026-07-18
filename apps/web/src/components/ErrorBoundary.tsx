@@ -1,5 +1,5 @@
-import { Component } from 'react';
-import { logger } from '@gym-pilot/shared';
+import { Component } from 'react'
+import { logger } from '@gym-pilot/shared'
 
 export class ErrorBoundary extends Component<
   React.PropsWithChildren,
@@ -7,21 +7,21 @@ export class ErrorBoundary extends Component<
 > {
   state = {
     hasError: false,
-  };
+  }
 
   static getDerivedStateFromError() {
-    return { hasError: true };
+    return { hasError: true }
   }
 
   componentDidCatch(error: Error) {
-    logger.error('React Error Boundary', error);
+    logger.error('React Error Boundary', error)
   }
 
   render() {
     if (this.state.hasError) {
-      return <h1>Something went wrong.</h1>;
+      return <h1>Something went wrong.</h1>
     }
 
-    return this.props.children;
+    return this.props.children
   }
 }

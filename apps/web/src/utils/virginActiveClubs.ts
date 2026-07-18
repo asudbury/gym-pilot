@@ -46,11 +46,19 @@ const fallbackClubs: VirginActiveClub[] = [
 function normalizeClubs(payload: unknown): VirginActiveClub[] {
   if (Array.isArray(payload)) {
     return payload
-      .filter((item): item is Record<string, unknown> => Boolean(item && typeof item === 'object'))
+      .filter((item): item is Record<string, unknown> =>
+        Boolean(item && typeof item === 'object'),
+      )
       .map((item) => ({
-        clubId: typeof item.clubId === 'number' ? item.clubId : Number(item.clubId) || 0,
+        clubId:
+          typeof item.clubId === 'number'
+            ? item.clubId
+            : Number(item.clubId) || 0,
         name: typeof item.name === 'string' ? item.name : '',
-        compositeAddress: typeof item.compositeAddress === 'string' ? item.compositeAddress : null,
+        compositeAddress:
+          typeof item.compositeAddress === 'string'
+            ? item.compositeAddress
+            : null,
       }))
       .filter((club) => club.clubId > 0 && club.name.trim().length > 0)
   }
@@ -69,7 +77,10 @@ export function getFallbackVirginActiveClubs(): VirginActiveClub[] {
   return fallbackClubs
 }
 
-export function resolveVirginActiveClubName(value: string | null | undefined, clubs: VirginActiveClub[] = []): string {
+export function resolveVirginActiveClubName(
+  value: string | null | undefined,
+  clubs: VirginActiveClub[] = [],
+): string {
   const trimmedValue = value?.trim() ?? ''
 
   if (!trimmedValue) {
@@ -77,7 +88,9 @@ export function resolveVirginActiveClubName(value: string | null | undefined, cl
   }
 
   const matchingClub = clubs.find(
-    (club) => String(club.clubId) === trimmedValue || club.name.trim().toLowerCase() === trimmedValue.toLowerCase(),
+    (club) =>
+      String(club.clubId) === trimmedValue ||
+      club.name.trim().toLowerCase() === trimmedValue.toLowerCase(),
   )
 
   if (matchingClub) {
@@ -85,7 +98,9 @@ export function resolveVirginActiveClubName(value: string | null | undefined, cl
   }
 
   const fallbackMatch = fallbackClubs.find(
-    (club) => String(club.clubId) === trimmedValue || club.name.trim().toLowerCase() === trimmedValue.toLowerCase(),
+    (club) =>
+      String(club.clubId) === trimmedValue ||
+      club.name.trim().toLowerCase() === trimmedValue.toLowerCase(),
   )
 
   return fallbackMatch?.name ?? trimmedValue
@@ -101,7 +116,8 @@ export async function loadVirginActiveClubs(): Promise<VirginActiveClub[]> {
   }
 
   clubRequest = (async () => {
-    const endpoint = import.meta.env.VITE_VIRGIN_ACTIVE_CLUBS_URL as string | undefined
+    const endpoint = import.meta.env.VITE_VIRGIN_ACTIVE_CLUBS_URL as
+      string | undefined
 
     if (endpoint) {
       try {
@@ -121,7 +137,10 @@ export async function loadVirginActiveClubs(): Promise<VirginActiveClub[]> {
           }
         }
       } catch (error) {
-        logger.warn('[VirginActive] Could not load clubs from configured endpoint', error)
+        logger.warn(
+          '[VirginActive] Could not load clubs from configured endpoint',
+          error,
+        )
       }
     }
 

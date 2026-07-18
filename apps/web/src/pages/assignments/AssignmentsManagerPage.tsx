@@ -34,7 +34,10 @@ export function AssignmentsManagerPage() {
             <Paragraph>Assignments</Paragraph>
             <Heading1 className="mt-2">Create assignment</Heading1>
           </div>
-          <Link to="/assignments" className={getToneClass('default', 'px-4 py-2 text-sm font-medium')}>
+          <Link
+            to="/assignments"
+            className={getToneClass('default', 'px-4 py-2 text-sm font-medium')}
+          >
             Back to assignments
           </Link>
         </div>
@@ -42,8 +45,13 @@ export function AssignmentsManagerPage() {
         <div className="mt-6 rounded-2xl border border-slate-200 bg-white p-4">
           <div className="max-w-2xl space-y-4">
             <div>
-              <h2 className="text-lg font-semibold text-slate-900">Choose a user and a plan</h2>
-              <p className="mt-1 text-sm text-slate-600">Create a single assignment copy for one person and send them straight to the assignments list.</p>
+              <h2 className="text-lg font-semibold text-slate-900">
+                Choose a user and a plan
+              </h2>
+              <p className="mt-1 text-sm text-slate-600">
+                Create a single assignment copy for one person and send them
+                straight to the assignments list.
+              </p>
             </div>
 
             <label className="block space-y-2">
@@ -77,7 +85,12 @@ export function AssignmentsManagerPage() {
                 ))}
               </select>
             </label>
-            <Button tone="emerald" onClick={handleCreateAssignment} className="w-full justify-center px-4 py-2" disabled={!selectedPlanId || !selectedUserId}>
+            <Button
+              tone="emerald"
+              onClick={handleCreateAssignment}
+              className="w-full justify-center px-4 py-2"
+              disabled={!selectedPlanId || !selectedUserId}
+            >
               Create assignment
             </Button>
           </div>

@@ -1,6 +1,11 @@
 import { useMemo, useState, type DragEvent } from 'react'
 import { AgGridReact } from 'ag-grid-react'
-import { AllCommunityModule, ModuleRegistry, provideGlobalGridOptions, type ColDef } from 'ag-grid-community'
+import {
+  AllCommunityModule,
+  ModuleRegistry,
+  provideGlobalGridOptions,
+  type ColDef,
+} from 'ag-grid-community'
 import 'ag-grid-community/styles/ag-grid.css'
 import 'ag-grid-community/styles/ag-theme-quartz.css'
 import { exercises } from '@gym-pilot/shared'
@@ -75,30 +80,47 @@ export function PlanBuilderWorkspace({
   onSave,
   saveDisabled = false,
 }: PlanBuilderWorkspaceProps) {
-  const activeTab = useMemo(() => tabs.find((tab) => tab.id === activeTabId) ?? tabs[0], [activeTabId, tabs])
+  const activeTab = useMemo(
+    () => tabs.find((tab) => tab.id === activeTabId) ?? tabs[0],
+    [activeTabId, tabs],
+  )
   const [isDropActive, setIsDropActive] = useState(false)
 
-  const groupedFavoriteLinks = useMemo(() => resolveFavoriteLinkGroups(favoriteLinks), [favoriteLinks])
+  const groupedFavoriteLinks = useMemo(
+    () => resolveFavoriteLinkGroups(favoriteLinks),
+    [favoriteLinks],
+  )
 
   const handleDropLinks = (event: DragEvent<HTMLDivElement>) => {
     event.preventDefault()
     setIsDropActive(false)
 
-    const payload = event.dataTransfer.getData('application/x-gym-pilot-links') || event.dataTransfer.getData('text/plain')
+    const payload =
+      event.dataTransfer.getData('application/x-gym-pilot-links') ||
+      event.dataTransfer.getData('text/plain')
 
     if (!payload) {
       return
     }
 
     try {
-      const parsed = JSON.parse(payload) as { items?: Array<{ label: string; path: string }> } | Array<{ label: string; path: string }>
+      const parsed = JSON.parse(payload) as
+        | { items?: Array<{ label: string; path: string }> }
+        | Array<{ label: string; path: string }>
       const links = Array.isArray(parsed)
         ? parsed
         : Array.isArray(parsed?.items)
           ? parsed.items
           : []
 
-      onAddLinkRows?.(links.filter((item) => item && typeof item.label === 'string' && typeof item.path === 'string'))
+      onAddLinkRows?.(
+        links.filter(
+          (item) =>
+            item &&
+            typeof item.label === 'string' &&
+            typeof item.path === 'string',
+        ),
+      )
     } catch {
       // Ignore invalid payloads.
     }
@@ -124,7 +146,11 @@ export function PlanBuilderWorkspace({
           return exercise?.name ?? ''
         },
         onCellValueChanged: (params) => {
-          onCellChange(params.data?.id ?? '', 'exerciseId', params.newValue as string)
+          onCellChange(
+            params.data?.id ?? '',
+            'exerciseId',
+            params.newValue as string,
+          )
         },
         cellStyle: {
           fontSize: '0.95rem',
@@ -154,7 +180,11 @@ export function PlanBuilderWorkspace({
         flex: 1,
         minWidth: 120,
         onCellValueChanged: (params) => {
-          onCellChange(params.data?.id ?? '', 'workingSets', params.newValue as string)
+          onCellChange(
+            params.data?.id ?? '',
+            'workingSets',
+            params.newValue as string,
+          )
         },
         cellStyle: {
           fontSize: '0.95rem',
@@ -169,7 +199,11 @@ export function PlanBuilderWorkspace({
         flex: 1,
         minWidth: 180,
         onCellValueChanged: (params) => {
-          onCellChange(params.data?.id ?? '', 'notes', params.newValue as string)
+          onCellChange(
+            params.data?.id ?? '',
+            'notes',
+            params.newValue as string,
+          )
         },
         cellStyle: {
           fontSize: '0.95rem',
@@ -186,11 +220,15 @@ export function PlanBuilderWorkspace({
         sortable: false,
         flex: 1,
         minWidth: 160,
-        cellRenderer: (params: { data: PlanGridRow; node?: { rowIndex?: number | null } }) => {
+        cellRenderer: (params: {
+          data: PlanGridRow
+          node?: { rowIndex?: number | null }
+        }) => {
           const row = params.data
           const rowIndex = params.node?.rowIndex
           const isFirstRow = typeof rowIndex === 'number' && rowIndex <= 0
-          const isLastRow = typeof rowIndex === 'number' && rowIndex >= activeRows.length - 1
+          const isLastRow =
+            typeof rowIndex === 'number' && rowIndex >= activeRows.length - 1
 
           return (
             <div className="mt-1 flex flex-wrap items-center gap-2">
@@ -237,14 +275,20 @@ export function PlanBuilderWorkspace({
               Export Excel
             </Button>
             {!isFullscreen ? (
-              <Button tone="default" onClick={onToggleFullscreen} className="px-4 py-2">
+              <Button
+                tone="default"
+                onClick={onToggleFullscreen}
+                className="px-4 py-2"
+              >
                 Full screen
               </Button>
             ) : null}
           </div>
         </div>
 
-        <p className="text-sm text-slate-600">Each tab is exported as a separate worksheet in a single workbook.</p>
+        <p className="text-sm text-slate-600">
+          Each tab is exported as a separate worksheet in a single workbook.
+        </p>
 
         {!isFullscreen ? (
           <div className="flex flex-col gap-3 rounded-2xl border border-slate-200 bg-slate-50 p-3 sm:flex-row sm:items-end sm:justify-between">
@@ -263,7 +307,11 @@ export function PlanBuilderWorkspace({
                   }}
                 />
               </div>
-              <Button tone="emerald" onClick={() => onAddRow(selectedExerciseId)} className="px-4 py-2">
+              <Button
+                tone="emerald"
+                onClick={() => onAddRow(selectedExerciseId)}
+                className="px-4 py-2"
+              >
                 Add row
               </Button>
             </div>
@@ -271,7 +319,11 @@ export function PlanBuilderWorkspace({
         ) : null}
 
         <div
-          className={isFullscreen ? 'fixed inset-3 z-50 flex flex-col overflow-hidden rounded-3xl border border-slate-300 bg-white shadow-2xl' : `overflow-hidden rounded-2xl border ${isDropActive ? 'border-emerald-400 bg-emerald-50/70' : 'border-slate-200 bg-white'}`}
+          className={
+            isFullscreen
+              ? 'fixed inset-3 z-50 flex flex-col overflow-hidden rounded-3xl border border-slate-300 bg-white shadow-2xl'
+              : `overflow-hidden rounded-2xl border ${isDropActive ? 'border-emerald-400 bg-emerald-50/70' : 'border-slate-200 bg-white'}`
+          }
           onDragEnter={(event) => {
             event.preventDefault()
             setIsDropActive(true)
@@ -303,11 +355,19 @@ export function PlanBuilderWorkspace({
                     }}
                   />
                 </div>
-                <Button tone="emerald" onClick={() => onAddRow(selectedExerciseId)} className="px-4 py-2">
+                <Button
+                  tone="emerald"
+                  onClick={() => onAddRow(selectedExerciseId)}
+                  className="px-4 py-2"
+                >
                   Add row
                 </Button>
               </div>
-              <Button tone="default" onClick={onToggleFullscreen} className="px-4 py-2">
+              <Button
+                tone="default"
+                onClick={onToggleFullscreen}
+                className="px-4 py-2"
+              >
                 Exit full screen
               </Button>
             </div>
@@ -321,7 +381,9 @@ export function PlanBuilderWorkspace({
 
           {favoriteExercises.length > 0 ? (
             <div className="flex flex-wrap gap-2 border-b border-slate-200 bg-slate-50 px-3 py-3">
-              <span className="self-center text-sm font-medium text-slate-600">From favourites</span>
+              <span className="self-center text-sm font-medium text-slate-600">
+                From favourites
+              </span>
               {favoriteExercises.map((exercise) => (
                 <button
                   key={exercise.id}
@@ -337,12 +399,21 @@ export function PlanBuilderWorkspace({
 
           {groupedFavoriteLinks.length > 0 ? (
             <div className="flex flex-wrap items-center gap-2 border-b border-slate-200 bg-slate-50 px-3 py-3">
-              <span className="self-center text-sm font-medium text-slate-600">Favourite groups</span>
+              <span className="self-center text-sm font-medium text-slate-600">
+                Favourite groups
+              </span>
               {groupedFavoriteLinks.map((group) => (
                 <button
                   key={group.folderName}
                   type="button"
-                  onClick={() => onAddLinkRows?.(group.links.map((link) => ({ label: link.label, path: link.path })))}
+                  onClick={() =>
+                    onAddLinkRows?.(
+                      group.links.map((link) => ({
+                        label: link.label,
+                        path: link.path,
+                      })),
+                    )
+                  }
                   className="rounded-full border border-emerald-200 bg-emerald-50 px-3 py-1.5 text-sm font-medium text-emerald-700 transition hover:bg-emerald-100"
                 >
                   {group.folderName}
@@ -384,7 +455,9 @@ export function PlanBuilderWorkspace({
             </Button>
           </div>
 
-          <div className={`ag-theme-quartz ${isFullscreen ? 'h-full' : 'h-96 sm:h-105'} w-full`}>
+          <div
+            className={`ag-theme-quartz ${isFullscreen ? 'h-full' : 'h-96 sm:h-105'} w-full`}
+          >
             <AgGridReact<PlanGridRow>
               key={activeTab?.id}
               rowData={activeRows}
@@ -409,7 +482,12 @@ export function PlanBuilderWorkspace({
               className="w-full min-w-0 rounded-full border border-slate-200 bg-white px-4 py-2 text-sm text-slate-700 sm:min-w-56 sm:w-auto"
             />
           ) : null}
-          <Button tone="emerald" onClick={onSave} className="px-4 py-2" disabled={saveDisabled}>
+          <Button
+            tone="emerald"
+            onClick={onSave}
+            className="px-4 py-2"
+            disabled={saveDisabled}
+          >
             {saveLabel}
           </Button>
         </div>

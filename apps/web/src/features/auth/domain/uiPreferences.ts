@@ -25,7 +25,9 @@ export function readStoredShowVersion(): boolean {
     return true
   }
 
-  const storedShowVersion = window.localStorage.getItem(SHOW_VERSION_STORAGE_KEY)
+  const storedShowVersion = window.localStorage.getItem(
+    SHOW_VERSION_STORAGE_KEY,
+  )
   return storedShowVersion === null ? true : storedShowVersion === 'true'
 }
 
@@ -34,5 +36,8 @@ export function persistShowVersion(showVersion: boolean) {
     return
   }
 
-  window.localStorage.setItem(SHOW_VERSION_STORAGE_KEY, showVersion ? 'true' : 'false')
+  window.localStorage.setItem(
+    SHOW_VERSION_STORAGE_KEY,
+    showVersion ? 'true' : 'false',
+  )
 }

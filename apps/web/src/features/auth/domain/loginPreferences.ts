@@ -1,5 +1,6 @@
 const REMEMBERED_EMAIL_STORAGE_KEY = 'gym-pilot-remembered-email'
-const REMEMBER_EMAIL_PREFERENCE_STORAGE_KEY = 'gym-pilot-remember-email-preference'
+const REMEMBER_EMAIL_PREFERENCE_STORAGE_KEY =
+  'gym-pilot-remember-email-preference'
 
 type StorageLike = Pick<Storage, 'getItem' | 'setItem' | 'removeItem'>
 
@@ -15,18 +16,24 @@ function getStorage(storage?: StorageLike | null): StorageLike | null {
   return window.localStorage
 }
 
-export function readStoredRememberEmailPreference(storage?: StorageLike | null): boolean {
+export function readStoredRememberEmailPreference(
+  storage?: StorageLike | null,
+): boolean {
   const activeStorage = getStorage(storage)
 
   if (!activeStorage) {
     return true
   }
 
-  const storedPreference = activeStorage.getItem(REMEMBER_EMAIL_PREFERENCE_STORAGE_KEY)
+  const storedPreference = activeStorage.getItem(
+    REMEMBER_EMAIL_PREFERENCE_STORAGE_KEY,
+  )
   return storedPreference === null ? true : storedPreference === 'true'
 }
 
-export function readStoredRememberedEmail(storage?: StorageLike | null): string {
+export function readStoredRememberedEmail(
+  storage?: StorageLike | null,
+): string {
   const activeStorage = getStorage(storage)
 
   if (!activeStorage) {
@@ -36,17 +43,27 @@ export function readStoredRememberedEmail(storage?: StorageLike | null): string 
   return activeStorage.getItem(REMEMBERED_EMAIL_STORAGE_KEY) ?? ''
 }
 
-export function persistRememberEmailPreference(shouldRememberEmail: boolean, storage?: StorageLike | null) {
+export function persistRememberEmailPreference(
+  shouldRememberEmail: boolean,
+  storage?: StorageLike | null,
+) {
   const activeStorage = getStorage(storage)
 
   if (!activeStorage) {
     return
   }
 
-  activeStorage.setItem(REMEMBER_EMAIL_PREFERENCE_STORAGE_KEY, String(shouldRememberEmail))
+  activeStorage.setItem(
+    REMEMBER_EMAIL_PREFERENCE_STORAGE_KEY,
+    String(shouldRememberEmail),
+  )
 }
 
-export function persistRememberedEmail(value: string, shouldRememberEmail: boolean, storage?: StorageLike | null) {
+export function persistRememberedEmail(
+  value: string,
+  shouldRememberEmail: boolean,
+  storage?: StorageLike | null,
+) {
   const activeStorage = getStorage(storage)
 
   if (!activeStorage) {

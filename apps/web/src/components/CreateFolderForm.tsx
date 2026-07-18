@@ -7,11 +7,21 @@ type CreateFolderFormProps = {
   onSubmit: (event: React.FormEvent<HTMLFormElement>) => void
 }
 
-export function CreateFolderForm({ newFolderName, onNewFolderNameChange, onSubmit }: CreateFolderFormProps) {
+export function CreateFolderForm({
+  newFolderName,
+  onNewFolderNameChange,
+  onSubmit,
+}: CreateFolderFormProps) {
   return (
-    <form onSubmit={onSubmit} className="flex flex-col gap-3 sm:flex-row sm:items-end">
+    <form
+      onSubmit={onSubmit}
+      className="flex flex-col gap-3 sm:flex-row sm:items-end"
+    >
       <Panel variant="muted" padding="md" className="flex-1">
-        <label htmlFor="new-folder-name" className="text-xs font-semibold uppercase tracking-wide text-slate-500">
+        <label
+          htmlFor="new-folder-name"
+          className="text-xs font-semibold uppercase tracking-wide text-slate-500"
+        >
           Create folder
         </label>
         <input
@@ -22,7 +32,13 @@ export function CreateFolderForm({ newFolderName, onNewFolderNameChange, onSubmi
           className="mt-2 w-full rounded-xl border border-slate-200 bg-white px-3 py-2 text-sm text-slate-700 shadow-sm outline-none ring-0 focus:border-slate-400"
         />
       </Panel>
-      <button type="submit" className={getToneClass('default', 'rounded-xl px-4 py-2 text-sm font-medium')}>
+      <button
+        type="submit"
+        className={getToneClass(
+          'default',
+          'rounded-xl px-4 py-2 text-sm font-medium',
+        )}
+      >
         Add folder
       </button>
     </form>

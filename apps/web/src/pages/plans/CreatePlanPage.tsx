@@ -7,14 +7,20 @@ import { PageLayout } from '../../layouts/PageLayout'
 import { Heading1, Paragraph } from '../../components/Typography'
 import { PlanBuilderWorkspace } from '../../components/PlanBuilderWorkspace'
 import { usePlanBuilderFeature } from '../../features/planBuilder/hooks/usePlanBuilderFeature'
-import { hasBuilderContent, resolveCreateFlowViewModel } from '../../features/planBuilder/domain/createFlow'
+import {
+  hasBuilderContent,
+  resolveCreateFlowViewModel,
+} from '../../features/planBuilder/domain/createFlow'
 
 export function CreatePlanPage() {
   const { createPlan, plans, updatePlan } = usePlan()
   const navigate = useNavigate()
   const location = useLocation()
   const { planSlug } = useParams()
-  const planToEdit = useMemo(() => plans.find((item) => item.planSlug === planSlug), [plans, planSlug])
+  const planToEdit = useMemo(
+    () => plans.find((item) => item.planSlug === planSlug),
+    [plans, planSlug],
+  )
   const isAssignmentRoute = location.pathname.includes('/assignments/')
   const isEditMode = Boolean(planToEdit)
   const createFlowViewModel = useMemo(
@@ -89,7 +95,10 @@ export function CreatePlanPage() {
             <Paragraph>Plans</Paragraph>
             <Heading1 className="mt-2">{createFlowViewModel.title}</Heading1>
           </div>
-          <Link to="/plans" className={getToneClass('default', 'px-4 py-2 text-sm font-medium')}>
+          <Link
+            to="/plans"
+            className={getToneClass('default', 'px-4 py-2 text-sm font-medium')}
+          >
             Back to plans
           </Link>
         </div>

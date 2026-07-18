@@ -1,6 +1,20 @@
 import type { User, UserRole } from '@gym-pilot/types'
 
-export type AuthUser = Pick<User, 'id' | 'name' | 'slug' | 'role' | 'roles' | 'trainerId' | 'applicationName' | 'gymBrand' | 'gymName' | 'accountTier' | 'accessEndsAt' | 'isFrozen'> & {
+export type AuthUser = Pick<
+  User,
+  | 'id'
+  | 'name'
+  | 'slug'
+  | 'role'
+  | 'roles'
+  | 'trainerId'
+  | 'applicationName'
+  | 'gymBrand'
+  | 'gymName'
+  | 'accountTier'
+  | 'accessEndsAt'
+  | 'isFrozen'
+> & {
   email?: string | null
   lastLoggedInAt?: string | null
   previousLastLoggedInAt?: string | null
@@ -30,7 +44,11 @@ export function isUserAccessBlocked(user: AuthUser | null | undefined) {
   return parsedDate.getTime() <= Date.now()
 }
 
-export function hasAccessToRole(user: AuthUser | null | undefined, requiredRole: UserRole | UserRole[], isBypassEnabled: boolean) {
+export function hasAccessToRole(
+  user: AuthUser | null | undefined,
+  requiredRole: UserRole | UserRole[],
+  isBypassEnabled: boolean,
+) {
   if (isBypassEnabled) {
     return true
   }
@@ -39,17 +57,22 @@ export function hasAccessToRole(user: AuthUser | null | undefined, requiredRole:
     return false
   }
 
-  const userRoles = Array.isArray(user.roles) && user.roles.length > 0
-    ? user.roles.filter((role): role is UserRole => ['admin', 'trainer', 'client', 'guest'].includes(role))
-    : user.role
-      ? [user.role]
-      : []
+  const userRoles =
+    Array.isArray(user.roles) && user.roles.length > 0
+      ? user.roles.filter((role): role is UserRole =>
+          ['admin', 'trainer', 'client', 'guest'].includes(role),
+        )
+      : user.role
+        ? [user.role]
+        : []
 
   if (userRoles.includes('admin')) {
     return true
   }
 
-  const requiredRoles = Array.isArray(requiredRole) ? requiredRole : [requiredRole]
+  const requiredRoles = Array.isArray(requiredRole)
+    ? requiredRole
+    : [requiredRole]
 
   return requiredRoles.some((role) => userRoles.includes(role))
 }

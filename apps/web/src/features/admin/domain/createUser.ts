@@ -34,7 +34,9 @@ export function buildCreateUserProfilePayload(values: {
     user_id: values.userId,
     friendly_name: values.displayName,
     roles: values.roles,
-    trainer_id: values.roles.includes('client') ? values.selectedTrainerId || null : null,
+    trainer_id: values.roles.includes('client')
+      ? values.selectedTrainerId || null
+      : null,
     gym_brand: null,
     account_tier: 'free',
     access_ends_at: null,

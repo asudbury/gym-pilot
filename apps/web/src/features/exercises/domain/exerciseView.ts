@@ -6,9 +6,16 @@ export type ExercisePageViewModel = {
   mediaGif: string
 }
 
-export function resolveExercisePageViewModel(slug: string | undefined, exerciseList: Array<(typeof exercises)[number]> = exercisesSchema.parse(exercises)) {
+export function resolveExercisePageViewModel(
+  slug: string | undefined,
+  exerciseList: Array<(typeof exercises)[number]> = exercisesSchema.parse(
+    exercises,
+  ),
+) {
   const exercise = slug
-    ? exerciseList.find((item) => getExerciseSlug(item) === slug || item.id === slug)
+    ? exerciseList.find(
+        (item) => getExerciseSlug(item) === slug || item.id === slug,
+      )
     : undefined
 
   return {

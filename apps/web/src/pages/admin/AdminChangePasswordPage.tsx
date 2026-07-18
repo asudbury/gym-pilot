@@ -42,7 +42,10 @@ export function AdminChangePasswordPage() {
       navigate('/admin/preferences')
     } catch (error) {
       logger.error('[ChangePassword] Failed to update password', error)
-      const message = error instanceof Error ? error.message : 'Could not update the password right now.'
+      const message =
+        error instanceof Error
+          ? error.message
+          : 'Could not update the password right now.'
       setStatusMessage(message)
     } finally {
       setIsSaving(false)
@@ -57,7 +60,10 @@ export function AdminChangePasswordPage() {
             <Paragraph>Account</Paragraph>
             <Heading1 className="mt-2">Change password</Heading1>
           </div>
-          <Link to="/admin/preferences" className={getToneClass('default', 'px-4 py-2 text-sm font-medium')}>
+          <Link
+            to="/admin/preferences"
+            className={getToneClass('default', 'px-4 py-2 text-sm font-medium')}
+          >
             Back to preferences
           </Link>
         </div>
@@ -65,7 +71,10 @@ export function AdminChangePasswordPage() {
         <form onSubmit={handleSubmit} className="mt-8 flex flex-col gap-4">
           <div className="rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3 text-sm text-slate-700">
             <p className="font-medium">Update your account password</p>
-            <p className="mt-1 text-sm text-slate-400">Use this screen to change the password for the currently signed-in account.</p>
+            <p className="mt-1 text-sm text-slate-400">
+              Use this screen to change the password for the currently signed-in
+              account.
+            </p>
           </div>
 
           <label className="flex flex-col gap-2 text-sm font-medium text-slate-700">
@@ -95,7 +104,10 @@ export function AdminChangePasswordPage() {
           <button
             type="submit"
             disabled={isSaving}
-            className={getToneClass('blue', 'w-fit rounded-full px-4 py-2.5 text-sm font-semibold text-white transition disabled:cursor-not-allowed disabled:bg-slate-400')}
+            className={getToneClass(
+              'blue',
+              'w-fit rounded-full px-4 py-2.5 text-sm font-semibold text-white transition disabled:cursor-not-allowed disabled:bg-slate-400',
+            )}
           >
             {isSaving ? 'Updating…' : 'Update password'}
           </button>

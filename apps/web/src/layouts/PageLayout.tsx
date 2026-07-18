@@ -19,15 +19,16 @@ export function PageLayout({ children, className = '' }: PageLayoutProps) {
           <div className="mb-4">
             <NavLink
               to="/"
-              className={getToneClass('default', 'px-4 py-2 text-sm font-medium')}
+              className={getToneClass(
+                'default',
+                'px-4 py-2 text-sm font-medium',
+              )}
             >
               <span>Go Home</span>
             </NavLink>
           </div>
         )}
-        <div className="flex flex-col gap-6">
-          {children}
-        </div>
+        <div className="flex flex-col gap-6">{children}</div>
       </div>
     </main>
   )

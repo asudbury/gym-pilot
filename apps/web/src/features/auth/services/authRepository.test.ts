@@ -22,8 +22,16 @@ describe('auth session repository', () => {
       shouldUseRemoteForKey: () => false,
     })
 
-    await repository.save('gym-pilot-auth-session', { id: 'user-1', name: 'Ada', slug: 'ada' })
+    await repository.save('gym-pilot-auth-session', {
+      id: 'user-1',
+      name: 'Ada',
+      slug: 'ada',
+    })
 
-    expect(saveLocal).toHaveBeenCalledWith('gym-pilot-auth-session', { id: 'user-1', name: 'Ada', slug: 'ada' })
+    expect(saveLocal).toHaveBeenCalledWith('gym-pilot-auth-session', {
+      id: 'user-1',
+      name: 'Ada',
+      slug: 'ada',
+    })
   })
 })

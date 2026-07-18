@@ -31,7 +31,7 @@ void initializeSupabaseAuth()
 createRoot(document.getElementById('root')!).render(
   <StrictMode>
     <ErrorBoundary>
-        <QueryClientProvider client={queryClient}>
+      <QueryClientProvider client={queryClient}>
         <HashRouter>
           <GoogleAnalytics />
           <PlanProvider storageKey={PLANS_KEY}>

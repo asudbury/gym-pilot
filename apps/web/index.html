@@ -2,10 +2,13 @@
 <html lang="en">
   <head>
     <script>
-      const theme = localStorage.getItem('theme');
+      const theme = localStorage.getItem('theme')
 
-      if (theme === 'dark' || (!theme && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
-        document.documentElement.classList.add('dark');
+      if (
+        theme === 'dark' ||
+        (!theme && window.matchMedia('(prefers-color-scheme: dark)').matches)
+      ) {
+        document.documentElement.classList.add('dark')
       }
     </script>
 
@@ -15,11 +18,16 @@
     <title>Gym-Pilot</title>
   </head>
   <body>
-    <script async src="https://www.googletagmanager.com/gtag/js?id=G-P2QV3LZH5Y"></script>
+    <script
+      async
+      src="https://www.googletagmanager.com/gtag/js?id=G-P2QV3LZH5Y"
+    ></script>
     <script>
-      window.dataLayer = window.dataLayer || [];
-      function gtag(){dataLayer.push(arguments);}
-      gtag('js', new Date());
+      window.dataLayer = window.dataLayer || []
+      function gtag() {
+        dataLayer.push(arguments)
+      }
+      gtag('js', new Date())
     </script>
     <div id="root"></div>
     <script type="module" src="/src/main.tsx"></script>

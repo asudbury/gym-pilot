@@ -10,7 +10,7 @@ export function toAuthUser(user: User | null | undefined): AuthUser | null {
     id: user.id,
     name: user.name,
     slug: user.slug,
-    role: (user.role ?? (user.roles?.[0] ?? 'client')) as UserRole,
+    role: (user.role ?? user.roles?.[0] ?? 'client') as UserRole,
     roles: (user.roles ?? []) as UserRole[],
     trainerId: user.trainerId ?? null,
     applicationName: user.applicationName ?? null,

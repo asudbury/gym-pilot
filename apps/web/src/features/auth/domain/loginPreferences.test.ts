@@ -13,7 +13,9 @@ function createMemoryStorage(initialEntries: Record<string, string> = {}) {
 
   const storage: StorageLike = {
     getItem(key: string) {
-      return Object.prototype.hasOwnProperty.call(entries, key) ? entries[key] : null
+      return Object.prototype.hasOwnProperty.call(entries, key)
+        ? entries[key]
+        : null
     },
     setItem(key: string, value: string) {
       entries[key] = value

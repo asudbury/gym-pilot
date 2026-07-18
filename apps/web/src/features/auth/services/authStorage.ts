@@ -1,5 +1,8 @@
 import type { AuthUser } from '../domain/authTypes'
-import { loadAuthSessionWithRepository, saveAuthSessionWithRepository } from './authRepository'
+import {
+  loadAuthSessionWithRepository,
+  saveAuthSessionWithRepository,
+} from './authRepository'
 
 export const CURRENT_USER_ID_STORAGE_KEY = 'gym-pilot-current-user-id'
 export const LOGOUT_PENDING_STORAGE_KEY = 'gym-pilot-auth-logout-pending'
@@ -22,11 +25,16 @@ export async function persistSession(user: AuthUser | null) {
   await saveAuthSessionWithRepository(user)
 }
 
-export function readCurrentUserId(storage: StorageLike | null = getSessionStorage()) {
+export function readCurrentUserId(
+  storage: StorageLike | null = getSessionStorage(),
+) {
   return storage?.getItem(CURRENT_USER_ID_STORAGE_KEY) ?? null
 }
 
-export function persistCurrentUserId(userId: string | null, storage: StorageLike | null = getSessionStorage()) {
+export function persistCurrentUserId(
+  userId: string | null,
+  storage: StorageLike | null = getSessionStorage(),
+) {
   if (!storage) {
     return
   }
@@ -39,11 +47,16 @@ export function persistCurrentUserId(userId: string | null, storage: StorageLike
   storage.removeItem(CURRENT_USER_ID_STORAGE_KEY)
 }
 
-export function readLogoutPending(storage: StorageLike | null = getSessionStorage()) {
+export function readLogoutPending(
+  storage: StorageLike | null = getSessionStorage(),
+) {
   return storage?.getItem(LOGOUT_PENDING_STORAGE_KEY) === 'true'
 }
 
-export function persistLogoutPending(isPending: boolean, storage: StorageLike | null = getSessionStorage()) {
+export function persistLogoutPending(
+  isPending: boolean,
+  storage: StorageLike | null = getSessionStorage(),
+) {
   if (!storage) {
     return
   }

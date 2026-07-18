@@ -52,7 +52,10 @@ export function groupFavoritesByFolder(items: QuickLink[]) {
   })
 }
 
-export function getQuickLinkForPath(pathname: string, exerciseLookup: Map<string, { id: string; name: string }>): QuickLink | null {
+export function getQuickLinkForPath(
+  pathname: string,
+  exerciseLookup: Map<string, { id: string; name: string }>,
+): QuickLink | null {
   if (pathname === '/') {
     return { id: 'home', label: 'Home', path: '/' }
   }
@@ -75,7 +78,11 @@ export function getQuickLinkForPath(pathname: string, exerciseLookup: Map<string
     const exercise = exerciseLookup.get(exerciseId)
 
     return exercise
-      ? { id: `exercise-${exercise.id}`, label: formatLabel(exercise.name), path: pathname }
+      ? {
+          id: `exercise-${exercise.id}`,
+          label: formatLabel(exercise.name),
+          path: pathname,
+        }
       : { id: `exercise-${exerciseId}`, label: 'Exercise', path: pathname }
   }
 

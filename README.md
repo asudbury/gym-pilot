@@ -71,6 +71,19 @@ Run the test suite:
 npm test
 ```
 
+## Local tooling commands
+
+Useful commands for local development and quality checks:
+
+```bash
+npm run format:web   # format the web app files
+npm run lint:web     # run ESLint
+npm run test:web     # run Vitest
+npm run knip         # check for unused files, exports, and dependencies
+npm run sonar:up     # start a local SonarQube instance with Docker
+npm run sonar:analyze # run SonarQube analysis against the local instance
+```
+
 ## How to use the planner
 
 1. Open the web app and navigate to the plan builder.

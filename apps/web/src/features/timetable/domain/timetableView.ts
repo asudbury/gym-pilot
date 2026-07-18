@@ -33,10 +33,14 @@ export function resolveTimetableViewModel(input: {
   activeInstructor: string
   activeClassName: string
 }): TimetableViewModel {
-  const groupedSessions = input.sessions.reduce<Map<string, TimetableSession[]>>((groups, session) => {
+  const groupedSessions = input.sessions.reduce<
+    Map<string, TimetableSession[]>
+  >((groups, session) => {
     const startTime = session.startTime ?? ''
     const parsed = new Date(startTime)
-    const dateKey = Number.isNaN(parsed.getTime()) ? 'unknown' : parsed.toISOString().slice(0, 10)
+    const dateKey = Number.isNaN(parsed.getTime())
+      ? 'unknown'
+      : parsed.toISOString().slice(0, 10)
     const existing = groups.get(dateKey) ?? []
     existing.push(session)
     groups.set(dateKey, existing)
@@ -51,35 +55,63 @@ export function resolveTimetableViewModel(input: {
       sessions: daySessions.sort((left, right) => compareSessions(left, right)),
     }))
 
-  const instructorOptions = Array.from(new Set(input.sessions.flatMap((session) => {
-    const name = session.instructorName?.trim()
-    return name ? [name] : session.instructorId != null ? [String(session.instructorId)] : []
-  }))).sort((left, right) => left.localeCompare(right))
+  const instructorOptions = Array.from(
+    new Set(
+      input.sessions.flatMap((session) => {
+        const name = session.instructorName?.trim()
+        return name
+          ? [name]
+          : session.instructorId != null
+            ? [String(session.instructorId)]
+            : []
+      }),
+    ),
+  ).sort((left, right) => left.localeCompare(right))
 
-  const classOptions = Array.from(new Set(input.sessions.flatMap((session) => session.className?.trim() ? [session.className.trim()] : []))).sort((left, right) => left.localeCompare(right))
+  const classOptions = Array.from(
+    new Set(
+      input.sessions.flatMap((session) =>
+        session.className?.trim() ? [session.className.trim()] : [],
+      ),
+    ),
+  ).sort((left, right) => left.localeCompare(right))
 
-  const activeDayGroup = input.activeDayKey === 'all'
-    ? null
-    : (orderedGroups.find((dayGroup) => dayGroup.dateKey === input.activeDayKey) ?? orderedGroups[0] ?? null)
+  const activeDayGroup =
+    input.activeDayKey === 'all'
+      ? null
+      : (orderedGroups.find(
+          (dayGroup) => dayGroup.dateKey === input.activeDayKey,
+        ) ??
+        orderedGroups[0] ??
+        null)
 
-  const visibleSessions = (input.activeDayKey === 'all'
-    ? orderedGroups.flatMap((dayGroup) => dayGroup.sessions)
-    : (activeDayGroup?.sessions ?? [])
-  ).filter((session) => {
-    const matchesInstructor = input.activeInstructor === 'all'
-      ? true
-      : (() => {
-          const instructorName = session.instructorName?.trim() ?? ''
-          const instructorId = session.instructorId == null ? '' : String(session.instructorId)
-          return instructorName === input.activeInstructor || instructorId === input.activeInstructor
-        })()
+  const visibleSessions = (
+    input.activeDayKey === 'all'
+      ? orderedGroups.flatMap((dayGroup) => dayGroup.sessions)
+      : (activeDayGroup?.sessions ?? [])
+  )
+    .filter((session) => {
+      const matchesInstructor =
+        input.activeInstructor === 'all'
+          ? true
+          : (() => {
+              const instructorName = session.instructorName?.trim() ?? ''
+              const instructorId =
+                session.instructorId == null ? '' : String(session.instructorId)
+              return (
+                instructorName === input.activeInstructor ||
+                instructorId === input.activeInstructor
+              )
+            })()
 
-    const matchesClass = input.activeClassName === 'all'
-      ? true
-      : (session.className?.trim() ?? '') === input.activeClassName
+      const matchesClass =
+        input.activeClassName === 'all'
+          ? true
+          : (session.className?.trim() ?? '') === input.activeClassName
 
-    return matchesInstructor && matchesClass
-  }).sort((left, right) => compareSessions(left, right))
+      return matchesInstructor && matchesClass
+    })
+    .sort((left, right) => compareSessions(left, right))
 
   return {
     groupedSessions: orderedGroups,

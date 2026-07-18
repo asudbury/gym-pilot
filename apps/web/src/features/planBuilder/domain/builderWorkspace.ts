@@ -1,11 +1,17 @@
-import { normalizeFolderName, sortFavorites, type QuickLink } from '../../../utils/favouriteUtils'
+import {
+  normalizeFolderName,
+  sortFavorites,
+  type QuickLink,
+} from '../../../utils/favouriteUtils'
 
 export type BuilderFavoriteGroup = {
   folderName: string
   links: QuickLink[]
 }
 
-export function resolveFavoriteLinkGroups(favoriteLinks: QuickLink[]): BuilderFavoriteGroup[] {
+export function resolveFavoriteLinkGroups(
+  favoriteLinks: QuickLink[],
+): BuilderFavoriteGroup[] {
   const sortedLinks = sortFavorites(favoriteLinks)
   const groups = new Map<string, QuickLink[]>()
   const folderNames = new Set<string>()

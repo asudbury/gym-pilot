@@ -37,8 +37,11 @@ function formatFriendlyTimestamp(buildDate: string, buildTime: string): string {
   return `${day} ${month} ${year} at ${time}${timezone ? ` ${timezone}` : ''}`
 }
 
-export function getBuildMetadata(env: Record<string, string | undefined> = import.meta.env): BuildMetadata {
-  const appVersion = readEnvValue(env.VITE_APP_VERSION) || webPackageJson.version || '0.0.0'
+export function getBuildMetadata(
+  env: Record<string, string | undefined> = import.meta.env,
+): BuildMetadata {
+  const appVersion =
+    readEnvValue(env.VITE_APP_VERSION) || webPackageJson.version || '0.0.0'
   const buildDate = readEnvValue(env.VITE_BUILD_DATE) || 'Unknown'
   const buildTime = readEnvValue(env.VITE_BUILD_TIME) || 'Unknown'
   const commitSha = readEnvValue(env.VITE_GIT_COMMIT_SHA) || 'Unknown'

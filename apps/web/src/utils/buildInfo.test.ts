@@ -3,13 +3,15 @@ import { getBuildMetadata } from './buildInfo'
 
 describe('getBuildMetadata', () => {
   it('uses injected build information when present', () => {
-    expect(getBuildMetadata({
-      VITE_APP_VERSION: '1.2.3',
-      VITE_BUILD_DATE: '2026-07-18',
-      VITE_BUILD_TIME: '10:30:00 UTC',
-      VITE_GIT_COMMIT_SHA: 'abc1234',
-      VITE_GIT_BRANCH: 'main',
-    })).toEqual({
+    expect(
+      getBuildMetadata({
+        VITE_APP_VERSION: '1.2.3',
+        VITE_BUILD_DATE: '2026-07-18',
+        VITE_BUILD_TIME: '10:30:00 UTC',
+        VITE_GIT_COMMIT_SHA: 'abc1234',
+        VITE_GIT_BRANCH: 'main',
+      }),
+    ).toEqual({
       appVersion: '1.2.3',
       buildDate: '2026-07-18',
       buildTime: '10:30:00 UTC',

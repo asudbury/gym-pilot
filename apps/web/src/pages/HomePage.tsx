@@ -7,7 +7,11 @@ import { logger } from '@gym-pilot/shared'
 import { ExerciseFilterPanel } from '../components/exercises/ExerciseFilterPanel'
 import { ExerciseResultsHeader } from '../components/exercises/ExerciseResultsHeader'
 import { ExerciseList } from '../components/exercises/ExerciseList'
-import { filterExercises, resolveHomeViewModel, type HomeFilters } from '../features/home/domain/homeView'
+import {
+  filterExercises,
+  resolveHomeViewModel,
+  type HomeFilters,
+} from '../features/home/domain/homeView'
 
 type HomePageProps = {
   filters: HomeFilters
@@ -16,14 +20,20 @@ type HomePageProps = {
   isExerciseFavorite?: (exerciseId: string) => boolean
 }
 
-export function HomePage({ filters, onFiltersChange, onToggleFavoriteExercise, isExerciseFavorite }: HomePageProps) {
-  
+export function HomePage({
+  filters,
+  onFiltersChange,
+  onToggleFavoriteExercise,
+  isExerciseFavorite,
+}: HomePageProps) {
   logger.debug('Rendering HomePage with filters:', filters)
-  
+
   const { selectedCategory } = filters
   const [copiedId, setCopiedId] = useState<string | null>(null)
   const [draftSearchTerm, setDraftSearchTerm] = useState(filters.searchTerm)
-  const [showExerciseImages, setShowExerciseImages] = useState(filters.showImages)
+  const [showExerciseImages, setShowExerciseImages] = useState(
+    filters.showImages,
+  )
   const [isLargeScreen, setIsLargeScreen] = useState(() => {
     if (typeof window === 'undefined') {
       return true
@@ -67,7 +77,10 @@ export function HomePage({ filters, onFiltersChange, onToggleFavoriteExercise, i
       return
     }
 
-    if (trimmedSearchTerm.length > 0 && trimmedSearchTerm.length < MIN_SEARCH_CHARS) {
+    if (
+      trimmedSearchTerm.length > 0 &&
+      trimmedSearchTerm.length < MIN_SEARCH_CHARS
+    ) {
       return
     }
 
@@ -86,15 +99,31 @@ export function HomePage({ filters, onFiltersChange, onToggleFavoriteExercise, i
     try {
       await copyExerciseLinkToClipboard(exerciseId)
       setCopiedId(exerciseId)
-      window.setTimeout(() => setCopiedId((current) => (current === exerciseId ? null : current)), 1500)
+      window.setTimeout(
+        () =>
+          setCopiedId((current) => (current === exerciseId ? null : current)),
+        1500,
+      )
     } catch {
       setCopiedId(null)
     }
   }
 
   const filteredExercises = useMemo(() => {
-    return filterExercises(exerciseList, filters, normalizedCategory, hasExplicitAll, deferredSearchTerm)
-  }, [exerciseList, deferredSearchTerm, filters, hasExplicitAll, normalizedCategory])
+    return filterExercises(
+      exerciseList,
+      filters,
+      normalizedCategory,
+      hasExplicitAll,
+      deferredSearchTerm,
+    )
+  }, [
+    exerciseList,
+    deferredSearchTerm,
+    filters,
+    hasExplicitAll,
+    normalizedCategory,
+  ])
 
   return (
     <PageLayout className="gap-6">
@@ -106,12 +135,31 @@ export function HomePage({ filters, onFiltersChange, onToggleFavoriteExercise, i
           normalizedCategory={normalizedCategory ?? null}
           showExerciseImages={showExerciseImages}
           onSearchChange={(nextValue) => setDraftSearchTerm(nextValue)}
-          onSelectExercise={(nextSearchTerm) => onFiltersChange({ ...filters, searchTerm: nextSearchTerm, selectedCategory: null, showImages: showExerciseImages })}
-          onCategoryChange={(nextCategory) => onFiltersChange({ ...filters, searchTerm: draftSearchTerm, selectedCategory: nextCategory, showImages: showExerciseImages })}
+          onSelectExercise={(nextSearchTerm) =>
+            onFiltersChange({
+              ...filters,
+              searchTerm: nextSearchTerm,
+              selectedCategory: null,
+              showImages: showExerciseImages,
+            })
+          }
+          onCategoryChange={(nextCategory) =>
+            onFiltersChange({
+              ...filters,
+              searchTerm: draftSearchTerm,
+              selectedCategory: nextCategory,
+              showImages: showExerciseImages,
+            })
+          }
           onToggleImages={() => {
             const nextShowExerciseImages = !showExerciseImages
             setShowExerciseImages(nextShowExerciseImages)
-            onFiltersChange({ ...filters, searchTerm: draftSearchTerm, selectedCategory, showImages: nextShowExerciseImages })
+            onFiltersChange({
+              ...filters,
+              searchTerm: draftSearchTerm,
+              selectedCategory,
+              showImages: nextShowExerciseImages,
+            })
           }}
         />
       </PageCard>

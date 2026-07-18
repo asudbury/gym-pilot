@@ -39,9 +39,7 @@ export function LoginPage() {
 
   const emailParam = useMemo(() => {
     const rawValue =
-      searchParams.get('email') ||
-      searchParams.get('emailAddress') ||
-      ''
+      searchParams.get('email') || searchParams.get('emailAddress') || ''
 
     return rawValue.trim()
   }, [searchParams])
@@ -71,9 +69,7 @@ export function LoginPage() {
   }, [location.state])
 
   const appName =
-    user?.applicationName?.trim() ||
-    user?.name?.trim() ||
-    'GymPilot'
+    user?.applicationName?.trim() || user?.name?.trim() || 'GymPilot'
 
   const handlePasswordSignIn = async (
     event: React.FormEvent<HTMLFormElement>,
@@ -85,58 +81,40 @@ export function LoginPage() {
 
     const password = passwordRef.current?.value ?? ''
 
-    const response = await signInWithPassword(
-      email,
-      password,
-    )
+    const response = await signInWithPassword(email, password)
 
     setIsSubmitting(false)
 
     if (response.error) {
-      logger.error(
-        '[Login] Password sign-in failed',
-        response.error,
-      )
+      logger.error('[Login] Password sign-in failed', response.error)
 
-      setAuthMessage(
-        `Sign-in failed: ${response.error.message}`,
-      )
+      setAuthMessage(`Sign-in failed: ${response.error.message}`)
 
       return
     }
 
     rememberEmail(email, shouldRememberEmail)
 
-    const accessState =
-      await loadSupabaseProfileAccessState()
+    const accessState = await loadSupabaseProfileAccessState()
 
     if (accessState.isBlocked) {
       await signOutFromSupabase()
 
-      setAuthMessage(
-        'This account is frozen or its access has expired.',
-      )
+      setAuthMessage('This account is frozen or its access has expired.')
 
-      window.dispatchEvent(
-        new Event('gym-pilot-auth-updated'),
-      )
+      window.dispatchEvent(new Event('gym-pilot-auth-updated'))
 
       return
     }
 
-    const requiresPasswordChange =
-      await loadSupabaseProfileFlag(
-        'must_change_password',
-      )
+    const requiresPasswordChange = await loadSupabaseProfileFlag(
+      'must_change_password',
+    )
 
     if (requiresPasswordChange) {
-      setAuthMessage(
-        'Please set a new password to continue.',
-      )
+      setAuthMessage('Please set a new password to continue.')
 
-      window.dispatchEvent(
-        new Event('gym-pilot-auth-updated'),
-      )
+      window.dispatchEvent(new Event('gym-pilot-auth-updated'))
 
       navigate('/reset-password', {
         replace: true,
@@ -146,18 +124,14 @@ export function LoginPage() {
       return
     }
 
-    window.dispatchEvent(
-      new Event('gym-pilot-auth-updated'),
-    )
+    window.dispatchEvent(new Event('gym-pilot-auth-updated'))
 
     navigate(from, { replace: true })
   }
 
   const handleForgotPassword = async () => {
     if (!email.trim()) {
-      setAuthMessage(
-        'Enter your email address to receive a reset link.',
-      )
+      setAuthMessage('Enter your email address to receive a reset link.')
 
       return
     }
@@ -165,17 +139,12 @@ export function LoginPage() {
     setIsResetting(true)
     setAuthMessage('')
 
-    const response = await resetSupabasePassword(
-      email.trim(),
-    )
+    const response = await resetSupabasePassword(email.trim())
 
     setIsResetting(false)
 
     if (response.error) {
-      logger.error(
-        '[Login] Password reset failed',
-        response.error,
-      )
+      logger.error('[Login] Password reset failed', response.error)
 
       setAuthMessage(
         `Could not send the reset email: ${response.error.message}`,
@@ -197,9 +166,7 @@ export function LoginPage() {
         padding="spacious"
       >
         <div className="flex flex-col gap-2">
-          <Heading1 as="h1">
-            Welcome to {appName}
-          </Heading1>
+          <Heading1 as="h1">Welcome to {appName}</Heading1>
         </div>
 
         <form
@@ -218,9 +185,7 @@ export function LoginPage() {
               name="email"
               type="email"
               value={email}
-              onChange={(event) =>
-                setEmail(event.target.value)
-              }
+              onChange={(event) => setEmail(event.target.value)}
               autoComplete="username"
               inputMode="email"
               autoCapitalize="none"
@@ -253,15 +218,11 @@ export function LoginPage() {
             <input
               type="checkbox"
               checked={shouldRememberEmail}
-              onChange={(event) =>
-                setShouldRememberEmail(event.target.checked)
-              }
+              onChange={(event) => setShouldRememberEmail(event.target.checked)}
               className="h-4 w-4 rounded border-slate-300 text-blue-700 focus:ring-blue-600"
             />
 
-            <span>
-              Remember this email on this device
-            </span>
+            <span>Remember this email on this device</span>
           </label>
 
           <button
@@ -278,9 +239,7 @@ export function LoginPage() {
             disabled={isResetting}
             className="text-left text-sm font-medium text-blue-700 transition hover:text-blue-800 disabled:cursor-not-allowed disabled:text-slate-400"
           >
-            {isResetting
-              ? 'Sending reset email…'
-              : 'Forgot password?'}
+            {isResetting ? 'Sending reset email…' : 'Forgot password?'}
           </button>
         </form>
 
@@ -293,4 +252,3 @@ export function LoginPage() {
     </div>
   )
 }
-

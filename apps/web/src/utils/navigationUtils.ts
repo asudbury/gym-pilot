@@ -64,12 +64,14 @@ export function buildNavigationMenuItems({
     : []
 
   const adminItem: NavigationMenuListItem[] = isAuthenticated
-    ? [{
-        to: '/admin',
-        label: 'Admin',
-        onClick: onItemClick,
-        className: itemClassName,
-      }]
+    ? [
+        {
+          to: '/admin',
+          label: 'Admin',
+          onClick: onItemClick,
+          className: itemClassName,
+        },
+      ]
     : []
 
   return [
@@ -84,12 +86,17 @@ export function buildNavigationMenuItems({
   ]
 }
 
-export async function copyExerciseLinkToClipboard(exerciseId: string): Promise<void> {
+export async function copyExerciseLinkToClipboard(
+  exerciseId: string,
+): Promise<void> {
   const parsedExercises = exercisesSchema.parse(exercises)
   const exercise = parsedExercises.find((item) => item.id === exerciseId)
   const slug = exercise ? getExerciseSlug(exercise) : exerciseId
   const path = exercise ? getExercisePath(exercise) : `/exercise/${slug}`
-  const baseUrl = new URL(import.meta.env.BASE_URL || '/', window.location.origin)
+  const baseUrl = new URL(
+    import.meta.env.BASE_URL || '/',
+    window.location.origin,
+  )
   baseUrl.hash = path
   const shareUrl = baseUrl.toString()
 

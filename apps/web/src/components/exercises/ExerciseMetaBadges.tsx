@@ -9,9 +9,17 @@ type InfoPillProps = {
   className?: string
 }
 
-export function InfoPill({ children, tone = 'default', className }: InfoPillProps) {
+export function InfoPill({
+  children,
+  tone = 'default',
+  className,
+}: InfoPillProps) {
   const toneClassName = getToneClass(tone, className)
-  return <span className={toneClassName.replace('cursor-pointer ', '')}>{children}</span>
+  return (
+    <span className={toneClassName.replace('cursor-pointer ', '')}>
+      {children}
+    </span>
+  )
 }
 
 type ExerciseMetaBadgesProps = {
@@ -28,7 +36,9 @@ export function ExerciseMetaBadges({
   pillClassName,
 }: ExerciseMetaBadgesProps) {
   return (
-    <div className={['flex flex-wrap gap-2', className].filter(Boolean).join(' ')}>
+    <div
+      className={['flex flex-wrap gap-2', className].filter(Boolean).join(' ')}
+    >
       {values.map((value, index) => (
         <InfoPill
           key={`${value}-${index}`}

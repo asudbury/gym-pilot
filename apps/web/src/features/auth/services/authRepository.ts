@@ -1,5 +1,15 @@
-import { createPersistenceRepository, isSupabasePersistenceEnabled, loadSupabaseJsonRecord, removeSupabaseJsonRecord, saveSupabaseJsonRecord } from '@gym-pilot/shared'
-import { loadJsonRecord as loadDexieJsonRecord, saveJsonRecord as saveDexieJsonRecord, removeJsonRecord as removeDexieJsonRecord } from '@gym-pilot/shared'
+import {
+  createPersistenceRepository,
+  isSupabasePersistenceEnabled,
+  loadSupabaseJsonRecord,
+  removeSupabaseJsonRecord,
+  saveSupabaseJsonRecord,
+} from '@gym-pilot/shared'
+import {
+  loadJsonRecord as loadDexieJsonRecord,
+  saveJsonRecord as saveDexieJsonRecord,
+  removeJsonRecord as removeDexieJsonRecord,
+} from '@gym-pilot/shared'
 import { type AuthUser } from '../domain/authTypes'
 
 const SESSION_STORAGE_KEY = 'gym-pilot-auth-session'
@@ -68,7 +78,10 @@ export function createAuthSessionRepository() {
 
 export async function loadAuthSessionWithRepository(): Promise<AuthUser | null> {
   const repository = createAuthSessionRepository()
-  const stored = await repository.load<Partial<AuthUser> | null>(SESSION_STORAGE_KEY, null)
+  const stored = await repository.load<Partial<AuthUser> | null>(
+    SESSION_STORAGE_KEY,
+    null,
+  )
 
   if (!stored?.id || !stored?.name || !stored?.slug) {
     return null

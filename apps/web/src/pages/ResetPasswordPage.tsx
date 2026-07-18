@@ -3,7 +3,11 @@ import { useLocation, useNavigate, useSearchParams } from 'react-router-dom'
 import { PageCard } from '../components/PageCard'
 import { Heading1 } from '../components/Typography'
 import { appTokens } from '../constants/tokens'
-import { getSupabaseClient, logger, saveSupabaseProfileFlag } from '@gym-pilot/shared'
+import {
+  getSupabaseClient,
+  logger,
+  saveSupabaseProfileFlag,
+} from '@gym-pilot/shared'
 
 export function ResetPasswordPage() {
   const navigate = useNavigate()
@@ -14,8 +18,14 @@ export function ResetPasswordPage() {
   const [statusMessage, setStatusMessage] = useState('')
   const [isSubmitting, setIsSubmitting] = useState(false)
 
-  const accessToken = useMemo(() => searchParams.get('access_token') || '', [searchParams])
-  const refreshToken = useMemo(() => searchParams.get('refresh_token') || '', [searchParams])
+  const accessToken = useMemo(
+    () => searchParams.get('access_token') || '',
+    [searchParams],
+  )
+  const refreshToken = useMemo(
+    () => searchParams.get('refresh_token') || '',
+    [searchParams],
+  )
   const hasResetTokens = Boolean(accessToken && refreshToken)
   const from = useMemo(() => {
     const state = location.state as { from?: { pathname?: string } } | null
@@ -57,7 +67,10 @@ export function ResetPasswordPage() {
 
       sessionError = sessionResponse.error
     } else {
-      const { data: { session }, error } = await client.auth.getSession()
+      const {
+        data: { session },
+        error,
+      } = await client.auth.getSession()
       sessionError = error
 
       if (!session) {
@@ -66,8 +79,13 @@ export function ResetPasswordPage() {
     }
 
     if (sessionError) {
-      logger.error('[ResetPassword] Could not restore Supabase session', sessionError)
-      setStatusMessage('The password reset link could not be used. Please request a new one or sign in again.')
+      logger.error(
+        '[ResetPassword] Could not restore Supabase session',
+        sessionError,
+      )
+      setStatusMessage(
+        'The password reset link could not be used. Please request a new one or sign in again.',
+      )
       setIsSubmitting(false)
       return
     }
@@ -84,14 +102,20 @@ export function ResetPasswordPage() {
 
     await saveSupabaseProfileFlag('must_change_password', false)
 
-    setStatusMessage('Password updated successfully. You can now continue using the app.')
+    setStatusMessage(
+      'Password updated successfully. You can now continue using the app.',
+    )
     window.dispatchEvent(new Event('gym-pilot-auth-updated'))
     navigate(from, { replace: true })
   }
 
   return (
     <div className={`${appTokens.pageShell} flex items-start justify-center`}>
-      <PageCard as="section" className="w-full max-w-xl self-start" padding="spacious">
+      <PageCard
+        as="section"
+        className="w-full max-w-xl self-start"
+        padding="spacious"
+      >
         <div className="flex flex-col gap-2">
           <Heading1 as="h1">Set a new password</Heading1>
           <p className="text-sm text-slate-600">

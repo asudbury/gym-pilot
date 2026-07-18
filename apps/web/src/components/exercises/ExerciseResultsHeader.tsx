@@ -31,7 +31,9 @@ export function ExerciseResultsHeader({
               : 'Start typing or choose a category to reveal exercises.'}
         </p>
       </div>
-      {normalizedCategory ? <div className={appTokens.pill}>Category: {normalizedCategory}</div> : null}
+      {normalizedCategory ? (
+        <div className={appTokens.pill}>Category: {normalizedCategory}</div>
+      ) : null}
     </div>
   )
 }

@@ -23,12 +23,18 @@ export type PlanDetailViewModel = {
   sessions: PlanDetailSession[]
 }
 
-export function resolvePlanDetailViewModel(plan: Plan | undefined, assignment: Assignment | undefined, planSlug: string | undefined) {
+export function resolvePlanDetailViewModel(
+  plan: Plan | undefined,
+  assignment: Assignment | undefined,
+  planSlug: string | undefined,
+) {
   const isAssignment = Boolean(assignment)
-  const resolvedPlanName = assignment?.planName ?? plan?.planName ?? 'Untitled plan'
-  const sessions = (assignment?.planSessions && assignment.planSessions.length > 0)
-    ? assignment.planSessions as unknown as PlanDetailSession[]
-    : ((plan?.planSessions ?? []) as PlanDetailSession[])
+  const resolvedPlanName =
+    assignment?.planName ?? plan?.planName ?? 'Untitled plan'
+  const sessions =
+    assignment?.planSessions && assignment.planSessions.length > 0
+      ? (assignment.planSessions as unknown as PlanDetailSession[])
+      : ((plan?.planSessions ?? []) as PlanDetailSession[])
 
   return {
     title: assignment?.assignmentName ?? plan?.planName ?? 'Untitled plan',
@@ -36,7 +42,9 @@ export function resolvePlanDetailViewModel(plan: Plan | undefined, assignment: A
     editPath: isAssignment
       ? `/users/${assignment?.assignedUserId ?? 'user'}/assignments/${assignment?.id ?? planSlug}/edit`
       : `/plans/${plan?.id ?? planSlug}/edit`,
-    backPath: isAssignment ? `/users/${assignment?.assignedUserId ?? 'user'}/assignments` : '/plans',
+    backPath: isAssignment
+      ? `/users/${assignment?.assignedUserId ?? 'user'}/assignments`
+      : '/plans',
     editLabel: isAssignment ? 'Edit assignment' : 'Edit plan',
     backLabel: isAssignment ? 'Back to assignments' : 'Back to plans',
     sessions,
@@ -44,5 +52,10 @@ export function resolvePlanDetailViewModel(plan: Plan | undefined, assignment: A
 }
 
 export function resolveExerciseForPlanItem(item: PlanDetailItem) {
-  return exercises.find((exercise) => exercise.id === item.exercise_id || exercise.id === item.id || exercise.name === item.exercise_name)
+  return exercises.find(
+    (exercise) =>
+      exercise.id === item.exercise_id ||
+      exercise.id === item.id ||
+      exercise.name === item.exercise_name,
+  )
 }

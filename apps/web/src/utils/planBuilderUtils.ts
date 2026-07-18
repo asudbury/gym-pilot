@@ -19,7 +19,9 @@ export interface PlanTab {
 }
 
 export function createId() {
-  return typeof crypto !== 'undefined' && 'randomUUID' in crypto ? crypto.randomUUID() : `${Date.now()}-${Math.random()}`
+  return typeof crypto !== 'undefined' && 'randomUUID' in crypto
+    ? crypto.randomUUID()
+    : `${Date.now()}-${Math.random()}`
 }
 
 export function createBlankRow(exerciseId = ''): PlanGridRow {
@@ -67,7 +69,8 @@ export function buildPlanSessionsFromTabs(tabs: PlanTab[]): PlanSession[] {
           id: row.exerciseId || row.id,
           name: exercise?.name ?? linkLabel ?? row.exerciseId ?? 'Link',
           exercise_id: row.exerciseId,
-          exercise_name: exercise?.name ?? linkLabel ?? row.exerciseId ?? 'Link',
+          exercise_name:
+            exercise?.name ?? linkLabel ?? row.exerciseId ?? 'Link',
           reps: row.reps ?? '',
           workingSets: row.workingSets ?? '',
           notes: linkUrl || (row.notes ?? ''),
@@ -78,7 +81,9 @@ export function buildPlanSessionsFromTabs(tabs: PlanTab[]): PlanSession[] {
   }))
 }
 
-export function buildTabsFromSessions(sessions: PlanSession[] | undefined): PlanTab[] {
+export function buildTabsFromSessions(
+  sessions: PlanSession[] | undefined,
+): PlanTab[] {
   if (!sessions || sessions.length === 0) {
     return [createBlankTab('Day 1')]
   }
@@ -87,7 +92,10 @@ export function buildTabsFromSessions(sessions: PlanSession[] | undefined): Plan
     const tab = createBlankTab(session.title?.trim() || `Day ${index + 1}`)
     tab.rows = (session.planItems ?? []).map((item) => {
       if (item.link_url || item.link_label) {
-        const row = createLinkRow(item.link_label || item.exercise_name || 'Link', item.link_url || item.notes || '')
+        const row = createLinkRow(
+          item.link_label || item.exercise_name || 'Link',
+          item.link_url || item.notes || '',
+        )
         row.notes = item.notes ?? ''
         row.reps = item.reps ?? ''
         row.workingSets = item.workingSets ?? ''
@@ -105,6 +113,9 @@ export function buildTabsFromSessions(sessions: PlanSession[] | undefined): Plan
 }
 
 export function sanitizeSheetName(value: string) {
-  const cleaned = value.replace(/[\\/*?:\[\]]/g, '').trim().slice(0, 31)
+  const cleaned = value
+    .replace(/[\\/*?:\[\]]/g, '')
+    .trim()
+    .slice(0, 31)
   return cleaned || 'Sheet'
 }

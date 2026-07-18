@@ -13,16 +13,25 @@ type DashboardPageProps = {
 export function DashboardPage({ userName }: DashboardPageProps) {
   const { user } = useAuth()
   const displayName = userName?.trim() || 'there'
-  const previousLoginLabel = formatDashboardTimestamp(user?.previousLastLoggedInAt ?? null)
-  const viewModel = useMemo(() => resolveDashboardViewModel(user?.role, user?.roles), [user?.role, user?.roles])
-  const [selectedRole, setSelectedRole] = useState<string | null>(() => user?.role ?? viewModel.availableRoles[0] ?? null)
+  const previousLoginLabel = formatDashboardTimestamp(
+    user?.previousLastLoggedInAt ?? null,
+  )
+  const viewModel = useMemo(
+    () => resolveDashboardViewModel(user?.role, user?.roles),
+    [user?.role, user?.roles],
+  )
+  const [selectedRole, setSelectedRole] = useState<string | null>(
+    () => user?.role ?? viewModel.availableRoles[0] ?? null,
+  )
 
   const layouts = viewModel.layouts
   const shouldShowRoleSelector = viewModel.shouldShowRoleSelector
-  const selectedLayoutKey = selectedRole && layouts.some((layout) => layout.key === selectedRole)
-    ? selectedRole
-    : viewModel.selectedLayoutKey
-  const selectedLayout = layouts.find((layout) => layout.key === selectedLayoutKey) ?? layouts[0]
+  const selectedLayoutKey =
+    selectedRole && layouts.some((layout) => layout.key === selectedRole)
+      ? selectedRole
+      : viewModel.selectedLayoutKey
+  const selectedLayout =
+    layouts.find((layout) => layout.key === selectedLayoutKey) ?? layouts[0]
 
   useEffect(() => {
     if (!layouts.some((layout) => layout.key === selectedRole)) {
@@ -34,10 +43,15 @@ export function DashboardPage({ userName }: DashboardPageProps) {
     <PageLayout className="gap-6">
       <PageCard as="section" className="space-y-6">
         <div className="space-y-2">
-          <p className="text-sm font-semibold uppercase tracking-[0.24em] text-slate-500">Dashboard</p>
-          <h1 className="text-2xl font-semibold tracking-tight text-slate-900 sm:text-3xl dark:text-slate-100">Welcome back, {displayName}</h1>
+          <p className="text-sm font-semibold uppercase tracking-[0.24em] text-slate-500">
+            Dashboard
+          </p>
+          <h1 className="text-2xl font-semibold tracking-tight text-slate-900 sm:text-3xl dark:text-slate-100">
+            Welcome back, {displayName}
+          </h1>
           <p className="max-w-2xl text-sm text-slate-600 dark:text-slate-300">
-            Choose the view that fits your role and jump back into your work from one place.
+            Choose the view that fits your role and jump back into your work
+            from one place.
           </p>
           {previousLoginLabel ? (
             <p className="max-w-2xl text-sm text-slate-500 dark:text-slate-400">
@@ -67,8 +81,12 @@ export function DashboardPage({ userName }: DashboardPageProps) {
         {selectedLayout ? (
           <div className="space-y-2">
             <div className="space-y-1">
-              <h2 className="text-xl font-semibold text-slate-900 dark:text-slate-100">{selectedLayout.title}</h2>
-              <p className="text-sm text-slate-600 dark:text-slate-300">{selectedLayout.description}</p>
+              <h2 className="text-xl font-semibold text-slate-900 dark:text-slate-100">
+                {selectedLayout.title}
+              </h2>
+              <p className="text-sm text-slate-600 dark:text-slate-300">
+                {selectedLayout.description}
+              </p>
             </div>
             {renderDashboardWidgets(layouts, selectedLayoutKey)}
           </div>

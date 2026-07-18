@@ -36,7 +36,12 @@ export function ResponsiveVisibility<T extends ElementType = 'div'>({
   const hiddenClass = hiddenOn ? hiddenBreakpointClasses[hiddenOn] : ''
 
   return (
-    <Component className={[responsiveClass, hiddenClass, className].filter(Boolean).join(' ')} {...props}>
+    <Component
+      className={[responsiveClass, hiddenClass, className]
+        .filter(Boolean)
+        .join(' ')}
+      {...props}
+    >
       {children}
     </Component>
   )

@@ -9,7 +9,10 @@ type RequireAuthProps = {
   requireClubId?: boolean
 }
 
-export function RequireAuth({ requiredRole, requireClubId = false }: RequireAuthProps) {
+export function RequireAuth({
+  requiredRole,
+  requireClubId = false,
+}: RequireAuthProps) {
   const { isAuthenticated, hasAccess, user } = useAuth()
   const location = useLocation()
 

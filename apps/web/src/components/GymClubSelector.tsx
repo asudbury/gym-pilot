@@ -15,8 +15,16 @@ type GymClubSelectorProps = {
   disabled?: boolean
 }
 
-export function GymClubSelector({ value, onChange, className, placeholder, disabled = false }: GymClubSelectorProps) {
-  const [availableClubs, setAvailableClubs] = useState<VirginActiveClub[]>(() => getFallbackVirginActiveClubs())
+export function GymClubSelector({
+  value,
+  onChange,
+  className,
+  placeholder,
+  disabled = false,
+}: GymClubSelectorProps) {
+  const [availableClubs, setAvailableClubs] = useState<VirginActiveClub[]>(() =>
+    getFallbackVirginActiveClubs(),
+  )
   const [isLoadingClubs, setIsLoadingClubs] = useState(false)
   const [clubsError, setClubsError] = useState<string | null>(null)
   const listId = useId()
@@ -54,7 +62,10 @@ export function GymClubSelector({ value, onChange, className, placeholder, disab
     }
   }, [])
 
-  const displayValue = useMemo(() => resolveVirginActiveClubName(value, availableClubs), [availableClubs, value])
+  const displayValue = useMemo(
+    () => resolveVirginActiveClubName(value, availableClubs),
+    [availableClubs, value],
+  )
 
   const handleFocus = () => {
     if (disabled) {
@@ -78,7 +89,9 @@ export function GymClubSelector({ value, onChange, className, placeholder, disab
       return
     }
 
-    const matchingClub = availableClubs.find((club) => club.name.trim().toLowerCase() === rawValue.toLowerCase())
+    const matchingClub = availableClubs.find(
+      (club) => club.name.trim().toLowerCase() === rawValue.toLowerCase(),
+    )
 
     if (matchingClub) {
       onChange(String(matchingClub.clubId))
@@ -103,8 +116,12 @@ export function GymClubSelector({ value, onChange, className, placeholder, disab
           <option key={club.clubId} value={club.name} />
         ))}
       </datalist>
-      {isLoadingClubs ? <p className="text-xs text-slate-500">Loading clubs…</p> : null}
-      {clubsError ? <p className="text-xs text-rose-600">{clubsError}</p> : null}
+      {isLoadingClubs ? (
+        <p className="text-xs text-slate-500">Loading clubs…</p>
+      ) : null}
+      {clubsError ? (
+        <p className="text-xs text-rose-600">{clubsError}</p>
+      ) : null}
     </div>
   )
 }

@@ -2,8 +2,17 @@ import { useEffect, useMemo, useState } from 'react'
 import { useLocation, useNavigate } from 'react-router-dom'
 import { getToneClass } from './toneClasses'
 import { classNames, exercises, exercisesSchema } from '@gym-pilot/shared'
-import { getQuickLinkForPath, groupFavoritesByFolder, normalizeFolderName, sortFavorites, type QuickLink } from '../utils/favouriteUtils'
-import { normalizeFolderName as normalizeFavoriteFolderName, sortQuickLinks } from '../features/favourites/domain/quickLinks'
+import {
+  getQuickLinkForPath,
+  groupFavoritesByFolder,
+  normalizeFolderName,
+  sortFavorites,
+  type QuickLink,
+} from '../utils/favouriteUtils'
+import {
+  normalizeFolderName as normalizeFavoriteFolderName,
+  sortQuickLinks,
+} from '../features/favourites/domain/quickLinks'
 
 type SavedSearch = {
   id: string
@@ -57,7 +66,12 @@ export function FavouriteLinksMenu({
       const menu = document.getElementById('quick-links-menu')
       const trigger = document.getElementById('quick-links-trigger')
 
-      if (menu && trigger && !menu.contains(target) && !trigger.contains(target)) {
+      if (
+        menu &&
+        trigger &&
+        !menu.contains(target) &&
+        !trigger.contains(target)
+      ) {
         setMenuOpen(false)
       }
     }
@@ -77,7 +91,10 @@ export function FavouriteLinksMenu({
     window.addEventListener('gym-pilot-open-favourites-menu', handleOpenRequest)
 
     return () => {
-      window.removeEventListener('gym-pilot-open-favourites-menu', handleOpenRequest)
+      window.removeEventListener(
+        'gym-pilot-open-favourites-menu',
+        handleOpenRequest,
+      )
     }
   }, [])
 
@@ -105,11 +122,18 @@ export function FavouriteLinksMenu({
     return new Map(parsed.map((exercise) => [exercise.id, exercise]))
   }, [])
 
-  const currentQuickLink = useMemo(() => getQuickLinkForPath(location.pathname, exerciseLookup), [exerciseLookup, location.pathname])
-  const isCurrentPageFavorite = currentQuickLink ? favorites.some((item) => item.path === currentQuickLink.path) : false
+  const currentQuickLink = useMemo(
+    () => getQuickLinkForPath(location.pathname, exerciseLookup),
+    [exerciseLookup, location.pathname],
+  )
+  const isCurrentPageFavorite = currentQuickLink
+    ? favorites.some((item) => item.path === currentQuickLink.path)
+    : false
   const favoriteGroups = useMemo(() => {
     const groups = groupFavoritesByFolder(favorites)
-    const folderGroups = folders.map((folderName) => [folderName, [] as QuickLink[]] as const)
+    const folderGroups = folders.map(
+      (folderName) => [folderName, [] as QuickLink[]] as const,
+    )
     const merged = new Map<string, QuickLink[]>(groups)
 
     folderGroups.forEach(([folderName]) => {
@@ -150,7 +174,9 @@ export function FavouriteLinksMenu({
       return
     }
 
-    const existingFavorite = favorites.find((item) => item.path === currentQuickLink.path)
+    const existingFavorite = favorites.find(
+      (item) => item.path === currentQuickLink.path,
+    )
     const folderName = normalizeFolderName(existingFavorite?.folder ?? '')
 
     setSelectedFolder(folderName)
@@ -163,31 +189,45 @@ export function FavouriteLinksMenu({
       return
     }
 
-    onFoldersChange(Array.from(new Set([...folders, folderName])).sort((left, right) => left.localeCompare(right)))
+    onFoldersChange(
+      Array.from(new Set([...folders, folderName])).sort((left, right) =>
+        left.localeCompare(right),
+      ),
+    )
     setSelectedFolder(folderName)
     setNewFolderName('')
   }
 
   const handleUpdateFavoriteLink = (link: QuickLink, folderName?: string) => {
-    const normalizedFolder = normalizeFavoriteFolderName(folderName ?? '') || undefined
+    const normalizedFolder =
+      normalizeFavoriteFolderName(folderName ?? '') || undefined
     const alreadySaved = favorites.some((item) => item.path === link.path)
 
     if (alreadySaved) {
       onFavoritesChange(
         sortFavorites(
-          favorites.map((item) => (item.path === link.path ? { ...item, folder: normalizedFolder } : item)),
+          favorites.map((item) =>
+            item.path === link.path
+              ? { ...item, folder: normalizedFolder }
+              : item,
+          ),
         ),
       )
       return
     }
 
-    const nextFavorites = sortQuickLinks([...favorites, { ...link, folder: normalizedFolder }]).slice(0, 12)
+    const nextFavorites = sortQuickLinks([
+      ...favorites,
+      { ...link, folder: normalizedFolder },
+    ]).slice(0, 12)
 
     onFavoritesChange(nextFavorites)
   }
 
   const handleRemoveFavoriteLink = (link: QuickLink) => {
-    onFavoritesChange(sortQuickLinks(favorites.filter((item) => item.path !== link.path)))
+    onFavoritesChange(
+      sortQuickLinks(favorites.filter((item) => item.path !== link.path)),
+    )
   }
 
   const handleToggleCurrentFavorite = () => {
@@ -212,9 +252,11 @@ export function FavouriteLinksMenu({
     variant === 'header'
       ? getToneClass('blue', 'w-full px-4 py-2 text-left text-sm font-medium')
       : classNames(
-        'w-full cursor-pointer rounded-xl px-3 py-2 text-left text-sm font-medium transition',
-        menuOpen ? 'bg-slate-900 text-white' : 'text-slate-700 hover:bg-slate-50',
-      ),
+          'w-full cursor-pointer rounded-xl px-3 py-2 text-left text-sm font-medium transition',
+          menuOpen
+            ? 'bg-slate-900 text-white'
+            : 'text-slate-700 hover:bg-slate-50',
+        ),
   )
 
   return (
@@ -228,12 +270,19 @@ export function FavouriteLinksMenu({
         <span>Favourites</span>
       </button>
       {menuOpen && (
-        <div id="quick-links-menu" className="fixed inset-x-3 top-16 z-40 max-h-[min(75vh,32rem)] overflow-y-auto rounded-2xl border border-slate-200 bg-white p-3 shadow-xl sm:absolute sm:right-0 sm:left-auto sm:top-full sm:mt-2 sm:w-80 sm:max-w-[calc(100vw-2rem)]">
+        <div
+          id="quick-links-menu"
+          className="fixed inset-x-3 top-16 z-40 max-h-[min(75vh,32rem)] overflow-y-auto rounded-2xl border border-slate-200 bg-white p-3 shadow-xl sm:absolute sm:right-0 sm:left-auto sm:top-full sm:mt-2 sm:w-80 sm:max-w-[calc(100vw-2rem)]"
+        >
           <div className="mb-3 flex flex-col gap-2 border-b border-slate-100 pb-3">
             <div className="flex items-start justify-between gap-2">
               <div className="min-w-0">
-                <p className="text-sm font-semibold text-slate-900">Manage favourites</p>
-                <p className="mt-1 text-xs text-slate-500">Quick links for pages you use most often.</p>
+                <p className="text-sm font-semibold text-slate-900">
+                  Manage favourites
+                </p>
+                <p className="mt-1 text-xs text-slate-500">
+                  Quick links for pages you use most often.
+                </p>
               </div>
               <div className="flex flex-col gap-2 sm:items-end">
                 <label className="text-[11px] font-semibold uppercase tracking-wide text-slate-500">
@@ -269,7 +318,10 @@ export function FavouriteLinksMenu({
                 <button
                   type="button"
                   onClick={handleToggleCurrentFavorite}
-                  className={getToneClass('default', 'cursor-pointer px-3 py-1.5 text-xs font-medium')}
+                  className={getToneClass(
+                    'default',
+                    'cursor-pointer px-3 py-1.5 text-xs font-medium',
+                  )}
                 >
                   {isCurrentPageFavorite ? 'Update' : 'Add to favorites'}
                 </button>
@@ -278,7 +330,10 @@ export function FavouriteLinksMenu({
             <button
               type="button"
               onClick={handleOpenFavouritesPage}
-              className={getToneClass('blue', 'w-fit cursor-pointer px-3 py-2 text-xs font-medium')}
+              className={getToneClass(
+                'blue',
+                'w-fit cursor-pointer px-3 py-2 text-xs font-medium',
+              )}
             >
               Open favourites page
             </button>
@@ -287,13 +342,19 @@ export function FavouriteLinksMenu({
           {favorites.length > 0 ? (
             <div className="flex flex-col gap-3">
               {favoriteGroups.map(([folderName, items]) => (
-                <div key={folderName} className="rounded-xl border border-slate-200 bg-slate-50 p-2">
+                <div
+                  key={folderName}
+                  className="rounded-xl border border-slate-200 bg-slate-50 p-2"
+                >
                   <div className="mb-2 px-1 text-xs font-semibold tracking-wide text-slate-500">
                     {folderName === 'No folder' ? 'No folder' : folderName}
                   </div>
                   <div className="ml-2 flex flex-col gap-2 border-l border-slate-200 pl-3">
                     {items.map((item) => (
-                      <div key={item.id} className="flex flex-col gap-2 rounded-xl border border-slate-200 bg-white p-2 sm:flex-row sm:items-center">
+                      <div
+                        key={item.id}
+                        className="flex flex-col gap-2 rounded-xl border border-slate-200 bg-white p-2 sm:flex-row sm:items-center"
+                      >
                         <button
                           type="button"
                           onClick={() => handleOpenQuickLink(item)}
@@ -302,7 +363,12 @@ export function FavouriteLinksMenu({
                           {item.label}
                         </button>
                         <div className="flex items-center gap-2 self-end sm:self-auto">
-                          <button type="button" onClick={() => handleRemoveFavoriteLink(item)} className="cursor-pointer rounded-lg border border-slate-200 bg-white px-2 py-2 text-xs text-slate-600" aria-label="Remove favorite">
+                          <button
+                            type="button"
+                            onClick={() => handleRemoveFavoriteLink(item)}
+                            className="cursor-pointer rounded-lg border border-slate-200 bg-white px-2 py-2 text-xs text-slate-600"
+                            aria-label="Remove favorite"
+                          >
                             ✕
                           </button>
                         </div>

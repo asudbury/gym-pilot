@@ -1,5 +1,10 @@
 import { exercises } from '@gym-pilot/shared'
-import { createBlankRow, createBlankTab, createLinkRow, type PlanTab } from '../../../utils/planBuilderUtils'
+import {
+  createBlankRow,
+  createBlankTab,
+  createLinkRow,
+  type PlanTab,
+} from '../../../utils/planBuilderUtils'
 import type { PlanSession } from '@gym-pilot/types'
 import { buildTabsFromSessions } from '../../../utils/planBuilderUtils'
 
@@ -11,7 +16,10 @@ export type PlanBuilderTransitionState = {
   personNamesInput?: string
 }
 
-export function resolvePlanBuilderTabState(currentState: PlanBuilderTransitionState, title: string) {
+export function resolvePlanBuilderTabState(
+  currentState: PlanBuilderTransitionState,
+  title: string,
+) {
   const nextTab = createBlankTab(title)
 
   return {
@@ -20,7 +28,10 @@ export function resolvePlanBuilderTabState(currentState: PlanBuilderTransitionSt
   }
 }
 
-export function resolvePlanBuilderRemoveTabState(currentState: PlanBuilderTransitionState, tabId: string) {
+export function resolvePlanBuilderRemoveTabState(
+  currentState: PlanBuilderTransitionState,
+  tabId: string,
+) {
   if (currentState.tabs.length <= 1) {
     return currentState
   }
@@ -30,23 +41,35 @@ export function resolvePlanBuilderRemoveTabState(currentState: PlanBuilderTransi
 
   return {
     tabs: nextTabs,
-    activeTabId: removedTabWasActive ? nextTabs[0]?.id ?? null : currentState.activeTabId,
+    activeTabId: removedTabWasActive
+      ? (nextTabs[0]?.id ?? null)
+      : currentState.activeTabId,
   }
 }
 
-export function resolvePlanBuilderRowState(currentState: PlanBuilderTransitionState, exerciseId: string) {
+export function resolvePlanBuilderRowState(
+  currentState: PlanBuilderTransitionState,
+  exerciseId: string,
+) {
   if (!exerciseId || !currentState.activeTabId) {
     return null
   }
 
   return {
-    tabs: currentState.tabs.map((tab) => (tab.id === currentState.activeTabId ? { ...tab, rows: [...tab.rows, createBlankRow(exerciseId)] } : tab)),
+    tabs: currentState.tabs.map((tab) =>
+      tab.id === currentState.activeTabId
+        ? { ...tab, rows: [...tab.rows, createBlankRow(exerciseId)] }
+        : tab,
+    ),
     selectedExerciseId: '',
     selectedExerciseName: '',
   }
 }
 
-export function resolvePlanBuilderLinkRows(links: Array<{ label: string; path: string }>, activeTabId: string | null) {
+export function resolvePlanBuilderLinkRows(
+  links: Array<{ label: string; path: string }>,
+  activeTabId: string | null,
+) {
   if (!activeTabId) {
     return []
   }
@@ -70,7 +93,9 @@ export function resolvePlanBuilderResetState() {
   }
 }
 
-export function resolvePlanBuilderHydrationState(plan: { planSessions?: PlanSession[]; planName?: string } | null | undefined) {
+export function resolvePlanBuilderHydrationState(
+  plan: { planSessions?: PlanSession[]; planName?: string } | null | undefined,
+) {
   const nextTabs = buildTabsFromSessions(plan?.planSessions)
 
   return {

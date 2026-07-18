@@ -13,7 +13,14 @@ type AdminSectionShellProps = {
   className?: string
 }
 
-export function AdminSectionShell({ title, subtitle, backTo = '/admin', backLabel = 'Back to admin', children, className }: AdminSectionShellProps) {
+export function AdminSectionShell({
+  title,
+  subtitle,
+  backTo = '/admin',
+  backLabel = 'Back to admin',
+  children,
+  className,
+}: AdminSectionShellProps) {
   return (
     <PageLayout className={className}>
       <PageCard>
@@ -21,9 +28,14 @@ export function AdminSectionShell({ title, subtitle, backTo = '/admin', backLabe
           <div>
             <Paragraph>Admin</Paragraph>
             <Heading1 className="mt-2">{title}</Heading1>
-            {subtitle ? <p className="mt-2 text-sm text-slate-600">{subtitle}</p> : null}
+            {subtitle ? (
+              <p className="mt-2 text-sm text-slate-600">{subtitle}</p>
+            ) : null}
           </div>
-          <Link to={backTo} className={getToneClass('default', 'px-4 py-2 text-sm font-medium')}>
+          <Link
+            to={backTo}
+            className={getToneClass('default', 'px-4 py-2 text-sm font-medium')}
+          >
             {backLabel}
           </Link>
         </div>

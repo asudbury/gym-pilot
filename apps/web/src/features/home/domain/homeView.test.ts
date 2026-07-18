@@ -1,6 +1,10 @@
 import { describe, expect, it } from 'vitest'
 import type { exercises } from '@gym-pilot/shared'
-import { filterExercises, normalizeCategory, resolveHomeViewModel } from './homeView'
+import {
+  filterExercises,
+  normalizeCategory,
+  resolveHomeViewModel,
+} from './homeView'
 
 type ExerciseFixture = (typeof exercises)[number]
 
@@ -13,7 +17,11 @@ describe('normalizeCategory', () => {
 
 describe('resolveHomeViewModel', () => {
   it('builds the expected search and filter state', () => {
-    const viewModel = resolveHomeViewModel({ searchTerm: 'squat', selectedCategory: 'All', showImages: true })
+    const viewModel = resolveHomeViewModel({
+      searchTerm: 'squat',
+      selectedCategory: 'All',
+      showImages: true,
+    })
 
     expect(viewModel.categories[0]).toBe('All')
     expect(viewModel.hasExplicitAll).toBe(true)
@@ -62,7 +70,13 @@ describe('filterExercises', () => {
       },
     ]
 
-    const result = filterExercises(exerciseList, { searchTerm: 'squat', selectedCategory: 'Legs', showImages: true }, 'Legs', false, 'squat')
+    const result = filterExercises(
+      exerciseList,
+      { searchTerm: 'squat', selectedCategory: 'Legs', showImages: true },
+      'Legs',
+      false,
+      'squat',
+    )
 
     expect(result).toHaveLength(1)
     expect(result[0]?.name).toBe('Squat')

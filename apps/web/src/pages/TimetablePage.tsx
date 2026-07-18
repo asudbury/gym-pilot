@@ -3,9 +3,13 @@ import { useAuth } from '../auth/AuthContext'
 import { PageCard } from '../components/PageCard'
 import { PageLayout } from '../layouts/PageLayout'
 import { loadVirginActiveClubs } from '../utils/virginActiveClubs'
-import { resolveTimetableViewModel, type TimetableSession } from '../features/timetable/domain/timetableView'
+import {
+  resolveTimetableViewModel,
+  type TimetableSession,
+} from '../features/timetable/domain/timetableView'
 
-const TIMETABLE_ENDPOINT = 'https://czasc5rowjxovhkdbd6p6jdtky0hnqas.lambda-url.eu-west-2.on.aws/'
+const TIMETABLE_ENDPOINT =
+  'https://czasc5rowjxovhkdbd6p6jdtky0hnqas.lambda-url.eu-west-2.on.aws/'
 const timetableCache = new Map<string, Promise<TimetableSession[]>>()
 
 function isRecord(value: unknown): value is Record<string, unknown> {
@@ -59,14 +63,19 @@ function buildInstructorLookup(payload: unknown): Record<string, string> {
   }
 
   const candidate = isRecord(payload.data) ? payload.data : payload
-  const instructors = Array.isArray(candidate.instructors) ? candidate.instructors : []
+  const instructors = Array.isArray(candidate.instructors)
+    ? candidate.instructors
+    : []
 
   return instructors.reduce<Record<string, string>>((lookup, item) => {
     if (!isRecord(item)) {
       return lookup
     }
 
-    const instructorId = typeof item.id === 'number' || typeof item.id === 'string' ? String(item.id) : null
+    const instructorId =
+      typeof item.id === 'number' || typeof item.id === 'string'
+        ? String(item.id)
+        : null
     const instructorName = typeof item.name === 'string' ? item.name : null
 
     if (instructorId && instructorName) {
@@ -90,7 +99,10 @@ function buildClassLookup(payload: unknown): Record<string, string> {
       return lookup
     }
 
-    const classId = typeof item.id === 'number' || typeof item.id === 'string' ? String(item.id) : null
+    const classId =
+      typeof item.id === 'number' || typeof item.id === 'string'
+        ? String(item.id)
+        : null
     const className = typeof item.name === 'string' ? item.name : null
 
     if (classId && className) {
@@ -103,7 +115,9 @@ function buildClassLookup(payload: unknown): Record<string, string> {
 
 function normalizeSessions(payload: unknown): TimetableSession[] {
   if (Array.isArray(payload)) {
-    return payload.map(parseSession).filter((session): session is TimetableSession => Boolean(session))
+    return payload
+      .map(parseSession)
+      .filter((session): session is TimetableSession => Boolean(session))
   }
 
   if (isRecord(payload)) {
@@ -163,7 +177,8 @@ function formatTimeLabel(value: string | null | undefined) {
 
 function formatAvailability(session: TimetableSession) {
   const booked = typeof session.booked === 'number' ? session.booked : null
-  const capacity = typeof session.capacity === 'number' ? session.capacity : null
+  const capacity =
+    typeof session.capacity === 'number' ? session.capacity : null
 
   if (booked !== null && capacity !== null) {
     return `${booked}/${capacity} booked`
@@ -231,7 +246,9 @@ export function TimetablePage() {
         return
       }
 
-      const matchingClub = clubs.find((club) => String(club.clubId) === rawGymName)
+      const matchingClub = clubs.find(
+        (club) => String(club.clubId) === rawGymName,
+      )
       setResolvedClubName(matchingClub?.name ?? rawGymName)
     })
 
@@ -252,34 +269,43 @@ export function TimetablePage() {
         timetableUrl.searchParams.set('clubid', clubId)
 
         const cachedRequest = timetableCache.get(clubId)
-        const request = cachedRequest ?? (async () => {
-          const response = await fetch(timetableUrl.toString(), {
-            headers: {
-              Accept: 'application/json',
-            },
-          })
+        const request =
+          cachedRequest ??
+          (async () => {
+            const response = await fetch(timetableUrl.toString(), {
+              headers: {
+                Accept: 'application/json',
+              },
+            })
 
-          if (!response.ok) {
-            throw new Error(`Request failed with status ${response.status}`)
-          }
-
-          const payload = await response.json()
-          const instructorLookup = buildInstructorLookup(payload)
-          const classLookup = buildClassLookup(payload)
-
-          return normalizeSessions(payload).map((session) => {
-            const instructorId = session.instructorId == null ? null : String(session.instructorId)
-            const instructorName = instructorId ? instructorLookup[instructorId] ?? null : null
-            const classId = session.classId == null ? null : String(session.classId)
-            const className = classId ? classLookup[classId] ?? null : null
-
-            return {
-              ...session,
-              className: className ?? session.className ?? null,
-              instructorName: instructorName ?? session.instructorName ?? null,
+            if (!response.ok) {
+              throw new Error(`Request failed with status ${response.status}`)
             }
-          })
-        })()
+
+            const payload = await response.json()
+            const instructorLookup = buildInstructorLookup(payload)
+            const classLookup = buildClassLookup(payload)
+
+            return normalizeSessions(payload).map((session) => {
+              const instructorId =
+                session.instructorId == null
+                  ? null
+                  : String(session.instructorId)
+              const instructorName = instructorId
+                ? (instructorLookup[instructorId] ?? null)
+                : null
+              const classId =
+                session.classId == null ? null : String(session.classId)
+              const className = classId ? (classLookup[classId] ?? null) : null
+
+              return {
+                ...session,
+                className: className ?? session.className ?? null,
+                instructorName:
+                  instructorName ?? session.instructorName ?? null,
+              }
+            })
+          })()
 
         if (!cachedRequest) {
           timetableCache.set(clubId, request)
@@ -294,7 +320,11 @@ export function TimetablePage() {
         }
       } catch (error) {
         if (!cancelled) {
-          setErrorMessage(error instanceof Error ? error.message : 'Could not load the timetable right now.')
+          setErrorMessage(
+            error instanceof Error
+              ? error.message
+              : 'Could not load the timetable right now.',
+          )
         }
       } finally {
         if (!cancelled) {
@@ -310,12 +340,17 @@ export function TimetablePage() {
     }
   }, [clubId])
 
-  const { groupedSessions, instructorOptions, classOptions, visibleSessions } = useMemo(() => resolveTimetableViewModel({
-    sessions,
-    activeDayKey,
-    activeInstructor,
-    activeClassName,
-  }), [activeClassName, activeDayKey, activeInstructor, sessions])
+  const { groupedSessions, instructorOptions, classOptions, visibleSessions } =
+    useMemo(
+      () =>
+        resolveTimetableViewModel({
+          sessions,
+          activeDayKey,
+          activeInstructor,
+          activeClassName,
+        }),
+      [activeClassName, activeDayKey, activeInstructor, sessions],
+    )
 
   useEffect(() => {
     if (!groupedSessions.length) {
@@ -324,7 +359,10 @@ export function TimetablePage() {
     }
 
     setActiveDayKey((current) => {
-      if (current && groupedSessions.some((dayGroup) => dayGroup.dateKey === current)) {
+      if (
+        current &&
+        groupedSessions.some((dayGroup) => dayGroup.dateKey === current)
+      ) {
         return current
       }
 
@@ -332,28 +370,43 @@ export function TimetablePage() {
     })
   }, [groupedSessions])
 
-  const activeDayGroup = activeDayKey === 'all'
-    ? null
-    : (groupedSessions.find((dayGroup) => dayGroup.dateKey === activeDayKey) ?? groupedSessions[0] ?? null)
+  const activeDayGroup =
+    activeDayKey === 'all'
+      ? null
+      : (groupedSessions.find(
+          (dayGroup) => dayGroup.dateKey === activeDayKey,
+        ) ??
+        groupedSessions[0] ??
+        null)
 
   return (
     <PageLayout className="max-w-6xl">
       <PageCard padding="spacious" className="space-y-6">
         <div className="space-y-2">
-          <p className="text-sm font-medium uppercase tracking-[0.2em] text-slate-500">Timetable</p>
-          <h1 className="text-3xl font-semibold text-slate-900">{gymBrandLabel} {gymNameLabel}</h1>
+          <p className="text-sm font-medium uppercase tracking-[0.2em] text-slate-500">
+            Timetable
+          </p>
+          <h1 className="text-3xl font-semibold text-slate-900">
+            {gymBrandLabel} {gymNameLabel}
+          </h1>
         </div>
 
         {isLoading ? (
-          <div className="rounded-2xl border border-slate-200 bg-slate-50 p-4 text-sm text-slate-600">Loading timetable…</div>
+          <div className="rounded-2xl border border-slate-200 bg-slate-50 p-4 text-sm text-slate-600">
+            Loading timetable…
+          </div>
         ) : null}
 
         {!isLoading && errorMessage ? (
-          <div className="rounded-2xl border border-rose-200 bg-rose-50 p-4 text-sm text-rose-700">{errorMessage}</div>
+          <div className="rounded-2xl border border-rose-200 bg-rose-50 p-4 text-sm text-rose-700">
+            {errorMessage}
+          </div>
         ) : null}
 
         {!isLoading && !errorMessage && groupedSessions.length === 0 ? (
-          <div className="rounded-2xl border border-slate-200 bg-slate-50 p-4 text-sm text-slate-600">No timetable sessions were returned.</div>
+          <div className="rounded-2xl border border-slate-200 bg-slate-50 p-4 text-sm text-slate-600">
+            No timetable sessions were returned.
+          </div>
         ) : null}
 
         {!isLoading && !errorMessage && groupedSessions.length > 0 ? (
@@ -384,12 +437,16 @@ export function TimetablePage() {
                   <span className="font-medium">Instructor</span>
                   <select
                     value={activeInstructor}
-                    onChange={(event) => setActiveInstructor(event.target.value)}
+                    onChange={(event) =>
+                      setActiveInstructor(event.target.value)
+                    }
                     className="rounded-full border border-slate-300 bg-white px-3 py-1.5 text-sm text-slate-700"
                   >
                     <option value="all">All</option>
                     {instructorOptions.map((instructorName) => (
-                      <option key={instructorName} value={instructorName}>{instructorName}</option>
+                      <option key={instructorName} value={instructorName}>
+                        {instructorName}
+                      </option>
                     ))}
                   </select>
                 </label>
@@ -403,7 +460,9 @@ export function TimetablePage() {
                   >
                     <option value="all">All</option>
                     {classOptions.map((className) => (
-                      <option key={className} value={className}>{className}</option>
+                      <option key={className} value={className}>
+                        {className}
+                      </option>
                     ))}
                   </select>
                 </label>
@@ -412,17 +471,32 @@ export function TimetablePage() {
 
             {activeDayKey === 'all' ? (
               <section className="space-y-3">
-                <h2 className="text-lg font-semibold text-slate-900">All days</h2>
+                <h2 className="text-lg font-semibold text-slate-900">
+                  All days
+                </h2>
                 {visibleSessions.length === 0 ? (
-                  <div className="rounded-2xl border border-slate-200 bg-slate-50 p-4 text-sm text-slate-600">No sessions match the selected filters.</div>
+                  <div className="rounded-2xl border border-slate-200 bg-slate-50 p-4 text-sm text-slate-600">
+                    No sessions match the selected filters.
+                  </div>
                 ) : (
                   <div className="grid gap-3 md:grid-cols-2 xl:grid-cols-3">
                     {visibleSessions.map((session) => (
-                      <article key={session.id ?? `${session.classId}-${session.startTime}`} className={`rounded-2xl border p-4 shadow-sm ${isPastSession(session) ? 'border-slate-300 bg-slate-100/70' : 'border-slate-200 bg-white'}`}>
+                      <article
+                        key={
+                          session.id ??
+                          `${session.classId}-${session.startTime}`
+                        }
+                        className={`rounded-2xl border p-4 shadow-sm ${isPastSession(session) ? 'border-slate-300 bg-slate-100/70' : 'border-slate-200 bg-white'}`}
+                      >
                         <div className="flex items-start justify-between gap-2">
                           <div>
-                            <p className="text-sm font-semibold text-slate-900">{session.className ?? `Class ${session.classId ?? 'Unknown'}`}</p>
-                            <p className="text-sm text-slate-600">{session.room ?? 'Room TBD'}</p>
+                            <p className="text-sm font-semibold text-slate-900">
+                              {session.className ??
+                                `Class ${session.classId ?? 'Unknown'}`}
+                            </p>
+                            <p className="text-sm text-slate-600">
+                              {session.room ?? 'Room TBD'}
+                            </p>
                           </div>
                           <div className="flex flex-col items-end gap-1">
                             {isPastSession(session) ? (
@@ -430,19 +504,50 @@ export function TimetablePage() {
                                 Ended
                               </span>
                             ) : (
-                              <span className={`rounded-full px-2.5 py-1 text-xs font-semibold ${session.status === 'Available' ? 'bg-emerald-100 text-emerald-700' : session.status === 'Waitlist' ? 'bg-amber-100 text-amber-700' : 'bg-slate-100 text-slate-700'}`}>
+                              <span
+                                className={`rounded-full px-2.5 py-1 text-xs font-semibold ${session.status === 'Available' ? 'bg-emerald-100 text-emerald-700' : session.status === 'Waitlist' ? 'bg-amber-100 text-amber-700' : 'bg-slate-100 text-slate-700'}`}
+                              >
                                 {session.status ?? 'Unknown'}
                               </span>
                             )}
                           </div>
                         </div>
                         <div className="mt-3 space-y-1 text-sm text-slate-600">
-                          <p><span className="font-medium text-slate-700">Day:</span> {formatDateLabel(session.startTime)}</p>
-                          <p><span className="font-medium text-slate-700">Time:</span> {formatTimeLabel(session.startTime)} – {formatTimeLabel(session.endTime)}</p>
-                          <p><span className="font-medium text-slate-700">Instructor:</span> {session.instructorName ?? session.instructorId ?? 'TBC'}</p>
-                          <p><span className="font-medium text-slate-700">Availability:</span> {formatAvailability(session)}</p>
-                          {typeof session.waitlistCount === 'number' && session.waitlistCount > 0 ? (
-                            <p><span className="font-medium text-slate-700">Waitlist:</span> {session.waitlistCount}</p>
+                          <p>
+                            <span className="font-medium text-slate-700">
+                              Day:
+                            </span>{' '}
+                            {formatDateLabel(session.startTime)}
+                          </p>
+                          <p>
+                            <span className="font-medium text-slate-700">
+                              Time:
+                            </span>{' '}
+                            {formatTimeLabel(session.startTime)} –{' '}
+                            {formatTimeLabel(session.endTime)}
+                          </p>
+                          <p>
+                            <span className="font-medium text-slate-700">
+                              Instructor:
+                            </span>{' '}
+                            {session.instructorName ??
+                              session.instructorId ??
+                              'TBC'}
+                          </p>
+                          <p>
+                            <span className="font-medium text-slate-700">
+                              Availability:
+                            </span>{' '}
+                            {formatAvailability(session)}
+                          </p>
+                          {typeof session.waitlistCount === 'number' &&
+                          session.waitlistCount > 0 ? (
+                            <p>
+                              <span className="font-medium text-slate-700">
+                                Waitlist:
+                              </span>{' '}
+                              {session.waitlistCount}
+                            </p>
                           ) : null}
                         </div>
                       </article>
@@ -454,17 +559,32 @@ export function TimetablePage() {
 
             {activeDayKey !== 'all' && activeDayGroup ? (
               <section className="space-y-3">
-                <h2 className="text-lg font-semibold text-slate-900">{activeDayGroup.label}</h2>
+                <h2 className="text-lg font-semibold text-slate-900">
+                  {activeDayGroup.label}
+                </h2>
                 {visibleSessions.length === 0 ? (
-                  <div className="rounded-2xl border border-slate-200 bg-slate-50 p-4 text-sm text-slate-600">No sessions match the selected filters for this day.</div>
+                  <div className="rounded-2xl border border-slate-200 bg-slate-50 p-4 text-sm text-slate-600">
+                    No sessions match the selected filters for this day.
+                  </div>
                 ) : (
                   <div className="grid gap-3 md:grid-cols-2 xl:grid-cols-3">
                     {visibleSessions.map((session) => (
-                      <article key={session.id ?? `${session.classId}-${session.startTime}`} className={`rounded-2xl border p-4 shadow-sm ${isPastSession(session) ? 'border-slate-300 bg-slate-100/70' : 'border-slate-200 bg-white'}`}>
+                      <article
+                        key={
+                          session.id ??
+                          `${session.classId}-${session.startTime}`
+                        }
+                        className={`rounded-2xl border p-4 shadow-sm ${isPastSession(session) ? 'border-slate-300 bg-slate-100/70' : 'border-slate-200 bg-white'}`}
+                      >
                         <div className="flex items-start justify-between gap-2">
                           <div>
-                            <p className="text-sm font-semibold text-slate-900">{session.className ?? `Class ${session.classId ?? 'Unknown'}`}</p>
-                            <p className="text-sm text-slate-600">{session.room ?? 'Room TBD'}</p>
+                            <p className="text-sm font-semibold text-slate-900">
+                              {session.className ??
+                                `Class ${session.classId ?? 'Unknown'}`}
+                            </p>
+                            <p className="text-sm text-slate-600">
+                              {session.room ?? 'Room TBD'}
+                            </p>
                           </div>
                           <div className="flex flex-col items-end gap-1">
                             {isPastSession(session) ? (
@@ -472,18 +592,44 @@ export function TimetablePage() {
                                 Ended
                               </span>
                             ) : (
-                              <span className={`rounded-full px-2.5 py-1 text-xs font-semibold ${session.status === 'Available' ? 'bg-emerald-100 text-emerald-700' : session.status === 'Waitlist' ? 'bg-amber-100 text-amber-700' : 'bg-slate-100 text-slate-700'}`}>
+                              <span
+                                className={`rounded-full px-2.5 py-1 text-xs font-semibold ${session.status === 'Available' ? 'bg-emerald-100 text-emerald-700' : session.status === 'Waitlist' ? 'bg-amber-100 text-amber-700' : 'bg-slate-100 text-slate-700'}`}
+                              >
                                 {session.status ?? 'Unknown'}
                               </span>
                             )}
                           </div>
                         </div>
                         <div className="mt-3 space-y-1 text-sm text-slate-600">
-                          <p><span className="font-medium text-slate-700">Time:</span> {formatTimeLabel(session.startTime)} – {formatTimeLabel(session.endTime)}</p>
-                          <p><span className="font-medium text-slate-700">Instructor:</span> {session.instructorName ?? session.instructorId ?? 'TBC'}</p>
-                          <p><span className="font-medium text-slate-700">Availability:</span> {formatAvailability(session)}</p>
-                          {typeof session.waitlistCount === 'number' && session.waitlistCount > 0 ? (
-                            <p><span className="font-medium text-slate-700">Waitlist:</span> {session.waitlistCount}</p>
+                          <p>
+                            <span className="font-medium text-slate-700">
+                              Time:
+                            </span>{' '}
+                            {formatTimeLabel(session.startTime)} –{' '}
+                            {formatTimeLabel(session.endTime)}
+                          </p>
+                          <p>
+                            <span className="font-medium text-slate-700">
+                              Instructor:
+                            </span>{' '}
+                            {session.instructorName ??
+                              session.instructorId ??
+                              'TBC'}
+                          </p>
+                          <p>
+                            <span className="font-medium text-slate-700">
+                              Availability:
+                            </span>{' '}
+                            {formatAvailability(session)}
+                          </p>
+                          {typeof session.waitlistCount === 'number' &&
+                          session.waitlistCount > 0 ? (
+                            <p>
+                              <span className="font-medium text-slate-700">
+                                Waitlist:
+                              </span>{' '}
+                              {session.waitlistCount}
+                            </p>
                           ) : null}
                         </div>
                       </article>

@@ -16,10 +16,19 @@ export type HomeFilters = {
   showImages: boolean
 }
 
-export function normalizeFavouriteStorageValue(value: unknown): FavouritesStorageValue {
+export function normalizeFavouriteStorageValue(
+  value: unknown,
+): FavouritesStorageValue {
   if (Array.isArray(value)) {
     return {
-      favorites: value.filter((item): item is QuickLink => Boolean(item && typeof item === 'object' && typeof (item as QuickLink).path === 'string' && typeof (item as QuickLink).label === 'string')),
+      favorites: value.filter((item): item is QuickLink =>
+        Boolean(
+          item &&
+          typeof item === 'object' &&
+          typeof (item as QuickLink).path === 'string' &&
+          typeof (item as QuickLink).label === 'string',
+        ),
+      ),
       folders: [],
     }
   }
@@ -27,34 +36,59 @@ export function normalizeFavouriteStorageValue(value: unknown): FavouritesStorag
   if (value && typeof value === 'object') {
     const candidate = value as Partial<FavouritesStorageValue>
     const folders = Array.isArray(candidate.folders)
-      ? candidate.folders.filter((folder): folder is string => typeof folder === 'string' && folder.trim().length > 0)
+      ? candidate.folders.filter(
+          (folder): folder is string =>
+            typeof folder === 'string' && folder.trim().length > 0,
+        )
       : []
 
     const favorites = Array.isArray(candidate.favorites)
-      ? candidate.favorites.filter((item): item is QuickLink => Boolean(item && typeof item === 'object' && typeof (item as QuickLink).path === 'string' && typeof (item as QuickLink).label === 'string'))
+      ? candidate.favorites.filter((item): item is QuickLink =>
+          Boolean(
+            item &&
+            typeof item === 'object' &&
+            typeof (item as QuickLink).path === 'string' &&
+            typeof (item as QuickLink).label === 'string',
+          ),
+        )
       : []
 
     return {
       favorites,
-      folders: Array.from(new Set(folders.map((folder) => folder.trim()))).sort((left, right) => left.localeCompare(right)),
+      folders: Array.from(new Set(folders.map((folder) => folder.trim()))).sort(
+        (left, right) => left.localeCompare(right),
+      ),
     }
   }
 
   return { favorites: [], folders: [] }
 }
 
-export function normalizeHomeFilters(filters: Partial<HomeFilters> | null | undefined): HomeFilters {
+export function normalizeHomeFilters(
+  filters: Partial<HomeFilters> | null | undefined,
+): HomeFilters {
   const selectedCategory = filters?.selectedCategory
 
   return {
-    searchTerm: typeof filters?.searchTerm === 'string' ? filters.searchTerm : '',
-    selectedCategory: selectedCategory === null || selectedCategory === '' || selectedCategory === 'All' ? null : typeof selectedCategory === 'string' ? selectedCategory : null,
-    showImages: typeof filters?.showImages === 'boolean' ? filters.showImages : true,
+    searchTerm:
+      typeof filters?.searchTerm === 'string' ? filters.searchTerm : '',
+    selectedCategory:
+      selectedCategory === null ||
+      selectedCategory === '' ||
+      selectedCategory === 'All'
+        ? null
+        : typeof selectedCategory === 'string'
+          ? selectedCategory
+          : null,
+    showImages:
+      typeof filters?.showImages === 'boolean' ? filters.showImages : true,
   }
 }
 
 export function sortQuickLinks(items: QuickLink[]) {
-  return [...items].sort((left, right) => left.label.localeCompare(right.label, undefined, { sensitivity: 'base' }))
+  return [...items].sort((left, right) =>
+    left.label.localeCompare(right.label, undefined, { sensitivity: 'base' }),
+  )
 }
 
 export function formatDashboardTimestamp(value?: string | null) {
@@ -74,8 +108,17 @@ export function formatDashboardTimestamp(value?: string | null) {
   }).format(parsedDate)
 }
 
-export function getHashHomeUrl(locationHref = typeof window !== 'undefined' ? window.location.href : 'http://localhost/') {
-  const targetUrl = new URL(locationHref, typeof window !== 'undefined' ? window.location.origin : 'http://localhost/')
+export function getHashHomeUrl(
+  locationHref = typeof window !== 'undefined'
+    ? window.location.href
+    : 'http://localhost/',
+) {
+  const targetUrl = new URL(
+    locationHref,
+    typeof window !== 'undefined'
+      ? window.location.origin
+      : 'http://localhost/',
+  )
   targetUrl.hash = '#/'
   return targetUrl.toString()
 }

@@ -19,10 +19,16 @@ export function Button<T extends ElementType = 'button'>({
 }: ButtonProps<T>) {
   const Component = as ?? 'button'
   const defaultProps = as ? {} : { type: 'button' as const }
-  const combinedClassName = [defaultClassName, className].filter(Boolean).join(' ')
+  const combinedClassName = [defaultClassName, className]
+    .filter(Boolean)
+    .join(' ')
 
   return (
-    <Component className={getToneClass(tone, combinedClassName)} {...defaultProps} {...props}>
+    <Component
+      className={getToneClass(tone, combinedClassName)}
+      {...defaultProps}
+      {...props}
+    >
       {children}
     </Component>
   )

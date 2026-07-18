@@ -7,13 +7,25 @@ import { PageLayout } from '../../layouts/PageLayout'
 import { Heading1, Paragraph } from '../../components/Typography'
 import { PlanBuilderWorkspace } from '../../components/PlanBuilderWorkspace'
 import { usePlanBuilderFeature } from '../../features/planBuilder/hooks/usePlanBuilderFeature'
-import { hasBuilderContent, resolveCreateFlowViewModel } from '../../features/planBuilder/domain/createFlow'
+import {
+  hasBuilderContent,
+  resolveCreateFlowViewModel,
+} from '../../features/planBuilder/domain/createFlow'
 
 export function CreateAssignmentPage() {
-  const { assignments, visiblePlans, visibleUsers, updateAssignment, assignUsersToPlan } = usePlan()
+  const {
+    assignments,
+    visiblePlans,
+    visibleUsers,
+    updateAssignment,
+    assignUsersToPlan,
+  } = usePlan()
   const navigate = useNavigate()
   const { planSlug } = useParams()
-  const assignmentToEdit = useMemo(() => assignments.find((item) => item.id === planSlug), [assignments, planSlug])
+  const assignmentToEdit = useMemo(
+    () => assignments.find((item) => item.id === planSlug),
+    [assignments, planSlug],
+  )
   const isEditMode = Boolean(assignmentToEdit)
   const createFlowViewModel = useMemo(
     () => resolveCreateFlowViewModel({ isAssignmentRoute: true, isEditMode }),
@@ -69,7 +81,9 @@ export function CreateAssignmentPage() {
       }
 
       updateAssignment(assignmentToEdit.id, assignmentToEdit.id, planSessions)
-      navigate(`/users/${assignmentToEdit.assignedUserId ?? 'user'}/assignments/${assignmentToEdit.id}`)
+      navigate(
+        `/users/${assignmentToEdit.assignedUserId ?? 'user'}/assignments/${assignmentToEdit.id}`,
+      )
       return
     }
 
@@ -89,7 +103,10 @@ export function CreateAssignmentPage() {
             <Paragraph>Assignments</Paragraph>
             <Heading1 className="mt-2">{createFlowViewModel.title}</Heading1>
           </div>
-          <Link to="/assignments" className={getToneClass('default', 'px-4 py-2 text-sm font-medium')}>
+          <Link
+            to="/assignments"
+            className={getToneClass('default', 'px-4 py-2 text-sm font-medium')}
+          >
             Back to assignments
           </Link>
         </div>
@@ -99,7 +116,9 @@ export function CreateAssignmentPage() {
             <div className="rounded-2xl border border-slate-200 bg-white p-3 sm:p-4">
               <div className="grid gap-4 md:grid-cols-2">
                 <label className="block space-y-2">
-                  <span className="text-sm font-medium text-slate-700">User</span>
+                  <span className="text-sm font-medium text-slate-700">
+                    User
+                  </span>
                   <select
                     value={selectedUserId}
                     onChange={(event) => setSelectedUserId(event.target.value)}
@@ -115,7 +134,9 @@ export function CreateAssignmentPage() {
                 </label>
 
                 <label className="block space-y-2">
-                  <span className="text-sm font-medium text-slate-700">Base plan</span>
+                  <span className="text-sm font-medium text-slate-700">
+                    Base plan
+                  </span>
                   <select
                     value={selectedPlanId}
                     onChange={(event) => setSelectedPlanId(event.target.value)}
@@ -162,7 +183,11 @@ export function CreateAssignmentPage() {
             onCellChange={handleCellChange}
             onSave={handleSaveAssignment}
             saveLabel={createFlowViewModel.saveLabel}
-            saveDisabled={isEditMode ? !assignmentToEdit : !selectedPlanId || !selectedUserId}
+            saveDisabled={
+              isEditMode
+                ? !assignmentToEdit
+                : !selectedPlanId || !selectedUserId
+            }
           />
         </div>
       </PageCard>

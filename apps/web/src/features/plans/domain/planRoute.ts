@@ -5,7 +5,11 @@ export type PlanRouteSelection = {
   assignment: Assignment | undefined
 }
 
-export function resolvePlanRouteSelection(plans: Plan[], assignments: Assignment[], planSlug: string | undefined) {
+export function resolvePlanRouteSelection(
+  plans: Plan[],
+  assignments: Assignment[],
+  planSlug: string | undefined,
+) {
   const plan = plans.find((item) => item.planSlug === planSlug)
   const assignment = assignments.find((item) => item.id === planSlug)
 
@@ -15,7 +19,11 @@ export function resolvePlanRouteSelection(plans: Plan[], assignments: Assignment
   } satisfies PlanRouteSelection
 }
 
-export function resolveAssignmentRouteSelection(plans: Plan[], assignments: Assignment[], planSlug: string | undefined) {
+export function resolveAssignmentRouteSelection(
+  plans: Plan[],
+  assignments: Assignment[],
+  planSlug: string | undefined,
+) {
   const assignment = assignments.find((item) => item.id === planSlug)
   const plan = plans.find((item) => item.id === assignment?.planId)
 

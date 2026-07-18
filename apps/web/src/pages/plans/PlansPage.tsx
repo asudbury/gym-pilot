@@ -13,8 +13,9 @@ export function PlansPage() {
   const basePlans = visiblePlans
   const cards = resolvePlanListViewModels(basePlans)
 
-  const description = 'Create a plan to assign to clients, or view and manage existing plans.'
-  
+  const description =
+    'Create a plan to assign to clients, or view and manage existing plans.'
+
   return (
     <PageLayout>
       {basePlans.length === 0 ? (
@@ -26,7 +27,13 @@ export function PlansPage() {
           <CallToAction
             title="Manage plans"
             action={
-              <Link to="/plans/new" className={getToneClass('blue', 'inline-flex items-center rounded-lg px-4 py-2 text-sm font-medium')}>
+              <Link
+                to="/plans/new"
+                className={getToneClass(
+                  'blue',
+                  'inline-flex items-center rounded-lg px-4 py-2 text-sm font-medium',
+                )}
+              >
                 Create a new plan
               </Link>
             }
@@ -39,7 +46,13 @@ export function PlansPage() {
           description={description}
         >
           <div className="flex justify-end">
-            <Link to="/plans/new" className={getToneClass('blue', 'inline-flex items-center rounded-lg px-4 py-2 text-sm font-medium')}>
+            <Link
+              to="/plans/new"
+              className={getToneClass(
+                'blue',
+                'inline-flex items-center rounded-lg px-4 py-2 text-sm font-medium',
+              )}
+            >
               Create a new plan
             </Link>
           </div>
@@ -55,17 +68,37 @@ export function PlansPage() {
                 <PageCard key={card.id} padding="compact">
                   <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
                     <div>
-                      <h2 className="text-xl font-semibold text-slate-900">{card.title}</h2>
-                      <p className="mt-1 text-sm text-slate-600">{card.subtitle}</p>
+                      <h2 className="text-xl font-semibold text-slate-900">
+                        {card.title}
+                      </h2>
+                      <p className="mt-1 text-sm text-slate-600">
+                        {card.subtitle}
+                      </p>
                     </div>
                     <div className="flex flex-col gap-2 sm:flex-row sm:items-center">
-                      <Link to={card.viewPath} className={getToneClass('default', 'px-3 py-1.5 text-sm text-center')}>
+                      <Link
+                        to={card.viewPath}
+                        className={getToneClass(
+                          'default',
+                          'px-3 py-1.5 text-sm text-center',
+                        )}
+                      >
                         View
                       </Link>
-                      <Link to={card.editPath} className={getToneClass('default', 'px-3 py-1.5 text-sm text-center')}>
+                      <Link
+                        to={card.editPath}
+                        className={getToneClass(
+                          'default',
+                          'px-3 py-1.5 text-sm text-center',
+                        )}
+                      >
                         Update
                       </Link>
-                      <Button tone="rose" onClick={() => deletePlan(plan.id)} className="px-3 py-1.5">
+                      <Button
+                        tone="rose"
+                        onClick={() => deletePlan(plan.id)}
+                        className="px-3 py-1.5"
+                      >
                         Remove
                       </Button>
                     </div>

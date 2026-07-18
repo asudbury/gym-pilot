@@ -1,4 +1,4 @@
-import { formatLabel } from "./formatUtils";
+import { formatLabel } from './formatUtils'
 
 export function slugify(value: string) {
   return value

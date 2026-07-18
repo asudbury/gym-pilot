@@ -14,7 +14,10 @@ export type BuilderSessionLike = {
   planItems: Array<unknown>
 }
 
-export function resolveCreateFlowViewModel({ isAssignmentRoute, isEditMode }: CreateFlowContext): CreateFlowViewModel {
+export function resolveCreateFlowViewModel({
+  isAssignmentRoute,
+  isEditMode,
+}: CreateFlowContext): CreateFlowViewModel {
   if (isAssignmentRoute) {
     return {
       title: isEditMode ? 'Edit assignment' : 'Create a new assignment',
@@ -33,5 +36,7 @@ export function resolveCreateFlowViewModel({ isAssignmentRoute, isEditMode }: Cr
 }
 
 export function hasBuilderContent(sessions: BuilderSessionLike[] | undefined) {
-  return (sessions ?? []).some((session) => (session.planItems?.length ?? 0) > 0)
+  return (sessions ?? []).some(
+    (session) => (session.planItems?.length ?? 0) > 0,
+  )
 }

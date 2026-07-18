@@ -6,9 +6,18 @@ type SectionPanelProps = HTMLAttributes<HTMLElement> & {
   className?: string
 }
 
-export function SectionPanel({ children, className = '', ...props }: SectionPanelProps) {
+export function SectionPanel({
+  children,
+  className = '',
+  ...props
+}: SectionPanelProps) {
   return (
-    <Panel className={`space-y-4 ${className}`.trim()} variant="muted" padding="md" {...props}>
+    <Panel
+      className={`space-y-4 ${className}`.trim()}
+      variant="muted"
+      padding="md"
+      {...props}
+    >
       {children}
     </Panel>
   )

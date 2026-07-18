@@ -1,10 +1,28 @@
-import { createPersistenceRepository, type PersistenceRepository } from '@gym-pilot/shared'
-import { loadJsonRecord as loadDexieJsonRecord, saveJsonRecord as saveDexieJsonRecord, removeJsonRecord as removeDexieJsonRecord } from '@gym-pilot/shared'
-import { isSupabasePersistenceEnabled, loadSupabaseJsonRecord, removeSupabaseJsonRecord, saveSupabaseJsonRecord } from '@gym-pilot/shared'
+import {
+  createPersistenceRepository,
+  type PersistenceRepository,
+} from '@gym-pilot/shared'
+import {
+  loadJsonRecord as loadDexieJsonRecord,
+  saveJsonRecord as saveDexieJsonRecord,
+  removeJsonRecord as removeDexieJsonRecord,
+} from '@gym-pilot/shared'
+import {
+  isSupabasePersistenceEnabled,
+  loadSupabaseJsonRecord,
+  removeSupabaseJsonRecord,
+  saveSupabaseJsonRecord,
+} from '@gym-pilot/shared'
 import { FAVORITES_KEY } from '../../../constants/storageKeys'
-import { normalizeFavouritesState, type FavouritesStorageValue } from '../domain/quickLinks'
+import {
+  normalizeFavouritesState,
+  type FavouritesStorageValue,
+} from '../domain/quickLinks'
 
-const LOCAL_ONLY_KEYS = new Set(['gym-pilot-auth-session', 'gym-pilot-auth-bypass'])
+const LOCAL_ONLY_KEYS = new Set([
+  'gym-pilot-auth-session',
+  'gym-pilot-auth-bypass',
+])
 
 function shouldUseRemoteForKey(key: string) {
   return !LOCAL_ONLY_KEYS.has(key)
@@ -74,11 +92,16 @@ export function createFavouritesRepository(): PersistenceRepository {
 
 export async function loadFavouritesStorageWithRepository(): Promise<FavouritesStorageValue> {
   const repository = createFavouritesRepository()
-  const storedValue = await repository.load<unknown>(FAVORITES_KEY, { favorites: [], folders: [] })
+  const storedValue = await repository.load<unknown>(FAVORITES_KEY, {
+    favorites: [],
+    folders: [],
+  })
   return normalizeFavouritesState(storedValue)
 }
 
-export async function saveFavouritesStorageWithRepository(value: FavouritesStorageValue) {
+export async function saveFavouritesStorageWithRepository(
+  value: FavouritesStorageValue,
+) {
   const repository = createFavouritesRepository()
   await repository.save(FAVORITES_KEY, value)
 }

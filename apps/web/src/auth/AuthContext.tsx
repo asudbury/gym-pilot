@@ -1,11 +1,24 @@
-import { createContext, useContext, useEffect, useMemo, useState, type ReactNode } from 'react'
+import {
+  createContext,
+  useContext,
+  useEffect,
+  useMemo,
+  useState,
+  type ReactNode,
+} from 'react'
 import type { UserRole } from '@gym-pilot/types'
 import { logger, usePlan } from '@gym-pilot/shared'
 import { getHashHomeUrl } from '../utils/appUtils'
 import { useAuthModule } from '../features/auth/hooks/useAuthModule'
 import type { AuthUser } from '../features/auth/domain/authTypes'
 import { isUserAccessBlocked } from '../features/auth/domain/authTypes'
-import { persistShowVersion, persistThemePreference, readStoredShowVersion, readStoredThemePreference, type ThemePreference } from '../features/auth/domain/uiPreferences'
+import {
+  persistShowVersion,
+  persistThemePreference,
+  readStoredShowVersion,
+  readStoredThemePreference,
+  type ThemePreference,
+} from '../features/auth/domain/uiPreferences'
 
 type AuthContextValue = {
   user: AuthUser | null
@@ -29,7 +42,6 @@ type AuthProviderProps = {
 
 const AuthContext = createContext<AuthContextValue | undefined>(undefined)
 
-
 export function AuthProvider({ children }: AuthProviderProps) {
   const { users } = usePlan()
   const {
@@ -45,8 +57,12 @@ export function AuthProvider({ children }: AuthProviderProps) {
     updateGymBrand: updateGymBrandInModule,
     updateGymName: updateGymNameInModule,
   } = useAuthModule(users)
-  const [themePreference, setThemePreferenceState] = useState<ThemePreference>(() => readStoredThemePreference())
-  const [showVersion, setShowVersionState] = useState<boolean>(() => readStoredShowVersion())
+  const [themePreference, setThemePreferenceState] = useState<ThemePreference>(
+    () => readStoredThemePreference(),
+  )
+  const [showVersion, setShowVersionState] = useState<boolean>(() =>
+    readStoredShowVersion(),
+  )
 
   useEffect(() => {
     const handleAuthStateChanged = () => {
@@ -59,7 +75,10 @@ export function AuthProvider({ children }: AuthProviderProps) {
     void refreshSupabaseSession()
 
     return () => {
-      window.removeEventListener('gym-pilot-auth-updated', handleAuthStateChanged)
+      window.removeEventListener(
+        'gym-pilot-auth-updated',
+        handleAuthStateChanged,
+      )
     }
   }, [hydrateSession, refreshSupabaseSession])
 
@@ -72,7 +91,10 @@ export function AuthProvider({ children }: AuthProviderProps) {
       return
     }
 
-    document.documentElement.classList.toggle('dark', themePreference === 'dark')
+    document.documentElement.classList.toggle(
+      'dark',
+      themePreference === 'dark',
+    )
     document.documentElement.style.colorScheme = themePreference
     persistThemePreference(themePreference)
   }, [themePreference])
@@ -169,11 +191,7 @@ export function AuthProvider({ children }: AuthProviderProps) {
     [user, themePreference, showVersion, users],
   )
 
-  return (
-    <AuthContext.Provider value={value}>
-      {children}
-    </AuthContext.Provider>
-  )
+  return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>
 }
 
 export function useAuth() {

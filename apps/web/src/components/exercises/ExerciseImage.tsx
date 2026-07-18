@@ -1,8 +1,8 @@
 import { getAssetUrl } from '../../utils/assetUrl'
 
 type ExerciseImageProps = {
-  mediaGif: string,
-  exerciseName: string,
+  mediaGif: string
+  exerciseName: string
   className?: string
 }
 

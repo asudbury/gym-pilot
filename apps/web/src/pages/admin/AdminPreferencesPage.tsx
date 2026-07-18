@@ -12,10 +12,22 @@ import { GymClubSelector } from '../../components/GymClubSelector'
 import { logger } from '@gym-pilot/shared'
 
 export function AdminPreferencesPage() {
-  const { user, updateProfileName, updateApplicationName, updateGymBrand, updateGymName, themePreference, setThemePreference, showVersion, setShowVersion } = useAuth()
+  const {
+    user,
+    updateProfileName,
+    updateApplicationName,
+    updateGymBrand,
+    updateGymName,
+    themePreference,
+    setThemePreference,
+    showVersion,
+    setShowVersion,
+  } = useAuth()
   const navigate = useNavigate()
   const [friendlyName, setFriendlyName] = useState(user?.name ?? '')
-  const [applicationName, setApplicationName] = useState(user?.applicationName ?? '')
+  const [applicationName, setApplicationName] = useState(
+    user?.applicationName ?? '',
+  )
   const [gymBrand, setGymBrand] = useState(user?.gymBrand ?? '')
   const [gymName, setGymName] = useState(user?.gymName ?? '')
   const [isSaving, setIsSaving] = useState(false)
@@ -47,7 +59,10 @@ export function AdminPreferencesPage() {
       navigate('/admin')
     } catch (error) {
       logger.error('[Preferences] Failed to save preferences', error)
-      const message = error instanceof Error ? error.message : 'Could not save the preferences right now.'
+      const message =
+        error instanceof Error
+          ? error.message
+          : 'Could not save the preferences right now.'
       setStatusMessage(message)
     } finally {
       setIsSaving(false)
@@ -62,7 +77,10 @@ export function AdminPreferencesPage() {
             <Paragraph>Admin</Paragraph>
             <Heading1 className="mt-2">Preferences</Heading1>
           </div>
-          <Link to="/admin" className={getToneClass('default', 'px-4 py-2 text-sm font-medium')}>
+          <Link
+            to="/admin"
+            className={getToneClass('default', 'px-4 py-2 text-sm font-medium')}
+          >
             Back to admin
           </Link>
         </div>
@@ -70,10 +88,15 @@ export function AdminPreferencesPage() {
         <form onSubmit={handleSubmit} className="mt-8 flex flex-col gap-4">
           <div className="flex flex-col gap-2 rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3 text-sm text-slate-700">
             <p className="font-medium">Your roles</p>
-            <p className="text-sm text-slate-400">These are the permissions currently assigned to your account.</p>
+            <p className="text-sm text-slate-400">
+              These are the permissions currently assigned to your account.
+            </p>
             <div className="mt-1 flex flex-wrap gap-2">
               {displayRoles.map((role) => (
-                <span key={role} className="rounded-full bg-slate-900 px-3 py-1 text-xs font-semibold uppercase tracking-[0.2em] text-white">
+                <span
+                  key={role}
+                  className="rounded-full bg-slate-900 px-3 py-1 text-xs font-semibold uppercase tracking-[0.2em] text-white"
+                >
                   {role}
                 </span>
               ))}
@@ -82,7 +105,9 @@ export function AdminPreferencesPage() {
 
           <label className="flex flex-col gap-2 text-sm font-medium text-slate-700">
             <p>Your email address</p>
-            <p className="mt-1 text-sm text-slate-400">This is the email associated with the current account.</p>
+            <p className="mt-1 text-sm text-slate-400">
+              This is the email associated with the current account.
+            </p>
             <p className="mt-1 text-lg font-semibold text-slate-700">
               {getDisplayEmail(user?.email)}
             </p>
@@ -92,7 +117,10 @@ export function AdminPreferencesPage() {
             <>
               <label className="flex flex-col gap-2 text-sm font-medium text-slate-700">
                 <p>Display name</p>
-                <p className="mt-1 text-sm text-slate-400">This name is used for your profile and visible identity in the app.</p>
+                <p className="mt-1 text-sm text-slate-400">
+                  This name is used for your profile and visible identity in the
+                  app.
+                </p>
                 <input
                   type="text"
                   value={friendlyName}
@@ -104,7 +132,11 @@ export function AdminPreferencesPage() {
 
               <label className="flex flex-col gap-2 text-sm font-medium text-slate-700">
                 <p>Application name</p>
-                <p className="mt-1 text-sm text-slate-400">Set the name shown in the header for your trainer branding. Leave it blank to fall back to your display name or the default GymPilot branding.</p>
+                <p className="mt-1 text-sm text-slate-400">
+                  Set the name shown in the header for your trainer branding.
+                  Leave it blank to fall back to your display name or the
+                  default GymPilot branding.
+                </p>
                 <input
                   type="text"
                   value={applicationName}
@@ -116,7 +148,9 @@ export function AdminPreferencesPage() {
 
               <label className="flex flex-col gap-2 text-sm font-medium text-slate-700">
                 <p>Gym brand</p>
-                <p className="mt-1 text-sm text-slate-400">Select the gym brand from the approved list.</p>
+                <p className="mt-1 text-sm text-slate-400">
+                  Select the gym brand from the approved list.
+                </p>
                 <select
                   value={gymBrand}
                   onChange={(event) => {
@@ -136,7 +170,10 @@ export function AdminPreferencesPage() {
 
               <label className="flex flex-col gap-2 text-sm font-medium text-slate-700">
                 <p>Gym name</p>
-                <p className="mt-1 text-sm text-slate-400">Select the Virgin Active club. The value stored for the profile is the club ID.</p>
+                <p className="mt-1 text-sm text-slate-400">
+                  Select the Virgin Active club. The value stored for the
+                  profile is the club ID.
+                </p>
                 <GymClubSelector
                   value={gymName}
                   onChange={setGymName}
@@ -149,21 +186,33 @@ export function AdminPreferencesPage() {
           ) : (
             <div className="flex flex-col gap-2 rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3 text-sm text-slate-700">
               <p className="font-medium">Trainer-only branding</p>
-              <p className="text-sm text-slate-400">This app-name setting is available only for trainer accounts.</p>
+              <p className="text-sm text-slate-400">
+                This app-name setting is available only for trainer accounts.
+              </p>
             </div>
           )}
 
           <div className="flex flex-col gap-2 rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3 text-sm text-slate-700">
             <p className="font-medium">Change password</p>
-            <p className="mt-1 text-sm text-slate-400">Manage your account password from a dedicated screen.</p>
-            <Link to="/admin/change-password" className={getToneClass('default', 'mt-2 w-fit rounded-full px-4 py-2 text-sm font-medium')}>
+            <p className="mt-1 text-sm text-slate-400">
+              Manage your account password from a dedicated screen.
+            </p>
+            <Link
+              to="/admin/change-password"
+              className={getToneClass(
+                'default',
+                'mt-2 w-fit rounded-full px-4 py-2 text-sm font-medium',
+              )}
+            >
               Open password screen
             </Link>
           </div>
 
           <label className="flex flex-col gap-2 text-sm font-medium text-slate-700">
             <p>Theme preference</p>
-            <p className="mt-1 text-sm text-slate-400">Choose your preferred theme for the app.</p>
+            <p className="mt-1 text-sm text-slate-400">
+              Choose your preferred theme for the app.
+            </p>
             <div className="mt-4 flex gap-3">
               <button
                 type="button"
@@ -184,7 +233,9 @@ export function AdminPreferencesPage() {
 
           <label className="flex flex-col gap-2 text-sm font-medium text-slate-700">
             <p>Show app version</p>
-            <p className="mt-1 text-sm text-slate-400">Toggle whether the version badge is shown in the header.</p>
+            <p className="mt-1 text-sm text-slate-400">
+              Toggle whether the version badge is shown in the header.
+            </p>
             <div className="mt-4 flex gap-3">
               <button
                 type="button"
@@ -205,7 +256,10 @@ export function AdminPreferencesPage() {
           <button
             type="submit"
             disabled={isSaving}
-            className={getToneClass('blue', 'w-fit rounded-full px-4 py-2.5 text-sm font-semibold text-white transition disabled:cursor-not-allowed disabled:bg-slate-400')}
+            className={getToneClass(
+              'blue',
+              'w-fit rounded-full px-4 py-2.5 text-sm font-semibold text-white transition disabled:cursor-not-allowed disabled:bg-slate-400',
+            )}
           >
             {isSaving ? 'Saving…' : 'Save preferences'}
           </button>

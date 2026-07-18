@@ -19,10 +19,12 @@ type ExercisePageProps = {
   isExerciseFavorite?: (exerciseId: string) => boolean
 }
 
-export function ExercisePage({ onToggleFavoriteExercise, isExerciseFavorite }: ExercisePageProps) {
-  
+export function ExercisePage({
+  onToggleFavoriteExercise,
+  isExerciseFavorite,
+}: ExercisePageProps) {
   logger.debug('Rendering ExercisePage')
-  
+
   const { slug } = useParams()
   const [copied, setCopied] = useState(false)
 
@@ -72,31 +74,45 @@ export function ExercisePage({ onToggleFavoriteExercise, isExerciseFavorite }: E
             <Heading1 className="mt-0">{formatLabel(exercise.name)}</Heading1>
             <div className="mt-3 flex flex-wrap items-center gap-2">
               <ExerciseMetaBadges
-                values={[formatLabel(exercise.body_part), formatLabel(exercise.equipment), formatLabel(exercise.target)]}
+                values={[
+                  formatLabel(exercise.body_part),
+                  formatLabel(exercise.equipment),
+                  formatLabel(exercise.target),
+                ]}
                 tones={['blue', 'orange', 'default']}
               />
             </div>
           </div>
         </PageActionRow>
-        <ExerciseImage mediaGif={mediaGif} exerciseName={exercise.name} className="mt-6" />
+        <ExerciseImage
+          mediaGif={mediaGif}
+          exerciseName={exercise.name}
+          className="mt-6"
+        />
         <YouTubeExerciseSearchButton exerciseName={exercise.name} />
         <ExerciseSteps steps={exercise.instruction_steps.en} className="mt-8" />
         <PageActionGroup className="mt-6 flex-col sm:flex-row sm:justify-end">
           <button
             type="button"
             onClick={handleOpenFavouritePicker}
-            className={isExerciseFavorite?.(exercise.id)
-              ? 'cursor-pointer rounded-full bg-emerald-600 px-4 py-2 text-sm font-medium text-white'
-              : 'cursor-pointer rounded-full bg-slate-100 px-4 py-2 text-sm font-medium text-slate-700 transition-colors dark:bg-slate-800 dark:text-slate-100'}
+            className={
+              isExerciseFavorite?.(exercise.id)
+                ? 'cursor-pointer rounded-full bg-emerald-600 px-4 py-2 text-sm font-medium text-white'
+                : 'cursor-pointer rounded-full bg-slate-100 px-4 py-2 text-sm font-medium text-slate-700 transition-colors dark:bg-slate-800 dark:text-slate-100'
+            }
           >
-            {isExerciseFavorite?.(exercise.id) ? 'Manage favourite' : 'Add to Favourites'}
+            {isExerciseFavorite?.(exercise.id)
+              ? 'Manage favourite'
+              : 'Add to Favourites'}
           </button>
           <button
             type="button"
             onClick={handleCopyUrl}
-            className={copied
-              ? 'cursor-pointer rounded-full bg-emerald-600 px-4 py-2 text-sm font-medium text-white'
-              : 'cursor-pointer rounded-full bg-slate-100 px-4 py-2 text-sm font-medium text-slate-700 transition-colors dark:bg-slate-800 dark:text-slate-100'}
+            className={
+              copied
+                ? 'cursor-pointer rounded-full bg-emerald-600 px-4 py-2 text-sm font-medium text-white'
+                : 'cursor-pointer rounded-full bg-slate-100 px-4 py-2 text-sm font-medium text-slate-700 transition-colors dark:bg-slate-800 dark:text-slate-100'
+            }
           >
             {copied ? 'Copied!' : 'Copy URL'}
           </button>

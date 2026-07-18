@@ -1,7 +1,13 @@
 import { useEffect, useState } from 'react'
 import { type QuickLink } from '../domain/quickLinks'
-import { resolveFavouritesHydrationState, resolveFavouritesPersistenceState } from '../domain/favouritesTransitions'
-import { loadFavouritesStorage, saveFavouritesStorage } from '../services/favouritesStorage'
+import {
+  resolveFavouritesHydrationState,
+  resolveFavouritesPersistenceState,
+} from '../domain/favouritesTransitions'
+import {
+  loadFavouritesStorage,
+  saveFavouritesStorage,
+} from '../services/favouritesStorage'
 
 export function useFavouritesFeature() {
   const [favorites, setFavorites] = useState<QuickLink[]>([])
@@ -40,7 +46,9 @@ export function useFavouritesFeature() {
       return
     }
 
-    void saveFavouritesStorage(resolveFavouritesPersistenceState({ favorites, folders }))
+    void saveFavouritesStorage(
+      resolveFavouritesPersistenceState({ favorites, folders }),
+    )
   }, [favorites, folders, hydrated])
 
   return {

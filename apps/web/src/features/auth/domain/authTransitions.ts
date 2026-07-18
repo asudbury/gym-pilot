@@ -9,13 +9,20 @@ export function resolveLoginAuthUser(users: User[], userId: string) {
   return selectedUser ? toAuthUser(selectedUser) : null
 }
 
-export function resolveAuthUserProfileNameUpdate(user: AuthUser | null, friendlyName: string) {
+export function resolveAuthUserProfileNameUpdate(
+  user: AuthUser | null,
+  friendlyName: string,
+) {
   if (!user) {
     return null
   }
 
   const trimmedName = friendlyName.trim()
-  const slug = trimmedName.toLowerCase().trim().replace(/[^a-z0-9]+/g, '-') || 'user'
+  const slug =
+    trimmedName
+      .toLowerCase()
+      .trim()
+      .replace(/[^a-z0-9]+/g, '-') || 'user'
 
   return {
     user: {
@@ -27,7 +34,10 @@ export function resolveAuthUserProfileNameUpdate(user: AuthUser | null, friendly
   }
 }
 
-export function resolveAuthUserApplicationNameUpdate(user: AuthUser | null, applicationName: string) {
+export function resolveAuthUserApplicationNameUpdate(
+  user: AuthUser | null,
+  applicationName: string,
+) {
   if (!user) {
     return null
   }
@@ -43,7 +53,10 @@ export function resolveAuthUserApplicationNameUpdate(user: AuthUser | null, appl
   }
 }
 
-export function resolveAuthUserGymBrandUpdate(user: AuthUser | null, gymBrand: string) {
+export function resolveAuthUserGymBrandUpdate(
+  user: AuthUser | null,
+  gymBrand: string,
+) {
   if (!user) {
     return null
   }
@@ -56,7 +69,7 @@ export function resolveAuthUserGymBrandUpdate(user: AuthUser | null, gymBrand: s
     user: {
       ...user,
       gymBrand: trimmedValue || null,
-      gymName: isVirginBrand ? user.gymName ?? previousGymName : null,
+      gymName: isVirginBrand ? (user.gymName ?? previousGymName) : null,
     },
     persistedUserId: resolvePersistedUserId(user),
     isVirginBrand,
@@ -64,7 +77,11 @@ export function resolveAuthUserGymBrandUpdate(user: AuthUser | null, gymBrand: s
   }
 }
 
-export function resolveAuthUserGymNameUpdate(user: AuthUser | null, gymName: string, gymBrand?: string | null) {
+export function resolveAuthUserGymNameUpdate(
+  user: AuthUser | null,
+  gymName: string,
+  gymBrand?: string | null,
+) {
   if (!user) {
     return null
   }
@@ -82,7 +99,10 @@ export function resolveAuthUserGymNameUpdate(user: AuthUser | null, gymName: str
   }
 }
 
-export function resolveAuthAccessState(user: AuthUser | null, requiredRole: UserRole | UserRole[]) {
+export function resolveAuthAccessState(
+  user: AuthUser | null,
+  requiredRole: UserRole | UserRole[],
+) {
   return {
     isAuthenticated: user !== null,
     hasAccess: hasAccessToRole(user, requiredRole, false),
