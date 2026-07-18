@@ -5,7 +5,7 @@ import { PageLayout } from '../layouts/PageLayout'
 import { CreateFolderForm } from '../components/CreateFolderForm'
 import { FavouriteFolderGroup } from '../components/FavouriteFolderGroup'
 import { normalizeFolderName, sortFavorites, type QuickLink } from '../utils/favouriteUtils'
-import { resolveFavoritesPageViewModel } from '../features/favorites/domain/favoritesPage'
+import { resolveFavouritesPageViewModel } from '../features/favourites/domain/favouritesPage'
 
 type FavouritesPageProps = {
   favorites: QuickLink[]
@@ -19,7 +19,7 @@ export function FavouritesPage({ favorites, folders, onFoldersChange, onFavorite
   const [newFolderName, setNewFolderName] = useState('')
   const [expandedFolders, setExpandedFolders] = useState<Record<string, boolean>>({})
 
-  const viewModel = useMemo(() => resolveFavoritesPageViewModel(favorites, folders), [favorites, folders])
+  const viewModel = useMemo(() => resolveFavouritesPageViewModel(favorites, folders), [favorites, folders])
   const folderOptions = viewModel.folderOptions
   const groupedFavorites = viewModel.groupedFavorites
 

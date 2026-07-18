@@ -3,7 +3,7 @@ import { useLocation, useNavigate } from 'react-router-dom'
 import { getToneClass } from './toneClasses'
 import { classNames, exercises, exercisesSchema } from '@gym-pilot/shared'
 import { getQuickLinkForPath, groupFavoritesByFolder, normalizeFolderName, sortFavorites, type QuickLink } from '../utils/favouriteUtils'
-import { normalizeFolderName as normalizeFavoriteFolderName, sortQuickLinks } from '../features/favorites/domain/quickLinks'
+import { normalizeFolderName as normalizeFavoriteFolderName, sortQuickLinks } from '../features/favourites/domain/quickLinks'
 
 type SavedSearch = {
   id: string

@@ -1,11 +1,11 @@
 import { normalizeFolderName, sortFavorites, type QuickLink } from '../../../utils/favouriteUtils'
 
-export type FavoritesPageViewModel = {
+export type FavouritesPageViewModel = {
   folderOptions: string[]
   groupedFavorites: Array<[string, QuickLink[]]>
 }
 
-export function resolveFavoritesPageViewModel(favorites: QuickLink[], folders: string[]): FavoritesPageViewModel {
+export function resolveFavouritesPageViewModel(favorites: QuickLink[], folders: string[]): FavouritesPageViewModel {
   const sortedFavorites = sortFavorites(favorites)
   const folderOptions = getFolderOptions(folders, sortedFavorites)
   const groupedFavorites = groupFavorites(sortedFavorites, folders)

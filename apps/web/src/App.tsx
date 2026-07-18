@@ -35,8 +35,8 @@ import { buildNavigationMenuItems } from './utils/navigationUtils'
 import { AssignmentDetailPage } from './pages/assignments/AssignmentDetailPage'
 import { logger } from '@gym-pilot/shared'
 import { getHashHomeUrl, normalizeHomeFilters, type HomeFilters } from './utils/appUtils'
-import { useFavoritesFeature } from './features/favorites/hooks/useFavoritesFeature'
-import { sortQuickLinks, type QuickLink } from './features/favorites/domain/quickLinks'
+import { useFavouritesFeature } from './features/favourites/hooks/useFavouritesFeature'
+import { sortQuickLinks, type QuickLink } from './features/favourites/domain/quickLinks'
 
 function ScrollToTop() {
   const { pathname } = useLocation()
@@ -55,7 +55,7 @@ function App() {
   const SHOW_AUTH_BUTTON = true
   const { user, logout, showVersion } = useAuth()
   const appVersion = webPackageJson.version || '0.0.0'
-  const { favorites, folders, setFavorites, setFolders } = useFavoritesFeature()
+  const { favorites, folders, setFavorites, setFolders } = useFavouritesFeature()
 
   const [homeFilters, setHomeFilters] = useState<HomeFilters>(() => {
     if (typeof window === 'undefined') {

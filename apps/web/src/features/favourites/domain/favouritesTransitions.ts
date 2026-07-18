@@ -1,9 +1,9 @@
-export type FavoritesTransitionState = {
+export type FavouritesTransitionState = {
   favorites: Array<{ id: string; label: string; path: string; folder?: string }>
   folders: string[]
 }
 
-export function resolveFavoritesHydrationState(storedValue: unknown): FavoritesTransitionState {
+export function resolveFavouritesHydrationState(storedValue: unknown): FavouritesTransitionState {
   const normalizedValue = storedValue && typeof storedValue === 'object'
     ? storedValue as { favorites?: Array<{ id?: string; label?: string; path?: string; folder?: string }>; folders?: string[] }
     : { favorites: [] as Array<{ id?: string; label?: string; path?: string; folder?: string }>, folders: [] as string[] }
@@ -19,7 +19,7 @@ export function resolveFavoritesHydrationState(storedValue: unknown): FavoritesT
   }
 }
 
-export function resolveFavoritesPersistenceState(state: FavoritesTransitionState) {
+export function resolveFavouritesPersistenceState(state: FavouritesTransitionState) {
   return {
     favorites: state.favorites.map((item) => ({ id: item.id, label: item.label, path: item.path, folder: item.folder })),
     folders: state.folders,

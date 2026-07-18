@@ -7,6 +7,8 @@
 ## Architecture principles
 - Keep UI components focused on presentation and user interaction.
 - Move business logic, data shaping, filtering, mapping, and route-specific decisions into feature-domain modules under apps/web/src/features/.
+- Keep hooks thin and focused on React state, effects, and side effects. If logic can be expressed as a decision or transformation, move it into a pure function in the feature domain instead of keeping it inline in the hook.
+- Prefer pure helpers for state transitions, view-model construction, normalization, validation, filtering, grouping, role resolution, and route selection so they can be tested independently from React.
 - Use shared packages under packages/ for cross-cutting types and data contracts whenever the logic is shared outside a single page.
 - Keep page-level components thin; they should orchestrate state and render views rather than contain domain logic inline.
 
@@ -22,7 +24,8 @@
 
 ## Refactor expectations
 - When touching existing pages, prefer extracting logic into a feature-domain helper before adding more inline branching or transformation code.
-- If a component is doing data mapping, filtering, grouping, role resolution, or route selection, move that logic into a helper in the relevant feature domain.
+- If a component or hook is doing data mapping, filtering, grouping, role resolution, route selection, or state transitions, move that logic into a helper in the relevant feature domain.
+- Treat hooks as orchestration layers: React state and effects stay in the hook, while reusable business rules live in pure functions that can be unit tested.
 - Preserve current user-facing behavior while improving testability and readability.
 
 ## Testing expectations

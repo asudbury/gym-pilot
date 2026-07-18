@@ -5,7 +5,7 @@ export type QuickLink = {
   folder?: string
 }
 
-export type FavoritesStorageValue = {
+export type FavouritesStorageValue = {
   favorites: QuickLink[]
   folders: string[]
 }
@@ -16,7 +16,7 @@ export type HomeFilters = {
   showImages: boolean
 }
 
-export function normalizeFavoriteStorageValue(value: unknown): FavoritesStorageValue {
+export function normalizeFavouriteStorageValue(value: unknown): FavouritesStorageValue {
   if (Array.isArray(value)) {
     return {
       favorites: value.filter((item): item is QuickLink => Boolean(item && typeof item === 'object' && typeof (item as QuickLink).path === 'string' && typeof (item as QuickLink).label === 'string')),
@@ -25,7 +25,7 @@ export function normalizeFavoriteStorageValue(value: unknown): FavoritesStorageV
   }
 
   if (value && typeof value === 'object') {
-    const candidate = value as Partial<FavoritesStorageValue>
+    const candidate = value as Partial<FavouritesStorageValue>
     const folders = Array.isArray(candidate.folders)
       ? candidate.folders.filter((folder): folder is string => typeof folder === 'string' && folder.trim().length > 0)
       : []

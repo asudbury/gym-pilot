@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest'
 import {
-  normalizeFavoriteStorageValue,
+  normalizeFavouriteStorageValue,
   normalizeFolderName,
   sortQuickLinks,
   type QuickLink,
@@ -17,7 +17,7 @@ describe('favorites domain helpers', () => {
       folders: ['  Zeta  ', 'Alpha', 'Alpha'],
     }
 
-    const normalized = normalizeFavoriteStorageValue(value)
+    const normalized = normalizeFavouriteStorageValue(value)
 
     expect(normalized.folders).toEqual(['Alpha', 'Zeta'])
     expect(normalized.favorites).toHaveLength(3)
