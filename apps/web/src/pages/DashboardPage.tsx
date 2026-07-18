@@ -3,7 +3,7 @@ import { PageCard } from '../components/PageCard'
 import { PageLayout } from '../layouts/PageLayout'
 import { useAuth } from '../auth/AuthContext'
 import { renderDashboardWidgets } from '../components/dashboard/dashboardLayouts'
-import { formatDashboardTimestamp } from '../utils/appUtils'
+import { renderDashboardTimestamp } from '../utils/appUtils'
 import { resolveDashboardViewModel } from '../features/dashboard/domain/dashboardLayout'
 import { DecorativeIcon } from '../components/ui/DecorativeIcon'
 
@@ -14,9 +14,7 @@ type DashboardPageProps = {
 export function DashboardPage({ userName }: DashboardPageProps) {
   const { user } = useAuth()
   const displayName = userName?.trim() || 'there'
-  const previousLoginLabel = formatDashboardTimestamp(
-    user?.previousLastLoggedInAt ?? null,
-  )
+  const previousLoginTimestamp = user?.previousLastLoggedInAt ?? null
   const viewModel = useMemo(
     () => resolveDashboardViewModel(user?.role, user?.roles),
     [user?.role, user?.roles],
@@ -56,9 +54,9 @@ export function DashboardPage({ userName }: DashboardPageProps) {
               Choose the view that fits your role and jump back into your work
               from one place.
             </p>
-            {previousLoginLabel ? (
+            {previousLoginTimestamp ? (
               <p className="max-w-2xl text-sm text-slate-500 dark:text-slate-400">
-                Your last login: {previousLoginLabel}.
+                Your last login: {renderDashboardTimestamp(previousLoginTimestamp)}.
               </p>
             ) : null}
           </div>

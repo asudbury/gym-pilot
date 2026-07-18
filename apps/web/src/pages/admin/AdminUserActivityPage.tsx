@@ -13,14 +13,14 @@ import {
   type UserActivityProfileViewModel,
   type UserActivityRowViewModel,
 } from '../../features/admin/domain/userActivity'
-import { formatDashboardTimestamp } from '../../utils/appUtils'
+import { renderDashboardTimestamp } from '../../utils/appUtils'
 
 const formatStoredTimestamp = (value?: string | null) => {
   if (!value) {
     return 'Not recorded yet'
   }
 
-  return formatDashboardTimestamp(value) ?? 'Invalid date'
+  return renderDashboardTimestamp(value) ?? 'Invalid date'
 }
 
 export function AdminUserActivityPage() {

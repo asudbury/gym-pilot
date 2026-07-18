@@ -1,3 +1,5 @@
+import { createElement, type ReactNode } from 'react'
+
 export type QuickLink = {
   id: string
   label: string
@@ -124,6 +126,23 @@ export function formatDashboardTimestamp(value?: string | null) {
     dateStyle: 'medium',
     timeStyle: 'short',
   }).format(parsedDate)
+}
+
+export function renderDashboardTimestamp(
+  value?: string | null,
+  className = 'font-semibold text-slate-900 dark:text-slate-100',
+): ReactNode {
+  const formattedTimestamp = formatDashboardTimestamp(value)
+
+  if (!formattedTimestamp) {
+    return null
+  }
+
+  if (formattedTimestamp.startsWith('Today,')) {
+    return createElement('span', { className }, formattedTimestamp)
+  }
+
+  return formattedTimestamp
 }
 
 export function getHashHomeUrl(
