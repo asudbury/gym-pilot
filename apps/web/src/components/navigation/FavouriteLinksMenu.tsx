@@ -235,7 +235,7 @@ export function FavouriteLinksMenu({
           'w-full px-4 py-2 text-left text-sm font-medium',
         )
       : classNames(
-          'w-full cursor-pointer rounded-xl px-3 py-2 text-left text-sm font-medium transition',
+          'w-full rounded-xl px-3 py-2 text-left text-sm font-medium transition',
           menuOpen
             ? 'bg-slate-900 text-white'
             : 'text-slate-700 hover:bg-slate-50',
@@ -288,7 +288,7 @@ export function FavouriteLinksMenu({
                   onClick={handleToggleCurrentFavorite}
                   className={getToneClass(
                     'blue',
-                    'cursor-pointer px-3 py-1.5 text-xs font-medium',
+                    'px-3 py-1.5 text-xs font-medium',
                   )}
                 >
                   Add to favourites
@@ -300,7 +300,7 @@ export function FavouriteLinksMenu({
               onClick={handleOpenFavouritesPage}
               className={getToneClass(
                 'default',
-                'w-fit cursor-pointer px-3 py-2 text-xs font-medium',
+                'w-fit px-3 py-2 text-xs font-medium',
               )}
             >
               Open favourites page
@@ -326,7 +326,7 @@ export function FavouriteLinksMenu({
                         <button
                           type="button"
                           onClick={() => handleOpenQuickLink(item)}
-                          className="w-full cursor-pointer rounded-lg px-3 py-2 text-left text-sm text-slate-700 transition hover:bg-slate-50 hover:text-slate-900 sm:flex-1"
+                          className="w-full rounded-lg px-3 py-2 text-left text-sm text-slate-700 transition hover:bg-slate-50 hover:text-slate-900 sm:flex-1"
                         >
                           {item.label}
                         </button>
@@ -334,7 +334,7 @@ export function FavouriteLinksMenu({
                           <button
                             type="button"
                             onClick={() => handleRemoveFavoriteLink(item)}
-                            className="cursor-pointer rounded-lg border border-slate-200 bg-white px-2 py-2 text-xs text-slate-600"
+                            className="rounded-lg border border-slate-200 bg-white px-2 py-2 text-xs text-slate-600"
                             aria-label="Remove favorite"
                           >
                             ✕

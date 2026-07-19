@@ -179,7 +179,7 @@ export function RecordAttendancePage() {
                           key={option.kind}
                           type="button"
                           onClick={() => setAttendanceSelection(option.kind)}
-                          className={`cursor-pointer rounded-full border px-3 py-1.5 text-sm font-semibold transition ${isSelected ? 'border-sky-600 bg-sky-600 text-white shadow-sm' : 'border-slate-300 bg-white text-slate-700 hover:bg-slate-50'}`}
+                          className={`rounded-full border px-3 py-1.5 text-sm font-semibold transition ${isSelected ? 'border-sky-600 bg-sky-600 text-white shadow-sm' : 'border-slate-300 bg-white text-slate-700 hover:bg-slate-50'}`}
                         >
                           {option.label}
                         </button>
@@ -201,7 +201,7 @@ export function RecordAttendancePage() {
                         key={value}
                         type="button"
                         onClick={() => setAttendanceRating(value)}
-                        className={`cursor-pointer rounded-full border px-3 py-1.5 text-sm font-semibold transition ${isSelected ? 'border-sky-600 bg-sky-600 text-white shadow-sm' : 'border-slate-300 bg-white text-slate-700 hover:bg-slate-50'}`}
+                        className={`rounded-full border px-3 py-1.5 text-sm font-semibold transition ${isSelected ? 'border-sky-600 bg-sky-600 text-white shadow-sm' : 'border-slate-300 bg-white text-slate-700 hover:bg-slate-50'}`}
                       >
                         {value} / 5
                       </button>
@@ -230,14 +230,14 @@ export function RecordAttendancePage() {
                   type="button"
                   onClick={handleAttendanceSubmit}
                   disabled={attendanceSaving}
-                  className="cursor-pointer rounded-full border border-emerald-600 bg-emerald-600 px-3 py-1.5 text-sm font-semibold text-white shadow-sm transition hover:bg-emerald-700 disabled:cursor-not-allowed disabled:border-emerald-300 disabled:bg-emerald-300 disabled:text-emerald-950"
+                  className="rounded-full border border-emerald-600 bg-emerald-600 px-3 py-1.5 text-sm font-semibold text-white shadow-sm transition hover:bg-emerald-700 disabled:cursor-not-allowed disabled:border-emerald-300 disabled:bg-emerald-300 disabled:text-emerald-950"
                 >
                   {attendanceSaving ? 'Saving…' : 'Record attendance'}
                 </button>
                 <button
                   type="button"
                   onClick={() => navigate('/timetable')}
-                  className="cursor-pointer rounded-full border border-slate-300 bg-white px-3 py-1.5 text-sm font-medium text-slate-700 transition hover:bg-slate-50"
+                  className="rounded-full border border-slate-300 bg-white px-3 py-1.5 text-sm font-medium text-slate-700 transition hover:bg-slate-50"
                 >
                   Cancel
                 </button>

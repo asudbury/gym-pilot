@@ -97,8 +97,8 @@ export function ExercisePage({
             onClick={handleOpenFavouritePicker}
             className={
               isExerciseFavorite?.(exercise.id)
-                ? 'cursor-pointer rounded-full bg-emerald-600 px-4 py-2 text-sm font-medium text-white'
-                : 'cursor-pointer rounded-full bg-slate-100 px-4 py-2 text-sm font-medium text-slate-700 transition-colors dark:bg-slate-800 dark:text-slate-100'
+                ? 'rounded-full bg-emerald-600 px-4 py-2 text-sm font-medium text-white'
+                : 'rounded-full bg-slate-100 px-4 py-2 text-sm font-medium text-slate-700 transition-colors dark:bg-slate-800 dark:text-slate-100'
             }
           >
             {isExerciseFavorite?.(exercise.id)
@@ -110,8 +110,8 @@ export function ExercisePage({
             onClick={handleCopyUrl}
             className={
               copied
-                ? 'cursor-pointer rounded-full bg-emerald-600 px-4 py-2 text-sm font-medium text-white'
-                : 'cursor-pointer rounded-full bg-slate-100 px-4 py-2 text-sm font-medium text-slate-700 transition-colors dark:bg-slate-800 dark:text-slate-100'
+                ? 'rounded-full bg-emerald-600 px-4 py-2 text-sm font-medium text-white'
+                : 'rounded-full bg-slate-100 px-4 py-2 text-sm font-medium text-slate-700 transition-colors dark:bg-slate-800 dark:text-slate-100'
             }
           >
             {copied ? 'Copied!' : 'Copy URL'}

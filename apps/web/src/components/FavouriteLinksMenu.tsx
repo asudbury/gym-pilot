@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useState } from 'react'
 import { useLocation, useNavigate } from 'react-router-dom'
 import { getToneClass } from './toneClasses'
+import { DecorativeIcon } from './ui/DecorativeIcon'
 import { classNames, exercises, exercisesSchema } from '@gym-pilot/shared'
 import {
   getQuickLinkForPath,
@@ -43,14 +44,12 @@ export function FavouriteLinksMenu({
   folders,
   variant = 'menu',
   onFavoritesChange,
-  onFoldersChange,
   onMenuOpenChange,
 }: FavouriteLinksMenuProps) {
   const location = useLocation()
   const navigate = useNavigate()
   const [menuOpen, setMenuOpen] = useState(false)
   const [selectedFolder, setSelectedFolder] = useState('')
-  const [newFolderName, setNewFolderName] = useState('')
 
   useEffect(() => {
     onMenuOpenChange?.(menuOpen)
@@ -126,9 +125,6 @@ export function FavouriteLinksMenu({
     () => getQuickLinkForPath(location.pathname, exerciseLookup),
     [exerciseLookup, location.pathname],
   )
-  const isCurrentPageFavorite = currentQuickLink
-    ? favorites.some((item) => item.path === currentQuickLink.path)
-    : false
   const favoriteGroups = useMemo(() => {
     const groups = groupFavoritesByFolder(favorites)
     const folderGroups = folders.map(
@@ -182,22 +178,6 @@ export function FavouriteLinksMenu({
     setSelectedFolder(folderName)
   }, [currentQuickLink, favorites, menuOpen])
 
-  const handleCreateFolder = () => {
-    const folderName = normalizeFavoriteFolderName(newFolderName)
-
-    if (!folderName) {
-      return
-    }
-
-    onFoldersChange(
-      Array.from(new Set([...folders, folderName])).sort((left, right) =>
-        left.localeCompare(right),
-      ),
-    )
-    setSelectedFolder(folderName)
-    setNewFolderName('')
-  }
-
   const handleUpdateFavoriteLink = (link: QuickLink, folderName?: string) => {
     const normalizedFolder =
       normalizeFavoriteFolderName(folderName ?? '') || undefined
@@ -250,9 +230,12 @@ export function FavouriteLinksMenu({
 
   const triggerClassName = classNames(
     variant === 'header'
-      ? getToneClass('blue', 'w-full px-4 py-2 text-left text-sm font-medium')
+      ? getToneClass(
+          'default',
+          'w-full px-4 py-2 text-left text-sm font-medium',
+        )
       : classNames(
-          'w-full cursor-pointer rounded-xl px-3 py-2 text-left text-sm font-medium transition',
+          'w-full rounded-xl px-3 py-2 text-left text-sm font-medium transition',
           menuOpen
             ? 'bg-slate-900 text-white'
             : 'text-slate-700 hover:bg-slate-50',
@@ -267,7 +250,10 @@ export function FavouriteLinksMenu({
         onClick={() => setMenuOpen((current) => !current)}
         className={triggerClassName}
       >
-        <span>Favourites</span>
+        <span className="inline-flex items-center gap-2">
+          <DecorativeIcon icon="star" className="h-4 w-4" />
+          <span>Favourites</span>
+        </span>
       </button>
       {menuOpen && (
         <div
@@ -280,9 +266,6 @@ export function FavouriteLinksMenu({
                 <p className="text-sm font-semibold text-slate-900">
                   Manage favourites
                 </p>
-                <p className="mt-1 text-xs text-slate-500">
-                  Quick links for pages you use most often.
-                </p>
               </div>
               <div className="flex flex-col gap-2 sm:items-end">
                 <label className="text-[11px] font-semibold uppercase tracking-wide text-slate-500">
@@ -292,7 +275,7 @@ export function FavouriteLinksMenu({
                     onChange={(event) => setSelectedFolder(event.target.value)}
                     className="rounded-lg border border-slate-200 bg-white px-2.5 py-1.5 text-xs text-slate-700"
                   >
-                    <option value="">No folder</option>
+                    <option value="">Select folder</option>
                     {folderOptions.map((folderOption) => (
                       <option key={folderOption} value={folderOption}>
                         {folderOption}
@@ -300,30 +283,15 @@ export function FavouriteLinksMenu({
                     ))}
                   </select>
                 </label>
-                <div className="flex items-center gap-1">
-                  <input
-                    value={newFolderName}
-                    onChange={(event) => setNewFolderName(event.target.value)}
-                    placeholder="New folder"
-                    className="w-24 rounded-lg border border-slate-200 bg-white px-2 py-1.5 text-xs text-slate-700 outline-none"
-                  />
-                  <button
-                    type="button"
-                    onClick={handleCreateFolder}
-                    className="rounded-lg border border-slate-200 bg-white px-2 py-1.5 text-[11px] font-medium text-slate-700"
-                  >
-                    Add
-                  </button>
-                </div>
                 <button
                   type="button"
                   onClick={handleToggleCurrentFavorite}
                   className={getToneClass(
-                    'default',
-                    'cursor-pointer px-3 py-1.5 text-xs font-medium',
+                    'blue',
+                    'px-3 py-1.5 text-xs font-medium',
                   )}
                 >
-                  {isCurrentPageFavorite ? 'Update' : 'Add to favorites'}
+                  Add to favourites
                 </button>
               </div>
             </div>
@@ -331,8 +299,8 @@ export function FavouriteLinksMenu({
               type="button"
               onClick={handleOpenFavouritesPage}
               className={getToneClass(
-                'blue',
-                'w-fit cursor-pointer px-3 py-2 text-xs font-medium',
+                'default',
+                'w-fit px-3 py-2 text-xs font-medium',
               )}
             >
               Open favourites page
@@ -358,7 +326,7 @@ export function FavouriteLinksMenu({
                         <button
                           type="button"
                           onClick={() => handleOpenQuickLink(item)}
-                          className="w-full cursor-pointer rounded-lg px-3 py-2 text-left text-sm text-slate-700 transition hover:bg-slate-50 hover:text-slate-900 sm:flex-1"
+                          className="w-full rounded-lg px-3 py-2 text-left text-sm text-slate-700 transition hover:bg-slate-50 hover:text-slate-900 sm:flex-1"
                         >
                           {item.label}
                         </button>
@@ -366,7 +334,7 @@ export function FavouriteLinksMenu({
                           <button
                             type="button"
                             onClick={() => handleRemoveFavoriteLink(item)}
-                            className="cursor-pointer rounded-lg border border-slate-200 bg-white px-2 py-2 text-xs text-slate-600"
+                            className="rounded-lg border border-slate-200 bg-white px-2 py-2 text-xs text-slate-600"
                             aria-label="Remove favorite"
                           >
                             ✕

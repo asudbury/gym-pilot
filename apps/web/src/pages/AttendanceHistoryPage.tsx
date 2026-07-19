@@ -201,7 +201,7 @@ export function AttendanceHistoryPage() {
                                 key={value}
                                 type="button"
                                 onClick={() => setEditRating(value)}
-                                className={`cursor-pointer rounded-full border px-3 py-1.5 text-sm font-semibold transition ${isSelected ? 'border-sky-600 bg-sky-600 text-white' : 'border-slate-300 bg-white text-slate-700 hover:bg-slate-50'}`}
+                                className={`rounded-full border px-3 py-1.5 text-sm font-semibold transition ${isSelected ? 'border-sky-600 bg-sky-600 text-white' : 'border-slate-300 bg-white text-slate-700 hover:bg-slate-50'}`}
                               >
                                 {value} / 5
                               </button>

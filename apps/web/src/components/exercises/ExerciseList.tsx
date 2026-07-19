@@ -139,7 +139,7 @@ export function ExerciseList({
                     return (
                       <div
                         key={exercise.id}
-                        className="flex h-full min-h-75 cursor-pointer gap-3 rounded-2xl border border-slate-200/70 bg-white/80 p-4 shadow-sm transition hover:-translate-y-0.5 hover:border-slate-300 hover:shadow-md dark:border-slate-700 dark:bg-slate-900/90 dark:hover:border-slate-600"
+                        className="flex h-full min-h-75 gap-3 rounded-2xl border border-slate-200/70 bg-white/80 p-4 shadow-sm transition hover:-translate-y-0.5 hover:border-slate-300 hover:shadow-md dark:border-slate-700 dark:bg-slate-900/90 dark:hover:border-slate-600"
                       >
                         <Link
                           to={getExercisePath(exercise)}
@@ -188,7 +188,7 @@ export function ExerciseList({
                   return (
                     <div
                       key={exercise.id}
-                      className="flex h-full min-h-35 cursor-pointer gap-2 rounded-2xl border border-slate-200/70 bg-white/80 p-2 shadow-sm transition hover:-translate-y-0.5 hover:border-slate-300 hover:shadow-md dark:border-slate-700 dark:bg-slate-900/90 dark:hover:border-slate-600"
+                      className="flex h-full min-h-35 gap-2 rounded-2xl border border-slate-200/70 bg-white/80 p-2 shadow-sm transition hover:-translate-y-0.5 hover:border-slate-300 hover:shadow-md dark:border-slate-700 dark:bg-slate-900/90 dark:hover:border-slate-600"
                     >
                       <Link
                         to={getExercisePath(exercise)}

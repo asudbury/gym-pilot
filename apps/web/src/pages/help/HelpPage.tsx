@@ -6,7 +6,7 @@ import { helpSections } from '../../utils/helpUtils'
 import { getBuildMetadata } from '../../utils/buildInfo'
 
 export function HelpPage() {
-  const { hasAccess } = useAuth()
+  const { hasAccess, user, isAuthenticated } = useAuth()
   const buildMetadata = getBuildMetadata()
   const isAdmin = hasAccess('admin')
   const isTrainer = hasAccess('trainer')
@@ -145,11 +145,20 @@ export function HelpPage() {
               </Panel>
             ))}
           </div>
-          <Panel
-            variant="white"
-            padding="md"
-            className="text-sm text-slate-500"
-          >
+          <Panel variant="white" padding="md">
+            {isAuthenticated && user ? (
+              <>
+                <h3 className="text-sm font-semibold">Roles</h3>
+                <p className="mt-2">
+                  {Array.isArray(user.roles) && user.roles.length > 0
+                    ? user.roles.join(', ')
+                    : user.role
+                      ? String(user.role)
+                      : 'None'}
+                </p>
+              </>
+            ) : null}
+            <br />
             <p>App version: {buildMetadata.appVersion}</p>
             <p className="mt-1">Build: {buildMetadata.buildTimestamp}</p>
           </Panel>

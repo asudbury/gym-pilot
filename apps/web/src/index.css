@@ -87,6 +87,16 @@ html {
   min-height: 100vh;
 }
 
+/* Ensure buttons show a pointer cursor by default and a not-allowed cursor when disabled. */
+button {
+  cursor: pointer;
+}
+
+button:disabled,
+button[disabled] {
+  cursor: not-allowed;
+}
+
 html.dark .bg-white {
   background-color: var(--app-surface) !important;
 }

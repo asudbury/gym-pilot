@@ -180,7 +180,7 @@ export function AdminUserProfilesPage() {
 
       if (
         error &&
-        /trainer_id|does not exist|column .* does not exist/i.test(
+        /trainer_id|roles|does not exist|column .* does not exist|schema cache/i.test(
           error.message,
         )
       ) {
@@ -466,7 +466,7 @@ export function AdminUserProfilesPage() {
                                 onClick={() =>
                                   updateDraft(profile.id, { showVersion: true })
                                 }
-                                className={`cursor-pointer rounded-full px-3 py-1.5 text-sm font-medium transition ${(draft?.showVersion ?? true) ? 'bg-slate-900 text-white' : 'bg-white text-slate-700 border border-slate-200'}`}
+                                className={`rounded-full px-3 py-1.5 text-sm font-medium transition ${(draft?.showVersion ?? true) ? 'bg-slate-900 text-white' : 'bg-white text-slate-700 border border-slate-200'}`}
                               >
                                 Show
                               </button>
@@ -477,7 +477,7 @@ export function AdminUserProfilesPage() {
                                     showVersion: false,
                                   })
                                 }
-                                className={`cursor-pointer rounded-full px-3 py-1.5 text-sm font-medium transition ${!(draft?.showVersion ?? true) ? 'bg-slate-900 text-white' : 'bg-white text-slate-700 border border-slate-200'}`}
+                                className={`rounded-full px-3 py-1.5 text-sm font-medium transition ${!(draft?.showVersion ?? true) ? 'bg-slate-900 text-white' : 'bg-white text-slate-700 border border-slate-200'}`}
                               >
                                 Hide
                               </button>

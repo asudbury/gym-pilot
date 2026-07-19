@@ -2,8 +2,8 @@ import { useMemo, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { Button } from '../../components/Button'
 import {
-  ensureAuthenticatedSupabaseSession,
   getSupabaseClient,
+  getSupabaseAdminClient,
   logger,
   saveSupabaseProfileRoles,
   signUpWithPassword,
@@ -21,6 +21,14 @@ import {
 type StatusMessageState = {
   text: string
   tone: 'success' | 'error'
+}
+
+function isSupabaseAuthCredentialError(message?: string) {
+  if (!message) {
+    return false
+  }
+
+  return /invalid login credentials|jwt|token|session/i.test(message)
 }
 
 export function AdminCreateUserPage() {
@@ -70,70 +78,197 @@ export function AdminCreateUserPage() {
     }
 
     if (hasTemporaryPassword) {
-      const response = await signUpWithPassword(
-        newUserEmail.trim() || resolvedDisplayName,
-        tempPassword,
-        { passwordChangeRequired: true, persistSession: false },
-      )
+      // Try to create the auth user via the service-role admin client so
+      // the new user exists in `auth.users` before we insert the profile
+      // row (avoids foreign-key race errors). Fall back to a normal
+      // client-side signup when the service role key is not available.
+      const serviceAdminClient = getSupabaseAdminClient()
+      let response: Awaited<ReturnType<typeof signUpWithPassword>> | null = null
+      let createdUserId: string | undefined
 
-      if (response.error) {
-        logger.error(
-          '[AdminCreateUser] Could not create Supabase auth user',
-          response.error,
-        )
-        setTempPassword('')
+      if (serviceAdminClient) {
+        const emailCandidate = newUserEmail.trim() || resolvedDisplayName
+        const normalizedEmail = emailCandidate.includes('@')
+          ? emailCandidate.toLowerCase()
+          : `${
+              emailCandidate
+                .replace(/\s+/g, '.')
+                .replace(/[^a-z0-9._-]/gi, '')
+                .toLowerCase() || 'user'
+            }@gym-pilot.local`
 
-        const errorMessage = response.error.message?.includes('rate limit')
-          ? 'We could not create the account right now because Supabase is temporarily rate-limiting email sign-ups. Please try again in a few minutes.'
-          : `Could not create user: ${response.error.message}`
+        try {
+          // use the admin API to create the user without affecting session
+          // state in the browser
+          // @ts-expect-error - admin typings vary by supabase-js version
+          const { data, error } =
+            await serviceAdminClient.auth.admin.createUser({
+              email: normalizedEmail,
+              password: tempPassword,
+              user_metadata: { password_change_required: true },
+            })
 
-        setStatusMessage({ text: errorMessage, tone: 'error' })
-        return
+          logger.info('[AdminCreateUser] service createUser result', {
+            data,
+            error,
+          })
+
+          if (error) {
+            logger.error(
+              '[AdminCreateUser] Service-role createUser failed',
+              error,
+            )
+          } else if (data?.user?.id) {
+            createdUserId = data.user.id
+          }
+        } catch (err) {
+          logger.warn('[AdminCreateUser] Service-role create user threw', err)
+        }
       }
 
-      const client = getSupabaseClient({
+      // If we didn't create via the service role, fall back to the public
+      // signup flow which returns a session/user id or an error.
+      if (!createdUserId) {
+        response = await signUpWithPassword(
+          newUserEmail.trim() || resolvedDisplayName,
+          tempPassword,
+          { passwordChangeRequired: true, persistSession: false },
+        )
+
+        if (response.error) {
+          logger.error(
+            '[AdminCreateUser] Could not create Supabase auth user',
+            response.error,
+          )
+          setTempPassword('')
+
+          const errorMessage = response.error.message?.includes('rate limit')
+            ? 'We could not create the account right now because Supabase is temporarily rate-limiting email sign-ups. Please try again in a few minutes.'
+            : `Could not create user: ${response.error.message}`
+
+          setStatusMessage({ text: errorMessage, tone: 'error' })
+          return
+        }
+      }
+
+      const noPersistClient = getSupabaseClient({
         persistSession: false,
         autoRefreshToken: false,
       })
+      const adminClient = getSupabaseClient()
 
-      if (client && response.data?.user?.id) {
-        const sessionResult = await ensureAuthenticatedSupabaseSession(
-          client,
-          newUserEmail.trim() || resolvedDisplayName,
-          tempPassword,
-          response,
-        )
+      // Prefer the service-role client when available so we can both create
+      // the auth user and upsert the profile using the same privileged
+      // connection (avoids FK races). Otherwise prefer the admin client
+      // (current logged-in admin session) then the no-persist client.
+      const client = serviceAdminClient ?? adminClient ?? noPersistClient
 
-        if (sessionResult.error) {
-          logger.error(
-            '[AdminCreateUser] Could not establish Supabase auth session',
-            sessionResult.error,
-          )
-          setStatusMessage({
-            text: `Could not create the profile row: ${sessionResult.error.message}`,
-            tone: 'error',
-          })
-          return
+      if (!client) {
+        setStatusMessage({
+          text: 'Could not create the profile row: Supabase client is not available.',
+          tone: 'error',
+        })
+        return
+      }
+
+      const resolvedNewUserId = createdUserId ?? response?.data?.user?.id
+
+      logger.info('[AdminCreateUser] resolvedNewUserId', {
+        resolvedNewUserId,
+        createdUserId,
+        responseData: response?.data,
+      })
+
+      // If we created the user via the service-role client, poll auth.users
+      // until the new user record is visible to avoid FK races caused by
+      // eventual consistency in the auth system.
+      if (serviceAdminClient && createdUserId) {
+        let seen = false
+        let attempts = 0
+        while (!seen && attempts < 10) {
+          try {
+            // admin.getUserById may vary by supabase-js version; try common APIs
+            // @ts-expect-error
+            const lookup =
+              await serviceAdminClient.auth.admin.getUserById(createdUserId)
+            // @ts-expect-error
+            if (lookup?.data?.user || lookup?.user) {
+              seen = true
+              break
+            }
+            // some SDKs return { data: { user } }
+            // @ts-expect-error
+            if (
+              lookup?.data &&
+              Array.isArray(lookup.data) &&
+              lookup.data.length > 0
+            ) {
+              seen = true
+              break
+            }
+          } catch (err) {
+            // ignore and retry
+          }
+
+          attempts += 1
+          // eslint-disable-next-line no-await-in-loop
+          await new Promise((res) => setTimeout(res, 200 * attempts))
         }
 
+        if (!seen) {
+          logger.warn(
+            '[AdminCreateUser] service admin could not verify new user presence after retries',
+            { createdUserId },
+          )
+        }
+      }
+
+      if (resolvedNewUserId) {
         const profilePayload = buildCreateUserProfilePayload({
-          userId: response.data.user.id,
+          userId: resolvedNewUserId,
           displayName: resolvedDisplayName,
           roles: newUserRoles,
           selectedTrainerId,
         })
 
-        const { error: profileError } = await client
+        let { error: profileError } = await client
           .from('gym_pilot_profile')
           .upsert(profilePayload, { onConflict: 'user_id' })
 
+        if (
+          profileError &&
+          /violates foreign key constraint/i.test(profileError.message || '')
+        ) {
+          // transient FK error — retry several times with exponential backoff
+          logger.warn(
+            '[AdminCreateUser] FK constraint when creating profile; retrying',
+            profileError,
+          )
+          let attempts = 0
+          while (attempts < 8 && profileError) {
+            const delay = 150 * Math.pow(1.6, attempts)
+            // eslint-disable-next-line no-await-in-loop
+            await new Promise((res) => setTimeout(res, Math.round(delay)))
+            // eslint-disable-next-line no-await-in-loop
+            const result = await client
+              .from('gym_pilot_profile')
+              .upsert(profilePayload, { onConflict: 'user_id' })
+            profileError = result.error
+            attempts += 1
+          }
+        }
+
         if (!profileError) {
-          await saveSupabaseProfileRoles(newUserRoles, response.data.user.id)
+          await saveSupabaseProfileRoles(
+            newUserRoles,
+            resolvedNewUserId,
+            client,
+          )
         }
 
         if (
           profileError &&
-          /trainer_id|does not exist|column .* does not exist/i.test(
+          /trainer_id|roles|does not exist|column .* does not exist|schema cache/i.test(
             profileError.message,
           )
         ) {
@@ -141,7 +276,7 @@ export function AdminCreateUserPage() {
             .from('gym_pilot_profile')
             .upsert(
               {
-                user_id: response.data.user.id,
+                user_id: resolvedNewUserId,
                 friendly_name: resolvedDisplayName,
                 must_change_password: true,
               },
@@ -149,7 +284,11 @@ export function AdminCreateUserPage() {
             )
 
           if (!fallbackError) {
-            await saveSupabaseProfileRoles(newUserRoles, response.data.user.id)
+            await saveSupabaseProfileRoles(
+              newUserRoles,
+              resolvedNewUserId,
+              client,
+            )
           }
 
           if (fallbackError) {
@@ -168,8 +307,15 @@ export function AdminCreateUserPage() {
             '[AdminCreateUser] Could not create Supabase profile row',
             profileError,
           )
+
+          const profileErrorMessage = isSupabaseAuthCredentialError(
+            profileError.message,
+          )
+            ? 'Could not create the profile row: Your admin session has expired. Sign in again and retry.'
+            : `Could not create the profile row: ${profileError.message}`
+
           setStatusMessage({
-            text: `Could not create the profile row: ${profileError.message}`,
+            text: profileErrorMessage,
             tone: 'error',
           })
           return

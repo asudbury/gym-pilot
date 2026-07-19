@@ -131,7 +131,7 @@ export function WelcomePage() {
             type="button"
             onClick={handleAccept}
             disabled={isAccepting || hasAccepted}
-            className="cursor-pointer rounded-full border border-emerald-600 bg-emerald-600 px-4 py-2.5 text-sm font-semibold text-white transition hover:bg-emerald-700 disabled:cursor-not-allowed disabled:border-emerald-300 disabled:bg-emerald-300 disabled:text-emerald-950"
+            className="rounded-full border border-emerald-600 bg-emerald-600 px-4 py-2.5 text-sm font-semibold text-white transition hover:bg-emerald-700 disabled:cursor-not-allowed disabled:border-emerald-300 disabled:bg-emerald-300 disabled:text-emerald-950"
           >
             {isAccepting
               ? 'Saving…'
@@ -142,7 +142,7 @@ export function WelcomePage() {
           <button
             type="button"
             onClick={handleDecline}
-            className="cursor-pointer rounded-full border border-slate-300 bg-white px-4 py-2.5 text-sm font-medium text-slate-700 transition hover:bg-slate-50"
+            className="rounded-full border border-slate-300 bg-white px-4 py-2.5 text-sm font-medium text-slate-700 transition hover:bg-slate-50"
           >
             Decline and sign out
           </button>

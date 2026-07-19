@@ -15,6 +15,7 @@ export {
   changeSupabasePassword,
   signOutFromSupabase,
 } from './supabase'
+export { getSupabaseAdminClient } from './supabase'
 export {
   isSupabasePersistenceEnabled,
   loadSupabaseProfileSnapshot,

@@ -10,7 +10,6 @@ import {
   saveSupabaseGymName,
   saveSupabaseProfileLastLoggedIn,
   saveSupabaseProfileName,
-  saveSupabaseProfileTermsAcceptance,
   signOutFromSupabase,
 } from '@gym-pilot/shared'
 import type { User, UserRole } from '@gym-pilot/types'
@@ -73,7 +72,6 @@ export async function resolveSupabaseAuthUser(
     }
 
     await saveSupabaseProfileName(displayName)
-    await saveSupabaseProfileTermsAcceptance(false, supabaseUser.id)
     await saveSupabaseProfileLastLoggedIn(supabaseUser.id)
     await recordSupabaseUserActivity(
       'login',

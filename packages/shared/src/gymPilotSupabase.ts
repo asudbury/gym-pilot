@@ -1,3 +1,4 @@
+import type { SupabaseClient } from '@supabase/supabase-js'
 import type { Assignment, Plan, UserRole } from '@gym-pilot/types'
 import { getSupabaseClient, isSupabasePersistenceEnabled as isSupabasePersistenceEnabledBase } from './supabase'
 import { logger } from './logging'
@@ -626,8 +627,12 @@ export async function loadSupabaseProfileRoles(userId: string): Promise<UserRole
   return loadSupabaseUserRoles(client, userId)
 }
 
-export async function saveSupabaseProfileRoles(roles: Array<UserRole | string> | UserRole | null | undefined, userId?: string) {
-  const client = getSupabaseClient()
+export async function saveSupabaseProfileRoles(
+  roles: Array<UserRole | string> | UserRole | null | undefined,
+  userId?: string,
+  clientOverride?: SupabaseClient,
+) {
+  const client = clientOverride ?? getSupabaseClient()
 
   if (!client) {
     return

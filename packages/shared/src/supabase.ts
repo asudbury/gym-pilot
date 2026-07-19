@@ -24,7 +24,7 @@ function getSupabaseServiceRoleKey() {
   return import.meta.env?.VITE_SUPABASE_SERVICE_ROLE_KEY as string | undefined
 }
 
-function getSupabaseAdminClient() {
+export function getSupabaseAdminClient() {
   const url = getSupabaseUrl()
   const serviceRoleKey = getSupabaseServiceRoleKey()
 

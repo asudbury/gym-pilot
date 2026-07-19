@@ -222,14 +222,14 @@ export function AdminPreferencesPage() {
               <button
                 type="button"
                 onClick={() => setThemePreference('light')}
-                className={`cursor-pointer rounded-full px-4 py-2 text-sm font-medium transition ${themePreference === 'light' ? 'bg-slate-900 text-white' : 'bg-white text-slate-700 border border-slate-200'}`}
+                className={`rounded-full px-4 py-2 text-sm font-medium transition ${themePreference === 'light' ? 'bg-slate-900 text-white' : 'bg-white text-slate-700 border border-slate-200'}`}
               >
                 Light
               </button>
               <button
                 type="button"
                 onClick={() => setThemePreference('dark')}
-                className={`cursor-pointer rounded-full px-4 py-2 text-sm font-medium transition ${themePreference === 'dark' ? 'bg-slate-900 text-white' : 'bg-white text-slate-700 border border-slate-200'}`}
+                className={`rounded-full px-4 py-2 text-sm font-medium transition ${themePreference === 'dark' ? 'bg-slate-900 text-white' : 'bg-white text-slate-700 border border-slate-200'}`}
               >
                 Dark
               </button>

@@ -580,7 +580,7 @@ export function TimetablePage() {
                             key={option.kind}
                             type="button"
                             onClick={() => setAttendanceSelection(option.kind)}
-                            className={`cursor-pointer rounded-full border px-3 py-1.5 text-sm font-semibold transition ${isSelected ? 'border-sky-600 bg-sky-600 text-white shadow-sm' : 'border-slate-300 bg-white text-slate-700 hover:bg-slate-50'}`}
+                            className={`rounded-full border px-3 py-1.5 text-sm font-semibold transition ${isSelected ? 'border-sky-600 bg-sky-600 text-white shadow-sm' : 'border-slate-300 bg-white text-slate-700 hover:bg-slate-50'}`}
                           >
                             {option.label}
                           </button>
@@ -601,7 +601,7 @@ export function TimetablePage() {
                           key={value}
                           type="button"
                           onClick={() => setAttendanceRating(value)}
-                          className={`cursor-pointer rounded-full border px-3 py-1.5 text-sm font-semibold transition ${isSelected ? 'border-sky-600 bg-sky-600 text-white shadow-sm' : 'border-slate-300 bg-white text-slate-700 hover:bg-slate-50'}`}
+                          className={`rounded-full border px-3 py-1.5 text-sm font-semibold transition ${isSelected ? 'border-sky-600 bg-sky-600 text-white shadow-sm' : 'border-slate-300 bg-white text-slate-700 hover:bg-slate-50'}`}
                         >
                           {value} / 5
                         </button>
@@ -627,7 +627,7 @@ export function TimetablePage() {
                     type="button"
                     onClick={handleAttendanceSubmit}
                     disabled={attendanceSaving}
-                    className="cursor-pointer rounded-full border border-emerald-600 bg-emerald-600 px-3 py-1.5 text-sm font-semibold text-white shadow-sm transition hover:bg-emerald-700 disabled:cursor-not-allowed disabled:border-emerald-300 disabled:bg-emerald-300 disabled:text-emerald-950"
+                    className="rounded-full border border-emerald-600 bg-emerald-600 px-3 py-1.5 text-sm font-semibold text-white shadow-sm transition hover:bg-emerald-700 disabled:cursor-not-allowed disabled:border-emerald-300 disabled:bg-emerald-300 disabled:text-emerald-950"
                   >
                     {attendanceSaving ? 'Saving…' : 'Record attendance'}
                   </button>
@@ -640,7 +640,7 @@ export function TimetablePage() {
                       setAttendanceMessage(null)
                       setAttendanceSelection(null)
                     }}
-                    className="cursor-pointer rounded-full border border-slate-300 bg-white px-3 py-1.5 text-sm font-medium text-slate-700 transition hover:bg-slate-50"
+                    className="rounded-full border border-slate-300 bg-white px-3 py-1.5 text-sm font-medium text-slate-700 transition hover:bg-slate-50"
                   >
                     Cancel
                   </button>
@@ -693,7 +693,7 @@ export function TimetablePage() {
                     type="button"
                     onClick={handleRefreshTimetable}
                     disabled={isLoading}
-                    className="inline-flex cursor-pointer items-center rounded-full border border-slate-300 bg-white px-3 py-1.5 text-sm font-medium text-slate-700 transition hover:bg-slate-50 disabled:cursor-not-allowed disabled:bg-slate-100"
+                    className="inline-flex items-center rounded-full border border-slate-300 bg-white px-3 py-1.5 text-sm font-medium text-slate-700 transition hover:bg-slate-50 disabled:cursor-not-allowed disabled:bg-slate-100"
                   >
                     {isLoading ? 'Refreshing…' : 'Refresh'}
                   </button>
@@ -702,7 +702,7 @@ export function TimetablePage() {
                   <button
                     type="button"
                     onClick={() => setActiveDayKey('all')}
-                    className={`cursor-pointer rounded-full px-3 py-1.5 text-sm font-medium transition ${activeDayKey === 'all' ? 'bg-slate-900 text-white' : 'bg-white text-slate-700 hover:bg-slate-100'}`}
+                    className={`rounded-full px-3 py-1.5 text-sm font-medium transition ${activeDayKey === 'all' ? 'bg-slate-900 text-white' : 'bg-white text-slate-700 hover:bg-slate-100'}`}
                   >
                     All days
                   </button>
@@ -711,7 +711,7 @@ export function TimetablePage() {
                       key={dayGroup.dateKey}
                       type="button"
                       onClick={() => setActiveDayKey(dayGroup.dateKey)}
-                      className={`cursor-pointer rounded-full px-3 py-1.5 text-sm font-medium transition ${activeDayKey === dayGroup.dateKey ? 'bg-slate-900 text-white' : 'bg-white text-slate-700 hover:bg-slate-100'}`}
+                      className={`rounded-full px-3 py-1.5 text-sm font-medium transition ${activeDayKey === dayGroup.dateKey ? 'bg-slate-900 text-white' : 'bg-white text-slate-700 hover:bg-slate-100'}`}
                     >
                       {dayGroup.label}
                     </button>
@@ -849,7 +849,7 @@ export function TimetablePage() {
                                       `${session.classId ?? 'unknown'}-${session.startTime ?? 'unknown'}`
                                     ],
                               )}
-                              className="mt-3 inline-flex cursor-pointer items-center rounded-full border border-emerald-600 bg-emerald-600 px-3 py-1.5 text-sm font-semibold text-white shadow-sm transition hover:bg-emerald-700 hover:shadow-md disabled:cursor-not-allowed disabled:border-emerald-300 disabled:bg-emerald-300 disabled:text-emerald-950"
+                              className="mt-3 inline-flex items-center rounded-full border border-emerald-600 bg-emerald-600 px-3 py-1.5 text-sm font-semibold text-white shadow-sm transition hover:bg-emerald-700 hover:shadow-md disabled:cursor-not-allowed disabled:border-emerald-300 disabled:bg-emerald-300 disabled:text-emerald-950"
                             >
                               {Boolean(
                                 session.id
@@ -955,7 +955,7 @@ export function TimetablePage() {
                                       `${session.classId ?? 'unknown'}-${session.startTime ?? 'unknown'}`
                                     ],
                               )}
-                              className="mt-3 inline-flex cursor-pointer items-center rounded-full border border-emerald-600 bg-emerald-600 px-3 py-1.5 text-sm font-semibold text-white shadow-sm transition hover:bg-emerald-700 hover:shadow-md disabled:cursor-not-allowed disabled:border-emerald-300 disabled:bg-emerald-300 disabled:text-emerald-950"
+                              className="mt-3 inline-flex items-center rounded-full border border-emerald-600 bg-emerald-600 px-3 py-1.5 text-sm font-semibold text-white shadow-sm transition hover:bg-emerald-700 hover:shadow-md disabled:cursor-not-allowed disabled:border-emerald-300 disabled:bg-emerald-300 disabled:text-emerald-950"
                             >
                               {Boolean(
                                 session.id

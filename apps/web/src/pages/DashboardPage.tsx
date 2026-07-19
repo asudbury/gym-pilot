@@ -24,8 +24,27 @@ export function DashboardPage() {
     selectedRole && layouts.some((layout) => layout.key === selectedRole)
       ? selectedRole
       : viewModel.selectedLayoutKey
-  const selectedLayout =
-    layouts.find((layout) => layout.key === selectedLayoutKey) ?? layouts[0]
+
+  // If the user does not have a gym/club id (stored in `gymName`), hide
+  // timetable and attendance widgets which require a club context.
+  const canShowTimetable = Boolean(user?.gymName && user.gymName.trim())
+
+  const filteredLayouts = layouts.map((layout) => ({
+    ...layout,
+    widgets: layout.widgets.filter((widget) => {
+      if (canShowTimetable) return true
+      const path = widget.to ?? ''
+      if (path === '/timetable' || path === '/attendance-history') {
+        return false
+      }
+      return true
+    }),
+  }))
+
+  const filteredSelectedLayout =
+    filteredLayouts.find((layout) => layout.key === selectedLayoutKey) ??
+    filteredLayouts.find((layout) => layout.widgets.length > 0) ??
+    filteredLayouts[0]
 
   useEffect(() => {
     if (!layouts.some((layout) => layout.key === selectedRole)) {
@@ -57,33 +76,35 @@ export function DashboardPage() {
 
         {shouldShowRoleSelector ? (
           <div className="flex flex-wrap gap-2">
-            {layouts.map((layout) => {
-              const isActive = selectedLayoutKey === layout.key
-              return (
-                <button
-                  key={layout.key}
-                  type="button"
-                  onClick={() => setSelectedRole(layout.key)}
-                  className={`cursor-pointer rounded-full border px-3 py-1.5 text-sm font-medium transition ${isActive ? 'border-slate-900 bg-slate-900 text-white dark:border-slate-100 dark:bg-slate-100 dark:text-slate-950' : 'border-slate-300 bg-white text-slate-700 hover:bg-slate-100 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-200'}`}
-                >
-                  {layout.label}
-                </button>
-              )
-            })}
+            {filteredLayouts
+              .filter((l) => l.widgets.length > 0)
+              .map((layout) => {
+                const isActive = selectedLayoutKey === layout.key
+                return (
+                  <button
+                    key={layout.key}
+                    type="button"
+                    onClick={() => setSelectedRole(layout.key)}
+                    className={`rounded-full border px-3 py-1.5 text-sm font-medium transition ${isActive ? 'border-slate-900 bg-slate-900 text-white dark:border-slate-100 dark:bg-slate-100 dark:text-slate-950' : 'border-slate-300 bg-white text-slate-700 hover:bg-slate-100 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-200'}`}
+                  >
+                    {layout.label}
+                  </button>
+                )
+              })}
           </div>
         ) : null}
 
-        {selectedLayout ? (
+        {filteredSelectedLayout ? (
           <div className="space-y-2">
             <div className="space-y-1">
               <h2 className="text-xl font-semibold text-slate-900 dark:text-slate-100">
-                {selectedLayout.title}
+                {filteredSelectedLayout.title}
               </h2>
               <p className="text-sm text-slate-600 dark:text-slate-300">
-                {selectedLayout.description}
+                {filteredSelectedLayout.description}
               </p>
             </div>
-            {renderDashboardWidgets(layouts, selectedLayoutKey)}
+            {renderDashboardWidgets(filteredLayouts, selectedLayoutKey)}
           </div>
         ) : null}
       </PageCard>

@@ -389,7 +389,7 @@ export function PlanBuilderWorkspace({
                   key={exercise.id}
                   type="button"
                   onClick={() => onAddRow(exercise.id)}
-                  className="cursor-pointer rounded-full border px-3 py-1.5 text-sm font-medium"
+                  className="rounded-full border px-3 py-1.5 text-sm font-medium"
                 >
                   {formatLabel(exercise.name)}
                 </button>

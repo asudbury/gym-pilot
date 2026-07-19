@@ -3,7 +3,6 @@ import type { UserRole } from '@gym-pilot/types'
 export type CreateUserProfilePayload = {
   user_id: string
   friendly_name: string
-  roles: UserRole[]
   trainer_id: string | null
   gym_brand: string | null
   account_tier: string
@@ -33,7 +32,6 @@ export function buildCreateUserProfilePayload(values: {
   return {
     user_id: values.userId,
     friendly_name: values.displayName,
-    roles: values.roles,
     trainer_id: values.roles.includes('client')
       ? values.selectedTrainerId || null
       : null,

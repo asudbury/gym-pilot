@@ -20,7 +20,6 @@ describe('createUser domain helpers', () => {
     expect(payload).toMatchObject({
       user_id: 'u1',
       friendly_name: 'Ada',
-      roles: ['client'],
       trainer_id: 't1',
       account_tier: 'free',
       is_frozen: false,
