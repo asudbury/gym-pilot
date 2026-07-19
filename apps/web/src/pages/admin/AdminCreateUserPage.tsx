@@ -2,6 +2,7 @@ import { useMemo, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { Button } from '../../components/Button'
 import {
+  ensureAuthenticatedSupabaseSession,
   getSupabaseClient,
   logger,
   signUpWithPassword,
@@ -95,6 +96,25 @@ export function AdminCreateUserPage() {
       })
 
       if (client && response.data?.user?.id) {
+        const sessionResult = await ensureAuthenticatedSupabaseSession(
+          client,
+          newUserEmail.trim() || resolvedDisplayName,
+          tempPassword,
+          response,
+        )
+
+        if (sessionResult.error) {
+          logger.error(
+            '[AdminCreateUser] Could not establish Supabase auth session',
+            sessionResult.error,
+          )
+          setStatusMessage({
+            text: `Could not create the profile row: ${sessionResult.error.message}`,
+            tone: 'error',
+          })
+          return
+        }
+
         const profilePayload = buildCreateUserProfilePayload({
           userId: response.data.user.id,
           displayName: resolvedDisplayName,

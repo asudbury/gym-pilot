@@ -5,6 +5,7 @@ export * from './storage'
 export * from './schemaDocs'
 export * from './logging'
 export {
+  ensureAuthenticatedSupabaseSession,
   getSupabaseClient,
   signInWithGoogle,
   signInWithPassword,

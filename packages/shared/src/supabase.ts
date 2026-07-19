@@ -160,6 +160,41 @@ export async function signUpWithPassword(email: string, password: string, option
   })
 }
 
+export async function ensureAuthenticatedSupabaseSession(
+  client: SupabaseClient,
+  email: string,
+  password: string,
+  signUpResult: Awaited<ReturnType<SupabaseClient['auth']['signUp']>>,
+) {
+  if (signUpResult.error) {
+    return signUpResult
+  }
+
+  const session = signUpResult.data?.session
+
+  if (session) {
+    return signUpResult
+  }
+
+  logger.info('[Supabase] Signup did not return a session; signing in with password to establish an auth session')
+
+  const signInResult = await client.auth.signInWithPassword({
+    email: normalizeAuthEmail(email),
+    password,
+  })
+
+  if (signInResult.error || !signInResult.data?.session) {
+    return signInResult
+  }
+
+  await client.auth.setSession({
+    access_token: signInResult.data.session.access_token,
+    refresh_token: signInResult.data.session.refresh_token,
+  })
+
+  return signInResult
+}
+
 async function getCurrentSessionSupabaseUser(): Promise<SupabaseAuthUser | null> {
   const client = getSupabaseClient()
 
