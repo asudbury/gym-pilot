@@ -55,6 +55,7 @@ import {
   sortQuickLinks,
   type QuickLink,
 } from './features/favourites/domain/quickLinks'
+import { getInstallHint, isAppleDevice, isInstalledAsApp } from './utils/pwa'
 
 function ScrollToTop() {
   const { pathname } = useLocation()
@@ -98,6 +99,7 @@ function App() {
   })
 
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
+  const [showInstallHint, setShowInstallHint] = useState(false)
 
   useEffect(() => {
     window.sessionStorage.setItem(
@@ -132,6 +134,23 @@ function App() {
   useEffect(() => {
     setMobileMenuOpen(false)
   }, [pathname, user?.id, user?.email])
+
+  useEffect(() => {
+    const isApple = isAppleDevice()
+    const isInstalled = isInstalledAsApp()
+
+    if (isInstalled || (!isApple && !window.location.hostname.match(/^(localhost|127\.0\.0\.1|0\.0\.0\.0|::1)$/))) {
+      setShowInstallHint(false)
+      return
+    }
+
+    if (!isApple) {
+      setShowInstallHint(true)
+      return
+    }
+
+    setShowInstallHint(false)
+  }, [])
 
   const handleToggleFavoriteExercise = (exerciseId: string) => {
     logger.debug(`Toggling favorite exercise: ${exerciseId}`)
@@ -221,6 +240,20 @@ function App() {
   return (
     <div className="min-h-screen bg-slate-50 text-slate-900 transition-colors dark:bg-slate-950 dark:text-slate-100">
       <ScrollToTop />
+      {showInstallHint ? (
+        <div className="border-b border-slate-200 bg-slate-900 px-4 py-3 text-sm text-white">
+          <div className="mx-auto flex max-w-6xl items-center justify-between gap-3">
+            <span>{getInstallHint(true, false)}</span>
+            <button
+              type="button"
+              onClick={() => setShowInstallHint(false)}
+              className="rounded-full bg-white/15 px-3 py-1 text-xs font-semibold text-white transition hover:bg-white/25"
+            >
+              Close
+            </button>
+          </div>
+        </div>
+      ) : null}
       <Header
         appName={appName}
         appVersion={appVersion}
