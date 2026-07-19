@@ -3,6 +3,7 @@ export type DecorativeIconProps = {
     | 'spark'
     | 'dumbbell'
     | 'search'
+    | 'star'
     | 'chart'
     | 'lock'
     | 'grid'
@@ -18,6 +19,7 @@ export type DecorativeIconProps = {
     | 'key'
     | 'user'
   className?: string
+  withContainer?: boolean
 }
 
 const baseClasses =
@@ -26,8 +28,12 @@ const baseClasses =
 export function DecorativeIcon({
   icon = 'spark',
   className = '',
+  withContainer = false,
 }: DecorativeIconProps) {
-  const iconClassName = 'h-5 w-5'
+  const iconClassName = className || 'h-5 w-5'
+  const containerClassName = withContainer
+    ? `${baseClasses} ${className}`.trim()
+    : className
 
   const iconMarkup = {
     spark: (
@@ -70,6 +76,17 @@ export function DecorativeIcon({
       <svg viewBox="0 0 24 24" fill="none" className={iconClassName}>
         <circle cx="11" cy="11" r="5.5" stroke="currentColor" strokeWidth="1.8" />
         <path d="m15 15 4 4" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" />
+      </svg>
+    ),
+    star: (
+      <svg viewBox="0 0 24 24" fill="none" className={iconClassName}>
+        <path
+          d="M12 3.8 14.6 8.5l5 .7-3.8 3.7.9 5.1-4.7-2.5-4.7 2.5.9-5.1L4.4 9.2l5-.7L12 3.8Z"
+          stroke="currentColor"
+          strokeWidth="1.8"
+          strokeLinecap="round"
+          strokeLinejoin="round"
+        />
       </svg>
     ),
     chart: (
@@ -169,7 +186,7 @@ export function DecorativeIcon({
   }[icon]
 
   return (
-    <div className={`${baseClasses} ${className}`.trim()} aria-hidden="true">
+    <div className={containerClassName} aria-hidden="true">
       {iconMarkup}
     </div>
   )

@@ -13,6 +13,7 @@ export function NavigationMenuList({
           to={item.to}
           onClick={item.onClick}
           className={item.className}
+          icon={item.icon}
         >
           {item.label}
         </NavigationMenuItem>

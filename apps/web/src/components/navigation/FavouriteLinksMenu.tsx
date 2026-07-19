@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useState } from 'react'
 import { useLocation, useNavigate } from 'react-router-dom'
 import { getToneClass } from '../toneClasses'
+import { DecorativeIcon } from '../ui/DecorativeIcon'
 import { classNames, exercises, exercisesSchema } from '@gym-pilot/shared'
 import {
   getQuickLinkForPath,
@@ -249,7 +250,10 @@ export function FavouriteLinksMenu({
         onClick={() => setMenuOpen((current) => !current)}
         className={triggerClassName}
       >
-        <span>Favourites</span>
+        <span className="inline-flex items-center gap-2">
+          <DecorativeIcon icon="star" className="h-4 w-4" />
+          <span>Favourites</span>
+        </span>
       </button>
       {menuOpen && (
         <div

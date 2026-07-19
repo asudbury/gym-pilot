@@ -3,6 +3,7 @@ import { FavouriteLinksMenu } from './navigation/FavouriteLinksMenu'
 import { NavigationMenuList } from './navigation/NavigationMenuList'
 import type { NavigationMenuListItem } from '../utils/navigationUtils'
 import { ResponsiveVisibility } from './ResponsiveVisibility'
+import { DecorativeIcon } from './ui/DecorativeIcon'
 import { getToneClass } from './toneClasses'
 
 type HeaderProps = {
@@ -110,10 +111,11 @@ export function Header({
                     onClick={handleAuthAction}
                     className={getToneClass(
                       'default',
-                      'px-4 py-2 text-sm font-medium',
+                      'inline-flex items-center gap-2 px-4 py-2 text-sm font-medium',
                     )}
                   >
-                    {user ? 'Log out' : 'Login'}
+                    <DecorativeIcon icon={user ? 'lock' : 'user'} className="h-4 w-4" />
+                    <span>{user ? 'Log out' : 'Login'}</span>
                   </button>
                 ) : null}
               </div>
@@ -152,9 +154,10 @@ export function Header({
                         <button
                           type="button"
                           onClick={handleAuthAction}
-                          className="rounded-xl px-3 py-2 text-left text-sm font-medium text-slate-700 transition hover:bg-slate-50"
+                          className="inline-flex items-center gap-2 rounded-xl px-3 py-2 text-left text-sm font-medium text-slate-700 transition hover:bg-slate-50"
                         >
-                          {user ? 'Logout' : 'Login'}
+                          <DecorativeIcon icon={user ? 'lock' : 'user'} className="h-4 w-4" />
+                          <span>{user ? 'Logout' : 'Login'}</span>
                         </button>
                       ) : null}
                     </div>
@@ -196,9 +199,10 @@ export function Header({
                         <button
                           type="button"
                           onClick={handleAuthAction}
-                          className="rounded-xl px-3 py-2 text-left text-sm font-medium text-slate-700 transition hover:bg-slate-50"
+                          className="inline-flex items-center gap-2 rounded-xl px-3 py-2 text-left text-sm font-medium text-slate-700 transition hover:bg-slate-50"
                         >
-                          {user ? 'Logout' : 'Login'}
+                          <DecorativeIcon icon={user ? 'lock' : 'user'} className="h-4 w-4" />
+                          <span>{user ? 'Logout' : 'Login'}</span>
                         </button>
                       ) : null}
                     </div>

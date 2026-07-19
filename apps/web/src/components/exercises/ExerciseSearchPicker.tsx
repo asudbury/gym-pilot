@@ -46,14 +46,14 @@ export function ExerciseSearchField({
       >
         {label}
       </label>
-      <div className="relative flex-1">
+      <div className="relative w-full">
         <input
           id={id}
           type="text"
           value={value}
           onChange={(event) => onChange?.(event.target.value)}
           placeholder={placeholder}
-          className={`${appTokens.input} pr-70 outline-none ring-0 focus:border-slate-400`}
+          className={`${appTokens.input} pr-20 outline-none ring-0 focus:border-slate-400 sm:pr-24`}
         />
         {value && (
           <button

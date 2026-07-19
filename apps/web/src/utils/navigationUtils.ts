@@ -1,4 +1,5 @@
 import type { ReactNode } from 'react'
+import type { DecorativeIconProps } from '../components/ui/DecorativeIcon'
 import { getExercisePath, getExerciseSlug } from './exerciseRouteUtils'
 import { exercises, exercisesSchema } from '@gym-pilot/shared'
 
@@ -7,6 +8,7 @@ export type NavigationMenuItemProps = {
   children: ReactNode
   onClick?: () => void
   className?: string
+  icon?: DecorativeIconProps['icon']
 }
 
 export type NavigationMenuListItem = {
@@ -14,6 +16,7 @@ export type NavigationMenuListItem = {
   label: ReactNode
   onClick?: () => void
   className?: string
+  icon?: DecorativeIconProps['icon']
 }
 
 export type NavigationMenuListProps = {
@@ -41,24 +44,28 @@ export function buildNavigationMenuItems({
           label: 'Exercises',
           onClick: onItemClick,
           className: itemClassName,
+          icon: 'dumbbell',
         },
         {
           to: '/plans',
           label: 'Plans',
           onClick: onItemClick,
           className: itemClassName,
+          icon: 'clipboard',
         },
         {
           to: '/assignments',
           label: 'Assignments',
           onClick: onItemClick,
           className: itemClassName,
+          icon: 'tasks',
         },
         {
           to: '/timetable',
           label: 'Timetable',
           onClick: onItemClick,
           className: itemClassName,
+          icon: 'calendar',
         },
       ]
     : []
@@ -70,6 +77,7 @@ export function buildNavigationMenuItems({
           label: 'Admin',
           onClick: onItemClick,
           className: itemClassName,
+          icon: 'settings',
         },
       ]
     : []
@@ -82,6 +90,7 @@ export function buildNavigationMenuItems({
       label: 'Help',
       onClick: onItemClick,
       className: itemClassName,
+      icon: 'help',
     },
   ]
 }
