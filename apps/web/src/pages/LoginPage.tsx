@@ -3,6 +3,7 @@ import { useNavigate, useLocation, useSearchParams } from 'react-router-dom'
 import {
   loadSupabaseProfileAccessState,
   loadSupabaseProfileFlag,
+  loadSupabaseProfileTermsAcceptance,
   logger,
   resetSupabasePassword,
   signInWithPassword,
@@ -111,6 +112,19 @@ export function LoginPage() {
     const requiresPasswordChange = await loadSupabaseProfileFlag(
       'must_change_password',
     )
+
+    const hasAcceptedTerms = await loadSupabaseProfileTermsAcceptance()
+
+    if (!hasAcceptedTerms) {
+      window.dispatchEvent(new Event('gym-pilot-auth-updated'))
+
+      navigate('/welcome', {
+        replace: true,
+        state: { from },
+      })
+
+      return
+    }
 
     if (requiresPasswordChange) {
       setAuthMessage('Please set a new password to continue.')

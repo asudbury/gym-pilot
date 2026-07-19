@@ -19,6 +19,8 @@ type SupabaseProfileSnapshot = {
   lastLoggedInAt: string | null
   previousLastLoggedInAt: string | null
   mustChangePassword: boolean
+  termsAccepted: boolean
+  termsAcceptedAt: string | null
   roles: UserRole[]
   trainerId: string | null
 }
@@ -132,6 +134,8 @@ function createEmptyProfileSnapshot(): SupabaseProfileSnapshot {
     lastLoggedInAt: null,
     previousLastLoggedInAt: null,
     mustChangePassword: false,
+    termsAccepted: false,
+    termsAcceptedAt: null,
     roles: [],
     trainerId: null,
   }
@@ -254,12 +258,12 @@ export async function loadSupabaseProfileSnapshot(userId?: string): Promise<Supa
   const requestPromise = (async () => {
     const { data, error } = await client
       .from('gym_pilot_profile')
-      .select('friendly_name, application_name, gym_brand, gym_name, gym_club_id, account_tier, access_ends_at, is_frozen, last_logged_in_at, previous_last_logged_in_at, roles, trainer_id, must_change_password')
+      .select('friendly_name, application_name, gym_brand, gym_name, gym_club_id, account_tier, access_ends_at, is_frozen, last_logged_in_at, previous_last_logged_in_at, roles, trainer_id, must_change_password, terms_accepted, terms_accepted_at')
       .eq('user_id', resolvedUserId)
       .maybeSingle()
 
     if (error) {
-      if (isMissingProfileColumnError(error, ['friendly_name', 'application_name', 'gym_brand', 'gym_club_id', 'last_logged_in_at', 'previous_last_logged_in_at', 'roles', 'trainer_id', 'must_change_password'])) {
+      if (isMissingProfileColumnError(error, ['friendly_name', 'application_name', 'gym_brand', 'gym_club_id', 'last_logged_in_at', 'previous_last_logged_in_at', 'roles', 'trainer_id', 'must_change_password', 'terms_accepted', 'terms_accepted_at'])) {
         return createEmptyProfileSnapshot()
       }
 
@@ -286,6 +290,8 @@ export async function loadSupabaseProfileSnapshot(userId?: string): Promise<Supa
       lastLoggedInAt: typeof profileData?.last_logged_in_at === 'string' ? profileData.last_logged_in_at : null,
       previousLastLoggedInAt: typeof profileData?.previous_last_logged_in_at === 'string' ? profileData.previous_last_logged_in_at : null,
       mustChangePassword: Boolean(profileData?.must_change_password),
+      termsAccepted: Boolean(profileData?.terms_accepted),
+      termsAcceptedAt: typeof profileData?.terms_accepted_at === 'string' ? profileData.terms_accepted_at : null,
       roles: normalizeProfileRoles(profileData?.roles),
       trainerId: typeof profileData?.trainer_id === 'string' ? profileData.trainer_id : null,
     }
@@ -449,6 +455,19 @@ export async function loadSupabaseProfileFlag(flag: 'must_change_password', user
 
   const snapshot = await loadSupabaseProfileSnapshot(userId)
   return snapshot.mustChangePassword
+}
+
+export async function loadSupabaseProfileTermsAcceptance(userId?: string): Promise<boolean> {
+  const snapshot = await loadSupabaseProfileSnapshot(userId)
+  return snapshot.termsAccepted
+}
+
+export function buildSupabaseProfileTermsAcceptancePayload(userId: string, accepted: boolean, acceptedAt?: string | null) {
+  return {
+    user_id: userId,
+    terms_accepted: Boolean(accepted),
+    terms_accepted_at: accepted ? acceptedAt ?? new Date().toISOString() : null,
+  }
 }
 
 function invalidateSupabaseProfileCache(userId?: string) {
@@ -619,6 +638,34 @@ export async function saveSupabaseProfileFlag(flag: 'must_change_password', valu
 
   if (error) {
     logger.error('[Supabase] Could not save profile flag', error)
+    return
+  }
+
+  invalidateSupabaseProfileCache(resolvedUserId)
+}
+
+export async function saveSupabaseProfileTermsAcceptance(accepted: boolean, userId?: string) {
+  const client = getSupabaseClient()
+
+  if (!client) {
+    return
+  }
+
+  const resolvedUserId = userId || await getAuthenticatedUserId(client)
+
+  if (!resolvedUserId) {
+    return
+  }
+
+  const payload = buildSupabaseProfileTermsAcceptancePayload(resolvedUserId, accepted)
+  const { error } = await client.from('gym_pilot_profile').upsert(payload, { onConflict: 'user_id' })
+
+  if (error) {
+    if (isMissingProfileColumnError(error, ['terms_accepted', 'terms_accepted_at'])) {
+      return
+    }
+
+    logger.error('[Supabase] Could not save terms acceptance', error)
     return
   }
 

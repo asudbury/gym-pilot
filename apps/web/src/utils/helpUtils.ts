@@ -48,6 +48,14 @@ export const helpSections = [
     ],
   },
   {
+    title: 'Terms and conditions',
+    items: [
+      'Before you continue into protected parts of the app, you will be asked to review and accept the terms and conditions.',
+      'Your acceptance is stored on your profile so you do not need to repeat the prompt on every visit.',
+      'If you decline, the welcome screen remains in place until you choose to continue.',
+    ],
+  },
+  {
     title: 'Admin tools',
     items: [
       'Use Admin to manage users, create new accounts, review stored data, and adjust preferences.',

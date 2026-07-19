@@ -39,6 +39,8 @@ create table if not exists public.gym_pilot_profile (
   user_id uuid references auth.users(id) on delete cascade not null unique,
   friendly_name text,
   must_change_password boolean not null default false,
+  terms_accepted boolean not null default false,
+  terms_accepted_at timestamptz,
   roles jsonb not null default '[]'::jsonb,
   trainer_id uuid,
   application_name text,

@@ -16,6 +16,7 @@ Gym Pilot is a monorepo for a fitness planning workspace with a React web app, s
 - Export plan tabs to Excel workbooks using ExcelJS
 - Persist data locally in the browser and optionally sync to Supabase
 - Support authenticated profile and access state flows
+- Guide new users through a welcome step that records terms-and-conditions acceptance before access is granted
 
 ## Project structure
 

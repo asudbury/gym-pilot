@@ -63,6 +63,8 @@ Stores optional profile metadata for the authenticated Supabase user.
 - id: string
 - user_id: string
 - friendly_name: string | null
+- terms_accepted: boolean
+- terms_accepted_at: string | null
 - created_at: string
 - updated_at: string
 
@@ -102,7 +104,7 @@ The shared Supabase helpers in [packages/shared/src/gymPilotSupabase.ts](package
 | Area | Current call patterns | Tables / resources |
 | --- | --- | --- |
 | Auth and session | `client.auth.getSession()`, `client.auth.signInWithOAuth()`, `client.auth.signInWithPassword()`, `client.auth.signUp()`, `client.auth.resetPasswordForEmail()`, `client.auth.updateUser()`, `client.auth.signOut()` | Supabase Auth users and session state |
-| Profiles and settings | `loadSupabaseProfileSnapshot()`, `saveSupabaseProfileName()`, `saveSupabaseApplicationName()`, `saveSupabaseGymBrand()`, `saveSupabaseGymName()`, `saveSupabaseProfileAccessSettings()`, `saveSupabaseProfileFlag()`, `saveSupabaseProfileLastLoggedIn()` | `gym_pilot_profile` |
+| Profiles and settings | `loadSupabaseProfileSnapshot()`, `saveSupabaseProfileName()`, `saveSupabaseApplicationName()`, `saveSupabaseGymBrand()`, `saveSupabaseGymName()`, `saveSupabaseProfileAccessSettings()`, `saveSupabaseProfileFlag()`, `saveSupabaseProfileLastLoggedIn()`, `loadSupabaseProfileTermsAcceptance()`, `saveSupabaseProfileTermsAcceptance()` | `gym_pilot_profile` |
 | Key/value persistence | `loadSupabaseJsonRecord()`, `saveSupabaseJsonRecord()`, `removeSupabaseJsonRecord()` | `gym_pilot_app_state` plus table-specific rows for plans, assignments, favourites, and app state |
 | Plans and assignments | `select`, `insert`, `upsert`, `delete` against remote rows | `gym_pilot_plan`, `gym_pilot_assignment` |
 | Favourites and folders | `select`, `insert`, `upsert`, `delete` against remote rows | `gym_pilot_favourite_folder`, `gym_pilot_favourite` |
@@ -143,6 +145,8 @@ erDiagram
         text account_tier
         timestamptz access_ends_at
         boolean is_frozen
+        boolean terms_accepted
+        timestamptz terms_accepted_at
         timestamptz last_logged_in_at
         timestamptz previous_last_logged_in_at
         timestamptz created_at
@@ -215,7 +219,7 @@ erDiagram
 
 ### Notes
 - a shared app state table for user-scoped key/value persistence
-- a profile table for friendly names, gym brand/club metadata, and optional user settings
+- a profile table for friendly names, gym brand/club metadata, optional user settings, and the terms-and-conditions acceptance state used by the welcome flow
 - a favourites table plus folders for saved exercise and link shortcuts
 - a plans table for plan templates
 - an assignments table for user-specific plan assignments

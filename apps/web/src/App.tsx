@@ -28,6 +28,7 @@ import { formatLabel } from './utils/formatUtils'
 import { RequireAuth } from './auth/RequireAuth'
 import { LoginPage } from './pages/LoginPage'
 import { ResetPasswordPage } from './pages/ResetPasswordPage'
+import { WelcomePage } from './pages/WelcomePage'
 import { useAuth } from './auth/AuthContext'
 import { AdminPage } from './pages/admin/AdminPage'
 import { AdminUsersPage } from './pages/admin/AdminUsersPage'
@@ -285,12 +286,13 @@ function App() {
       <Routes>
         <Route path="/login" element={<LoginPage />} />
         <Route path="/reset-password" element={<ResetPasswordPage />} />
+        <Route path="/welcome" element={<WelcomePage />} />
         <Route path="/auth/callback" element={<LoginPage />} />
         <Route
           path="/"
           element={
             user ? (
-              <DashboardPage userName={user.name || user.email || null} />
+              <DashboardPage />
             ) : (
               <HomePage
                 filters={homeFilters}

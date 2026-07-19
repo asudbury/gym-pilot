@@ -1,5 +1,7 @@
+import { useEffect, useState } from 'react'
 import { Navigate, Outlet, useLocation } from 'react-router-dom'
 import type { UserRole } from '@gym-pilot/types'
+import { loadSupabaseProfileTermsAcceptance } from '@gym-pilot/shared'
 import { useAuth } from './AuthContext'
 import { isPublicRoute } from './publicAccess'
 import { AUTH_PROTECTION_ENABLED } from './config'
@@ -15,6 +17,44 @@ export function RequireAuth({
 }: RequireAuthProps) {
   const { isAuthenticated, hasAccess, user } = useAuth()
   const location = useLocation()
+  const [termsAccepted, setTermsAccepted] = useState<boolean | null>(null)
+  const [isCheckingTerms, setIsCheckingTerms] = useState(false)
+
+  useEffect(() => {
+    if (!user?.id || location.pathname === '/welcome') {
+      setTermsAccepted(null)
+      setIsCheckingTerms(false)
+      return
+    }
+
+    let isActive = true
+
+    setIsCheckingTerms(true)
+
+    void (async () => {
+      try {
+        const accepted = await loadSupabaseProfileTermsAcceptance(user.id)
+
+        if (!isActive) {
+          return
+        }
+
+        setTermsAccepted(accepted)
+      } catch {
+        if (isActive) {
+          setTermsAccepted(false)
+        }
+      } finally {
+        if (isActive) {
+          setIsCheckingTerms(false)
+        }
+      }
+    })()
+
+    return () => {
+      isActive = false
+    }
+  }, [location.pathname, user?.id])
 
   if (!AUTH_PROTECTION_ENABLED) {
     return <Outlet />
@@ -26,6 +66,22 @@ export function RequireAuth({
 
   if (!isAuthenticated) {
     return <Navigate to="/login" replace state={{ from: location }} />
+  }
+
+  if (user?.id && location.pathname !== '/welcome' && !isCheckingTerms) {
+    if (termsAccepted === false) {
+      const returnTo = `${location.pathname}${location.search}`
+      return (
+        <Navigate
+          to={`/welcome?returnTo=${encodeURIComponent(returnTo)}`}
+          replace
+        />
+      )
+    }
+  }
+
+  if (user?.id && isCheckingTerms) {
+    return null
   }
 
   if (requiredRole && !hasAccess(requiredRole)) {
