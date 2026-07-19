@@ -98,9 +98,6 @@ export function AdminCreateUserPage() {
             }@gym-pilot.local`
 
         try {
-          // use the admin API to create the user without affecting session
-          // state in the browser
-          // @ts-expect-error - admin typings vary by supabase-js version
           const { data, error } =
             await serviceAdminClient.auth.admin.createUser({
               email: normalizedEmail,
@@ -187,8 +184,6 @@ export function AdminCreateUserPage() {
         let attempts = 0
         while (!seen && attempts < 10) {
           try {
-            // admin.getUserById may vary by supabase-js version; try common APIs
-            // @ts-expect-error
             const lookup =
               await serviceAdminClient.auth.admin.getUserById(createdUserId)
             // @ts-expect-error
@@ -196,8 +191,6 @@ export function AdminCreateUserPage() {
               seen = true
               break
             }
-            // some SDKs return { data: { user } }
-            // @ts-expect-error
             if (
               lookup?.data &&
               Array.isArray(lookup.data) &&
