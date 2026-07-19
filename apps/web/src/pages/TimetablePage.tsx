@@ -163,8 +163,12 @@ export function TimetablePage() {
   const [attendanceNotes, setAttendanceNotes] = useState('')
   const [attendanceRating, setAttendanceRating] = useState<number | null>(null)
   const [attendanceSaving, setAttendanceSaving] = useState(false)
-  const [attendanceMessage, setAttendanceMessage] = useState<string | null>(null)
-  const [attendanceSelection, setAttendanceSelection] = useState<'attended' | 'taught' | null>(null)
+  const [attendanceMessage, setAttendanceMessage] = useState<string | null>(
+    null,
+  )
+  const [attendanceSelection, setAttendanceSelection] = useState<
+    'attended' | 'taught' | null
+  >(null)
   const [refreshVersion, setRefreshVersion] = useState(0)
   const [lastRefreshedAt, setLastRefreshedAt] = useState<string | null>(null)
 
@@ -455,7 +459,9 @@ export function TimetablePage() {
       setAttendanceRating(null)
       setAttendanceSelection(null)
     } else {
-      setAttendanceMessage(result.error?.message ?? 'Could not save attendance.')
+      setAttendanceMessage(
+        result.error?.message ?? 'Could not save attendance.',
+      )
     }
 
     setAttendanceSaving(false)
@@ -492,7 +498,8 @@ export function TimetablePage() {
               <div className="flex items-start justify-between gap-2">
                 <div>
                   <p className="text-sm font-semibold text-slate-900">
-                    {attendancePendingSession.className ?? `Class ${attendancePendingSession.classId ?? 'Unknown'}`}
+                    {attendancePendingSession.className ??
+                      `Class ${attendancePendingSession.classId ?? 'Unknown'}`}
                   </p>
                   <p className="text-sm text-slate-600">
                     {attendancePendingSession.room ?? 'Room TBD'}
@@ -519,15 +526,21 @@ export function TimetablePage() {
                 </p>
                 <p>
                   <span className="font-medium text-slate-700">Time:</span>{' '}
-                  {formatTimetableTimeLabel(attendancePendingSession.startTime)} –{' '}
-                  {formatTimetableTimeLabel(attendancePendingSession.endTime)}
+                  {formatTimetableTimeLabel(attendancePendingSession.startTime)}{' '}
+                  – {formatTimetableTimeLabel(attendancePendingSession.endTime)}
                 </p>
                 <p>
-                  <span className="font-medium text-slate-700">Instructor:</span>{' '}
-                  {attendancePendingSession.instructorName ?? attendancePendingSession.instructorId ?? 'TBC'}
+                  <span className="font-medium text-slate-700">
+                    Instructor:
+                  </span>{' '}
+                  {attendancePendingSession.instructorName ??
+                    attendancePendingSession.instructorId ??
+                    'TBC'}
                 </p>
                 <p>
-                  <span className="font-medium text-slate-700">Availability:</span>{' '}
+                  <span className="font-medium text-slate-700">
+                    Availability:
+                  </span>{' '}
                   {formatTimetableAvailability(attendancePendingSession)}
                 </p>
               </div>
@@ -567,7 +580,9 @@ export function TimetablePage() {
                   </div>
                 ) : null}
                 <div className="flex flex-col gap-2">
-                  <span className="text-sm font-medium text-slate-700">Rating</span>
+                  <span className="text-sm font-medium text-slate-700">
+                    Rating
+                  </span>
                   <div className="flex flex-wrap gap-2">
                     {[1, 2, 3, 4, 5].map((value) => {
                       const isSelected = attendanceRating === value
@@ -660,7 +675,9 @@ export function TimetablePage() {
               <div className="flex flex-wrap items-center justify-between gap-3 rounded-2xl border border-slate-200 bg-slate-50 p-3">
                 <div className="flex flex-wrap items-center gap-2">
                   <div className="text-sm text-slate-500">
-                    {lastRefreshedAt ? `Last refreshed: ${lastRefreshedAt}` : 'Refresh to update the latest timetable data.'}
+                    {lastRefreshedAt
+                      ? `Last refreshed: ${lastRefreshedAt}`
+                      : 'Refresh to update the latest timetable data.'}
                   </div>
                   <button
                     type="button"
