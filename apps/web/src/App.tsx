@@ -6,7 +6,6 @@ import {
   useLocation,
   useNavigate,
 } from 'react-router-dom'
-import webPackageJson from '../package.json'
 import {
   exercises,
   exercisesSchema,
@@ -72,8 +71,7 @@ function App() {
   const navigate = useNavigate()
   const { users, visiblePlans, visibleAssignments } = usePlan()
   const SHOW_AUTH_BUTTON = true
-  const { user, logout, showVersion } = useAuth()
-  const appVersion = webPackageJson.version || '0.0.0'
+  const { user, logout } = useAuth()
   const { favorites, folders, setFavorites, setFolders } =
     useFavouritesFeature()
 
@@ -209,16 +207,22 @@ function App() {
           assignedTrainer.name?.trim())
       ? assignedTrainer.applicationName?.trim() || assignedTrainer.name?.trim()
       : 'Gym-Pilot'
+  const hasTimetableAccess = Boolean(
+    user?.gymName?.trim() && /^\d+$/.test(user.gymName.trim()),
+  )
+
   const desktopMenuItems = buildNavigationMenuItems({
     plansCount,
     assignmentsCount: visibleAssignments.length,
     isAuthenticated: Boolean(user),
+    showTimetable: hasTimetableAccess,
     itemClassName: getToneClass('default', 'px-4 py-2 text-sm font-medium'),
   })
   const tabletMenuItems = buildNavigationMenuItems({
     plansCount,
     assignmentsCount: visibleAssignments.length,
     isAuthenticated: Boolean(user),
+    showTimetable: hasTimetableAccess,
     onItemClick: () => setMobileMenuOpen(false),
     itemClassName:
       'rounded-xl px-3 py-2 text-sm font-medium text-slate-700 transition hover:bg-slate-50',
@@ -227,6 +231,7 @@ function App() {
     plansCount,
     assignmentsCount: visibleAssignments.length,
     isAuthenticated: Boolean(user),
+    showTimetable: hasTimetableAccess,
     onItemClick: () => setMobileMenuOpen(false),
     itemClassName:
       'rounded-xl px-3 py-2 text-sm font-medium text-slate-700 transition hover:bg-slate-50',
@@ -251,8 +256,6 @@ function App() {
       ) : null}
       <Header
         appName={appName}
-        appVersion={appVersion}
-        showVersion={showVersion}
         favorites={favorites}
         homeFilters={homeFilters}
         desktopMenuItems={desktopMenuItems}

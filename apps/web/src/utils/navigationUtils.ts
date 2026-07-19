@@ -30,12 +30,14 @@ export type BuildNavigationMenuItemsOptions = {
   onItemClick?: () => void
   itemClassName?: string
   isAuthenticated?: boolean
+  showTimetable?: boolean
 }
 
 export function buildNavigationMenuItems({
   onItemClick,
   itemClassName,
   isAuthenticated = false,
+  showTimetable = true,
 }: BuildNavigationMenuItemsOptions): NavigationMenuListItem[] {
   const protectedItems: NavigationMenuListItem[] = isAuthenticated
     ? [
@@ -60,13 +62,17 @@ export function buildNavigationMenuItems({
           className: itemClassName,
           icon: 'tasks',
         },
-        {
-          to: '/timetable',
-          label: 'Timetable',
-          onClick: onItemClick,
-          className: itemClassName,
-          icon: 'calendar',
-        },
+        ...(showTimetable
+          ? [
+              {
+                to: '/timetable',
+                label: 'Timetable',
+                onClick: onItemClick,
+                className: itemClassName,
+                icon: 'calendar' as const,
+              },
+            ]
+          : []),
       ]
     : []
 

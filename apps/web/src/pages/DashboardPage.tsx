@@ -51,7 +51,9 @@ export function DashboardPage({ userName }: DashboardPageProps) {
             </div>
             <div className="flex flex-col items-start">
               <h1 className="text-2xl font-semibold tracking-tight text-slate-900 sm:text-3xl dark:text-slate-100">
-                {displayName ? `Welcome back, ${displayName}` : 'Welcome back to Gym-Pilot'}
+                {displayName
+                  ? `Welcome back, ${displayName}`
+                  : 'Welcome back to Gym-Pilot'}
               </h1>
               {previousLoginTimestamp ? (
                 <p className="max-w-2xl text-sm text-slate-500 dark:text-slate-400">

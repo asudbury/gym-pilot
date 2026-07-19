@@ -24,8 +24,6 @@ export function AdminPreferencesPage() {
     updateGymName,
     themePreference,
     setThemePreference,
-    showVersion,
-    setShowVersion,
   } = useAuth()
   const navigate = useNavigate()
   const [friendlyName, setFriendlyName] = useState(user?.name ?? '')
@@ -238,28 +236,6 @@ export function AdminPreferencesPage() {
             </div>
           </label>
 
-          <label className="flex flex-col gap-2 text-sm font-medium text-slate-700">
-            <p>Show app version</p>
-            <p className="mt-1 text-sm text-slate-400">
-              Toggle whether the version badge is shown in the header.
-            </p>
-            <div className="mt-4 flex gap-3">
-              <button
-                type="button"
-                onClick={() => setShowVersion(true)}
-                className={`cursor-pointer rounded-full px-4 py-2 text-sm font-medium transition ${showVersion ? 'bg-slate-900 text-white' : 'bg-white text-slate-700 border border-slate-200'}`}
-              >
-                Show
-              </button>
-              <button
-                type="button"
-                onClick={() => setShowVersion(false)}
-                className={`cursor-pointer rounded-full px-4 py-2 text-sm font-medium transition ${!showVersion ? 'bg-slate-900 text-white' : 'bg-white text-slate-700 border border-slate-200'}`}
-              >
-                Hide
-              </button>
-            </div>
-          </label>
           <button
             type="submit"
             disabled={isSaving}

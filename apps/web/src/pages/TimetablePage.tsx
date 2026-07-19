@@ -8,6 +8,7 @@ import {
   formatTimetableDateLabel,
   formatTimetableTimeLabel,
   isPastTimetableSession,
+  resolveNextActiveDayKey,
   resolveTimetableHeaderViewModel,
   resolveTimetableViewModel,
   type TimetableSession,
@@ -168,7 +169,7 @@ export function TimetablePage() {
 
   const clubId = useMemo(() => {
     const storedClubId = user?.gymName?.trim() ?? ''
-    return /^\d+$/.test(storedClubId) ? storedClubId : '60'
+    return /^\d+$/.test(storedClubId) ? storedClubId : null
   }, [user?.gymName])
 
   useEffect(() => {
@@ -200,15 +201,28 @@ export function TimetablePage() {
   useEffect(() => {
     let cancelled = false
 
+    if (!clubId) {
+      setSessions([])
+      setIsLoading(false)
+      setErrorMessage(null)
+      setActiveInstructor('all')
+      setActiveClassName('all')
+      return () => {
+        cancelled = true
+      }
+    }
+
+    const activeClubId = clubId
+
     async function loadTimetable() {
       setIsLoading(true)
       setErrorMessage(null)
 
       try {
         const timetableUrl = new URL(TIMETABLE_ENDPOINT)
-        timetableUrl.searchParams.set('clubid', clubId)
+        timetableUrl.searchParams.set('clubid', activeClubId)
 
-        const cachedRequest = timetableCache.get(clubId)
+        const cachedRequest = timetableCache.get(activeClubId)
         const request =
           cachedRequest ??
           (async () => {
@@ -248,7 +262,7 @@ export function TimetablePage() {
           })()
 
         if (!cachedRequest) {
-          timetableCache.set(clubId, request)
+          timetableCache.set(activeClubId, request)
         }
 
         const nextSessions = await request
@@ -298,16 +312,9 @@ export function TimetablePage() {
       return
     }
 
-    setActiveDayKey((current) => {
-      if (
-        current &&
-        groupedSessions.some((dayGroup) => dayGroup.dateKey === current)
-      ) {
-        return current
-      }
-
-      return groupedSessions[0]?.dateKey ?? ''
-    })
+    setActiveDayKey((current) =>
+      resolveNextActiveDayKey(current, groupedSessions),
+    )
   }, [groupedSessions])
 
   const activeDayGroup =
@@ -319,13 +326,30 @@ export function TimetablePage() {
         groupedSessions[0] ??
         null)
 
+  if (!clubId) {
+    return (
+      <PageLayout className="max-w-6xl">
+        <PageCardLayout
+          title={headerViewModel.title}
+          subtitle={headerViewModel.subtitle}
+          description={headerViewModel.description}
+          icon="calendar"
+        >
+          <div className="rounded-2xl border border-amber-200 bg-amber-50 p-4 text-sm text-amber-800">
+            Select a valid gym club to view the timetable.
+          </div>
+        </PageCardLayout>
+      </PageLayout>
+    )
+  }
+
   return (
     <PageLayout className="max-w-6xl">
       <PageCardLayout
         title={headerViewModel.title}
         subtitle={headerViewModel.subtitle}
         description={headerViewModel.description}
-        icon={headerViewModel.showIcon ? 'calendar' : null}
+        icon="calendar"
       >
         <div className="space-y-6">
           {isLoading ? (
@@ -347,235 +371,237 @@ export function TimetablePage() {
           ) : null}
 
           {!isLoading && !errorMessage && groupedSessions.length > 0 ? (
-          <div className="space-y-4">
-            <div className="flex flex-wrap items-center justify-between gap-3 rounded-2xl border border-slate-200 bg-slate-50 p-3">
-              <div className="flex flex-wrap gap-2">
-                <button
-                  type="button"
-                  onClick={() => setActiveDayKey('all')}
-                  className={`cursor-pointer rounded-full px-3 py-1.5 text-sm font-medium transition ${activeDayKey === 'all' ? 'bg-slate-900 text-white' : 'bg-white text-slate-700 hover:bg-slate-100'}`}
-                >
-                  All days
-                </button>
-                {groupedSessions.map((dayGroup) => (
+            <div className="space-y-4">
+              <div className="flex flex-wrap items-center justify-between gap-3 rounded-2xl border border-slate-200 bg-slate-50 p-3">
+                <div className="flex flex-wrap gap-2">
                   <button
-                    key={dayGroup.dateKey}
                     type="button"
-                    onClick={() => setActiveDayKey(dayGroup.dateKey)}
-                    className={`cursor-pointer rounded-full px-3 py-1.5 text-sm font-medium transition ${activeDayKey === dayGroup.dateKey ? 'bg-slate-900 text-white' : 'bg-white text-slate-700 hover:bg-slate-100'}`}
+                    onClick={() => setActiveDayKey('all')}
+                    className={`cursor-pointer rounded-full px-3 py-1.5 text-sm font-medium transition ${activeDayKey === 'all' ? 'bg-slate-900 text-white' : 'bg-white text-slate-700 hover:bg-slate-100'}`}
                   >
-                    {dayGroup.label}
+                    All days
                   </button>
-                ))}
+                  {groupedSessions.map((dayGroup) => (
+                    <button
+                      key={dayGroup.dateKey}
+                      type="button"
+                      onClick={() => setActiveDayKey(dayGroup.dateKey)}
+                      className={`cursor-pointer rounded-full px-3 py-1.5 text-sm font-medium transition ${activeDayKey === dayGroup.dateKey ? 'bg-slate-900 text-white' : 'bg-white text-slate-700 hover:bg-slate-100'}`}
+                    >
+                      {dayGroup.label}
+                    </button>
+                  ))}
+                </div>
+
+                <div className="flex flex-col items-start self-stretch gap-2 sm:items-end sm:self-auto">
+                  <label className="flex flex-col gap-1 self-start text-sm text-slate-700">
+                    <span className="font-medium">Instructor</span>
+                    <select
+                      value={activeInstructor}
+                      onChange={(event) =>
+                        setActiveInstructor(event.target.value)
+                      }
+                      className="min-w-36 rounded-full border border-slate-300 bg-white px-3 py-1.5 text-sm text-slate-700 shadow-sm"
+                    >
+                      <option value="all">All</option>
+                      {instructorOptions.map((instructorName) => (
+                        <option key={instructorName} value={instructorName}>
+                          {instructorName}
+                        </option>
+                      ))}
+                    </select>
+                  </label>
+
+                  <label className="flex flex-col gap-1 text-sm text-slate-700">
+                    <span className="font-medium">Class</span>
+                    <select
+                      value={activeClassName}
+                      onChange={(event) =>
+                        setActiveClassName(event.target.value)
+                      }
+                      className="min-w-[9rem] rounded-full border border-slate-300 bg-white px-3 py-1.5 text-sm text-slate-700 shadow-sm"
+                    >
+                      <option value="all">All</option>
+                      {classOptions.map((className) => (
+                        <option key={className} value={className}>
+                          {className}
+                        </option>
+                      ))}
+                    </select>
+                  </label>
+                </div>
               </div>
 
-              <div className="flex flex-wrap items-center gap-2">
-                <label className="flex items-center gap-2 text-sm text-slate-700">
-                  <span className="font-medium">Instructor</span>
-                  <select
-                    value={activeInstructor}
-                    onChange={(event) =>
-                      setActiveInstructor(event.target.value)
-                    }
-                    className="rounded-full border border-slate-300 bg-white px-3 py-1.5 text-sm text-slate-700"
-                  >
-                    <option value="all">All</option>
-                    {instructorOptions.map((instructorName) => (
-                      <option key={instructorName} value={instructorName}>
-                        {instructorName}
-                      </option>
-                    ))}
-                  </select>
-                </label>
+              {activeDayKey === 'all' ? (
+                <section className="space-y-3">
+                  <h2 className="text-lg font-semibold text-slate-900">
+                    All days
+                  </h2>
+                  {visibleSessions.length === 0 ? (
+                    <div className="rounded-2xl border border-slate-200 bg-slate-50 p-4 text-sm text-slate-600">
+                      No sessions match the selected filters.
+                    </div>
+                  ) : (
+                    <div className="grid gap-3 md:grid-cols-2 xl:grid-cols-3">
+                      {visibleSessions.map((session) => (
+                        <article
+                          key={
+                            session.id ??
+                            `${session.classId}-${session.startTime}`
+                          }
+                          className={`rounded-2xl border p-4 shadow-sm ${isPastTimetableSession(session) ? 'border-slate-300 bg-slate-100/70' : 'border-slate-200 bg-white'}`}
+                        >
+                          <div className="flex items-start justify-between gap-2">
+                            <div>
+                              <p className="text-sm font-semibold text-slate-900">
+                                {session.className ??
+                                  `Class ${session.classId ?? 'Unknown'}`}
+                              </p>
+                              <p className="text-sm text-slate-600">
+                                {session.room ?? 'Room TBD'}
+                              </p>
+                            </div>
+                            <div className="flex flex-col items-end gap-1">
+                              {isPastTimetableSession(session) ? (
+                                <span className="rounded-full bg-slate-200 px-2.5 py-1 text-[11px] font-semibold uppercase tracking-wide text-slate-700">
+                                  Ended
+                                </span>
+                              ) : (
+                                <span
+                                  className={`rounded-full px-2.5 py-1 text-xs font-semibold ${session.status === 'Available' ? 'bg-emerald-100 text-emerald-700' : session.status === 'Waitlist' ? 'bg-amber-100 text-amber-700' : 'bg-slate-100 text-slate-700'}`}
+                                >
+                                  {session.status ?? 'Unknown'}
+                                </span>
+                              )}
+                            </div>
+                          </div>
+                          <div className="mt-3 space-y-1 text-sm text-slate-600">
+                            <p>
+                              <span className="font-medium text-slate-700">
+                                Day:
+                              </span>{' '}
+                              {formatTimetableDateLabel(session.startTime)}
+                            </p>
+                            <p>
+                              <span className="font-medium text-slate-700">
+                                Time:
+                              </span>{' '}
+                              {formatTimetableTimeLabel(session.startTime)} –{' '}
+                              {formatTimetableTimeLabel(session.endTime)}
+                            </p>
+                            <p>
+                              <span className="font-medium text-slate-700">
+                                Instructor:
+                              </span>{' '}
+                              {session.instructorName ??
+                                session.instructorId ??
+                                'TBC'}
+                            </p>
+                            <p>
+                              <span className="font-medium text-slate-700">
+                                Availability:
+                              </span>{' '}
+                              {formatTimetableAvailability(session)}
+                            </p>
+                            {typeof session.waitlistCount === 'number' &&
+                            session.waitlistCount > 0 ? (
+                              <p>
+                                <span className="font-medium text-slate-700">
+                                  Waitlist:
+                                </span>{' '}
+                                {session.waitlistCount}
+                              </p>
+                            ) : null}
+                          </div>
+                        </article>
+                      ))}
+                    </div>
+                  )}
+                </section>
+              ) : null}
 
-                <label className="flex items-center gap-2 text-sm text-slate-700">
-                  <span className="font-medium">Class</span>
-                  <select
-                    value={activeClassName}
-                    onChange={(event) => setActiveClassName(event.target.value)}
-                    className="rounded-full border border-slate-300 bg-white px-3 py-1.5 text-sm text-slate-700"
-                  >
-                    <option value="all">All</option>
-                    {classOptions.map((className) => (
-                      <option key={className} value={className}>
-                        {className}
-                      </option>
-                    ))}
-                  </select>
-                </label>
-              </div>
+              {activeDayKey !== 'all' && activeDayGroup ? (
+                <section className="space-y-3">
+                  <h2 className="text-lg font-semibold text-slate-900">
+                    {activeDayGroup.label}
+                  </h2>
+                  {visibleSessions.length === 0 ? (
+                    <div className="rounded-2xl border border-slate-200 bg-slate-50 p-4 text-sm text-slate-600">
+                      No sessions match the selected filters for this day.
+                    </div>
+                  ) : (
+                    <div className="grid gap-3 md:grid-cols-2 xl:grid-cols-3">
+                      {visibleSessions.map((session) => (
+                        <article
+                          key={
+                            session.id ??
+                            `${session.classId}-${session.startTime}`
+                          }
+                          className={`rounded-2xl border p-4 shadow-sm ${isPastTimetableSession(session) ? 'border-slate-300 bg-slate-100/70' : 'border-slate-200 bg-white'}`}
+                        >
+                          <div className="flex items-start justify-between gap-2">
+                            <div>
+                              <p className="text-sm font-semibold text-slate-900">
+                                {session.className ??
+                                  `Class ${session.classId ?? 'Unknown'}`}
+                              </p>
+                              <p className="text-sm text-slate-600">
+                                {session.room ?? 'Room TBD'}
+                              </p>
+                            </div>
+                            <div className="flex flex-col items-end gap-1">
+                              {isPastTimetableSession(session) ? (
+                                <span className="rounded-full bg-slate-200 px-2.5 py-1 text-[11px] font-semibold uppercase tracking-wide text-slate-700">
+                                  Ended
+                                </span>
+                              ) : (
+                                <span
+                                  className={`rounded-full px-2.5 py-1 text-xs font-semibold ${session.status === 'Available' ? 'bg-emerald-100 text-emerald-700' : session.status === 'Waitlist' ? 'bg-amber-100 text-amber-700' : 'bg-slate-100 text-slate-700'}`}
+                                >
+                                  {session.status ?? 'Unknown'}
+                                </span>
+                              )}
+                            </div>
+                          </div>
+                          <div className="mt-3 space-y-1 text-sm text-slate-600">
+                            <p>
+                              <span className="font-medium text-slate-700">
+                                Time:
+                              </span>{' '}
+                              {formatTimetableTimeLabel(session.startTime)} –{' '}
+                              {formatTimetableTimeLabel(session.endTime)}
+                            </p>
+                            <p>
+                              <span className="font-medium text-slate-700">
+                                Instructor:
+                              </span>{' '}
+                              {session.instructorName ??
+                                session.instructorId ??
+                                'TBC'}
+                            </p>
+                            <p>
+                              <span className="font-medium text-slate-700">
+                                Availability:
+                              </span>{' '}
+                              {formatTimetableAvailability(session)}
+                            </p>
+                            {typeof session.waitlistCount === 'number' &&
+                            session.waitlistCount > 0 ? (
+                              <p>
+                                <span className="font-medium text-slate-700">
+                                  Waitlist:
+                                </span>{' '}
+                                {session.waitlistCount}
+                              </p>
+                            ) : null}
+                          </div>
+                        </article>
+                      ))}
+                    </div>
+                  )}
+                </section>
+              ) : null}
             </div>
-
-            {activeDayKey === 'all' ? (
-              <section className="space-y-3">
-                <h2 className="text-lg font-semibold text-slate-900">
-                  All days
-                </h2>
-                {visibleSessions.length === 0 ? (
-                  <div className="rounded-2xl border border-slate-200 bg-slate-50 p-4 text-sm text-slate-600">
-                    No sessions match the selected filters.
-                  </div>
-                ) : (
-                  <div className="grid gap-3 md:grid-cols-2 xl:grid-cols-3">
-                    {visibleSessions.map((session) => (
-                      <article
-                        key={
-                          session.id ??
-                          `${session.classId}-${session.startTime}`
-                        }
-                        className={`rounded-2xl border p-4 shadow-sm ${isPastTimetableSession(session) ? 'border-slate-300 bg-slate-100/70' : 'border-slate-200 bg-white'}`}
-                      >
-                        <div className="flex items-start justify-between gap-2">
-                          <div>
-                            <p className="text-sm font-semibold text-slate-900">
-                              {session.className ??
-                                `Class ${session.classId ?? 'Unknown'}`}
-                            </p>
-                            <p className="text-sm text-slate-600">
-                              {session.room ?? 'Room TBD'}
-                            </p>
-                          </div>
-                          <div className="flex flex-col items-end gap-1">
-                            {isPastTimetableSession(session) ? (
-                              <span className="rounded-full bg-slate-200 px-2.5 py-1 text-[11px] font-semibold uppercase tracking-wide text-slate-700">
-                                Ended
-                              </span>
-                            ) : (
-                              <span
-                                className={`rounded-full px-2.5 py-1 text-xs font-semibold ${session.status === 'Available' ? 'bg-emerald-100 text-emerald-700' : session.status === 'Waitlist' ? 'bg-amber-100 text-amber-700' : 'bg-slate-100 text-slate-700'}`}
-                              >
-                                {session.status ?? 'Unknown'}
-                              </span>
-                            )}
-                          </div>
-                        </div>
-                        <div className="mt-3 space-y-1 text-sm text-slate-600">
-                          <p>
-                            <span className="font-medium text-slate-700">
-                              Day:
-                            </span>{' '}
-                            {formatTimetableDateLabel(session.startTime)}
-                          </p>
-                          <p>
-                            <span className="font-medium text-slate-700">
-                              Time:
-                            </span>{' '}
-                            {formatTimetableTimeLabel(session.startTime)} –{' '}
-                            {formatTimetableTimeLabel(session.endTime)}
-                          </p>
-                          <p>
-                            <span className="font-medium text-slate-700">
-                              Instructor:
-                            </span>{' '}
-                            {session.instructorName ??
-                              session.instructorId ??
-                              'TBC'}
-                          </p>
-                          <p>
-                            <span className="font-medium text-slate-700">
-                              Availability:
-                            </span>{' '}
-                            {formatTimetableAvailability(session)}
-                          </p>
-                          {typeof session.waitlistCount === 'number' &&
-                          session.waitlistCount > 0 ? (
-                            <p>
-                              <span className="font-medium text-slate-700">
-                                Waitlist:
-                              </span>{' '}
-                              {session.waitlistCount}
-                            </p>
-                          ) : null}
-                        </div>
-                      </article>
-                    ))}
-                  </div>
-                )}
-              </section>
-            ) : null}
-
-            {activeDayKey !== 'all' && activeDayGroup ? (
-              <section className="space-y-3">
-                <h2 className="text-lg font-semibold text-slate-900">
-                  {activeDayGroup.label}
-                </h2>
-                {visibleSessions.length === 0 ? (
-                  <div className="rounded-2xl border border-slate-200 bg-slate-50 p-4 text-sm text-slate-600">
-                    No sessions match the selected filters for this day.
-                  </div>
-                ) : (
-                  <div className="grid gap-3 md:grid-cols-2 xl:grid-cols-3">
-                    {visibleSessions.map((session) => (
-                      <article
-                        key={
-                          session.id ??
-                          `${session.classId}-${session.startTime}`
-                        }
-                        className={`rounded-2xl border p-4 shadow-sm ${isPastTimetableSession(session) ? 'border-slate-300 bg-slate-100/70' : 'border-slate-200 bg-white'}`}
-                      >
-                        <div className="flex items-start justify-between gap-2">
-                          <div>
-                            <p className="text-sm font-semibold text-slate-900">
-                              {session.className ??
-                                `Class ${session.classId ?? 'Unknown'}`}
-                            </p>
-                            <p className="text-sm text-slate-600">
-                              {session.room ?? 'Room TBD'}
-                            </p>
-                          </div>
-                          <div className="flex flex-col items-end gap-1">
-                            {isPastTimetableSession(session) ? (
-                              <span className="rounded-full bg-slate-200 px-2.5 py-1 text-[11px] font-semibold uppercase tracking-wide text-slate-700">
-                                Ended
-                              </span>
-                            ) : (
-                              <span
-                                className={`rounded-full px-2.5 py-1 text-xs font-semibold ${session.status === 'Available' ? 'bg-emerald-100 text-emerald-700' : session.status === 'Waitlist' ? 'bg-amber-100 text-amber-700' : 'bg-slate-100 text-slate-700'}`}
-                              >
-                                {session.status ?? 'Unknown'}
-                              </span>
-                            )}
-                          </div>
-                        </div>
-                        <div className="mt-3 space-y-1 text-sm text-slate-600">
-                          <p>
-                            <span className="font-medium text-slate-700">
-                              Time:
-                            </span>{' '}
-                            {formatTimetableTimeLabel(session.startTime)} –{' '}
-                            {formatTimetableTimeLabel(session.endTime)}
-                          </p>
-                          <p>
-                            <span className="font-medium text-slate-700">
-                              Instructor:
-                            </span>{' '}
-                            {session.instructorName ??
-                              session.instructorId ??
-                              'TBC'}
-                          </p>
-                          <p>
-                            <span className="font-medium text-slate-700">
-                              Availability:
-                            </span>{' '}
-                            {formatTimetableAvailability(session)}
-                          </p>
-                          {typeof session.waitlistCount === 'number' &&
-                          session.waitlistCount > 0 ? (
-                            <p>
-                              <span className="font-medium text-slate-700">
-                                Waitlist:
-                              </span>{' '}
-                              {session.waitlistCount}
-                            </p>
-                          ) : null}
-                        </div>
-                      </article>
-                    ))}
-                  </div>
-                )}
-              </section>
-            ) : null}
-          </div>
           ) : null}
         </div>
       </PageCardLayout>

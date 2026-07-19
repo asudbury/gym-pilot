@@ -69,7 +69,9 @@ export function DashboardWidget({
         description={cardContent}
         action={action}
         className="h-full"
-        icon={icon ? <DecorativeIcon icon={icon} className="h-5 w-5" /> : undefined}
+        icon={
+          icon ? <DecorativeIcon icon={icon} className="h-5 w-5" /> : undefined
+        }
       />
     </div>
   )

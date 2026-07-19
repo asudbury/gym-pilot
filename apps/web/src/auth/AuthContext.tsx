@@ -13,9 +13,7 @@ import { useAuthModule } from '../features/auth/hooks/useAuthModule'
 import type { AuthUser } from '../features/auth/domain/authTypes'
 import { isUserAccessBlocked } from '../features/auth/domain/authTypes'
 import {
-  persistShowVersion,
   persistThemePreference,
-  readStoredShowVersion,
   readStoredThemePreference,
   type ThemePreference,
 } from '../features/auth/domain/uiPreferences'
@@ -24,7 +22,6 @@ type AuthContextValue = {
   user: AuthUser | null
   isAuthenticated: boolean
   themePreference: 'light' | 'dark'
-  showVersion: boolean
   login: (userId: string) => boolean
   logout: () => void
   updateProfileName: (friendlyName: string) => Promise<void>
@@ -32,7 +29,6 @@ type AuthContextValue = {
   updateGymBrand: (gymBrand: string) => Promise<void>
   updateGymName: (gymName: string, gymBrand?: string | null) => Promise<void>
   setThemePreference: (theme: 'light' | 'dark') => void
-  setShowVersion: (show: boolean) => void
   hasAccess: (requiredRole: UserRole | UserRole[]) => boolean
 }
 
@@ -59,9 +55,6 @@ export function AuthProvider({ children }: AuthProviderProps) {
   } = useAuthModule(users)
   const [themePreference, setThemePreferenceState] = useState<ThemePreference>(
     () => readStoredThemePreference(),
-  )
-  const [showVersion, setShowVersionState] = useState<boolean>(() =>
-    readStoredShowVersion(),
   )
 
   useEffect(() => {
@@ -98,14 +91,6 @@ export function AuthProvider({ children }: AuthProviderProps) {
     document.documentElement.style.colorScheme = themePreference
     persistThemePreference(themePreference)
   }, [themePreference])
-
-  useEffect(() => {
-    if (typeof window === 'undefined') {
-      return
-    }
-
-    persistShowVersion(showVersion)
-  }, [showVersion])
 
   const notifyAuthStateChanged = () => {
     window.dispatchEvent(new Event('gym-pilot-auth-updated'))
@@ -168,16 +153,11 @@ export function AuthProvider({ children }: AuthProviderProps) {
     setThemePreferenceState(theme)
   }
 
-  const setShowVersion = (show: boolean) => {
-    setShowVersionState(show)
-  }
-
   const value = useMemo<AuthContextValue>(
     () => ({
       user,
       isAuthenticated: Boolean(user && !isUserAccessBlocked(user)),
       themePreference,
-      showVersion,
       login: handleLogin,
       logout,
       updateProfileName,
@@ -185,10 +165,9 @@ export function AuthProvider({ children }: AuthProviderProps) {
       updateGymBrand,
       updateGymName,
       setThemePreference,
-      setShowVersion,
       hasAccess,
     }),
-    [user, themePreference, showVersion, users],
+    [user, themePreference, users],
   )
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>

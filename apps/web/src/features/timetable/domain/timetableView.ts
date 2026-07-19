@@ -63,6 +63,24 @@ export function resolveTimetableHeaderViewModel(input: {
   }
 }
 
+export function resolveNextActiveDayKey(
+  currentActiveDayKey: string,
+  groupedSessions: Array<{ dateKey: string }>,
+) {
+  if (currentActiveDayKey === 'all') {
+    return 'all'
+  }
+
+  if (
+    currentActiveDayKey &&
+    groupedSessions.some((dayGroup) => dayGroup.dateKey === currentActiveDayKey)
+  ) {
+    return currentActiveDayKey
+  }
+
+  return groupedSessions[0]?.dateKey ?? ''
+}
+
 export function resolveTimetableViewModel(input: {
   sessions: TimetableSession[]
   activeDayKey: string
@@ -94,6 +112,11 @@ export function resolveTimetableViewModel(input: {
   const instructorOptions = Array.from(
     new Set(
       input.sessions.flatMap((session) => {
+        const hasClass = Boolean(session.className?.trim())
+        if (!hasClass) {
+          return []
+        }
+
         const name = session.instructorName?.trim()
         return name
           ? [name]
