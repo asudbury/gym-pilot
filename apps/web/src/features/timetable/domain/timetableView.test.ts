@@ -1,5 +1,8 @@
 import { describe, expect, it } from 'vitest'
-import { resolveTimetableViewModel } from './timetableView'
+import {
+  resolveTimetableHeaderViewModel,
+  resolveTimetableViewModel,
+} from './timetableView'
 
 describe('resolveTimetableViewModel', () => {
   it('groups sessions by day and filters by instructor and class', () => {
@@ -29,5 +32,17 @@ describe('resolveTimetableViewModel', () => {
     expect(viewModel.visibleSessions).toHaveLength(1)
     expect(viewModel.visibleSessions[0]?.className).toBe('Yoga')
     expect(viewModel.instructorOptions).toEqual(['Ada', 'Ben'])
+  })
+
+  it('hides the header icon when the gym details are not set', () => {
+    const viewModel = resolveTimetableHeaderViewModel({
+      gymBrand: '',
+      gymName: '',
+      resolvedClubName: null,
+    })
+
+    expect(viewModel.showIcon).toBe(false)
+    expect(viewModel.title).toBe('Timetable')
+    expect(viewModel.subtitle).toBe('Gym not selected')
   })
 })

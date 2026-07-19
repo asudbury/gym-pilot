@@ -55,17 +55,29 @@ export function PageCardLayout({
   className = '',
   icon,
 }: PageCardLayoutProps) {
-  const resolvedIcon = icon ?? resolveLayoutIcon(title, subtitle)
+  const resolvedIcon = icon === undefined ? resolveLayoutIcon(title, subtitle) : icon
 
   return (
     <PageCard className={className}>
       <div className="space-y-4">
-        <div className="flex items-start gap-3">
-          <DecorativeIcon icon={resolvedIcon} />
-          <div className="space-y-2">
-            {title ? <Paragraph>{title}</Paragraph> : null}
-            {subtitle ? <Heading1 className="mt-2">{subtitle}</Heading1> : null}
-            {description ? <div>{description}</div> : null}
+        <div className="flex flex-col items-start gap-2">
+          <div className="flex items-center gap-2">
+            <div className="shrink-0">
+              <DecorativeIcon icon={resolvedIcon} className="h-5 w-5" />
+            </div>
+            {title ? <Paragraph className="text-[0.65rem] sm:text-xs">{title}</Paragraph> : null}
+          </div>
+          <div className="flex flex-col items-start">
+            {subtitle ? (
+              <Heading1 className="text-2xl font-semibold tracking-tight text-slate-900 sm:text-3xl dark:text-slate-100">
+                {subtitle}
+              </Heading1>
+            ) : null}
+            {description ? (
+              <p className="max-w-2xl text-sm leading-6 text-slate-600 dark:text-slate-300">
+                {description}
+              </p>
+            ) : null}
           </div>
         </div>
         {children ? (

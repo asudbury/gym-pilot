@@ -10,6 +10,25 @@ export type DashboardLayoutDefinition = {
     description?: string
     to?: string
     tone?: 'blue' | 'default' | 'emerald' | 'orange' | 'rose' | 'white'
+    icon?:
+      | 'spark'
+      | 'dumbbell'
+      | 'search'
+      | 'star'
+      | 'chart'
+      | 'lock'
+      | 'grid'
+      | 'heart'
+      | 'clipboard'
+      | 'shield'
+      | 'calendar'
+      | 'help'
+      | 'tasks'
+      | 'users'
+      | 'database'
+      | 'settings'
+      | 'key'
+      | 'user'
   }>
 }
 
@@ -66,24 +85,28 @@ export function getDashboardLayoutDefinitions(
           description: 'Create and maintain user records and role assignments.',
           to: '/admin/users',
           tone: 'blue',
+          icon: 'users',
         },
         {
           title: 'Admin tools',
           description: 'Jump into the main admin experience.',
           to: '/admin',
           tone: 'default',
+          icon: 'settings',
         },
         {
           title: 'Database',
           description: 'Inspect the Supabase-backed data store.',
           to: '/admin/database',
           tone: 'default',
+          icon: 'database',
         },
         {
           title: 'Preferences',
           description: 'Adjust application-wide preferences.',
           to: '/admin/preferences',
           tone: 'emerald',
+          icon: 'settings',
         },
       ],
     })
@@ -102,24 +125,28 @@ export function getDashboardLayoutDefinitions(
           description: 'Review work assigned to your clients.',
           to: '/assignments',
           tone: 'blue',
+          icon: 'clipboard',
         },
         {
           title: 'Plans',
           description: 'Share and review training plans.',
           to: '/plans',
           tone: 'default',
+          icon: 'tasks',
         },
         {
           title: 'Exercises',
           description: 'Search the exercise library for your next session.',
           to: '/exercises',
           tone: 'default',
+          icon: 'dumbbell',
         },
         {
           title: 'Help',
           description: 'Find support and guidance.',
           to: '/help',
           tone: 'emerald',
+          icon: 'help',
         },
       ],
     })
@@ -138,24 +165,28 @@ export function getDashboardLayoutDefinitions(
           description: 'Browse exercises and favourite your go-tos.',
           to: '/exercises',
           tone: 'blue',
+          icon: 'dumbbell',
         },
         {
           title: 'Plans',
           description: 'Review your training plans and keep momentum.',
           to: '/plans',
           tone: 'default',
+          icon: 'tasks',
         },
         {
           title: 'Assignments',
           description: 'See the work assigned to you and stay on track.',
           to: '/assignments',
           tone: 'default',
+          icon: 'clipboard',
         },
         {
           title: 'Help',
           description: 'Find guidance and support for the app.',
           to: '/help',
           tone: 'emerald',
+          icon: 'help',
         },
       ],
     })
@@ -173,12 +204,14 @@ export function getDashboardLayoutDefinitions(
           description: 'Browse the library.',
           to: '/exercises',
           tone: 'blue',
+          icon: 'dumbbell',
         },
         {
           title: 'Help',
           description: 'Find support and guidance.',
           to: '/help',
           tone: 'default',
+          icon: 'help',
         },
       ],
     })

@@ -13,7 +13,7 @@ type DashboardPageProps = {
 
 export function DashboardPage({ userName }: DashboardPageProps) {
   const { user } = useAuth()
-  const displayName = userName?.trim() || 'there'
+  const displayName = userName || user?.name || user?.email || null
   const previousLoginTimestamp = user?.previousLastLoggedInAt ?? null
   const viewModel = useMemo(
     () => resolveDashboardViewModel(user?.role, user?.roles),
@@ -42,24 +42,24 @@ export function DashboardPage({ userName }: DashboardPageProps) {
     <PageLayout className="gap-6">
       <PageCard as="section" className="space-y-6">
         <div className="flex items-start gap-3">
-          <DecorativeIcon icon="grid" />
-          <div className="space-y-2">
-            <p className="text-sm font-semibold uppercase tracking-[0.24em] text-slate-500">
-              Dashboard
-            </p>
-            <h1 className="text-2xl font-semibold tracking-tight text-slate-900 sm:text-3xl dark:text-slate-100">
-              Welcome back, {displayName}
-            </h1>
-            <p className="max-w-2xl text-sm text-slate-600 dark:text-slate-300">
-              Choose the view that fits your role and jump back into your work
-              from one place.
-            </p>
-            {previousLoginTimestamp ? (
-              <p className="max-w-2xl text-sm text-slate-500 dark:text-slate-400">
-                Your last login:{' '}
-                {renderDashboardTimestamp(previousLoginTimestamp)}.
+          <div className="flex flex-col items-start gap-2">
+            <div className="flex items-center gap-2">
+              <DecorativeIcon icon="chart" />
+              <p className="text-sm font-semibold uppercase tracking-[0.24em] text-slate-500">
+                Dashboard
               </p>
-            ) : null}
+            </div>
+            <div className="flex flex-col items-start">
+              <h1 className="text-2xl font-semibold tracking-tight text-slate-900 sm:text-3xl dark:text-slate-100">
+                {displayName ? `Welcome back, ${displayName}` : 'Welcome back to Gym-Pilot'}
+              </h1>
+              {previousLoginTimestamp ? (
+                <p className="max-w-2xl text-sm text-slate-500 dark:text-slate-400">
+                  Your last login:{' '}
+                  {renderDashboardTimestamp(previousLoginTimestamp)}.
+                </p>
+              ) : null}
+            </div>
           </div>
         </div>
 

@@ -5,6 +5,7 @@ type CallToActionProps = {
   description?: ReactNode
   action?: ReactNode
   className?: string
+  icon?: ReactNode
 }
 
 export function CallToAction({
@@ -12,12 +13,18 @@ export function CallToAction({
   description,
   action,
   className = '',
+  icon,
 }: CallToActionProps) {
   return (
     <div
       className={`rounded-2xl border border-slate-200 bg-slate-50 p-4 ${className}`.trim()}
     >
-      <center>
+      <div className="flex flex-col items-center text-center">
+        {icon ? (
+          <div className="mb-3 flex h-10 w-10 items-center justify-center rounded-2xl border border-slate-200 bg-white text-slate-700 shadow-sm dark:border-slate-700 dark:bg-slate-900/70 dark:text-slate-200">
+            {icon}
+          </div>
+        ) : null}
         {title ? (
           <p className="text-lg font-semibold text-slate-900">{title}</p>
         ) : null}
@@ -27,7 +34,7 @@ export function CallToAction({
         {action ? (
           <div className="mt-5 flex justify-center">{action}</div>
         ) : null}
-      </center>
+      </div>
     </div>
   )
 }

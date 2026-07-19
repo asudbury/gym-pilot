@@ -18,6 +18,7 @@ export type DecorativeIconProps = {
     | 'settings'
     | 'key'
     | 'user'
+    | null
   className?: string
   withContainer?: boolean
 }
@@ -30,6 +31,10 @@ export function DecorativeIcon({
   className = '',
   withContainer = false,
 }: DecorativeIconProps) {
+  if (icon === null) {
+    return null
+  }
+
   const iconClassName = className || 'h-5 w-5'
   const containerClassName = withContainer
     ? `${baseClasses} ${className}`.trim()

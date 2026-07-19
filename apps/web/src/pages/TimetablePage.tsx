@@ -1,10 +1,14 @@
 import { useEffect, useMemo, useState } from 'react'
 import { useAuth } from '../auth/AuthContext'
-import { PageCard } from '../components/PageCard'
 import { PageLayout } from '../layouts/PageLayout'
-import { DecorativeIcon } from '../components/ui/DecorativeIcon'
+import { PageCardLayout } from '../layouts/PageCardLayout'
 import { loadVirginActiveClubs } from '../utils/virginActiveClubs'
 import {
+  formatTimetableAvailability,
+  formatTimetableDateLabel,
+  formatTimetableTimeLabel,
+  isPastTimetableSession,
+  resolveTimetableHeaderViewModel,
   resolveTimetableViewModel,
   type TimetableSession,
 } from '../features/timetable/domain/timetableView'
@@ -139,68 +143,6 @@ function normalizeSessions(payload: unknown): TimetableSession[] {
   return []
 }
 
-function formatDateLabel(value: string | null | undefined) {
-  if (!value) {
-    return 'Unknown date'
-  }
-
-  const parsed = new Date(value)
-
-  if (Number.isNaN(parsed.getTime())) {
-    return 'Unknown date'
-  }
-
-  return new Intl.DateTimeFormat(undefined, {
-    timeZone: 'UTC',
-    weekday: 'short',
-    day: 'numeric',
-    month: 'short',
-  }).format(parsed)
-}
-
-function formatTimeLabel(value: string | null | undefined) {
-  if (!value) {
-    return 'Time TBD'
-  }
-
-  const parsed = new Date(value)
-
-  if (Number.isNaN(parsed.getTime())) {
-    return value
-  }
-
-  return new Intl.DateTimeFormat(undefined, {
-    timeZone: 'UTC',
-    hour: 'numeric',
-    minute: '2-digit',
-  }).format(parsed)
-}
-
-function formatAvailability(session: TimetableSession) {
-  const booked = typeof session.booked === 'number' ? session.booked : null
-  const capacity =
-    typeof session.capacity === 'number' ? session.capacity : null
-
-  if (booked !== null && capacity !== null) {
-    return `${booked}/${capacity} booked`
-  }
-
-  return 'Availability unavailable'
-}
-
-function isPastSession(session: TimetableSession) {
-  if (!session.startTime) {
-    return false
-  }
-
-  const parsed = new Date(session.startTime)
-  if (Number.isNaN(parsed.getTime())) {
-    return false
-  }
-
-  return parsed.getTime() < Date.now()
-}
-
 export function TimetablePage() {
   const { user } = useAuth()
   const [sessions, setSessions] = useState<TimetableSession[]>([])
@@ -214,18 +156,15 @@ export function TimetablePage() {
   const rawGymBrand = user?.gymBrand?.trim() ?? ''
   const rawGymName = user?.gymName?.trim() ?? ''
   const isVirginBrand = rawGymBrand.toLowerCase() === 'virgin'
-  const gymBrandLabel = rawGymBrand || 'Brand not set'
-  const gymNameLabel = useMemo(() => {
-    if (!rawGymName) {
-      return 'Gym not selected'
-    }
-
-    if (isVirginBrand && /^\d+$/.test(rawGymName)) {
-      return resolvedClubName ?? rawGymName
-    }
-
-    return rawGymName
-  }, [isVirginBrand, rawGymName, resolvedClubName])
+  const headerViewModel = useMemo(
+    () =>
+      resolveTimetableHeaderViewModel({
+        gymBrand: rawGymBrand,
+        gymName: rawGymName,
+        resolvedClubName,
+      }),
+    [rawGymBrand, rawGymName, resolvedClubName],
+  )
 
   const clubId = useMemo(() => {
     const storedClubId = user?.gymName?.trim() ?? ''
@@ -382,38 +321,32 @@ export function TimetablePage() {
 
   return (
     <PageLayout className="max-w-6xl">
-      <PageCard padding="spacious" className="space-y-6">
-        <div className="flex items-start gap-3">
-          <DecorativeIcon icon="calendar" />
-          <div className="space-y-2">
-            <p className="text-sm font-medium uppercase tracking-[0.2em] text-slate-500">
-              Timetable
-            </p>
-            <h1 className="text-3xl font-semibold text-slate-900">
-              {gymBrandLabel} {gymNameLabel}
-            </h1>
-          </div>
-        </div>
+      <PageCardLayout
+        title={headerViewModel.title}
+        subtitle={headerViewModel.subtitle}
+        description={headerViewModel.description}
+        icon={headerViewModel.showIcon ? 'calendar' : null}
+      >
+        <div className="space-y-6">
+          {isLoading ? (
+            <div className="rounded-2xl border border-slate-200 bg-slate-50 p-4 text-sm text-slate-600">
+              Loading timetable…
+            </div>
+          ) : null}
 
-        {isLoading ? (
-          <div className="rounded-2xl border border-slate-200 bg-slate-50 p-4 text-sm text-slate-600">
-            Loading timetable…
-          </div>
-        ) : null}
+          {!isLoading && errorMessage ? (
+            <div className="rounded-2xl border border-rose-200 bg-rose-50 p-4 text-sm text-rose-700">
+              {errorMessage}
+            </div>
+          ) : null}
 
-        {!isLoading && errorMessage ? (
-          <div className="rounded-2xl border border-rose-200 bg-rose-50 p-4 text-sm text-rose-700">
-            {errorMessage}
-          </div>
-        ) : null}
+          {!isLoading && !errorMessage && groupedSessions.length === 0 ? (
+            <div className="rounded-2xl border border-slate-200 bg-slate-50 p-4 text-sm text-slate-600">
+              No timetable sessions were returned.
+            </div>
+          ) : null}
 
-        {!isLoading && !errorMessage && groupedSessions.length === 0 ? (
-          <div className="rounded-2xl border border-slate-200 bg-slate-50 p-4 text-sm text-slate-600">
-            No timetable sessions were returned.
-          </div>
-        ) : null}
-
-        {!isLoading && !errorMessage && groupedSessions.length > 0 ? (
+          {!isLoading && !errorMessage && groupedSessions.length > 0 ? (
           <div className="space-y-4">
             <div className="flex flex-wrap items-center justify-between gap-3 rounded-2xl border border-slate-200 bg-slate-50 p-3">
               <div className="flex flex-wrap gap-2">
@@ -490,7 +423,7 @@ export function TimetablePage() {
                           session.id ??
                           `${session.classId}-${session.startTime}`
                         }
-                        className={`rounded-2xl border p-4 shadow-sm ${isPastSession(session) ? 'border-slate-300 bg-slate-100/70' : 'border-slate-200 bg-white'}`}
+                        className={`rounded-2xl border p-4 shadow-sm ${isPastTimetableSession(session) ? 'border-slate-300 bg-slate-100/70' : 'border-slate-200 bg-white'}`}
                       >
                         <div className="flex items-start justify-between gap-2">
                           <div>
@@ -503,7 +436,7 @@ export function TimetablePage() {
                             </p>
                           </div>
                           <div className="flex flex-col items-end gap-1">
-                            {isPastSession(session) ? (
+                            {isPastTimetableSession(session) ? (
                               <span className="rounded-full bg-slate-200 px-2.5 py-1 text-[11px] font-semibold uppercase tracking-wide text-slate-700">
                                 Ended
                               </span>
@@ -521,14 +454,14 @@ export function TimetablePage() {
                             <span className="font-medium text-slate-700">
                               Day:
                             </span>{' '}
-                            {formatDateLabel(session.startTime)}
+                            {formatTimetableDateLabel(session.startTime)}
                           </p>
                           <p>
                             <span className="font-medium text-slate-700">
                               Time:
                             </span>{' '}
-                            {formatTimeLabel(session.startTime)} –{' '}
-                            {formatTimeLabel(session.endTime)}
+                            {formatTimetableTimeLabel(session.startTime)} –{' '}
+                            {formatTimetableTimeLabel(session.endTime)}
                           </p>
                           <p>
                             <span className="font-medium text-slate-700">
@@ -542,7 +475,7 @@ export function TimetablePage() {
                             <span className="font-medium text-slate-700">
                               Availability:
                             </span>{' '}
-                            {formatAvailability(session)}
+                            {formatTimetableAvailability(session)}
                           </p>
                           {typeof session.waitlistCount === 'number' &&
                           session.waitlistCount > 0 ? (
@@ -578,7 +511,7 @@ export function TimetablePage() {
                           session.id ??
                           `${session.classId}-${session.startTime}`
                         }
-                        className={`rounded-2xl border p-4 shadow-sm ${isPastSession(session) ? 'border-slate-300 bg-slate-100/70' : 'border-slate-200 bg-white'}`}
+                        className={`rounded-2xl border p-4 shadow-sm ${isPastTimetableSession(session) ? 'border-slate-300 bg-slate-100/70' : 'border-slate-200 bg-white'}`}
                       >
                         <div className="flex items-start justify-between gap-2">
                           <div>
@@ -591,7 +524,7 @@ export function TimetablePage() {
                             </p>
                           </div>
                           <div className="flex flex-col items-end gap-1">
-                            {isPastSession(session) ? (
+                            {isPastTimetableSession(session) ? (
                               <span className="rounded-full bg-slate-200 px-2.5 py-1 text-[11px] font-semibold uppercase tracking-wide text-slate-700">
                                 Ended
                               </span>
@@ -609,8 +542,8 @@ export function TimetablePage() {
                             <span className="font-medium text-slate-700">
                               Time:
                             </span>{' '}
-                            {formatTimeLabel(session.startTime)} –{' '}
-                            {formatTimeLabel(session.endTime)}
+                            {formatTimetableTimeLabel(session.startTime)} –{' '}
+                            {formatTimetableTimeLabel(session.endTime)}
                           </p>
                           <p>
                             <span className="font-medium text-slate-700">
@@ -624,7 +557,7 @@ export function TimetablePage() {
                             <span className="font-medium text-slate-700">
                               Availability:
                             </span>{' '}
-                            {formatAvailability(session)}
+                            {formatTimetableAvailability(session)}
                           </p>
                           {typeof session.waitlistCount === 'number' &&
                           session.waitlistCount > 0 ? (
@@ -643,8 +576,9 @@ export function TimetablePage() {
               </section>
             ) : null}
           </div>
-        ) : null}
-      </PageCard>
+          ) : null}
+        </div>
+      </PageCardLayout>
     </PageLayout>
   )
 }

@@ -27,6 +27,42 @@ export type TimetableViewModel = {
   visibleSessions: TimetableSession[]
 }
 
+export type TimetableHeaderViewModel = {
+  title: string
+  subtitle: string
+  description?: string
+  showIcon: boolean
+}
+
+export function resolveTimetableHeaderViewModel(input: {
+  gymBrand?: string | null
+  gymName?: string | null
+  resolvedClubName?: string | null
+}): TimetableHeaderViewModel {
+  const rawGymBrand = input.gymBrand?.trim() ?? ''
+  const rawGymName = input.gymName?.trim() ?? ''
+  const resolvedClubName = input.resolvedClubName?.trim() ?? ''
+  const isVirginBrand = rawGymBrand.toLowerCase() === 'virgin'
+  const hasGymDetails = Boolean(rawGymBrand || rawGymName)
+
+  const displayGymName = !rawGymName
+    ? 'Gym not selected'
+    : isVirginBrand && /^\d+$/.test(rawGymName)
+      ? resolvedClubName || rawGymName
+      : rawGymName
+
+  const subtitle = hasGymDetails
+    ? [rawGymBrand, displayGymName].filter(Boolean).join(' ').trim()
+    : 'Gym not selected'
+
+  return {
+    title: 'Timetable',
+    subtitle,
+    description: hasGymDetails ? undefined : 'Select a gym to view sessions.',
+    showIcon: hasGymDetails,
+  }
+}
+
 export function resolveTimetableViewModel(input: {
   sessions: TimetableSession[]
   activeDayKey: string
@@ -51,7 +87,7 @@ export function resolveTimetableViewModel(input: {
     .sort(([leftKey], [rightKey]) => leftKey.localeCompare(rightKey))
     .map(([dateKey, daySessions]) => ({
       dateKey,
-      label: formatDateLabel(daySessions[0]?.startTime ?? null),
+      label: formatTimetableDateLabel(daySessions[0]?.startTime ?? null),
       sessions: daySessions.sort((left, right) => compareSessions(left, right)),
     }))
 
@@ -135,7 +171,7 @@ function compareSessions(left: TimetableSession, right: TimetableSession) {
   return leftName.localeCompare(rightName)
 }
 
-function formatDateLabel(value: string | null | undefined) {
+export function formatTimetableDateLabel(value: string | null | undefined) {
   if (!value) {
     return 'Unknown date'
   }
@@ -152,4 +188,47 @@ function formatDateLabel(value: string | null | undefined) {
     day: 'numeric',
     month: 'short',
   }).format(parsed)
+}
+
+export function formatTimetableTimeLabel(value: string | null | undefined) {
+  if (!value) {
+    return 'Time TBD'
+  }
+
+  const parsed = new Date(value)
+
+  if (Number.isNaN(parsed.getTime())) {
+    return value
+  }
+
+  return new Intl.DateTimeFormat(undefined, {
+    timeZone: 'UTC',
+    hour: 'numeric',
+    minute: '2-digit',
+  }).format(parsed)
+}
+
+export function formatTimetableAvailability(session: TimetableSession) {
+  const booked = typeof session.booked === 'number' ? session.booked : null
+  const capacity =
+    typeof session.capacity === 'number' ? session.capacity : null
+
+  if (booked !== null && capacity !== null) {
+    return `${booked}/${capacity} booked`
+  }
+
+  return 'Availability unavailable'
+}
+
+export function isPastTimetableSession(session: TimetableSession) {
+  if (!session.startTime) {
+    return false
+  }
+
+  const parsed = new Date(session.startTime)
+  if (Number.isNaN(parsed.getTime())) {
+    return false
+  }
+
+  return parsed.getTime() < Date.now()
 }

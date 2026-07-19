@@ -8,8 +8,6 @@ import { getToneClass } from '../toneClasses'
 
 type HeaderProps = {
   appName: string
-  appVersion: string
-  showVersion: boolean
   favorites: Array<{ id: string; label: string; path: string }>
   folders: string[]
   homeFilters: {
@@ -38,8 +36,6 @@ type HeaderProps = {
 
 export function Header({
   appName,
-  appVersion,
-  showVersion,
   favorites,
   homeFilters,
   desktopMenuItems,
@@ -74,17 +70,14 @@ export function Header({
     <nav className="sticky top-0 z-30 h-16 border-b border-slate-200 bg-white text-slate-900 shadow-sm transition-colors dark:border-slate-700 dark:bg-slate-950 dark:text-slate-100">
       <div className="mx-auto flex h-full max-w-6xl items-center justify-between px-4 sm:px-6 lg:px-8">
         <div className="flex flex-col">
-          <NavLink
-            to="/"
-            className="text-lg font-semibold text-slate-900 transition-colors dark:text-slate-100"
-          >
-            <span>{appName}</span>
-            {showVersion ? (
-              <span className="ml-2 text-[11px] font-medium tracking-[0.2em] text-slate-500">
-                {`(v${appVersion})`}
-              </span>
-            ) : null}
-          </NavLink>
+          <div className="flex items-center gap-2">
+            <NavLink
+              to="/"
+              className="text-lg font-semibold text-slate-900 transition-colors dark:text-slate-100"
+            >
+              <span>{appName}</span>
+            </NavLink>
+          </div>
           {showUserBadge ? (
             <div>
               <span>{headerUserLabel}</span>
