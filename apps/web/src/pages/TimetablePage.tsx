@@ -4,6 +4,7 @@ import { saveTimetableAttendance } from '@gym-pilot/shared'
 import { useAuth } from '../auth/AuthContext'
 import { PageLayout } from '../layouts/PageLayout'
 import { PageCardLayout } from '../layouts/PageCardLayout'
+import { Button } from '../components/Button'
 import { loadVirginActiveClubs } from '../utils/virginActiveClubs'
 import {
   formatTimetableAvailability,
@@ -623,16 +624,18 @@ export function TimetablePage() {
                   <p className="text-sm text-rose-600">{attendanceMessage}</p>
                 ) : null}
                 <div className="flex flex-wrap gap-2">
-                  <button
+                  <Button
                     type="button"
+                    tone="emerald"
                     onClick={handleAttendanceSubmit}
                     disabled={attendanceSaving}
-                    className="rounded-full border border-emerald-600 bg-emerald-600 px-3 py-1.5 text-sm font-semibold text-white shadow-sm transition hover:bg-emerald-700 disabled:cursor-not-allowed disabled:border-emerald-300 disabled:bg-emerald-300 disabled:text-emerald-950"
+                    className="shadow-sm transition hover:shadow-md disabled:cursor-not-allowed disabled:border-emerald-300 disabled:bg-emerald-300 disabled:text-emerald-950"
                   >
                     {attendanceSaving ? 'Saving…' : 'Record attendance'}
-                  </button>
-                  <button
+                  </Button>
+                  <Button
                     type="button"
+                    tone="default"
                     onClick={() => {
                       setAttendancePendingSession(null)
                       setAttendanceNotes('')
@@ -640,10 +643,10 @@ export function TimetablePage() {
                       setAttendanceMessage(null)
                       setAttendanceSelection(null)
                     }}
-                    className="rounded-full border border-slate-300 bg-white px-3 py-1.5 text-sm font-medium text-slate-700 transition hover:bg-slate-50"
+                    className=""
                   >
                     Cancel
-                  </button>
+                  </Button>
                 </div>
               </div>
             </div>
@@ -839,8 +842,9 @@ export function TimetablePage() {
                             ) : null}
                           </div>
                           {attendanceAction.canShow ? (
-                            <button
+                            <Button
                               type="button"
+                              tone="emerald"
                               onClick={() => handleAttendanceAction(session)}
                               disabled={Boolean(
                                 session.id
@@ -849,7 +853,7 @@ export function TimetablePage() {
                                       `${session.classId ?? 'unknown'}-${session.startTime ?? 'unknown'}`
                                     ],
                               )}
-                              className="mt-3 inline-flex items-center rounded-full border border-emerald-600 bg-emerald-600 px-3 py-1.5 text-sm font-semibold text-white shadow-sm transition hover:bg-emerald-700 hover:shadow-md disabled:cursor-not-allowed disabled:border-emerald-300 disabled:bg-emerald-300 disabled:text-emerald-950"
+                              className="mt-3 shadow-sm hover:shadow-md disabled:cursor-not-allowed disabled:border-emerald-300 disabled:bg-emerald-300 disabled:text-emerald-950"
                             >
                               {Boolean(
                                 session.id
@@ -860,7 +864,7 @@ export function TimetablePage() {
                               )
                                 ? attendanceAction.completedLabel
                                 : attendanceAction.label}
-                            </button>
+                            </Button>
                           ) : null}
                         </article>
                       ))}
@@ -945,8 +949,9 @@ export function TimetablePage() {
                             ) : null}
                           </div>
                           {attendanceAction.canShow ? (
-                            <button
+                            <Button
                               type="button"
+                              tone="emerald"
                               onClick={() => handleAttendanceAction(session)}
                               disabled={Boolean(
                                 session.id
@@ -955,7 +960,7 @@ export function TimetablePage() {
                                       `${session.classId ?? 'unknown'}-${session.startTime ?? 'unknown'}`
                                     ],
                               )}
-                              className="mt-3 inline-flex items-center rounded-full border border-emerald-600 bg-emerald-600 px-3 py-1.5 text-sm font-semibold text-white shadow-sm transition hover:bg-emerald-700 hover:shadow-md disabled:cursor-not-allowed disabled:border-emerald-300 disabled:bg-emerald-300 disabled:text-emerald-950"
+                              className="mt-3 shadow-sm hover:shadow-md disabled:cursor-not-allowed disabled:border-emerald-300 disabled:bg-emerald-300 disabled:text-emerald-950"
                             >
                               {Boolean(
                                 session.id
@@ -966,7 +971,7 @@ export function TimetablePage() {
                               )
                                 ? attendanceAction.completedLabel
                                 : attendanceAction.label}
-                            </button>
+                            </Button>
                           ) : null}
                         </article>
                       ))}

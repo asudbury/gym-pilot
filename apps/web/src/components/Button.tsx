@@ -13,7 +13,7 @@ export function Button<T extends ElementType = 'button'>({
   as,
   tone = 'default',
   className = '',
-  defaultClassName = 'rounded-full text-sm font-medium',
+  defaultClassName = 'inline-flex items-center rounded-full text-sm font-medium',
   children,
   ...props
 }: ButtonProps<T>) {

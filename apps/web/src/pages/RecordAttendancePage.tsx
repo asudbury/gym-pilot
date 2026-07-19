@@ -4,6 +4,7 @@ import { saveTimetableAttendance } from '@gym-pilot/shared'
 import { useAuth } from '../auth/AuthContext'
 import { PageLayout } from '../layouts/PageLayout'
 import { PageCardLayout } from '../layouts/PageCardLayout'
+import { Button } from '../components/Button'
 import {
   formatTimetableDateLabel,
   formatTimetableTimeLabel,
@@ -175,14 +176,15 @@ export function RecordAttendancePage() {
                     {attendanceAction.options.map((option) => {
                       const isSelected = attendanceSelection === option.kind
                       return (
-                        <button
+                        <Button
                           key={option.kind}
                           type="button"
                           onClick={() => setAttendanceSelection(option.kind)}
-                          className={`rounded-full border px-3 py-1.5 text-sm font-semibold transition ${isSelected ? 'border-sky-600 bg-sky-600 text-white shadow-sm' : 'border-slate-300 bg-white text-slate-700 hover:bg-slate-50'}`}
+                          tone={isSelected ? 'blue' : 'default'}
+                          className={isSelected ? 'shadow-sm' : ''}
                         >
                           {option.label}
-                        </button>
+                        </Button>
                       )
                     })}
                   </div>
@@ -197,14 +199,15 @@ export function RecordAttendancePage() {
                   {[1, 2, 3, 4, 5].map((value) => {
                     const isSelected = attendanceRating === value
                     return (
-                      <button
+                      <Button
                         key={value}
                         type="button"
                         onClick={() => setAttendanceRating(value)}
-                        className={`rounded-full border px-3 py-1.5 text-sm font-semibold transition ${isSelected ? 'border-sky-600 bg-sky-600 text-white shadow-sm' : 'border-slate-300 bg-white text-slate-700 hover:bg-slate-50'}`}
+                        tone={isSelected ? 'blue' : 'default'}
+                        className={isSelected ? 'shadow-sm' : ''}
                       >
                         {value} / 5
-                      </button>
+                      </Button>
                     )
                   })}
                 </div>
@@ -226,21 +229,23 @@ export function RecordAttendancePage() {
               ) : null}
 
               <div className="flex flex-wrap gap-2">
-                <button
+                <Button
                   type="button"
+                  tone="emerald"
                   onClick={handleAttendanceSubmit}
                   disabled={attendanceSaving}
-                  className="rounded-full border border-emerald-600 bg-emerald-600 px-3 py-1.5 text-sm font-semibold text-white shadow-sm transition hover:bg-emerald-700 disabled:cursor-not-allowed disabled:border-emerald-300 disabled:bg-emerald-300 disabled:text-emerald-950"
+                  className="shadow-sm hover:shadow-md disabled:cursor-not-allowed disabled:border-emerald-300 disabled:bg-emerald-300 disabled:text-emerald-950"
                 >
                   {attendanceSaving ? 'Saving…' : 'Record attendance'}
-                </button>
-                <button
+                </Button>
+                <Button
                   type="button"
+                  tone="default"
                   onClick={() => navigate('/timetable')}
-                  className="rounded-full border border-slate-300 bg-white px-3 py-1.5 text-sm font-medium text-slate-700 transition hover:bg-slate-50"
+                  className=""
                 >
                   Cancel
-                </button>
+                </Button>
               </div>
             </div>
           </div>
