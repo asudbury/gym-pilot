@@ -1,50 +1,13 @@
 import { useEffect, useState } from 'react'
-import {
-  Navigate,
-  Route,
-  Routes,
-  useLocation,
-  useNavigate,
-} from 'react-router-dom'
-import {
-  exercises,
-  exercisesSchema,
-  getSupabaseClient,
-  usePlan,
-} from '@gym-pilot/shared'
+import { Routes, useLocation, useNavigate } from 'react-router-dom'
+import { exercises, exercisesSchema, getSupabaseClient, usePlan } from '@gym-pilot/shared'
 import { getToneClass } from './components/toneClasses'
 import { HOME_FILTER_KEY } from './constants/storageKeys'
-import { ExercisePage } from './pages/ExercisePage'
-import { HomePage } from './pages/HomePage'
-import { PlanDetailPage } from './pages/plans/PlanDetailPage'
-import { PlansPage } from './pages/plans/PlansPage'
-import { AssignmentsPage } from './pages/assignments/AssignmentsPage'
-import { CreatePlanPage } from './pages/plans/CreatePlanPage'
-import { CreateAssignmentPage } from './pages/assignments/CreateAssignmentPage'
-import { AssignmentsManagerPage } from './pages/assignments/AssignmentsManagerPage'
 import { getExercisePath } from './utils/exerciseRouteUtils'
 import { Header } from './components/navigation/Header'
 import { formatLabel } from './utils/formatUtils'
-import { RequireAuth } from './auth/RequireAuth'
-import { LoginPage } from './pages/LoginPage'
-import { ResetPasswordPage } from './pages/ResetPasswordPage'
-import { WelcomePage } from './pages/WelcomePage'
 import { useAuth } from './auth/AuthContext'
-import { AdminPage } from './pages/admin/AdminPage'
-import { AdminUsersPage } from './pages/admin/AdminUsersPage'
-import { AdminCreateUserPage } from './pages/admin/AdminCreateUserPage'
-import { AdminUserProfilesPage } from './pages/admin/AdminUserProfilesPage'
-import { AdminUserActivityPage } from './pages/admin/AdminUserActivityPage'
-import { AdminDatabasePage } from './pages/admin/AdminDatabasePage'
-import { AdminPreferencesPage } from './pages/admin/AdminPreferencesPage'
-import { AdminChangePasswordPage } from './pages/admin/AdminChangePasswordPage'
-import { HelpPage } from './pages/help/HelpPage'
-import { FavouritesPage } from './pages/FavouritesPage'
-import { DashboardPage } from './pages/DashboardPage'
-import { TimetablePage } from './pages/TimetablePage'
-import { AttendanceHistoryPage } from './pages/AttendanceHistoryPage'
 import { buildNavigationMenuItems } from './utils/navigationUtils'
-import { AssignmentDetailPage } from './pages/assignments/AssignmentDetailPage'
 import { logger } from '@gym-pilot/shared'
 import {
   getHashHomeUrl,
@@ -57,6 +20,8 @@ import {
   type QuickLink,
 } from './features/favourites/domain/quickLinks'
 import { getInstallHint, isAppleDevice, isInstalledAsApp } from './utils/pwa'
+import { createAuthRoutes } from './routes/authRoutes'
+import { createPublicRoutes } from './routes/publicRoutes'
 
 function ScrollToTop() {
   const { pathname } = useLocation()
@@ -284,130 +249,18 @@ function App() {
       />
 
       <Routes>
-        <Route path="/login" element={<LoginPage />} />
-        <Route path="/reset-password" element={<ResetPasswordPage />} />
-        <Route path="/welcome" element={<WelcomePage />} />
-        <Route path="/auth/callback" element={<LoginPage />} />
-        <Route
-          path="/"
-          element={
-            user ? (
-              <DashboardPage />
-            ) : (
-              <HomePage
-                filters={homeFilters}
-                onFiltersChange={setHomeFilters}
-                onToggleFavoriteExercise={handleToggleFavoriteExercise}
-                isExerciseFavorite={isExerciseFavorite}
-              />
-            )
-          }
-        />
-        <Route
-          path="/exercise/:slug"
-          element={
-            <ExercisePage
-              onToggleFavoriteExercise={handleToggleFavoriteExercise}
-              isExerciseFavorite={isExerciseFavorite}
-            />
-          }
-        />
-        <Route>
-          <Route path="/help" element={<HelpPage />} />
-          <Route
-            path="/favourites"
-            element={
-              <FavouritesPage
-                favorites={favorites}
-                folders={folders}
-                onFoldersChange={setFolders}
-                onFavoritesChange={setFavorites}
-              />
-            }
-          />
-          <Route element={<RequireAuth />}>
-            <Route
-              path="/exercises"
-              element={
-                <HomePage
-                  filters={homeFilters}
-                  onFiltersChange={setHomeFilters}
-                  onToggleFavoriteExercise={handleToggleFavoriteExercise}
-                  isExerciseFavorite={isExerciseFavorite}
-                />
-              }
-            />
-            <Route path="/plans" element={<PlansPage />} />
-            <Route element={<RequireAuth requireClubId />}>
-              <Route path="/timetable" element={<TimetablePage />} />
-              <Route
-                path="/attendance-history"
-                element={<AttendanceHistoryPage />}
-              />
-            </Route>
-            <Route path="/assignments" element={<AssignmentsPage />} />
-            <Route
-              path="/users/:userSlug/assignments"
-              element={<AssignmentsPage />}
-            />
-            <Route
-              path="/users/:userSlug/assignments/create"
-              element={<AssignmentsManagerPage />}
-            />
-            <Route path="/plans/new" element={<CreatePlanPage />} />
-            <Route path="/plans/:planSlug/edit" element={<CreatePlanPage />} />
-            <Route path="/plans/:planSlug" element={<PlanDetailPage />} />
-            <Route
-              path="/assignments/new"
-              element={<AssignmentsManagerPage />}
-            />
-            <Route
-              path="/assignments/create"
-              element={<Navigate to="/assignments/new" replace />}
-            />
-            <Route
-              path="/users/:userSlug/assignments/new"
-              element={<AssignmentsManagerPage />}
-            />
-            <Route
-              path="/users/:userSlug/assignments/create"
-              element={<Navigate to="../new" replace />}
-            />
-            <Route
-              path="/users/:userSlug/assignments/:planSlug"
-              element={<AssignmentDetailPage />}
-            />
-            <Route
-              path="/users/:userSlug/assignments/:planSlug/edit"
-              element={<CreateAssignmentPage />}
-            />
-            <Route path="/admin" element={<AdminPage />} />
-            <Route
-              path="/admin/preferences"
-              element={<AdminPreferencesPage />}
-            />
-            <Route
-              path="/admin/change-password"
-              element={<AdminChangePasswordPage />}
-            />
-          </Route>
-          <Route element={<RequireAuth requiredRole="admin" />}>
-            <Route path="/admin/users" element={<AdminUsersPage />} />
-            <Route
-              path="/admin/users/create"
-              element={<AdminCreateUserPage />}
-            />
-            <Route
-              path="/admin/users/profiles/:userId"
-              element={<AdminUserProfilesPage />}
-            />
-            <Route
-              path="/admin/users/profiles/:userId/activity"
-              element={<AdminUserActivityPage />}
-            />
-            <Route path="/admin/database" element={<AdminDatabasePage />} />
-          </Route>
-        </Route>
+        {createAuthRoutes()}
+        {createPublicRoutes({
+          user,
+          homeFilters,
+          onHomeFiltersChange: setHomeFilters,
+          onToggleFavoriteExercise: handleToggleFavoriteExercise,
+          isExerciseFavorite,
+          favorites,
+          folders,
+          onFoldersChange: setFolders,
+          onFavoritesChange: setFavorites,
+        })}
       </Routes>
     </div>
   )

@@ -1,5 +1,13 @@
 export const helpSections = [
   {
+    title: 'Terms and conditions',
+    items: [
+      'Before you continue into protected parts of the app, you will be asked to review and accept the terms and conditions.',
+      'Your acceptance is stored on your profile so you do not need to repeat the prompt on every visit.',
+      'If you decline, the welcome screen remains in place until you choose to continue.',
+    ],
+  },
+  {
     title: 'Getting started',
     items: [
       'Sign in with your email and password to unlock your dashboard, plans, assignments, and saved favourites.',
@@ -45,14 +53,6 @@ export const helpSections = [
       'Use the Timetable section to check upcoming sessions for your selected gym club.',
       'Filter by instructor or class to focus on the sessions that matter to you.',
       'The timetable is useful for keeping track of classes and planning around them.',
-    ],
-  },
-  {
-    title: 'Terms and conditions',
-    items: [
-      'Before you continue into protected parts of the app, you will be asked to review and accept the terms and conditions.',
-      'Your acceptance is stored on your profile so you do not need to repeat the prompt on every visit.',
-      'If you decline, the welcome screen remains in place until you choose to continue.',
     ],
   },
   {

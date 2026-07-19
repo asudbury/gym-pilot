@@ -2,6 +2,7 @@ import { NavLink, useLocation } from 'react-router-dom'
 import type { ReactNode } from 'react'
 import { appTokens } from '../constants/tokens'
 import { getToneClass } from '../components/toneClasses'
+import { DecorativeIcon } from '../components/ui/DecorativeIcon'
 
 type PageLayoutProps = {
   children: ReactNode
@@ -21,9 +22,10 @@ export function PageLayout({ children, className = '' }: PageLayoutProps) {
               to="/"
               className={getToneClass(
                 'default',
-                'px-4 py-2 text-sm font-medium',
+                'inline-flex items-center gap-2 px-4 py-2 text-sm font-medium',
               )}
             >
+              <DecorativeIcon icon="home" className="h-4 w-4" />
               <span>Go Home</span>
             </NavLink>
           </div>
