@@ -176,7 +176,8 @@ export function getDashboardLayoutDefinitions(
       widgets: [
         {
           title: 'Class attendance history',
-          description: 'Review and manage your recorded class attendance entries.',
+          description:
+            'Review and manage your recorded class attendance entries.',
           to: '/attendance-history',
           tone: 'blue',
           icon: 'calendar',

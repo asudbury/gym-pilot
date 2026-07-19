@@ -338,7 +338,10 @@ function App() {
             <Route path="/plans" element={<PlansPage />} />
             <Route element={<RequireAuth requireClubId />}>
               <Route path="/timetable" element={<TimetablePage />} />
-              <Route path="/attendance-history" element={<AttendanceHistoryPage />} />
+              <Route
+                path="/attendance-history"
+                element={<AttendanceHistoryPage />}
+              />
             </Route>
             <Route path="/assignments" element={<AssignmentsPage />} />
             <Route
