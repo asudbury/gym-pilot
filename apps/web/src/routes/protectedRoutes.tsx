@@ -42,7 +42,10 @@ export function createProtectedRoutes({
       <Route path="/plans" element={<PlansPage />} />
       <Route element={<RequireAuth requireClubId />}>
         <Route path="/timetable" element={<TimetablePage />} />
-        <Route path="/timetable/attendance" element={<RecordAttendancePage />} />
+        <Route
+          path="/timetable/attendance"
+          element={<RecordAttendancePage />}
+        />
         <Route path="/attendance-history" element={<AttendanceHistoryPage />} />
       </Route>
       <Route path="/assignments" element={<AssignmentsPage />} />

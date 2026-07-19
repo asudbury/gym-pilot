@@ -25,7 +25,9 @@ export function RecordAttendancePage() {
   const [attendanceNotes, setAttendanceNotes] = useState('')
   const [attendanceRating, setAttendanceRating] = useState<number | null>(null)
   const [attendanceSaving, setAttendanceSaving] = useState(false)
-  const [attendanceMessage, setAttendanceMessage] = useState<string | null>(null)
+  const [attendanceMessage, setAttendanceMessage] = useState<string | null>(
+    null,
+  )
 
   const attendanceAction = useMemo(
     () => resolveTimetableAttendanceAction(user?.role, user?.roles),
