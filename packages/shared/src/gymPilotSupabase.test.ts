@@ -1,10 +1,14 @@
 import { describe, expect, it } from 'vitest'
 import {
+  buildSupabaseProfileLocalCacheEntry,
+  buildSupabaseUserRoleRows,
   formatAttendanceHistoryError,
   getAttendanceHistoryTableName,
+  getSupabaseProfileLocalStorageKey,
   getSupabaseTableName,
   isLocalhostHost,
   mapAttendanceHistoryEntryFromSupabase,
+  normalizeSupabaseUserRoleRows,
   removeAttendanceHistoryEntry,
   shouldRecordLoginActivity,
   shouldRecordSupabaseUserActivity,
@@ -118,6 +122,51 @@ describe('attendance history error formatting', () => {
 
   it('falls back to a generic message for unknown errors', () => {
     expect(formatAttendanceHistoryError('something went wrong')).toBe('We could not load your attendance history right now.')
+  })
+})
+
+describe('user role table helpers', () => {
+  it('builds role rows for the dedicated user roles table', () => {
+    expect(buildSupabaseUserRoleRows('user-1', ['admin', 'client'])).toEqual([
+      { user_id: 'user-1', role: 'admin' },
+      { user_id: 'user-1', role: 'client' },
+    ])
+  })
+
+  it('normalizes role rows into the app role model', () => {
+    expect(normalizeSupabaseUserRoleRows([
+      { user_id: 'user-1', role: 'admin' },
+      { user_id: 'user-1', role: 'client' },
+      { user_id: 'user-1', role: 'invalid' },
+    ])).toEqual(['admin', 'client'])
+  })
+})
+
+describe('local profile snapshot sync', () => {
+  it('builds a stable IndexedDB cache entry for the current profile snapshot', () => {
+    const entry = buildSupabaseProfileLocalCacheEntry('user-1', {
+      friendlyName: 'Ada',
+      applicationName: 'Gym Pilot',
+      gymBrand: 'Virgin',
+      gymName: 'Manchester',
+      gymClubId: '123',
+      accountTier: 'gold',
+      accessEndsAt: null,
+      isFrozen: false,
+      lastLoggedInAt: '2026-01-01T00:00:00.000Z',
+      previousLastLoggedInAt: null,
+      mustChangePassword: false,
+      termsAccepted: true,
+      termsAcceptedAt: '2026-01-01T00:00:00.000Z',
+      roles: ['admin'],
+      trainerId: null,
+    })
+
+    expect(getSupabaseProfileLocalStorageKey('user-1')).toBe('profile:user-1')
+    expect(entry.userId).toBe('user-1')
+    expect(entry.snapshot.friendlyName).toBe('Ada')
+    expect(entry.snapshot.roles).toEqual(['admin'])
+    expect(entry.storedAt).toMatch(/^\d{4}-\d{2}-\d{2}T/)
   })
 })
 

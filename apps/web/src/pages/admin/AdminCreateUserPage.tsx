@@ -5,6 +5,7 @@ import {
   ensureAuthenticatedSupabaseSession,
   getSupabaseClient,
   logger,
+  saveSupabaseProfileRoles,
   signUpWithPassword,
   usePlan,
 } from '@gym-pilot/shared'
@@ -126,6 +127,10 @@ export function AdminCreateUserPage() {
           .from('gym_pilot_profile')
           .upsert(profilePayload, { onConflict: 'user_id' })
 
+        if (!profileError) {
+          await saveSupabaseProfileRoles(newUserRoles, response.data.user.id)
+        }
+
         if (
           profileError &&
           /trainer_id|does not exist|column .* does not exist/i.test(
@@ -138,11 +143,14 @@ export function AdminCreateUserPage() {
               {
                 user_id: response.data.user.id,
                 friendly_name: resolvedDisplayName,
-                roles: newUserRoles,
                 must_change_password: true,
               },
               { onConflict: 'user_id' },
             )
+
+          if (!fallbackError) {
+            await saveSupabaseProfileRoles(newUserRoles, response.data.user.id)
+          }
 
           if (fallbackError) {
             logger.error(

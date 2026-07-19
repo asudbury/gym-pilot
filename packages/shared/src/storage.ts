@@ -18,7 +18,7 @@ export interface IPersistenceStore {
   save<T>(key: string, value: T): Promise<void>
 }
 
-const LOCAL_ONLY_KEYS = new Set(['gym-pilot-auth-session', 'gym-pilot-auth-bypass'])
+const LOCAL_ONLY_KEYS = new Set(['gym-pilot-auth-session'])
 
 function shouldUseSupabaseForKey(key: string) {
   if (LOCAL_ONLY_KEYS.has(key)) {

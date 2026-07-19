@@ -5,6 +5,7 @@ import {
   getSupabaseClient,
   listSupabaseAuthUsers,
   logger,
+  saveSupabaseProfileRoles,
   usePlan,
 } from '@gym-pilot/shared'
 import type { UserRole } from '@gym-pilot/types'
@@ -70,7 +71,7 @@ export function AdminUserProfilesPage() {
     const { data, error } = await client
       .from('gym_pilot_profile')
       .select(
-        'user_id, friendly_name, roles, trainer_id, application_name, gym_brand, gym_club_id, account_tier, access_ends_at, is_frozen, must_change_password, last_logged_in_at, previous_last_logged_in_at',
+        'user_id, friendly_name, trainer_id, application_name, gym_brand, gym_club_id, account_tier, access_ends_at, is_frozen, must_change_password, last_logged_in_at, previous_last_logged_in_at',
       )
 
     if (error) {
@@ -169,7 +170,6 @@ export function AdminUserProfilesPage() {
           ? new Date(draft.accessEndsAt).toISOString()
           : null,
         is_frozen: draft.isFrozen,
-        roles: draft.roles,
         trainer_id: draft.trainerId ?? null,
         must_change_password: draft.mustChangePassword,
       }
@@ -201,7 +201,6 @@ export function AdminUserProfilesPage() {
                 ? new Date(draft.accessEndsAt).toISOString()
                 : null,
               is_frozen: draft.isFrozen,
-              roles: draft.roles,
               must_change_password: draft.mustChangePassword,
             },
             { onConflict: 'user_id' },
@@ -214,6 +213,7 @@ export function AdminUserProfilesPage() {
         throw error
       }
 
+      await saveSupabaseProfileRoles(draft.roles, profile.id)
       await refreshProfiles()
       setStatusMessage(`Profile updated for ${trimmedName}.`)
       navigate('/admin/users', { replace: true })

@@ -21,7 +21,6 @@ import {
 
 const LOCAL_ONLY_KEYS = new Set([
   'gym-pilot-auth-session',
-  'gym-pilot-auth-bypass',
 ])
 
 function shouldUseRemoteForKey(key: string) {

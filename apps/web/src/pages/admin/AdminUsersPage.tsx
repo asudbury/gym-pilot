@@ -4,6 +4,7 @@ import { Button } from '../../components/Button'
 import {
   getSupabaseClient,
   listSupabaseAuthUsers,
+  loadSupabaseProfileRoles,
   logger,
 } from '@gym-pilot/shared'
 import { AdminSectionShell } from '../../components/admin/AdminSectionShell'
@@ -41,7 +42,7 @@ export function AdminUsersPage() {
 
     const { data, error } = await client
       .from('gym_pilot_profile')
-      .select('user_id, friendly_name, roles, trainer_id, must_change_password')
+      .select('user_id, friendly_name, trainer_id, must_change_password')
 
     const profileSelectionError =
       error &&
@@ -65,7 +66,7 @@ export function AdminUsersPage() {
       profileSelectionError === null && error
         ? await client
             .from('gym_pilot_profile')
-            .select('user_id, friendly_name, roles, must_change_password')
+            .select('user_id, friendly_name, must_change_password')
         : null
 
     const resolvedData = fallbackSelection?.data ?? data
@@ -85,7 +86,21 @@ export function AdminUsersPage() {
       authUsers.map((user) => [user.id, user.email ?? null]),
     )
 
-    const nextRows = mapAdminProfileRows(resolvedData ?? [], emailLookup)
+    const roleLookup = new Map<string, string[]>()
+    const profileIds = (resolvedData ?? []).map((row) => String(row.user_id ?? '')).filter(Boolean)
+
+    for (const profileId of profileIds) {
+      const roles = await loadSupabaseProfileRoles(profileId)
+      roleLookup.set(profileId, roles)
+    }
+
+    const nextRows = mapAdminProfileRows(
+      (resolvedData ?? []).map((row) => ({
+        ...row,
+        roles: roleLookup.get(String(row.user_id ?? '')) ?? [],
+      })),
+      emailLookup,
+    )
 
     setProfileUsers(nextRows)
     setIsLoadingSupabaseUsers(false)

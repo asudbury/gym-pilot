@@ -2,6 +2,7 @@ import type { Assignment, Plan, UserRole } from '@gym-pilot/types'
 import { getSupabaseClient, isSupabasePersistenceEnabled as isSupabasePersistenceEnabledBase } from './supabase'
 import { logger } from './logging'
 import { normalizeUserRoles } from './utils'
+import { saveJsonRecord as saveDexieJsonRecord, loadJsonRecord as loadDexieJsonRecord } from './dexie'
 
 const DEFAULT_SUPABASE_TABLE = 'gym_pilot_app_state'
 
@@ -26,6 +27,40 @@ type SupabaseProfileSnapshot = {
 }
 
 const profileSnapshotCache = new Map<string, Promise<SupabaseProfileSnapshot>>()
+
+export function getSupabaseProfileLocalStorageKey(userId: string) {
+  return `profile:${userId}`
+}
+
+export function buildSupabaseProfileLocalCacheEntry(userId: string, snapshot: SupabaseProfileSnapshot) {
+  return {
+    userId,
+    snapshot,
+    storedAt: new Date().toISOString(),
+  }
+}
+
+async function persistSupabaseProfileSnapshotToLocalCache(userId: string, snapshot: SupabaseProfileSnapshot) {
+  try {
+    await saveDexieJsonRecord(getSupabaseProfileLocalStorageKey(userId), buildSupabaseProfileLocalCacheEntry(userId, snapshot))
+  } catch (error) {
+    logger.warn('[Supabase] Could not persist profile snapshot to local cache', error)
+  }
+}
+
+async function loadSupabaseProfileSnapshotFromLocalCache(userId: string): Promise<SupabaseProfileSnapshot | null> {
+  try {
+    const cachedEntry = await loadDexieJsonRecord<{ userId: string; snapshot: SupabaseProfileSnapshot; storedAt: string } | null>(getSupabaseProfileLocalStorageKey(userId), null)
+    if (!cachedEntry?.snapshot) {
+      return null
+    }
+
+    return cachedEntry.snapshot
+  } catch (error) {
+    logger.warn('[Supabase] Could not load profile snapshot from local cache', error)
+    return null
+  }
+}
 
 // The app persists arbitrary JSON payloads as { user_id, key, value } rows.
 // These records are stored in the shared app_state table rather than the
@@ -106,6 +141,90 @@ function normalizeProfileRoles(roles: unknown): UserRole[] {
   return normalizeUserRoles(Array.isArray(roles) ? roles : undefined)
 }
 
+export function normalizeSupabaseUserRoleRows(rows: Array<{ user_id?: unknown; role?: unknown }> | null | undefined): UserRole[] {
+  const normalizedRoles = (Array.isArray(rows) ? rows : [])
+    .map((row) => (row && typeof row === 'object' ? (row as Record<string, unknown>).role : undefined))
+    .filter((role): role is UserRole => typeof role === 'string' && normalizeUserRoles([role]).length > 0)
+
+  return normalizeUserRoles(normalizedRoles)
+}
+
+export function buildSupabaseUserRoleRows(userId: string, roles: Array<UserRole | string> | UserRole | null | undefined): Array<{ user_id: string; role: UserRole }> {
+  const normalizedRoles = normalizeUserRoles(Array.isArray(roles) ? roles : roles ? [roles] : [])
+
+  return normalizedRoles.map((role) => ({ user_id: userId, role }))
+}
+
+async function loadSupabaseUserRoles(client: ReturnType<typeof getSupabaseClient>, userId: string): Promise<UserRole[]> {
+  if (!client) {
+    return []
+  }
+
+  const { data, error } = await client
+    .from('gym_pilot_user_role')
+    .select('user_id, role')
+    .eq('user_id', userId)
+
+  if (error) {
+    if (isMissingProfileColumnError(error, ['role'])) {
+      return []
+    }
+
+    logger.warn('[Supabase] Could not load user roles', error)
+    return []
+  }
+
+  return normalizeSupabaseUserRoleRows(data ?? [])
+}
+
+async function loadSupabaseUserRolesByUserIds(client: ReturnType<typeof getSupabaseClient>, userIds: string[]): Promise<Map<string, UserRole[]>> {
+  const roleLookup = new Map<string, UserRole[]>()
+
+  if (!client || userIds.length === 0) {
+    return roleLookup
+  }
+
+  const { data, error } = await client
+    .from('gym_pilot_user_role')
+    .select('user_id, role')
+    .in('user_id', userIds)
+
+  if (error) {
+    if (isMissingProfileColumnError(error, ['role'])) {
+      return roleLookup
+    }
+
+    logger.warn('[Supabase] Could not load user roles for user list', error)
+    return roleLookup
+  }
+
+  const rows = Array.isArray(data) ? data : []
+  const groupedRows = new Map<string, Array<{ user_id?: unknown; role?: unknown }>>()
+
+  rows.forEach((row) => {
+    if (!row || typeof row !== 'object') {
+      return
+    }
+
+    const candidate = row as Record<string, unknown>
+    const candidateUserId = typeof candidate.user_id === 'string' ? candidate.user_id : null
+
+    if (!candidateUserId) {
+      return
+    }
+
+    const existingRows = groupedRows.get(candidateUserId) ?? []
+    existingRows.push(candidate)
+    groupedRows.set(candidateUserId, existingRows)
+  })
+
+  groupedRows.forEach((roleRows, candidateUserId) => {
+    roleLookup.set(candidateUserId, normalizeSupabaseUserRoleRows(roleRows))
+  })
+
+  return roleLookup
+}
+
 function normalizeProfileAccessTier(value: unknown): SupabaseAccessTier {
   const normalizedValue = typeof value === 'string' ? value.trim().toLowerCase() : ''
 
@@ -171,7 +290,7 @@ function mapSupabaseProfile(profile: {
   must_change_password: boolean
   created_at?: string
   updated_at?: string
-}): SupabaseProfile {
+}, roleOverride?: UserRole[]): SupabaseProfile {
   return {
     id: profile.id,
     user_id: profile.user_id,
@@ -182,7 +301,7 @@ function mapSupabaseProfile(profile: {
     account_tier: normalizeProfileAccessTier(profile.account_tier),
     access_ends_at: typeof profile.access_ends_at === 'string' ? profile.access_ends_at : null,
     is_frozen: Boolean(profile.is_frozen),
-    roles: normalizeProfileRoles(profile.roles),
+    roles: roleOverride ?? normalizeProfileRoles(profile.roles),
     trainer_id: typeof profile.trainer_id === 'string' ? profile.trainer_id : null,
     must_change_password: Boolean(profile.must_change_password),
     created_at: profile.created_at,
@@ -256,9 +375,11 @@ export async function loadSupabaseProfileSnapshot(userId?: string): Promise<Supa
   }
 
   const requestPromise = (async () => {
+    const localCachedSnapshot = await loadSupabaseProfileSnapshotFromLocalCache(resolvedUserId)
+
     const { data, error } = await client
       .from('gym_pilot_profile')
-      .select('friendly_name, application_name, gym_brand, gym_name, gym_club_id, account_tier, access_ends_at, is_frozen, last_logged_in_at, previous_last_logged_in_at, roles, trainer_id, must_change_password, terms_accepted, terms_accepted_at')
+      .select('friendly_name, application_name, gym_brand, gym_name, gym_club_id, account_tier, access_ends_at, is_frozen, last_logged_in_at, previous_last_logged_in_at, trainer_id, must_change_password, terms_accepted, terms_accepted_at')
       .eq('user_id', resolvedUserId)
       .maybeSingle()
 
@@ -277,8 +398,9 @@ export async function loadSupabaseProfileSnapshot(userId?: string): Promise<Supa
     const gymClubId = typeof profileData?.gym_club_id === 'number' && Number.isFinite(profileData.gym_club_id)
       ? String(profileData.gym_club_id)
       : null
+    const profileRoles = await loadSupabaseUserRoles(client, resolvedUserId)
 
-    return {
+    const snapshot = {
       friendlyName: typeof profileData?.friendly_name === 'string' ? profileData.friendly_name.trim() || null : null,
       applicationName: typeof profileData?.application_name === 'string' ? profileData.application_name.trim() || null : null,
       gymBrand,
@@ -292,9 +414,16 @@ export async function loadSupabaseProfileSnapshot(userId?: string): Promise<Supa
       mustChangePassword: Boolean(profileData?.must_change_password),
       termsAccepted: Boolean(profileData?.terms_accepted),
       termsAcceptedAt: typeof profileData?.terms_accepted_at === 'string' ? profileData.terms_accepted_at : null,
-      roles: normalizeProfileRoles(profileData?.roles),
+      roles: profileRoles,
       trainerId: typeof profileData?.trainer_id === 'string' ? profileData.trainer_id : null,
     }
+
+    if (localCachedSnapshot && (!data || error)) {
+      return localCachedSnapshot
+    }
+
+    await persistSupabaseProfileSnapshotToLocalCache(resolvedUserId, snapshot)
+    return snapshot
   })()
 
   profileSnapshotCache.set(cacheKey, requestPromise)
@@ -363,27 +492,39 @@ export async function listSupabaseProfiles(): Promise<SupabaseProfile[]> {
 
   const { data, error } = await client
     .from('gym_pilot_profile')
-    .select('id, user_id, friendly_name, application_name, gym_brand, gym_name, account_tier, access_ends_at, is_frozen, roles, trainer_id, must_change_password, created_at, updated_at')
+    .select('id, user_id, friendly_name, application_name, gym_brand, gym_name, account_tier, access_ends_at, is_frozen, trainer_id, must_change_password, created_at, updated_at')
 
   if (error && isMissingProfileColumnError(error, ['trainer_id', 'gym_brand'])) {
     const fallback = await client
       .from('gym_pilot_profile')
-      .select('id, user_id, friendly_name, application_name, gym_name, account_tier, access_ends_at, is_frozen, roles, must_change_password, created_at, updated_at')
+      .select('id, user_id, friendly_name, application_name, gym_name, account_tier, access_ends_at, is_frozen, must_change_password, created_at, updated_at')
 
     if (fallback.error) {
       logger.error('[Supabase] Could not load profiles', fallback.error)
       return []
     }
 
-    return ((fallback.data ?? []) as Array<{
+    const fallbackProfiles = ((fallback.data ?? []) as Array<{
       id: string
       user_id: string
       friendly_name: string | null
-      roles?: unknown
       must_change_password: boolean
       created_at?: string
       updated_at?: string
-    }>).filter((profile) => typeof profile.user_id === 'string').map(mapSupabaseProfile)
+    }>).filter((profile) => typeof profile.user_id === 'string')
+
+    return fallbackProfiles.map((profile) => mapSupabaseProfile({
+      id: profile.id,
+      user_id: profile.user_id,
+      friendly_name: typeof profile.friendly_name === 'string' ? profile.friendly_name : null,
+      application_name: null,
+      gym_brand: null,
+      gym_name: null,
+      trainer_id: null,
+      must_change_password: Boolean(profile.must_change_password),
+      created_at: profile.created_at,
+      updated_at: profile.updated_at,
+    }))
   }
 
   if (error) {
@@ -391,25 +532,42 @@ export async function listSupabaseProfiles(): Promise<SupabaseProfile[]> {
     return []
   }
 
-  const profiles: SupabaseProfile[] = ((data ?? []) as Array<{
+  const profileRows = ((data ?? []) as Array<{
     id: string
     user_id: string
     friendly_name: string | null
-    roles?: unknown
     must_change_password: boolean
     created_at?: string
     updated_at?: string
-  }>).filter((profile) => typeof profile.user_id === 'string').map(mapSupabaseProfile)
+  }>).filter((profile) => typeof profile.user_id === 'string')
+
+  const profiles: SupabaseProfile[] = []
+  const roleLookup = await loadSupabaseUserRolesByUserIds(client, profileRows.map((profile) => profile.user_id))
+
+  for (const profile of profileRows) {
+    profiles.push(mapSupabaseProfile({
+      id: profile.id,
+      user_id: profile.user_id,
+      friendly_name: typeof profile.friendly_name === 'string' ? profile.friendly_name : null,
+      application_name: null,
+      gym_brand: null,
+      gym_name: null,
+      trainer_id: null,
+      must_change_password: Boolean(profile.must_change_password),
+      created_at: profile.created_at,
+      updated_at: profile.updated_at,
+    }, roleLookup.get(profile.user_id) ?? []))
+  }
 
   if (!profiles.some((profile) => profile.user_id === userId)) {
     const { error: upsertError } = await client.from('gym_pilot_profile').upsert(
-      { user_id: userId, friendly_name: null, application_name: null, gym_brand: null, roles: ['client'], trainer_id: null, must_change_password: false },
+      { user_id: userId, friendly_name: null, application_name: null, gym_brand: null, trainer_id: null, must_change_password: false },
       { onConflict: 'user_id' },
     )
 
     if (upsertError && isMissingProfileColumnError(upsertError, ['trainer_id', 'gym_brand'])) {
       const fallback = await client.from('gym_pilot_profile').upsert(
-        { user_id: userId, friendly_name: null, application_name: null, roles: ['client'], must_change_password: false },
+        { user_id: userId, friendly_name: null, application_name: null, must_change_password: false },
         { onConflict: 'user_id' },
       )
 
@@ -424,28 +582,98 @@ export async function listSupabaseProfiles(): Promise<SupabaseProfile[]> {
 
     const { data: refreshedData, error: refreshError } = await client
       .from('gym_pilot_profile')
-      .select('id, user_id, friendly_name, application_name, gym_brand, gym_name, account_tier, access_ends_at, is_frozen, roles, trainer_id, must_change_password, created_at, updated_at')
+      .select('id, user_id, friendly_name, application_name, gym_brand, gym_name, account_tier, access_ends_at, is_frozen, trainer_id, must_change_password, created_at, updated_at')
 
     if (refreshError) {
       logger.error('[Supabase] Could not reload profiles after creating the current user row', refreshError)
       return profiles
     }
 
-    return (refreshedData ?? []).map((profile) => mapSupabaseProfile({
+    const refreshedRows = ((refreshedData ?? []) as Array<{
+      id: string
+      user_id: string
+      friendly_name: string | null
+      must_change_password: boolean
+      created_at?: string
+      updated_at?: string
+    }>).filter((profile) => typeof profile.user_id === 'string')
+    const refreshedRoleLookup = await loadSupabaseUserRolesByUserIds(client, refreshedRows.map((profile) => profile.user_id))
+
+    return refreshedRows.map((profile) => mapSupabaseProfile({
       id: profile.id,
       user_id: profile.user_id,
       friendly_name: typeof profile.friendly_name === 'string' ? profile.friendly_name : null,
-      application_name: typeof profile.application_name === 'string' ? profile.application_name : null,
-      gym_brand: typeof profile.gym_brand === 'string' ? profile.gym_brand : null,
-      roles: profile.roles,
-      trainer_id: typeof profile.trainer_id === 'string' ? profile.trainer_id : null,
+      application_name: null,
+      gym_brand: null,
+      gym_name: null,
+      trainer_id: null,
       must_change_password: Boolean(profile.must_change_password),
       created_at: profile.created_at,
       updated_at: profile.updated_at,
-    }))
+    }, refreshedRoleLookup.get(profile.user_id) ?? []))
   }
 
   return profiles
+}
+
+export async function loadSupabaseProfileRoles(userId: string): Promise<UserRole[]> {
+  const client = getSupabaseClient()
+
+  if (!client) {
+    return []
+  }
+
+  return loadSupabaseUserRoles(client, userId)
+}
+
+export async function saveSupabaseProfileRoles(roles: Array<UserRole | string> | UserRole | null | undefined, userId?: string) {
+  const client = getSupabaseClient()
+
+  if (!client) {
+    return
+  }
+
+  const resolvedUserId = userId || await getAuthenticatedUserId(client)
+
+  if (!resolvedUserId) {
+    return
+  }
+
+  const roleRows = buildSupabaseUserRoleRows(resolvedUserId, roles)
+
+  const { error: deleteError } = await client
+    .from('gym_pilot_user_role')
+    .delete()
+    .eq('user_id', resolvedUserId)
+
+  if (deleteError) {
+    if (isMissingProfileColumnError(deleteError, ['role'])) {
+      return
+    }
+
+    logger.error('[Supabase] Could not clear existing user roles', deleteError)
+    return
+  }
+
+  if (roleRows.length === 0) {
+    await invalidateSupabaseProfileCache(resolvedUserId)
+    return
+  }
+
+  const { error: insertError } = await client
+    .from('gym_pilot_user_role')
+    .insert(roleRows)
+
+  if (insertError) {
+    if (isMissingProfileColumnError(insertError, ['role'])) {
+      return
+    }
+
+    logger.error('[Supabase] Could not save user roles', insertError)
+    return
+  }
+
+  await invalidateSupabaseProfileCache(resolvedUserId)
 }
 
 export async function loadSupabaseProfileFlag(flag: 'must_change_password', userId?: string): Promise<boolean> {
@@ -470,13 +698,19 @@ export function buildSupabaseProfileTermsAcceptancePayload(userId: string, accep
   }
 }
 
-function invalidateSupabaseProfileCache(userId?: string) {
+async function invalidateSupabaseProfileCache(userId?: string) {
   if (!userId) {
     profileSnapshotCache.clear()
     return
   }
 
   profileSnapshotCache.delete(`profile:${userId}`)
+
+  try {
+    await saveDexieJsonRecord(getSupabaseProfileLocalStorageKey(userId), null)
+  } catch (error) {
+    logger.warn('[Supabase] Could not clear local profile snapshot cache', error)
+  }
 }
 
 export async function saveSupabaseProfileName(friendlyName: string | null) {
@@ -504,7 +738,7 @@ export async function saveSupabaseProfileName(friendlyName: string | null) {
     return
   }
 
-  invalidateSupabaseProfileCache(userId)
+  await invalidateSupabaseProfileCache(userId)
 }
 
 async function saveSupabaseProfileTextValue(fieldName: 'application_name' | 'gym_brand' | 'gym_name' | 'gym_club_id', value: string | null, userId?: string) {
@@ -615,7 +849,7 @@ export async function saveSupabaseProfileAccessSettings(accountTier: string | nu
     return
   }
 
-  invalidateSupabaseProfileCache(resolvedUserId)
+  await invalidateSupabaseProfileCache(resolvedUserId)
 }
 
 export async function saveSupabaseProfileFlag(flag: 'must_change_password', value: boolean, userId?: string) {
@@ -641,7 +875,7 @@ export async function saveSupabaseProfileFlag(flag: 'must_change_password', valu
     return
   }
 
-  invalidateSupabaseProfileCache(resolvedUserId)
+  await invalidateSupabaseProfileCache(resolvedUserId)
 }
 
 export async function saveSupabaseProfileTermsAcceptance(accepted: boolean, userId?: string) {
@@ -726,7 +960,7 @@ export async function saveSupabaseProfileLastLoggedIn(userId?: string) {
     return
   }
 
-  invalidateSupabaseProfileCache(resolvedUserId)
+  await invalidateSupabaseProfileCache(resolvedUserId)
 
   if (shouldRecord) {
     await recordSupabaseUserActivity('login', {}, resolvedUserId)

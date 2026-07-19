@@ -68,6 +68,15 @@ Stores optional profile metadata for the authenticated Supabase user.
 - created_at: string
 - updated_at: string
 
+### User role
+Stores one row per assigned role for a user, replacing the previous JSONB roles array on the profile table.
+
+- id: string
+- user_id: string
+- role: admin | trainer | client | guest
+- created_at: string
+- updated_at: string
+
 ### Favourite folder
 Groups favourite shortcuts for easier organisation.
 
@@ -104,7 +113,7 @@ The shared Supabase helpers in [packages/shared/src/gymPilotSupabase.ts](package
 | Area | Current call patterns | Tables / resources |
 | --- | --- | --- |
 | Auth and session | `client.auth.getSession()`, `client.auth.signInWithOAuth()`, `client.auth.signInWithPassword()`, `client.auth.signUp()`, `client.auth.resetPasswordForEmail()`, `client.auth.updateUser()`, `client.auth.signOut()` | Supabase Auth users and session state |
-| Profiles and settings | `loadSupabaseProfileSnapshot()`, `saveSupabaseProfileName()`, `saveSupabaseApplicationName()`, `saveSupabaseGymBrand()`, `saveSupabaseGymName()`, `saveSupabaseProfileAccessSettings()`, `saveSupabaseProfileFlag()`, `saveSupabaseProfileLastLoggedIn()`, `loadSupabaseProfileTermsAcceptance()`, `saveSupabaseProfileTermsAcceptance()` | `gym_pilot_profile` |
+| Profiles and settings | `loadSupabaseProfileSnapshot()`, `saveSupabaseProfileName()`, `saveSupabaseApplicationName()`, `saveSupabaseGymBrand()`, `saveSupabaseGymName()`, `saveSupabaseProfileAccessSettings()`, `saveSupabaseProfileFlag()`, `saveSupabaseProfileLastLoggedIn()`, `loadSupabaseProfileTermsAcceptance()`, `saveSupabaseProfileTermsAcceptance()`, `loadSupabaseProfileRoles()`, `saveSupabaseProfileRoles()` | `gym_pilot_profile`, `gym_pilot_user_role` |
 | Key/value persistence | `loadSupabaseJsonRecord()`, `saveSupabaseJsonRecord()`, `removeSupabaseJsonRecord()` | `gym_pilot_app_state` plus table-specific rows for plans, assignments, favourites, and app state |
 | Plans and assignments | `select`, `insert`, `upsert`, `delete` against remote rows | `gym_pilot_plan`, `gym_pilot_assignment` |
 | Favourites and folders | `select`, `insert`, `upsert`, `delete` against remote rows | `gym_pilot_favourite_folder`, `gym_pilot_favourite` |
@@ -116,6 +125,7 @@ The shared Supabase helpers in [packages/shared/src/gymPilotSupabase.ts](package
 erDiagram
     auth_users ||--o{ gym_pilot_app_state : owns
     auth_users ||--o{ gym_pilot_profile : owns
+    auth_users ||--o{ gym_pilot_user_role : has
     auth_users ||--o{ gym_pilot_favourite_folder : owns
     auth_users ||--o{ gym_pilot_favourite : owns
     auth_users ||--o{ gym_pilot_plan : owns
@@ -136,7 +146,6 @@ erDiagram
         uuid user_id
         text friendly_name
         boolean must_change_password
-        jsonb roles
         uuid trainer_id
         text application_name
         text gym_brand
@@ -149,6 +158,14 @@ erDiagram
         timestamptz terms_accepted_at
         timestamptz last_logged_in_at
         timestamptz previous_last_logged_in_at
+        timestamptz created_at
+        timestamptz updated_at
+    }
+
+    gym_pilot_user_role {
+        uuid id
+        uuid user_id
+        text role
         timestamptz created_at
         timestamptz updated_at
     }

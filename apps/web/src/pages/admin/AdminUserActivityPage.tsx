@@ -5,6 +5,7 @@ import { AdminSectionShell } from '../../components/admin/AdminSectionShell'
 import {
   getSupabaseClient,
   listSupabaseAuthUsers,
+  loadSupabaseProfileRoles,
   logger,
 } from '@gym-pilot/shared'
 import { getDisplayEmail } from '../../features/admin/domain/adminUtils'
@@ -50,7 +51,7 @@ export function AdminUserActivityPage() {
     const { data: profileData, error: profileError } = await client
       .from('gym_pilot_profile')
       .select(
-        'user_id, friendly_name, roles, last_logged_in_at, previous_last_logged_in_at',
+        'user_id, friendly_name, last_logged_in_at, previous_last_logged_in_at',
       )
       .eq('user_id', profileId)
       .maybeSingle()
@@ -69,8 +70,12 @@ export function AdminUserActivityPage() {
     const emailLookup = new Map(
       authUsers.map((item) => [item.id, item.email ?? null]),
     )
-
-    const viewModel = resolveUserActivityViewModel(profileData, [], emailLookup)
+    const profileRoles = await loadSupabaseProfileRoles(profileId)
+    const viewModel = resolveUserActivityViewModel(
+      profileData ? { ...profileData, roles: profileRoles } : profileData,
+      [],
+      emailLookup,
+    )
     const nextProfile = viewModel.profile
 
     setProfile(nextProfile)
@@ -100,7 +105,7 @@ export function AdminUserActivityPage() {
     }
 
     const nextActivityRows = resolveUserActivityViewModel(
-      profileData,
+      profileData ? { ...profileData, roles: profileRoles } : profileData,
       activityData ?? [],
       emailLookup,
     ).activityRows
