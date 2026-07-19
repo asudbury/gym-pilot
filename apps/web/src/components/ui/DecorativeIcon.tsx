@@ -98,10 +98,7 @@ export function DecorativeIcon({
     ),
     grid: (
       <svg viewBox="0 0 24 24" fill="none" className={iconClassName}>
-        <rect x="4" y="4" width="6" height="6" rx="1.2" stroke="currentColor" strokeWidth="1.8" />
-        <rect x="14" y="4" width="6" height="6" rx="1.2" stroke="currentColor" strokeWidth="1.8" />
-        <rect x="4" y="14" width="6" height="6" rx="1.2" stroke="currentColor" strokeWidth="1.8" />
-        <rect x="14" y="14" width="6" height="6" rx="1.2" stroke="currentColor" strokeWidth="1.8" />
+        <path d="M4 6.5h6M14 6.5h6M4 12h6M14 12h6M4 17.5h6M14 17.5h6" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" />
       </svg>
     ),
     heart: (
