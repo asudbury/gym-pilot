@@ -27,7 +27,11 @@ export function shouldShowInstallHint(): boolean {
     return false
   }
 
-  return isLocalhostPreview() && !isAppleDevice() && !isInstalledAsApp()
+  if (isInstalledAsApp()) {
+    return false
+  }
+
+  return isAppleDevice()
 }
 
 export function getInstallHint(isApple: boolean, isInstalled: boolean): string {

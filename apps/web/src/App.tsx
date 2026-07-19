@@ -139,17 +139,12 @@ function App() {
     const isApple = isAppleDevice()
     const isInstalled = isInstalledAsApp()
 
-    if (isInstalled || (!isApple && !window.location.hostname.match(/^(localhost|127\.0\.0\.1|0\.0\.0\.0|::1)$/))) {
+    if (isInstalled || !isApple) {
       setShowInstallHint(false)
       return
     }
 
-    if (!isApple) {
-      setShowInstallHint(true)
-      return
-    }
-
-    setShowInstallHint(false)
+    setShowInstallHint(true)
   }, [])
 
   const handleToggleFavoriteExercise = (exerciseId: string) => {
