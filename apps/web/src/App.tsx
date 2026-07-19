@@ -41,6 +41,7 @@ import { HelpPage } from './pages/help/HelpPage'
 import { FavouritesPage } from './pages/FavouritesPage'
 import { DashboardPage } from './pages/DashboardPage'
 import { TimetablePage } from './pages/TimetablePage'
+import { AttendanceHistoryPage } from './pages/AttendanceHistoryPage'
 import { buildNavigationMenuItems } from './utils/navigationUtils'
 import { AssignmentDetailPage } from './pages/assignments/AssignmentDetailPage'
 import { logger } from '@gym-pilot/shared'
@@ -337,6 +338,7 @@ function App() {
             <Route path="/plans" element={<PlansPage />} />
             <Route element={<RequireAuth requireClubId />}>
               <Route path="/timetable" element={<TimetablePage />} />
+              <Route path="/attendance-history" element={<AttendanceHistoryPage />} />
             </Route>
             <Route path="/assignments" element={<AssignmentsPage />} />
             <Route

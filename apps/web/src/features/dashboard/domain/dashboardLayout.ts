@@ -121,10 +121,24 @@ export function getDashboardLayoutDefinitions(
         'Monitor your clients, plans and assignments from one place.',
       widgets: [
         {
+          title: 'Attendance history',
+          description: 'Review and manage your recorded attendance entries.',
+          to: '/attendance-history',
+          tone: 'blue',
+          icon: 'calendar',
+        },
+        {
+          title: 'Timetable',
+          description: 'Open your class timetable and upcoming sessions.',
+          to: '/timetable',
+          tone: 'default',
+          icon: 'calendar',
+        },
+        {
           title: 'Client assignments',
           description: 'Review work assigned to your clients.',
           to: '/assignments',
-          tone: 'blue',
+          tone: 'default',
           icon: 'clipboard',
         },
         {
@@ -161,10 +175,24 @@ export function getDashboardLayoutDefinitions(
         'Jump back into your exercises, plans and assignments from one place.',
       widgets: [
         {
+          title: 'Class attendance history',
+          description: 'Review and manage your recorded class attendance entries.',
+          to: '/attendance-history',
+          tone: 'blue',
+          icon: 'calendar',
+        },
+        {
+          title: 'Timetable',
+          description: 'Open your class timetable and upcoming sessions.',
+          to: '/timetable',
+          tone: 'default',
+          icon: 'calendar',
+        },
+        {
           title: 'Exercises',
           description: 'Browse exercises and favourite your go-tos.',
           to: '/exercises',
-          tone: 'blue',
+          tone: 'default',
           icon: 'dumbbell',
         },
         {

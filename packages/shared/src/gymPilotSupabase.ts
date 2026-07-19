@@ -1037,6 +1037,215 @@ export async function recordSupabaseUserActivity(eventType: string, eventData: R
   }
 }
 
+export type AttendanceHistoryEntry = {
+  id: string
+  userId?: string
+  sessionId?: string | null
+  classId?: string | null
+  className?: string | null
+  instructorName?: string | null
+  startedAt?: string | null
+  attendanceType: 'attended' | 'taught'
+  notes?: string | null
+  rating?: number | null
+  createdAt?: string | null
+  updatedAt?: string | null
+}
+
+type SupabaseAttendanceHistoryRow = {
+  id: string
+  user_id?: string | null
+  session_id?: string | null
+  class_id?: string | null
+  class_name?: string | null
+  instructor_name?: string | null
+  started_at?: string | null
+  attendance_type?: 'attended' | 'taught' | null
+  notes?: string | null
+  rating?: number | null
+  created_at?: string | null
+  updated_at?: string | null
+}
+
+const ATTENDANCE_HISTORY_STORAGE_KEY = 'gym-pilot.timetable-attendance-history'
+
+export function getAttendanceHistoryTableName() {
+  return 'gym_pilot_class_attendance'
+}
+
+function createAttendanceHistoryEntryId() {
+  if (typeof crypto !== 'undefined' && typeof crypto.randomUUID === 'function') {
+    return crypto.randomUUID()
+  }
+
+  return `attendance-${Date.now()}-${Math.random().toString(16).slice(2)}`
+}
+
+function loadAttendanceHistoryRecordsFromStorage(): AttendanceHistoryEntry[] {
+  if (typeof window === 'undefined') {
+    return []
+  }
+
+  const storedValue = window.localStorage.getItem(ATTENDANCE_HISTORY_STORAGE_KEY)
+
+  if (!storedValue) {
+    return []
+  }
+
+  try {
+    const parsedValue = JSON.parse(storedValue) as unknown
+
+    if (!Array.isArray(parsedValue)) {
+      return []
+    }
+
+    return parsedValue.filter((record): record is AttendanceHistoryEntry => Boolean(record) && typeof record === 'object' && typeof (record as AttendanceHistoryEntry).id === 'string')
+  } catch {
+    return []
+  }
+}
+
+function persistAttendanceHistoryRecords(records: AttendanceHistoryEntry[]) {
+  if (typeof window === 'undefined') {
+    return
+  }
+
+  window.localStorage.setItem(ATTENDANCE_HISTORY_STORAGE_KEY, JSON.stringify(records))
+}
+
+export function mapAttendanceHistoryEntryFromSupabase(row: SupabaseAttendanceHistoryRow): AttendanceHistoryEntry {
+  return {
+    id: row.id,
+    userId: row.user_id ?? undefined,
+    sessionId: row.session_id ?? null,
+    classId: row.class_id ?? null,
+    className: row.class_name ?? null,
+    instructorName: row.instructor_name ?? null,
+    startedAt: row.started_at ?? null,
+    attendanceType: row.attendance_type === 'taught' ? 'taught' : 'attended',
+    notes: row.notes ?? null,
+    rating: typeof row.rating === 'number' ? row.rating : null,
+    createdAt: row.created_at ?? null,
+    updatedAt: row.updated_at ?? null,
+  }
+}
+
+export function formatAttendanceHistoryError(error: unknown): string {
+  if (error && typeof error === 'object' && 'message' in error && typeof (error as { message?: unknown }).message === 'string') {
+    const message = (error as { message: string }).message
+    if (message.trim().length > 0) {
+      return message
+    }
+  }
+
+  return 'We could not load your attendance history right now.'
+}
+
+export async function loadAttendanceHistoryEntries(userId?: string): Promise<AttendanceHistoryEntry[]> {
+  const client = getSupabaseClient()
+
+  if (client) {
+    const resolvedUserId = userId || await getAuthenticatedUserId(client)
+
+    if (resolvedUserId) {
+      const { data, error } = await client
+        .from(getAttendanceHistoryTableName())
+        .select('id, user_id, session_id, class_id, class_name, instructor_name, started_at, attendance_type, notes, rating, created_at')
+        .eq('user_id', resolvedUserId)
+        .order('created_at', { ascending: false })
+
+      if (!error && Array.isArray(data)) {
+        const remoteEntries = data.map((row) => mapAttendanceHistoryEntryFromSupabase(row as SupabaseAttendanceHistoryRow))
+        persistAttendanceHistoryRecords(remoteEntries)
+        return remoteEntries
+      }
+
+      if (error) {
+        logger.warn('[Supabase] Could not load attendance history', error)
+      }
+    }
+  }
+
+  const records = loadAttendanceHistoryRecordsFromStorage()
+
+  if (!userId) {
+    return records
+  }
+
+  return records.filter((record) => record.userId === userId)
+}
+
+export async function saveAttendanceHistoryEntry(entry: AttendanceHistoryEntry, userId?: string): Promise<AttendanceHistoryEntry[]> {
+  const client = getSupabaseClient()
+  const resolvedUserId = userId || (client ? await getAuthenticatedUserId(client) : null)
+
+  if (client && resolvedUserId) {
+    const { error } = await client
+      .from(getAttendanceHistoryTableName())
+      .upsert({
+        id: entry.id,
+        user_id: resolvedUserId,
+        session_id: entry.sessionId ?? null,
+        class_id: entry.classId ?? null,
+        class_name: entry.className ?? null,
+        instructor_name: entry.instructorName ?? null,
+        started_at: entry.startedAt ?? null,
+        attendance_type: entry.attendanceType,
+        notes: entry.notes ?? null,
+        rating: entry.rating ?? null,
+        created_at: entry.createdAt ?? null,
+      }, { onConflict: 'id' })
+
+    if (!error) {
+      const nextRecords = upsertAttendanceHistoryEntry(loadAttendanceHistoryRecordsFromStorage(), entry)
+      persistAttendanceHistoryRecords(nextRecords)
+      return nextRecords
+    }
+
+    logger.warn('[Supabase] Could not persist updated attendance history entry', error)
+  }
+
+  const nextRecords = upsertAttendanceHistoryEntry(loadAttendanceHistoryRecordsFromStorage(), entry)
+  persistAttendanceHistoryRecords(nextRecords)
+  return nextRecords
+}
+
+export async function deleteAttendanceHistoryEntry(entryId: string, userId?: string): Promise<AttendanceHistoryEntry[]> {
+  const client = getSupabaseClient()
+  const resolvedUserId = userId || (client ? await getAuthenticatedUserId(client) : null)
+
+  if (client && resolvedUserId) {
+    const { error } = await client.from(getAttendanceHistoryTableName()).delete().eq('id', entryId).eq('user_id', resolvedUserId)
+
+    if (!error) {
+      const nextRecords = removeAttendanceHistoryEntry(loadAttendanceHistoryRecordsFromStorage(), entryId)
+      persistAttendanceHistoryRecords(nextRecords)
+      return nextRecords
+    }
+
+    logger.warn('[Supabase] Could not delete attendance history entry', error)
+  }
+
+  const nextRecords = removeAttendanceHistoryEntry(loadAttendanceHistoryRecordsFromStorage(), entryId)
+  persistAttendanceHistoryRecords(nextRecords)
+  return nextRecords
+}
+
+export function upsertAttendanceHistoryEntry(
+  records: AttendanceHistoryEntry[],
+  entry: AttendanceHistoryEntry,
+): AttendanceHistoryEntry[] {
+  const next = records.filter((candidate) => candidate.id !== entry.id)
+  return [...next, entry]
+}
+
+export function removeAttendanceHistoryEntry(
+  records: AttendanceHistoryEntry[],
+  entryId: string,
+): AttendanceHistoryEntry[] {
+  return records.filter((candidate) => candidate.id !== entryId)
+}
+
 export async function saveTimetableAttendance(input: {
   userId?: string
   sessionId?: string | number | null
@@ -1060,7 +1269,22 @@ export async function saveTimetableAttendance(input: {
     return { success: false as const, error: new Error('Unable to resolve the current user') }
   }
 
-  const { error } = await client.from('gym_pilot_class_attendance').insert({
+  const historyEntry: AttendanceHistoryEntry = {
+    id: createAttendanceHistoryEntryId(),
+    userId: resolvedUserId,
+    sessionId: input.sessionId != null ? String(input.sessionId) : null,
+    classId: input.classId != null ? String(input.classId) : null,
+    className: input.className ?? null,
+    instructorName: input.instructorName?.trim() ? input.instructorName.trim() : null,
+    startedAt: input.startedAt ?? null,
+    attendanceType: input.attendanceType,
+    notes: input.notes?.trim() ? input.notes.trim() : null,
+    rating: input.rating ?? null,
+    createdAt: new Date().toISOString(),
+    updatedAt: new Date().toISOString(),
+  }
+
+  const { error } = await client.from(getAttendanceHistoryTableName()).insert({
     user_id: resolvedUserId,
     session_id: input.sessionId != null ? String(input.sessionId) : null,
     class_id: input.classId != null ? String(input.classId) : null,
@@ -1078,6 +1302,9 @@ export async function saveTimetableAttendance(input: {
 
     if (isMissingTableError) {
       logger.warn('[Supabase] gym_pilot_class_attendance table is not available yet; recording attendance as a user activity fallback', error)
+      const existingEntries = await loadAttendanceHistoryEntries(resolvedUserId)
+      const nextRecords = upsertAttendanceHistoryEntry(existingEntries, historyEntry)
+      persistAttendanceHistoryRecords(nextRecords)
       await recordSupabaseUserActivity('timetable_attendance', {
         sessionId: input.sessionId != null ? String(input.sessionId) : null,
         classId: input.classId != null ? String(input.classId) : null,
@@ -1095,6 +1322,10 @@ export async function saveTimetableAttendance(input: {
     logger.error('[Supabase] Could not save timetable attendance', error)
     return { success: false as const, error }
   }
+
+  const existingEntries = await loadAttendanceHistoryEntries(resolvedUserId)
+  const nextRecords = upsertAttendanceHistoryEntry(existingEntries, historyEntry)
+  persistAttendanceHistoryRecords(nextRecords)
 
   return { success: true as const }
 }

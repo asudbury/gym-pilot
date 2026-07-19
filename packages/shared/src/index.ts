@@ -38,6 +38,15 @@ export {
   removeSupabaseJsonRecord,
   recordSupabaseUserActivity,
   saveTimetableAttendance,
+  loadAttendanceHistoryEntries,
+  mapAttendanceHistoryEntryFromSupabase,
+  formatAttendanceHistoryError,
+  getAttendanceHistoryTableName,
+  saveAttendanceHistoryEntry,
+  deleteAttendanceHistoryEntry,
+  upsertAttendanceHistoryEntry,
+  removeAttendanceHistoryEntry,
+  type AttendanceHistoryEntry,
 } from './gymPilotSupabase'
 export * from './utils'
 export * from './repositories'

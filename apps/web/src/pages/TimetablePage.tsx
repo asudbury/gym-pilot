@@ -1,4 +1,5 @@
 import { useEffect, useMemo, useState } from 'react'
+import { useNavigate } from 'react-router-dom'
 import { saveTimetableAttendance } from '@gym-pilot/shared'
 import { useAuth } from '../auth/AuthContext'
 import { PageLayout } from '../layouts/PageLayout'
@@ -148,6 +149,7 @@ function normalizeSessions(payload: unknown): TimetableSession[] {
 
 export function TimetablePage() {
   const { user } = useAuth()
+  const navigate = useNavigate()
   const [sessions, setSessions] = useState<TimetableSession[]>([])
   const [isLoading, setIsLoading] = useState(true)
   const [errorMessage, setErrorMessage] = useState<string | null>(null)
@@ -458,6 +460,7 @@ export function TimetablePage() {
       setAttendanceNotes('')
       setAttendanceRating(null)
       setAttendanceSelection(null)
+      navigate('/attendance-history', { replace: true })
     } else {
       setAttendanceMessage(
         result.error?.message ?? 'Could not save attendance.',
