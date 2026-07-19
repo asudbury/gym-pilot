@@ -1,5 +1,10 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest'
-import { getInstallHint, isAppleDevice, isInstalledAsApp, shouldShowInstallHint } from './pwa'
+import {
+  getInstallHint,
+  isAppleDevice,
+  isInstalledAsApp,
+  shouldShowInstallHint,
+} from './pwa'
 
 describe('pwa helpers', () => {
   beforeEach(() => {
@@ -21,7 +26,9 @@ describe('pwa helpers', () => {
   })
 
   it('detects standalone app mode', () => {
-    expect(isInstalledAsApp({ standalone: true } as unknown as Navigator)).toBe(true)
+    expect(isInstalledAsApp({ standalone: true } as unknown as Navigator)).toBe(
+      true,
+    )
   })
 
   it('returns an iOS-specific install hint', () => {

@@ -118,7 +118,7 @@ export function HelpPage() {
         subtitle="How to use the app"
         description="Find answers to common questions and learn how to use the app effectively"
       >
-       <div className="flex flex-col gap-4">
+        <div className="flex flex-col gap-4">
           <Panel
             variant="white"
             padding="md"
@@ -173,17 +173,14 @@ export function HelpPage() {
               </Panel>
             ))}
           </div>
-
-          {isAdmin ? (
-            <Panel
-              variant="white"
-              padding="md"
-              className="text-sm text-slate-500"
-            >
-              <p>App version: {buildMetadata.appVersion}</p>
-              <p className="mt-1">Build: {buildMetadata.buildTimestamp}</p>
-            </Panel>
-          ) : null}
+          <Panel
+            variant="white"
+            padding="md"
+            className="text-sm text-slate-500"
+          >
+            <p>App version: {buildMetadata.appVersion}</p>
+            <p className="mt-1">Build: {buildMetadata.buildTimestamp}</p>
+          </Panel>
         </div>
       </PageCardLayout>
     </PageLayout>

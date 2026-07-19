@@ -45,7 +45,7 @@ export function PlansPage() {
           subtitle="Plans Dashboard"
           description={description}
         >
-         <div className="flex justify-end">
+          <div className="flex justify-end">
             <Link
               to="/plans/new"
               className={getToneClass(

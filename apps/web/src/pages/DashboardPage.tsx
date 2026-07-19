@@ -56,7 +56,8 @@ export function DashboardPage({ userName }: DashboardPageProps) {
             </p>
             {previousLoginTimestamp ? (
               <p className="max-w-2xl text-sm text-slate-500 dark:text-slate-400">
-                Your last login: {renderDashboardTimestamp(previousLoginTimestamp)}.
+                Your last login:{' '}
+                {renderDashboardTimestamp(previousLoginTimestamp)}.
               </p>
             ) : null}
           </div>

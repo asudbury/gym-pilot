@@ -44,7 +44,7 @@ export function AssignmentsPage() {
           subtitle="Assignments Dashboard"
           description={description}
         >
-         <div className="flex justify-end">
+          <div className="flex justify-end">
             <Link
               to="/assignments/new"
               className={getToneClass(

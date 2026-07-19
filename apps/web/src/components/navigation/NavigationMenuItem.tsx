@@ -13,7 +13,9 @@ export function NavigationMenuItem({
     <NavLink
       to={to}
       onClick={onClick}
-      className={['inline-flex items-center gap-0', className].filter(Boolean).join(' ')}
+      className={['inline-flex items-center gap-0', className]
+        .filter(Boolean)
+        .join(' ')}
     >
       {icon ? (
         <span className="flex h-5 w-5 shrink-0 items-center justify-center text-slate-500 dark:text-slate-400">

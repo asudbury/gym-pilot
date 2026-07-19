@@ -26,7 +26,10 @@ function formatFriendlyTimestamp(buildDate: string, buildTime: string): string {
   }
 
   const day = dateValue.getUTCDate()
-  const month = dateValue.toLocaleDateString('en-GB', { month: 'short', timeZone: 'UTC' })
+  const month = dateValue.toLocaleDateString('en-GB', {
+    month: 'short',
+    timeZone: 'UTC',
+  })
   const year = dateValue.getUTCFullYear()
   const time = dateValue.toLocaleTimeString('en-GB', {
     hour: '2-digit',

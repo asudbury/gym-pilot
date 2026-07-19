@@ -114,7 +114,10 @@ export function Header({
                       'inline-flex items-center gap-2 px-4 py-2 text-sm font-medium',
                     )}
                   >
-                    <DecorativeIcon icon={user ? 'lock' : 'user'} className="h-4 w-4" />
+                    <DecorativeIcon
+                      icon={user ? 'lock' : 'user'}
+                      className="h-4 w-4"
+                    />
                     <span>{user ? 'Log out' : 'Login'}</span>
                   </button>
                 ) : null}
@@ -156,7 +159,10 @@ export function Header({
                           onClick={handleAuthAction}
                           className="inline-flex items-center gap-2 rounded-xl px-3 py-2 text-left text-sm font-medium text-slate-700 transition hover:bg-slate-50"
                         >
-                          <DecorativeIcon icon={user ? 'lock' : 'user'} className="h-4 w-4" />
+                          <DecorativeIcon
+                            icon={user ? 'lock' : 'user'}
+                            className="h-4 w-4"
+                          />
                           <span>{user ? 'Logout' : 'Login'}</span>
                         </button>
                       ) : null}
@@ -201,7 +207,10 @@ export function Header({
                           onClick={handleAuthAction}
                           className="inline-flex items-center gap-2 rounded-xl px-3 py-2 text-left text-sm font-medium text-slate-700 transition hover:bg-slate-50"
                         >
-                          <DecorativeIcon icon={user ? 'lock' : 'user'} className="h-4 w-4" />
+                          <DecorativeIcon
+                            icon={user ? 'lock' : 'user'}
+                            className="h-4 w-4"
+                          />
                           <span>{user ? 'Logout' : 'Login'}</span>
                         </button>
                       ) : null}

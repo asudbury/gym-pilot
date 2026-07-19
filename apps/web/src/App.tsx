@@ -203,12 +203,12 @@ function App() {
       ? users.find((candidate) => candidate.id === user.trainerId)
       : undefined
   const appName = isTrainer
-    ? user?.applicationName?.trim() || 'GymPilot'
+    ? user?.applicationName?.trim() || 'Gym-Pilot'
     : assignedTrainer &&
         (assignedTrainer.applicationName?.trim() ||
           assignedTrainer.name?.trim())
       ? assignedTrainer.applicationName?.trim() || assignedTrainer.name?.trim()
-      : 'GymPilot'
+      : 'Gym-Pilot'
   const desktopMenuItems = buildNavigationMenuItems({
     plansCount,
     assignmentsCount: visibleAssignments.length,

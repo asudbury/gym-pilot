@@ -8,7 +8,10 @@ import { Heading1, Paragraph } from '../../components/Typography'
 import { DecorativeIcon } from '../../components/ui/DecorativeIcon'
 import { useAuth } from '../../auth/AuthContext'
 import { appTokens } from '../../constants/tokens'
-import { getDisplayEmail, getDisplayRoles } from '../../features/admin/domain/adminUtils'
+import {
+  getDisplayEmail,
+  getDisplayRoles,
+} from '../../features/admin/domain/adminUtils'
 import { GymClubSelector } from '../../components/GymClubSelector'
 import { logger } from '@gym-pilot/shared'
 

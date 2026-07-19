@@ -9,8 +9,8 @@ export function isInstalledAsApp(
 ): boolean {
   return Boolean(
     navigatorRef.standalone ||
-      window.matchMedia('(display-mode: standalone)').matches ||
-      window.matchMedia('(display-mode: fullscreen)').matches,
+    window.matchMedia('(display-mode: standalone)').matches ||
+    window.matchMedia('(display-mode: fullscreen)').matches,
   )
 }
 
@@ -19,7 +19,9 @@ export function isLocalhostPreview(): boolean {
     return false
   }
 
-  return /^(localhost|127\.0\.0\.1|0\.0\.0\.0|::1)$/.test(window.location.hostname)
+  return /^(localhost|127\.0\.0\.1|0\.0\.0\.0|::1)$/.test(
+    window.location.hostname,
+  )
 }
 
 export function shouldShowInstallHint(): boolean {
@@ -43,5 +45,5 @@ export function getInstallHint(isApple: boolean, isInstalled: boolean): string {
     return 'On iPhone, tap Share and choose Add to Home Screen to create a shortcut.'
   }
 
-  return 'Preview mode: use your browser\'s install option to add this app to your device.'
+  return "Preview mode: use your browser's install option to add this app to your device."
 }

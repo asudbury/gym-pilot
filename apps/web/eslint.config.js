@@ -7,7 +7,7 @@ import eslintConfigPrettier from 'eslint-config-prettier'
 
 export default [
   {
-    ignores: ['dist'],
+    ignores: ['dist', 'coverage'],
   },
   {
     files: ['**/*.{js,jsx,mjs,cjs}'],
