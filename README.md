@@ -65,6 +65,10 @@ Build the web app for production:
 npm run build:web
 ```
 
+## GitHub Pages deployment
+
+The web app is configured for GitHub Pages under the repository subpath `/gym-pilot/`. If the repository name changes, update the base path in [apps/web/vite.config.ts](apps/web/vite.config.ts) so the built app, manifest, and install links continue to resolve correctly on the published site.
+
 Run the test suite:
 
 ```bash
