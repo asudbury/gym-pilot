@@ -1,6 +1,7 @@
 import { describe, expect, it } from 'vitest'
 import {
   resolveNextActiveDayKey,
+  resolveTimetableAttendanceAction,
   resolveTimetableHeaderViewModel,
   resolveTimetableViewModel,
 } from './timetableView'
@@ -89,5 +90,32 @@ describe('resolveTimetableViewModel', () => {
     })
 
     expect(viewModel.instructorOptions).toEqual(['Ada'])
+  })
+
+  it('returns the right attendance action for clients and trainers', () => {
+    expect(resolveTimetableAttendanceAction('client', [])).toMatchObject({
+      canShow: true,
+      kind: 'attended',
+      label: 'I attended',
+      completedLabel: 'Marked as attended',
+    })
+
+    expect(resolveTimetableAttendanceAction('trainer', [])).toMatchObject({
+      canShow: true,
+      kind: 'taught',
+      label: 'I attended',
+      completedLabel: 'Marked as attended',
+    })
+  })
+
+  it('offers both attendance options when the user has both roles', () => {
+    const action = resolveTimetableAttendanceAction('client', ['trainer'])
+
+    expect(action.canShow).toBe(true)
+    expect(action.kind).toBeNull()
+    expect(action.options).toEqual([
+      { kind: 'attended', label: 'I attended' },
+      { kind: 'taught', label: 'I taught' },
+    ])
   })
 })

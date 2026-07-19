@@ -92,7 +92,7 @@ function normalizeFavoriteStorageValue(value: unknown): FavoriteStorageValue {
   return { favorites: [], folders: [] }
 }
 
-function getSupabaseTableName(key: string) {
+export function getSupabaseTableName(key: string) {
   if (isFavoritesKey(key)) {
     return 'gym_pilot_favourite'
   }
@@ -1035,4 +1035,66 @@ export async function recordSupabaseUserActivity(eventType: string, eventData: R
   if (error) {
     logger.error('[Supabase] Could not record user activity', error)
   }
+}
+
+export async function saveTimetableAttendance(input: {
+  userId?: string
+  sessionId?: string | number | null
+  classId?: string | number | null
+  className?: string | null
+  instructorName?: string | null
+  startedAt?: string | null
+  attendanceType: 'attended' | 'taught'
+  notes?: string | null
+  rating?: number | null
+}) {
+  const client = getSupabaseClient()
+
+  if (!client) {
+    return { success: false as const, error: new Error('Supabase client is not available') }
+  }
+
+  const resolvedUserId = input.userId || await getAuthenticatedUserId(client)
+
+  if (!resolvedUserId) {
+    return { success: false as const, error: new Error('Unable to resolve the current user') }
+  }
+
+  const { error } = await client.from('gym_pilot_class_attendance').insert({
+    user_id: resolvedUserId,
+    session_id: input.sessionId != null ? String(input.sessionId) : null,
+    class_id: input.classId != null ? String(input.classId) : null,
+    class_name: input.className ?? null,
+    instructor_name: input.instructorName?.trim() ? input.instructorName.trim() : null,
+    started_at: input.startedAt ?? null,
+    attendance_type: input.attendanceType,
+    notes: input.notes?.trim() ? input.notes.trim() : null,
+    rating: input.rating ?? null,
+    created_at: new Date().toISOString(),
+  })
+
+  if (error) {
+    const isMissingTableError = error.message?.includes("Could not find the table") || error.message?.includes('does not exist')
+
+    if (isMissingTableError) {
+      logger.warn('[Supabase] gym_pilot_class_attendance table is not available yet; recording attendance as a user activity fallback', error)
+      await recordSupabaseUserActivity('timetable_attendance', {
+        sessionId: input.sessionId != null ? String(input.sessionId) : null,
+        classId: input.classId != null ? String(input.classId) : null,
+        className: input.className ?? null,
+        instructorName: input.instructorName?.trim() ? input.instructorName.trim() : null,
+        startedAt: input.startedAt ?? null,
+        attendanceType: input.attendanceType,
+        notes: input.notes?.trim() ? input.notes.trim() : null,
+        rating: input.rating ?? null,
+      }, resolvedUserId)
+
+      return { success: true as const, fallback: true as const }
+    }
+
+    logger.error('[Supabase] Could not save timetable attendance', error)
+    return { success: false as const, error }
+  }
+
+  return { success: true as const }
 }

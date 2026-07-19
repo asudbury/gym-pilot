@@ -37,6 +37,7 @@ export {
   saveSupabaseJsonRecord,
   removeSupabaseJsonRecord,
   recordSupabaseUserActivity,
+  saveTimetableAttendance,
 } from './gymPilotSupabase'
 export * from './utils'
 export * from './repositories'

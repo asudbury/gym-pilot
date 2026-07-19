@@ -1,4 +1,5 @@
 import { useEffect, useMemo, useState } from 'react'
+import { saveTimetableAttendance } from '@gym-pilot/shared'
 import { useAuth } from '../auth/AuthContext'
 import { PageLayout } from '../layouts/PageLayout'
 import { PageCardLayout } from '../layouts/PageCardLayout'
@@ -9,6 +10,7 @@ import {
   formatTimetableTimeLabel,
   isPastTimetableSession,
   resolveNextActiveDayKey,
+  resolveTimetableAttendanceAction,
   resolveTimetableHeaderViewModel,
   resolveTimetableViewModel,
   type TimetableSession,
@@ -153,6 +155,18 @@ export function TimetablePage() {
   const [activeInstructor, setActiveInstructor] = useState('all')
   const [activeClassName, setActiveClassName] = useState('all')
   const [resolvedClubName, setResolvedClubName] = useState<string | null>(null)
+  const [attendanceState, setAttendanceState] = useState<
+    Record<string, 'attended' | 'taught'>
+  >({})
+  const [attendancePendingSession, setAttendancePendingSession] =
+    useState<TimetableSession | null>(null)
+  const [attendanceNotes, setAttendanceNotes] = useState('')
+  const [attendanceRating, setAttendanceRating] = useState<number | null>(null)
+  const [attendanceSaving, setAttendanceSaving] = useState(false)
+  const [attendanceMessage, setAttendanceMessage] = useState<string | null>(null)
+  const [attendanceSelection, setAttendanceSelection] = useState<'attended' | 'taught' | null>(null)
+  const [refreshVersion, setRefreshVersion] = useState(0)
+  const [lastRefreshedAt, setLastRefreshedAt] = useState<string | null>(null)
 
   const rawGymBrand = user?.gymBrand?.trim() ?? ''
   const rawGymName = user?.gymName?.trim() ?? ''
@@ -171,6 +185,49 @@ export function TimetablePage() {
     const storedClubId = user?.gymName?.trim() ?? ''
     return /^\d+$/.test(storedClubId) ? storedClubId : null
   }, [user?.gymName])
+
+  const attendanceAction = useMemo(
+    () => resolveTimetableAttendanceAction(user?.role, user?.roles),
+    [user?.role, user?.roles],
+  )
+
+  useEffect(() => {
+    if (typeof window === 'undefined') {
+      return
+    }
+
+    try {
+      const storedAttendance = window.localStorage.getItem(
+        'gym-pilot.timetable-attendance',
+      )
+
+      if (!storedAttendance) {
+        return
+      }
+
+      const parsedAttendance = JSON.parse(storedAttendance) as Record<
+        string,
+        'attended' | 'taught'
+      >
+
+      if (parsedAttendance && typeof parsedAttendance === 'object') {
+        setAttendanceState(parsedAttendance)
+      }
+    } catch {
+      // Ignore invalid stored attendance state.
+    }
+  }, [])
+
+  useEffect(() => {
+    if (typeof window === 'undefined') {
+      return
+    }
+
+    window.localStorage.setItem(
+      'gym-pilot.timetable-attendance',
+      JSON.stringify(attendanceState),
+    )
+  }, [attendanceState])
 
   useEffect(() => {
     let cancelled = false
@@ -292,7 +349,7 @@ export function TimetablePage() {
     return () => {
       cancelled = true
     }
-  }, [clubId])
+  }, [clubId, refreshVersion])
 
   const { groupedSessions, instructorOptions, classOptions, visibleSessions } =
     useMemo(
@@ -326,6 +383,84 @@ export function TimetablePage() {
         groupedSessions[0] ??
         null)
 
+  const handleAttendanceAction = (session: TimetableSession) => {
+    if (!attendanceAction.canShow) {
+      return
+    }
+
+    setAttendancePendingSession(session)
+    setAttendanceNotes('')
+    setAttendanceRating(null)
+    setAttendanceMessage(null)
+    setAttendanceSelection(
+      attendanceAction.options.length > 1 ? null : attendanceAction.kind,
+    )
+  }
+
+  const handleRefreshTimetable = () => {
+    if (!clubId) {
+      return
+    }
+
+    timetableCache.delete(clubId)
+    setRefreshVersion((current) => current + 1)
+    setLastRefreshedAt(new Date().toLocaleString())
+    setErrorMessage(null)
+  }
+
+  const handleAttendanceSubmit = async () => {
+    if (!attendancePendingSession) {
+      return
+    }
+
+    const attendanceKind = attendanceSelection ?? attendanceAction.kind
+
+    if (!attendanceKind) {
+      setAttendanceMessage('Choose whether you attended or taught this class.')
+      return
+    }
+
+    setAttendanceSaving(true)
+    setAttendanceMessage(null)
+
+    const attendanceKey =
+      attendancePendingSession.id ??
+      `${attendancePendingSession.classId ?? 'unknown'}-${attendancePendingSession.startTime ?? 'unknown'}`
+
+    const result = await saveTimetableAttendance({
+      sessionId: attendancePendingSession.id,
+      classId: attendancePendingSession.classId,
+      className: attendancePendingSession.className,
+      instructorName:
+        attendancePendingSession.instructorName != null
+          ? String(attendancePendingSession.instructorName)
+          : attendancePendingSession.instructorId != null
+            ? String(attendancePendingSession.instructorId)
+            : null,
+      startedAt: attendancePendingSession.startTime,
+      attendanceType: attendanceKind,
+      notes: attendanceNotes,
+      rating: attendanceRating,
+      userId: user?.id,
+    })
+
+    if (result.success) {
+      setAttendanceState((current) => ({
+        ...current,
+        [attendanceKey]: attendanceKind,
+      }))
+      setAttendanceMessage('Attendance saved.')
+      setAttendancePendingSession(null)
+      setAttendanceNotes('')
+      setAttendanceRating(null)
+      setAttendanceSelection(null)
+    } else {
+      setAttendanceMessage(result.error?.message ?? 'Could not save attendance.')
+    }
+
+    setAttendanceSaving(false)
+  }
+
   if (!clubId) {
     return (
       <PageLayout className="max-w-6xl">
@@ -337,6 +472,156 @@ export function TimetablePage() {
         >
           <div className="rounded-2xl border border-amber-200 bg-amber-50 p-4 text-sm text-amber-800">
             Select a valid gym club to view the timetable.
+          </div>
+        </PageCardLayout>
+      </PageLayout>
+    )
+  }
+
+  if (attendancePendingSession) {
+    return (
+      <PageLayout className="max-w-6xl">
+        <PageCardLayout
+          title={headerViewModel.title}
+          subtitle={headerViewModel.subtitle}
+          description={headerViewModel.description}
+          icon="calendar"
+        >
+          <div className="space-y-6">
+            <div className="rounded-2xl border border-slate-200 bg-white p-4 shadow-sm">
+              <div className="flex items-start justify-between gap-2">
+                <div>
+                  <p className="text-sm font-semibold text-slate-900">
+                    {attendancePendingSession.className ?? `Class ${attendancePendingSession.classId ?? 'Unknown'}`}
+                  </p>
+                  <p className="text-sm text-slate-600">
+                    {attendancePendingSession.room ?? 'Room TBD'}
+                  </p>
+                </div>
+                <div className="flex flex-col items-end gap-1">
+                  {isPastTimetableSession(attendancePendingSession) ? (
+                    <span className="rounded-full bg-slate-200 px-2.5 py-1 text-[11px] font-semibold uppercase tracking-wide text-slate-700">
+                      Ended
+                    </span>
+                  ) : (
+                    <span
+                      className={`rounded-full px-2.5 py-1 text-xs font-semibold ${attendancePendingSession.status === 'Available' ? 'bg-emerald-100 text-emerald-700' : attendancePendingSession.status === 'Waitlist' ? 'bg-amber-100 text-amber-700' : 'bg-slate-100 text-slate-700'}`}
+                    >
+                      {attendancePendingSession.status ?? 'Unknown'}
+                    </span>
+                  )}
+                </div>
+              </div>
+              <div className="mt-3 space-y-1 text-sm text-slate-600">
+                <p>
+                  <span className="font-medium text-slate-700">Day:</span>{' '}
+                  {formatTimetableDateLabel(attendancePendingSession.startTime)}
+                </p>
+                <p>
+                  <span className="font-medium text-slate-700">Time:</span>{' '}
+                  {formatTimetableTimeLabel(attendancePendingSession.startTime)} –{' '}
+                  {formatTimetableTimeLabel(attendancePendingSession.endTime)}
+                </p>
+                <p>
+                  <span className="font-medium text-slate-700">Instructor:</span>{' '}
+                  {attendancePendingSession.instructorName ?? attendancePendingSession.instructorId ?? 'TBC'}
+                </p>
+                <p>
+                  <span className="font-medium text-slate-700">Availability:</span>{' '}
+                  {formatTimetableAvailability(attendancePendingSession)}
+                </p>
+              </div>
+            </div>
+            <div className="rounded-2xl border border-slate-200 bg-white p-4 shadow-sm">
+              <div className="space-y-3">
+                <div>
+                  <h3 className="text-base font-semibold text-slate-900">
+                    Confirm attendance
+                  </h3>
+                  <p className="text-sm text-slate-600">
+                    {attendanceAction.options.length > 1
+                      ? 'Choose how this class should be recorded and add any notes.'
+                      : 'Record your attendance for this class and add any notes.'}
+                  </p>
+                </div>
+                {attendanceAction.options.length > 1 ? (
+                  <div className="flex flex-col gap-2">
+                    <span className="text-sm font-medium text-slate-700">
+                      Role
+                    </span>
+                    <div className="flex flex-wrap gap-2">
+                      {attendanceAction.options.map((option) => {
+                        const isSelected = attendanceSelection === option.kind
+                        return (
+                          <button
+                            key={option.kind}
+                            type="button"
+                            onClick={() => setAttendanceSelection(option.kind)}
+                            className={`cursor-pointer rounded-full border px-3 py-1.5 text-sm font-semibold transition ${isSelected ? 'border-sky-600 bg-sky-600 text-white shadow-sm' : 'border-slate-300 bg-white text-slate-700 hover:bg-slate-50'}`}
+                          >
+                            {option.label}
+                          </button>
+                        )
+                      })}
+                    </div>
+                  </div>
+                ) : null}
+                <div className="flex flex-col gap-2">
+                  <span className="text-sm font-medium text-slate-700">Rating</span>
+                  <div className="flex flex-wrap gap-2">
+                    {[1, 2, 3, 4, 5].map((value) => {
+                      const isSelected = attendanceRating === value
+                      return (
+                        <button
+                          key={value}
+                          type="button"
+                          onClick={() => setAttendanceRating(value)}
+                          className={`rounded-full border px-3 py-1.5 text-sm font-semibold transition ${isSelected ? 'border-sky-600 bg-sky-600 text-white shadow-sm' : 'border-slate-300 bg-white text-slate-700 hover:bg-slate-50'}`}
+                        >
+                          {value} / 5
+                        </button>
+                      )
+                    })}
+                  </div>
+                </div>
+                <label className="flex flex-col gap-1 text-sm text-slate-700">
+                  <span className="font-medium">Notes</span>
+                  <textarea
+                    value={attendanceNotes}
+                    onChange={(event) => setAttendanceNotes(event.target.value)}
+                    rows={4}
+                    className="rounded-2xl border border-slate-300 bg-white px-3 py-2 text-sm text-slate-700 shadow-sm"
+                    placeholder="Add any details about the class"
+                  />
+                </label>
+                {attendanceMessage ? (
+                  <p className="text-sm text-rose-600">{attendanceMessage}</p>
+                ) : null}
+                <div className="flex flex-wrap gap-2">
+                  <button
+                    type="button"
+                    onClick={handleAttendanceSubmit}
+                    disabled={attendanceSaving}
+                    className="cursor-pointer rounded-full border border-emerald-600 bg-emerald-600 px-3 py-1.5 text-sm font-semibold text-white shadow-sm transition hover:bg-emerald-700 disabled:cursor-not-allowed disabled:border-emerald-300 disabled:bg-emerald-300 disabled:text-emerald-950"
+                  >
+                    {attendanceSaving ? 'Saving…' : 'Record attendance'}
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setAttendancePendingSession(null)
+                      setAttendanceNotes('')
+                      setAttendanceRating(null)
+                      setAttendanceMessage(null)
+                      setAttendanceSelection(null)
+                    }}
+                    className="cursor-pointer rounded-full border border-slate-300 bg-white px-3 py-1.5 text-sm font-medium text-slate-700 transition hover:bg-slate-50"
+                  >
+                    Cancel
+                  </button>
+                </div>
+              </div>
+            </div>
           </div>
         </PageCardLayout>
       </PageLayout>
@@ -373,6 +658,19 @@ export function TimetablePage() {
           {!isLoading && !errorMessage && groupedSessions.length > 0 ? (
             <div className="space-y-4">
               <div className="flex flex-wrap items-center justify-between gap-3 rounded-2xl border border-slate-200 bg-slate-50 p-3">
+                <div className="flex flex-wrap items-center gap-2">
+                  <div className="text-sm text-slate-500">
+                    {lastRefreshedAt ? `Last refreshed: ${lastRefreshedAt}` : 'Refresh to update the latest timetable data.'}
+                  </div>
+                  <button
+                    type="button"
+                    onClick={handleRefreshTimetable}
+                    disabled={isLoading}
+                    className="inline-flex cursor-pointer items-center rounded-full border border-slate-300 bg-white px-3 py-1.5 text-sm font-medium text-slate-700 transition hover:bg-slate-50 disabled:cursor-not-allowed disabled:bg-slate-100"
+                  >
+                    {isLoading ? 'Refreshing…' : 'Refresh'}
+                  </button>
+                </div>
                 <div className="flex flex-wrap gap-2">
                   <button
                     type="button"
@@ -419,7 +717,7 @@ export function TimetablePage() {
                       onChange={(event) =>
                         setActiveClassName(event.target.value)
                       }
-                      className="min-w-[9rem] rounded-full border border-slate-300 bg-white px-3 py-1.5 text-sm text-slate-700 shadow-sm"
+                      className="min-w-36 rounded-full border border-slate-300 bg-white px-3 py-1.5 text-sm text-slate-700 shadow-sm"
                     >
                       <option value="all">All</option>
                       {classOptions.map((className) => (
@@ -513,6 +811,30 @@ export function TimetablePage() {
                               </p>
                             ) : null}
                           </div>
+                          {attendanceAction.canShow ? (
+                            <button
+                              type="button"
+                              onClick={() => handleAttendanceAction(session)}
+                              disabled={Boolean(
+                                session.id
+                                  ? attendanceState[session.id]
+                                  : attendanceState[
+                                      `${session.classId ?? 'unknown'}-${session.startTime ?? 'unknown'}`
+                                    ],
+                              )}
+                              className="mt-3 inline-flex cursor-pointer items-center rounded-full border border-emerald-600 bg-emerald-600 px-3 py-1.5 text-sm font-semibold text-white shadow-sm transition hover:bg-emerald-700 hover:shadow-md disabled:cursor-not-allowed disabled:border-emerald-300 disabled:bg-emerald-300 disabled:text-emerald-950"
+                            >
+                              {Boolean(
+                                session.id
+                                  ? attendanceState[session.id]
+                                  : attendanceState[
+                                      `${session.classId ?? 'unknown'}-${session.startTime ?? 'unknown'}`
+                                    ],
+                              )
+                                ? attendanceAction.completedLabel
+                                : attendanceAction.label}
+                            </button>
+                          ) : null}
                         </article>
                       ))}
                     </div>
@@ -595,6 +917,30 @@ export function TimetablePage() {
                               </p>
                             ) : null}
                           </div>
+                          {attendanceAction.canShow ? (
+                            <button
+                              type="button"
+                              onClick={() => handleAttendanceAction(session)}
+                              disabled={Boolean(
+                                session.id
+                                  ? attendanceState[session.id]
+                                  : attendanceState[
+                                      `${session.classId ?? 'unknown'}-${session.startTime ?? 'unknown'}`
+                                    ],
+                              )}
+                              className="mt-3 inline-flex cursor-pointer items-center rounded-full border border-emerald-600 bg-emerald-600 px-3 py-1.5 text-sm font-semibold text-white shadow-sm transition hover:bg-emerald-700 hover:shadow-md disabled:cursor-not-allowed disabled:border-emerald-300 disabled:bg-emerald-300 disabled:text-emerald-950"
+                            >
+                              {Boolean(
+                                session.id
+                                  ? attendanceState[session.id]
+                                  : attendanceState[
+                                      `${session.classId ?? 'unknown'}-${session.startTime ?? 'unknown'}`
+                                    ],
+                              )
+                                ? attendanceAction.completedLabel
+                                : attendanceAction.label}
+                            </button>
+                          ) : null}
                         </article>
                       ))}
                     </div>

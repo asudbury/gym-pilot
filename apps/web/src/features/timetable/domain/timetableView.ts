@@ -34,6 +34,72 @@ export type TimetableHeaderViewModel = {
   showIcon: boolean
 }
 
+export type TimetableAttendanceOption = {
+  kind: 'attended' | 'taught'
+  label: string
+}
+
+export type TimetableAttendanceAction = {
+  canShow: boolean
+  kind: 'attended' | 'taught' | null
+  label: string
+  completedLabel: string
+  options: TimetableAttendanceOption[]
+}
+
+export function resolveTimetableAttendanceAction(
+  role?: string | null,
+  roles?: Array<string | null | undefined> | null,
+): TimetableAttendanceAction {
+  const normalizedRoles = [role, ...(roles ?? [])]
+    .filter((value): value is string => Boolean(value))
+    .map((value) => value.trim().toLowerCase())
+
+  const hasClientRole = normalizedRoles.includes('client')
+  const hasTrainerRole = normalizedRoles.includes('trainer')
+
+  if (hasClientRole && hasTrainerRole) {
+    return {
+      canShow: true,
+      kind: null,
+      label: 'Record attendance',
+      completedLabel: 'Marked',
+      options: [
+        { kind: 'attended', label: 'I attended' },
+        { kind: 'taught', label: 'I taught' },
+      ],
+    }
+  }
+
+  if (hasTrainerRole) {
+    return {
+      canShow: true,
+      kind: 'taught',
+      label: 'I attended',
+      completedLabel: 'Marked as attended',
+      options: [{ kind: 'taught', label: 'I taught' }],
+    }
+  }
+
+  if (hasClientRole) {
+    return {
+      canShow: true,
+      kind: 'attended',
+      label: 'I attended',
+      completedLabel: 'Marked as attended',
+      options: [{ kind: 'attended', label: 'I attended' }],
+    }
+  }
+
+  return {
+    canShow: false,
+    kind: null,
+    label: '',
+    completedLabel: '',
+    options: [],
+  }
+}
+
 export function resolveTimetableHeaderViewModel(input: {
   gymBrand?: string | null
   gymName?: string | null

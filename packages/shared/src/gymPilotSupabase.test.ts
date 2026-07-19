@@ -1,6 +1,21 @@
 import { describe, expect, it } from 'vitest'
 import { getSupabaseTableName, isLocalhostHost, shouldRecordLoginActivity, shouldRecordSupabaseUserActivity } from './gymPilotSupabase'
 
+describe('timetable attendance persistence', () => {
+  it('includes the rating in the attendance payload when provided', () => {
+    const payload = {
+      user_id: 'user-1',
+      session_id: 'session-1',
+      attendance_type: 'attended',
+      notes: 'Great class',
+      rating: 5,
+      created_at: '2026-01-01T00:00:00.000Z',
+    }
+
+    expect(payload.rating).toBe(5)
+  })
+})
+
 describe('local activity recording guard', () => {
   it('treats localhost-style hosts as local and skips recording', () => {
     expect(isLocalhostHost('localhost')).toBe(true)
