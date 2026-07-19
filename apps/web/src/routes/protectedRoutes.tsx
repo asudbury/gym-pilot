@@ -44,7 +44,10 @@ export function createProtectedRoutes({
         <Route path="/attendance-history" element={<AttendanceHistoryPage />} />
       </Route>
       <Route path="/assignments" element={<AssignmentsPage />} />
-      <Route path="/users/:userSlug/assignments" element={<AssignmentsPage />} />
+      <Route
+        path="/users/:userSlug/assignments"
+        element={<AssignmentsPage />}
+      />
       <Route
         path="/users/:userSlug/assignments/create"
         element={<AssignmentsManagerPage />}

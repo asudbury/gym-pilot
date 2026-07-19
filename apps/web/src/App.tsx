@@ -1,6 +1,11 @@
 import { useEffect, useState } from 'react'
 import { Routes, useLocation, useNavigate } from 'react-router-dom'
-import { exercises, exercisesSchema, getSupabaseClient, usePlan } from '@gym-pilot/shared'
+import {
+  exercises,
+  exercisesSchema,
+  getSupabaseClient,
+  usePlan,
+} from '@gym-pilot/shared'
 import { getToneClass } from './components/toneClasses'
 import { HOME_FILTER_KEY } from './constants/storageKeys'
 import { getExercisePath } from './utils/exerciseRouteUtils'
