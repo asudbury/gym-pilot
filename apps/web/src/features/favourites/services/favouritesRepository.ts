@@ -19,9 +19,7 @@ import {
   type FavouritesStorageValue,
 } from '../domain/quickLinks'
 
-const LOCAL_ONLY_KEYS = new Set([
-  'gym-pilot-auth-session',
-])
+const LOCAL_ONLY_KEYS = new Set(['gym-pilot-auth-session'])
 
 function shouldUseRemoteForKey(key: string) {
   return !LOCAL_ONLY_KEYS.has(key)

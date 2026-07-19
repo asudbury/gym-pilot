@@ -87,7 +87,9 @@ export function AdminUsersPage() {
     )
 
     const roleLookup = new Map<string, string[]>()
-    const profileIds = (resolvedData ?? []).map((row) => String(row.user_id ?? '')).filter(Boolean)
+    const profileIds = (resolvedData ?? [])
+      .map((row) => String(row.user_id ?? ''))
+      .filter(Boolean)
 
     for (const profileId of profileIds) {
       const roles = await loadSupabaseProfileRoles(profileId)
