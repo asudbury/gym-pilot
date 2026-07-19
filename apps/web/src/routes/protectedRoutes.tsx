@@ -10,6 +10,7 @@ import { CreatePlanPage } from '../pages/plans/CreatePlanPage'
 import { PlanDetailPage } from '../pages/plans/PlanDetailPage'
 import { PlansPage } from '../pages/plans/PlansPage'
 import { TimetablePage } from '../pages/TimetablePage'
+import { RecordAttendancePage } from '../pages/RecordAttendancePage'
 import { type HomeFilters } from '../utils/appUtils'
 
 interface ProtectedRoutesProps {
@@ -41,6 +42,7 @@ export function createProtectedRoutes({
       <Route path="/plans" element={<PlansPage />} />
       <Route element={<RequireAuth requireClubId />}>
         <Route path="/timetable" element={<TimetablePage />} />
+        <Route path="/timetable/attendance" element={<RecordAttendancePage />} />
         <Route path="/attendance-history" element={<AttendanceHistoryPage />} />
       </Route>
       <Route path="/assignments" element={<AssignmentsPage />} />

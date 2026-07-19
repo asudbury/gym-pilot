@@ -1550,38 +1550,88 @@ export async function saveTimetableAttendance(input: {
     return { success: false as const, error: new Error('Unable to resolve the current user') }
   }
 
-  const historyEntry: AttendanceHistoryEntry = {
-    id: createAttendanceHistoryEntryId(),
-    userId: resolvedUserId,
-    sessionId: input.sessionId != null ? String(input.sessionId) : null,
-    classId: input.classId != null ? String(input.classId) : null,
-    className: input.className ?? null,
-    instructorName: input.instructorName?.trim() ? input.instructorName.trim() : null,
-    startedAt: input.startedAt ?? null,
-    attendanceType: input.attendanceType,
-    notes: input.notes?.trim() ? input.notes.trim() : null,
-    rating: input.rating ?? null,
-    createdAt: new Date().toISOString(),
-    updatedAt: new Date().toISOString(),
+  let existingId: string | null = null
+  let tableExists = true
+
+  if (input.sessionId != null || (input.classId != null && input.startedAt != null)) {
+    let query = client
+      .from(getAttendanceHistoryTableName())
+      .select('id')
+      .eq('user_id', resolvedUserId)
+
+    if (input.sessionId != null) {
+      query = query.eq('session_id', String(input.sessionId))
+    } else {
+      query = query.eq('class_id', String(input.classId)).eq('started_at', input.startedAt)
+    }
+
+    const { data: existingData, error: selectError } = await query.limit(1)
+    if (selectError) {
+      const isMissingTable = selectError.message?.includes("Could not find the table") || selectError.message?.includes('does not exist')
+      if (isMissingTable) {
+        tableExists = false
+      }
+    } else if (existingData && existingData.length > 0) {
+      existingId = existingData[0].id
+    }
   }
 
-  const { error } = await client.from(getAttendanceHistoryTableName()).insert({
-    user_id: resolvedUserId,
-    session_id: input.sessionId != null ? String(input.sessionId) : null,
-    class_id: input.classId != null ? String(input.classId) : null,
-    class_name: input.className ?? null,
-    instructor_name: input.instructorName?.trim() ? input.instructorName.trim() : null,
-    started_at: input.startedAt ?? null,
-    attendance_type: input.attendanceType,
-    notes: input.notes?.trim() ? input.notes.trim() : null,
-    rating: input.rating ?? null,
-    created_at: new Date().toISOString(),
-  })
+  let dbResult: { data: any[] | null; error: any } = { data: null, error: null }
+
+  if (!tableExists) {
+    dbResult.error = { message: `Could not find the table ${getAttendanceHistoryTableName()}` }
+  } else if (existingId) {
+    dbResult = await client
+      .from(getAttendanceHistoryTableName())
+      .update({
+        class_name: input.className ?? null,
+        instructor_name: input.instructorName?.trim() ? input.instructorName.trim() : null,
+        attendance_type: input.attendanceType,
+        notes: input.notes?.trim() ? input.notes.trim() : null,
+        rating: input.rating ?? null,
+        updated_at: new Date().toISOString(),
+      })
+      .eq('id', existingId)
+      .select()
+  } else {
+    dbResult = await client
+      .from(getAttendanceHistoryTableName())
+      .insert({
+        user_id: resolvedUserId,
+        session_id: input.sessionId != null ? String(input.sessionId) : null,
+        class_id: input.classId != null ? String(input.classId) : null,
+        class_name: input.className ?? null,
+        instructor_name: input.instructorName?.trim() ? input.instructorName.trim() : null,
+        started_at: input.startedAt ?? null,
+        attendance_type: input.attendanceType,
+        notes: input.notes?.trim() ? input.notes.trim() : null,
+        rating: input.rating ?? null,
+        created_at: new Date().toISOString(),
+      })
+      .select()
+  }
+
+  const { data, error } = dbResult
 
   if (error) {
     const isMissingTableError = error.message?.includes("Could not find the table") || error.message?.includes('does not exist')
 
     if (isMissingTableError) {
+      const historyEntry: AttendanceHistoryEntry = {
+        id: createAttendanceHistoryEntryId(),
+        userId: resolvedUserId,
+        sessionId: input.sessionId != null ? String(input.sessionId) : null,
+        classId: input.classId != null ? String(input.classId) : null,
+        className: input.className ?? null,
+        instructorName: input.instructorName?.trim() ? input.instructorName.trim() : null,
+        startedAt: input.startedAt ?? null,
+        attendanceType: input.attendanceType,
+        notes: input.notes?.trim() ? input.notes.trim() : null,
+        rating: input.rating ?? null,
+        createdAt: new Date().toISOString(),
+        updatedAt: new Date().toISOString(),
+      }
+
       logger.warn('[Supabase] gym_pilot_class_attendance table is not available yet; recording attendance as a user activity fallback', error)
       const existingEntries = await loadAttendanceHistoryEntries(resolvedUserId)
       const nextRecords = upsertAttendanceHistoryEntry(existingEntries, historyEntry)
@@ -1603,6 +1653,24 @@ export async function saveTimetableAttendance(input: {
     logger.error('[Supabase] Could not save timetable attendance', error)
     return { success: false as const, error }
   }
+
+  const insertedRow = data && data[0]
+  const historyEntry: AttendanceHistoryEntry = insertedRow
+    ? mapAttendanceHistoryEntryFromSupabase(insertedRow as SupabaseAttendanceHistoryRow)
+    : {
+        id: existingId || createAttendanceHistoryEntryId(),
+        userId: resolvedUserId,
+        sessionId: input.sessionId != null ? String(input.sessionId) : null,
+        classId: input.classId != null ? String(input.classId) : null,
+        className: input.className ?? null,
+        instructorName: input.instructorName?.trim() ? input.instructorName.trim() : null,
+        startedAt: input.startedAt ?? null,
+        attendanceType: input.attendanceType,
+        notes: input.notes?.trim() ? input.notes.trim() : null,
+        rating: input.rating ?? null,
+        createdAt: new Date().toISOString(),
+        updatedAt: new Date().toISOString(),
+      }
 
   const existingEntries = await loadAttendanceHistoryEntries(resolvedUserId)
   const nextRecords = upsertAttendanceHistoryEntry(existingEntries, historyEntry)

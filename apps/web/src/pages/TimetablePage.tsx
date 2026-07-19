@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from 'react'
+import { useEffect, useMemo, useRef, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { saveTimetableAttendance } from '@gym-pilot/shared'
 import { useAuth } from '../auth/AuthContext'
@@ -150,6 +150,7 @@ function normalizeSessions(payload: unknown): TimetableSession[] {
 export function TimetablePage() {
   const { user } = useAuth()
   const navigate = useNavigate()
+  const savingRef = useRef(false)
   const [sessions, setSessions] = useState<TimetableSession[]>([])
   const [isLoading, setIsLoading] = useState(true)
   const [errorMessage, setErrorMessage] = useState<string | null>(null)
@@ -415,7 +416,7 @@ export function TimetablePage() {
   }
 
   const handleAttendanceSubmit = async () => {
-    if (!attendancePendingSession) {
+    if (!attendancePendingSession || attendanceSaving || savingRef.current) {
       return
     }
 
@@ -426,48 +427,54 @@ export function TimetablePage() {
       return
     }
 
+    savingRef.current = true
     setAttendanceSaving(true)
     setAttendanceMessage(null)
 
-    const attendanceKey =
-      attendancePendingSession.id ??
-      `${attendancePendingSession.classId ?? 'unknown'}-${attendancePendingSession.startTime ?? 'unknown'}`
+    try {
+      const attendanceKey =
+        attendancePendingSession.id ??
+        `${attendancePendingSession.classId ?? 'unknown'}-${attendancePendingSession.startTime ?? 'unknown'}`
 
-    const result = await saveTimetableAttendance({
-      sessionId: attendancePendingSession.id,
-      classId: attendancePendingSession.classId,
-      className: attendancePendingSession.className,
-      instructorName:
-        attendancePendingSession.instructorName != null
-          ? String(attendancePendingSession.instructorName)
-          : attendancePendingSession.instructorId != null
-            ? String(attendancePendingSession.instructorId)
-            : null,
-      startedAt: attendancePendingSession.startTime,
-      attendanceType: attendanceKind,
-      notes: attendanceNotes,
-      rating: attendanceRating,
-      userId: user?.id,
-    })
+      const result = await saveTimetableAttendance({
+        sessionId: attendancePendingSession.id,
+        classId: attendancePendingSession.classId,
+        className: attendancePendingSession.className,
+        instructorName:
+          attendancePendingSession.instructorName != null
+            ? String(attendancePendingSession.instructorName)
+            : attendancePendingSession.instructorId != null
+              ? String(attendancePendingSession.instructorId)
+              : null,
+        startedAt: attendancePendingSession.startTime,
+        attendanceType: attendanceKind,
+        notes: attendanceNotes,
+        rating: attendanceRating,
+        userId: user?.id,
+      })
 
-    if (result.success) {
-      setAttendanceState((current) => ({
-        ...current,
-        [attendanceKey]: attendanceKind,
-      }))
-      setAttendanceMessage('Attendance saved.')
-      setAttendancePendingSession(null)
-      setAttendanceNotes('')
-      setAttendanceRating(null)
-      setAttendanceSelection(null)
-      navigate('/attendance-history', { replace: true })
-    } else {
-      setAttendanceMessage(
-        result.error?.message ?? 'Could not save attendance.',
-      )
+      if (result.success) {
+        setAttendanceState((current) => ({
+          ...current,
+          [attendanceKey]: attendanceKind,
+        }))
+        setAttendanceMessage('Attendance saved.')
+        setAttendancePendingSession(null)
+        setAttendanceNotes('')
+        setAttendanceRating(null)
+        setAttendanceSelection(null)
+        navigate('/attendance-history', { replace: true })
+      } else {
+        setAttendanceMessage(
+          result.error?.message ?? 'Could not save attendance.',
+        )
+      }
+    } catch (err: any) {
+      setAttendanceMessage(err?.message ?? 'An unexpected error occurred.')
+    } finally {
+      savingRef.current = false
+      setAttendanceSaving(false)
     }
-
-    setAttendanceSaving(false)
   }
 
   if (!clubId) {
@@ -594,7 +601,7 @@ export function TimetablePage() {
                           key={value}
                           type="button"
                           onClick={() => setAttendanceRating(value)}
-                          className={`rounded-full border px-3 py-1.5 text-sm font-semibold transition ${isSelected ? 'border-sky-600 bg-sky-600 text-white shadow-sm' : 'border-slate-300 bg-white text-slate-700 hover:bg-slate-50'}`}
+                          className={`cursor-pointer rounded-full border px-3 py-1.5 text-sm font-semibold transition ${isSelected ? 'border-sky-600 bg-sky-600 text-white shadow-sm' : 'border-slate-300 bg-white text-slate-700 hover:bg-slate-50'}`}
                         >
                           {value} / 5
                         </button>

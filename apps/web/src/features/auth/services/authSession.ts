@@ -53,7 +53,7 @@ export async function resolveSupabaseAuthUser(
       supabaseUser.user_metadata?.full_name ||
       supabaseUser.user_metadata?.name ||
       supabaseUser.email ||
-      'Supabase user'
+      'Unknown user'
     const slug =
       displayName
         .toLowerCase()
@@ -88,10 +88,11 @@ export async function resolveSupabaseAuthUser(
       role: resolvedRole,
       roles: resolvedRoles,
       trainerId: matchingProfileUser?.trainerId ?? null,
-      applicationName:
-        profileSnapshot.applicationName ??
-        matchingProfileUser?.applicationName ??
-        null,
+      applicationName: 'Gym-Pilot',
+      // applicationName:
+      //   profileSnapshot.applicationName ??
+      //   matchingProfileUser?.applicationName ??
+      //   null,
       gymBrand:
         profileSnapshot.gymBrand ?? matchingProfileUser?.gymBrand ?? null,
       gymName: profileSnapshot.gymName ?? matchingProfileUser?.gymName ?? null,
