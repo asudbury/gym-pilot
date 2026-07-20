@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useState } from 'react'
-import { Link } from 'react-router-dom'
 import { Button } from '../components/Button'
+import { SessionActions } from '../components/SessionActions'
 import { useAuth } from '../auth/AuthContext'
 import { PageCardLayout } from '../layouts/PageCardLayout'
 import { PageLayout } from '../layouts/PageLayout'
@@ -167,14 +167,7 @@ export function SessionHistoryPage() {
         description="Review the sessions you have recorded, update any notes or rating, or remove entries that no longer apply."
         icon="tasks"
       >
-        <div className="mb-4 flex flex-wrap items-center gap-2">
-          <Link
-            to="/sessions"
-            className="inline-flex items-center rounded-full border border-slate-300 bg-white px-3 py-1.5 text-sm font-medium text-slate-700 transition hover:bg-slate-50"
-          >
-            Sessions
-          </Link>
-        </div>
+        <SessionActions includeViewSessionsButton={false} />
         {errorMessage ? (
           <p className="rounded-2xl border border-rose-200 bg-rose-50 p-3 text-sm font-medium text-rose-700">
             {errorMessage}

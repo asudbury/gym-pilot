@@ -1,18 +1,25 @@
 import { describe, expect, it } from 'vitest'
 import {
+  buildSessionBookingAttendancePayload,
+  buildSessionRecordPayload,
   buildSupabaseProfileLocalCacheEntry,
   buildSupabaseUserRoleRows,
-  formatAttendanceHistoryError,
-  getAttendanceHistoryTableName,
+  formatSessionHistoryError,
+  getSessionHistoryTableName,
   getSupabaseProfileLocalStorageKey,
   getSupabaseTableName,
+  getSessionBookingTableName,
+  getSessionTableName,
   isLocalhostHost,
-  mapAttendanceHistoryEntryFromSupabase,
+  listSessions,
+  mapSessionHistoryEntryFromSupabase,
+  normalizeSessionTypeForPersistence,
   normalizeSupabaseUserRoleRows,
-  removeAttendanceHistoryEntry,
+  recordSession,
+  removeSessionHistoryEntry,
   shouldRecordLoginActivity,
   shouldRecordSupabaseUserActivity,
-  upsertAttendanceHistoryEntry,
+  upsertSessionHistoryEntry,
 } from './gymPilotSupabase'
 
 describe('timetable attendance persistence', () => {
@@ -30,7 +37,7 @@ describe('timetable attendance persistence', () => {
   })
 })
 
-describe('attendance history helpers', () => {
+describe('session history helpers', () => {
   it('replaces an existing attendance record when the same id is upserted', () => {
     const records = [
       {
@@ -41,7 +48,7 @@ describe('attendance history helpers', () => {
       },
     ]
 
-    const updated = upsertAttendanceHistoryEntry(records, {
+    const updated = upsertSessionHistoryEntry(records, {
       id: 'entry-1',
       attendanceType: 'taught',
       className: 'Yoga',
@@ -70,23 +77,73 @@ describe('attendance history helpers', () => {
       },
     ]
 
-    const updated = removeAttendanceHistoryEntry(records, 'entry-1')
+    const updated = removeSessionHistoryEntry(records, 'entry-1')
+
+    expect(updated).toHaveLength(1)
+    expect(updated[0].id).toBe('entry-2')
+  })
+
+  it('deduplicates entries that refer to the same session identity', () => {
+    const records = [
+      {
+        id: 'entry-1',
+        sessionId: 'session-1',
+        attendanceType: 'attended',
+        className: 'Yoga',
+        createdAt: '2026-01-01T00:00:00.000Z',
+      },
+    ]
+
+    const updated = upsertSessionHistoryEntry(records, {
+      id: 'entry-2',
+      sessionId: 'session-1',
+      attendanceType: 'taught',
+      className: 'Yoga',
+      createdAt: '2026-01-02T00:00:00.000Z',
+      updatedAt: '2026-01-02T00:00:00.000Z',
+    } as any)
+
+    expect(updated).toHaveLength(1)
+    expect(updated[0].id).toBe('entry-2')
+  })
+
+  it('deduplicates solo sessions that share the same user and start time', () => {
+    const records = [
+      {
+        id: 'entry-1',
+        userId: 'user-1',
+        sessionType: 'solo',
+        startedAt: '2026-01-01T10:00:00.000Z',
+        attendanceType: 'attended',
+        createdAt: '2026-01-01T00:00:00.000Z',
+      },
+    ]
+
+    const updated = upsertSessionHistoryEntry(records, {
+      id: 'entry-2',
+      userId: 'user-1',
+      sessionType: 'solo',
+      startedAt: '2026-01-01T10:00:00.000Z',
+      attendanceType: 'attended',
+      createdAt: '2026-01-02T00:00:00.000Z',
+      updatedAt: '2026-01-02T00:00:00.000Z',
+    } as any)
 
     expect(updated).toHaveLength(1)
     expect(updated[0].id).toBe('entry-2')
   })
 })
 
-describe('remote attendance mapping', () => {
+describe('remote session mapping', () => {
   it('maps Supabase attendance rows into the UI history entry shape', () => {
-    const entry = mapAttendanceHistoryEntryFromSupabase({
+    const entry = mapSessionHistoryEntryFromSupabase({
       id: 'entry-1',
       user_id: 'user-1',
       session_id: 'session-1',
       class_id: 'class-7',
       class_name: 'Yoga Flow',
-      instructor_name: 'Sam',
-      started_at: '2026-01-01T10:00:00.000Z',
+      trainer_name: 'Sam',
+      start_at: '2026-01-01T10:00:00.000Z',
       attendance_type: 'attended',
       notes: 'Great class',
       rating: 5,
@@ -107,21 +164,159 @@ describe('remote attendance mapping', () => {
       createdAt: '2026-01-01T09:30:00.000Z',
     })
   })
-})
 
-describe('attendance history table selection', () => {
-  it('prefers the shared Supabase attendance table name', () => {
-    expect(getAttendanceHistoryTableName()).toBe('gym_pilot_class_attendance')
+  it('preserves the persisted session type for history entries', () => {
+    const entry = mapSessionHistoryEntryFromSupabase({
+      id: 'entry-3',
+      user_id: 'user-1',
+      session_type: 'personal_training',
+      trainer_name: 'Sam',
+      start_at: '2026-01-01T10:00:00.000Z',
+      attendance_type: 'attended',
+      created_at: '2026-01-01T09:30:00.000Z',
+    } as any)
+
+    expect(entry.sessionType).toBe('personal_training')
+  })
+
+  it('maps rows that use the database trainer_name column', () => {
+    const entry = mapSessionHistoryEntryFromSupabase({
+      id: 'entry-2',
+      user_id: 'user-1',
+      class_name: 'Pilates',
+      trainer_name: 'Alex',
+      started_at: '2026-01-02T10:00:00.000Z',
+      attendance_type: 'taught',
+      notes: 'Led the session',
+      rating: 4,
+      created_at: '2026-01-02T09:30:00.000Z',
+    } as any)
+
+    expect(entry.instructorName).toBe('Alex')
+    expect(entry.attendanceType).toBe('taught')
   })
 })
 
-describe('attendance history error formatting', () => {
+describe('session history table selection', () => {
+  it('uses the consolidated user session table for history persistence', () => {
+    expect(getSessionHistoryTableName()).toBe('gym_pilot_user_session')
+  })
+})
+
+describe('session-based shared helpers', () => {
+  it('exposes session-oriented helpers for listing and recording sessions', () => {
+    expect(typeof listSessions).toBe('function')
+    expect(typeof recordSession).toBe('function')
+  })
+})
+
+describe('session table naming', () => {
+  it('uses the consolidated user session table for session persistence', () => {
+    expect(getSessionTableName()).toBe('gym_pilot_user_session')
+    expect(getSessionBookingTableName()).toBe('gym_pilot_user_session')
+  })
+})
+
+describe('session type normalization', () => {
+  it('defaults missing session types to a valid persisted value', () => {
+    expect(normalizeSessionTypeForPersistence(undefined as never)).toBe('solo')
+    expect(normalizeSessionTypeForPersistence('personal_training')).toBe('personal_training')
+    expect(normalizeSessionTypeForPersistence('solo')).toBe('solo')
+  })
+})
+
+it('maps booking roles into attendance history entries', () => {
+  const entry = mapSessionHistoryEntryFromSupabase({
+    id: 'entry-1',
+    user_id: 'user-1',
+    session_id: 'session-1',
+    role: 'trainer',
+    status: 'attended',
+    notes: 'Led the session',
+    rating: 4,
+    created_at: '2026-01-01T10:00:00.000Z',
+    session: {
+      class_name: 'Pilates',
+      trainer_name: 'Sam',
+      start_at: '2026-01-01T10:00:00.000Z',
+    },
+  } as any)
+
+  expect(entry.attendanceType).toBe('taught')
+  expect(entry.className).toBe('Pilates')
+  expect(entry.instructorName).toBe('Sam')
+})
+
+it('includes a persisted session type for timetable booking payloads', () => {
+  const payload = buildSessionBookingAttendancePayload({
+    userId: 'user-1',
+    sessionId: 'session-1',
+    classId: 'class-7',
+    className: 'Yoga Flow',
+    instructorName: 'Sam',
+    startedAt: '2026-01-01T10:00:00.000Z',
+    attendanceType: 'attended',
+    notes: 'Great class',
+    rating: 5,
+  })
+
+  expect(payload).toMatchObject({
+    user_id: 'user-1',
+    session_id: 'session-1',
+    class_id: 'class-7',
+    class_name: 'Yoga Flow',
+    trainer_name: 'Sam',
+    role: 'client',
+    status: 'attended',
+    attendance_type: 'attended',
+  })
+  expect(payload).toHaveProperty('session_type', 'class')
+})
+
+it('builds booking payloads using only supported columns', () => {
+  const payload = buildSessionBookingAttendancePayload({
+    userId: 'user-1',
+    sessionId: 'session-1',
+    attendanceType: 'taught',
+    notes: 'Led the session',
+    rating: 4,
+  })
+
+  expect(payload).toMatchObject({
+    user_id: 'user-1',
+    session_id: 'session-1',
+    role: 'trainer',
+    status: 'attended',
+    notes: 'Led the session',
+    rating: 4,
+  })
+  expect(payload).toHaveProperty('class_id', null)
+  expect(payload).toHaveProperty('attendance_type', 'taught')
+  expect(payload).toHaveProperty('session_type', 'solo')
+})
+
+it('builds a session record payload that persists the authenticated user id', () => {
+  const payload = buildSessionRecordPayload({
+    userId: 'user-1',
+    sessionType: 'solo',
+    startAt: '2026-01-01T10:00:00.000Z',
+  })
+
+  expect(payload).toMatchObject({
+    user_id: 'user-1',
+    session_type: 'solo',
+    status: 'attended',
+    start_at: '2026-01-01T10:00:00.000Z',
+  })
+})
+
+describe('session history error formatting', () => {
   it('returns a readable message for Supabase table errors', () => {
-    expect(formatAttendanceHistoryError({ message: "Could not find the table 'public.class_attendance' in the schema cache" })).toBe("Could not find the table 'public.class_attendance' in the schema cache")
+    expect(formatSessionHistoryError({ message: "Could not find the table 'public.class_attendance' in the schema cache" })).toBe("Could not find the table 'public.class_attendance' in the schema cache")
   })
 
   it('falls back to a generic message for unknown errors', () => {
-    expect(formatAttendanceHistoryError('something went wrong')).toBe('We could not load your attendance history right now.')
+    expect(formatSessionHistoryError('something went wrong')).toBe('We could not load your session history right now.')
   })
 })
 

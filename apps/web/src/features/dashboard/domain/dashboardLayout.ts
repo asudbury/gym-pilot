@@ -121,9 +121,9 @@ export function getDashboardLayoutDefinitions(
         'Monitor your clients, plans and assignments from one place.',
       widgets: [
         {
-          title: 'Attendance history',
-          description: 'Review and manage your recorded attendance entries.',
-          to: '/attendance-history',
+          title: 'Sessions',
+          description: 'Review and manage your recorded sessions.',
+          to: '/sessions',
           tone: 'blue',
           icon: 'calendar',
         },
@@ -175,10 +175,9 @@ export function getDashboardLayoutDefinitions(
         'Jump back into your exercises, plans and assignments from one place.',
       widgets: [
         {
-          title: 'Class attendance history',
-          description:
-            'Review and manage your recorded class attendance entries.',
-          to: '/attendance-history',
+          title: 'Sessions',
+          description: 'Review and manage your recorded sessions.',
+          to: '/sessions',
           tone: 'blue',
           icon: 'calendar',
         },

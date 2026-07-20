@@ -47,6 +47,12 @@ export type TimetableAttendanceAction = {
   options: TimetableAttendanceOption[]
 }
 
+export function resolveAttendanceRoleLabel(
+  attendanceType: 'attended' | 'taught',
+): string {
+  return attendanceType === 'taught' ? 'Taught' : ''
+}
+
 export function resolveTimetableAttendanceAction(
   role?: string | null,
   roles?: Array<string | null | undefined> | null,
@@ -62,8 +68,8 @@ export function resolveTimetableAttendanceAction(
     return {
       canShow: true,
       kind: null,
-      label: 'Record attendance',
-      completedLabel: 'Marked',
+      label: 'Record session',
+      completedLabel: 'Saved',
       options: [
         { kind: 'attended', label: 'I attended' },
         { kind: 'taught', label: 'I taught' },
@@ -75,8 +81,8 @@ export function resolveTimetableAttendanceAction(
     return {
       canShow: true,
       kind: 'taught',
-      label: 'I attended',
-      completedLabel: 'Marked as attended',
+      label: 'Record session',
+      completedLabel: 'Saved',
       options: [{ kind: 'taught', label: 'I taught' }],
     }
   }
@@ -85,8 +91,8 @@ export function resolveTimetableAttendanceAction(
     return {
       canShow: true,
       kind: 'attended',
-      label: 'I attended',
-      completedLabel: 'Marked as attended',
+      label: 'Record session',
+      completedLabel: 'Saved',
       options: [{ kind: 'attended', label: 'I attended' }],
     }
   }

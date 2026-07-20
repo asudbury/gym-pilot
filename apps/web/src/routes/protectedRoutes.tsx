@@ -4,14 +4,13 @@ import { AssignmentDetailPage } from '../pages/assignments/AssignmentDetailPage'
 import { AssignmentsManagerPage } from '../pages/assignments/AssignmentsManagerPage'
 import { AssignmentsPage } from '../pages/assignments/AssignmentsPage'
 import { CreateAssignmentPage } from '../pages/assignments/CreateAssignmentPage'
-import { AttendanceHistoryPage } from '../pages/AttendanceHistoryPage'
+import { SessionHistoryPage } from '../pages/SessionHistoryPage'
 import { HomePage } from '../pages/HomePage'
 import { CreatePlanPage } from '../pages/plans/CreatePlanPage'
 import { PlanDetailPage } from '../pages/plans/PlanDetailPage'
 import { PlansPage } from '../pages/plans/PlansPage'
 import { TimetablePage } from '../pages/TimetablePage'
-import { RecordAttendancePage } from '../pages/RecordAttendancePage'
-import { BookingPage } from '../pages/BookingPage'
+import { RecordSessionPage } from '../pages/RecordSessionPage'
 import { TrainerReportPage } from '../pages/TrainerReportPage'
 import { type HomeFilters } from '../utils/appUtils'
 
@@ -44,13 +43,10 @@ export function createProtectedRoutes({
       <Route path="/plans" element={<PlansPage />} />
       <Route element={<RequireAuth requireClubId />}>
         <Route path="/timetable" element={<TimetablePage />} />
-        <Route
-          path="/timetable/attendance"
-          element={<RecordAttendancePage />}
-        />
-        <Route path="/bookings" element={<BookingPage />} />
+        <Route path="/record-session" element={<RecordSessionPage />} />
+        <Route path="/sessions" element={<SessionHistoryPage />} />
         <Route path="/trainer-report" element={<TrainerReportPage />} />
-        <Route path="/attendance-history" element={<AttendanceHistoryPage />} />
+        <Route path="/sessions" element={<SessionHistoryPage />} />
       </Route>
       <Route path="/assignments" element={<AssignmentsPage />} />
       <Route

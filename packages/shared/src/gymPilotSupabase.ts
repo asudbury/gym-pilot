@@ -1358,11 +1358,52 @@ export async function recordSupabaseUserActivity(eventType: string, eventData: R
   }
 }
 
-export type AttendanceHistoryEntry = {
+export type SessionHistoryEntry = {
   id: string
   userId?: string
   sessionId?: string | null
   classId?: string | null
+  className?: string | null
+  instructorName?: string | null
+  startedAt?: string | null
+  sessionType?: 'class' | 'personal_training' | 'solo' | null
+  attendanceType: 'attended' | 'taught'
+  notes?: string | null
+  rating?: number | null
+  createdAt?: string | null
+  updatedAt?: string | null
+}
+
+type SupabaseSessionHistoryRow = {
+  id: string
+  user_id?: string | null
+  session_id?: string | null
+  class_id?: string | null
+  class_name?: string | null
+  trainer_name?: string | null
+  session_type?: 'class' | 'personal_training' | 'solo' | null
+  start_at?: string | null
+  started_at?: string | null
+  attendance_type?: 'attended' | 'taught' | null
+  notes?: string | null
+  rating?: number | null
+  created_at?: string | null
+  updated_at?: string | null
+  role?: 'client' | 'trainer' | null
+  status?: 'booked' | 'cancelled' | 'attended' | 'no_show' | 'declined' | null
+  session?: {
+    class_name?: string | null
+    trainer_name?: string | null
+    start_at?: string | null
+    started_at?: string | null
+    session_type?: 'class' | 'personal_training' | 'solo' | null
+  } | null
+}
+
+export function buildSessionBookingSessionPayload(input: {
+  userId: string
+  sessionId?: string | number | null
+  classId?: string | number | null
   className?: string | null
   instructorName?: string | null
   startedAt?: string | null
@@ -1371,79 +1412,74 @@ export type AttendanceHistoryEntry = {
   rating?: number | null
   createdAt?: string | null
   updatedAt?: string | null
+  role?: 'client' | 'trainer' | null
+  status?: 'booked' | 'cancelled' | 'attended' | 'no_show' | 'declined' | null
+  sessionType?: 'class' | 'personal_training' | 'solo' | null
+}) {
+  const resolvedSessionType = normalizeSessionTypeForPersistence(input.sessionType ?? (input.classId || input.className ? 'class' : input.instructorName ? 'personal_training' : 'solo'))
+
+  return {
+    user_id: input.userId,
+    session_id: input.sessionId != null ? String(input.sessionId) : null,
+    class_id: input.classId != null ? String(input.classId) : null,
+    class_name: input.className ?? null,
+    trainer_name: input.instructorName?.trim() ? input.instructorName.trim() : null,
+    start_at: input.startedAt ?? null,
+    attendance_type: input.attendanceType,
+    notes: input.notes?.trim() ? input.notes.trim() : null,
+    rating: input.rating ?? null,
+    created_at: input.createdAt ?? new Date().toISOString(),
+    updated_at: input.updatedAt ?? new Date().toISOString(),
+    role: input.role ?? (input.attendanceType === 'taught' ? 'trainer' : 'client'),
+    status: input.status ?? 'attended',
+    session_type: resolvedSessionType,
+  }
 }
 
-type SupabaseAttendanceHistoryRow = {
-  id: string
-  user_id?: string | null
-  session_id?: string | null
-  class_id?: string | null
-  class_name?: string | null
-  instructor_name?: string | null
-  started_at?: string | null
-  attendance_type?: 'attended' | 'taught' | null
+export function buildSessionBookingAttendancePayload(input: {
+  userId: string
+  sessionId?: string | number | null
+  classId?: string | number | null
+  className?: string | null
+  instructorName?: string | null
+  startedAt?: string | null
+  attendanceType: 'attended' | 'taught'
   notes?: string | null
   rating?: number | null
-  created_at?: string | null
-  updated_at?: string | null
+  createdAt?: string | null
+  updatedAt?: string | null
+  role?: 'client' | 'trainer' | null
+  status?: 'booked' | 'cancelled' | 'attended' | 'no_show' | 'declined' | null
+}) {
+  return buildSessionBookingSessionPayload(input)
 }
 
-const ATTENDANCE_HISTORY_STORAGE_KEY = 'gym-pilot.timetable-attendance-history'
-
-export function getAttendanceHistoryTableName() {
-  return 'gym_pilot_class_attendance'
+export function getSessionHistoryTableName() {
+  return getSessionTableName()
 }
 
-function createAttendanceHistoryEntryId() {
-  if (typeof crypto !== 'undefined' && typeof crypto.randomUUID === 'function') {
-    return crypto.randomUUID()
-  }
+export function mapSessionHistoryEntryFromSupabase(row: SupabaseSessionHistoryRow): SessionHistoryEntry {
+  const mappedAttendanceType = row.attendance_type === 'taught'
+    ? 'taught'
+    : row.role === 'trainer'
+      ? 'taught'
+      : 'attended'
 
-  return `attendance-${Date.now()}-${Math.random().toString(16).slice(2)}`
-}
+  const explicitSessionType = row.session_type ?? row.session?.session_type
+  const normalizedSessionType = normalizeSessionTypeForPersistence(
+    explicitSessionType ?? (row.class_id || row.class_name ? 'class' : row.trainer_name ? 'personal_training' : 'solo'),
+  )
 
-function loadAttendanceHistoryRecordsFromStorage(): AttendanceHistoryEntry[] {
-  if (typeof window === 'undefined') {
-    return []
-  }
-
-  const storedValue = window.localStorage.getItem(ATTENDANCE_HISTORY_STORAGE_KEY)
-
-  if (!storedValue) {
-    return []
-  }
-
-  try {
-    const parsedValue = JSON.parse(storedValue) as unknown
-
-    if (!Array.isArray(parsedValue)) {
-      return []
-    }
-
-    return parsedValue.filter((record): record is AttendanceHistoryEntry => Boolean(record) && typeof record === 'object' && typeof (record as AttendanceHistoryEntry).id === 'string')
-  } catch {
-    return []
-  }
-}
-
-function persistAttendanceHistoryRecords(records: AttendanceHistoryEntry[]) {
-  if (typeof window === 'undefined') {
-    return
-  }
-
-  window.localStorage.setItem(ATTENDANCE_HISTORY_STORAGE_KEY, JSON.stringify(records))
-}
-
-export function mapAttendanceHistoryEntryFromSupabase(row: SupabaseAttendanceHistoryRow): AttendanceHistoryEntry {
   return {
     id: row.id,
     userId: row.user_id ?? undefined,
     sessionId: row.session_id ?? null,
     classId: row.class_id ?? null,
-    className: row.class_name ?? null,
-    instructorName: row.instructor_name ?? null,
-    startedAt: row.started_at ?? null,
-    attendanceType: row.attendance_type === 'taught' ? 'taught' : 'attended',
+    className: row.class_name ?? row.session?.class_name ?? null,
+    instructorName: row.trainer_name ?? row.session?.trainer_name ?? null,
+    startedAt: row.start_at ?? row.started_at ?? row.session?.start_at ?? row.session?.started_at ?? null,
+    sessionType: normalizedSessionType,
+    attendanceType: mappedAttendanceType,
     notes: row.notes ?? null,
     rating: typeof row.rating === 'number' ? row.rating : null,
     createdAt: row.created_at ?? null,
@@ -1451,7 +1487,60 @@ export function mapAttendanceHistoryEntryFromSupabase(row: SupabaseAttendanceHis
   }
 }
 
-export function formatAttendanceHistoryError(error: unknown): string {
+function matchesSessionIdentity(left: SessionHistoryEntry, right: SessionHistoryEntry) {
+  const leftSessionId = left.sessionId?.trim()
+  const rightSessionId = right.sessionId?.trim()
+
+  if (leftSessionId && rightSessionId && leftSessionId === rightSessionId) {
+    return true
+  }
+
+  const leftClassId = left.classId?.trim()
+  const rightClassId = right.classId?.trim()
+  const leftStartedAt = left.startedAt?.trim()
+  const rightStartedAt = right.startedAt?.trim()
+
+  if (leftClassId && rightClassId && leftStartedAt && rightStartedAt && leftClassId === rightClassId && leftStartedAt === rightStartedAt) {
+    return true
+  }
+
+  const leftUserId = left.userId?.trim()
+  const rightUserId = right.userId?.trim()
+
+  if (leftUserId && rightUserId && leftUserId === rightUserId && leftStartedAt && rightStartedAt && leftStartedAt === rightStartedAt) {
+    return true
+  }
+
+  return false
+}
+
+export function upsertSessionHistoryEntry(
+  records: SessionHistoryEntry[],
+  entry: SessionHistoryEntry,
+): SessionHistoryEntry[] {
+  const next = records.filter((candidate) => {
+    if (candidate.id === entry.id) {
+      return false
+    }
+
+    if (matchesSessionIdentity(candidate, entry)) {
+      return false
+    }
+
+    return true
+  })
+
+  return [...next, entry]
+}
+
+export function removeSessionHistoryEntry(
+  records: SessionHistoryEntry[],
+  entryId: string,
+): SessionHistoryEntry[] {
+  return records.filter((candidate) => candidate.id !== entryId)
+}
+
+export function formatSessionHistoryError(error: unknown): string {
   if (error && typeof error === 'object' && 'message' in error && typeof (error as { message?: unknown }).message === 'string') {
     const message = (error as { message: string }).message
     if (message.trim().length > 0) {
@@ -1459,10 +1548,10 @@ export function formatAttendanceHistoryError(error: unknown): string {
     }
   }
 
-  return 'We could not load your attendance history right now.'
+  return 'We could not load your session history right now.'
 }
 
-export async function loadAttendanceHistoryEntries(userId?: string): Promise<AttendanceHistoryEntry[]> {
+export async function loadSessionHistoryEntries(userId?: string): Promise<SessionHistoryEntry[]> {
   const client = getSupabaseClient()
 
   if (client) {
@@ -1470,101 +1559,87 @@ export async function loadAttendanceHistoryEntries(userId?: string): Promise<Att
 
     if (resolvedUserId) {
       const { data, error } = await client
-        .from(getAttendanceHistoryTableName())
-        .select('id, user_id, session_id, class_id, class_name, instructor_name, started_at, attendance_type, notes, rating, created_at')
-        .eq('user_id', resolvedUserId)
+        .from(getSessionHistoryTableName())
+        .select('id, user_id, session_id, class_id, class_name, trainer_name, session_type, start_at, attendance_type, notes, rating, created_at, updated_at, role, status')
+        .or(`user_id.eq.${resolvedUserId},user_id.is.null`)
         .order('created_at', { ascending: false })
 
       if (!error && Array.isArray(data)) {
-        const remoteEntries = data.map((row) => mapAttendanceHistoryEntryFromSupabase(row as SupabaseAttendanceHistoryRow))
-        persistAttendanceHistoryRecords(remoteEntries)
-        return remoteEntries
+        return data
+          .filter((row) => Boolean(row) && typeof row === 'object')
+          .map((row) => {
+            const candidate = row as SupabaseSessionHistoryRow
+            const mappedRow = mapSessionHistoryEntryFromSupabase(candidate)
+
+            if (!mappedRow.sessionType && candidate.session_type == null && candidate.class_id == null && candidate.class_name == null && candidate.trainer_name == null) {
+              return {
+                ...mappedRow,
+                sessionType: 'solo',
+              }
+            }
+
+            return mappedRow
+          })
       }
 
       if (error) {
-        logger.warn('[Supabase] Could not load attendance history', error)
+        logger.warn('[Supabase] Could not load session history', error)
       }
     }
   }
 
-  const records = loadAttendanceHistoryRecordsFromStorage()
-
-  if (!userId) {
-    return records
-  }
-
-  return records.filter((record) => record.userId === userId)
+  return []
 }
 
-export async function saveAttendanceHistoryEntry(entry: AttendanceHistoryEntry, userId?: string): Promise<AttendanceHistoryEntry[]> {
+export async function saveSessionHistoryEntry(entry: SessionHistoryEntry, userId?: string): Promise<SessionHistoryEntry[]> {
   const client = getSupabaseClient()
   const resolvedUserId = userId || (client ? await getAuthenticatedUserId(client) : null)
 
   if (client && resolvedUserId) {
     const { error } = await client
-      .from(getAttendanceHistoryTableName())
+      .from(getSessionHistoryTableName())
       .upsert({
         id: entry.id,
-        user_id: resolvedUserId,
-        session_id: entry.sessionId ?? null,
-        class_id: entry.classId ?? null,
-        class_name: entry.className ?? null,
-        instructor_name: entry.instructorName ?? null,
-        started_at: entry.startedAt ?? null,
-        attendance_type: entry.attendanceType,
-        notes: entry.notes ?? null,
-        rating: entry.rating ?? null,
-        created_at: entry.createdAt ?? null,
+        ...buildSessionBookingSessionPayload({
+          userId: resolvedUserId,
+          sessionId: entry.sessionId,
+          classId: entry.classId,
+          className: entry.className,
+          instructorName: entry.instructorName,
+          startedAt: entry.startedAt,
+          attendanceType: entry.attendanceType,
+          notes: entry.notes,
+          rating: entry.rating,
+          createdAt: entry.createdAt ?? null,
+          updatedAt: entry.updatedAt ?? null,
+        }),
       }, { onConflict: 'id' })
 
     if (!error) {
-      const nextRecords = upsertAttendanceHistoryEntry(loadAttendanceHistoryRecordsFromStorage(), entry)
-      persistAttendanceHistoryRecords(nextRecords)
-      return nextRecords
+      return [entry]
     }
 
-    logger.warn('[Supabase] Could not persist updated attendance history entry', error)
+    logger.warn('[Supabase] Could not persist updated session history entry', error)
   }
 
-  const nextRecords = upsertAttendanceHistoryEntry(loadAttendanceHistoryRecordsFromStorage(), entry)
-  persistAttendanceHistoryRecords(nextRecords)
-  return nextRecords
+  return [entry]
 }
 
-export async function deleteAttendanceHistoryEntry(entryId: string, userId?: string): Promise<AttendanceHistoryEntry[]> {
+export async function deleteSessionHistoryEntry(entryId: string, userId?: string): Promise<SessionHistoryEntry[]> {
   const client = getSupabaseClient()
   const resolvedUserId = userId || (client ? await getAuthenticatedUserId(client) : null)
 
   if (client && resolvedUserId) {
-    const { error } = await client.from(getAttendanceHistoryTableName()).delete().eq('id', entryId).eq('user_id', resolvedUserId)
+    const { error } = await client.from(getSessionHistoryTableName()).delete().eq('id', entryId).eq('user_id', resolvedUserId)
 
     if (!error) {
-      const nextRecords = removeAttendanceHistoryEntry(loadAttendanceHistoryRecordsFromStorage(), entryId)
-      persistAttendanceHistoryRecords(nextRecords)
-      return nextRecords
+      return []
     }
 
-    logger.warn('[Supabase] Could not delete attendance history entry', error)
+    logger.warn('[Supabase] Could not delete session history entry', error)
   }
 
-  const nextRecords = removeAttendanceHistoryEntry(loadAttendanceHistoryRecordsFromStorage(), entryId)
-  persistAttendanceHistoryRecords(nextRecords)
-  return nextRecords
-}
-
-export function upsertAttendanceHistoryEntry(
-  records: AttendanceHistoryEntry[],
-  entry: AttendanceHistoryEntry,
-): AttendanceHistoryEntry[] {
-  const next = records.filter((candidate) => candidate.id !== entry.id)
-  return [...next, entry]
-}
-
-export function removeAttendanceHistoryEntry(
-  records: AttendanceHistoryEntry[],
-  entryId: string,
-): AttendanceHistoryEntry[] {
-  return records.filter((candidate) => candidate.id !== entryId)
+  return []
 }
 
 export async function saveTimetableAttendance(input: {
@@ -1595,14 +1670,14 @@ export async function saveTimetableAttendance(input: {
 
   if (input.sessionId != null || (input.classId != null && input.startedAt != null)) {
     let query = client
-      .from(getAttendanceHistoryTableName())
+      .from(getSessionHistoryTableName())
       .select('id')
       .eq('user_id', resolvedUserId)
 
     if (input.sessionId != null) {
       query = query.eq('session_id', String(input.sessionId))
     } else {
-      query = query.eq('class_id', String(input.classId)).eq('started_at', input.startedAt)
+      query = query.eq('class_id', String(input.classId)).eq('start_at', input.startedAt)
     }
 
     const { data: existingData, error: selectError } = await query.limit(1)
@@ -1619,63 +1694,47 @@ export async function saveTimetableAttendance(input: {
   let dbResult: { data: any[] | null; error: any } = { data: null, error: null }
 
   if (!tableExists) {
-    dbResult.error = { message: `Could not find the table ${getAttendanceHistoryTableName()}` }
+    dbResult.error = { message: `Could not find the table ${getSessionHistoryTableName()}` }
   } else if (existingId) {
     dbResult = await client
-      .from(getAttendanceHistoryTableName())
-      .update({
-        class_name: input.className ?? null,
-        instructor_name: input.instructorName?.trim() ? input.instructorName.trim() : null,
-        attendance_type: input.attendanceType,
-        notes: input.notes?.trim() ? input.notes.trim() : null,
-        rating: input.rating ?? null,
-        updated_at: new Date().toISOString(),
-      })
+      .from(getSessionHistoryTableName())
+      .update(buildSessionBookingSessionPayload({
+        userId: resolvedUserId,
+        sessionId: input.sessionId,
+        classId: input.classId,
+        className: input.className,
+        instructorName: input.instructorName,
+        startedAt: input.startedAt,
+        attendanceType: input.attendanceType,
+        notes: input.notes,
+        rating: input.rating,
+      }))
       .eq('id', existingId)
       .select()
   } else {
     dbResult = await client
-      .from(getAttendanceHistoryTableName())
-      .insert({
-        user_id: resolvedUserId,
-        session_id: input.sessionId != null ? String(input.sessionId) : null,
-        class_id: input.classId != null ? String(input.classId) : null,
-        class_name: input.className ?? null,
-        instructor_name: input.instructorName?.trim() ? input.instructorName.trim() : null,
-        started_at: input.startedAt ?? null,
-        attendance_type: input.attendanceType,
-        notes: input.notes?.trim() ? input.notes.trim() : null,
-        rating: input.rating ?? null,
-        created_at: new Date().toISOString(),
-      })
+      .from(getSessionHistoryTableName())
+      .insert(buildSessionBookingSessionPayload({
+        userId: resolvedUserId,
+        sessionId: input.sessionId,
+        classId: input.classId,
+        className: input.className,
+        instructorName: input.instructorName,
+        startedAt: input.startedAt,
+        attendanceType: input.attendanceType,
+        notes: input.notes,
+        rating: input.rating,
+      }))
       .select()
   }
 
-  const { data, error } = dbResult
+  const { error } = dbResult
 
   if (error) {
     const isMissingTableError = error.message?.includes("Could not find the table") || error.message?.includes('does not exist')
 
     if (isMissingTableError) {
-      const historyEntry: AttendanceHistoryEntry = {
-        id: createAttendanceHistoryEntryId(),
-        userId: resolvedUserId,
-        sessionId: input.sessionId != null ? String(input.sessionId) : null,
-        classId: input.classId != null ? String(input.classId) : null,
-        className: input.className ?? null,
-        instructorName: input.instructorName?.trim() ? input.instructorName.trim() : null,
-        startedAt: input.startedAt ?? null,
-        attendanceType: input.attendanceType,
-        notes: input.notes?.trim() ? input.notes.trim() : null,
-        rating: input.rating ?? null,
-        createdAt: new Date().toISOString(),
-        updatedAt: new Date().toISOString(),
-      }
-
       logger.warn('[Supabase] gym_pilot_class_attendance table is not available yet; recording attendance as a user activity fallback', error)
-      const existingEntries = await loadAttendanceHistoryEntries(resolvedUserId)
-      const nextRecords = upsertAttendanceHistoryEntry(existingEntries, historyEntry)
-      persistAttendanceHistoryRecords(nextRecords)
       await recordSupabaseUserActivity('timetable_attendance', {
         sessionId: input.sessionId != null ? String(input.sessionId) : null,
         classId: input.classId != null ? String(input.classId) : null,
@@ -1694,37 +1753,65 @@ export async function saveTimetableAttendance(input: {
     return { success: false as const, error }
   }
 
-  const insertedRow = data && data[0]
-  const historyEntry: AttendanceHistoryEntry = insertedRow
-    ? mapAttendanceHistoryEntryFromSupabase(insertedRow as SupabaseAttendanceHistoryRow)
-    : {
-        id: existingId || createAttendanceHistoryEntryId(),
-        userId: resolvedUserId,
-        sessionId: input.sessionId != null ? String(input.sessionId) : null,
-        classId: input.classId != null ? String(input.classId) : null,
-        className: input.className ?? null,
-        instructorName: input.instructorName?.trim() ? input.instructorName.trim() : null,
-        startedAt: input.startedAt ?? null,
-        attendanceType: input.attendanceType,
-        notes: input.notes?.trim() ? input.notes.trim() : null,
-        rating: input.rating ?? null,
-        createdAt: new Date().toISOString(),
-        updatedAt: new Date().toISOString(),
-      }
-
-  const existingEntries = await loadAttendanceHistoryEntries(resolvedUserId)
-  const nextRecords = upsertAttendanceHistoryEntry(existingEntries, historyEntry)
-  persistAttendanceHistoryRecords(nextRecords)
-
   return { success: true as const }
 }
 
 export function getSessionTableName() {
-  return 'gym_pilot_session'
+  return 'gym_pilot_user_session'
 }
 
 export function getSessionBookingTableName() {
-  return 'gym_pilot_session_booking'
+  return getSessionTableName()
+}
+
+export function normalizeSessionTypeForPersistence(sessionType: string | null | undefined) {
+  if (sessionType === 'class' || sessionType === 'personal_training' || sessionType === 'solo') {
+    return sessionType
+  }
+
+  return 'solo'
+}
+
+export function buildSessionRecordPayload(input: {
+  userId?: string | null
+  gymClubId?: number | null
+  sessionType: 'class' | 'personal_training' | 'solo'
+  classId?: string | null
+  className?: string | null
+  trainerId?: string | null
+  trainerName?: string | null
+  startAt: string
+  durationMinutes?: number | null
+  location?: string | null
+  capacity?: number | null
+  price?: number | null
+  metadata?: any | null
+  createdAt?: string | null
+  updatedAt?: string | null
+}) {
+  return {
+    gym_club_id: input.gymClubId ?? null,
+    session_type: normalizeSessionTypeForPersistence(input.sessionType),
+    class_id: input.classId ?? null,
+    class_name: input.className ?? null,
+    trainer_id: input.trainerId ?? null,
+    trainer_name: input.trainerName ?? null,
+    start_at: input.startAt,
+    duration_minutes: input.durationMinutes ?? null,
+    location: input.location ?? null,
+    capacity: input.capacity ?? null,
+    price: input.price ?? null,
+    metadata: input.metadata ?? null,
+    user_id: input.userId ?? null,
+    session_id: null,
+    role: null,
+    status: 'attended',
+    notes: null,
+    rating: null,
+    attendance_type: null,
+    created_at: input.createdAt ?? new Date().toISOString(),
+    updated_at: input.updatedAt ?? new Date().toISOString(),
+  }
 }
 
 export async function createSession(input: {
@@ -1746,21 +1833,22 @@ export async function createSession(input: {
     return { success: false as const, error: new Error('Supabase client is not available') }
   }
 
-  const payload = {
-    gym_club_id: input.gymClubId ?? null,
-    session_type: input.sessionType,
-    class_id: input.classId ?? null,
-    class_name: input.className ?? null,
-    trainer_id: input.trainerId ?? null,
-    trainer_name: input.trainerName ?? null,
-    start_at: input.startAt,
-    duration_minutes: input.durationMinutes ?? null,
-    location: input.location ?? null,
-    capacity: input.capacity ?? null,
-    price: input.price ?? null,
-    metadata: input.metadata ?? null,
-    created_at: new Date().toISOString(),
-  }
+  const resolvedUserId = await getAuthenticatedUserId(client)
+  const payload = buildSessionRecordPayload({
+    userId: resolvedUserId,
+    gymClubId: input.gymClubId,
+    sessionType: input.sessionType,
+    classId: input.classId,
+    className: input.className,
+    trainerId: input.trainerId,
+    trainerName: input.trainerName,
+    startAt: input.startAt,
+    durationMinutes: input.durationMinutes,
+    location: input.location,
+    capacity: input.capacity,
+    price: input.price,
+    metadata: input.metadata,
+  })
 
   const { data, error } = await client.from(getSessionTableName()).insert(payload).select()
 
@@ -1790,16 +1878,17 @@ export async function bookSession(input: {
   }
 
   const payload = {
-    session_id: input.sessionId,
     user_id: resolvedUserId,
+    session_id: input.sessionId,
     role: input.role,
-    status: 'booked',
+    status: 'attended',
     notes: input.notes ?? null,
     rating: typeof input.rating === 'number' && Number.isFinite(input.rating) ? input.rating : null,
-    created_at: new Date().toISOString(),
+    attendance_type: input.role === 'trainer' ? 'taught' : 'attended',
+    updated_at: new Date().toISOString(),
   }
 
-  const { data, error } = await client.from(getSessionBookingTableName()).insert(payload).select()
+  const { data, error } = await client.from(getSessionTableName()).update(payload).eq('id', input.sessionId).select()
 
   if (error) {
     logger.error('[Supabase] Could not book session', error)
@@ -1807,6 +1896,16 @@ export async function bookSession(input: {
   }
 
   return { success: true as const, booking: data && data[0] }
+}
+
+export async function recordSession(input: {
+  sessionId: string
+  userId?: string
+  role: 'client' | 'trainer'
+  notes?: string | null
+  rating?: number | null
+}) {
+  return bookSession(input)
 }
 
 export async function cancelBooking(input: { bookingId?: string; sessionId?: string; userId?: string }) {
@@ -1820,12 +1919,12 @@ export async function cancelBooking(input: { bookingId?: string; sessionId?: str
     return { success: false as const, error: new Error('Unable to resolve the current user') }
   }
 
-  let query = client.from(getSessionBookingTableName()).update({ status: 'cancelled', updated_at: new Date().toISOString() })
+  let query = client.from(getSessionTableName()).update({ status: 'cancelled', updated_at: new Date().toISOString() })
 
   if (input.bookingId) {
     query = query.eq('id', input.bookingId).eq('user_id', resolvedUserId)
   } else if (input.sessionId) {
-    query = query.eq('session_id', input.sessionId).eq('user_id', resolvedUserId)
+    query = query.eq('id', input.sessionId).eq('user_id', resolvedUserId)
   } else {
     return { success: false as const, error: new Error('bookingId or sessionId required') }
   }
@@ -1840,13 +1939,13 @@ export async function cancelBooking(input: { bookingId?: string; sessionId?: str
   return { success: true as const, bookings: data }
 }
 
-export async function listBookings(filters?: { userId?: string; trainerId?: string; from?: string; to?: string; status?: string }) {
+export async function listSessions(filters?: { userId?: string; trainerId?: string; from?: string; to?: string; status?: string }) {
   const client = getSupabaseClient()
   if (!client) {
     return [] as any[]
   }
 
-  let query = client.from(getSessionBookingTableName()).select('*, session:session_id(*)')
+  let query = client.from(getSessionTableName()).select('*')
 
   if (filters?.userId) {
     query = query.eq('user_id', filters.userId)
@@ -1857,7 +1956,7 @@ export async function listBookings(filters?: { userId?: string; trainerId?: stri
   }
 
   if (filters?.trainerId) {
-    // join via session.trainer_id isn't directly available; filter client-side after fetching
+    query = query.eq('trainer_id', filters.trainerId)
   }
 
   const { data, error } = await query.order('created_at', { ascending: false })
@@ -1868,13 +1967,19 @@ export async function listBookings(filters?: { userId?: string; trainerId?: stri
 
   let results = Array.isArray(data) ? data : []
 
-  if (filters?.trainerId) {
-    results = results.filter((r: any) => r.session && r.session.trainer_id === filters.trainerId)
-  }
+  results = results.map((row: any) => ({
+    ...row,
+    session: {
+      class_name: row.class_name ?? null,
+      session_type: row.session_type ?? null,
+      start_at: row.start_at ?? null,
+      trainer_name: row.trainer_name ?? null,
+    },
+  }))
 
   if (filters?.from || filters?.to) {
     results = results.filter((r: any) => {
-      const start = r.session?.start_at ? new Date(r.session.start_at) : null
+      const start = r.start_at ? new Date(r.start_at) : null
       if (!start) return false
       if (filters?.from && start < new Date(filters.from)) return false
       if (filters?.to && start > new Date(filters.to)) return false
@@ -1883,4 +1988,8 @@ export async function listBookings(filters?: { userId?: string; trainerId?: stri
   }
 
   return results
+}
+
+export async function listBookings(filters?: { userId?: string; trainerId?: string; from?: string; to?: string; status?: string }) {
+  return listSessions(filters)
 }

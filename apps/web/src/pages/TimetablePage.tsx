@@ -5,7 +5,6 @@ import { useAuth } from '../auth/AuthContext'
 import { PageLayout } from '../layouts/PageLayout'
 import { PageCardLayout } from '../layouts/PageCardLayout'
 import { Button } from '../components/Button'
-import BookingModal from '../components/BookingModal'
 import { loadVirginActiveClubs } from '../utils/virginActiveClubs'
 import {
   formatTimetableAvailability,
@@ -159,7 +158,6 @@ export function TimetablePage() {
   const [activeDayKey, setActiveDayKey] = useState('')
   const [activeInstructor, setActiveInstructor] = useState('all')
   const [activeClassName, setActiveClassName] = useState('all')
-  const [showBookingModal, setShowBookingModal] = useState(false)
   const [resolvedClubName, setResolvedClubName] = useState<string | null>(null)
   const [attendanceState, setAttendanceState] = useState<
     Record<string, 'attended' | 'taught'>
@@ -443,7 +441,9 @@ export function TimetablePage() {
     const attendanceKind = attendanceSelection ?? attendanceAction.kind
 
     if (!attendanceKind) {
-      setAttendanceMessage('Choose whether you attended or taught this class.')
+      setAttendanceMessage(
+        'Choose whether you attended or taught this session.',
+      )
       return
     }
 
@@ -478,16 +478,14 @@ export function TimetablePage() {
           ...current,
           [attendanceKey]: attendanceKind,
         }))
-        setAttendanceMessage('Attendance saved.')
+        setAttendanceMessage('Session saved.')
         setAttendancePendingSession(null)
         setAttendanceNotes('')
         setAttendanceRating(null)
         setAttendanceSelection(null)
-        navigate('/attendance-history', { replace: true })
+        navigate('/sessions', { replace: true })
       } else {
-        setAttendanceMessage(
-          result.error?.message ?? 'Could not save attendance.',
-        )
+        setAttendanceMessage(result.error?.message ?? 'Could not save session.')
       }
     } catch (err: any) {
       setAttendanceMessage(err?.message ?? 'An unexpected error occurred.')
@@ -528,8 +526,7 @@ export function TimetablePage() {
               <div className="flex items-start justify-between gap-2">
                 <div>
                   <p className="text-sm font-semibold text-slate-900">
-                    {attendancePendingSession.className ??
-                      `Class ${attendancePendingSession.classId ?? 'Unknown'}`}
+                    {attendancePendingSession.className ?? 'PT Session'}
                   </p>
                   <p className="text-sm text-slate-600">
                     {attendancePendingSession.room ?? 'Room TBD'}
@@ -539,7 +536,9 @@ export function TimetablePage() {
                   <Button
                     type="button"
                     tone="emerald"
-                    onClick={() => setShowBookingModal(true)}
+                    onClick={() =>
+                      navigate('/record-session?type=personal_training')
+                    }
                     className="ml-2"
                   >
                     Record session
@@ -589,12 +588,12 @@ export function TimetablePage() {
               <div className="space-y-3">
                 <div>
                   <h3 className="text-base font-semibold text-slate-900">
-                    Confirm attendance
+                    Record session
                   </h3>
                   <p className="text-sm text-slate-600">
                     {attendanceAction.options.length > 1
-                      ? 'Choose how this class should be recorded and add any notes.'
-                      : 'Record your attendance for this class and add any notes.'}
+                      ? 'Choose how this session should be recorded and add any notes.'
+                      : 'Record this session and add any notes.'}
                   </p>
                 </div>
                 {attendanceAction.options.length > 1 ? (
@@ -660,7 +659,7 @@ export function TimetablePage() {
                     disabled={attendanceSaving}
                     className="shadow-sm transition hover:shadow-md disabled:cursor-not-allowed disabled:border-emerald-300 disabled:bg-emerald-300 disabled:text-emerald-950"
                   >
-                    {attendanceSaving ? 'Saving…' : 'Record attendance'}
+                    {attendanceSaving ? 'Saving…' : 'Save session'}
                   </Button>
                   <Button
                     type="button"
@@ -758,7 +757,7 @@ export function TimetablePage() {
                       onChange={(event) =>
                         setActiveInstructor(event.target.value)
                       }
-                      className="min-w-[9rem] rounded-full border border-slate-300 bg-white px-3 py-1.5 text-sm text-slate-700 shadow-sm"
+                      className="min-w-36 rounded-full border border-slate-300 bg-white px-3 py-1.5 text-sm text-slate-700 shadow-sm"
                     >
                       <option value="all">All</option>
                       {instructorOptions.map((instructorName) => (
@@ -777,7 +776,7 @@ export function TimetablePage() {
                         setActiveClassName(event.target.value)
                       }
                       ref={classSelectRef}
-                      className={`min-w-[9rem] rounded-full border border-slate-300 bg-white px-3 py-1.5 text-sm text-slate-700 shadow-sm ${
+                      className={`min-w-36 rounded-full border border-slate-300 bg-white px-3 py-1.5 text-sm text-slate-700 shadow-sm ${
                         highlightClassFilter ? 'ring-2 ring-amber-300' : ''
                       }`}
                     >
@@ -814,8 +813,7 @@ export function TimetablePage() {
                           <div className="flex items-start justify-between gap-2">
                             <div>
                               <p className="text-sm font-semibold text-slate-900">
-                                {session.className ??
-                                  `Class ${session.classId ?? 'Unknown'}`}
+                                {session.className ?? 'PT Session'}
                               </p>
                               <p className="text-sm text-slate-600">
                                 {session.room ?? 'Room TBD'}
@@ -927,8 +925,7 @@ export function TimetablePage() {
                           <div className="flex items-start justify-between gap-2">
                             <div>
                               <p className="text-sm font-semibold text-slate-900">
-                                {session.className ??
-                                  `Class ${session.classId ?? 'Unknown'}`}
+                                {session.className ?? 'PT Session'}
                               </p>
                               <p className="text-sm text-slate-600">
                                 {session.room ?? 'Room TBD'}
@@ -1015,10 +1012,6 @@ export function TimetablePage() {
           ) : null}
         </div>
       </PageCardLayout>
-      <BookingModal
-        open={showBookingModal}
-        onClose={() => setShowBookingModal(false)}
-      />
     </PageLayout>
   )
 }

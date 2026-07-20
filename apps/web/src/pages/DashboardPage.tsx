@@ -1,5 +1,4 @@
 import { useEffect, useMemo, useState } from 'react'
-import { useNavigate } from 'react-router-dom'
 import { PageCard } from '../components/PageCard'
 import { PageLayout } from '../layouts/PageLayout'
 import { useAuth } from '../auth/AuthContext'
@@ -8,7 +7,7 @@ import { renderDashboardTimestamp } from '../utils/appUtils'
 import { resolveDashboardViewModel } from '../features/dashboard/domain/dashboardLayout'
 import { DecorativeIcon } from '../components/ui/DecorativeIcon'
 import { Button } from '../components/Button'
-import BookingModal from '../components/BookingModal'
+import { SessionActions } from '../components/SessionActions'
 
 export function DashboardPage() {
   const { user } = useAuth()
@@ -37,7 +36,7 @@ export function DashboardPage() {
     widgets: layout.widgets.filter((widget) => {
       if (canShowTimetable) return true
       const path = widget.to ?? ''
-      if (path === '/timetable' || path === '/attendance-history') {
+      if (path === '/timetable' || path === '/sessions') {
         return false
       }
       return true
@@ -48,12 +47,6 @@ export function DashboardPage() {
     filteredLayouts.find((layout) => layout.key === selectedLayoutKey) ??
     filteredLayouts.find((layout) => layout.widgets.length > 0) ??
     filteredLayouts[0]
-
-  const [showBookingModal, setShowBookingModal] = useState(false)
-  const [bookingInitialType, setBookingInitialType] = useState<
-    'solo' | 'personal_training' | null
-  >(null)
-  const navigate = useNavigate()
 
   useEffect(() => {
     if (!layouts.some((layout) => layout.key === selectedRole)) {
@@ -107,54 +100,12 @@ export function DashboardPage() {
           <PageCard as="section">
             <div className="mb-1 flex items-start gap-3">
               <DecorativeIcon icon="calendar" />
-              <div>
-                <p className="text-sm font-semibold uppercase tracking-[0.24em] text-slate-500">
-                  Record a session
-                </p>
-                <p className="text-sm text-slate-600 dark:text-slate-300">
-                  Easily record a class, personal training session, or a solo
-                  session.
-                </p>
-              </div>
+              <p className="text-sm font-semibold uppercase tracking-[0.24em] text-slate-500">
+                Record a session
+              </p>
             </div>
 
-            <div className="mt-3 flex flex-wrap gap-3">
-              <Button
-                tone="emerald"
-                onClick={() => navigate('/timetable?prefill=class')}
-              >
-                <div className="inline-flex items-center gap-2">
-                  <DecorativeIcon icon="calendar" className="h-4 w-4" />
-                  <span>Record class</span>
-                </div>
-              </Button>
-
-              <Button
-                tone="emerald"
-                onClick={() => {
-                  setBookingInitialType('personal_training')
-                  setShowBookingModal(true)
-                }}
-              >
-                <div className="inline-flex items-center gap-2">
-                  <DecorativeIcon icon="users" className="h-4 w-4" />
-                  <span>Record personal training</span>
-                </div>
-              </Button>
-
-              <Button
-                tone="emerald"
-                onClick={() => {
-                  setBookingInitialType('solo')
-                  setShowBookingModal(true)
-                }}
-              >
-                <div className="inline-flex items-center gap-2">
-                  <DecorativeIcon icon="dumbbell" className="h-4 w-4" />
-                  <span>Record solo session</span>
-                </div>
-              </Button>
-            </div>
+            <SessionActions includeViewSessionsButton={true} />
           </PageCard>
         </div>
 
@@ -170,16 +121,6 @@ export function DashboardPage() {
             </div>
             {renderDashboardWidgets(filteredLayouts, selectedLayoutKey)}
           </div>
-        ) : null}
-        {showBookingModal ? (
-          <BookingModal
-            open={showBookingModal}
-            onClose={() => {
-              setShowBookingModal(false)
-              setBookingInitialType(null)
-            }}
-            initialSessionType={bookingInitialType ?? undefined}
-          />
         ) : null}
       </PageCard>
     </PageLayout>

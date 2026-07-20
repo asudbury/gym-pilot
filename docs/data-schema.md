@@ -118,7 +118,7 @@ The shared Supabase helpers in [packages/shared/src/gymPilotSupabase.ts](package
 | Plans and assignments | `select`, `insert`, `upsert`, `delete` against remote rows | `gym_pilot_plan`, `gym_pilot_assignment` |
 | Favourites and folders | `select`, `insert`, `upsert`, `delete` against remote rows | `gym_pilot_favourite_folder`, `gym_pilot_favourite` |
 | Activity logging | `recordSupabaseUserActivity()` uses `insert` into `gym_pilot_user_activity`; it skips inserts when the app is running on localhost-style hosts | `gym_pilot_user_activity` |
-| Timetable attendance | `saveTimetableAttendance()` inserts role-based attendance records with optional notes and a 1-5 rating for a session/class | `gym_pilot_class_attendance` |
+| Session recording | `saveTimetableAttendance()` inserts role-based session records with optional notes and a 1-5 rating for a session/class | `gym_pilot_session_booking` |
 
 ### Entity relationship overview
 ```mermaid
@@ -220,17 +220,16 @@ erDiagram
         timestamptz created_at
     }
 
-    gym_pilot_class_attendance {
+    gym_pilot_session_booking {
         uuid id
+        uuid session_id
         uuid user_id
-        text session_id
-        text class_id
-        text class_name
-        timestamptz started_at
-        text attendance_type
+        text role
+        text status
         text notes
         smallint rating
         timestamptz created_at
+        timestamptz updated_at
     }
 ```
 
