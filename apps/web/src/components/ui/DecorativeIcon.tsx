@@ -19,6 +19,10 @@ export type DecorativeIconProps = {
     | 'settings'
     | 'key'
     | 'user'
+    | 'edit'
+    | 'trash'
+    | 'check'
+    | 'close'
     | null
   className?: string
   withContainer?: boolean
@@ -27,11 +31,11 @@ export type DecorativeIconProps = {
 const baseClasses =
   'flex h-11 w-11 items-center justify-center rounded-2xl border border-slate-200 bg-slate-50 text-slate-700 shadow-sm dark:border-slate-700 dark:bg-slate-900/70 dark:text-slate-200'
 
-export function DecorativeIcon({
+const DecorativeIcon = ({
   icon = 'spark',
   className = '',
   withContainer = false,
-}: DecorativeIconProps) {
+}: DecorativeIconProps) => {
   if (icon === null) {
     return null
   }
@@ -393,6 +397,66 @@ export function DecorativeIcon({
         />
       </svg>
     ),
+    edit: (
+      <svg viewBox="0 0 24 24" fill="none" className={iconClassName}>
+        <path
+          d="M4 20h4l10.5-10.5a2 2 0 0 0 0-2.8l-1.2-1.2a2 2 0 0 0-2.8 0L4 14v6Z"
+          stroke="currentColor"
+          strokeWidth="1.8"
+          strokeLinecap="round"
+          strokeLinejoin="round"
+        />
+        <path
+          d="m13 6 5 5"
+          stroke="currentColor"
+          strokeWidth="1.8"
+          strokeLinecap="round"
+        />
+      </svg>
+    ),
+    trash: (
+      <svg viewBox="0 0 24 24" fill="none" className={iconClassName}>
+        <path
+          d="M4 7h16"
+          stroke="currentColor"
+          strokeWidth="1.8"
+          strokeLinecap="round"
+        />
+        <path
+          d="M8 7V5a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"
+          stroke="currentColor"
+          strokeWidth="1.8"
+          strokeLinecap="round"
+        />
+        <path
+          d="M8 10v8m4-8v8m4-8v8"
+          stroke="currentColor"
+          strokeWidth="1.8"
+          strokeLinecap="round"
+        />
+      </svg>
+    ),
+    check: (
+      <svg viewBox="0 0 24 24" fill="none" className={iconClassName}>
+        <path
+          d="m5 12 4 4 10-10"
+          stroke="currentColor"
+          strokeWidth="1.8"
+          strokeLinecap="round"
+          strokeLinejoin="round"
+        />
+      </svg>
+    ),
+    close: (
+      <svg viewBox="0 0 24 24" fill="none" className={iconClassName}>
+        <path
+          d="m6 6 12 12M18 6 6 18"
+          stroke="currentColor"
+          strokeWidth="1.8"
+          strokeLinecap="round"
+        />
+      </svg>
+    ),
   }[icon]
 
   return (
@@ -401,3 +465,5 @@ export function DecorativeIcon({
     </div>
   )
 }
+
+export { DecorativeIcon }

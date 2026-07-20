@@ -13,7 +13,10 @@ export function NavigationMenuItem({
     <NavLink
       to={to}
       onClick={onClick}
-      className={['inline-flex items-center gap-0', className]
+      className={[
+        'inline-flex items-center gap-0 rounded-lg border border-transparent px-2 py-1.5 transition-all duration-200 hover:border-slate-400 hover:bg-slate-100 hover:font-semibold hover:shadow-sm',
+        className,
+      ]
         .filter(Boolean)
         .join(' ')}
     >

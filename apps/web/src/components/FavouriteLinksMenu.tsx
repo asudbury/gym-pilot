@@ -233,13 +233,13 @@ export function FavouriteLinksMenu({
     variant === 'header'
       ? getToneClass(
           'default',
-          'w-full px-4 py-2 text-left text-sm font-medium',
+          'w-full border border-transparent px-4 py-2 text-left text-sm font-medium transition hover:border-slate-300 hover:font-semibold',
         )
       : classNames(
-          'w-full rounded-xl px-3 py-2 text-left text-sm font-medium transition',
+          'w-full rounded-xl border border-transparent px-3 py-2 text-left text-sm font-medium transition',
           menuOpen
             ? 'bg-slate-900 text-white'
-            : 'text-slate-700 hover:bg-slate-50',
+            : 'text-slate-700 hover:border-slate-300 hover:bg-slate-50 hover:font-semibold',
         ),
   )
 
@@ -327,7 +327,7 @@ export function FavouriteLinksMenu({
                         <Button
                           type="button"
                           onClick={() => handleOpenQuickLink(item)}
-                          className="w-full rounded-lg px-3 py-2 text-left text-sm text-slate-700 transition hover:bg-slate-50 hover:text-slate-900 sm:flex-1"
+                          className="w-full rounded-lg border border-transparent px-3 py-2 text-left text-sm text-slate-700 transition-all duration-200 hover:border-slate-400 hover:bg-slate-100 hover:font-semibold hover:text-slate-900 hover:shadow-sm sm:flex-1"
                         >
                           {item.label}
                         </Button>

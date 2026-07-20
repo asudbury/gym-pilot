@@ -45,7 +45,7 @@ export function RecordSessionPage() {
     boolean | null
   >(null)
   const [rating, setRating] = useState<number | null>(null)
-  const [duration, setDuration] = useState<number | undefined>(30)
+  const [duration, setDuration] = useState<number | undefined>(undefined)
   const [notes, setNotes] = useState('')
   const [isSaving, setIsSaving] = useState(false)
   const [error, setError] = useState<string | null>(null)
@@ -233,8 +233,11 @@ export function RecordSessionPage() {
                       key={value}
                       type="button"
                       onClick={() => setRating(value)}
-                      tone={isSelected ? 'blue' : 'default'}
-                      className={isSelected ? 'shadow-sm' : ''}
+                      className={
+                        isSelected
+                          ? 'rounded-full border border-sky-600 bg-sky-600 px-3 py-1.5 text-sm font-semibold text-white shadow-sm'
+                          : 'rounded-full border border-slate-300 bg-white px-3 py-1.5 text-sm font-semibold text-slate-700'
+                      }
                     >
                       {value} / 5
                     </Button>
@@ -260,7 +263,37 @@ export function RecordSessionPage() {
 
             <div className="mt-6 flex flex-wrap gap-2">
               <Button onClick={handleSubmit} tone="emerald" disabled={isSaving}>
-                {isSaving ? 'Recording…' : 'Record session'}
+                <span className="inline-flex items-center gap-2">
+                  {isSaving ? (
+                    <>
+                      <svg
+                        className="h-4 w-4 animate-spin"
+                        viewBox="0 0 24 24"
+                        fill="none"
+                        aria-hidden="true"
+                      >
+                        <circle
+                          cx="12"
+                          cy="12"
+                          r="9"
+                          stroke="currentColor"
+                          strokeWidth="2"
+                          strokeLinecap="round"
+                          opacity="0.25"
+                        />
+                        <path
+                          d="M21 12a9 9 0 0 0-9-9"
+                          stroke="currentColor"
+                          strokeWidth="2"
+                          strokeLinecap="round"
+                        />
+                      </svg>
+                      <span>Recording…</span>
+                    </>
+                  ) : (
+                    'Record session'
+                  )}
+                </span>
               </Button>
               <Button onClick={() => navigate('/')} tone="default">
                 Cancel

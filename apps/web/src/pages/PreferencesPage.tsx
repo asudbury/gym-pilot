@@ -229,9 +229,11 @@ export function PreferencesPage() {
             type="submit"
             disabled={isSaving}
             tone="emerald"
+            isLoading={isSaving}
+            loadingLabel="Saving…"
             className="w-fit rounded-full px-4 py-2.5 text-sm font-semibold transition disabled:cursor-not-allowed disabled:bg-slate-400"
           >
-            {isSaving ? 'Saving…' : 'Save preferences'}
+            Save preferences
           </Button>
         </form>
 

@@ -132,8 +132,14 @@ export function AdminAppSettingsPage() {
             ))}
 
             <div className="flex items-center gap-3">
-              <Button type="submit" tone="emerald" disabled={saving}>
-                {saving ? 'Saving…' : 'Save settings'}
+              <Button
+                type="submit"
+                tone="emerald"
+                disabled={saving}
+                isLoading={saving}
+                loadingLabel="Saving…"
+              >
+                Save settings
               </Button>
               {message ? (
                 <span className="text-sm text-slate-600">{message}</span>

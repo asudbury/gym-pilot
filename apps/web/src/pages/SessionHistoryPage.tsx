@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useState } from 'react'
-import { Button } from '../components/Button'
 import { SessionActions } from '../components/SessionActions'
+import { DecorativeIcon } from '../components/ui/DecorativeIcon'
 import { useAuth } from '../auth/AuthContext'
 import { PageCardLayout } from '../layouts/PageCardLayout'
 import { PageLayout } from '../layouts/PageLayout'
@@ -70,6 +70,9 @@ export function SessionHistoryPage() {
   >('attended')
   const [editNotes, setEditNotes] = useState('')
   const [editRating, setEditRating] = useState<number | null>(null)
+  const [pendingDeleteEntryId, setPendingDeleteEntryId] = useState<
+    string | null
+  >(null)
   const [statusMessage, setStatusMessage] = useState<string | null>(null)
   const [errorMessage, setErrorMessage] = useState<string | null>(null)
 
@@ -152,13 +155,19 @@ export function SessionHistoryPage() {
   }
 
   const deleteEntry = async (entryId: string) => {
-    try {
-      await deleteSessionHistoryEntry(entryId, userId ?? undefined)
-      await refreshEntries()
-      setStatusMessage('Session deleted.')
-    } catch (error) {
-      setErrorMessage(formatSessionHistoryError(error))
+    if (pendingDeleteEntryId === entryId) {
+      try {
+        await deleteSessionHistoryEntry(entryId, userId ?? undefined)
+        await refreshEntries()
+        setPendingDeleteEntryId(null)
+        setStatusMessage('Session deleted.')
+      } catch (error) {
+        setErrorMessage(formatSessionHistoryError(error))
+      }
+      return
     }
+
+    setPendingDeleteEntryId(entryId)
   }
 
   return (
@@ -169,7 +178,9 @@ export function SessionHistoryPage() {
         description="Review the sessions you have recorded, update any notes or rating, or remove entries that no longer apply."
         icon="tasks"
       >
-        <SessionActions includeViewSessionsButton={false} />
+        {!editingEntryId ? (
+          <SessionActions includeViewSessionsButton={false} />
+        ) : null}
         {errorMessage ? (
           <p className="rounded-2xl border border-rose-200 bg-rose-50 p-3 text-sm font-medium text-rose-700">
             {errorMessage}
@@ -202,14 +213,14 @@ export function SessionHistoryPage() {
                           {(['attended', 'taught'] as const).map((option) => {
                             const isSelected = editAttendanceType === option
                             return (
-                              <Button
+                              <button
                                 key={option}
                                 type="button"
                                 onClick={() => setEditAttendanceType(option)}
-                                className={`rounded-full border px-3 py-1.5 text-sm font-semibold transition ${isSelected ? 'border-sky-600 bg-sky-600 text-white' : 'border-slate-300 bg-white text-slate-700 hover:bg-slate-50'}`}
+                                className={`rounded-full border px-3 py-1.5 text-sm font-semibold transition ${isSelected ? 'border-sky-600 bg-sky-600 text-white shadow-sm' : 'border-slate-300 bg-white text-slate-700 hover:bg-slate-50'}`}
                               >
                                 {option === 'attended' ? 'Attended' : 'Taught'}
-                              </Button>
+                              </button>
                             )
                           })}
                         </div>
@@ -222,14 +233,14 @@ export function SessionHistoryPage() {
                           {[1, 2, 3, 4, 5].map((value) => {
                             const isSelected = editRating === value
                             return (
-                              <Button
+                              <button
                                 key={value}
                                 type="button"
                                 onClick={() => setEditRating(value)}
-                                className={`rounded-full border px-3 py-1.5 text-sm font-semibold transition ${isSelected ? 'border-sky-600 bg-sky-600 text-white' : 'border-slate-300 bg-white text-slate-700 hover:bg-slate-50'}`}
+                                className={`rounded-full border px-3 py-1.5 text-sm font-semibold transition ${isSelected ? 'border-sky-600 bg-sky-600 text-white shadow-sm' : 'border-slate-300 bg-white text-slate-700 hover:bg-slate-50'}`}
                               >
                                 {value} / 5
-                              </Button>
+                              </button>
                             )
                           })}
                         </div>
@@ -245,20 +256,20 @@ export function SessionHistoryPage() {
                         />
                       </label>
                       <div className="flex flex-wrap gap-2">
-                        <Button
+                        <button
                           type="button"
                           onClick={() => saveEditing(entry)}
-                          className="rounded-full border border-emerald-600 bg-emerald-600 px-3 py-1.5 text-sm font-semibold text-white"
+                          className="rounded-full border border-emerald-200 bg-emerald-50 px-3 py-1.5 text-sm font-semibold text-emerald-700 shadow-sm"
                         >
                           Save
-                        </Button>
-                        <Button
+                        </button>
+                        <button
                           type="button"
                           onClick={cancelEditing}
                           className="rounded-full border border-slate-300 bg-white px-3 py-1.5 text-sm font-medium text-slate-700"
                         >
                           Cancel
-                        </Button>
+                        </button>
                       </div>
                     </div>
                   ) : (
@@ -303,17 +314,46 @@ export function SessionHistoryPage() {
                         <button
                           type="button"
                           onClick={() => startEditing(entry)}
-                          className="rounded-full border border-slate-300 bg-white px-3 py-1.5 text-sm font-medium text-slate-700"
+                          className="inline-flex items-center gap-2 rounded-full border border-slate-300 bg-white px-3 py-1.5 text-sm font-medium text-slate-700"
                         >
-                          Edit
+                          <DecorativeIcon icon="edit" className="h-4 w-4" />
+                          <span>Edit</span>
                         </button>
-                        <button
-                          type="button"
-                          onClick={() => deleteEntry(entry.id)}
-                          className="rounded-full border border-rose-300 bg-rose-50 px-3 py-1.5 text-sm font-medium text-rose-700"
-                        >
-                          Delete
-                        </button>
+                        {pendingDeleteEntryId === entry.id ? (
+                          <>
+                            <button
+                              type="button"
+                              onClick={() => deleteEntry(entry.id)}
+                              className="inline-flex items-center gap-2 rounded-full border border-rose-600 bg-rose-600 px-3 py-1.5 text-sm font-medium text-white shadow-sm transition-all duration-200 hover:border-rose-700 hover:bg-rose-700 hover:font-semibold"
+                            >
+                              <DecorativeIcon
+                                icon="check"
+                                className="h-4 w-4"
+                              />
+                              <span>Confirm delete</span>
+                            </button>
+                            <button
+                              type="button"
+                              onClick={() => setPendingDeleteEntryId(null)}
+                              className="inline-flex items-center gap-2 rounded-full border border-slate-300 bg-white px-3 py-1.5 text-sm font-medium text-slate-700 transition-all duration-200 hover:border-slate-400 hover:bg-slate-50 hover:font-semibold hover:shadow-sm"
+                            >
+                              <DecorativeIcon
+                                icon="close"
+                                className="h-4 w-4"
+                              />
+                              <span>Cancel</span>
+                            </button>
+                          </>
+                        ) : (
+                          <button
+                            type="button"
+                            onClick={() => deleteEntry(entry.id)}
+                            className="inline-flex items-center gap-2 rounded-full border border-rose-300 bg-rose-50 px-3 py-1.5 text-sm font-medium text-rose-700 transition-all duration-200 hover:border-rose-400 hover:bg-rose-100 hover:font-semibold hover:shadow-sm"
+                          >
+                            <DecorativeIcon icon="trash" className="h-4 w-4" />
+                            <span>Delete</span>
+                          </button>
+                        )}
                       </div>
                     </div>
                   )}

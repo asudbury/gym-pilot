@@ -1,7 +1,8 @@
 import { useEffect, useMemo, useState } from 'react'
 import { Link } from 'react-router-dom'
-import { Button } from '../components/Button'
 import { useAuth } from '../auth/AuthContext'
+import { Button } from '../components/Button'
+import { DecorativeIcon } from '../components/ui/DecorativeIcon'
 import { PageCardLayout } from '../layouts/PageCardLayout'
 import { PageLayout } from '../layouts/PageLayout'
 import {
@@ -207,14 +208,14 @@ export function SessionHistoryPage() {
                           {(['attended', 'taught'] as const).map((option) => {
                             const isSelected = editAttendanceType === option
                             return (
-                              <Button
+                              <button
                                 key={option}
                                 type="button"
                                 onClick={() => setEditAttendanceType(option)}
-                                className={`rounded-full border px-3 py-1.5 text-sm font-semibold transition ${isSelected ? 'border-sky-600 bg-sky-600 text-white' : 'border-slate-300 bg-white text-slate-700 hover:bg-slate-50'}`}
+                                className={`rounded-full border px-3 py-1.5 text-sm font-semibold transition ${isSelected ? 'border-sky-600 bg-sky-600 text-white shadow-sm' : 'border-slate-300 bg-white text-slate-700 hover:bg-slate-50'}`}
                               >
                                 {option === 'attended' ? 'Attended' : 'Taught'}
-                              </Button>
+                              </button>
                             )
                           })}
                         </div>
@@ -227,14 +228,14 @@ export function SessionHistoryPage() {
                           {[1, 2, 3, 4, 5].map((value) => {
                             const isSelected = editRating === value
                             return (
-                              <Button
+                              <button
                                 key={value}
                                 type="button"
                                 onClick={() => setEditRating(value)}
-                                className={`rounded-full border px-3 py-1.5 text-sm font-semibold transition ${isSelected ? 'border-sky-600 bg-sky-600 text-white' : 'border-slate-300 bg-white text-slate-700 hover:bg-slate-50'}`}
+                                className={`rounded-full border px-3 py-1.5 text-sm font-semibold transition ${isSelected ? 'border-sky-600 bg-sky-600 text-white shadow-sm' : 'border-slate-300 bg-white text-slate-700 hover:bg-slate-50'}`}
                               >
                                 {value} / 5
-                              </Button>
+                              </button>
                             )
                           })}
                         </div>
@@ -253,7 +254,7 @@ export function SessionHistoryPage() {
                         <Button
                           type="button"
                           onClick={() => saveEditing(entry)}
-                          className="rounded-full border border-emerald-600 bg-emerald-600 px-3 py-1.5 text-sm font-semibold text-white"
+                          className="rounded-full border border-emerald-200 bg-emerald-50 px-3 py-1.5 text-sm font-semibold text-emerald-700"
                         >
                           Save
                         </Button>
@@ -308,16 +309,18 @@ export function SessionHistoryPage() {
                         <button
                           type="button"
                           onClick={() => startEditing(entry)}
-                          className="rounded-full border border-slate-300 bg-white px-3 py-1.5 text-sm font-medium text-slate-700"
+                          className="inline-flex items-center gap-2 rounded-full border border-slate-300 bg-white px-3 py-1.5 text-sm font-medium text-slate-700 transition-all duration-200 hover:border-slate-400 hover:bg-slate-50 hover:font-semibold hover:shadow-sm"
                         >
-                          Edit
+                          <DecorativeIcon icon="edit" className="h-4 w-4" />
+                          <span>Edit</span>
                         </button>
                         <button
                           type="button"
                           onClick={() => deleteEntry(entry.id)}
-                          className="rounded-full border border-rose-300 bg-rose-50 px-3 py-1.5 text-sm font-medium text-rose-700"
+                          className="inline-flex items-center gap-2 rounded-full border border-rose-300 bg-rose-50 px-3 py-1.5 text-sm font-medium text-rose-700 transition-all duration-200 hover:border-rose-400 hover:bg-rose-100 hover:font-semibold hover:shadow-sm"
                         >
-                          Delete
+                          <DecorativeIcon icon="trash" className="h-4 w-4" />
+                          <span>Delete</span>
                         </button>
                       </div>
                     </div>

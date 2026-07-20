@@ -428,8 +428,10 @@ export function AdminEditUserPage() {
                   onClick={handleSave}
                   className="px-3 py-1.5"
                   disabled={saving}
+                  isLoading={saving}
+                  loadingLabel="Saving…"
                 >
-                  {saving ? 'Saving…' : 'Save profile'}
+                  Save profile
                 </Button>
                 <Button
                   tone="rose"
