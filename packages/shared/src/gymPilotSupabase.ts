@@ -1430,6 +1430,7 @@ export type SessionHistoryEntry = {
   attendanceType: 'attended' | 'taught'
   notes?: string | null
   rating?: number | null
+  durationMinutes?: number | null
   createdAt?: string | null
   updatedAt?: string | null
 }
@@ -1447,6 +1448,7 @@ type SupabaseSessionHistoryRow = {
   attendance_type?: 'attended' | 'taught' | null
   notes?: string | null
   rating?: number | null
+  duration_minutes?: number | null
   created_at?: string | null
   updated_at?: string | null
   role?: 'client' | 'trainer' | null
@@ -1485,6 +1487,7 @@ export function buildSessionBookingSessionPayload(input: {
   attendanceType: 'attended' | 'taught'
   notes?: string | null
   rating?: number | null
+  durationMinutes?: number | null
   createdAt?: string | null
   updatedAt?: string | null
   role?: 'client' | 'trainer' | null
@@ -1503,6 +1506,7 @@ export function buildSessionBookingSessionPayload(input: {
     attendance_type: input.attendanceType,
     notes: input.notes?.trim() ? input.notes.trim() : null,
     rating: normalizeSessionRating(input.rating),
+    duration_minutes: input.durationMinutes ?? null,
     created_at: input.createdAt ?? new Date().toISOString(),
     updated_at: input.updatedAt ?? new Date().toISOString(),
     role: input.role ?? (input.attendanceType === 'taught' ? 'trainer' : 'client'),
@@ -1521,6 +1525,7 @@ export function buildSessionBookingAttendancePayload(input: {
   attendanceType: 'attended' | 'taught'
   notes?: string | null
   rating?: number | null
+  durationMinutes?: number | null
   createdAt?: string | null
   updatedAt?: string | null
   role?: 'client' | 'trainer' | null
@@ -1578,6 +1583,7 @@ export function mapSessionHistoryEntryFromSupabase(row: SupabaseSessionHistoryRo
     attendanceType: mappedAttendanceType,
     notes: row.notes ?? null,
     rating: normalizeSessionRating(row.rating),
+    durationMinutes: typeof row.duration_minutes === 'number' ? row.duration_minutes : null,
     createdAt: row.created_at ?? null,
     updatedAt: row.updated_at ?? null,
   }
@@ -1721,6 +1727,7 @@ export async function saveSessionHistoryEntry(entry: SessionHistoryEntry, userId
           attendanceType: entry.attendanceType,
           notes: entry.notes,
           rating: entry.rating,
+          durationMinutes: entry.durationMinutes ?? null,
           createdAt: entry.createdAt ?? null,
           updatedAt: entry.updatedAt ?? null,
         }),
@@ -1787,6 +1794,7 @@ export async function saveTimetableAttendance(input: {
   attendanceType: 'attended' | 'taught'
   notes?: string | null
   rating?: number | null
+  durationMinutes?: number | null
 }) {
   const client = getSupabaseClient()
 
@@ -1843,6 +1851,7 @@ export async function saveTimetableAttendance(input: {
         attendanceType: input.attendanceType,
         notes: input.notes,
         rating: input.rating,
+        durationMinutes: input.durationMinutes,
       }))
       .eq('id', existingId)
       .select()
@@ -1859,6 +1868,7 @@ export async function saveTimetableAttendance(input: {
         attendanceType: input.attendanceType,
         notes: input.notes,
         rating: input.rating,
+        durationMinutes: input.durationMinutes,
       }))
       .select()
   }

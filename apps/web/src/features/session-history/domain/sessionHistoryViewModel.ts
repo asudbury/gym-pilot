@@ -1,7 +1,14 @@
 import type { SessionHistoryEntry } from '@gym-pilot/shared'
 
-export function getSessionEntryRating(entry: SessionHistoryEntry): number | null {
-  if (typeof entry.rating === 'number' && Number.isFinite(entry.rating) && entry.rating >= 1 && entry.rating <= 5) {
+export function getSessionEntryRating(
+  entry: SessionHistoryEntry,
+): number | null {
+  if (
+    typeof entry.rating === 'number' &&
+    Number.isFinite(entry.rating) &&
+    entry.rating >= 1 &&
+    entry.rating <= 5
+  ) {
     return entry.rating
   }
 

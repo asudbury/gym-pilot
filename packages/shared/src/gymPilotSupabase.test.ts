@@ -218,6 +218,20 @@ describe('remote session mapping', () => {
 
     expect(entry.rating).toBe(5)
   })
+
+  it('maps persisted duration minutes into history entries', () => {
+    const entry = mapSessionHistoryEntryFromSupabase({
+      id: 'entry-5',
+      user_id: 'user-1',
+      session_type: 'solo',
+      start_at: '2026-01-04T10:00:00.000Z',
+      attendance_type: 'attended',
+      duration_minutes: 45,
+      created_at: '2026-01-04T09:30:00.000Z',
+    } as any)
+
+    expect(entry.durationMinutes).toBe(45)
+  })
 })
 
 describe('session history table selection', () => {
@@ -289,6 +303,7 @@ it('includes a persisted session type for timetable booking payloads', () => {
     attendanceType: 'attended',
     notes: 'Great class',
     rating: 5,
+    durationMinutes: 45,
   })
 
   expect(payload).toMatchObject({
@@ -302,6 +317,7 @@ it('includes a persisted session type for timetable booking payloads', () => {
     attendance_type: 'attended',
   })
   expect(payload).toHaveProperty('session_type', 'class')
+  expect(payload).toHaveProperty('duration_minutes', 45)
 })
 
 it('builds booking payloads using only supported columns', () => {

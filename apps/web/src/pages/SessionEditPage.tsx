@@ -10,16 +10,22 @@ import {
   saveSessionHistoryEntry,
   type SessionHistoryEntry,
 } from '@gym-pilot/shared'
-import { getSessionEntryRating, getSessionEntryTitle } from '../features/session-history/domain/sessionHistoryViewModel'
+import {
+  getSessionEntryRating,
+  getSessionEntryTitle,
+} from '../features/session-history/domain/sessionHistoryViewModel'
 
 export function SessionEditPage() {
   const { user } = useAuth()
   const navigate = useNavigate()
   const { entryId } = useParams<{ entryId: string }>()
   const [entry, setEntry] = useState<SessionHistoryEntry | null>(null)
-  const [attendanceType, setAttendanceType] = useState<'attended' | 'taught'>('attended')
+  const [attendanceType, setAttendanceType] = useState<'attended' | 'taught'>(
+    'attended',
+  )
   const [notes, setNotes] = useState('')
   const [rating, setRating] = useState<number | null>(null)
+  const [durationMinutes, setDurationMinutes] = useState<number | null>(null)
   const [startedAt, setStartedAt] = useState('')
   const [isSaving, setIsSaving] = useState(false)
   const [errorMessage, setErrorMessage] = useState<string | null>(null)
@@ -35,17 +41,21 @@ export function SessionEditPage() {
 
     void (async () => {
       try {
-        const loadedEntries = await loadSessionHistoryEntries(userId ?? undefined)
+        const loadedEntries = await loadSessionHistoryEntries(
+          userId ?? undefined,
+        )
         if (!isActive) {
           return
         }
 
-        const nextEntry = loadedEntries.find((candidate) => candidate.id === entryId) ?? null
+        const nextEntry =
+          loadedEntries.find((candidate) => candidate.id === entryId) ?? null
         setEntry(nextEntry)
         if (nextEntry) {
           setAttendanceType(nextEntry.attendanceType)
           setNotes(nextEntry.notes ?? '')
           setRating(getSessionEntryRating(nextEntry))
+          setDurationMinutes(nextEntry.durationMinutes ?? null)
           setStartedAt(nextEntry.startedAt ?? '')
         }
         setErrorMessage(null)
@@ -80,12 +90,16 @@ export function SessionEditPage() {
     setErrorMessage(null)
 
     try {
-      const normalizedRating = getSessionEntryRating({ ...entry, rating: rating ?? entry.rating } as SessionHistoryEntry)
+      const normalizedRating = getSessionEntryRating({
+        ...entry,
+        rating: rating ?? entry.rating,
+      } as SessionHistoryEntry)
       const nextEntry = {
         ...entry,
         attendanceType,
         notes: notes.trim() ? notes.trim() : null,
         rating: normalizedRating,
+        durationMinutes: durationMinutes ?? entry.durationMinutes ?? null,
         startedAt: startedAt || entry.startedAt || null,
         updatedAt: new Date().toISOString(),
       }
@@ -124,20 +138,55 @@ export function SessionEditPage() {
               <div className="rounded-2xl border border-slate-200 bg-slate-50 p-4">
                 <div className="flex flex-col gap-2 text-sm text-slate-700">
                   <div className="flex flex-wrap items-center gap-2">
-                    <span className="font-semibold text-slate-900">Session details</span>
+                    <span className="font-semibold text-slate-900">
+                      Session details
+                    </span>
                   </div>
                   {entry.className ? (
-                    <p><span className="font-medium text-slate-800">Class:</span> {entry.className}</p>
+                    <p>
+                      <span className="font-medium text-slate-800">Class:</span>{' '}
+                      {entry.className}
+                    </p>
                   ) : null}
                   {entry.instructorName ? (
-                    <p><span className="font-medium text-slate-800">Instructor:</span> {entry.instructorName}</p>
+                    <p>
+                      <span className="font-medium text-slate-800">
+                        Instructor:
+                      </span>{' '}
+                      {entry.instructorName}
+                    </p>
                   ) : null}
-                  <p><span className="font-medium text-slate-800">Started:</span> {new Date(entry.startedAt ?? entry.createdAt ?? '').toLocaleString()}</p>
+                  <p>
+                    <span className="font-medium text-slate-800">Started:</span>{' '}
+                    {new Date(
+                      entry.startedAt ?? entry.createdAt ?? '',
+                    ).toLocaleString()}
+                  </p>
                   {entry.notes ? (
-                    <p><span className="font-medium text-slate-800">Current notes:</span> {entry.notes}</p>
+                    <p>
+                      <span className="font-medium text-slate-800">
+                        Current notes:
+                      </span>{' '}
+                      {entry.notes}
+                    </p>
                   ) : null}
-                  {typeof entry.rating === 'number' && entry.rating >= 1 && entry.rating <= 5 ? (
-                    <p><span className="font-medium text-slate-800">Current rating:</span> {entry.rating} / 5</p>
+                  {typeof entry.rating === 'number' &&
+                  entry.rating >= 1 &&
+                  entry.rating <= 5 ? (
+                    <p>
+                      <span className="font-medium text-slate-800">
+                        Current rating:
+                      </span>{' '}
+                      {entry.rating} / 5
+                    </p>
+                  ) : null}
+                  {entry.durationMinutes != null ? (
+                    <p>
+                      <span className="font-medium text-slate-800">
+                        Current duration:
+                      </span>{' '}
+                      {entry.durationMinutes} min
+                    </p>
                   ) : null}
                 </div>
               </div>
@@ -166,13 +215,21 @@ export function SessionEditPage() {
                 <input
                   type="datetime-local"
                   value={startedAt ? startedAt.slice(0, 16) : ''}
-                  onChange={(event) => setStartedAt(event.target.value ? new Date(event.target.value).toISOString() : '')}
+                  onChange={(event) =>
+                    setStartedAt(
+                      event.target.value
+                        ? new Date(event.target.value).toISOString()
+                        : '',
+                    )
+                  }
                   className="rounded-2xl border border-slate-300 bg-white px-3 py-2 text-sm text-slate-700 shadow-sm"
                 />
               </label>
 
               <div className="mt-4 flex flex-col gap-2">
-                <span className="text-sm font-medium text-slate-700">Rating</span>
+                <span className="text-sm font-medium text-slate-700">
+                  Rating
+                </span>
                 <div className="flex flex-wrap gap-2">
                   {[1, 2, 3, 4, 5].map((value) => {
                     const isSelected = rating === value
@@ -191,6 +248,21 @@ export function SessionEditPage() {
               </div>
 
               <label className="mt-4 flex flex-col gap-1 text-sm text-slate-700">
+                <span className="font-medium">Duration (minutes)</span>
+                <input
+                  type="number"
+                  min="0"
+                  value={durationMinutes ?? ''}
+                  onChange={(event) => {
+                    const nextValue = event.target.value
+                    setDurationMinutes(nextValue === '' ? null : Number(nextValue))
+                  }}
+                  placeholder="Optional"
+                  className="rounded-2xl border border-slate-300 bg-white px-3 py-2 text-sm text-slate-700 shadow-sm"
+                />
+              </label>
+
+              <label className="mt-4 flex flex-col gap-1 text-sm text-slate-700">
                 <span className="font-medium">Notes</span>
                 <textarea
                   value={notes}
@@ -202,10 +274,19 @@ export function SessionEditPage() {
               </label>
 
               <div className="mt-6 flex flex-wrap gap-2">
-                <Button tone="emerald" type="button" onClick={handleSave} isLoading={isSaving}>
+                <Button
+                  tone="emerald"
+                  type="button"
+                  onClick={handleSave}
+                  isLoading={isSaving}
+                >
                   Save changes
                 </Button>
-                <Button type="button" tone="default" onClick={() => navigate('/sessions')}>
+                <Button
+                  type="button"
+                  tone="default"
+                  onClick={() => navigate('/sessions')}
+                >
                   Cancel
                 </Button>
               </div>

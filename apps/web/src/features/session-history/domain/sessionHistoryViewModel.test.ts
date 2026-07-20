@@ -1,6 +1,9 @@
 import { describe, expect, it } from 'vitest'
 import type { SessionHistoryEntry } from '@gym-pilot/shared'
-import { getSessionEntryRating, getSessionEntryTitle } from './sessionHistoryViewModel'
+import {
+  getSessionEntryRating,
+  getSessionEntryTitle,
+} from './sessionHistoryViewModel'
 
 describe('session history view model', () => {
   it('builds a readable title for class sessions', () => {
