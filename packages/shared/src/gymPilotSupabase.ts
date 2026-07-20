@@ -4,6 +4,12 @@ import { getSupabaseClient, isSupabasePersistenceEnabled as isSupabasePersistenc
 import { logger } from './logging'
 import { normalizeUserRoles } from './utils'
 import { saveJsonRecord as saveDexieJsonRecord, loadJsonRecord as loadDexieJsonRecord } from './dexie'
+import {
+  buildAppSettingsMap,
+  getDefaultAppSettings,
+  type AppSettingKey,
+  type AppSettingValue,
+} from './appSettings'
 
 const DEFAULT_SUPABASE_TABLE = 'gym_pilot_app_state'
 
@@ -682,6 +688,62 @@ export async function saveSupabaseProfileRoles(
   }
 
   await invalidateSupabaseProfileCache(resolvedUserId)
+}
+
+export async function loadAppSettings(): Promise<Record<string, AppSettingValue>> {
+  const client = getSupabaseClient()
+
+  if (!client) {
+    return getDefaultAppSettings()
+  }
+
+  const { data, error } = await client
+    .from('gym_pilot_app_setting')
+    .select('setting_key, setting_value')
+
+  if (error) {
+    logger.warn('[Supabase] Could not load app settings', error)
+    return getDefaultAppSettings()
+  }
+
+  return buildAppSettingsMap((data ?? []) as Array<Partial<{ setting_key: AppSettingKey; setting_value: AppSettingValue }>>)
+}
+
+export async function loadAppSetting(key: AppSettingKey, fallback?: AppSettingValue): Promise<AppSettingValue> {
+  const settings = await loadAppSettings()
+  const defaultSettings = getDefaultAppSettings()
+  const resolvedValue = settings[key] ?? defaultSettings[key]
+
+  return typeof resolvedValue === 'undefined' ? (fallback ?? null) : resolvedValue
+}
+
+export async function saveAppSetting(key: AppSettingKey, value: AppSettingValue) {
+  const client = getSupabaseClient()
+
+  if (!client) {
+    return
+  }
+
+  const { error } = await client.from('gym_pilot_app_setting').upsert(
+    { setting_key: key, setting_value: value },
+    { onConflict: 'setting_key' },
+  )
+
+  if (error) {
+    logger.error('[Supabase] Could not save app setting', error)
+  }
+}
+
+export async function saveAppSettings(settings: Record<string, AppSettingValue>) {
+  const client = getSupabaseClient()
+
+  if (!client) {
+    return
+  }
+
+  await Promise.all(
+    Object.entries(settings).map(([key, value]) => saveAppSetting(key as AppSettingKey, value)),
+  )
 }
 
 export async function loadSupabaseProfileFlag(flag: 'must_change_password', userId?: string): Promise<boolean> {

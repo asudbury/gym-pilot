@@ -98,6 +98,22 @@ Represents a saved navigation shortcut or exercise shortcut.
 - created_at: string
 - updated_at: string
 
+### Error log
+Stores application errors when the app setting `error_logging_enabled` is true.
+
+- id: string
+- message: string
+- details: Record<string, unknown> | null
+- created_at: string
+
+### Audit log
+Stores audit events when the app setting `audit_logging_enabled` is true.
+
+- id: string
+- message: string
+- details: Record<string, unknown> | null
+- created_at: string
+
 ## Storage model
 The app now has a local-first data layer based on Dexie and a query layer based on TanStack Query.
 
@@ -119,6 +135,7 @@ The shared Supabase helpers in [packages/shared/src/gymPilotSupabase.ts](package
 | Favourites and folders | `select`, `insert`, `upsert`, `delete` against remote rows | `gym_pilot_favourite_folder`, `gym_pilot_favourite` |
 | Activity logging | `recordSupabaseUserActivity()` uses `insert` into `gym_pilot_user_activity`; it skips inserts when the app is running on localhost-style hosts | `gym_pilot_user_activity` |
 | Session recording | `saveTimetableAttendance()` inserts role-based session records with optional notes and a 1-5 rating for a session/class | `gym_pilot_session_booking` |
+| Error and audit logging | `persistErrorLog()` and `persistAuditLog()` write to `gym_pilot_error_log` and `gym_pilot_audit_log` only when the matching app settings are enabled | `gym_pilot_error_log`, `gym_pilot_audit_log` |
 
 ### Entity relationship overview
 ```mermaid

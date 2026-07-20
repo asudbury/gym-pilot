@@ -1,5 +1,14 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest'
-import { addLog, clearLogs, createEntry, formatConsolePretty, getLogs, logger } from './logging'
+import {
+  addLog,
+  clearLogs,
+  createEntry,
+  formatConsolePretty,
+  getLogs,
+  logger,
+  shouldPersistAuditLogs,
+  shouldPersistErrorLogs,
+} from './logging'
 
 describe('logging helpers', () => {
   beforeEach(() => {
@@ -41,5 +50,12 @@ describe('logging helpers', () => {
 
     expect(consoleSpy).toHaveBeenCalled()
     expect(getLogs().length).toBeGreaterThan(0)
+  })
+
+  it('respects app settings for error and audit persistence', () => {
+    expect(shouldPersistErrorLogs({ error_logging_enabled: true })).toBe(true)
+    expect(shouldPersistErrorLogs({ error_logging_enabled: false })).toBe(false)
+    expect(shouldPersistAuditLogs({ audit_logging_enabled: true })).toBe(true)
+    expect(shouldPersistAuditLogs({ audit_logging_enabled: false })).toBe(false)
   })
 })

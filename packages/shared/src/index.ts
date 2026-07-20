@@ -4,6 +4,7 @@ export * from './data'
 export * from './storage'
 export * from './schemaDocs'
 export * from './logging'
+export { shouldPersistErrorLogs, shouldPersistAuditLogs, persistErrorLog, persistAuditLog } from './logging'
 export {
   ensureAuthenticatedSupabaseSession,
   getSupabaseClient,
@@ -43,6 +44,10 @@ export {
   saveSupabaseJsonRecord,
   removeSupabaseJsonRecord,
   recordSupabaseUserActivity,
+  loadAppSettings,
+  loadAppSetting,
+  saveAppSetting,
+  saveAppSettings,
   saveTimetableAttendance,
   loadSessionHistoryEntries,
   mapSessionHistoryEntryFromSupabase,
@@ -64,3 +69,4 @@ export {
 } from './gymPilotSupabase'
 export * from './utils'
 export * from './repositories'
+export * from './appSettings'

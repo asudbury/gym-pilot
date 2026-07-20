@@ -39,10 +39,22 @@ export const adminCards: AdminActionCard[] = [
     label: 'Manage users',
   },
   {
+    title: 'App settings',
+    description: 'Update login, messaging, and logging settings for the whole application.',
+    href: '/admin/app-settings',
+    label: 'App settings',
+  },
+  {
     title: 'Database',
     description: "Manage the application's database.",
     href: '/admin/database',
     label: 'Database',
+  },
+  {
+    title: 'Logs',
+    description: 'Inspect persisted error and audit events for the application.',
+    href: '/admin/logs/error',
+    label: 'Logs',
   },
 ]
 

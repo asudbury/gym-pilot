@@ -53,6 +53,30 @@ export function resolveAttendanceRoleLabel(
   return attendanceType === 'taught' ? 'Taught' : ''
 }
 
+export function resolveTimetableErrorMessage(input: {
+  status?: number | null
+  statusText?: string | null
+  details?: string | null
+}): string {
+  const status = input.status != null ? String(input.status) : ''
+  const statusText = input.statusText?.trim()
+  const details = input.details?.trim()
+
+  const summary = details
+    ? `${details}.`
+    : 'The timetable service could not be reached.'
+
+  if (status && statusText) {
+    return `We could not load the timetable (HTTP ${status} ${statusText}). ${summary}`
+  }
+
+  if (status) {
+    return `We could not load the timetable (HTTP ${status}). ${summary}`
+  }
+
+  return `We could not load the timetable. ${summary}`
+}
+
 export function resolveTimetableAttendanceAction(
   role?: string | null,
   roles?: Array<string | null | undefined> | null,

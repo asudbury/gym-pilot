@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useRef, useState } from 'react'
 import { useNavigate, useLocation, useSearchParams } from 'react-router-dom'
 import {
+  loadAppSetting,
   loadSupabaseProfileAccessState,
   loadSupabaseProfileFlag,
   loadSupabaseProfileTermsAcceptance,
@@ -76,6 +77,15 @@ export function LoginPage() {
 
     const password = passwordRef.current?.value ?? ''
 
+    const loginEnabled = Boolean(await loadAppSetting('login_enabled', true))
+
+    if (!loginEnabled) {
+      setIsSubmitting(false)
+      setAuthMessageTone('error')
+      setAuthMessage('Login is currently disabled by an administrator.')
+      return
+    }
+
     const response = await signInWithPassword(email, password)
 
     setIsSubmitting(false)
@@ -93,6 +103,13 @@ export function LoginPage() {
     }
 
     persistRememberedEmail(email, true)
+
+    const postLoginMessage = String(await loadAppSetting('post_login_message', ''))
+
+    if (postLoginMessage) {
+      setAuthMessageTone('default')
+      setAuthMessage(postLoginMessage)
+    }
 
     const accessState = await loadSupabaseProfileAccessState()
 

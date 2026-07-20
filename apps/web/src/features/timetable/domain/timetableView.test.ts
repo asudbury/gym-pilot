@@ -3,6 +3,7 @@ import {
   resolveAttendanceRoleLabel,
   resolveNextActiveDayKey,
   resolveTimetableAttendanceAction,
+  resolveTimetableErrorMessage,
   resolveTimetableHeaderViewModel,
   resolveTimetableViewModel,
 } from './timetableView'
@@ -123,5 +124,17 @@ describe('resolveTimetableViewModel', () => {
   it('only shows an explicit label for taught entries', () => {
     expect(resolveAttendanceRoleLabel('attended')).toBe('')
     expect(resolveAttendanceRoleLabel('taught')).toBe('Taught')
+  })
+
+  it('includes available error details when the timetable request fails', () => {
+    const message = resolveTimetableErrorMessage({
+      status: 502,
+      statusText: 'Bad Gateway',
+      details: 'The timetable service is temporarily unavailable.',
+    })
+
+    expect(message).toContain('502')
+    expect(message).toContain('Bad Gateway')
+    expect(message).toContain('temporarily unavailable')
   })
 })

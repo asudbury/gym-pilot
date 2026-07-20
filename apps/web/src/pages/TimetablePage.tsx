@@ -13,6 +13,7 @@ import {
   isPastTimetableSession,
   resolveNextActiveDayKey,
   resolveTimetableAttendanceAction,
+  resolveTimetableErrorMessage,
   resolveTimetableHeaderViewModel,
   resolveTimetableViewModel,
   type TimetableSession,
@@ -315,7 +316,15 @@ export function TimetablePage() {
             })
 
             if (!response.ok) {
-              throw new Error(`Request failed with status ${response.status}`)
+              const statusText = response.statusText?.trim() || 'Request failed'
+              const details = `The timetable service responded with ${response.status} ${statusText}`
+              throw new Error(
+                resolveTimetableErrorMessage({
+                  status: response.status,
+                  statusText,
+                  details,
+                }),
+              )
             }
 
             const payload = await response.json()
@@ -356,10 +365,15 @@ export function TimetablePage() {
         }
       } catch (error) {
         if (!cancelled) {
+          const fallbackMessage = resolveTimetableErrorMessage({
+            details:
+              error instanceof Error
+                ? error.message
+                : 'Could not load the timetable right now.',
+          })
+
           setErrorMessage(
-            error instanceof Error
-              ? error.message
-              : 'Could not load the timetable right now.',
+            error instanceof Error ? error.message : fallbackMessage,
           )
         }
       } finally {
@@ -700,8 +714,20 @@ export function TimetablePage() {
           ) : null}
 
           {!isLoading && errorMessage ? (
-            <div className="rounded-2xl border border-rose-200 bg-rose-50 p-4 text-sm text-rose-700">
-              {errorMessage}
+            <div className="space-y-3 rounded-2xl border border-rose-200 bg-rose-50 p-4 text-sm text-rose-700">
+              <div className="space-y-1">
+                <p className="font-semibold">We could not load the timetable.</p>
+                <p>{errorMessage}</p>
+              </div>
+              <div className="flex flex-wrap gap-2">
+                <button
+                  type="button"
+                  onClick={handleRefreshTimetable}
+                  className="inline-flex items-center rounded-full border border-rose-300 bg-white px-3 py-1.5 font-medium text-rose-700 transition hover:bg-rose-100"
+                >
+                  Try again
+                </button>
+              </div>
             </div>
           ) : null}
 

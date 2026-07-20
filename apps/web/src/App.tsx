@@ -4,6 +4,7 @@ import {
   exercises,
   exercisesSchema,
   getSupabaseClient,
+  loadAppSetting,
   usePlan,
 } from '@gym-pilot/shared'
 import { getToneClass } from './components/toneClasses'
@@ -73,6 +74,7 @@ function App() {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
   const [mustChangePassword, setMustChangePassword] = useState<boolean>(false)
   const [showInstallHint, setShowInstallHint] = useState(false)
+  const [broadcastMessage, setBroadcastMessage] = useState('')
 
   useEffect(() => {
     window.sessionStorage.setItem(
@@ -133,6 +135,31 @@ function App() {
       isActive = false
     }
   }, [user?.id])
+
+  useEffect(() => {
+    let isActive = true
+
+    const refreshBroadcastMessage = async () => {
+      const message = await loadAppSetting('broadcast_messages', '')
+
+      if (isActive) {
+        setBroadcastMessage(typeof message === 'string' ? message : '')
+      }
+    }
+
+    void refreshBroadcastMessage()
+
+    const handleSettingsUpdated = () => {
+      void refreshBroadcastMessage()
+    }
+
+    window.addEventListener('gym-pilot-settings-updated', handleSettingsUpdated)
+
+    return () => {
+      isActive = false
+      window.removeEventListener('gym-pilot-settings-updated', handleSettingsUpdated)
+    }
+  }, [])
 
   useEffect(() => {
     const isApple = isAppleDevice()
@@ -254,6 +281,11 @@ function App() {
   return (
     <div className="min-h-screen bg-slate-50 text-slate-900 transition-colors dark:bg-slate-950 dark:text-slate-100">
       <ScrollToTop />
+      {broadcastMessage.trim() ? (
+        <div className="border-b border-amber-200 bg-amber-50 px-4 py-2 text-center text-sm font-medium text-amber-900">
+          {broadcastMessage}
+        </div>
+      ) : null}
       {showInstallHint ? (
         <div className="border-b border-slate-200 bg-slate-900 px-4 py-3 text-sm text-white">
           <div className="mx-auto flex max-w-6xl items-center justify-between gap-3">

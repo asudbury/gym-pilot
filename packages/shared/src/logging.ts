@@ -1,3 +1,5 @@
+import type { AppSettingValue } from './appSettings'
+
 const loggerAppName = 'gym-pilot'
 
 export interface LogEntry {
@@ -61,6 +63,76 @@ export interface ILoggingService {
   log: (...args: unknown[]) => void
 }
 
+export function shouldPersistErrorLogs(settings?: Record<string, AppSettingValue> | null): boolean {
+  const value = settings?.error_logging_enabled
+  return typeof value === 'boolean' ? value : true
+}
+
+export function shouldPersistAuditLogs(settings?: Record<string, AppSettingValue> | null): boolean {
+  const value = settings?.audit_logging_enabled
+  return typeof value === 'boolean' ? value : true
+}
+
+export async function persistErrorLog(message: string, details?: Record<string, unknown> | unknown): Promise<void> {
+  const { getSupabaseClient } = await import('./supabase')
+  const { loadAppSettings } = await import('./gymPilotSupabase')
+  const settings = await loadAppSettings()
+
+  if (!shouldPersistErrorLogs(settings)) {
+    return
+  }
+
+  const client = getSupabaseClient()
+
+  if (!client) {
+    return
+  }
+
+  try {
+    const { error } = await client.from('gym_pilot_error_log').insert({
+      message,
+      details: details ?? null,
+      created_at: new Date().toISOString(),
+    })
+
+    if (error) {
+      console.warn('[gym-pilot] Could not persist error log entry', error)
+    }
+  } catch (error) {
+    console.warn('[gym-pilot] Could not persist error log entry', error)
+  }
+}
+
+export async function persistAuditLog(message: string, details?: Record<string, unknown> | unknown): Promise<void> {
+  const { getSupabaseClient } = await import('./supabase')
+  const { loadAppSettings } = await import('./gymPilotSupabase')
+  const settings = await loadAppSettings()
+
+  if (!shouldPersistAuditLogs(settings)) {
+    return
+  }
+
+  const client = getSupabaseClient()
+
+  if (!client) {
+    return
+  }
+
+  try {
+    const { error } = await client.from('gym_pilot_audit_log').insert({
+      message,
+      details: details ?? null,
+      created_at: new Date().toISOString(),
+    })
+
+    if (error) {
+      console.warn('[gym-pilot] Could not persist audit log entry', error)
+    }
+  } catch (error) {
+    console.warn('[gym-pilot] Could not persist audit log entry', error)
+  }
+}
+
 export const currentLogLevel: LogLevel = 'debug'
 
 let singletonLogger: ILoggingService | null = null
@@ -109,6 +181,7 @@ export class LoggingService implements ILoggingService {
       const entry = createEntry('error', args)
       addLog(entry)
       console.error(...formatConsolePretty(loggerAppName, 'error', args))
+      void persistErrorLog(args[0] instanceof Error ? args[0].message : String(args[0] ?? ''), args.length > 1 ? args[1] : undefined)
     }
   }
 
