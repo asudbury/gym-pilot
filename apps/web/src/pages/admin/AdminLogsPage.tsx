@@ -113,7 +113,8 @@ export function AdminLogsPage({ view = 'combined' }: AdminLogsPageProps) {
       try {
         const shouldFetchErrorLogs = view === 'error' || view === 'combined'
         const shouldFetchAuditLogs = view === 'audit' || view === 'combined'
-        const shouldFetchActivityLogs = view === 'activity' || view === 'combined'
+        const shouldFetchActivityLogs =
+          view === 'activity' || view === 'combined'
 
         if (shouldFetchErrorLogs) {
           const { data: errorData, error: errorQueryError } = await client
@@ -186,7 +187,12 @@ export function AdminLogsPage({ view = 'combined' }: AdminLogsPageProps) {
 
   const clearTargetTable = resolveLogTableName(view)
 
-  const title = view === 'audit' ? 'Audit log' : view === 'activity' ? 'Activity log' : 'Error log'
+  const title =
+    view === 'audit'
+      ? 'Audit log'
+      : view === 'activity'
+        ? 'Activity log'
+        : 'Error log'
   const subtitle =
     view === 'audit'
       ? 'Inspect audit events'

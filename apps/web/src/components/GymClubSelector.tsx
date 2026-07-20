@@ -120,7 +120,11 @@ export function GymClubSelector({
         className={className}
         disabled={disabled}
       >
-        <option value="">{disabled ? 'Only available for Virgin brand' : placeholder ?? 'Select a club'}</option>
+        <option value="">
+          {disabled
+            ? 'Only available for Virgin brand'
+            : (placeholder ?? 'Select a club')}
+        </option>
         {availableClubs.map((club) => (
           <option key={club.clubId} value={String(club.clubId)}>
             {club.name}

@@ -177,9 +177,13 @@ export function TimetablePage() {
   const [attendanceSelection, setAttendanceSelection] = useState<
     'attended' | 'taught' | null
   >(null)
-  const [selectedClubId, setSelectedClubId] = useState(() => user?.gymName?.trim() ?? '')
+  const [selectedClubId, setSelectedClubId] = useState(
+    () => user?.gymName?.trim() ?? '',
+  )
   const [isChangingClub, setIsChangingClub] = useState(false)
-  const [clubChangeMessage, setClubChangeMessage] = useState<string | null>(null)
+  const [clubChangeMessage, setClubChangeMessage] = useState<string | null>(
+    null,
+  )
   const [refreshVersion, setRefreshVersion] = useState(0)
   const [lastRefreshedAt, setLastRefreshedAt] = useState<string | null>(null)
   const classSelectRef = useRef<HTMLSelectElement | null>(null)
