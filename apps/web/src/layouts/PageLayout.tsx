@@ -3,6 +3,7 @@ import type { ReactNode } from 'react'
 import { appTokens } from '../constants/tokens'
 import { getToneClass } from '../components/toneClasses'
 import { DecorativeIcon } from '../components/ui/DecorativeIcon'
+import ToastContainer from '../components/ToastContainer'
 
 type PageLayoutProps = {
   children: ReactNode
@@ -32,6 +33,7 @@ export function PageLayout({ children, className = '' }: PageLayoutProps) {
         )}
         <div className="flex flex-col gap-6">{children}</div>
       </div>
+      <ToastContainer />
     </main>
   )
 }

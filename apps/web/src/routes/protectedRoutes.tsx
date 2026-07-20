@@ -11,6 +11,8 @@ import { PlanDetailPage } from '../pages/plans/PlanDetailPage'
 import { PlansPage } from '../pages/plans/PlansPage'
 import { TimetablePage } from '../pages/TimetablePage'
 import { RecordAttendancePage } from '../pages/RecordAttendancePage'
+import { BookingPage } from '../pages/BookingPage'
+import { TrainerReportPage } from '../pages/TrainerReportPage'
 import { type HomeFilters } from '../utils/appUtils'
 
 interface ProtectedRoutesProps {
@@ -46,6 +48,8 @@ export function createProtectedRoutes({
           path="/timetable/attendance"
           element={<RecordAttendancePage />}
         />
+        <Route path="/bookings" element={<BookingPage />} />
+        <Route path="/trainer-report" element={<TrainerReportPage />} />
         <Route path="/attendance-history" element={<AttendanceHistoryPage />} />
       </Route>
       <Route path="/assignments" element={<AssignmentsPage />} />

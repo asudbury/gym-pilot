@@ -52,6 +52,12 @@ export {
   upsertAttendanceHistoryEntry,
   removeAttendanceHistoryEntry,
   type AttendanceHistoryEntry,
+  getSessionTableName,
+  getSessionBookingTableName,
+  createSession,
+  bookSession,
+  cancelBooking,
+  listBookings,
 } from './gymPilotSupabase'
 export * from './utils'
 export * from './repositories'

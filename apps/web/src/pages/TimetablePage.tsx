@@ -5,6 +5,7 @@ import { useAuth } from '../auth/AuthContext'
 import { PageLayout } from '../layouts/PageLayout'
 import { PageCardLayout } from '../layouts/PageCardLayout'
 import { Button } from '../components/Button'
+import BookingModal from '../components/BookingModal'
 import { loadVirginActiveClubs } from '../utils/virginActiveClubs'
 import {
   formatTimetableAvailability,
@@ -158,6 +159,7 @@ export function TimetablePage() {
   const [activeDayKey, setActiveDayKey] = useState('')
   const [activeInstructor, setActiveInstructor] = useState('all')
   const [activeClassName, setActiveClassName] = useState('all')
+  const [showBookingModal, setShowBookingModal] = useState(false)
   const [resolvedClubName, setResolvedClubName] = useState<string | null>(null)
   const [attendanceState, setAttendanceState] = useState<
     Record<string, 'attended' | 'taught'>
@@ -175,6 +177,8 @@ export function TimetablePage() {
   >(null)
   const [refreshVersion, setRefreshVersion] = useState(0)
   const [lastRefreshedAt, setLastRefreshedAt] = useState<string | null>(null)
+  const classSelectRef = useRef<HTMLSelectElement | null>(null)
+  const [highlightClassFilter, setHighlightClassFilter] = useState(false)
 
   const rawGymBrand = user?.gymBrand?.trim() ?? ''
   const rawGymName = user?.gymName?.trim() ?? ''
@@ -200,6 +204,21 @@ export function TimetablePage() {
   )
 
   useEffect(() => {
+    // Prefill handling from query params (e.g. ?prefill=class)
+    try {
+      const params = new URLSearchParams(window.location.search)
+      const prefill = params.get('prefill')
+      if (prefill === 'class') {
+        setActiveClassName('all')
+        setHighlightClassFilter(true)
+        window.setTimeout(() => setHighlightClassFilter(false), 2500)
+        // focus the class select when available
+        setTimeout(() => classSelectRef.current?.focus(), 300)
+      }
+    } catch {
+      // ignore
+    }
+
     if (typeof window === 'undefined') {
       return
     }
@@ -516,18 +535,28 @@ export function TimetablePage() {
                     {attendancePendingSession.room ?? 'Room TBD'}
                   </p>
                 </div>
-                <div className="flex flex-col items-end gap-1">
-                  {isPastTimetableSession(attendancePendingSession) ? (
-                    <span className="rounded-full bg-slate-200 px-2.5 py-1 text-[11px] font-semibold uppercase tracking-wide text-slate-700">
-                      Ended
-                    </span>
-                  ) : (
+                  <div className="flex flex-col items-end gap-1">
+                  <Button
+                    type="button"
+                    tone="emerald"
+                    onClick={() => setShowBookingModal(true)}
+                    className="ml-2"
+                  >
+                    Record session
+                  </Button>
+                  {attendancePendingSession.status ? (
                     <span
-                      className={`rounded-full px-2.5 py-1 text-xs font-semibold ${attendancePendingSession.status === 'Available' ? 'bg-emerald-100 text-emerald-700' : attendancePendingSession.status === 'Waitlist' ? 'bg-amber-100 text-amber-700' : 'bg-slate-100 text-slate-700'}`}
+                      className={`rounded-full px-2.5 py-1 text-xs font-semibold ${
+                        attendancePendingSession.status === 'Available'
+                          ? 'bg-emerald-100 text-emerald-700'
+                          : attendancePendingSession.status === 'Waitlist'
+                            ? 'bg-amber-100 text-amber-700'
+                            : 'bg-slate-100 text-slate-700'
+                      }`}
                     >
                       {attendancePendingSession.status ?? 'Unknown'}
                     </span>
-                  )}
+                  ) : null}
                 </div>
               </div>
               <div className="mt-3 space-y-1 text-sm text-slate-600">
@@ -747,7 +776,10 @@ export function TimetablePage() {
                       onChange={(event) =>
                         setActiveClassName(event.target.value)
                       }
-                      className="min-w-36 rounded-full border border-slate-300 bg-white px-3 py-1.5 text-sm text-slate-700 shadow-sm"
+                        ref={classSelectRef}
+                        className={`min-w-36 rounded-full border border-slate-300 bg-white px-3 py-1.5 text-sm text-slate-700 shadow-sm ${
+                          highlightClassFilter ? 'ring-2 ring-amber-300' : ''
+                        }`}
                     >
                       <option value="all">All</option>
                       {classOptions.map((className) => (
@@ -983,6 +1015,10 @@ export function TimetablePage() {
           ) : null}
         </div>
       </PageCardLayout>
+      <BookingModal
+        open={showBookingModal}
+        onClose={() => setShowBookingModal(false)}
+      />
     </PageLayout>
   )
 }

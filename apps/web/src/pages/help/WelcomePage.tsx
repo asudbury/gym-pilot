@@ -101,6 +101,11 @@ export function WelcomePage() {
               Before you continue, please review and accept our terms and
               conditions.
             </p>
+            <p className="mt-1 text-sm text-slate-600">
+              You can record sessions from the Dashboard (Record a session)
+              or from the Timetable page. Trainers and clients can view their
+              recorded sessions in the Bookings area.
+            </p>
           </div>
         </div>
 

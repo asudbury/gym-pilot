@@ -1683,3 +1683,167 @@ export async function saveTimetableAttendance(input: {
 
   return { success: true as const }
 }
+
+export function getSessionTableName() {
+  return 'gym_pilot_session'
+}
+
+export function getSessionBookingTableName() {
+  return 'gym_pilot_session_booking'
+}
+
+export async function createSession(input: {
+  gymClubId?: number | null
+  sessionType: 'class' | 'personal_training' | 'solo'
+  classId?: string | null
+  className?: string | null
+  trainerId?: string | null
+  trainerName?: string | null
+  startAt: string
+  durationMinutes?: number | null
+  location?: string | null
+  capacity?: number | null
+  price?: number | null
+  metadata?: any | null
+}) {
+  const client = getSupabaseClient()
+  if (!client) {
+    return { success: false as const, error: new Error('Supabase client is not available') }
+  }
+
+  const payload = {
+    gym_club_id: input.gymClubId ?? null,
+    session_type: input.sessionType,
+    class_id: input.classId ?? null,
+    class_name: input.className ?? null,
+    trainer_id: input.trainerId ?? null,
+    trainer_name: input.trainerName ?? null,
+    start_at: input.startAt,
+    duration_minutes: input.durationMinutes ?? null,
+    location: input.location ?? null,
+    capacity: input.capacity ?? null,
+    price: input.price ?? null,
+    metadata: input.metadata ?? null,
+    created_at: new Date().toISOString(),
+  }
+
+  const { data, error } = await client.from(getSessionTableName()).insert(payload).select()
+
+  if (error) {
+    logger.error('[Supabase] Could not create session', error)
+    return { success: false as const, error }
+  }
+
+  return { success: true as const, session: data && data[0] }
+}
+
+export async function bookSession(input: {
+  sessionId: string
+  userId?: string
+  role: 'client' | 'trainer'
+  notes?: string | null
+}) {
+  const client = getSupabaseClient()
+  if (!client) {
+    return { success: false as const, error: new Error('Supabase client is not available') }
+  }
+
+  const resolvedUserId = input.userId || await getAuthenticatedUserId(client)
+  if (!resolvedUserId) {
+    return { success: false as const, error: new Error('Unable to resolve the current user') }
+  }
+
+  const payload = {
+    session_id: input.sessionId,
+    user_id: resolvedUserId,
+    role: input.role,
+    status: 'booked',
+    notes: input.notes ?? null,
+    created_at: new Date().toISOString(),
+  }
+
+  const { data, error } = await client.from(getSessionBookingTableName()).insert(payload).select()
+
+  if (error) {
+    logger.error('[Supabase] Could not book session', error)
+    return { success: false as const, error }
+  }
+
+  return { success: true as const, booking: data && data[0] }
+}
+
+export async function cancelBooking(input: { bookingId?: string; sessionId?: string; userId?: string }) {
+  const client = getSupabaseClient()
+  if (!client) {
+    return { success: false as const, error: new Error('Supabase client is not available') }
+  }
+
+  const resolvedUserId = input.userId || await getAuthenticatedUserId(client)
+  if (!resolvedUserId) {
+    return { success: false as const, error: new Error('Unable to resolve the current user') }
+  }
+
+  let query = client.from(getSessionBookingTableName()).update({ status: 'cancelled', updated_at: new Date().toISOString() })
+
+  if (input.bookingId) {
+    query = query.eq('id', input.bookingId).eq('user_id', resolvedUserId)
+  } else if (input.sessionId) {
+    query = query.eq('session_id', input.sessionId).eq('user_id', resolvedUserId)
+  } else {
+    return { success: false as const, error: new Error('bookingId or sessionId required') }
+  }
+
+  const { data, error } = await query.select()
+
+  if (error) {
+    logger.error('[Supabase] Could not cancel booking', error)
+    return { success: false as const, error }
+  }
+
+  return { success: true as const, bookings: data }
+}
+
+export async function listBookings(filters?: { userId?: string; trainerId?: string; from?: string; to?: string; status?: string }) {
+  const client = getSupabaseClient()
+  if (!client) {
+    return [] as any[]
+  }
+
+  let query = client.from(getSessionBookingTableName()).select('*, session:session_id(*)')
+
+  if (filters?.userId) {
+    query = query.eq('user_id', filters.userId)
+  }
+
+  if (filters?.status) {
+    query = query.eq('status', filters.status)
+  }
+
+  if (filters?.trainerId) {
+    // join via session.trainer_id isn't directly available; filter client-side after fetching
+  }
+
+  const { data, error } = await query.order('created_at', { ascending: false })
+  if (error) {
+    logger.warn('[Supabase] Could not list bookings', error)
+    return []
+  }
+
+  let results = Array.isArray(data) ? data : []
+
+  if (filters?.trainerId) {
+    results = results.filter((r: any) => r.session && r.session.trainer_id === filters.trainerId)
+  }
+
+  if (filters?.from || filters?.to) {
+    results = results.filter((r: any) => {
+      const start = r.session?.start_at ? new Date(r.session.start_at) : null
+      if (!start) return false
+      if (filters?.from && start < new Date(filters.from)) return false
+      if (filters?.to && start > new Date(filters.to)) return false
+      return true
+    })
+  }
+
+  return results
+}
