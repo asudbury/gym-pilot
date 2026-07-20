@@ -1,10 +1,8 @@
 import { useEffect, useState } from 'react'
 import { useNavigate, Link } from 'react-router-dom'
 import { BackLink } from '../components/ui/BackLink'
-import { PageCard } from '../components/PageCard'
 import { PageLayout } from '../layouts/PageLayout'
-import { Heading1, Paragraph } from '../components/Typography'
-import { DecorativeIcon } from '../components/ui/DecorativeIcon'
+import { PageCardLayout } from '../layouts/PageCardLayout'
 import { useAuth } from '../auth/AuthContext'
 import { appTokens } from '../constants/tokens'
 import { GymClubSelector } from '../components/GymClubSelector'
@@ -75,15 +73,13 @@ export function PreferencesPage() {
 
   return (
     <PageLayout className="max-w-6xl">
-      <PageCard padding="spacious">
-        <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
-          <div className="flex items-start gap-3">
-            <DecorativeIcon icon="settings" />
-            <div>
-              <Paragraph>Preferences</Paragraph>
-              <Heading1 className="mt-2">Preferences</Heading1>
-            </div>
-          </div>
+      <PageCardLayout
+        title="Preferences"
+        subtitle="Preferences"
+        description="Update your profile and account preferences."
+        icon="preferences"
+      >
+        <div className="flex flex-wrap items-center justify-end gap-2">
           {isAdmin ? (
             <BackLink to="/admin" label="Back to admin" />
           ) : (
@@ -91,7 +87,7 @@ export function PreferencesPage() {
           )}
         </div>
 
-        <form onSubmit={handleSubmit} className="mt-8 flex flex-col gap-4">
+        <form onSubmit={handleSubmit} className="flex flex-col gap-4">
           <div className="flex flex-col gap-2 rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3 text-sm text-slate-700">
             <p className="font-medium">Your roles</p>
             <p className="text-sm text-slate-400">
@@ -244,7 +240,7 @@ export function PreferencesPage() {
             {statusMessage}
           </div>
         ) : null}
-      </PageCard>
+      </PageCardLayout>
     </PageLayout>
   )
 }

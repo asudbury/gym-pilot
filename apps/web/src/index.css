@@ -87,6 +87,12 @@ html {
   min-height: 100vh;
 }
 
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
 /* Ensure buttons show a pointer cursor by default and a not-allowed cursor when disabled. */
 button {
   cursor: pointer;

@@ -129,7 +129,7 @@ export function SessionHistoryPage() {
         title="Session History"
         subtitle="Session History"
         description="Review the sessions you have recorded, update any notes or rating, or remove entries that no longer apply."
-        icon="tasks"
+        icon="calendar"
       >
         <SessionActions includeViewSessionsButton={false} />
         {errorMessage ? (

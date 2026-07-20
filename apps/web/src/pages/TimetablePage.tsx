@@ -735,7 +735,7 @@ export function TimetablePage() {
                             key={option.kind}
                             type="button"
                             onClick={() => setAttendanceSelection(option.kind)}
-                            className={`rounded-full border px-3 py-1.5 text-sm font-semibold transition ${isSelected ? 'border-sky-600 bg-sky-600 text-white shadow-sm' : 'border-slate-300 bg-white text-slate-700 hover:bg-slate-50'}`}
+                            className={`rounded-full border px-3 py-1.5 text-sm font-semibold transition-all duration-200 ${isSelected ? 'border-sky-600 bg-sky-600 text-white shadow-sm' : 'border-slate-300 bg-white text-slate-700 hover:border-slate-400 hover:bg-slate-50 hover:shadow-md'}`}
                           >
                             {option.label}
                           </button>
@@ -756,7 +756,7 @@ export function TimetablePage() {
                           key={value}
                           type="button"
                           onClick={() => setAttendanceRating(value)}
-                          className={`rounded-full border px-3 py-1.5 text-sm font-semibold transition ${isSelected ? 'border-sky-600 bg-sky-600 text-white shadow-sm' : 'border-slate-300 bg-white text-slate-700 hover:bg-slate-50'}`}
+                          className={`rounded-full border px-3 py-1.5 text-sm font-semibold transition-all duration-200 ${isSelected ? 'border-sky-600 bg-sky-600 text-white shadow-sm' : 'border-slate-300 bg-white text-slate-700 hover:border-slate-400 hover:bg-slate-50 hover:shadow-md'}`}
                         >
                           {value} / 5
                         </button>
@@ -822,8 +822,22 @@ export function TimetablePage() {
           {clubSelectorBlock}
 
           {isLoading ? (
-            <div className="rounded-2xl border border-slate-200 bg-slate-50 p-4 text-sm text-slate-600">
-              Loading timetable…
+            <div className="flex items-center gap-3 rounded-2xl border border-slate-200 bg-slate-50 p-4 text-sm text-slate-600 shadow-sm">
+              <div className="flex h-9 w-9 items-center justify-center rounded-full border border-slate-300 bg-white text-slate-600 shadow-sm">
+                <span
+                  aria-hidden="true"
+                  className="text-base font-semibold"
+                  style={{ animation: 'spin 1s linear infinite' }}
+                >
+                  ⟳
+                </span>
+              </div>
+              <div>
+                <p className="font-medium text-slate-700">Loading timetable…</p>
+                <p className="text-xs text-slate-500">
+                  Fetching the latest sessions for your club.
+                </p>
+              </div>
             </div>
           ) : null}
 
@@ -839,7 +853,7 @@ export function TimetablePage() {
                 <button
                   type="button"
                   onClick={handleRefreshTimetable}
-                  className="inline-flex items-center rounded-full border border-rose-300 bg-white px-3 py-1.5 font-medium text-rose-700 transition hover:bg-rose-100"
+                  className="inline-flex items-center rounded-full border border-rose-300 bg-white px-3 py-1.5 font-medium text-rose-700 transition-all duration-200 hover:border-rose-400 hover:bg-rose-50 hover:shadow-md"
                 >
                   Try again
                 </button>
@@ -866,7 +880,7 @@ export function TimetablePage() {
                     type="button"
                     onClick={handleRefreshTimetable}
                     disabled={isLoading}
-                    className="inline-flex items-center rounded-full border border-slate-300 bg-white px-3 py-1.5 text-sm font-medium text-slate-700 transition hover:bg-slate-50 disabled:cursor-not-allowed disabled:bg-slate-100"
+                    className="inline-flex items-center rounded-full border border-slate-300 bg-white px-3 py-1.5 text-sm font-medium text-slate-700 transition-all duration-200 hover:border-slate-400 hover:bg-slate-50 hover:shadow-md disabled:cursor-not-allowed disabled:bg-slate-100"
                   >
                     {isLoading ? 'Refreshing…' : 'Refresh'}
                   </button>
@@ -875,7 +889,7 @@ export function TimetablePage() {
                   <button
                     type="button"
                     onClick={() => setActiveDayKey('all')}
-                    className={`rounded-full px-3 py-1.5 text-sm font-medium transition ${activeDayKey === 'all' ? 'bg-slate-900 text-white' : 'bg-white text-slate-700 hover:bg-slate-100'}`}
+                    className={`rounded-full border px-3 py-1.5 text-sm font-medium transition-all duration-200 shadow-sm ${activeDayKey === 'all' ? 'border-slate-900 bg-slate-900 text-white' : 'border-slate-300 bg-white text-slate-700 hover:border-slate-400 hover:bg-slate-50 hover:shadow-md'}`}
                   >
                     All days
                   </button>
@@ -884,7 +898,7 @@ export function TimetablePage() {
                       key={dayGroup.dateKey}
                       type="button"
                       onClick={() => setActiveDayKey(dayGroup.dateKey)}
-                      className={`rounded-full px-3 py-1.5 text-sm font-medium transition ${activeDayKey === dayGroup.dateKey ? 'bg-slate-900 text-white' : 'bg-white text-slate-700 hover:bg-slate-100'}`}
+                      className={`rounded-full border px-3 py-1.5 text-sm font-medium transition-all duration-200 shadow-sm ${activeDayKey === dayGroup.dateKey ? 'border-slate-900 bg-slate-900 text-white' : 'border-slate-300 bg-white text-slate-700 hover:border-slate-400 hover:bg-slate-50 hover:shadow-md'}`}
                     >
                       {dayGroup.label}
                     </button>

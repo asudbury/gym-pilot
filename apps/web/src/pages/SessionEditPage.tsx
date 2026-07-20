@@ -255,7 +255,9 @@ export function SessionEditPage() {
                   value={durationMinutes ?? ''}
                   onChange={(event) => {
                     const nextValue = event.target.value
-                    setDurationMinutes(nextValue === '' ? null : Number(nextValue))
+                    setDurationMinutes(
+                      nextValue === '' ? null : Number(nextValue),
+                    )
                   }}
                   placeholder="Optional"
                   className="rounded-2xl border border-slate-300 bg-white px-3 py-2 text-sm text-slate-700 shadow-sm"

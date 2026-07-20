@@ -28,6 +28,10 @@ function resolveLayoutIcon(title?: string, subtitle?: string) {
     return 'tasks' as const
   }
 
+  if (normalized.includes('session')) {
+    return 'calendar' as const
+  }
+
   if (normalized.includes('favour')) {
     return 'heart' as const
   }

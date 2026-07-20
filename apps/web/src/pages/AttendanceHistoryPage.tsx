@@ -167,7 +167,7 @@ export function SessionHistoryPage() {
         title="Session History"
         subtitle="Session History"
         description="Review the sessions you have recorded, update any notes or rating, or remove entries that no longer apply."
-        icon="tasks"
+        icon="calendar"
       >
         <div className="mb-4 flex flex-wrap items-center gap-2">
           <Link
