@@ -157,7 +157,10 @@ function App() {
 
     return () => {
       isActive = false
-      window.removeEventListener('gym-pilot-settings-updated', handleSettingsUpdated)
+      window.removeEventListener(
+        'gym-pilot-settings-updated',
+        handleSettingsUpdated,
+      )
     }
   }, [])
 

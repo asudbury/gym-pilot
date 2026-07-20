@@ -141,9 +141,7 @@ export function AdminLogsPage({ view = 'combined' }: AdminLogsPageProps) {
 
   const title = view === 'audit' ? 'Audit log' : 'Error log'
   const subtitle =
-    view === 'audit'
-      ? 'Inspect audit events'
-      : 'Inspect error events'
+    view === 'audit' ? 'Inspect audit events' : 'Inspect error events'
   const description =
     view === 'audit'
       ? 'Review the most recent audit entries captured.'
@@ -210,16 +208,26 @@ export function AdminLogsPage({ view = 'combined' }: AdminLogsPageProps) {
             </button>
           </div>
 
-          {error ? <div className="rounded-xl border border-amber-200 bg-amber-50 p-3 text-sm text-amber-900">{error}</div> : null}
+          {error ? (
+            <div className="rounded-xl border border-amber-200 bg-amber-50 p-3 text-sm text-amber-900">
+              {error}
+            </div>
+          ) : null}
 
-          {loading ? <div className="text-sm text-slate-600">Loading logs…</div> : null}
+          {loading ? (
+            <div className="text-sm text-slate-600">Loading logs…</div>
+          ) : null}
 
           {view === 'audit' ? (
             <section className="rounded-2xl border border-slate-200 bg-white p-4 shadow-sm">
               <div className="mb-3 flex items-center justify-between gap-3">
-                <h2 className="text-lg font-semibold text-slate-900">Audit logs</h2>
+                <h2 className="text-lg font-semibold text-slate-900">
+                  Audit logs
+                </h2>
                 <div className="flex items-center gap-2">
-                  <span className="text-sm text-slate-500">{auditLogs.length} rows</span>
+                  <span className="text-sm text-slate-500">
+                    {auditLogs.length} rows
+                  </span>
                   <Button
                     type="button"
                     tone="default"
@@ -232,13 +240,22 @@ export function AdminLogsPage({ view = 'combined' }: AdminLogsPageProps) {
               </div>
               <div className="space-y-3">
                 {auditLogs.length === 0 ? (
-                  <div className="rounded-xl border border-dashed border-slate-200 p-4 text-sm text-slate-600">No audit log entries yet.</div>
+                  <div className="rounded-xl border border-dashed border-slate-200 p-4 text-sm text-slate-600">
+                    No audit log entries yet.
+                  </div>
                 ) : (
                   auditLogs.map((entry) => (
-                    <article key={entry.id} className="rounded-xl border border-slate-200 bg-slate-50 p-3">
+                    <article
+                      key={entry.id}
+                      className="rounded-xl border border-slate-200 bg-slate-50 p-3"
+                    >
                       <div className="mb-2 flex items-center justify-between gap-3">
-                        <div className="text-sm font-semibold text-slate-900">{entry.message}</div>
-                        <div className="text-xs text-slate-500">{formatTimestamp(entry.created_at)}</div>
+                        <div className="text-sm font-semibold text-slate-900">
+                          {entry.message}
+                        </div>
+                        <div className="text-xs text-slate-500">
+                          {formatTimestamp(entry.created_at)}
+                        </div>
                       </div>
                       <pre className="overflow-x-auto whitespace-pre-wrap wrap-break-word text-xs text-slate-700">
                         {formatDetails(entry.details)}
@@ -251,9 +268,13 @@ export function AdminLogsPage({ view = 'combined' }: AdminLogsPageProps) {
           ) : (
             <section className="rounded-2xl border border-slate-200 bg-white p-4 shadow-sm">
               <div className="mb-3 flex items-center justify-between gap-3">
-                <h2 className="text-lg font-semibold text-slate-900">Error logs</h2>
+                <h2 className="text-lg font-semibold text-slate-900">
+                  Error logs
+                </h2>
                 <div className="flex items-center gap-2">
-                  <span className="text-sm text-slate-500">{errorLogs.length} rows</span>
+                  <span className="text-sm text-slate-500">
+                    {errorLogs.length} rows
+                  </span>
                   <Button
                     type="button"
                     tone="default"
@@ -266,13 +287,22 @@ export function AdminLogsPage({ view = 'combined' }: AdminLogsPageProps) {
               </div>
               <div className="space-y-3">
                 {errorLogs.length === 0 ? (
-                  <div className="rounded-xl border border-dashed border-slate-200 p-4 text-sm text-slate-600">No error log entries yet.</div>
+                  <div className="rounded-xl border border-dashed border-slate-200 p-4 text-sm text-slate-600">
+                    No error log entries yet.
+                  </div>
                 ) : (
                   errorLogs.map((entry) => (
-                    <article key={entry.id} className="rounded-xl border border-slate-200 bg-slate-50 p-3">
+                    <article
+                      key={entry.id}
+                      className="rounded-xl border border-slate-200 bg-slate-50 p-3"
+                    >
                       <div className="mb-2 flex items-center justify-between gap-3">
-                        <div className="text-sm font-semibold text-slate-900">{entry.message}</div>
-                        <div className="text-xs text-slate-500">{formatTimestamp(entry.created_at)}</div>
+                        <div className="text-sm font-semibold text-slate-900">
+                          {entry.message}
+                        </div>
+                        <div className="text-xs text-slate-500">
+                          {formatTimestamp(entry.created_at)}
+                        </div>
                       </div>
                       <pre className="overflow-x-auto whitespace-pre-wrap wrap-break-word text-xs text-slate-700">
                         {formatDetails(entry.details)}

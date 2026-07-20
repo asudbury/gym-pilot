@@ -104,7 +104,9 @@ export function LoginPage() {
 
     persistRememberedEmail(email, true)
 
-    const postLoginMessage = String(await loadAppSetting('post_login_message', ''))
+    const postLoginMessage = String(
+      await loadAppSetting('post_login_message', ''),
+    )
 
     if (postLoginMessage) {
       setAuthMessageTone('default')

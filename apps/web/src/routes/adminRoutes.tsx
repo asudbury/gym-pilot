@@ -38,8 +38,14 @@ export function createAdminRoutes() {
         <Route path="/admin/app-settings" element={<AdminAppSettingsPage />} />
         <Route path="/admin/database" element={<AdminDatabasePage />} />
         <Route path="/admin/logs" element={<AdminLogsPage />} />
-        <Route path="/admin/logs/error" element={<AdminLogsPage view="error" />} />
-        <Route path="/admin/logs/audit" element={<AdminLogsPage view="audit" />} />
+        <Route
+          path="/admin/logs/error"
+          element={<AdminLogsPage view="error" />}
+        />
+        <Route
+          path="/admin/logs/audit"
+          element={<AdminLogsPage view="audit" />}
+        />
       </Route>
     </>
   )

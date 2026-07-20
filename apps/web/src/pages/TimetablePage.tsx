@@ -716,7 +716,9 @@ export function TimetablePage() {
           {!isLoading && errorMessage ? (
             <div className="space-y-3 rounded-2xl border border-rose-200 bg-rose-50 p-4 text-sm text-rose-700">
               <div className="space-y-1">
-                <p className="font-semibold">We could not load the timetable.</p>
+                <p className="font-semibold">
+                  We could not load the timetable.
+                </p>
                 <p>{errorMessage}</p>
               </div>
               <div className="flex flex-wrap gap-2">

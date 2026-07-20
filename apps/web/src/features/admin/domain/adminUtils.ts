@@ -40,7 +40,8 @@ export const adminCards: AdminActionCard[] = [
   },
   {
     title: 'App settings',
-    description: 'Update login, messaging, and logging settings for the whole application.',
+    description:
+      'Update login, messaging, and logging settings for the whole application.',
     href: '/admin/app-settings',
     label: 'App settings',
   },
@@ -52,7 +53,8 @@ export const adminCards: AdminActionCard[] = [
   },
   {
     title: 'Logs',
-    description: 'Inspect persisted error and audit events for the application.',
+    description:
+      'Inspect persisted error and audit events for the application.',
     href: '/admin/logs/error',
     label: 'Logs',
   },
