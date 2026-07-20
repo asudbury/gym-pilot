@@ -335,12 +335,15 @@ export function AdminUserProfilesPage() {
                       </label>
 
                       <div className="mt-3 rounded-2xl border border-slate-200 bg-white p-3">
-                        <p className="text-sm font-medium text-slate-700">Roles</p>
+                        <p className="text-sm font-medium text-slate-700">
+                          Roles
+                        </p>
                         <div className="mt-2 flex flex-wrap gap-2">
                           {availableAdminRoles.map((role) => {
                             const checked =
-                              drafts[selectedProfile.id]?.roles.includes(role) ??
-                              selectedProfile.roles.includes(role)
+                              drafts[selectedProfile.id]?.roles.includes(
+                                role,
+                              ) ?? selectedProfile.roles.includes(role)
 
                             return (
                               <label
@@ -351,10 +354,15 @@ export function AdminUserProfilesPage() {
                                   type="checkbox"
                                   checked={checked}
                                   onChange={() => {
-                                    const nextRoles = (drafts[selectedProfile.id]
-                                      ?.roles ?? selectedProfile.roles) as UserRole[]
+                                    const nextRoles = (drafts[
+                                      selectedProfile.id
+                                    ]?.roles ??
+                                      selectedProfile.roles) as UserRole[]
                                     updateDraft(selectedProfile.id, {
-                                      roles: toggleRoleSelection(nextRoles, role),
+                                      roles: toggleRoleSelection(
+                                        nextRoles,
+                                        role,
+                                      ),
                                     })
                                   }}
                                 />
@@ -369,9 +377,14 @@ export function AdminUserProfilesPage() {
                         Display name
                         <input
                           type="text"
-                          value={drafts[selectedProfile.id]?.name ?? selectedProfile.name}
+                          value={
+                            drafts[selectedProfile.id]?.name ??
+                            selectedProfile.name
+                          }
                           onChange={(event) =>
-                            updateDraft(selectedProfile.id, { name: event.target.value })
+                            updateDraft(selectedProfile.id, {
+                              name: event.target.value,
+                            })
                           }
                           className="mt-1 w-full rounded-full border border-slate-200 bg-white px-3 py-2 text-sm text-slate-700"
                         />
@@ -381,9 +394,13 @@ export function AdminUserProfilesPage() {
                         Application name
                         <input
                           type="text"
-                          value={drafts[selectedProfile.id]?.applicationName ?? ''}
+                          value={
+                            drafts[selectedProfile.id]?.applicationName ?? ''
+                          }
                           onChange={(event) =>
-                            updateDraft(selectedProfile.id, { applicationName: event.target.value })
+                            updateDraft(selectedProfile.id, {
+                              applicationName: event.target.value,
+                            })
                           }
                           placeholder="Enter a custom app name"
                           className="mt-1 w-full rounded-full border border-slate-200 bg-white px-3 py-2 text-sm text-slate-700"
@@ -394,12 +411,21 @@ export function AdminUserProfilesPage() {
                         Gym club (optional)
                         <div className="mt-1">
                           <GymClubSelector
-                            value={drafts[selectedProfile.id]?.gymClubId ?? drafts[selectedProfile.id]?.gymName ?? ''}
+                            value={
+                              drafts[selectedProfile.id]?.gymClubId ??
+                              drafts[selectedProfile.id]?.gymName ??
+                              ''
+                            }
                             onChange={(nextValue) =>
                               updateDraft(selectedProfile.id, {
                                 gymClubId: nextValue,
-                                gymBrand: nextValue ? 'Virgin' : (drafts[selectedProfile.id]?.gymBrand ?? ''),
-                                gymName: nextValue || (drafts[selectedProfile.id]?.gymName ?? ''),
+                                gymBrand: nextValue
+                                  ? 'Virgin'
+                                  : (drafts[selectedProfile.id]?.gymBrand ??
+                                    ''),
+                                gymName:
+                                  nextValue ||
+                                  (drafts[selectedProfile.id]?.gymName ?? ''),
                               })
                             }
                             placeholder="Search for club (Virgin only)"
@@ -411,9 +437,13 @@ export function AdminUserProfilesPage() {
                       <label className="mt-3 block text-sm font-medium text-slate-700">
                         Account tier
                         <select
-                          value={drafts[selectedProfile.id]?.accountTier ?? 'free'}
+                          value={
+                            drafts[selectedProfile.id]?.accountTier ?? 'free'
+                          }
                           onChange={(event) =>
-                            updateDraft(selectedProfile.id, { accountTier: event.target.value })
+                            updateDraft(selectedProfile.id, {
+                              accountTier: event.target.value,
+                            })
                           }
                           className="mt-1 w-full rounded-full border border-slate-200 bg-white px-3 py-2 text-sm text-slate-700"
                         >
@@ -430,7 +460,9 @@ export function AdminUserProfilesPage() {
                           type="date"
                           value={drafts[selectedProfile.id]?.accessEndsAt ?? ''}
                           onChange={(event) =>
-                            updateDraft(selectedProfile.id, { accessEndsAt: event.target.value })
+                            updateDraft(selectedProfile.id, {
+                              accessEndsAt: event.target.value,
+                            })
                           }
                           className="mt-1 w-full rounded-full border border-slate-200 bg-white px-3 py-2 text-sm text-slate-700"
                         />
@@ -439,22 +471,38 @@ export function AdminUserProfilesPage() {
                       <label className="mt-3 flex items-center gap-2 rounded-full border border-slate-200 bg-white px-3 py-2 text-sm font-medium text-slate-700">
                         <input
                           type="checkbox"
-                          checked={drafts[selectedProfile.id]?.isFrozen ?? false}
-                          onChange={(event) => updateDraft(selectedProfile.id, { isFrozen: event.target.checked })}
+                          checked={
+                            drafts[selectedProfile.id]?.isFrozen ?? false
+                          }
+                          onChange={(event) =>
+                            updateDraft(selectedProfile.id, {
+                              isFrozen: event.target.checked,
+                            })
+                          }
                         />
                         <span>Freeze account</span>
                       </label>
 
                       <div className="mt-3 rounded-2xl border border-slate-200 bg-white p-3">
-                        <p className="text-sm font-medium text-slate-700">Login activity</p>
+                        <p className="text-sm font-medium text-slate-700">
+                          Login activity
+                        </p>
                         <div className="mt-2 space-y-1 text-sm text-slate-600">
                           <p>
-                            <span className="font-medium text-slate-700">Last login:</span>{' '}
-                            {formatStoredTimestamp(selectedProfile.lastLoggedInAt)}
+                            <span className="font-medium text-slate-700">
+                              Last login:
+                            </span>{' '}
+                            {formatStoredTimestamp(
+                              selectedProfile.lastLoggedInAt,
+                            )}
                           </p>
                           <p>
-                            <span className="font-medium text-slate-700">Previous login:</span>{' '}
-                            {formatStoredTimestamp(selectedProfile.previousLastLoggedInAt)}
+                            <span className="font-medium text-slate-700">
+                              Previous login:
+                            </span>{' '}
+                            {formatStoredTimestamp(
+                              selectedProfile.previousLastLoggedInAt,
+                            )}
                           </p>
                         </div>
                       </div>
@@ -473,48 +521,79 @@ export function AdminUserProfilesPage() {
                             }
 
                             try {
-                              const basePath = import.meta.env.BASE_URL === '/' ? '' : import.meta.env.BASE_URL
-                              const inviteUrl = new URL(`${window.location.origin}${basePath}#${encodeURIComponent('/login')}`)
+                              const basePath =
+                                import.meta.env.BASE_URL === '/'
+                                  ? ''
+                                  : import.meta.env.BASE_URL
+                              const inviteUrl = new URL(
+                                `${window.location.origin}${basePath}#${encodeURIComponent('/login')}`,
+                              )
                               inviteUrl.hash = `#/login?email=${encodeURIComponent(email)}`
-                              await navigator.clipboard.writeText(inviteUrl.toString())
+                              await navigator.clipboard.writeText(
+                                inviteUrl.toString(),
+                              )
                               setCopiedUserId(selectedProfile.id)
                               window.setTimeout(
-                                () => setCopiedUserId((current) => (current === selectedProfile.id ? null : current)),
+                                () =>
+                                  setCopiedUserId((current) =>
+                                    current === selectedProfile.id
+                                      ? null
+                                      : current,
+                                  ),
                                 1500,
                               )
                             } catch {
-                              setStatusMessage('Could not copy the invite link. Please try again.')
+                              setStatusMessage(
+                                'Could not copy the invite link. Please try again.',
+                              )
                               setStatusType('error')
                             }
                           }}
                           className="px-3 py-1.5"
                         >
-                          {copiedUserId === selectedProfile.id ? 'Invite link copied' : 'Copy invite link'}
+                          {copiedUserId === selectedProfile.id
+                            ? 'Invite link copied'
+                            : 'Copy invite link'}
                         </Button>
 
                         <Button
                           tone="blue"
-                          onClick={() => navigate(`/admin/users/profiles/${selectedProfile.id}/activity`)}
+                          onClick={() =>
+                            navigate(
+                              `/admin/users/profiles/${selectedProfile.id}/activity`,
+                            )
+                          }
                           className="px-3 py-1.5"
                         >
                           View activity
                         </Button>
                       </div>
 
-                      {(drafts[selectedProfile.id]?.roles.includes('client') ?? selectedProfile.roles.includes('client')) ? (
+                      {(drafts[selectedProfile.id]?.roles.includes('client') ??
+                      selectedProfile.roles.includes('client')) ? (
                         <label className="mt-3 block text-sm font-medium text-slate-700">
                           Assigned trainer
                           <select
-                            value={drafts[selectedProfile.id]?.trainerId ?? selectedProfile.trainerId ?? ''}
-                            onChange={(event) => updateDraft(selectedProfile.id, { trainerId: event.target.value || null })}
+                            value={
+                              drafts[selectedProfile.id]?.trainerId ??
+                              selectedProfile.trainerId ??
+                              ''
+                            }
+                            onChange={(event) =>
+                              updateDraft(selectedProfile.id, {
+                                trainerId: event.target.value || null,
+                              })
+                            }
                             className="mt-1 w-full rounded-full border border-slate-200 bg-white px-3 py-2 text-sm text-slate-700"
                           >
                             <option value="">No trainer assigned</option>
-                            {getTrainerOptionsForProfile(selectedProfile).map((trainer) => (
-                              <option key={trainer.id} value={trainer.id}>
-                                {trainer.name}
-                              </option>
-                            ))}
+                            {getTrainerOptionsForProfile(selectedProfile).map(
+                              (trainer) => (
+                                <option key={trainer.id} value={trainer.id}>
+                                  {trainer.name}
+                                </option>
+                              ),
+                            )}
                           </select>
                         </label>
                       ) : null}
@@ -524,19 +603,30 @@ export function AdminUserProfilesPage() {
                       <label className="flex items-center gap-2 rounded-full border border-slate-200 bg-white px-3 py-2 text-sm text-slate-700">
                         <input
                           type="checkbox"
-                          checked={drafts[selectedProfile.id]?.mustChangePassword ?? selectedProfile.mustChangePassword}
-                          onChange={(event) => updateDraft(selectedProfile.id, { mustChangePassword: event.target.checked })}
+                          checked={
+                            drafts[selectedProfile.id]?.mustChangePassword ??
+                            selectedProfile.mustChangePassword
+                          }
+                          onChange={(event) =>
+                            updateDraft(selectedProfile.id, {
+                              mustChangePassword: event.target.checked,
+                            })
+                          }
                         />
                         <span>Must change password</span>
                       </label>
                       <div className="flex flex-wrap items-center gap-2">
                         <Button
                           tone="blue"
-                          onClick={() => void handleSaveProfile(selectedProfile)}
+                          onClick={() =>
+                            void handleSaveProfile(selectedProfile)
+                          }
                           className="px-3 py-1.5"
                           disabled={savingProfileId === selectedProfile.id}
                         >
-                          {savingProfileId === selectedProfile.id ? 'Saving…' : 'Save profile'}
+                          {savingProfileId === selectedProfile.id
+                            ? 'Saving…'
+                            : 'Save profile'}
                         </Button>
                         <Button
                           tone="rose"

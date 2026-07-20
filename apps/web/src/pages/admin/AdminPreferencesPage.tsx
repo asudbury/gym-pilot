@@ -244,7 +244,10 @@ export function AdminPreferencesPage() {
           <Button
             type="submit"
             disabled={isSaving}
-            className={getToneClass('blue', 'w-fit rounded-full px-4 py-2.5 text-sm font-semibold text-white transition disabled:cursor-not-allowed disabled:bg-slate-400')}
+            className={getToneClass(
+              'blue',
+              'w-fit rounded-full px-4 py-2.5 text-sm font-semibold text-white transition disabled:cursor-not-allowed disabled:bg-slate-400',
+            )}
           >
             {isSaving ? 'Saving…' : 'Save preferences'}
           </Button>

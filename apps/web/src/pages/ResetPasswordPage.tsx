@@ -107,8 +107,13 @@ export function ResetPasswordPage() {
     }
 
     if (sessionError) {
-      logger.error('[ResetPassword] Could not restore Supabase session', sessionError)
-      setStatusMessage('The password reset link could not be used. Please request a new one or sign in again.')
+      logger.error(
+        '[ResetPassword] Could not restore Supabase session',
+        sessionError,
+      )
+      setStatusMessage(
+        'The password reset link could not be used. Please request a new one or sign in again.',
+      )
       setStatusTone('error')
       setIsSubmitting(false)
       setPassword('')
@@ -157,7 +162,9 @@ export function ResetPasswordPage() {
           <DecorativeIcon icon="lock" />
           <div className="flex flex-col gap-2">
             <Heading1 as="h1">Set a new password</Heading1>
-            <p className="text-sm text-slate-600">Choose a new password for your account.</p>
+            <p className="text-sm text-slate-600">
+              Choose a new password for your account.
+            </p>
           </div>
         </div>
 
@@ -217,17 +224,31 @@ export function ResetPasswordPage() {
               <li className="flex items-center gap-2">
                 <span
                   className={`inline-flex h-5 w-5 items-center justify-center rounded-full ${
-                    passwordRules.length ? 'bg-emerald-100 text-emerald-600' : 'bg-slate-100 text-slate-400'
+                    passwordRules.length
+                      ? 'bg-emerald-100 text-emerald-600'
+                      : 'bg-slate-100 text-slate-400'
                   }`}
                   aria-hidden
                 >
                   {passwordRules.length ? (
                     <svg viewBox="0 0 24 24" className="h-4 w-4" fill="none">
-                      <path d="M5 13l4 4L19 7" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+                      <path
+                        d="M5 13l4 4L19 7"
+                        stroke="currentColor"
+                        strokeWidth="2"
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                      />
                     </svg>
                   ) : (
                     <svg viewBox="0 0 24 24" className="h-3 w-3" fill="none">
-                      <circle cx="12" cy="12" r="6" stroke="currentColor" strokeWidth="1.5" />
+                      <circle
+                        cx="12"
+                        cy="12"
+                        r="6"
+                        stroke="currentColor"
+                        strokeWidth="1.5"
+                      />
                     </svg>
                   )}
                 </span>
@@ -237,17 +258,31 @@ export function ResetPasswordPage() {
               <li className="flex items-center gap-2">
                 <span
                   className={`inline-flex h-5 w-5 items-center justify-center rounded-full ${
-                    passwordRules.lower ? 'bg-emerald-100 text-emerald-600' : 'bg-slate-100 text-slate-400'
+                    passwordRules.lower
+                      ? 'bg-emerald-100 text-emerald-600'
+                      : 'bg-slate-100 text-slate-400'
                   }`}
                   aria-hidden
                 >
                   {passwordRules.lower ? (
                     <svg viewBox="0 0 24 24" className="h-4 w-4" fill="none">
-                      <path d="M5 13l4 4L19 7" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+                      <path
+                        d="M5 13l4 4L19 7"
+                        stroke="currentColor"
+                        strokeWidth="2"
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                      />
                     </svg>
                   ) : (
                     <svg viewBox="0 0 24 24" className="h-3 w-3" fill="none">
-                      <circle cx="12" cy="12" r="6" stroke="currentColor" strokeWidth="1.5" />
+                      <circle
+                        cx="12"
+                        cy="12"
+                        r="6"
+                        stroke="currentColor"
+                        strokeWidth="1.5"
+                      />
                     </svg>
                   )}
                 </span>
@@ -257,17 +292,31 @@ export function ResetPasswordPage() {
               <li className="flex items-center gap-2">
                 <span
                   className={`inline-flex h-5 w-5 items-center justify-center rounded-full ${
-                    passwordRules.upper ? 'bg-emerald-100 text-emerald-600' : 'bg-slate-100 text-slate-400'
+                    passwordRules.upper
+                      ? 'bg-emerald-100 text-emerald-600'
+                      : 'bg-slate-100 text-slate-400'
                   }`}
                   aria-hidden
                 >
                   {passwordRules.upper ? (
                     <svg viewBox="0 0 24 24" className="h-4 w-4" fill="none">
-                      <path d="M5 13l4 4L19 7" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+                      <path
+                        d="M5 13l4 4L19 7"
+                        stroke="currentColor"
+                        strokeWidth="2"
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                      />
                     </svg>
                   ) : (
                     <svg viewBox="0 0 24 24" className="h-3 w-3" fill="none">
-                      <circle cx="12" cy="12" r="6" stroke="currentColor" strokeWidth="1.5" />
+                      <circle
+                        cx="12"
+                        cy="12"
+                        r="6"
+                        stroke="currentColor"
+                        strokeWidth="1.5"
+                      />
                     </svg>
                   )}
                 </span>
@@ -277,17 +326,31 @@ export function ResetPasswordPage() {
               <li className="flex items-center gap-2">
                 <span
                   className={`inline-flex h-5 w-5 items-center justify-center rounded-full ${
-                    passwordRules.number ? 'bg-emerald-100 text-emerald-600' : 'bg-slate-100 text-slate-400'
+                    passwordRules.number
+                      ? 'bg-emerald-100 text-emerald-600'
+                      : 'bg-slate-100 text-slate-400'
                   }`}
                   aria-hidden
                 >
                   {passwordRules.number ? (
                     <svg viewBox="0 0 24 24" className="h-4 w-4" fill="none">
-                      <path d="M5 13l4 4L19 7" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+                      <path
+                        d="M5 13l4 4L19 7"
+                        stroke="currentColor"
+                        strokeWidth="2"
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                      />
                     </svg>
                   ) : (
                     <svg viewBox="0 0 24 24" className="h-3 w-3" fill="none">
-                      <circle cx="12" cy="12" r="6" stroke="currentColor" strokeWidth="1.5" />
+                      <circle
+                        cx="12"
+                        cy="12"
+                        r="6"
+                        stroke="currentColor"
+                        strokeWidth="1.5"
+                      />
                     </svg>
                   )}
                 </span>
@@ -297,17 +360,31 @@ export function ResetPasswordPage() {
               <li className="flex items-center gap-2">
                 <span
                   className={`inline-flex h-5 w-5 items-center justify-center rounded-full ${
-                    passwordRules.special ? 'bg-emerald-100 text-emerald-600' : 'bg-slate-100 text-slate-400'
+                    passwordRules.special
+                      ? 'bg-emerald-100 text-emerald-600'
+                      : 'bg-slate-100 text-slate-400'
                   }`}
                   aria-hidden
                 >
                   {passwordRules.special ? (
                     <svg viewBox="0 0 24 24" className="h-4 w-4" fill="none">
-                      <path d="M5 13l4 4L19 7" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+                      <path
+                        d="M5 13l4 4L19 7"
+                        stroke="currentColor"
+                        strokeWidth="2"
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                      />
                     </svg>
                   ) : (
                     <svg viewBox="0 0 24 24" className="h-3 w-3" fill="none">
-                      <circle cx="12" cy="12" r="6" stroke="currentColor" strokeWidth="1.5" />
+                      <circle
+                        cx="12"
+                        cy="12"
+                        r="6"
+                        stroke="currentColor"
+                        strokeWidth="1.5"
+                      />
                     </svg>
                   )}
                 </span>

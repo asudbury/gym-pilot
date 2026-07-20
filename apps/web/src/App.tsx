@@ -118,7 +118,10 @@ function App() {
 
     void (async () => {
       try {
-        const flag = await loadSupabaseProfileFlag('must_change_password', user.id)
+        const flag = await loadSupabaseProfileFlag(
+          'must_change_password',
+          user.id,
+        )
         if (!isActive) return
         setMustChangePassword(Boolean(flag))
       } catch {

@@ -120,7 +120,10 @@ export function FavouriteFolderGroup({
                 <Button
                   type="button"
                   onClick={() => onOpenLink(link)}
-                  className={getToneClass('default', 'rounded-lg px-3 py-2 text-sm font-medium')}
+                  className={getToneClass(
+                    'default',
+                    'rounded-lg px-3 py-2 text-sm font-medium',
+                  )}
                 >
                   Open
                 </Button>

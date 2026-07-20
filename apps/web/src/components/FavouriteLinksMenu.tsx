@@ -287,7 +287,10 @@ export function FavouriteLinksMenu({
                 <Button
                   type="button"
                   onClick={handleToggleCurrentFavorite}
-                  className={getToneClass('blue', 'px-3 py-1.5 text-xs font-medium')}
+                  className={getToneClass(
+                    'blue',
+                    'px-3 py-1.5 text-xs font-medium',
+                  )}
                 >
                   Add to favourites
                 </Button>
@@ -296,7 +299,10 @@ export function FavouriteLinksMenu({
             <Button
               type="button"
               onClick={handleOpenFavouritesPage}
-              className={getToneClass('default', 'w-fit px-3 py-2 text-xs font-medium')}
+              className={getToneClass(
+                'default',
+                'w-fit px-3 py-2 text-xs font-medium',
+              )}
             >
               Open favourites page
             </Button>

@@ -1,7 +1,10 @@
 import { useEffect, useState } from 'react'
 import { Navigate, Outlet, useLocation } from 'react-router-dom'
 import type { UserRole } from '@gym-pilot/types'
-import { loadSupabaseProfileTermsAcceptance, loadSupabaseProfileFlag } from '@gym-pilot/shared'
+import {
+  loadSupabaseProfileTermsAcceptance,
+  loadSupabaseProfileFlag,
+} from '@gym-pilot/shared'
 import { useAuth } from './AuthContext'
 import { isPublicRoute } from './publicAccess'
 import { AUTH_PROTECTION_ENABLED } from './config'
@@ -19,7 +22,9 @@ export function RequireAuth({
   const location = useLocation()
   const [termsAccepted, setTermsAccepted] = useState<boolean | null>(null)
   const [isCheckingTerms, setIsCheckingTerms] = useState(false)
-  const [mustChangePassword, setMustChangePassword] = useState<boolean | null>(null)
+  const [mustChangePassword, setMustChangePassword] = useState<boolean | null>(
+    null,
+  )
 
   useEffect(() => {
     if (!user?.id || location.pathname === '/welcome') {
@@ -67,7 +72,10 @@ export function RequireAuth({
 
     void (async () => {
       try {
-        const flag = await loadSupabaseProfileFlag('must_change_password', user.id)
+        const flag = await loadSupabaseProfileFlag(
+          'must_change_password',
+          user.id,
+        )
 
         if (!isActive) return
 
@@ -107,7 +115,11 @@ export function RequireAuth({
   }
 
   // If the profile requires a password change, force the reset page.
-  if (user?.id && mustChangePassword && location.pathname !== '/reset-password') {
+  if (
+    user?.id &&
+    mustChangePassword &&
+    location.pathname !== '/reset-password'
+  ) {
     return <Navigate to="/reset-password" replace state={{ from: location }} />
   }
 

@@ -79,8 +79,14 @@ export function ExerciseFilterPanel({
                 onClick={() => onCategoryChange(isAll ? 'All' : category)}
                 className={
                   isSelected
-                    ? getToneClass('blue', 'px-4 py-2 text-sm font-medium transition')
-                    : getToneClass('default', 'px-4 py-2 text-sm font-medium transition hover:bg-slate-200')
+                    ? getToneClass(
+                        'blue',
+                        'px-4 py-2 text-sm font-medium transition',
+                      )
+                    : getToneClass(
+                        'default',
+                        'px-4 py-2 text-sm font-medium transition hover:bg-slate-200',
+                      )
                 }
               >
                 {category}
@@ -93,8 +99,14 @@ export function ExerciseFilterPanel({
           onClick={onToggleImages}
           className={
             showExerciseImages
-              ? getToneClass('default', 'w-fit px-4 py-2 text-sm font-medium transition hover:bg-slate-200')
-              : getToneClass('blue', 'w-fit px-4 py-2 text-sm font-medium transition')
+              ? getToneClass(
+                  'default',
+                  'w-fit px-4 py-2 text-sm font-medium transition hover:bg-slate-200',
+                )
+              : getToneClass(
+                  'blue',
+                  'w-fit px-4 py-2 text-sm font-medium transition',
+                )
           }
         >
           {showExerciseImages ? 'Hide images' : 'Show images'}

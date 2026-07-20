@@ -149,7 +149,9 @@ export function Header({
                 ) : null}
               </div>
               {showRestrictedBadge ? (
-                <div className="mt-1 text-xs font-medium text-rose-700">Password reset required</div>
+                <div className="mt-1 text-xs font-medium text-rose-700">
+                  Password reset required
+                </div>
               ) : null}
             </div>
           </ResponsiveVisibility>
@@ -186,7 +188,7 @@ export function Header({
                       items={tabletMenuItems}
                     />
                     <div className="mt-2 flex flex-col gap-2 border-t border-slate-200 pt-3">
-                        {showAuthButton || Boolean(user) ? (
+                      {showAuthButton || Boolean(user) ? (
                         <Button
                           type="button"
                           onClick={handleAuthAction}

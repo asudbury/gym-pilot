@@ -32,7 +32,10 @@ export function CreateFolderForm({
           className="mt-2 w-full rounded-xl border border-slate-200 bg-white px-3 py-2 text-sm text-slate-700 shadow-sm outline-none ring-0 focus:border-slate-400"
         />
       </Panel>
-      <Button type="submit" className="rounded-xl px-4 py-2 text-sm font-medium">
+      <Button
+        type="submit"
+        className="rounded-xl px-4 py-2 text-sm font-medium"
+      >
         Add folder
       </Button>
     </form>

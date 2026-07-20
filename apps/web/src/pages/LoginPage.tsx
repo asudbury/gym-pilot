@@ -29,11 +29,12 @@ export function LoginPage() {
 
   const passwordRef = useRef<HTMLInputElement>(null)
 
-
   const [email, setEmail] = useState(() => readStoredRememberedEmail())
 
   const [authMessage, setAuthMessage] = useState('')
-  const [authMessageTone, setAuthMessageTone] = useState<'default' | 'error'>('default')
+  const [authMessageTone, setAuthMessageTone] = useState<'default' | 'error'>(
+    'default',
+  )
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [isResetting, setIsResetting] = useState(false)
 
@@ -55,7 +56,6 @@ export function LoginPage() {
     persistRememberEmailPreference(true)
     persistRememberedEmail(email, true)
   }, [email])
-
 
   const from = useMemo(() => {
     const state = location.state as {
@@ -87,7 +87,11 @@ export function LoginPage() {
 
       // If Supabase returns an email-not-confirmed error, surface it in red.
       const lower = (response.error.message || '').toLowerCase()
-      if (lower.includes('confirm') || lower.includes('not confirmed') || lower.includes('email not confirmed')) {
+      if (
+        lower.includes('confirm') ||
+        lower.includes('not confirmed') ||
+        lower.includes('email not confirmed')
+      ) {
         setAuthMessageTone('error')
       } else {
         setAuthMessageTone('default')
@@ -171,7 +175,9 @@ export function LoginPage() {
       logger.error('[Login] Password reset failed', response.error)
 
       setAuthMessageTone('error')
-      setAuthMessage(`Could not send the reset email: ${response.error.message}`)
+      setAuthMessage(
+        `Could not send the reset email: ${response.error.message}`,
+      )
 
       return
     }
@@ -185,7 +191,9 @@ export function LoginPage() {
   const handleResendConfirmation = async () => {
     if (!email.trim()) {
       setAuthMessageTone('default')
-      setAuthMessage('Enter your email address to receive a confirmation or reset link.')
+      setAuthMessage(
+        'Enter your email address to receive a confirmation or reset link.',
+      )
       return
     }
 
@@ -202,12 +210,16 @@ export function LoginPage() {
     if (response.error) {
       logger.error('[Login] Resend confirmation failed', response.error)
       setAuthMessageTone('error')
-      setAuthMessage(`Could not send a confirmation/reset email: ${response.error.message}`)
+      setAuthMessage(
+        `Could not send a confirmation/reset email: ${response.error.message}`,
+      )
       return
     }
 
     setAuthMessageTone('default')
-    setAuthMessage('An email has been sent. Check your inbox for a link to confirm or reset your account.')
+    setAuthMessage(
+      'An email has been sent. Check your inbox for a link to confirm or reset your account.',
+    )
   }
 
   return (
@@ -269,8 +281,6 @@ export function LoginPage() {
             />
           </label>
 
-          
-
           <Button
             type="submit"
             tone="emerald"
@@ -288,7 +298,8 @@ export function LoginPage() {
           >
             {isResetting ? 'Sending reset email…' : 'Forgot password?'}
           </button>
-          {authMessageTone === 'error' && authMessage.toLowerCase().includes('confirm') ? (
+          {authMessageTone === 'error' &&
+          authMessage.toLowerCase().includes('confirm') ? (
             <Button
               type="button"
               onClick={handleResendConfirmation}
