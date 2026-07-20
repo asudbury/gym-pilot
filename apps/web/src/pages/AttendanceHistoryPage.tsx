@@ -1,5 +1,6 @@
 import { useEffect, useMemo, useState } from 'react'
 import { Link } from 'react-router-dom'
+import { Button } from '../components/Button'
 import { useAuth } from '../auth/AuthContext'
 import { PageCardLayout } from '../layouts/PageCardLayout'
 import { PageLayout } from '../layouts/PageLayout'
@@ -177,14 +178,14 @@ export function AttendanceHistoryPage() {
                           {(['attended', 'taught'] as const).map((option) => {
                             const isSelected = editAttendanceType === option
                             return (
-                              <button
+                              <Button
                                 key={option}
                                 type="button"
                                 onClick={() => setEditAttendanceType(option)}
                                 className={`rounded-full border px-3 py-1.5 text-sm font-semibold transition ${isSelected ? 'border-sky-600 bg-sky-600 text-white' : 'border-slate-300 bg-white text-slate-700 hover:bg-slate-50'}`}
                               >
                                 {option === 'attended' ? 'Attended' : 'Taught'}
-                              </button>
+                              </Button>
                             )
                           })}
                         </div>
@@ -197,14 +198,14 @@ export function AttendanceHistoryPage() {
                           {[1, 2, 3, 4, 5].map((value) => {
                             const isSelected = editRating === value
                             return (
-                              <button
+                              <Button
                                 key={value}
                                 type="button"
                                 onClick={() => setEditRating(value)}
                                 className={`rounded-full border px-3 py-1.5 text-sm font-semibold transition ${isSelected ? 'border-sky-600 bg-sky-600 text-white' : 'border-slate-300 bg-white text-slate-700 hover:bg-slate-50'}`}
                               >
                                 {value} / 5
-                              </button>
+                              </Button>
                             )
                           })}
                         </div>
@@ -220,20 +221,20 @@ export function AttendanceHistoryPage() {
                         />
                       </label>
                       <div className="flex flex-wrap gap-2">
-                        <button
+                        <Button
                           type="button"
                           onClick={() => saveEditing(entry)}
                           className="rounded-full border border-emerald-600 bg-emerald-600 px-3 py-1.5 text-sm font-semibold text-white"
                         >
                           Save
-                        </button>
-                        <button
+                        </Button>
+                        <Button
                           type="button"
                           onClick={cancelEditing}
                           className="rounded-full border border-slate-300 bg-white px-3 py-1.5 text-sm font-medium text-slate-700"
                         >
                           Cancel
-                        </button>
+                        </Button>
                       </div>
                     </div>
                   ) : (

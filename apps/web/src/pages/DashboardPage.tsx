@@ -90,14 +90,14 @@ export function DashboardPage() {
               .map((layout) => {
                 const isActive = selectedLayoutKey === layout.key
                 return (
-                  <button
+                  <Button
                     key={layout.key}
                     type="button"
                     onClick={() => setSelectedRole(layout.key)}
                     className={`rounded-full border px-3 py-1.5 text-sm font-medium transition ${isActive ? 'border-slate-900 bg-slate-900 text-white dark:border-slate-100 dark:bg-slate-100 dark:text-slate-950' : 'border-slate-300 bg-white text-slate-700 hover:bg-slate-100 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-200'}`}
                   >
                     {layout.label}
-                  </button>
+                  </Button>
                 )
               })}
           </div>

@@ -13,6 +13,7 @@ import { formatLabel } from '../utils/formatUtils'
 import { logger } from '@gym-pilot/shared'
 import { copyExerciseLinkToClipboard } from '../utils/navigationUtils'
 import { resolveExercisePageViewModel } from '../features/exercises/domain/exerciseView'
+import { Button } from '../components/Button'
 
 type ExercisePageProps = {
   onToggleFavoriteExercise?: (exerciseId: string) => void
@@ -92,7 +93,7 @@ export function ExercisePage({
         <YouTubeExerciseSearchButton exerciseName={exercise.name} />
         <ExerciseSteps steps={exercise.instruction_steps.en} className="mt-8" />
         <PageActionGroup className="mt-6 flex-col sm:flex-row sm:justify-end">
-          <button
+          <Button
             type="button"
             onClick={handleOpenFavouritePicker}
             className={
@@ -104,8 +105,8 @@ export function ExercisePage({
             {isExerciseFavorite?.(exercise.id)
               ? 'Manage favourite'
               : 'Add to Favourites'}
-          </button>
-          <button
+          </Button>
+          <Button
             type="button"
             onClick={handleCopyUrl}
             className={
@@ -115,7 +116,7 @@ export function ExercisePage({
             }
           >
             {copied ? 'Copied!' : 'Copy URL'}
-          </button>
+          </Button>
         </PageActionGroup>
       </PageCard>
     </PageLayout>

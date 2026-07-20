@@ -34,6 +34,9 @@ export function AdminUserActivityPage() {
     [],
   )
   const [statusMessage, setStatusMessage] = useState('')
+  const [statusType, setStatusType] = useState<'info' | 'error' | 'success'>(
+    'info',
+  )
   const [isLoading, setIsLoading] = useState(false)
 
   const refreshProfileAndActivity = async (profileId: string) => {
@@ -44,6 +47,7 @@ export function AdminUserActivityPage() {
 
     if (!client) {
       setStatusMessage('Supabase is not configured for this session.')
+      setStatusType('error')
       setIsLoading(false)
       return
     }
@@ -62,6 +66,7 @@ export function AdminUserActivityPage() {
         profileError,
       )
       setStatusMessage(`Could not load profile: ${profileError.message}`)
+      setStatusType('error')
       setIsLoading(false)
       return
     }
@@ -99,6 +104,7 @@ export function AdminUserActivityPage() {
         activityError,
       )
       setStatusMessage(`Could not load activity: ${activityError.message}`)
+      setStatusType('error')
       setActivityRows([])
       setIsLoading(false)
       return
@@ -136,7 +142,11 @@ export function AdminUserActivityPage() {
     >
       <div className="space-y-4 rounded-2xl border border-slate-200 bg-slate-50 p-4">
         {statusMessage ? (
-          <p className="text-sm text-slate-600">{statusMessage}</p>
+          <p
+            className={`text-sm ${statusType === 'error' ? 'text-rose-600' : 'text-slate-600'}`}
+          >
+            {statusMessage}
+          </p>
         ) : null}
 
         {profile ? (

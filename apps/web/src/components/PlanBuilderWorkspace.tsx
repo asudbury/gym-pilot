@@ -385,14 +385,14 @@ export function PlanBuilderWorkspace({
                 From favourites
               </span>
               {favoriteExercises.map((exercise) => (
-                <button
+                <Button
                   key={exercise.id}
                   type="button"
                   onClick={() => onAddRow(exercise.id)}
                   className="rounded-full border px-3 py-1.5 text-sm font-medium"
                 >
                   {formatLabel(exercise.name)}
-                </button>
+                </Button>
               ))}
             </div>
           ) : null}
@@ -403,7 +403,7 @@ export function PlanBuilderWorkspace({
                 Favourite groups
               </span>
               {groupedFavoriteLinks.map((group) => (
-                <button
+                <Button
                   key={group.folderName}
                   type="button"
                   onClick={() =>
@@ -417,7 +417,7 @@ export function PlanBuilderWorkspace({
                   className="rounded-full border border-emerald-200 bg-emerald-50 px-3 py-1.5 text-sm font-medium text-emerald-700 transition hover:bg-emerald-100"
                 >
                   {group.folderName}
-                </button>
+                </Button>
               ))}
             </div>
           ) : null}

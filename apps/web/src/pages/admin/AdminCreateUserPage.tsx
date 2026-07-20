@@ -13,6 +13,7 @@ import type { UserRole } from '@gym-pilot/types'
 import { AdminSectionShell } from '../../components/admin/AdminSectionShell'
 import { Panel } from '../../components/ui/Panel'
 import { SectionPanel } from '../../components/ui/SectionPanel'
+import { GymClubSelector } from '../../components/GymClubSelector'
 import {
   buildCreateUserProfilePayload,
   getCreateUserRoleOptions,
@@ -39,6 +40,12 @@ export function AdminCreateUserPage() {
   const [tempPassword, setTempPassword] = useState('')
   const [newUserRoles, setNewUserRoles] = useState<UserRole[]>(['client'])
   const [selectedTrainerId, setSelectedTrainerId] = useState<string>('')
+  const [accountTier, setAccountTier] = useState<string>('free')
+  const [accessEndsAt, setAccessEndsAt] = useState<string>('')
+  const [isFrozen, setIsFrozen] = useState(false)
+  const [mustChangePasswordFlag, setMustChangePasswordFlag] = useState(true)
+  const [selectedGymClubId, setSelectedGymClubId] = useState<string>('')
+  const [sendInviteLink, setSendInviteLink] = useState(false)
   const [statusMessage, setStatusMessage] = useState<StatusMessageState | null>(
     null,
   )
@@ -217,11 +224,41 @@ export function AdminCreateUserPage() {
       }
 
       if (resolvedNewUserId) {
+        // Validate access end date
+        if (accessEndsAt) {
+          const selectedDate = new Date(accessEndsAt)
+          const today = new Date()
+          today.setHours(0, 0, 0, 0)
+          if (selectedDate < today) {
+            setStatusMessage({
+              text: 'Access end date must not be in the past.',
+              tone: 'error',
+            })
+            return
+          }
+        }
+
+        // Confirm when creating an admin account
+        if (newUserRoles.includes('admin')) {
+          const confirmed = window.confirm(
+            'You are about to create an admin account. Continue?',
+          )
+          if (!confirmed) {
+            return
+          }
+        }
+
         const profilePayload = buildCreateUserProfilePayload({
           userId: resolvedNewUserId,
           displayName: resolvedDisplayName,
           roles: newUserRoles,
           selectedTrainerId,
+          accountTier,
+          accessEndsAt: accessEndsAt || null,
+          isFrozen,
+          mustChangePassword: mustChangePasswordFlag,
+          gymClubId: selectedGymClubId || null,
+          gymBrand: selectedGymClubId ? 'Virgin' : null,
         })
 
         let { error: profileError } = await client
@@ -257,6 +294,31 @@ export function AdminCreateUserPage() {
             resolvedNewUserId,
             client,
           )
+
+          // Optionally copy an invite link to clipboard for the new user
+          if (sendInviteLink) {
+            const email = newUserEmail.trim() || resolvedDisplayName
+            if (email) {
+              try {
+                const basePath =
+                  import.meta.env.BASE_URL === '/'
+                    ? ''
+                    : import.meta.env.BASE_URL
+                const inviteUrl = new URL(
+                  `${window.location.origin}${basePath}#${encodeURIComponent('/login')}`,
+                )
+                inviteUrl.hash = `#/login?email=${encodeURIComponent(email)}`
+                await navigator.clipboard.writeText(inviteUrl.toString())
+                window.dispatchEvent(
+                  new CustomEvent('gym-pilot-notification', {
+                    detail: { text: 'Invite link copied', tone: 'success' },
+                  }),
+                )
+              } catch {
+                // ignore
+              }
+            }
+          }
         }
 
         if (
@@ -321,6 +383,11 @@ export function AdminCreateUserPage() {
     setTempPassword('')
     setNewUserRoles(['client'])
     setSelectedTrainerId('')
+    setSelectedGymClubId('')
+    setAccountTier('free')
+    setAccessEndsAt('')
+    setIsFrozen(false)
+    setMustChangePasswordFlag(true)
     setStatusMessage({ text: 'User created successfully.', tone: 'success' })
     navigate('/admin/users', { replace: true })
   }
@@ -401,6 +468,70 @@ export function AdminCreateUserPage() {
               </select>
             </label>
           ) : null}
+
+          <label className="block text-sm font-medium text-slate-700">
+            Account tier
+            <select
+              value={accountTier}
+              onChange={(event) => setAccountTier(event.target.value)}
+              className="mt-1 w-full rounded-full border border-slate-200 bg-white px-3 py-2 text-sm text-slate-700"
+            >
+              <option value="free">Free</option>
+              <option value="bronze">Bronze</option>
+              <option value="silver">Silver</option>
+              <option value="gold">Gold</option>
+            </select>
+          </label>
+
+          <label className="block text-sm font-medium text-slate-700">
+            Gym club (optional)
+            <GymClubSelector
+              value={selectedGymClubId}
+              onChange={(next) => setSelectedGymClubId(next)}
+              placeholder="Search for club (Virgin only)"
+              className="mt-1 w-full rounded-full border border-slate-200 bg-white px-3 py-2 text-sm text-slate-700"
+            />
+          </label>
+
+          <label className="flex items-center gap-2 text-sm font-medium text-slate-700">
+            <input
+              type="checkbox"
+              checked={mustChangePasswordFlag}
+              onChange={(e) => setMustChangePasswordFlag(e.target.checked)}
+              className="h-4 w-4 rounded border-slate-300 text-blue-700 focus:ring-blue-600"
+            />
+            <span>Require password change on first sign-in</span>
+          </label>
+
+          <label className="flex items-center gap-2 text-sm font-medium text-slate-700">
+            <input
+              type="checkbox"
+              checked={isFrozen}
+              onChange={(e) => setIsFrozen(e.target.checked)}
+              className="h-4 w-4 rounded border-slate-300 text-blue-700 focus:ring-blue-600"
+            />
+            <span>Freeze account</span>
+          </label>
+
+          <label className="block text-sm font-medium text-slate-700">
+            Access ends at (optional)
+            <input
+              type="date"
+              value={accessEndsAt}
+              onChange={(e) => setAccessEndsAt(e.target.value)}
+              className="mt-1 w-full rounded-full border border-slate-200 bg-white px-3 py-2 text-sm text-slate-700"
+            />
+          </label>
+
+          <label className="flex items-center gap-2 text-sm font-medium text-slate-700">
+            <input
+              type="checkbox"
+              checked={sendInviteLink}
+              onChange={(e) => setSendInviteLink(e.target.checked)}
+              className="h-4 w-4 rounded border-slate-300 text-blue-700 focus:ring-blue-600"
+            />
+            <span>Copy invite link to clipboard after creation</span>
+          </label>
 
           <Button
             tone="emerald"

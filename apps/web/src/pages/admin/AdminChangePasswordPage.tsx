@@ -7,6 +7,7 @@ import { PageLayout } from '../../layouts/PageLayout'
 import { Heading1, Paragraph } from '../../components/Typography'
 import { DecorativeIcon } from '../../components/ui/DecorativeIcon'
 import { appTokens } from '../../constants/tokens'
+import { Button } from '../../components/Button'
 
 export function AdminChangePasswordPage() {
   const navigate = useNavigate()
@@ -14,6 +15,9 @@ export function AdminChangePasswordPage() {
   const [confirmPassword, setConfirmPassword] = useState('')
   const [isSaving, setIsSaving] = useState(false)
   const [statusMessage, setStatusMessage] = useState('')
+  const [statusType, setStatusType] = useState<'info' | 'error' | 'success'>(
+    'info',
+  )
 
   const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault()
@@ -23,11 +27,13 @@ export function AdminChangePasswordPage() {
     try {
       if (newPassword.length < 8) {
         setStatusMessage('Password must be at least 8 characters long.')
+        setStatusType('error')
         return
       }
 
       if (newPassword !== confirmPassword) {
         setStatusMessage('The new passwords do not match.')
+        setStatusType('error')
         return
       }
 
@@ -40,6 +46,7 @@ export function AdminChangePasswordPage() {
       setNewPassword('')
       setConfirmPassword('')
       setStatusMessage('Password updated successfully.')
+      setStatusType('success')
       navigate('/admin/preferences')
     } catch (error) {
       logger.error('[ChangePassword] Failed to update password', error)
@@ -48,6 +55,7 @@ export function AdminChangePasswordPage() {
           ? error.message
           : 'Could not update the password right now.'
       setStatusMessage(message)
+      setStatusType('error')
     } finally {
       setIsSaving(false)
     }
@@ -105,20 +113,25 @@ export function AdminChangePasswordPage() {
             />
           </label>
 
-          <button
+          <Button
             type="submit"
             disabled={isSaving}
-            className={getToneClass(
-              'blue',
-              'w-fit rounded-full px-4 py-2.5 text-sm font-semibold text-white transition disabled:cursor-not-allowed disabled:bg-slate-400',
-            )}
+            className={getToneClass('blue', 'w-fit rounded-full px-4 py-2.5 text-sm font-semibold text-white transition disabled:cursor-not-allowed disabled:bg-slate-400')}
           >
             {isSaving ? 'Updating…' : 'Update password'}
-          </button>
+          </Button>
         </form>
 
         {statusMessage ? (
-          <div className="mt-4 rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3 text-sm text-slate-600">
+          <div
+            className={`mt-4 rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3 text-sm ${
+              statusType === 'error'
+                ? 'text-rose-600'
+                : statusType === 'success'
+                  ? 'text-emerald-600'
+                  : 'text-slate-600'
+            }`}
+          >
             {statusMessage}
           </div>
         ) : null}

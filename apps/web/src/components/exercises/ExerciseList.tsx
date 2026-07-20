@@ -3,6 +3,7 @@ import { Link } from 'react-router-dom'
 import { List, type RowComponentProps } from 'react-window'
 import { ExerciseMetaBadges } from './ExerciseMetaBadges'
 import { ExerciseImage } from './ExerciseImage'
+import { Button } from '../Button'
 import { ResponsiveVisibility } from '../ResponsiveVisibility'
 import { getExercisePath } from '../../utils/exerciseRouteUtils'
 import { formatLabel } from '../../utils/formatUtils'
@@ -38,7 +39,7 @@ function ExerciseActionButtons({
 }: ExerciseActionButtonsProps) {
   return (
     <div className="flex shrink-0 flex-col gap-2 self-start">
-      <button
+      <Button
         type="button"
         onClick={(event) => {
           event.preventDefault()
@@ -49,8 +50,8 @@ function ExerciseActionButtons({
         className={`rounded-full border px-3 py-2 text-sm font-medium transition ${isFavorite ? 'border-emerald-200 bg-emerald-50 text-emerald-700' : 'border-slate-200 bg-white text-slate-700'}`}
       >
         {isFavorite ? '★ Favourited' : '☆ Favourite'}
-      </button>
-      <button
+      </Button>
+      <Button
         type="button"
         onClick={(event) => {
           event.preventDefault()
@@ -60,7 +61,7 @@ function ExerciseActionButtons({
         className={`rounded-full border px-3 py-2 text-sm font-medium transition ${copiedId === exerciseId ? 'border-emerald-200 bg-emerald-50 text-emerald-700' : 'border-slate-200 bg-white text-slate-700'}`}
       >
         {copiedId === exerciseId ? 'Copied!' : 'Copy URL'}
-      </button>
+      </Button>
     </div>
   )
 }

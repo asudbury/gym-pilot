@@ -1,5 +1,6 @@
 import { ExerciseSearchPicker } from './ExerciseSearchPicker'
 import { getToneClass } from '../toneClasses'
+import { Button } from '../Button'
 import { formatLabel } from '../../utils/formatUtils'
 
 type ExerciseFilterPanelProps = {
@@ -73,44 +74,31 @@ export function ExerciseFilterPanel({
               : normalizedCategory === category
 
             return (
-              <button
+              <Button
                 key={category}
                 onClick={() => onCategoryChange(isAll ? 'All' : category)}
                 className={
                   isSelected
-                    ? getToneClass(
-                        'blue',
-                        'px-4 py-2 text-sm font-medium transition',
-                      )
-                    : getToneClass(
-                        'default',
-                        'px-4 py-2 text-sm font-medium transition hover:bg-slate-200',
-                      )
+                    ? getToneClass('blue', 'px-4 py-2 text-sm font-medium transition')
+                    : getToneClass('default', 'px-4 py-2 text-sm font-medium transition hover:bg-slate-200')
                 }
               >
                 {category}
-              </button>
+              </Button>
             )
           })}
         </div>
-
-        <button
+        <Button
           type="button"
           onClick={onToggleImages}
           className={
             showExerciseImages
-              ? getToneClass(
-                  'default',
-                  'w-fit px-4 py-2 text-sm font-medium transition hover:bg-slate-200',
-                )
-              : getToneClass(
-                  'blue',
-                  'w-fit px-4 py-2 text-sm font-medium transition',
-                )
+              ? getToneClass('default', 'w-fit px-4 py-2 text-sm font-medium transition hover:bg-slate-200')
+              : getToneClass('blue', 'w-fit px-4 py-2 text-sm font-medium transition')
           }
         >
           {showExerciseImages ? 'Hide images' : 'Show images'}
-        </button>
+        </Button>
       </div>
     </div>
   )

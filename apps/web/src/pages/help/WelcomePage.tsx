@@ -6,6 +6,7 @@ import {
   saveSupabaseProfileTermsAcceptance,
   signOutFromSupabase,
 } from '@gym-pilot/shared'
+import { loadSupabaseProfileFlag } from '@gym-pilot/shared'
 import { PageCard } from '../../components/PageCard'
 import { Heading1 } from '../../components/Typography'
 import { appTokens } from '../../constants/tokens'
@@ -35,6 +36,20 @@ export function WelcomePage() {
       }
 
       try {
+        // If the user must change password, redirect them to the reset
+        // password flow before allowing terms acceptance.
+        const requiresPasswordChange = await loadSupabaseProfileFlag(
+          'must_change_password',
+        )
+
+        if (requiresPasswordChange) {
+          navigate('/reset-password', {
+            replace: true,
+            state: { from: returnTo },
+          })
+          return
+        }
+
         const alreadyAccepted = await loadSupabaseProfileTermsAcceptance(
           user.id,
         )
@@ -45,7 +60,10 @@ export function WelcomePage() {
 
         setHasAccepted(alreadyAccepted)
       } catch (error) {
-        logger.error('[WelcomePage] Could not load terms acceptance', error)
+        logger.error(
+          '[WelcomePage] Could not load terms acceptance or password flag',
+          error,
+        )
       }
     })()
 

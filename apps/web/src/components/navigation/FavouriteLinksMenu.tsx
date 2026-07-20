@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useState } from 'react'
 import { useLocation, useNavigate } from 'react-router-dom'
 import { getToneClass } from '../toneClasses'
+import { Button } from '../Button'
 import { DecorativeIcon } from '../ui/DecorativeIcon'
 import { classNames, exercises, exercisesSchema } from '@gym-pilot/shared'
 import {
@@ -244,7 +245,7 @@ export function FavouriteLinksMenu({
 
   return (
     <div className="relative">
-      <button
+      <Button
         id="quick-links-trigger"
         type="button"
         onClick={() => setMenuOpen((current) => !current)}
@@ -254,7 +255,7 @@ export function FavouriteLinksMenu({
           <DecorativeIcon icon="star" className="h-4 w-4" />
           <span>Favourites</span>
         </span>
-      </button>
+      </Button>
       {menuOpen && (
         <div
           id="quick-links-menu"
@@ -283,28 +284,22 @@ export function FavouriteLinksMenu({
                     ))}
                   </select>
                 </label>
-                <button
+                <Button
                   type="button"
                   onClick={handleToggleCurrentFavorite}
-                  className={getToneClass(
-                    'blue',
-                    'px-3 py-1.5 text-xs font-medium',
-                  )}
+                  className={getToneClass('blue', 'px-3 py-1.5 text-xs font-medium')}
                 >
                   Add to favourites
-                </button>
+                </Button>
               </div>
             </div>
-            <button
+            <Button
               type="button"
               onClick={handleOpenFavouritesPage}
-              className={getToneClass(
-                'default',
-                'w-fit px-3 py-2 text-xs font-medium',
-              )}
+              className={getToneClass('default', 'w-fit px-3 py-2 text-xs font-medium')}
             >
               Open favourites page
-            </button>
+            </Button>
           </div>
 
           {favorites.length > 0 ? (
@@ -323,22 +318,22 @@ export function FavouriteLinksMenu({
                         key={item.id}
                         className="flex flex-col gap-2 rounded-xl border border-slate-200 bg-white p-2 sm:flex-row sm:items-center"
                       >
-                        <button
+                        <Button
                           type="button"
                           onClick={() => handleOpenQuickLink(item)}
                           className="w-full rounded-lg px-3 py-2 text-left text-sm text-slate-700 transition hover:bg-slate-50 hover:text-slate-900 sm:flex-1"
                         >
                           {item.label}
-                        </button>
+                        </Button>
                         <div className="flex items-center gap-2 self-end sm:self-auto">
-                          <button
+                          <Button
                             type="button"
                             onClick={() => handleRemoveFavoriteLink(item)}
                             className="rounded-lg border border-slate-200 bg-white px-2 py-2 text-xs text-slate-600"
                             aria-label="Remove favorite"
                           >
                             ✕
-                          </button>
+                          </Button>
                         </div>
                       </div>
                     ))}

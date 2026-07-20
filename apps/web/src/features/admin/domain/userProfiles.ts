@@ -9,6 +9,7 @@ export type ProfileDraft = {
   applicationName: string
   gymBrand: string
   gymName: string
+  gymClubId?: string
   accountTier: string
   accessEndsAt: string
   isFrozen: boolean
@@ -26,6 +27,7 @@ export function createInitialProfileDraft(
     applicationName: profile.applicationName ?? '',
     gymBrand: profile.gymBrand ?? '',
     gymName: profile.gymName ?? '',
+    gymClubId: profile.gymName ?? undefined,
     accountTier: profile.accountTier ?? 'free',
     accessEndsAt: profile.accessEndsAt ?? '',
     isFrozen: profile.isFrozen,

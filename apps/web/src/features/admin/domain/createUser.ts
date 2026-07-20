@@ -5,6 +5,7 @@ export type CreateUserProfilePayload = {
   friendly_name: string
   trainer_id: string | null
   gym_brand: string | null
+  gym_club_id?: string | null
   account_tier: string
   access_ends_at: string | null
   is_frozen: boolean
@@ -28,6 +29,12 @@ export function buildCreateUserProfilePayload(values: {
   displayName: string
   roles: UserRole[]
   selectedTrainerId: string
+  accountTier?: string | null
+  accessEndsAt?: string | null
+  isFrozen?: boolean
+  mustChangePassword?: boolean
+  gymBrand?: string | null
+  gymClubId?: string | null
 }): CreateUserProfilePayload {
   return {
     user_id: values.userId,
@@ -35,10 +42,11 @@ export function buildCreateUserProfilePayload(values: {
     trainer_id: values.roles.includes('client')
       ? values.selectedTrainerId || null
       : null,
-    gym_brand: null,
-    account_tier: 'free',
-    access_ends_at: null,
-    is_frozen: false,
-    must_change_password: true,
+    gym_brand: typeof values.gymBrand === 'string' ? values.gymBrand : null,
+    gym_club_id: values.gymClubId ?? null,
+    account_tier: values.accountTier ?? 'free',
+    access_ends_at: values.accessEndsAt ?? null,
+    is_frozen: Boolean(values.isFrozen),
+    must_change_password: values.mustChangePassword ?? true,
   }
 }

@@ -16,10 +16,10 @@ import { useAuth } from '../auth/AuthContext'
 import {
   persistRememberEmailPreference,
   persistRememberedEmail,
-  readStoredRememberEmailPreference,
   readStoredRememberedEmail,
 } from '../features/auth/domain/loginPreferences'
 import { DecorativeIcon } from '../components/ui/DecorativeIcon'
+import { Button } from '../components/Button'
 
 export function LoginPage() {
   const navigate = useNavigate()
@@ -29,13 +29,11 @@ export function LoginPage() {
 
   const passwordRef = useRef<HTMLInputElement>(null)
 
-  const [shouldRememberEmail, setShouldRememberEmail] = useState(() =>
-    readStoredRememberEmailPreference(),
-  )
 
   const [email, setEmail] = useState(() => readStoredRememberedEmail())
 
   const [authMessage, setAuthMessage] = useState('')
+  const [authMessageTone, setAuthMessageTone] = useState<'default' | 'error'>('default')
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [isResetting, setIsResetting] = useState(false)
 
@@ -49,18 +47,15 @@ export function LoginPage() {
   useEffect(() => {
     if (emailParam) {
       setEmail(emailParam)
-      persistRememberedEmail(emailParam, shouldRememberEmail)
+      persistRememberedEmail(emailParam, true)
     }
-  }, [emailParam, shouldRememberEmail])
+  }, [emailParam])
 
   useEffect(() => {
-    persistRememberEmailPreference(shouldRememberEmail)
-    persistRememberedEmail(email, shouldRememberEmail)
-  }, [email, shouldRememberEmail])
+    persistRememberEmailPreference(true)
+    persistRememberedEmail(email, true)
+  }, [email])
 
-  const rememberEmail = (value: string, remember: boolean) => {
-    persistRememberedEmail(value, remember)
-  }
 
   const from = useMemo(() => {
     const state = location.state as {
@@ -77,6 +72,7 @@ export function LoginPage() {
 
     setIsSubmitting(true)
     setAuthMessage('')
+    setAuthMessageTone('default')
 
     const password = passwordRef.current?.value ?? ''
 
@@ -87,18 +83,29 @@ export function LoginPage() {
     if (response.error) {
       logger.error('[Login] Password sign-in failed', response.error)
 
-      setAuthMessage(`Sign-in failed: ${response.error.message}`)
+      const message = `Sign-in failed: ${response.error.message}`
+
+      // If Supabase returns an email-not-confirmed error, surface it in red.
+      const lower = (response.error.message || '').toLowerCase()
+      if (lower.includes('confirm') || lower.includes('not confirmed') || lower.includes('email not confirmed')) {
+        setAuthMessageTone('error')
+      } else {
+        setAuthMessageTone('default')
+      }
+
+      setAuthMessage(message)
 
       return
     }
 
-    rememberEmail(email, shouldRememberEmail)
+    persistRememberedEmail(email, true)
 
     const accessState = await loadSupabaseProfileAccessState()
 
     if (accessState.isBlocked) {
       await signOutFromSupabase()
 
+      setAuthMessageTone('error')
       setAuthMessage('This account is frozen or its access has expired.')
 
       window.dispatchEvent(new Event('gym-pilot-auth-updated'))
@@ -106,9 +113,25 @@ export function LoginPage() {
       return
     }
 
+    // If the account requires a password change, force that first so users
+    // cannot continue until they've updated their credentials.
     const requiresPasswordChange = await loadSupabaseProfileFlag(
       'must_change_password',
     )
+
+    if (requiresPasswordChange) {
+      setAuthMessageTone('default')
+      setAuthMessage('Please set a new password to continue.')
+
+      window.dispatchEvent(new Event('gym-pilot-auth-updated'))
+
+      navigate('/reset-password', {
+        replace: true,
+        state: { from },
+      })
+
+      return
+    }
 
     const hasAcceptedTerms = await loadSupabaseProfileTermsAcceptance()
 
@@ -123,19 +146,6 @@ export function LoginPage() {
       return
     }
 
-    if (requiresPasswordChange) {
-      setAuthMessage('Please set a new password to continue.')
-
-      window.dispatchEvent(new Event('gym-pilot-auth-updated'))
-
-      navigate('/reset-password', {
-        replace: true,
-        state: { from },
-      })
-
-      return
-    }
-
     window.dispatchEvent(new Event('gym-pilot-auth-updated'))
 
     navigate(from, { replace: true })
@@ -143,6 +153,7 @@ export function LoginPage() {
 
   const handleForgotPassword = async () => {
     if (!email.trim()) {
+      setAuthMessageTone('default')
       setAuthMessage('Enter your email address to receive a reset link.')
 
       return
@@ -150,6 +161,7 @@ export function LoginPage() {
 
     setIsResetting(true)
     setAuthMessage('')
+    setAuthMessageTone('default')
 
     const response = await resetSupabasePassword(email.trim())
 
@@ -158,16 +170,44 @@ export function LoginPage() {
     if (response.error) {
       logger.error('[Login] Password reset failed', response.error)
 
-      setAuthMessage(
-        `Could not send the reset email: ${response.error.message}`,
-      )
+      setAuthMessageTone('error')
+      setAuthMessage(`Could not send the reset email: ${response.error.message}`)
 
       return
     }
 
+    setAuthMessageTone('default')
     setAuthMessage(
       'A password reset email has been sent. Check your inbox and follow the link to set a new password.',
     )
+  }
+
+  const handleResendConfirmation = async () => {
+    if (!email.trim()) {
+      setAuthMessageTone('default')
+      setAuthMessage('Enter your email address to receive a confirmation or reset link.')
+      return
+    }
+
+    setIsResetting(true)
+    setAuthMessage('')
+    setAuthMessageTone('default')
+
+    // As a safe client-side fallback we send a password-reset email which
+    // lets the user regain access even if they missed the original confirmation.
+    const response = await resetSupabasePassword(email.trim())
+
+    setIsResetting(false)
+
+    if (response.error) {
+      logger.error('[Login] Resend confirmation failed', response.error)
+      setAuthMessageTone('error')
+      setAuthMessage(`Could not send a confirmation/reset email: ${response.error.message}`)
+      return
+    }
+
+    setAuthMessageTone('default')
+    setAuthMessage('An email has been sent. Check your inbox for a link to confirm or reset your account.')
   }
 
   return (
@@ -229,24 +269,16 @@ export function LoginPage() {
             />
           </label>
 
-          <label className="flex items-center gap-2 text-sm font-medium text-slate-700">
-            <input
-              type="checkbox"
-              checked={shouldRememberEmail}
-              onChange={(event) => setShouldRememberEmail(event.target.checked)}
-              className="h-4 w-4 rounded border-slate-300 text-blue-700 focus:ring-blue-600"
-            />
+          
 
-            <span>Remember this email on this device</span>
-          </label>
-
-          <button
-            className="inline-flex items-center cursor-pointer rounded-full border border-emerald-300 bg-emerald-50 px-2 py-1 text-sm font-medium text-emerald-700 shadow-sm disabled:cursor-not-allowed disabled:border-emerald-300 disabled:bg-emerald-300 disabled:text-emerald-950"
+          <Button
             type="submit"
+            tone="emerald"
+            className="self-start w-full sm:w-auto shadow-sm disabled:cursor-not-allowed disabled:border-emerald-300 disabled:bg-emerald-300 disabled:text-emerald-950"
             disabled={isSubmitting}
           >
             {isSubmitting ? 'Logging in…' : 'Login'}
-          </button>
+          </Button>
 
           <button
             type="button"
@@ -256,10 +288,26 @@ export function LoginPage() {
           >
             {isResetting ? 'Sending reset email…' : 'Forgot password?'}
           </button>
+          {authMessageTone === 'error' && authMessage.toLowerCase().includes('confirm') ? (
+            <Button
+              type="button"
+              onClick={handleResendConfirmation}
+              disabled={isResetting}
+              className="w-full sm:w-auto px-3 py-2 text-sm"
+            >
+              {isResetting ? 'Sending…' : 'Resend confirmation / reset'}
+            </Button>
+          ) : null}
         </form>
 
         {authMessage ? (
-          <div className="mt-4 rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3 text-sm text-slate-600">
+          <div
+            className={`mt-4 rounded-2xl border px-4 py-3 text-sm ${
+              authMessageTone === 'error'
+                ? 'border-rose-200 bg-rose-50 text-rose-700'
+                : 'border-slate-200 bg-slate-50 text-slate-600'
+            }`}
+          >
             {authMessage}
           </div>
         ) : null}

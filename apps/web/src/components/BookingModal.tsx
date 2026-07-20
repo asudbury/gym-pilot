@@ -182,19 +182,19 @@ export function BookingModal({
               {[1, 2, 3, 4, 5].map((value) => {
                 const isSelected = rating === value
                 return (
-                  <button
+                  <Button
                     key={value}
                     type="button"
                     onClick={() => setRating(value)}
                     className={`rounded-full border px-3 py-1.5 text-sm font-semibold transition ${isSelected ? 'border-sky-600 bg-sky-600 text-white shadow-sm' : 'border-slate-300 bg-white text-slate-700 hover:bg-slate-50'}`}
                   >
                     {value} / 5
-                  </button>
+                  </Button>
                 )
               })}
             </div>
           </div>
-          
+
           <label className="mt-3 block text-sm text-slate-700">
             <span className="font-medium">Notes</span>
             <textarea
@@ -205,18 +205,16 @@ export function BookingModal({
             />
           </label>
 
-
-
           {error ? (
             <div className="mt-2 text-sm text-rose-600">{error}</div>
           ) : null}
 
           <div className="mt-4 flex gap-2">
-            <Button onClick={onClose} tone="default">
-              Cancel
-            </Button>
             <Button onClick={handleSubmit} tone="emerald" disabled={isSaving}>
               {isSaving ? 'Recording…' : 'Record session'}
+            </Button>
+            <Button onClick={onClose} tone="default">
+              Cancel
             </Button>
           </div>
         </div>

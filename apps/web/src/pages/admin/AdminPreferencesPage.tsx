@@ -14,6 +14,7 @@ import {
 } from '../../features/admin/domain/adminUtils'
 import { GymClubSelector } from '../../components/GymClubSelector'
 import { logger } from '@gym-pilot/shared'
+import { Button } from '../../components/Button'
 
 export function AdminPreferencesPage() {
   const {
@@ -34,6 +35,9 @@ export function AdminPreferencesPage() {
   const [gymName, setGymName] = useState(user?.gymName ?? '')
   const [isSaving, setIsSaving] = useState(false)
   const [statusMessage, setStatusMessage] = useState('')
+  const [statusType, setStatusType] = useState<'info' | 'error' | 'success'>(
+    'info',
+  )
 
   useEffect(() => {
     setFriendlyName(user?.name ?? '')
@@ -66,6 +70,7 @@ export function AdminPreferencesPage() {
           ? error.message
           : 'Could not save the preferences right now.'
       setStatusMessage(message)
+      setStatusType('error')
     } finally {
       setIsSaving(false)
     }
@@ -219,37 +224,42 @@ export function AdminPreferencesPage() {
               Choose your preferred theme for the app.
             </p>
             <div className="mt-4 flex gap-3">
-              <button
+              <Button
                 type="button"
                 onClick={() => setThemePreference('light')}
                 className={`rounded-full px-4 py-2 text-sm font-medium transition ${themePreference === 'light' ? 'bg-slate-900 text-white' : 'bg-white text-slate-700 border border-slate-200'}`}
               >
                 Light
-              </button>
-              <button
+              </Button>
+              <Button
                 type="button"
                 onClick={() => setThemePreference('dark')}
                 className={`rounded-full px-4 py-2 text-sm font-medium transition ${themePreference === 'dark' ? 'bg-slate-900 text-white' : 'bg-white text-slate-700 border border-slate-200'}`}
               >
                 Dark
-              </button>
+              </Button>
             </div>
           </label>
 
-          <button
+          <Button
             type="submit"
             disabled={isSaving}
-            className={getToneClass(
-              'blue',
-              'w-fit rounded-full px-4 py-2.5 text-sm font-semibold text-white transition disabled:cursor-not-allowed disabled:bg-slate-400',
-            )}
+            className={getToneClass('blue', 'w-fit rounded-full px-4 py-2.5 text-sm font-semibold text-white transition disabled:cursor-not-allowed disabled:bg-slate-400')}
           >
             {isSaving ? 'Saving…' : 'Save preferences'}
-          </button>
+          </Button>
         </form>
 
         {statusMessage ? (
-          <div className="mt-4 rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3 text-sm text-slate-600 transition-colors dark:border-slate-700 dark:bg-slate-950 dark:text-slate-100">
+          <div
+            className={`mt-4 rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3 text-sm transition-colors dark:border-slate-700 dark:bg-slate-950 ${
+              statusType === 'error'
+                ? 'text-rose-600'
+                : statusType === 'success'
+                  ? 'text-emerald-600'
+                  : 'text-slate-600 dark:text-slate-100'
+            }`}
+          >
             {statusMessage}
           </div>
         ) : null}

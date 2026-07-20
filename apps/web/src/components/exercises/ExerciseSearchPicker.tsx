@@ -1,6 +1,7 @@
 import { useDeferredValue, useEffect, useMemo, useState } from 'react'
 import { exercises } from '@gym-pilot/shared'
 import { formatLabel } from '../../utils/formatUtils'
+import { Button } from '../Button'
 import { MIN_SEARCH_CHARS } from '../../constants/home'
 import { appTokens } from '../../constants/tokens'
 
@@ -56,14 +57,14 @@ export function ExerciseSearchField({
           className={`${appTokens.input} pr-20 outline-none ring-0 focus:border-slate-400 sm:pr-24`}
         />
         {value && (
-          <button
+          <Button
             type="button"
             onClick={onClear}
             className="absolute inset-y-0 right-0 flex items-center pr-3 text-slate-400 transition hover:text-slate-600"
             aria-label="Clear search"
           >
             Clear
-          </button>
+          </Button>
         )}
       </div>
     </div>
@@ -85,7 +86,7 @@ export function ExerciseSearchSuggestions({
       </p>
       <div className="flex flex-col gap-1">
         {suggestions.map((exercise) => (
-          <button
+          <Button
             key={exercise.id}
             type="button"
             onClick={() => onSelectExercise?.(exercise)}
@@ -95,7 +96,7 @@ export function ExerciseSearchSuggestions({
             <span className="text-xs text-slate-500">
               {formatLabel(exercise.category)}
             </span>
-          </button>
+          </Button>
         ))}
       </div>
     </div>

@@ -6,6 +6,7 @@ import type { NavigationMenuListItem } from '../../utils/navigationUtils'
 import { ResponsiveVisibility } from '../ResponsiveVisibility'
 import { DecorativeIcon } from '../ui/DecorativeIcon'
 import { getToneClass } from '../toneClasses'
+import { Button } from '../Button'
 
 type HeaderProps = {
   appName: string
@@ -21,6 +22,7 @@ type HeaderProps = {
   mobileMenuItems: NavigationMenuListItem[]
   showAuthButton: boolean
   user: unknown
+  mustChangePassword?: boolean
   onFavoritesChange: (
     favorites: Array<{ id: string; label: string; path: string }>,
   ) => void
@@ -44,6 +46,7 @@ export function Header({
   mobileMenuItems,
   showAuthButton,
   user,
+  mustChangePassword,
   folders,
   onFavoritesChange,
   onFoldersChange,
@@ -62,6 +65,7 @@ export function Header({
       ? String((user as { email?: string }).email)
       : ''
   const headerUserLabel = headerUser || headerUserEmail || 'Signed in'
+  const showRestrictedBadge = Boolean(mustChangePassword)
   const showUserBadge = Boolean(headerUser || headerUserEmail)
 
   const handleAuthAction = () => {
@@ -121,12 +125,14 @@ export function Header({
                   onFoldersChange={onFoldersChange}
                   onHomeFiltersChange={onHomeFiltersChange}
                 />
-                <NavigationMenuList
-                  className="flex items-center gap-2"
-                  items={desktopMenuItems}
-                />
+                {!showRestrictedBadge ? (
+                  <NavigationMenuList
+                    className="flex items-center gap-2"
+                    items={desktopMenuItems}
+                  />
+                ) : null}
                 {showAuthButton || Boolean(user) ? (
-                  <button
+                  <Button
                     type="button"
                     onClick={handleAuthAction}
                     className={getToneClass(
@@ -139,15 +145,18 @@ export function Header({
                       className="h-4 w-4"
                     />
                     <span>{user ? 'Log out' : 'Login'}</span>
-                  </button>
+                  </Button>
                 ) : null}
               </div>
+              {showRestrictedBadge ? (
+                <div className="mt-1 text-xs font-medium text-rose-700">Password reset required</div>
+              ) : null}
             </div>
           </ResponsiveVisibility>
 
           <ResponsiveVisibility visibleOn="tablet">
             <div className="relative">
-              <button
+              <Button
                 type="button"
                 onClick={onToggleMobileMenu}
                 className={getToneClass(
@@ -157,7 +166,7 @@ export function Header({
               >
                 <DecorativeIcon icon="grid" className="h-4 w-4" />
                 <span>Menu</span>
-              </button>
+              </Button>
               {mobileMenuOpen ? (
                 <div
                   ref={menuContainerRef}
@@ -177,8 +186,8 @@ export function Header({
                       items={tabletMenuItems}
                     />
                     <div className="mt-2 flex flex-col gap-2 border-t border-slate-200 pt-3">
-                      {showAuthButton || Boolean(user) ? (
-                        <button
+                        {showAuthButton || Boolean(user) ? (
+                        <Button
                           type="button"
                           onClick={handleAuthAction}
                           className="inline-flex items-center gap-2 rounded-xl px-3 py-2 text-left text-sm font-medium text-slate-700 transition hover:bg-slate-50"
@@ -188,7 +197,7 @@ export function Header({
                             className="h-4 w-4"
                           />
                           <span>{user ? 'Logout' : 'Login'}</span>
-                        </button>
+                        </Button>
                       ) : null}
                     </div>
                   </div>
@@ -199,7 +208,7 @@ export function Header({
 
           <ResponsiveVisibility visibleOn="mobile">
             <div className="relative">
-              <button
+              <Button
                 type="button"
                 onClick={onToggleMobileMenu}
                 className={getToneClass(
@@ -209,7 +218,7 @@ export function Header({
               >
                 <DecorativeIcon icon="grid" className="h-4 w-4" />
                 <span>Menu</span>
-              </button>
+              </Button>
               {mobileMenuOpen ? (
                 <div
                   ref={menuContainerRef}
@@ -230,7 +239,7 @@ export function Header({
                     />
                     <div className="mt-2 flex flex-col gap-2 border-t border-slate-200 pt-3">
                       {showAuthButton || Boolean(user) ? (
-                        <button
+                        <Button
                           type="button"
                           onClick={handleAuthAction}
                           className="inline-flex items-center gap-2 rounded-xl px-3 py-2 text-left text-sm font-medium text-slate-700 transition hover:bg-slate-50"
@@ -240,7 +249,7 @@ export function Header({
                             className="h-4 w-4"
                           />
                           <span>{user ? 'Logout' : 'Login'}</span>
-                        </button>
+                        </Button>
                       ) : null}
                     </div>
                   </div>

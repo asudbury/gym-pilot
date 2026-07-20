@@ -10,6 +10,7 @@ import { getToneClass } from './components/toneClasses'
 import { HOME_FILTER_KEY } from './constants/storageKeys'
 import { getExercisePath } from './utils/exerciseRouteUtils'
 import { Header } from './components/navigation/Header'
+import { Button } from './components/Button'
 import { formatLabel } from './utils/formatUtils'
 import { useAuth } from './auth/AuthContext'
 import { buildNavigationMenuItems } from './utils/navigationUtils'
@@ -27,6 +28,7 @@ import {
 import { getInstallHint, isAppleDevice, isInstalledAsApp } from './utils/pwa'
 import { createAuthRoutes } from './routes/authRoutes'
 import { createPublicRoutes } from './routes/publicRoutes'
+import { loadSupabaseProfileFlag } from '@gym-pilot/shared'
 
 function ScrollToTop() {
   const { pathname } = useLocation()
@@ -69,6 +71,7 @@ function App() {
   })
 
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
+  const [mustChangePassword, setMustChangePassword] = useState<boolean>(false)
   const [showInstallHint, setShowInstallHint] = useState(false)
 
   useEffect(() => {
@@ -104,6 +107,29 @@ function App() {
   useEffect(() => {
     setMobileMenuOpen(false)
   }, [pathname, user?.id, user?.email])
+
+  useEffect(() => {
+    let isActive = true
+
+    if (!user?.id) {
+      setMustChangePassword(false)
+      return
+    }
+
+    void (async () => {
+      try {
+        const flag = await loadSupabaseProfileFlag('must_change_password', user.id)
+        if (!isActive) return
+        setMustChangePassword(Boolean(flag))
+      } catch {
+        if (isActive) setMustChangePassword(false)
+      }
+    })()
+
+    return () => {
+      isActive = false
+    }
+  }, [user?.id])
 
   useEffect(() => {
     const isApple = isAppleDevice()
@@ -216,13 +242,13 @@ function App() {
         <div className="border-b border-slate-200 bg-slate-900 px-4 py-3 text-sm text-white">
           <div className="mx-auto flex max-w-6xl items-center justify-between gap-3">
             <span>{getInstallHint(true, false)}</span>
-            <button
+            <Button
               type="button"
               onClick={() => setShowInstallHint(false)}
               className="rounded-full bg-white/15 px-3 py-1 text-xs font-semibold text-white transition hover:bg-white/25"
             >
               Close
-            </button>
+            </Button>
           </div>
         </div>
       ) : null}
@@ -235,6 +261,7 @@ function App() {
         mobileMenuItems={mobileMenuItems}
         showAuthButton={SHOW_AUTH_BUTTON}
         user={user}
+        mustChangePassword={mustChangePassword}
         folders={folders}
         onFoldersChange={setFolders}
         onFavoritesChange={setFavorites}
