@@ -1,16 +1,17 @@
 import { useEffect, useMemo, useState } from 'react'
-import { useNavigate, useSearchParams } from 'react-router-dom'
+import { useNavigate, useSearchParams, Link } from 'react-router-dom'
 import {
   loadSupabaseProfileTermsAcceptance,
   logger,
   saveSupabaseProfileTermsAcceptance,
   signOutFromSupabase,
 } from '@gym-pilot/shared'
-import { PageCard } from '../components/PageCard'
-import { Heading1 } from '../components/Typography'
-import { appTokens } from '../constants/tokens'
-import { useAuth } from '../auth/AuthContext'
-import { DecorativeIcon } from '../components/ui/DecorativeIcon'
+import { PageCard } from '../../components/PageCard'
+import { Heading1 } from '../../components/Typography'
+import { appTokens } from '../../constants/tokens'
+import { useAuth } from '../../auth/AuthContext'
+import { DecorativeIcon } from '../../components/ui/DecorativeIcon'
+import { Button } from '../../components/Button'
 
 export function WelcomePage() {
   const navigate = useNavigate()
@@ -127,18 +128,19 @@ export function WelcomePage() {
         ) : null}
 
         <div className="mt-6 flex flex-wrap gap-3">
-          <button
+          <Button
             type="button"
+            tone="emerald"
             onClick={handleAccept}
             disabled={isAccepting || hasAccepted}
-            className="rounded-full border border-emerald-600 bg-emerald-600 px-4 py-2.5 text-sm font-semibold text-white transition hover:bg-emerald-700 disabled:cursor-not-allowed disabled:border-emerald-300 disabled:bg-emerald-300 disabled:text-emerald-950"
+            className="shadow-sm transition hover:shadow-md disabled:cursor-not-allowed disabled:border-emerald-300 disabled:bg-emerald-300 disabled:text-emerald-950"
           >
             {isAccepting
               ? 'Saving…'
               : hasAccepted
                 ? 'Accepted'
                 : 'Accept and continue'}
-          </button>
+          </Button>
           <button
             type="button"
             onClick={handleDecline}
@@ -147,7 +149,18 @@ export function WelcomePage() {
             Decline and sign out
           </button>
         </div>
+
+        <div className="mt-4 text-sm">
+          <p>
+            Want to install Gym-Pilot on your iPhone?{' '}
+            <Link to="/help/install-ios" className="text-emerald-600">
+              Open the install guide
+            </Link>
+          </p>
+        </div>
       </PageCard>
     </div>
   )
 }
+
+export default WelcomePage

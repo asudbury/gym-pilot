@@ -99,7 +99,7 @@ button[disabled] {
 
 /* Base appearance for native button elements to match component buttons */
 button {
-  @apply rounded-full text-sm font-medium px-3 py-1 transition-colors;
+  @apply rounded-full text-sm font-medium px-2 py-1 transition-colors;
 }
 
 /* Helper for destructive/outline rose buttons (Delete style) */
@@ -109,7 +109,7 @@ button {
 
 /* Generic helper so anchors can match Button look: use like <a class="btn">Open</a> */
 .btn {
-  @apply cursor-pointer inline-flex items-center rounded-full px-3 py-1.5 text-sm font-medium;
+  @apply cursor-pointer inline-flex items-center rounded-full px-2 py-1 text-sm font-medium;
 }
 
 /* Tone helpers to match Button tones */
@@ -120,7 +120,7 @@ button {
   @apply border border-slate-200 bg-white text-slate-700 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-100;
 }
 .btn-emerald {
-  @apply border border-emerald-300 bg-emerald-50 text-emerald-700;
+  @apply border border-emerald-300 bg-emerald-50 text-emerald-700 px-2 py-1;
 }
 .btn-orange {
   @apply border border-orange-300 bg-orange-50 text-orange-700;
@@ -132,7 +132,7 @@ button {
   @apply border border-blue-300 bg-blue-50 text-blue-700;
 }
 .btn-destructive {
-  @apply border border-rose-300 bg-rose-50 text-rose-700;
+  @apply border border-rose-300 bg-rose-50 text-rose-700 px-2 py-1;
 }
 
 html.dark .bg-white {

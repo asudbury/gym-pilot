@@ -1,7 +1,7 @@
 import { Route } from 'react-router-dom'
 import { LoginPage } from '../pages/LoginPage'
 import { ResetPasswordPage } from '../pages/ResetPasswordPage'
-import { WelcomePage } from '../pages/WelcomePage'
+import { WelcomePage } from '../pages/help/WelcomePage'
 
 export function createAuthRoutes() {
   return (

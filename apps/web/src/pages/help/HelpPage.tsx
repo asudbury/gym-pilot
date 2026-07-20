@@ -3,6 +3,7 @@ import { PageCardLayout } from '../../layouts/PageCardLayout'
 import { Panel } from '../../components/ui/Panel'
 import { useAuth } from '../../auth/AuthContext'
 import { helpSections } from '../../utils/helpUtils'
+import { Link } from 'react-router-dom'
 import { getBuildMetadata } from '../../utils/buildInfo'
 
 export function HelpPage() {
@@ -145,6 +146,17 @@ export function HelpPage() {
               </Panel>
             ))}
           </div>
+          <Panel variant="white" padding="md">
+            <h3 className="text-sm font-semibold">Install on iPhone</h3>
+            <p className="mt-2 text-sm text-slate-600">
+              For a native-like experience on iOS, add Gym-Pilot to your Home
+              Screen. See the{' '}
+              <Link to="/help/install-ios" className="text-emerald-600">
+                iOS install guide
+              </Link>{' '}
+              for step-by-step instructions.
+            </p>
+          </Panel>
           <Panel variant="white" padding="md">
             {isAuthenticated && user ? (
               <>

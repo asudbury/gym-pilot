@@ -24,7 +24,7 @@ import { DecorativeIcon } from '../components/ui/DecorativeIcon'
 export function LoginPage() {
   const navigate = useNavigate()
   const location = useLocation()
-  const { user } = useAuth()
+  useAuth()
   const [searchParams] = useSearchParams()
 
   const passwordRef = useRef<HTMLInputElement>(null)
@@ -69,9 +69,6 @@ export function LoginPage() {
 
     return state?.from?.pathname || '/'
   }, [location.state])
-
-  const appName =
-    user?.applicationName?.trim() || user?.name?.trim() || 'GymPilot'
 
   const handlePasswordSignIn = async (
     event: React.FormEvent<HTMLFormElement>,
@@ -183,7 +180,7 @@ export function LoginPage() {
         <div className="flex items-start gap-3">
           <DecorativeIcon icon="lock" />
           <div className="flex flex-col gap-2">
-            <Heading1 as="h1">Welcome to {appName}</Heading1>
+            <Heading1 as="h1">Welcome to Gym-Pilot</Heading1>
           </div>
         </div>
 
@@ -244,9 +241,9 @@ export function LoginPage() {
           </label>
 
           <button
+            className="inline-flex items-center cursor-pointer rounded-full border border-emerald-300 bg-emerald-50 px-2 py-1 text-sm font-medium text-emerald-700 shadow-sm disabled:cursor-not-allowed disabled:border-emerald-300 disabled:bg-emerald-300 disabled:text-emerald-950"
             type="submit"
             disabled={isSubmitting}
-            className="rounded-full bg-blue-700 px-4 py-2.5 text-sm font-semibold text-white transition hover:bg-blue-800 disabled:cursor-not-allowed disabled:bg-slate-400"
           >
             {isSubmitting ? 'Logging in…' : 'Login'}
           </button>

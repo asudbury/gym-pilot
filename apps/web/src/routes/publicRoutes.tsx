@@ -2,6 +2,7 @@ import { Route } from 'react-router-dom'
 import { ExercisePage } from '../pages/ExercisePage'
 import { HomePage } from '../pages/HomePage'
 import { HelpPage } from '../pages/help/HelpPage'
+import { InstallOnIOSPage } from '../pages/help/InstallOnIOS'
 import { FavouritesPage } from '../pages/FavouritesPage'
 import { DashboardPage } from '../pages/DashboardPage'
 import { type HomeFilters } from '../utils/appUtils'
@@ -59,6 +60,7 @@ export function createPublicRoutes({
         }
       />
       <Route path="/help" element={<HelpPage />} />
+      <Route path="/help/install-ios" element={<InstallOnIOSPage />} />
       <Route
         path="/favourites"
         element={
