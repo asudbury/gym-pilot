@@ -4,7 +4,6 @@ import { listBookings } from '@gym-pilot/shared'
 import { PageLayout } from '../layouts/PageLayout'
 import { PageCardLayout } from '../layouts/PageCardLayout'
 
-
 export function BookingPage() {
   const { user } = useAuth()
   const [bookings, setBookings] = useState<any[]>([])

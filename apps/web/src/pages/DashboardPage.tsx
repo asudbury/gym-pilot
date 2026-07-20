@@ -112,13 +112,17 @@ export function DashboardPage() {
                   Record a session
                 </p>
                 <p className="text-sm text-slate-600 dark:text-slate-300">
-                  Easily record a class, personal training session, or a solo session.
+                  Easily record a class, personal training session, or a solo
+                  session.
                 </p>
               </div>
             </div>
 
             <div className="mt-3 flex flex-wrap gap-3">
-              <Button tone="emerald" onClick={() => navigate('/timetable?prefill=class')}>
+              <Button
+                tone="emerald"
+                onClick={() => navigate('/timetable?prefill=class')}
+              >
                 <div className="inline-flex items-center gap-2">
                   <DecorativeIcon icon="calendar" className="h-4 w-4" />
                   <span>Record class</span>
@@ -167,16 +171,16 @@ export function DashboardPage() {
             {renderDashboardWidgets(filteredLayouts, selectedLayoutKey)}
           </div>
         ) : null}
-      {showBookingModal ? (
-        <BookingModal
-          open={showBookingModal}
-          onClose={() => {
-            setShowBookingModal(false)
-            setBookingInitialType(null)
-          }}
-          initialSessionType={bookingInitialType ?? undefined}
-        />
-      ) : null}
+        {showBookingModal ? (
+          <BookingModal
+            open={showBookingModal}
+            onClose={() => {
+              setShowBookingModal(false)
+              setBookingInitialType(null)
+            }}
+            initialSessionType={bookingInitialType ?? undefined}
+          />
+        ) : null}
       </PageCard>
     </PageLayout>
   )

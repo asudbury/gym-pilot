@@ -535,7 +535,7 @@ export function TimetablePage() {
                     {attendancePendingSession.room ?? 'Room TBD'}
                   </p>
                 </div>
-                  <div className="flex flex-col items-end gap-1">
+                <div className="flex flex-col items-end gap-1">
                   <Button
                     type="button"
                     tone="emerald"
@@ -776,10 +776,10 @@ export function TimetablePage() {
                       onChange={(event) =>
                         setActiveClassName(event.target.value)
                       }
-                        ref={classSelectRef}
-                        className={`min-w-36 rounded-full border border-slate-300 bg-white px-3 py-1.5 text-sm text-slate-700 shadow-sm ${
-                          highlightClassFilter ? 'ring-2 ring-amber-300' : ''
-                        }`}
+                      ref={classSelectRef}
+                      className={`min-w-36 rounded-full border border-slate-300 bg-white px-3 py-1.5 text-sm text-slate-700 shadow-sm ${
+                        highlightClassFilter ? 'ring-2 ring-amber-300' : ''
+                      }`}
                     >
                       <option value="all">All</option>
                       {classOptions.map((className) => (

@@ -29,6 +29,7 @@ export function BookingModal({
     initialTrainerId ?? trainers[0]?.id,
   )
   const [startAt, setStartAt] = useState('')
+  const [rating, setRating] = useState<number | null>(null)
   const [duration, setDuration] = useState<number | undefined>(30)
   const [notes, setNotes] = useState('')
   const [isSaving, setIsSaving] = useState(false)
@@ -39,9 +40,16 @@ export function BookingModal({
     if (!open) return
     setSessionType(initialSessionType ?? 'personal_training')
     setTrainerId(initialTrainerId ?? trainers[0]?.id)
-    setStartAt('')
+    // default to current local datetime for quick recording
+    const now = new Date()
+    const tzOffset = now.getTimezoneOffset() * 60000
+    const localIso = new Date(now.getTime() - tzOffset)
+      .toISOString()
+      .slice(0, 16)
+    setStartAt(localIso)
     setDuration(30)
     setNotes('')
+    setRating(null)
     setError(null)
   }, [open, initialSessionType, initialTrainerId, trainers])
 
@@ -80,6 +88,8 @@ export function BookingModal({
       const bookingRes = await bookSession({
         sessionId,
         role: 'client',
+        notes: notes ?? null,
+        rating: rating ?? null,
       })
 
       if (!bookingRes.success) {
@@ -101,11 +111,19 @@ export function BookingModal({
     }
   }
 
+  const trainerName = trainers.find((t) => t.id === trainerId)?.name ?? null
+  const title =
+    sessionType === 'solo'
+      ? 'Record solo session'
+      : trainerName
+        ? `Record session with ${trainerName}`
+        : 'Record personal training session'
+
   return (
     <ModalShell>
       <ModalPanel>
         <div className="rounded-2xl bg-white p-4">
-          <h3 className="text-lg font-semibold">Record a session</h3>
+          <h3 className="text-lg font-semibold">{title}</h3>
 
           <label className="mt-3 block text-sm text-slate-700">
             <span className="font-medium">Type</span>
@@ -158,6 +176,25 @@ export function BookingModal({
 
           {/* Price is intentionally hidden from the UI */}
 
+          <div className="mt-3 block text-sm text-slate-700">
+            <span className="font-medium">Rating</span>
+            <div className="mt-2 flex flex-wrap gap-2">
+              {[1, 2, 3, 4, 5].map((value) => {
+                const isSelected = rating === value
+                return (
+                  <button
+                    key={value}
+                    type="button"
+                    onClick={() => setRating(value)}
+                    className={`rounded-full border px-3 py-1.5 text-sm font-semibold transition ${isSelected ? 'border-sky-600 bg-sky-600 text-white shadow-sm' : 'border-slate-300 bg-white text-slate-700 hover:bg-slate-50'}`}
+                  >
+                    {value} / 5
+                  </button>
+                )
+              })}
+            </div>
+          </div>
+          
           <label className="mt-3 block text-sm text-slate-700">
             <span className="font-medium">Notes</span>
             <textarea
@@ -167,6 +204,8 @@ export function BookingModal({
               className="mt-1 w-full rounded-2xl border border-slate-300 px-3 py-2"
             />
           </label>
+
+
 
           {error ? (
             <div className="mt-2 text-sm text-rose-600">{error}</div>

@@ -128,8 +128,6 @@ export function HomePage({
 
   return (
     <PageLayout className="gap-6">
-      
-
       <PageCard as="section">
         <div className="mb-4 flex items-start gap-3">
           <DecorativeIcon icon="dumbbell" />
@@ -200,7 +198,6 @@ export function HomePage({
           />
         ) : null}
       </PageCard>
-    
     </PageLayout>
   )
 }

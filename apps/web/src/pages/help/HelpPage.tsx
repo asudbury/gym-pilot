@@ -139,7 +139,7 @@ export function HelpPage() {
                 <ul className="mt-3 space-y-2 text-sm leading-6 text-slate-600">
                   {section.items.map((item) => (
                     <li key={item} className="leading-6">
-                        • {item}
+                      • {item}
                     </li>
                   ))}
                 </ul>

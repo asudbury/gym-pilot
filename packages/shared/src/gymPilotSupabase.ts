@@ -1742,6 +1742,7 @@ export async function bookSession(input: {
   userId?: string
   role: 'client' | 'trainer'
   notes?: string | null
+  rating?: number | null
 }) {
   const client = getSupabaseClient()
   if (!client) {
@@ -1759,6 +1760,7 @@ export async function bookSession(input: {
     role: input.role,
     status: 'booked',
     notes: input.notes ?? null,
+    rating: typeof input.rating === 'number' && Number.isFinite(input.rating) ? input.rating : null,
     created_at: new Date().toISOString(),
   }
 

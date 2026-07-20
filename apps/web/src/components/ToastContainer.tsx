@@ -18,7 +18,10 @@ export default function ToastContainer() {
 
     window.addEventListener('gym-pilot-notification', handler as EventListener)
     return () =>
-      window.removeEventListener('gym-pilot-notification', handler as EventListener)
+      window.removeEventListener(
+        'gym-pilot-notification',
+        handler as EventListener,
+      )
   }, [])
 
   if (!toasts.length) return null
