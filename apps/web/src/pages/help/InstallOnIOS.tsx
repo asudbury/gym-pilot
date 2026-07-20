@@ -44,8 +44,7 @@ export function InstallOnIOSPage() {
                 to open the app in a standalone view.
               </li>
               <li className="mt-2">
-                Enjoy Gym‑Pilot in a native-like, browser free
-                experience.
+                Enjoy Gym‑Pilot in a native-like, browser free experience.
               </li>
             </ol>
           </Panel>
