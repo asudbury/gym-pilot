@@ -15,7 +15,7 @@ export function Button<T extends ElementType = 'button'>({
   as,
   tone = 'default',
   className = '',
-  defaultClassName = 'inline-flex items-center justify-center sm:justify-start rounded-full font-medium',
+  defaultClassName = 'inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-full font-medium shadow-sm transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-slate-400/20 disabled:pointer-events-none disabled:opacity-50',
   children,
   isLoading = false,
   loadingLabel,

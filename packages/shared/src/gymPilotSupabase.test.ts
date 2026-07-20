@@ -6,6 +6,7 @@ import {
   buildSupabaseUserRoleRows,
   buildSessionHistoryDeleteError,
   formatSessionHistoryError,
+  getSessionHistorySelectColumns,
   getSessionHistoryTableName,
   getSupabaseProfileLocalStorageKey,
   getSupabaseTableName,
@@ -203,11 +204,33 @@ describe('remote session mapping', () => {
     expect(entry.instructorName).toBe('Alex')
     expect(entry.attendanceType).toBe('taught')
   })
+
+  it('normalizes numeric-string ratings from persistence rows', () => {
+    const entry = mapSessionHistoryEntryFromSupabase({
+      id: 'entry-4',
+      user_id: 'user-1',
+      session_type: 'solo',
+      start_at: '2026-01-03T10:00:00.000Z',
+      attendance_type: 'attended',
+      rating: '5',
+      created_at: '2026-01-03T09:30:00.000Z',
+    } as any)
+
+    expect(entry.rating).toBe(5)
+  })
 })
 
 describe('session history table selection', () => {
   it('uses the consolidated user session table for history persistence', () => {
     expect(getSessionHistoryTableName()).toBe('gym_pilot_user_session')
+  })
+
+  it('includes the related session data needed to recover class and instructor names', () => {
+    const selectColumns = getSessionHistorySelectColumns()
+
+    expect(selectColumns).toContain('class_name')
+    expect(selectColumns).toContain('trainer_name')
+    expect(selectColumns).toContain('session:session_id')
   })
 })
 

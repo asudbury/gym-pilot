@@ -1460,6 +1460,21 @@ type SupabaseSessionHistoryRow = {
   } | null
 }
 
+function normalizeSessionRating(value: number | string | null | undefined) {
+  if (typeof value === 'number' && Number.isFinite(value) && value >= 1 && value <= 5) {
+    return value
+  }
+
+  if (typeof value === 'string') {
+    const parsed = Number(value)
+    if (Number.isFinite(parsed) && parsed >= 1 && parsed <= 5) {
+      return parsed
+    }
+  }
+
+  return null
+}
+
 export function buildSessionBookingSessionPayload(input: {
   userId: string
   sessionId?: string | number | null
@@ -1487,7 +1502,7 @@ export function buildSessionBookingSessionPayload(input: {
     start_at: input.startedAt ?? null,
     attendance_type: input.attendanceType,
     notes: input.notes?.trim() ? input.notes.trim() : null,
-    rating: input.rating ?? null,
+    rating: normalizeSessionRating(input.rating),
     created_at: input.createdAt ?? new Date().toISOString(),
     updated_at: input.updatedAt ?? new Date().toISOString(),
     role: input.role ?? (input.attendanceType === 'taught' ? 'trainer' : 'client'),
@@ -1518,6 +1533,27 @@ export function getSessionHistoryTableName() {
   return getSessionTableName()
 }
 
+export function getSessionHistorySelectColumns() {
+  return [
+    'id',
+    'user_id',
+    'session_id',
+    'class_id',
+    'class_name',
+    'trainer_name',
+    'session_type',
+    'start_at',
+    'attendance_type',
+    'notes',
+    'rating',
+    'created_at',
+    'updated_at',
+    'role',
+    'status',
+    'session:session_id',
+  ]
+}
+
 export function mapSessionHistoryEntryFromSupabase(row: SupabaseSessionHistoryRow): SessionHistoryEntry {
   const mappedAttendanceType = row.attendance_type === 'taught'
     ? 'taught'
@@ -1541,7 +1577,7 @@ export function mapSessionHistoryEntryFromSupabase(row: SupabaseSessionHistoryRo
     sessionType: normalizedSessionType,
     attendanceType: mappedAttendanceType,
     notes: row.notes ?? null,
-    rating: typeof row.rating === 'number' ? row.rating : null,
+    rating: normalizeSessionRating(row.rating),
     createdAt: row.created_at ?? null,
     updatedAt: row.updated_at ?? null,
   }
@@ -1635,7 +1671,7 @@ export async function loadSessionHistoryEntries(userId?: string): Promise<Sessio
     if (resolvedUserId) {
       const { data, error } = await client
         .from(getSessionHistoryTableName())
-        .select('id, user_id, session_id, class_id, class_name, trainer_name, session_type, start_at, attendance_type, notes, rating, created_at, updated_at, role, status')
+        .select(getSessionHistorySelectColumns().join(', '))
         .or(`user_id.eq.${resolvedUserId},user_id.is.null`)
         .order('created_at', { ascending: false })
 
@@ -1982,7 +2018,7 @@ export async function bookSession(input: {
     role: input.role,
     status: 'attended',
     notes: input.notes ?? null,
-    rating: typeof input.rating === 'number' && Number.isFinite(input.rating) ? input.rating : null,
+    rating: normalizeSessionRating(input.rating),
     attendance_type: input.role === 'trainer' ? 'taught' : 'attended',
     updated_at: new Date().toISOString(),
   }

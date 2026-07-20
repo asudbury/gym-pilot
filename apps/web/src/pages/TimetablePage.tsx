@@ -488,17 +488,11 @@ export function TimetablePage() {
       return
     }
 
-    if (nextClubId === rawGymName) {
-      setClubChangeMessage('This club is already selected.')
-      return
-    }
-
     setIsChangingClub(true)
     setClubChangeMessage(null)
 
     try {
       await updateGymName(nextClubId, rawGymBrand || 'Virgin')
-      setClubChangeMessage('Club updated. Refreshing timetable…')
       timetableCache.delete(nextClubId)
       if (clubId) {
         timetableCache.delete(clubId)

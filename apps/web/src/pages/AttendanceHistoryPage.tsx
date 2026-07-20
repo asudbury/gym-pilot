@@ -13,6 +13,7 @@ import {
   type SessionHistoryEntry,
 } from '@gym-pilot/shared'
 import { resolveAttendanceRoleLabel } from '../features/timetable/domain/timetableView'
+import { getSessionEntryRating } from '../features/session-history/domain/sessionHistoryViewModel'
 
 function sortSessionEntries(entries: SessionHistoryEntry[]) {
   return [...entries].sort((left, right) =>
@@ -48,7 +49,7 @@ function getSessionEntryTitle(entry: SessionHistoryEntry) {
   }
 
   if (entry.sessionType === 'class') {
-    return 'Class Session'
+    return 'Class'
   }
 
   if (entry.sessionType === 'solo') {
@@ -299,11 +300,14 @@ export function SessionHistoryPage() {
                             {entry.notes}
                           </p>
                         ) : null}
-                        {entry.rating ? (
-                          <p className="text-sm text-slate-600">
-                            Rating: {entry.rating} / 5
-                          </p>
-                        ) : null}
+                        {(() => {
+                          const rating = getSessionEntryRating(entry)
+                          return rating != null ? (
+                            <p className="text-sm text-slate-600">
+                              Rating: {rating} / 5
+                            </p>
+                          ) : null
+                        })()}
                       </div>
                       <div className="flex flex-wrap gap-2">
                         <button

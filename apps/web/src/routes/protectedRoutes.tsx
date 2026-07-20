@@ -4,6 +4,7 @@ import { AssignmentDetailPage } from '../pages/assignments/AssignmentDetailPage'
 import { AssignmentsManagerPage } from '../pages/assignments/AssignmentsManagerPage'
 import { AssignmentsPage } from '../pages/assignments/AssignmentsPage'
 import { CreateAssignmentPage } from '../pages/assignments/CreateAssignmentPage'
+import { SessionEditPage } from '../pages/SessionEditPage'
 import { SessionHistoryPage } from '../pages/SessionHistoryPage'
 import { HomePage } from '../pages/HomePage'
 import { CreatePlanPage } from '../pages/plans/CreatePlanPage'
@@ -45,8 +46,8 @@ export function createProtectedRoutes({
         <Route path="/timetable" element={<TimetablePage />} />
         <Route path="/record-session" element={<RecordSessionPage />} />
         <Route path="/sessions" element={<SessionHistoryPage />} />
+        <Route path="/sessions/:entryId/edit" element={<SessionEditPage />} />
         <Route path="/trainer-report" element={<TrainerReportPage />} />
-        <Route path="/sessions" element={<SessionHistoryPage />} />
       </Route>
       <Route path="/assignments" element={<AssignmentsPage />} />
       <Route
