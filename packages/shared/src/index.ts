@@ -55,6 +55,7 @@ export {
   getSessionHistoryTableName,
   saveSessionHistoryEntry,
   deleteSessionHistoryEntry,
+  buildSessionHistoryDeleteError,
   upsertSessionHistoryEntry,
   removeSessionHistoryEntry,
   type SessionHistoryEntry,

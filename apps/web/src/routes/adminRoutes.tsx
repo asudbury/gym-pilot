@@ -46,6 +46,10 @@ export function createAdminRoutes() {
           path="/admin/logs/audit"
           element={<AdminLogsPage view="audit" />}
         />
+        <Route
+          path="/admin/logs/activity"
+          element={<AdminLogsPage view="activity" />}
+        />
       </Route>
     </>
   )

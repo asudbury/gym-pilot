@@ -5,6 +5,8 @@ import { useAuth } from '../auth/AuthContext'
 import { PageLayout } from '../layouts/PageLayout'
 import { PageCardLayout } from '../layouts/PageCardLayout'
 import { Button } from '../components/Button'
+import { GymClubSelector } from '../components/GymClubSelector'
+import { reportUiError } from '../utils/uiErrorLogging'
 import { loadVirginActiveClubs } from '../utils/virginActiveClubs'
 import {
   formatTimetableAvailability,
@@ -13,6 +15,7 @@ import {
   isPastTimetableSession,
   resolveNextActiveDayKey,
   resolveTimetableAttendanceAction,
+  resolveTimetableClubSelectionViewModel,
   resolveTimetableErrorMessage,
   resolveTimetableHeaderViewModel,
   resolveTimetableViewModel,
@@ -150,7 +153,7 @@ function normalizeSessions(payload: unknown): TimetableSession[] {
 }
 
 export function TimetablePage() {
-  const { user } = useAuth()
+  const { user, updateGymName } = useAuth()
   const navigate = useNavigate()
   const savingRef = useRef(false)
   const [sessions, setSessions] = useState<TimetableSession[]>([])
@@ -174,6 +177,9 @@ export function TimetablePage() {
   const [attendanceSelection, setAttendanceSelection] = useState<
     'attended' | 'taught' | null
   >(null)
+  const [selectedClubId, setSelectedClubId] = useState(() => user?.gymName?.trim() ?? '')
+  const [isChangingClub, setIsChangingClub] = useState(false)
+  const [clubChangeMessage, setClubChangeMessage] = useState<string | null>(null)
   const [refreshVersion, setRefreshVersion] = useState(0)
   const [lastRefreshedAt, setLastRefreshedAt] = useState<string | null>(null)
   const classSelectRef = useRef<HTMLSelectElement | null>(null)
@@ -191,6 +197,18 @@ export function TimetablePage() {
       }),
     [rawGymBrand, rawGymName, resolvedClubName],
   )
+  const clubSelectionViewModel = useMemo(
+    () =>
+      resolveTimetableClubSelectionViewModel({
+        gymBrand: rawGymBrand,
+        gymName: rawGymName,
+      }),
+    [rawGymBrand, rawGymName],
+  )
+
+  useEffect(() => {
+    setSelectedClubId(user?.gymName?.trim() ?? '')
+  }, [user?.gymName])
 
   const clubId = useMemo(() => {
     const storedClubId = user?.gymName?.trim() ?? ''
@@ -372,6 +390,12 @@ export function TimetablePage() {
                 : 'Could not load the timetable right now.',
           })
 
+          reportUiError('Timetable load failed', error, {
+            clubId: activeClubId,
+            rawGymBrand,
+            rawGymName,
+          })
+
           setErrorMessage(
             error instanceof Error ? error.message : fallbackMessage,
           )
@@ -447,6 +471,58 @@ export function TimetablePage() {
     setErrorMessage(null)
   }
 
+  const handleClubChange = async () => {
+    const nextClubId = selectedClubId.trim()
+
+    if (!nextClubId) {
+      setClubChangeMessage('Choose a Virgin Active club to continue.')
+      return
+    }
+
+    if (!/^\d+$/.test(nextClubId)) {
+      setClubChangeMessage('Choose a valid Virgin Active club.')
+      return
+    }
+
+    if (nextClubId === rawGymName) {
+      setClubChangeMessage('This club is already selected.')
+      return
+    }
+
+    setIsChangingClub(true)
+    setClubChangeMessage(null)
+
+    try {
+      await updateGymName(nextClubId, rawGymBrand || 'Virgin')
+      setClubChangeMessage('Club updated. Refreshing timetable…')
+      timetableCache.delete(nextClubId)
+      if (clubId) {
+        timetableCache.delete(clubId)
+      }
+      setRefreshVersion((current) => current + 1)
+      setLastRefreshedAt(new Date().toLocaleString())
+      setErrorMessage(null)
+      setActiveDayKey('all')
+      setActiveInstructor('all')
+      setActiveClassName('all')
+    } catch (error) {
+      const message =
+        error instanceof Error
+          ? error.message
+          : 'Could not update the club right now.'
+
+      reportUiError('Timetable club change failed', error, {
+        nextClubId,
+        currentClubId: rawGymName,
+        rawGymBrand,
+      })
+
+      setClubChangeMessage(message)
+    } finally {
+      setIsChangingClub(false)
+    }
+  }
+
   const handleAttendanceSubmit = async () => {
     if (!attendancePendingSession || attendanceSaving || savingRef.current) {
       return
@@ -509,6 +585,41 @@ export function TimetablePage() {
     }
   }
 
+  const clubSelectorBlock = clubSelectionViewModel.showPicker ? (
+    <div className="rounded-2xl border border-slate-200 bg-slate-50 p-4 shadow-sm">
+      <div className="flex flex-col gap-3 lg:flex-row lg:items-end lg:justify-between">
+        <div className="max-w-2xl">
+          <p className="text-sm font-semibold text-slate-900">Club</p>
+          <p className="mt-1 text-sm text-slate-600">
+            {clubSelectionViewModel.helperText}
+          </p>
+        </div>
+        <div className="flex flex-col gap-2 sm:flex-row sm:items-center">
+          <div className="min-w-60">
+            <GymClubSelector
+              value={selectedClubId}
+              onChange={setSelectedClubId}
+              className="w-full rounded-full border border-slate-300 bg-white px-3 py-2 text-sm text-slate-700 shadow-sm"
+              placeholder="Select a club"
+            />
+          </div>
+          <Button
+            type="button"
+            tone="blue"
+            onClick={handleClubChange}
+            disabled={isChangingClub}
+            className="shrink-0"
+          >
+            {isChangingClub ? 'Saving…' : 'Use this club'}
+          </Button>
+        </div>
+      </div>
+      {clubChangeMessage ? (
+        <p className="mt-3 text-sm text-slate-600">{clubChangeMessage}</p>
+      ) : null}
+    </div>
+  ) : null
+
   if (!clubId) {
     return (
       <PageLayout className="max-w-6xl">
@@ -518,8 +629,11 @@ export function TimetablePage() {
           description={headerViewModel.description}
           icon="calendar"
         >
-          <div className="rounded-2xl border border-amber-200 bg-amber-50 p-4 text-sm text-amber-800">
-            Select a valid gym club to view the timetable.
+          <div className="space-y-4">
+            {clubSelectorBlock}
+            <div className="rounded-2xl border border-amber-200 bg-amber-50 p-4 text-sm text-amber-800">
+              Select a valid gym club to view the timetable.
+            </div>
           </div>
         </PageCardLayout>
       </PageLayout>
@@ -707,6 +821,8 @@ export function TimetablePage() {
         icon="calendar"
       >
         <div className="space-y-6">
+          {clubSelectorBlock}
+
           {isLoading ? (
             <div className="rounded-2xl border border-slate-200 bg-slate-50 p-4 text-sm text-slate-600">
               Loading timetable…

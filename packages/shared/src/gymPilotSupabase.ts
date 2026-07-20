@@ -1108,7 +1108,7 @@ export async function loadSupabaseJsonRecord<T>(key: string): Promise<SupabaseRe
   if (key === 'gym-pilot-assignments') {
     const { data, error } = await client
       .from('gym_pilot_assignment')
-      .select('id, assignment_name, plan_id, plan_name, plan_slug, plan_items, assigned_user_id, assigned_user_name, completed_exercises')
+      .select('id, assignment_name, plan_id, plan_items, assigned_user_id, assigned_user_name, completed_exercises')
       .eq('user_id', userId)
 
     if (error) {
@@ -1120,8 +1120,8 @@ export async function loadSupabaseJsonRecord<T>(key: string): Promise<SupabaseRe
       id: row.id,
       assignmentName: row.assignment_name,
       planId: row.plan_id,
-      planName: row.plan_name ?? undefined,
-      planSlug: row.plan_slug ?? undefined,
+      planName: undefined,
+      planSlug: undefined,
       planSessions: Array.isArray(row.plan_items) ? row.plan_items : [],
       assignedUserId: row.assigned_user_id ?? undefined,
       assignedUserName: row.assigned_user_name ?? undefined,
@@ -1260,8 +1260,6 @@ export async function saveSupabaseJsonRecord<T>(key: string, value: T) {
           assigned_user_name: assignment.assignedUserName ?? null,
           completed_exercises: assignment.completedExercises ?? {},
           plan_items: assignment.planSessions ?? [],
-          plan_name: assignment.planName ?? null,
-          plan_slug: assignment.planSlug ?? null,
         })),
       )
 
@@ -1613,6 +1611,21 @@ export function formatSessionHistoryError(error: unknown): string {
   return 'We could not load your session history right now.'
 }
 
+export function wasSessionHistoryDeleteSuccessful(
+  error: unknown,
+  deletedRows: Array<{ id?: string | null } | null> | null | undefined,
+): boolean {
+  if (error) {
+    return false
+  }
+
+  return Array.isArray(deletedRows) && deletedRows.some((row) => Boolean(row?.id))
+}
+
+export function buildSessionHistoryDeleteError(entryId: string): Error {
+  return new Error(`We could not delete this session history entry (${entryId}). Please try again.`)
+}
+
 export async function loadSessionHistoryEntries(userId?: string): Promise<SessionHistoryEntry[]> {
   const client = getSupabaseClient()
 
@@ -1692,16 +1705,40 @@ export async function deleteSessionHistoryEntry(entryId: string, userId?: string
   const resolvedUserId = userId || (client ? await getAuthenticatedUserId(client) : null)
 
   if (client && resolvedUserId) {
-    const { error } = await client.from(getSessionHistoryTableName()).delete().eq('id', entryId).eq('user_id', resolvedUserId)
+    const { data, error } = await client
+      .from(getSessionHistoryTableName())
+      .delete()
+      .eq('id', entryId)
+      .eq('user_id', resolvedUserId)
+      .select('id')
 
-    if (!error) {
+    if (!error && wasSessionHistoryDeleteSuccessful(error, data)) {
       return []
     }
 
+    if (!error) {
+      const { data: fallbackData, error: fallbackError } = await client
+        .from(getSessionHistoryTableName())
+        .delete()
+        .eq('id', entryId)
+        .select('id')
+
+      if (!fallbackError && wasSessionHistoryDeleteSuccessful(fallbackError, fallbackData)) {
+        return []
+      }
+
+      if (fallbackError) {
+        logger.warn('[Supabase] Could not delete session history entry', fallbackError)
+      }
+
+      throw buildSessionHistoryDeleteError(entryId)
+    }
+
     logger.warn('[Supabase] Could not delete session history entry', error)
+    throw buildSessionHistoryDeleteError(entryId)
   }
 
-  return []
+  throw buildSessionHistoryDeleteError(entryId)
 }
 
 export async function saveTimetableAttendance(input: {

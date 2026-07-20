@@ -132,13 +132,19 @@ export function SessionHistoryPage() {
     }
 
     try {
-      const nextEntries = await saveSessionHistoryEntry(
-        nextEntry,
-        userId ?? undefined,
-      )
-      setEntries(sortSessionEntries(nextEntries))
+      await saveSessionHistoryEntry(nextEntry, userId ?? undefined)
+      await refreshEntries()
       setEditingEntryId(null)
       setStatusMessage('Session updated.')
+    } catch (error) {
+      setErrorMessage(formatSessionHistoryError(error))
+    }
+  }
+
+  const refreshEntries = async () => {
+    try {
+      const loadedEntries = await loadSessionHistoryEntries(userId ?? undefined)
+      setEntries(sortSessionEntries(loadedEntries))
       setErrorMessage(null)
     } catch (error) {
       setErrorMessage(formatSessionHistoryError(error))
@@ -147,13 +153,9 @@ export function SessionHistoryPage() {
 
   const deleteEntry = async (entryId: string) => {
     try {
-      const nextEntries = await deleteSessionHistoryEntry(
-        entryId,
-        userId ?? undefined,
-      )
-      setEntries(sortSessionEntries(nextEntries))
+      await deleteSessionHistoryEntry(entryId, userId ?? undefined)
+      await refreshEntries()
       setStatusMessage('Session deleted.')
-      setErrorMessage(null)
     } catch (error) {
       setErrorMessage(formatSessionHistoryError(error))
     }

@@ -12,6 +12,13 @@ type LogEntryRow = {
   created_at: string | null
 }
 
+type ActivityLogEntryRow = {
+  id: string
+  event_type: string | null
+  event_data: unknown
+  created_at: string | null
+}
+
 function formatDetails(details: unknown): string {
   if (!details) {
     return '—'
@@ -42,7 +49,7 @@ function formatTimestamp(value: string | null): string {
   return date.toLocaleString()
 }
 
-type LogViewMode = 'error' | 'audit' | 'combined'
+type LogViewMode = 'error' | 'audit' | 'activity' | 'combined'
 
 type AdminLogsPageProps = {
   view?: LogViewMode
@@ -57,13 +64,34 @@ export function resolveLogTableName(view: LogViewMode): string | null {
     return 'gym_pilot_audit_log'
   }
 
+  if (view === 'activity') {
+    return 'gym_pilot_user_activity'
+  }
+
   return null
+}
+
+function formatActivityDetails(details: unknown): string {
+  if (!details) {
+    return '—'
+  }
+
+  if (typeof details === 'string') {
+    return details
+  }
+
+  try {
+    return JSON.stringify(details, null, 2)
+  } catch {
+    return String(details)
+  }
 }
 
 export function AdminLogsPage({ view = 'combined' }: AdminLogsPageProps) {
   const navigate = useNavigate()
   const [errorLogs, setErrorLogs] = useState<LogEntryRow[]>([])
   const [auditLogs, setAuditLogs] = useState<LogEntryRow[]>([])
+  const [activityLogs, setActivityLogs] = useState<ActivityLogEntryRow[]>([])
   const [loading, setLoading] = useState(true)
   const [clearing, setClearing] = useState(false)
   const [error, setError] = useState('')
@@ -85,6 +113,7 @@ export function AdminLogsPage({ view = 'combined' }: AdminLogsPageProps) {
       try {
         const shouldFetchErrorLogs = view === 'error' || view === 'combined'
         const shouldFetchAuditLogs = view === 'audit' || view === 'combined'
+        const shouldFetchActivityLogs = view === 'activity' || view === 'combined'
 
         if (shouldFetchErrorLogs) {
           const { data: errorData, error: errorQueryError } = await client
@@ -97,7 +126,7 @@ export function AdminLogsPage({ view = 'combined' }: AdminLogsPageProps) {
           }
 
           if (errorQueryError) {
-            setError('Could not load the logs right now.')
+            setError('Could not load the log right now.')
             return
           }
 
@@ -121,6 +150,24 @@ export function AdminLogsPage({ view = 'combined' }: AdminLogsPageProps) {
 
           setAuditLogs((auditData ?? []) as LogEntryRow[])
         }
+
+        if (shouldFetchActivityLogs) {
+          const { data: activityData, error: activityQueryError } = await client
+            .from('gym_pilot_user_activity')
+            .select('id, event_type, event_data, created_at')
+            .order('created_at', { ascending: false })
+
+          if (!isActive) {
+            return
+          }
+
+          if (activityQueryError) {
+            setError('Could not load the logs right now.')
+            return
+          }
+
+          setActivityLogs((activityData ?? []) as ActivityLogEntryRow[])
+        }
       } catch {
         if (isActive) {
           setError('Could not load the logs right now.')
@@ -139,13 +186,19 @@ export function AdminLogsPage({ view = 'combined' }: AdminLogsPageProps) {
 
   const clearTargetTable = resolveLogTableName(view)
 
-  const title = view === 'audit' ? 'Audit log' : 'Error log'
+  const title = view === 'audit' ? 'Audit log' : view === 'activity' ? 'Activity log' : 'Error log'
   const subtitle =
-    view === 'audit' ? 'Inspect audit events' : 'Inspect error events'
+    view === 'audit'
+      ? 'Inspect audit events'
+      : view === 'activity'
+        ? 'Inspect user activity events'
+        : 'Inspect error events'
   const description =
     view === 'audit'
       ? 'Review the most recent audit entries captured.'
-      : 'Review the most recent error entries captured.'
+      : view === 'activity'
+        ? 'Review the most recent user activity entries captured.'
+        : 'Review the most recent error entries captured.'
 
   const handleClearLogs = async () => {
     const client = getSupabaseClient()
@@ -170,6 +223,8 @@ export function AdminLogsPage({ view = 'combined' }: AdminLogsPageProps) {
 
       if (view === 'audit') {
         setAuditLogs([])
+      } else if (view === 'activity') {
+        setActivityLogs([])
       } else {
         setErrorLogs([])
       }
@@ -197,14 +252,21 @@ export function AdminLogsPage({ view = 'combined' }: AdminLogsPageProps) {
               onClick={() => navigate('/admin/logs/error')}
               className={`rounded-full border px-3 py-1.5 text-sm font-semibold transition ${view === 'error' || view === 'combined' ? 'border-sky-600 bg-sky-600 text-white shadow-sm' : 'border-slate-300 bg-white text-slate-700 hover:bg-slate-50'}`}
             >
-              Error logs
+              Error log
             </button>
             <button
               type="button"
               onClick={() => navigate('/admin/logs/audit')}
               className={`rounded-full border px-3 py-1.5 text-sm font-semibold transition ${view === 'audit' ? 'border-sky-600 bg-sky-600 text-white shadow-sm' : 'border-slate-300 bg-white text-slate-700 hover:bg-slate-50'}`}
             >
-              Audit logs
+              Audit log
+            </button>
+            <button
+              type="button"
+              onClick={() => navigate('/admin/logs/activity')}
+              className={`rounded-full border px-3 py-1.5 text-sm font-semibold transition ${view === 'activity' ? 'border-sky-600 bg-sky-600 text-white shadow-sm' : 'border-slate-300 bg-white text-slate-700 hover:bg-slate-50'}`}
+            >
+              Activity log
             </button>
           </div>
 
@@ -265,11 +327,58 @@ export function AdminLogsPage({ view = 'combined' }: AdminLogsPageProps) {
                 )}
               </div>
             </section>
+          ) : view === 'activity' ? (
+            <section className="rounded-2xl border border-slate-200 bg-white p-4 shadow-sm">
+              <div className="mb-3 flex items-center justify-between gap-3">
+                <h2 className="text-lg font-semibold text-slate-900">
+                  Activity logs
+                </h2>
+                <div className="flex items-center gap-2">
+                  <span className="text-sm text-slate-500">
+                    {activityLogs.length} rows
+                  </span>
+                  <Button
+                    type="button"
+                    tone="default"
+                    onClick={() => void handleClearLogs()}
+                    disabled={clearing}
+                  >
+                    {clearing ? 'Clearing…' : 'Clear logs'}
+                  </Button>
+                </div>
+              </div>
+              <div className="space-y-3">
+                {activityLogs.length === 0 ? (
+                  <div className="rounded-xl border border-dashed border-slate-200 p-4 text-sm text-slate-600">
+                    No activity log entries yet.
+                  </div>
+                ) : (
+                  activityLogs.map((entry) => (
+                    <article
+                      key={entry.id}
+                      className="rounded-xl border border-slate-200 bg-slate-50 p-3"
+                    >
+                      <div className="mb-2 flex items-center justify-between gap-3">
+                        <div className="text-sm font-semibold text-slate-900">
+                          {entry.event_type ?? 'activity'}
+                        </div>
+                        <div className="text-xs text-slate-500">
+                          {formatTimestamp(entry.created_at)}
+                        </div>
+                      </div>
+                      <pre className="overflow-x-auto whitespace-pre-wrap wrap-break-word text-xs text-slate-700">
+                        {formatActivityDetails(entry.event_data)}
+                      </pre>
+                    </article>
+                  ))
+                )}
+              </div>
+            </section>
           ) : (
             <section className="rounded-2xl border border-slate-200 bg-white p-4 shadow-sm">
               <div className="mb-3 flex items-center justify-between gap-3">
                 <h2 className="text-lg font-semibold text-slate-900">
-                  Error logs
+                  Error log
                 </h2>
                 <div className="flex items-center gap-2">
                   <span className="text-sm text-slate-500">
@@ -281,7 +390,7 @@ export function AdminLogsPage({ view = 'combined' }: AdminLogsPageProps) {
                     onClick={() => void handleClearLogs()}
                     disabled={clearing}
                   >
-                    {clearing ? 'Clearing…' : 'Clear logs'}
+                    {clearing ? 'Clearing…' : 'Clear log'}
                   </Button>
                 </div>
               </div>

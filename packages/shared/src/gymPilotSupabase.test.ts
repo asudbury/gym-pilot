@@ -4,6 +4,7 @@ import {
   buildSessionRecordPayload,
   buildSupabaseProfileLocalCacheEntry,
   buildSupabaseUserRoleRows,
+  buildSessionHistoryDeleteError,
   formatSessionHistoryError,
   getSessionHistoryTableName,
   getSupabaseProfileLocalStorageKey,
@@ -38,6 +39,13 @@ describe('timetable attendance persistence', () => {
 })
 
 describe('session history helpers', () => {
+  it('builds a delete error that the UI can show to the user', () => {
+    const error = buildSessionHistoryDeleteError('entry-1')
+
+    expect(error).toBeInstanceOf(Error)
+    expect(error.message).toContain('delete')
+  })
+
   it('replaces an existing attendance record when the same id is upserted', () => {
     const records = [
       {

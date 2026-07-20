@@ -47,6 +47,32 @@ export type TimetableAttendanceAction = {
   options: TimetableAttendanceOption[]
 }
 
+export type TimetableClubSelectionViewModel = {
+  showPicker: boolean
+  helperText: string
+}
+
+export function resolveTimetableClubSelectionViewModel(input: {
+  gymBrand?: string | null
+  gymName?: string | null
+}): TimetableClubSelectionViewModel {
+  const rawGymBrand = input.gymBrand?.trim() ?? ''
+  const isVirginBrand = rawGymBrand.toLowerCase() === 'virgin'
+
+  if (!isVirginBrand) {
+    return {
+      showPicker: false,
+      helperText: 'Club switching is available for Virgin Active accounts.',
+    }
+  }
+
+  return {
+    showPicker: true,
+    helperText:
+      'Switch clubs to load a different timetable without leaving this screen.',
+  }
+}
+
 export function resolveAttendanceRoleLabel(
   attendanceType: 'attended' | 'taught',
 ): string {

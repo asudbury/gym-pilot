@@ -3,6 +3,7 @@ import {
   resolveAttendanceRoleLabel,
   resolveNextActiveDayKey,
   resolveTimetableAttendanceAction,
+  resolveTimetableClubSelectionViewModel,
   resolveTimetableErrorMessage,
   resolveTimetableHeaderViewModel,
   resolveTimetableViewModel,
@@ -124,6 +125,24 @@ describe('resolveTimetableViewModel', () => {
   it('only shows an explicit label for taught entries', () => {
     expect(resolveAttendanceRoleLabel('attended')).toBe('')
     expect(resolveAttendanceRoleLabel('taught')).toBe('Taught')
+  })
+
+  it('shows the club picker for Virgin accounts and hides it otherwise', () => {
+    const virginViewModel = resolveTimetableClubSelectionViewModel({
+      gymBrand: 'Virgin',
+      gymName: '76',
+    })
+
+    expect(virginViewModel.showPicker).toBe(true)
+    expect(virginViewModel.helperText).toContain('Switch')
+
+    const otherBrandViewModel = resolveTimetableClubSelectionViewModel({
+      gymBrand: 'Nuffield',
+      gymName: '123',
+    })
+
+    expect(otherBrandViewModel.showPicker).toBe(false)
+    expect(otherBrandViewModel.helperText).toContain('Virgin')
   })
 
   it('includes available error details when the timetable request fails', () => {

@@ -1,9 +1,8 @@
-import { useEffect, useId, useMemo, useState } from 'react'
+import { useEffect, useMemo, useState } from 'react'
 import { logger } from '@gym-pilot/shared'
 import {
   getFallbackVirginActiveClubs,
   loadVirginActiveClubs,
-  resolveVirginActiveClubName,
   type VirginActiveClub,
 } from '../utils/virginActiveClubs'
 
@@ -27,7 +26,6 @@ export function GymClubSelector({
   )
   const [isLoadingClubs, setIsLoadingClubs] = useState(false)
   const [clubsError, setClubsError] = useState<string | null>(null)
-  const listId = useId()
 
   useEffect(() => {
     let isActive = true
@@ -62,10 +60,31 @@ export function GymClubSelector({
     }
   }, [])
 
-  const displayValue = useMemo(
-    () => resolveVirginActiveClubName(value, availableClubs),
-    [availableClubs, value],
-  )
+  const selectedOptionValue = useMemo(() => {
+    const trimmedValue = value?.trim() ?? ''
+
+    if (!trimmedValue) {
+      return ''
+    }
+
+    const matchingClub = availableClubs.find(
+      (club) =>
+        String(club.clubId) === trimmedValue ||
+        club.name.trim().toLowerCase() === trimmedValue.toLowerCase(),
+    )
+
+    if (matchingClub) {
+      return String(matchingClub.clubId)
+    }
+
+    const fallbackClub = getFallbackVirginActiveClubs().find(
+      (club) =>
+        String(club.clubId) === trimmedValue ||
+        club.name.trim().toLowerCase() === trimmedValue.toLowerCase(),
+    )
+
+    return fallbackClub ? String(fallbackClub.clubId) : trimmedValue
+  }, [availableClubs, value])
 
   const handleFocus = () => {
     if (disabled) {
@@ -77,7 +96,7 @@ export function GymClubSelector({
     }
   }
 
-  const handleChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+  const handleChange = (event: React.ChangeEvent<HTMLSelectElement>) => {
     if (disabled) {
       return
     }
@@ -89,33 +108,25 @@ export function GymClubSelector({
       return
     }
 
-    const matchingClub = availableClubs.find(
-      (club) => club.name.trim().toLowerCase() === rawValue.toLowerCase(),
-    )
-
-    if (matchingClub) {
-      onChange(String(matchingClub.clubId))
-    }
+    onChange(rawValue)
   }
 
   return (
     <div className="flex flex-col gap-1">
-      <input
-        type="text"
-        value={displayValue}
+      <select
+        value={selectedOptionValue}
         onFocus={handleFocus}
         onChange={handleChange}
         className={className}
-        placeholder={disabled ? 'Only available for Virgin brand' : placeholder}
-        list={listId}
-        autoComplete="off"
         disabled={disabled}
-      />
-      <datalist id={listId}>
+      >
+        <option value="">{disabled ? 'Only available for Virgin brand' : placeholder ?? 'Select a club'}</option>
         {availableClubs.map((club) => (
-          <option key={club.clubId} value={club.name} />
+          <option key={club.clubId} value={String(club.clubId)}>
+            {club.name}
+          </option>
         ))}
-      </datalist>
+      </select>
       {isLoadingClubs ? (
         <p className="text-xs text-slate-500">Loading clubs…</p>
       ) : null}
