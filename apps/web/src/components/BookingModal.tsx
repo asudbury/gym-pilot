@@ -29,6 +29,11 @@ export function BookingModal({
     initialTrainerId ?? trainers[0]?.id,
   )
   const [startAt, setStartAt] = useState('')
+  const [datePart, setDatePart] = useState('')
+  const [timePart, setTimePart] = useState('')
+  const [supportsDateTimeLocal, setSupportsDateTimeLocal] = useState<
+    boolean | null
+  >(null)
   const [rating, setRating] = useState<number | null>(null)
   const [duration, setDuration] = useState<number | undefined>(30)
   const [notes, setNotes] = useState('')
@@ -51,7 +56,20 @@ export function BookingModal({
     setNotes('')
     setRating(null)
     setError(null)
+    setDatePart(localIso.slice(0, 10))
+    setTimePart(localIso.slice(11, 16))
   }, [open, initialSessionType, initialTrainerId, trainers])
+
+  useEffect(() => {
+    if (typeof window === 'undefined') return
+    try {
+      const input = document.createElement('input')
+      input.setAttribute('type', 'datetime-local')
+      setSupportsDateTimeLocal(input.type === 'datetime-local')
+    } catch {
+      setSupportsDateTimeLocal(false)
+    }
+  }, [])
 
   if (!open) return null
 
@@ -122,7 +140,7 @@ export function BookingModal({
   return (
     <ModalShell>
       <ModalPanel>
-        <div className="rounded-2xl bg-white p-4">
+        <div className="sm:rounded-2xl rounded-t-2xl bg-white p-4">
           <h3 className="text-lg font-semibold">{title}</h3>
 
           <label className="mt-3 block text-sm text-slate-700">
@@ -156,12 +174,39 @@ export function BookingModal({
 
           <label className="mt-3 block text-sm text-slate-700">
             <span className="font-medium">Start</span>
-            <input
-              type="datetime-local"
-              value={startAt}
-              onChange={(e) => setStartAt(e.target.value)}
-              className="mt-1 w-full rounded-2xl border border-slate-300 px-3 py-2"
-            />
+            {supportsDateTimeLocal === false ? (
+              <div className="mt-1 flex gap-2">
+                <input
+                  type="date"
+                  value={datePart}
+                  onChange={(e) => {
+                    setDatePart(e.target.value)
+                    if (e.target.value && timePart) {
+                      setStartAt(`${e.target.value}T${timePart}`)
+                    }
+                  }}
+                  className="w-1/2 rounded-2xl border border-slate-300 px-3 py-2"
+                />
+                <input
+                  type="time"
+                  value={timePart}
+                  onChange={(e) => {
+                    setTimePart(e.target.value)
+                    if (datePart && e.target.value) {
+                      setStartAt(`${datePart}T${e.target.value}`)
+                    }
+                  }}
+                  className="w-1/2 rounded-2xl border border-slate-300 px-3 py-2"
+                />
+              </div>
+            ) : (
+              <input
+                type="datetime-local"
+                value={startAt}
+                onChange={(e) => setStartAt(e.target.value)}
+                className="mt-1 w-full rounded-2xl border border-slate-300 px-3 py-2"
+              />
+            )}
           </label>
 
           <label className="mt-3 block text-sm text-slate-700">

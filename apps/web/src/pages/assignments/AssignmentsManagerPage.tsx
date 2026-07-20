@@ -1,7 +1,7 @@
 import { useMemo, useState } from 'react'
-import { Link, useNavigate } from 'react-router-dom'
+import { useNavigate } from 'react-router-dom'
+import { BackLink } from '../../components/ui/BackLink'
 import { Button } from '../../components/Button'
-import { getToneClass } from '../../components/toneClasses'
 import { usePlan } from '@gym-pilot/shared'
 import { PageCard } from '../../components/PageCard'
 import { PageLayout } from '../../layouts/PageLayout'
@@ -34,12 +34,7 @@ export function AssignmentsManagerPage() {
             <Paragraph>Assignments</Paragraph>
             <Heading1 className="mt-2">Create assignment</Heading1>
           </div>
-          <Link
-            to="/assignments"
-            className={getToneClass('default', 'px-4 py-2 text-sm font-medium')}
-          >
-            Back to assignments
-          </Link>
+          <BackLink to="/assignments" label="Back to assignments" />
         </div>
 
         <div className="mt-6 rounded-2xl border border-slate-200 bg-white p-4">

@@ -85,18 +85,8 @@ export function LoginPage() {
 
       const message = `Sign-in failed: ${response.error.message}`
 
-      // If Supabase returns an email-not-confirmed error, surface it in red.
-      const lower = (response.error.message || '').toLowerCase()
-      if (
-        lower.includes('confirm') ||
-        lower.includes('not confirmed') ||
-        lower.includes('email not confirmed')
-      ) {
-        setAuthMessageTone('error')
-      } else {
-        setAuthMessageTone('default')
-      }
-
+      // Always surface sign-in errors in the error tone (red).
+      setAuthMessageTone('error')
       setAuthMessage(message)
 
       return

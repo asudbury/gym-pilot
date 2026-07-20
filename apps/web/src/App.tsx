@@ -212,12 +212,19 @@ function App() {
     user?.gymName?.trim() && /^\d+$/.test(user.gymName.trim()),
   )
 
+  const userRoles = Array.isArray(user?.roles)
+    ? user.roles
+    : user?.role
+      ? [user.role]
+      : []
+
   const desktopMenuItems = buildNavigationMenuItems({
     plansCount,
     assignmentsCount: visibleAssignments.length,
     isAuthenticated: Boolean(user),
     showTimetable: hasTimetableAccess,
     itemClassName: getToneClass('default', 'px-4 py-2 text-sm font-medium'),
+    userRoles,
   })
   const tabletMenuItems = buildNavigationMenuItems({
     plansCount,
@@ -227,6 +234,7 @@ function App() {
     onItemClick: () => setMobileMenuOpen(false),
     itemClassName:
       'rounded-xl px-3 py-2 text-sm font-medium text-slate-700 transition hover:bg-slate-50',
+    userRoles,
   })
   const mobileMenuItems = buildNavigationMenuItems({
     plansCount,
@@ -236,7 +244,12 @@ function App() {
     onItemClick: () => setMobileMenuOpen(false),
     itemClassName:
       'rounded-xl px-3 py-2 text-sm font-medium text-slate-700 transition hover:bg-slate-50',
+    userRoles,
   })
+
+  const desktopMenuItemsFinal = desktopMenuItems
+  const tabletMenuItemsFinal = tabletMenuItems
+  const mobileMenuItemsFinal = mobileMenuItems
 
   return (
     <div className="min-h-screen bg-slate-50 text-slate-900 transition-colors dark:bg-slate-950 dark:text-slate-100">
@@ -259,9 +272,9 @@ function App() {
         appName={appName}
         favorites={favorites}
         homeFilters={homeFilters}
-        desktopMenuItems={desktopMenuItems}
-        tabletMenuItems={tabletMenuItems}
-        mobileMenuItems={mobileMenuItems}
+        desktopMenuItems={desktopMenuItemsFinal}
+        tabletMenuItems={tabletMenuItemsFinal}
+        mobileMenuItems={mobileMenuItemsFinal}
         showAuthButton={SHOW_AUTH_BUTTON}
         user={user}
         mustChangePassword={mustChangePassword}

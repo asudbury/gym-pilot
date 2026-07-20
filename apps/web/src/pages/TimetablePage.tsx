@@ -750,15 +750,15 @@ export function TimetablePage() {
                   ))}
                 </div>
 
-                <div className="flex flex-col items-start self-stretch gap-2 sm:items-end sm:self-auto">
-                  <label className="flex flex-col gap-1 self-start text-sm text-slate-700">
+                <div className="mt-3 flex flex-wrap items-center gap-4">
+                  <label className="flex flex-col sm:flex-row sm:items-center gap-1 sm:gap-3 self-start text-sm text-slate-700">
                     <span className="font-medium">Instructor</span>
                     <select
                       value={activeInstructor}
                       onChange={(event) =>
                         setActiveInstructor(event.target.value)
                       }
-                      className="min-w-36 rounded-full border border-slate-300 bg-white px-3 py-1.5 text-sm text-slate-700 shadow-sm"
+                      className="min-w-[9rem] rounded-full border border-slate-300 bg-white px-3 py-1.5 text-sm text-slate-700 shadow-sm"
                     >
                       <option value="all">All</option>
                       {instructorOptions.map((instructorName) => (
@@ -769,7 +769,7 @@ export function TimetablePage() {
                     </select>
                   </label>
 
-                  <label className="flex flex-col gap-1 text-sm text-slate-700">
+                  <label className="flex flex-col sm:flex-row sm:items-center gap-1 sm:gap-3 text-sm text-slate-700">
                     <span className="font-medium">Class</span>
                     <select
                       value={activeClassName}
@@ -777,7 +777,7 @@ export function TimetablePage() {
                         setActiveClassName(event.target.value)
                       }
                       ref={classSelectRef}
-                      className={`min-w-36 rounded-full border border-slate-300 bg-white px-3 py-1.5 text-sm text-slate-700 shadow-sm ${
+                      className={`min-w-[9rem] rounded-full border border-slate-300 bg-white px-3 py-1.5 text-sm text-slate-700 shadow-sm ${
                         highlightClassFilter ? 'ring-2 ring-amber-300' : ''
                       }`}
                     >
@@ -809,7 +809,7 @@ export function TimetablePage() {
                             session.id ??
                             `${session.classId}-${session.startTime}`
                           }
-                          className={`rounded-2xl border p-4 shadow-sm ${isPastTimetableSession(session) ? 'border-slate-300 bg-slate-100/70' : 'border-slate-200 bg-white'}`}
+                          className={`rounded-2xl border p-4 shadow-sm ${isPastTimetableSession(session) ? 'border-slate-300 bg-slate-100/70 dark:border-slate-700 dark:bg-slate-800/60' : 'border-slate-200 bg-white dark:border-slate-700 dark:bg-slate-950'}`}
                         >
                           <div className="flex items-start justify-between gap-2">
                             <div>
@@ -823,34 +823,34 @@ export function TimetablePage() {
                             </div>
                             <div className="flex flex-col items-end gap-1">
                               {isPastTimetableSession(session) ? (
-                                <span className="rounded-full bg-slate-200 px-2.5 py-1 text-[11px] font-semibold uppercase tracking-wide text-slate-700">
+                                <span className="rounded-full bg-slate-200 px-2.5 py-1 text-[11px] font-semibold uppercase tracking-wide text-slate-700 dark:bg-slate-800 dark:text-slate-300">
                                   Ended
                                 </span>
                               ) : (
                                 <span
-                                  className={`rounded-full px-2.5 py-1 text-xs font-semibold ${session.status === 'Available' ? 'bg-emerald-100 text-emerald-700' : session.status === 'Waitlist' ? 'bg-amber-100 text-amber-700' : 'bg-slate-100 text-slate-700'}`}
+                                  className={`rounded-full px-2.5 py-1 text-xs font-semibold ${session.status === 'Available' ? 'bg-emerald-100 text-emerald-700' : session.status === 'Waitlist' ? 'bg-amber-100 text-amber-700' : 'bg-slate-100 text-slate-700 dark:bg-slate-800 dark:text-slate-300'}`}
                                 >
                                   {session.status ?? 'Unknown'}
                                 </span>
                               )}
                             </div>
                           </div>
-                          <div className="mt-3 space-y-1 text-sm text-slate-600">
+                          <div className="mt-3 space-y-1 text-sm text-slate-600 dark:text-slate-400">
                             <p>
-                              <span className="font-medium text-slate-700">
+                              <span className="font-medium text-slate-700 dark:text-slate-200">
                                 Day:
                               </span>{' '}
                               {formatTimetableDateLabel(session.startTime)}
                             </p>
                             <p>
-                              <span className="font-medium text-slate-700">
+                              <span className="font-medium text-slate-700 dark:text-slate-200">
                                 Time:
                               </span>{' '}
                               {formatTimetableTimeLabel(session.startTime)} –{' '}
                               {formatTimetableTimeLabel(session.endTime)}
                             </p>
                             <p>
-                              <span className="font-medium text-slate-700">
+                              <span className="font-medium text-slate-700 dark:text-slate-200">
                                 Instructor:
                               </span>{' '}
                               {session.instructorName ??
@@ -858,7 +858,7 @@ export function TimetablePage() {
                                 'TBC'}
                             </p>
                             <p>
-                              <span className="font-medium text-slate-700">
+                              <span className="font-medium text-slate-700 dark:text-slate-200">
                                 Availability:
                               </span>{' '}
                               {formatTimetableAvailability(session)}
@@ -922,7 +922,7 @@ export function TimetablePage() {
                             session.id ??
                             `${session.classId}-${session.startTime}`
                           }
-                          className={`rounded-2xl border p-4 shadow-sm ${isPastTimetableSession(session) ? 'border-slate-300 bg-slate-100/70' : 'border-slate-200 bg-white'}`}
+                          className={`rounded-2xl border p-4 shadow-sm ${isPastTimetableSession(session) ? 'border-slate-300 bg-slate-100/70 dark:border-slate-700 dark:bg-slate-800/60' : 'border-slate-200 bg-white dark:border-slate-700 dark:bg-slate-950'}`}
                         >
                           <div className="flex items-start justify-between gap-2">
                             <div>
@@ -936,28 +936,28 @@ export function TimetablePage() {
                             </div>
                             <div className="flex flex-col items-end gap-1">
                               {isPastTimetableSession(session) ? (
-                                <span className="rounded-full bg-slate-200 px-2.5 py-1 text-[11px] font-semibold uppercase tracking-wide text-slate-700">
+                                <span className="rounded-full bg-slate-200 px-2.5 py-1 text-[11px] font-semibold uppercase tracking-wide text-slate-700 dark:bg-slate-800 dark:text-slate-300">
                                   Ended
                                 </span>
                               ) : (
                                 <span
-                                  className={`rounded-full px-2.5 py-1 text-xs font-semibold ${session.status === 'Available' ? 'bg-emerald-100 text-emerald-700' : session.status === 'Waitlist' ? 'bg-amber-100 text-amber-700' : 'bg-slate-100 text-slate-700'}`}
+                                  className={`rounded-full px-2.5 py-1 text-xs font-semibold ${session.status === 'Available' ? 'bg-emerald-100 text-emerald-700' : session.status === 'Waitlist' ? 'bg-amber-100 text-amber-700' : 'bg-slate-100 text-slate-700 dark:bg-slate-800 dark:text-slate-300'}`}
                                 >
                                   {session.status ?? 'Unknown'}
                                 </span>
                               )}
                             </div>
                           </div>
-                          <div className="mt-3 space-y-1 text-sm text-slate-600">
+                          <div className="mt-3 space-y-1 text-sm text-slate-600 dark:text-slate-400">
                             <p>
-                              <span className="font-medium text-slate-700">
+                              <span className="font-medium text-slate-700 dark:text-slate-200">
                                 Time:
                               </span>{' '}
                               {formatTimetableTimeLabel(session.startTime)} –{' '}
                               {formatTimetableTimeLabel(session.endTime)}
                             </p>
                             <p>
-                              <span className="font-medium text-slate-700">
+                              <span className="font-medium text-slate-700 dark:text-slate-200">
                                 Instructor:
                               </span>{' '}
                               {session.instructorName ??
@@ -973,7 +973,7 @@ export function TimetablePage() {
                             {typeof session.waitlistCount === 'number' &&
                             session.waitlistCount > 0 ? (
                               <p>
-                                <span className="font-medium text-slate-700">
+                                <span className="font-medium text-slate-700 dark:text-slate-200">
                                   Waitlist:
                                 </span>{' '}
                                 {session.waitlistCount}

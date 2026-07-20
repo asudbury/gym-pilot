@@ -133,12 +133,35 @@ export function ResetPasswordPage() {
       setConfirmPassword('')
       return
     }
+    // Persist the must_change_password flag, but don't block the UI if
+    // local persistence (IndexedDB) hangs — use a short timeout and
+    // continue regardless of persistence outcome.
+    try {
+      await Promise.race([
+        saveSupabaseProfileFlag('must_change_password', false),
+        new Promise((res) => setTimeout(res, 2000)),
+      ])
+    } catch (err) {
+      logger.warn(
+        '[ResetPassword] Could not persist must_change_password flag',
+        err,
+      )
+    }
 
-    await saveSupabaseProfileFlag('must_change_password', false)
-
-    // After password reset, ensure the user has accepted terms. If not,
-    // send them to the welcome/terms acceptance page first.
-    const hasAcceptedTerms = await loadSupabaseProfileTermsAcceptance()
+    // After password reset, check terms acceptance but avoid hanging the
+    // flow — default to not-accepted on timeout or error so the user sees
+    // the welcome/terms screen if needed.
+    let hasAcceptedTerms = false
+    try {
+      const result = await Promise.race([
+        loadSupabaseProfileTermsAcceptance(),
+        new Promise<boolean>((res) => setTimeout(() => res(false), 2000)),
+      ])
+      hasAcceptedTerms = Boolean(result)
+    } catch (err) {
+      logger.warn('[ResetPassword] Could not load terms acceptance', err)
+      hasAcceptedTerms = false
+    }
 
     setStatusMessage('Password updated successfully.')
     setStatusTone('default')
@@ -193,6 +216,8 @@ export function ResetPasswordPage() {
                 })
               }}
               required
+              autoComplete="new-password"
+              name="new-password"
               className={`${appTokens.input} w-full`}
               placeholder="Enter a new password"
             />
@@ -213,6 +238,8 @@ export function ResetPasswordPage() {
                 }
               }}
               required
+              autoComplete="new-password"
+              name="confirm-new-password"
               className={`${appTokens.input} w-full`}
               placeholder="Confirm your new password"
             />

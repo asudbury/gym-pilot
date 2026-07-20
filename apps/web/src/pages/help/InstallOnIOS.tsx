@@ -2,7 +2,7 @@ import { PageLayout } from '../../layouts/PageLayout'
 import { PageCardLayout } from '../../layouts/PageCardLayout'
 import { Panel } from '../../components/ui/Panel'
 import { Heading1 } from '../../components/Typography'
-import { Link } from 'react-router-dom'
+import { BackLink } from '../../components/ui/BackLink'
 
 export function InstallOnIOSPage() {
   return (
@@ -51,10 +51,12 @@ export function InstallOnIOSPage() {
 
           <Panel variant="white" padding="md">
             <p className="text-sm text-slate-600">
-              Back to{' '}
-              <Link to="/help" className="text-emerald-600">
-                Help
-              </Link>
+              <BackLink
+                to="/help"
+                label="Back to help"
+                variant="inline"
+                className="text-emerald-600"
+              />
             </p>
           </Panel>
         </div>

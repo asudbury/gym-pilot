@@ -42,7 +42,7 @@ export function AdminUsersPage() {
 
     const { data, error } = await client
       .from('gym_pilot_profile')
-      .select('user_id, friendly_name, trainer_id, must_change_password')
+      .select('user_id, friendly_name, email, trainer_id, must_change_password')
 
     const profileSelectionError =
       error &&
@@ -235,12 +235,10 @@ export function AdminUsersPage() {
                     </Button>
                     <Button
                       tone="blue"
-                      onClick={() =>
-                        navigate(`/admin/users/profiles/${user.id}`)
-                      }
+                      onClick={() => navigate(`/admin/users/edit/${user.id}`)}
                       className="px-3 py-1.5"
                     >
-                      View profile
+                      Edit user
                     </Button>
                   </div>
                 </div>

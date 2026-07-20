@@ -13,6 +13,7 @@ type SupabaseProfileSnapshot = {
   friendlyName: string | null
   applicationName: string | null
   gymBrand: string | null
+  email: string | null
   gymName: string | null
   gymClubId: string | null
   accountTier: SupabaseAccessTier
@@ -246,6 +247,7 @@ function createEmptyProfileSnapshot(): SupabaseProfileSnapshot {
     friendlyName: null,
     applicationName: null,
     gymBrand: null,
+    email: null,
     gymName: null,
     gymClubId: null,
     accountTier: 'free',
@@ -380,7 +382,7 @@ export async function loadSupabaseProfileSnapshot(userId?: string): Promise<Supa
 
     const { data, error } = await client
       .from('gym_pilot_profile')
-      .select('friendly_name, application_name, gym_brand, gym_name, gym_club_id, account_tier, access_ends_at, is_frozen, last_logged_in_at, previous_last_logged_in_at, trainer_id, must_change_password, terms_accepted, terms_accepted_at')
+      .select('friendly_name, application_name, gym_brand, email, gym_name, gym_club_id, account_tier, access_ends_at, is_frozen, last_logged_in_at, previous_last_logged_in_at, trainer_id, must_change_password, terms_accepted, terms_accepted_at')
       .eq('user_id', resolvedUserId)
       .maybeSingle()
 
@@ -404,6 +406,7 @@ export async function loadSupabaseProfileSnapshot(userId?: string): Promise<Supa
     const snapshot = {
       friendlyName: typeof profileData?.friendly_name === 'string' ? profileData.friendly_name.trim() || null : null,
       applicationName: typeof profileData?.application_name === 'string' ? profileData.application_name.trim() || null : null,
+      email: typeof profileData?.email === 'string' ? profileData.email.trim() || null : null,
       gymBrand,
       gymName: gymName ?? gymClubId,
       gymClubId,
@@ -740,6 +743,38 @@ export async function saveSupabaseProfileName(friendlyName: string | null) {
 
   if (error) {
     logger.error('[Supabase] Could not save profile name', error)
+    return
+  }
+
+  await invalidateSupabaseProfileCache(userId)
+}
+
+export async function saveSupabaseProfileEmail(email: string | null) {
+  const client = getSupabaseClient()
+
+  if (!client) {
+    return
+  }
+
+  const userId = await getAuthenticatedUserId(client)
+
+  if (!userId) {
+    return
+  }
+
+  const normalizedEmail = email?.trim() ? email.trim() : null
+
+  const { error } = await client.from('gym_pilot_profile').upsert(
+    { user_id: userId, email: normalizedEmail },
+    { onConflict: 'user_id' },
+  )
+
+  if (error) {
+    if (isMissingProfileColumnError(error, ['email'])) {
+      return
+    }
+
+    logger.error('[Supabase] Could not save profile email', error)
     return
   }
 

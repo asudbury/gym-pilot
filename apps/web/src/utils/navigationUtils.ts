@@ -1,7 +1,9 @@
 import type { ReactNode } from 'react'
+import type { UserRole } from '@gym-pilot/types'
 import type { DecorativeIconProps } from '../components/ui/DecorativeIcon'
 import { getExercisePath, getExerciseSlug } from './exerciseRouteUtils'
 import { exercises, exercisesSchema } from '@gym-pilot/shared'
+import { navigationMeta } from './navigationMeta'
 
 export type NavigationMenuItemProps = {
   to: string
@@ -31,6 +33,7 @@ export type BuildNavigationMenuItemsOptions = {
   itemClassName?: string
   isAuthenticated?: boolean
   showTimetable?: boolean
+  userRoles?: UserRole[]
 }
 
 export function buildNavigationMenuItems({
@@ -38,67 +41,34 @@ export function buildNavigationMenuItems({
   itemClassName,
   isAuthenticated = false,
   showTimetable = true,
+  userRoles = [],
 }: BuildNavigationMenuItemsOptions): NavigationMenuListItem[] {
-  const protectedItems: NavigationMenuListItem[] = isAuthenticated
-    ? [
-        {
-          to: '/exercises',
-          label: 'Exercises',
-          onClick: onItemClick,
-          className: itemClassName,
-          icon: 'dumbbell',
-        },
-        {
-          to: '/plans',
-          label: 'Plans',
-          onClick: onItemClick,
-          className: itemClassName,
-          icon: 'clipboard',
-        },
-        {
-          to: '/assignments',
-          label: 'Assignments',
-          onClick: onItemClick,
-          className: itemClassName,
-          icon: 'tasks',
-        },
-        ...(showTimetable
-          ? [
-              {
-                to: '/timetable',
-                label: 'Timetable',
-                onClick: onItemClick,
-                className: itemClassName,
-                icon: 'calendar' as const,
-              },
-            ]
-          : []),
-      ]
-    : []
+  const items: NavigationMenuListItem[] = []
 
-  const adminItem: NavigationMenuListItem[] = isAuthenticated
-    ? [
-        {
-          to: '/admin',
-          label: 'Admin',
-          onClick: onItemClick,
-          className: itemClassName,
-          icon: 'settings',
-        },
-      ]
-    : []
+  for (const meta of navigationMeta) {
+    if (meta.requireAuth && !isAuthenticated) continue
 
-  return [
-    ...protectedItems,
-    ...adminItem,
-    {
-      to: '/help',
-      label: 'Help',
+    if (meta.requiredRole) {
+      const required = Array.isArray(meta.requiredRole)
+        ? meta.requiredRole
+        : [meta.requiredRole]
+      const has =
+        Array.isArray(userRoles) && required.some((r) => userRoles.includes(r))
+      if (!has) continue
+    }
+
+    if (meta.requireClubId && !showTimetable) continue
+
+    items.push({
+      to: meta.to,
+      label: meta.label,
       onClick: onItemClick,
       className: itemClassName,
-      icon: 'help',
-    },
-  ]
+      icon: meta.icon as any,
+    })
+  }
+
+  return items
 }
 
 export async function copyExerciseLinkToClipboard(

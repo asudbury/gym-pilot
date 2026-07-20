@@ -29,7 +29,7 @@ export const adminCards: AdminActionCard[] = [
   {
     title: 'Preferences',
     description: 'Manage your preferences.',
-    href: '/admin/preferences',
+    href: '/preferences',
     label: 'Preferences',
   },
   {
@@ -63,6 +63,7 @@ export function mapAdminProfileRows(
   rows: Array<{
     user_id: string
     friendly_name: string | null
+    email?: string | null
     roles?: unknown
     trainer_id?: string | null
     application_name?: string | null
@@ -92,7 +93,10 @@ export function mapAdminProfileRows(
     accessEndsAt:
       typeof row.access_ends_at === 'string' ? row.access_ends_at : null,
     isFrozen: Boolean(row.is_frozen),
-    email: emailLookup.get(row.user_id) ?? null,
+    email:
+      typeof row.email === 'string' && row.email.trim()
+        ? row.email.trim()
+        : (emailLookup.get(row.user_id) ?? null),
     trainerId: typeof row.trainer_id === 'string' ? row.trainer_id : null,
     mustChangePassword: Boolean(row.must_change_password),
     lastLoggedInAt:

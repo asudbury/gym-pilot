@@ -30,6 +30,7 @@ export {
   loadSupabaseProfileRoles,
   loadSupabaseProfileTermsAcceptance,
   saveSupabaseProfileName,
+  saveSupabaseProfileEmail,
   saveSupabaseApplicationName,
   saveSupabaseGymBrand,
   saveSupabaseGymName,

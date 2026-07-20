@@ -407,12 +407,17 @@ export function AdminCreateUserPage() {
             value={newUserEmail}
             onChange={(event) => setNewUserEmail(event.target.value)}
             placeholder="Email address or login name"
+            autoComplete="email"
+            name="email"
             className="w-full rounded-full border border-slate-200 bg-white px-4 py-2 text-sm text-slate-700"
           />
           <input
+            type="password"
             value={tempPassword}
             onChange={(event) => setTempPassword(event.target.value)}
             placeholder="Temporary password"
+            autoComplete="off"
+            name="temporary-password"
             className="w-full rounded-full border border-slate-200 bg-white px-4 py-2 text-sm text-slate-700"
           />
           <input
@@ -420,6 +425,8 @@ export function AdminCreateUserPage() {
             value={newUserName}
             onChange={(event) => setNewUserName(event.target.value)}
             placeholder="Display name (optional)"
+            autoComplete="name"
+            name="name"
             className="w-full rounded-full border border-slate-200 bg-white px-4 py-2 text-sm text-slate-700"
           />
 

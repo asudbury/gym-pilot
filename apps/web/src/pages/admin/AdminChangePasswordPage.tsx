@@ -1,5 +1,6 @@
 import { useState } from 'react'
-import { Link, useNavigate } from 'react-router-dom'
+import { useNavigate } from 'react-router-dom'
+import { BackLink } from '../../components/ui/BackLink'
 import { changeSupabasePassword, logger } from '@gym-pilot/shared'
 import { getToneClass } from '../../components/toneClasses'
 import { PageCard } from '../../components/PageCard'
@@ -47,7 +48,7 @@ export function AdminChangePasswordPage() {
       setConfirmPassword('')
       setStatusMessage('Password updated successfully.')
       setStatusType('success')
-      navigate('/admin/preferences')
+      navigate('/preferences')
     } catch (error) {
       logger.error('[ChangePassword] Failed to update password', error)
       const message =
@@ -72,12 +73,7 @@ export function AdminChangePasswordPage() {
               <Heading1 className="mt-2">Change password</Heading1>
             </div>
           </div>
-          <Link
-            to="/admin/preferences"
-            className={getToneClass('default', 'px-4 py-2 text-sm font-medium')}
-          >
-            Back to preferences
-          </Link>
+          <BackLink to="/preferences" label="Back to preferences" />
         </div>
 
         <form onSubmit={handleSubmit} className="mt-8 flex flex-col gap-4">

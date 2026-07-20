@@ -10,6 +10,7 @@ export type ProfileDraft = {
   gymBrand: string
   gymName: string
   gymClubId?: string
+  email?: string
   accountTier: string
   accessEndsAt: string
   isFrozen: boolean
@@ -24,6 +25,7 @@ export function createInitialProfileDraft(
 ): ProfileDraft {
   return {
     name: profile.name,
+    email: profile.email ?? '',
     applicationName: profile.applicationName ?? '',
     gymBrand: profile.gymBrand ?? '',
     gymName: profile.gymName ?? '',
@@ -42,11 +44,14 @@ export function mapProfileRow(
   row: Record<string, unknown>,
   emailLookup: Map<string, string | null>,
 ): AdminProfileRowLike {
+  const friendlyNameValue = row.friendly_name
+  const emailValue = (row as Record<string, unknown>).email
+
   return {
     id: String(row.user_id ?? ''),
     name:
-      typeof row.friendly_name === 'string' && row.friendly_name.trim()
-        ? row.friendly_name.trim()
+      typeof friendlyNameValue === 'string' && friendlyNameValue.trim()
+        ? friendlyNameValue.trim()
         : String(row.user_id ?? ''),
     roles: getDisplayRoles(Array.isArray(row.roles) ? row.roles : undefined),
     applicationName:
@@ -59,7 +64,10 @@ export function mapProfileRow(
     accessEndsAt:
       typeof row.access_ends_at === 'string' ? row.access_ends_at : null,
     isFrozen: Boolean(row.is_frozen),
-    email: emailLookup.get(String(row.user_id ?? '')) ?? null,
+    email:
+      typeof emailValue === 'string' && emailValue.trim()
+        ? emailValue.trim()
+        : (emailLookup.get(String(row.user_id ?? '')) ?? null),
     trainerId: typeof row.trainer_id === 'string' ? row.trainer_id : null,
     mustChangePassword: Boolean(row.must_change_password),
     lastLoggedInAt:

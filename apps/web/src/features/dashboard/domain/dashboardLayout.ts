@@ -104,7 +104,7 @@ export function getDashboardLayoutDefinitions(
         {
           title: 'Preferences',
           description: 'Adjust application-wide preferences.',
-          to: '/admin/preferences',
+          to: '/preferences',
           tone: 'emerald',
           icon: 'settings',
         },

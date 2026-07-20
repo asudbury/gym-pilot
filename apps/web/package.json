@@ -1,7 +1,7 @@
 {
   "name": "Gym-Pilot",
   "private": true,
-  "version": "0.0.e",
+  "version": "0.1.0",
   "type": "module",
   "scripts": {
     "dev": "vite",
@@ -9,7 +9,7 @@
     "preview": "vite preview",
     "format": "prettier --write .",
     "lint": "eslint .",
-    "test": "vitest run --coverage"
+    "test": "vitest run"
   },
   "dependencies": {
     "@gym-pilot/shared": "^1.0.0",

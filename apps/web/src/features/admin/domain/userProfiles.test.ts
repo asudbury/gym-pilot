@@ -56,6 +56,20 @@ describe('mapProfileRow', () => {
     expect(profile.roles).toEqual(['client'])
     expect(profile.email).toBe('ada@example.com')
   })
+
+  it('trims friendly names and emails from raw strings', () => {
+    const profile = mapProfileRow(
+      {
+        user_id: 'u1',
+        friendly_name: '  Ada  ',
+        email: '  ada@example.com  ',
+      },
+      new Map([['u1', null]]),
+    )
+
+    expect(profile.name).toBe('Ada')
+    expect(profile.email).toBe('ada@example.com')
+  })
 })
 
 describe('resolveTrainerOptions', () => {

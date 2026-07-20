@@ -1,6 +1,6 @@
 import { useEffect, useMemo } from 'react'
-import { Link, useLocation, useNavigate, useParams } from 'react-router-dom'
-import { getToneClass } from '../../components/toneClasses'
+import { useLocation, useNavigate, useParams } from 'react-router-dom'
+import { BackLink } from '../../components/ui/BackLink'
 import { usePlan } from '@gym-pilot/shared'
 import { PageCard } from '../../components/PageCard'
 import { PageLayout } from '../../layouts/PageLayout'
@@ -95,12 +95,7 @@ export function CreatePlanPage() {
             <Paragraph>Plans</Paragraph>
             <Heading1 className="mt-2">{createFlowViewModel.title}</Heading1>
           </div>
-          <Link
-            to="/plans"
-            className={getToneClass('default', 'px-4 py-2 text-sm font-medium')}
-          >
-            Back to plans
-          </Link>
+          <BackLink to="/plans" label="Back to plans" />
         </div>
 
         <div className="mt-4 space-y-4 rounded-2xl border border-slate-200 bg-slate-50 p-3 sm:mt-6 sm:space-y-6 sm:p-4">

@@ -1,23 +1,21 @@
-import { Route } from 'react-router-dom'
+import { Route, Navigate } from 'react-router-dom'
 import { RequireAuth } from '../auth/RequireAuth'
 import { AdminPage } from '../pages/admin/AdminPage'
 import { AdminUsersPage } from '../pages/admin/AdminUsersPage'
 import { AdminCreateUserPage } from '../pages/admin/AdminCreateUserPage'
 import { AdminUserProfilesPage } from '../pages/admin/AdminUserProfilesPage'
+import { AdminEditUserPage } from '../pages/admin/AdminEditUserPage'
 import { AdminUserActivityPage } from '../pages/admin/AdminUserActivityPage'
 import { AdminDatabasePage } from '../pages/admin/AdminDatabasePage'
-import { AdminPreferencesPage } from '../pages/admin/AdminPreferencesPage'
-import { AdminChangePasswordPage } from '../pages/admin/AdminChangePasswordPage'
 
 export function createAdminRoutes() {
   return (
     <>
-      <Route element={<RequireAuth />}>
+      <Route element={<RequireAuth requiredRole="admin" />}>
         <Route path="/admin" element={<AdminPage />} />
-        <Route path="/admin/preferences" element={<AdminPreferencesPage />} />
         <Route
-          path="/admin/change-password"
-          element={<AdminChangePasswordPage />}
+          path="/admin/preferences"
+          element={<Navigate to="/preferences" replace />}
         />
       </Route>
       <Route element={<RequireAuth requiredRole="admin" />}>
@@ -26,6 +24,10 @@ export function createAdminRoutes() {
         <Route
           path="/admin/users/profiles/:userId"
           element={<AdminUserProfilesPage />}
+        />
+        <Route
+          path="/admin/users/edit/:userId"
+          element={<AdminEditUserPage />}
         />
         <Route
           path="/admin/users/profiles/:userId/activity"

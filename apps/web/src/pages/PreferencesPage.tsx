@@ -1,22 +1,18 @@
 import { useEffect, useState } from 'react'
-import { useNavigate } from 'react-router-dom'
-import { Link } from 'react-router-dom'
-import { getToneClass } from '../../components/toneClasses'
-import { PageCard } from '../../components/PageCard'
-import { PageLayout } from '../../layouts/PageLayout'
-import { Heading1, Paragraph } from '../../components/Typography'
-import { DecorativeIcon } from '../../components/ui/DecorativeIcon'
-import { useAuth } from '../../auth/AuthContext'
-import { appTokens } from '../../constants/tokens'
-import {
-  getDisplayEmail,
-  getDisplayRoles,
-} from '../../features/admin/domain/adminUtils'
-import { GymClubSelector } from '../../components/GymClubSelector'
+import { useNavigate, Link } from 'react-router-dom'
+import { BackLink } from '../components/ui/BackLink'
+import { PageCard } from '../components/PageCard'
+import { PageLayout } from '../layouts/PageLayout'
+import { Heading1, Paragraph } from '../components/Typography'
+import { DecorativeIcon } from '../components/ui/DecorativeIcon'
+import { useAuth } from '../auth/AuthContext'
+import { appTokens } from '../constants/tokens'
+import { GymClubSelector } from '../components/GymClubSelector'
 import { logger } from '@gym-pilot/shared'
-import { Button } from '../../components/Button'
+import { Button } from '../components/Button'
+import { getDisplayRoles } from '../features/admin/domain/adminUtils'
 
-export function AdminPreferencesPage() {
+export function PreferencesPage() {
   const {
     user,
     updateProfileName,
@@ -47,6 +43,7 @@ export function AdminPreferencesPage() {
   }, [user?.name, user?.applicationName, user?.gymBrand, user?.gymName])
 
   const displayRoles = getDisplayRoles(user?.roles, user?.role)
+  const isAdmin = displayRoles.includes('admin')
   const isTrainer = displayRoles.includes('trainer')
   const isVirginGymBrand = (gymBrand || '').trim().toLowerCase() === 'virgin'
 
@@ -62,7 +59,7 @@ export function AdminPreferencesPage() {
         await updateGymBrand(gymBrand)
         await updateGymName(gymName, gymBrand)
       }
-      navigate('/admin')
+      navigate('/')
     } catch (error) {
       logger.error('[Preferences] Failed to save preferences', error)
       const message =
@@ -83,16 +80,15 @@ export function AdminPreferencesPage() {
           <div className="flex items-start gap-3">
             <DecorativeIcon icon="settings" />
             <div>
-              <Paragraph>Admin</Paragraph>
+              <Paragraph>Preferences</Paragraph>
               <Heading1 className="mt-2">Preferences</Heading1>
             </div>
           </div>
-          <Link
-            to="/admin"
-            className={getToneClass('default', 'px-4 py-2 text-sm font-medium')}
-          >
-            Back to admin
-          </Link>
+          {isAdmin ? (
+            <BackLink to="/admin" label="Back to admin" />
+          ) : (
+            <BackLink to="/" label="Back to home" />
+          )}
         </div>
 
         <form onSubmit={handleSubmit} className="mt-8 flex flex-col gap-4">
@@ -112,16 +108,6 @@ export function AdminPreferencesPage() {
               ))}
             </div>
           </div>
-
-          <label className="flex flex-col gap-2 text-sm font-medium text-slate-700">
-            <p>Your email address</p>
-            <p className="mt-1 text-sm text-slate-400">
-              This is the email associated with the current account.
-            </p>
-            <p className="mt-1 text-lg font-semibold text-slate-700">
-              {getDisplayEmail(user?.email)}
-            </p>
-          </label>
 
           {isTrainer ? (
             <>
@@ -166,7 +152,6 @@ export function AdminPreferencesPage() {
                   onChange={(event) => {
                     const nextBrand = event.target.value
                     setGymBrand(nextBrand)
-
                     if (nextBrand.trim().toLowerCase() !== 'virgin') {
                       setGymName('')
                     }
@@ -207,15 +192,14 @@ export function AdminPreferencesPage() {
             <p className="mt-1 text-sm text-slate-400">
               Manage your account password from a dedicated screen.
             </p>
-            <Link
-              to="/admin/change-password"
-              className={getToneClass(
-                'default',
-                'mt-2 w-fit rounded-full px-4 py-2 text-sm font-medium',
-              )}
+            <Button
+              as={Link}
+              to="/reset-password"
+              tone="blue"
+              className="w-fit rounded-full px-3 py-1.5 text-sm font-semibold"
             >
-              Open password screen
-            </Link>
+              Change password
+            </Button>
           </div>
 
           <label className="flex flex-col gap-2 text-sm font-medium text-slate-700">
@@ -244,10 +228,8 @@ export function AdminPreferencesPage() {
           <Button
             type="submit"
             disabled={isSaving}
-            className={getToneClass(
-              'blue',
-              'w-fit rounded-full px-4 py-2.5 text-sm font-semibold text-white transition disabled:cursor-not-allowed disabled:bg-slate-400',
-            )}
+            tone="emerald"
+            className="w-fit rounded-full px-4 py-2.5 text-sm font-semibold transition disabled:cursor-not-allowed disabled:bg-slate-400"
           >
             {isSaving ? 'Saving…' : 'Save preferences'}
           </Button>
@@ -255,13 +237,7 @@ export function AdminPreferencesPage() {
 
         {statusMessage ? (
           <div
-            className={`mt-4 rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3 text-sm transition-colors dark:border-slate-700 dark:bg-slate-950 ${
-              statusType === 'error'
-                ? 'text-rose-600'
-                : statusType === 'success'
-                  ? 'text-emerald-600'
-                  : 'text-slate-600 dark:text-slate-100'
-            }`}
+            className={`mt-4 rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3 text-sm transition-colors dark:border-slate-700 dark:bg-slate-950 ${statusType === 'error' ? 'text-rose-600' : statusType === 'success' ? 'text-emerald-600' : 'text-slate-600 dark:text-slate-100'}`}
           >
             {statusMessage}
           </div>

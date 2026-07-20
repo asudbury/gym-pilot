@@ -7,6 +7,7 @@ import {
   recordSupabaseUserActivity,
   saveSupabaseApplicationName,
   saveSupabaseGymBrand,
+  saveSupabaseProfileEmail,
   saveSupabaseGymName,
   saveSupabaseProfileLastLoggedIn,
   saveSupabaseProfileName,
@@ -72,6 +73,7 @@ export async function resolveSupabaseAuthUser(
     }
 
     await saveSupabaseProfileName(displayName)
+    await saveSupabaseProfileEmail(supabaseUser.email ?? null)
     await saveSupabaseProfileLastLoggedIn(supabaseUser.id)
     await recordSupabaseUserActivity(
       'login',
