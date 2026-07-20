@@ -146,7 +146,7 @@ export function WelcomePage() {
             onClick={handleDecline}
             className="rounded-full border border-slate-300 bg-white px-4 py-2.5 text-sm font-medium text-slate-700 transition hover:bg-slate-50"
           >
-            Decline and sign out
+            Decline and log out
           </button>
         </div>
 
