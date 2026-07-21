@@ -19,6 +19,7 @@ import {
   persistRememberedEmail,
   readStoredRememberedEmail,
 } from '../features/auth/domain/loginPreferences'
+import { recordWelcomeJourneyActivity } from '../features/auth/domain/welcomeJourneyLogging'
 import { DecorativeIcon } from '../components/ui/DecorativeIcon'
 import { Button } from '../components/Button'
 
@@ -102,6 +103,17 @@ export function LoginPage() {
     const loginEnabled = Boolean(await loadAppSetting('login_enabled', true))
 
     if (!loginEnabled) {
+      void recordWelcomeJourneyActivity(
+        'welcome_journey_error',
+        {
+          step: 'login',
+          outcome: 'login_disabled',
+          returnTo: from,
+        },
+        null,
+        email.trim() || null,
+      )
+
       setIsSubmitting(false)
       setAuthMessageTone('error')
       setAuthMessage('Login is currently disabled by an administrator.')
@@ -110,10 +122,35 @@ export function LoginPage() {
 
     const response = await signInWithPassword(email, password)
 
+    if (!response.error) {
+      void recordWelcomeJourneyActivity(
+        'welcome_journey_login_attempted',
+        {
+          step: 'login',
+          outcome: 'success',
+          returnTo: from,
+        },
+        response.data?.user?.id ?? null,
+        response.data?.user?.email ?? null,
+      )
+    }
+
     setIsSubmitting(false)
 
     if (response.error) {
       logger.error('[Login] Password sign-in failed', response.error)
+
+      void recordWelcomeJourneyActivity(
+        'welcome_journey_login_attempted',
+        {
+          step: 'login',
+          outcome: 'failed',
+          returnTo: from,
+          error: response.error.message,
+        },
+        null,
+        email.trim() || null,
+      )
 
       const message = `Sign-in failed: ${response.error.message}`
 
@@ -138,6 +175,17 @@ export function LoginPage() {
     const accessState = await loadSupabaseProfileAccessState()
 
     if (accessState.isBlocked) {
+      void recordWelcomeJourneyActivity(
+        'welcome_journey_error',
+        {
+          step: 'login',
+          outcome: 'access_blocked',
+          returnTo: from,
+        },
+        response.data?.user?.id ?? null,
+        response.data?.user?.email ?? null,
+      )
+
       await signOutFromSupabase()
 
       setAuthMessageTone('error')
@@ -155,6 +203,18 @@ export function LoginPage() {
     )
 
     if (requiresPasswordChange) {
+      void recordWelcomeJourneyActivity(
+        'welcome_journey_redirected',
+        {
+          step: 'login',
+          outcome: 'password_reset_required',
+          returnTo: from,
+          reason: 'must_change_password',
+        },
+        response.data?.user?.id ?? null,
+        response.data?.user?.email ?? null,
+      )
+
       setAuthMessageTone('default')
       setAuthMessage('Please set a new password to continue.')
 
@@ -171,6 +231,18 @@ export function LoginPage() {
     const hasAcceptedTerms = await loadSupabaseProfileTermsAcceptance()
 
     if (!hasAcceptedTerms) {
+      void recordWelcomeJourneyActivity(
+        'welcome_journey_redirected',
+        {
+          step: 'login',
+          outcome: 'terms_required',
+          returnTo: from,
+          reason: 'terms_not_accepted',
+        },
+        response.data?.user?.id ?? null,
+        response.data?.user?.email ?? null,
+      )
+
       window.dispatchEvent(new Event('gym-pilot-auth-updated'))
 
       navigate('/welcome', {
@@ -204,6 +276,16 @@ export function LoginPage() {
 
     if (response.error) {
       logger.error('[Login] Password reset failed', response.error)
+      void recordWelcomeJourneyActivity(
+        'welcome_journey_error',
+        {
+          step: 'login',
+          outcome: 'reset_email_failed',
+          returnTo: from,
+        },
+        null,
+        email.trim() || null,
+      )
 
       setAuthMessageTone('error')
       setAuthMessage(
@@ -212,6 +294,17 @@ export function LoginPage() {
 
       return
     }
+
+    void recordWelcomeJourneyActivity(
+      'welcome_journey_password_reset',
+      {
+        step: 'login',
+        outcome: 'reset_email_requested',
+        returnTo: from,
+      },
+      null,
+      email.trim() || null,
+    )
 
     setAuthMessageTone('default')
     setAuthMessage(
@@ -240,12 +333,33 @@ export function LoginPage() {
 
     if (response.error) {
       logger.error('[Login] Resend confirmation failed', response.error)
+      void recordWelcomeJourneyActivity(
+        'welcome_journey_error',
+        {
+          step: 'login',
+          outcome: 'confirmation_email_failed',
+          returnTo: from,
+        },
+        null,
+        email.trim() || null,
+      )
       setAuthMessageTone('error')
       setAuthMessage(
         `Could not send a confirmation/reset email: ${response.error.message}`,
       )
       return
     }
+
+    void recordWelcomeJourneyActivity(
+      'welcome_journey_password_reset',
+      {
+        step: 'login',
+        outcome: 'confirmation_email_requested',
+        returnTo: from,
+      },
+      null,
+      email.trim() || null,
+    )
 
     setAuthMessageTone('default')
     setAuthMessage(

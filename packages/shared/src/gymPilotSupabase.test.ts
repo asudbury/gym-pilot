@@ -511,15 +511,33 @@ describe('local activity recording guard', () => {
   })
 
   it('keeps activity event data privacy-safe while adding a friendly name', () => {
-    expect(buildSupabaseUserActivityEventData({ email: 'ada@example.com' }, 'Ada')).toEqual({
-      friendlyName: 'Ada',
-    })
+    const result = buildSupabaseUserActivityEventData({ email: 'ada@example.com' }, 'Ada')
+
+    expect(result).toEqual(
+      expect.objectContaining({
+        friendlyName: 'Ada',
+        deviceType: expect.any(String),
+        isMobile: expect.any(Boolean),
+      }),
+    )
+    expect(result).not.toHaveProperty('email')
   })
 
-  it('preserves an email when no friendly name is available', () => {
-    expect(buildSupabaseUserActivityEventData({ email: 'ada@example.com' }, null)).toEqual({
-      email: 'ada@example.com',
-    })
+  it('removes password-like fields and drops email fields from activity payloads', () => {
+    const result = buildSupabaseUserActivityEventData(
+      { email: 'ada@example.com', password: 'secret', currentPassword: '1234' },
+      null,
+    )
+
+    expect(result).toEqual(
+      expect.objectContaining({
+        deviceType: expect.any(String),
+        isMobile: expect.any(Boolean),
+      }),
+    )
+    expect(result).not.toHaveProperty('email')
+    expect(result).not.toHaveProperty('password')
+    expect(result).not.toHaveProperty('currentPassword')
   })
 
   it('maps app storage keys to the singular table naming convention', () => {

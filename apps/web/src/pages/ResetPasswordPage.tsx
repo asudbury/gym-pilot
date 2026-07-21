@@ -13,6 +13,7 @@ import {
   saveSupabaseProfileFlag,
   loadSupabaseProfileTermsAcceptance,
 } from '@gym-pilot/shared'
+import { recordWelcomeJourneyActivity } from '../features/auth/domain/welcomeJourneyLogging'
 
 export function ResetPasswordPage() {
   const navigate = useNavigate()
@@ -113,6 +114,16 @@ export function ResetPasswordPage() {
         '[ResetPassword] Could not restore Supabase session',
         sessionError,
       )
+      void recordWelcomeJourneyActivity(
+        'welcome_journey_error',
+        {
+          step: 'reset_password',
+          outcome: 'session_restore_failed',
+          source: hasResetTokens ? 'reset_link' : 'signed_in_flow',
+        },
+        null,
+        null,
+      )
       setStatusMessage(
         'The password reset link could not be used. Please request a new one or sign in again.',
       )
@@ -129,6 +140,17 @@ export function ResetPasswordPage() {
 
     if (updateError) {
       logger.error('[ResetPassword] Password update failed', updateError)
+
+      void recordWelcomeJourneyActivity(
+        'welcome_journey_password_reset',
+        {
+          step: 'reset_password',
+          outcome: 'failed',
+          source: hasResetTokens ? 'reset_link' : 'signed_in_flow',
+        },
+        null,
+        null,
+      )
       setStatusMessage(updateError.message || 'Could not update your password.')
       setStatusTone('error')
       setPassword('')
@@ -140,6 +162,17 @@ export function ResetPasswordPage() {
       const currentUserId = authUserData.user?.id ?? null
 
       if (currentUserId) {
+        await recordWelcomeJourneyActivity(
+          'welcome_journey_password_reset',
+          {
+            step: 'reset_password',
+            outcome: 'succeeded',
+            source: hasResetTokens ? 'reset_link' : 'signed_in_flow',
+          },
+          currentUserId,
+          authUserData.user?.email ?? null,
+        )
+
         await recordSupabaseUserActivity(
           'password_set',
           { source: hasResetTokens ? 'reset_link' : 'signed_in_flow' },

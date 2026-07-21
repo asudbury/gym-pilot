@@ -15,6 +15,7 @@ import { useAuth } from '../../auth/AuthContext'
 import { DecorativeIcon } from '../../components/ui/DecorativeIcon'
 import { Button } from '../../components/Button'
 import { NotificationPill } from '../../components/NotificationPill'
+import { recordWelcomeJourneyActivity } from '../../features/auth/domain/welcomeJourneyLogging'
 
 export function WelcomePage() {
   const navigate = useNavigate()
@@ -45,6 +46,17 @@ export function WelcomePage() {
           user.name || user.email || null,
         )
 
+        await recordWelcomeJourneyActivity(
+          'welcome_journey_viewed',
+          {
+            step: 'welcome',
+            outcome: 'viewed',
+            returnTo,
+          },
+          user.id,
+          user.name || user.email || null,
+        )
+
         // If the user must change password, redirect them to the reset
         // password flow before allowing terms acceptance.
         const requiresPasswordChange = await loadSupabaseProfileFlag(
@@ -52,6 +64,18 @@ export function WelcomePage() {
         )
 
         if (requiresPasswordChange) {
+          await recordWelcomeJourneyActivity(
+            'welcome_journey_redirected',
+            {
+              step: 'welcome',
+              outcome: 'password_reset_required',
+              returnTo,
+              reason: 'must_change_password',
+            },
+            user.id,
+            user.name || user.email || null,
+          )
+
           navigate('/reset-password', {
             replace: true,
             state: { from: returnTo },
@@ -73,6 +97,16 @@ export function WelcomePage() {
           '[WelcomePage] Could not load terms acceptance or password flag',
           error,
         )
+        await recordWelcomeJourneyActivity(
+          'welcome_journey_error',
+          {
+            step: 'welcome',
+            outcome: 'load_failed',
+            returnTo,
+          },
+          user?.id ?? null,
+          user?.name || user?.email || null,
+        )
       }
     })()
 
@@ -92,10 +126,30 @@ export function WelcomePage() {
 
     try {
       await saveSupabaseProfileTermsAcceptance(true, user.id)
+      await recordWelcomeJourneyActivity(
+        'welcome_journey_completed',
+        {
+          step: 'terms',
+          outcome: 'accepted',
+          returnTo,
+        },
+        user.id,
+        user.name || user.email || null,
+      )
       setHasAccepted(true)
       navigate(returnTo, { replace: true })
     } catch (error) {
       logger.error('[WelcomePage] Could not save terms acceptance', error)
+      await recordWelcomeJourneyActivity(
+        'welcome_journey_error',
+        {
+          step: 'welcome',
+          outcome: 'accept_failed',
+          returnTo,
+        },
+        user.id,
+        user.name || user.email || null,
+      )
       setErrorMessage('We could not save your acceptance. Please try again.')
     } finally {
       setIsAccepting(false)
@@ -104,6 +158,16 @@ export function WelcomePage() {
 
   const handleDecline = async () => {
     try {
+      await recordWelcomeJourneyActivity(
+        'welcome_journey_completed',
+        {
+          step: 'terms',
+          outcome: 'declined',
+          returnTo,
+        },
+        user?.id ?? null,
+        user?.name || user?.email || null,
+      )
       await signOutFromSupabase()
     } catch (error) {
       logger.error('[WelcomePage] Could not sign out after decline', error)
