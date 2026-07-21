@@ -1,3 +1,4 @@
+import { useState } from 'react'
 import {
   addSessionWorkoutItem,
   normalizeSessionWorkoutCategory,
@@ -18,11 +19,49 @@ type SessionWorkoutEditorProps = {
   className?: string
 }
 
+export function resolveExpandedWorkoutItemId(
+  items: SessionWorkoutItem[],
+  activeItemId: string | null,
+) {
+  if (items.length === 0) {
+    return null
+  }
+
+  if (activeItemId && items.some((item) => item.id === activeItemId)) {
+    return activeItemId
+  }
+
+  return items[0]?.id ?? null
+}
+
 export function SessionWorkoutEditor({
   items,
   onChange,
   className = '',
 }: SessionWorkoutEditorProps) {
+  const [expandedItemId, setExpandedItemId] = useState<string | null>(() =>
+    resolveExpandedWorkoutItemId(items, null),
+  )
+
+  const handleExpandItem = (itemId: string) => {
+    setExpandedItemId((current) =>
+      current === itemId ? null : itemId,
+    )
+  }
+
+  const handleAddItem = () => {
+    const nextItems = addSessionWorkoutItem(items, {
+      category: 'exercise',
+      exerciseName: '',
+      reps: '',
+      sets: '',
+      notes: '',
+    })
+
+    onChange(nextItems)
+    setExpandedItemId(nextItems[nextItems.length - 1]?.id ?? null)
+  }
+
   return (
     <div
       className={`space-y-3 rounded-2xl border border-slate-200 bg-slate-50 p-3 ${className}`.trim()}
@@ -34,13 +73,25 @@ export function SessionWorkoutEditor({
         </p>
       ) : null}
 
-      {items.map((item, index) => (
-        <div
-          key={item.id}
-          className="rounded-2xl border border-slate-200 bg-white p-3"
-        >
-          <div className="flex flex-wrap items-center gap-2">
-            <select
+      {items.map((item, index) => {
+        const isExpanded = expandedItemId === item.id
+
+        return (
+          <div
+            key={item.id}
+            className="rounded-2xl border border-slate-200 bg-white p-3"
+          >
+            <div className="flex flex-wrap items-center gap-2">
+              <Button
+                type="button"
+                tone="default"
+                className="px-2 py-1 text-xs"
+                onClick={() => handleExpandItem(item.id)}
+                aria-label={isExpanded ? 'Collapse item' : 'Expand item'}
+              >
+                {isExpanded ? '−' : '+'}
+              </Button>
+              <select
               value={item.category}
               onChange={(event) => {
                 onChange(
@@ -130,7 +181,9 @@ export function SessionWorkoutEditor({
             </Button>
           </div>
 
-          {item.category === 'exercise' && item.exerciseId ? (
+          {isExpanded ? (
+            <>
+              {item.category === 'exercise' && item.exerciseId ? (
             <div className="mt-2">
               <a
                 href={getExercisePath({
@@ -221,37 +274,30 @@ export function SessionWorkoutEditor({
             />
           </div>
 
-          <textarea
-            value={item.notes ?? ''}
-            onChange={(event) => {
-              onChange(
-                updateSessionWorkoutItem(items, item.id, {
-                  notes: event.target.value,
-                }),
-              )
-            }}
-            rows={2}
-            placeholder="Notes"
-            className={`${appTokens.input} mt-2 w-full`}
-          />
-        </div>
-      ))}
+              <textarea
+                value={item.notes ?? ''}
+                onChange={(event) => {
+                  onChange(
+                    updateSessionWorkoutItem(items, item.id, {
+                      notes: event.target.value,
+                    }),
+                  )
+                }}
+                rows={2}
+                placeholder="Notes"
+                className={`${appTokens.input} mt-2 w-full`}
+              />
+            </>
+          ) : null}
+          </div>
+        )
+      })}
 
       <div className="flex flex-wrap gap-2">
         <Button
           type="button"
           tone="default"
-          onClick={() =>
-            onChange(
-              addSessionWorkoutItem(items, {
-                category: 'exercise',
-                exerciseName: '',
-                reps: '',
-                sets: '',
-                notes: '',
-              }),
-            )
-          }
+          onClick={handleAddItem}
         >
           Add item
         </Button>
