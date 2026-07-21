@@ -30,7 +30,7 @@ export function AdminDatabasePage() {
       className="max-w-6xl"
       icon="database"
     >
-      <div className="space-y-3 rounded-2xl border border-slate-200 bg-slate-50 p-4">
+      <div className="space-y-2 p-0 md:space-y-3 md:rounded-2xl md:border md:border-slate-200 md:bg-slate-50 md:p-4">
         {formattedEntries.map((entry) => (
           <div
             key={entry.key}

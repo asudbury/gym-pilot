@@ -1,6 +1,9 @@
 import { renderToStaticMarkup } from 'react-dom/server'
 import { describe, expect, it } from 'vitest'
-import { SessionWorkoutEditor, resolveExpandedWorkoutItemId } from './SessionWorkoutEditor'
+import {
+  SessionWorkoutEditor,
+  resolveExpandedWorkoutItemId,
+} from './SessionWorkoutEditor'
 
 describe('resolveExpandedWorkoutItemId', () => {
   it('keeps the current active id when it still exists', () => {
@@ -36,7 +39,9 @@ describe('resolveExpandedWorkoutItemId', () => {
   it('renders an explicit details control for workout items', () => {
     const markup = renderToStaticMarkup(
       <SessionWorkoutEditor
-        items={[{ id: 'item-1', category: 'exercise', exerciseName: 'Squat' } as any]}
+        items={[
+          { id: 'item-1', category: 'exercise', exerciseName: 'Squat' } as any,
+        ]}
         onChange={() => undefined}
       />,
     )

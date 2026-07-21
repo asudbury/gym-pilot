@@ -852,7 +852,7 @@ export function TimetablePage() {
           ) : null}
 
           {!isLoading && !errorMessage && groupedSessions.length === 0 ? (
-            <div className="rounded-2xl border border-slate-200 bg-slate-50 p-4 text-sm text-slate-600">
+            <div className="rounded-none border-0 bg-transparent p-0 text-sm text-slate-600 md:rounded-2xl md:border md:border-slate-200 md:bg-slate-50 md:p-4">
               No timetable sessions were returned.
             </div>
           ) : null}
@@ -943,7 +943,7 @@ export function TimetablePage() {
                     All days
                   </h2>
                   {visibleSessions.length === 0 ? (
-                    <div className="rounded-2xl border border-slate-200 bg-slate-50 p-4 text-sm text-slate-600">
+                    <div className="rounded-none border-0 bg-transparent p-0 text-sm text-slate-600 md:rounded-2xl md:border md:border-slate-200 md:bg-slate-50 md:p-4">
                       No sessions match the selected filters.
                     </div>
                   ) : (

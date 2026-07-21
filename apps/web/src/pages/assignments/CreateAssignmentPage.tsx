@@ -106,7 +106,7 @@ export function CreateAssignmentPage() {
           <BackLink to="/assignments" label="Back to assignments" />
         </div>
 
-        <div className="mt-4 space-y-4 rounded-2xl border border-slate-200 bg-slate-50 p-3 sm:mt-6 sm:space-y-6 sm:p-4">
+        <div className="mt-2 space-y-2 p-0 md:mt-4 md:space-y-4 md:rounded-2xl md:border md:border-slate-200 md:bg-slate-50 md:p-3 lg:mt-6 lg:space-y-6 lg:p-4">
           {!isEditMode ? (
             <div className="rounded-2xl border border-slate-200 bg-white p-3 sm:p-4">
               <div className="grid gap-4 md:grid-cols-2">

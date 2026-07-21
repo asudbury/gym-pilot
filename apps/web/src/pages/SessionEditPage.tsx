@@ -191,7 +191,7 @@ export function SessionEditPage() {
         icon="edit"
       >
         {entry ? (
-          <div className="space-y-4 rounded-2xl border border-slate-200 bg-slate-50 p-4">
+          <div className="space-y-2 p-0 md:space-y-4 md:rounded-2xl md:border md:border-slate-200 md:bg-slate-50 md:p-4">
             <div className="rounded-2xl border border-slate-200 bg-white p-4">
               <div className="mt-4 flex flex-col gap-2">
                 <span className="text-sm font-medium text-slate-700">Role</span>
@@ -269,7 +269,7 @@ export function SessionEditPage() {
                 />
               </label>
 
-              <div className="mt-4 rounded-2xl border border-slate-200 bg-slate-50 p-4">
+              <div className="mt-2 p-0 md:mt-4 md:rounded-2xl md:border md:border-slate-200 md:bg-slate-50 md:p-4">
                 <div className="flex items-center justify-between gap-2">
                   <span className="text-sm font-medium text-slate-700">
                     Workout log

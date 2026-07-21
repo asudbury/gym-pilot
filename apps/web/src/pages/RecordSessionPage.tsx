@@ -221,7 +221,7 @@ export function RecordSessionPage() {
           <BackLink to="/" label="Back to dashboard" />
         </div>
 
-        <div className="mt-8 space-y-4 rounded-2xl border border-slate-200 bg-slate-50 p-4">
+        <div className="mt-4 space-y-2 p-0 md:mt-8 md:space-y-4 md:rounded-2xl md:border md:border-slate-200 md:bg-slate-50 md:p-4">
           <div className="rounded-2xl border border-slate-200 bg-white p-4">
             {sessionType === 'personal_training' ? (
               <label className="mt-4 block text-sm text-slate-700">

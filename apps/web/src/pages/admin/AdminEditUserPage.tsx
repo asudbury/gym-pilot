@@ -185,7 +185,7 @@ export function AdminEditUserPage() {
       backLabel="Back to user admin"
       className="max-w-3xl"
     >
-      <div className="space-y-4 rounded-2xl border border-slate-200 bg-slate-50 p-4">
+      <div className="space-y-2 p-0 md:space-y-4 md:rounded-2xl md:border md:border-slate-200 md:bg-slate-50 md:p-4">
         {statusMessage ? (
           <p
             className={`text-sm ${statusType === 'error' ? 'text-rose-600' : statusType === 'success' ? 'text-emerald-600' : 'text-slate-600'}`}
