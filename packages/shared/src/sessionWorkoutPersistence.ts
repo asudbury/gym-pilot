@@ -98,10 +98,22 @@ export function buildWorkoutItemsPersistencePayloads(input: {
   const normalizedItems = input.workoutItems.map((item, index) => ({
     ...item,
     id: item.id || `item-${index}`,
-    sortOrder: item.sortOrder ?? index,
+    sortOrder: typeof item.sortOrder === 'number' ? item.sortOrder : index,
+    originalIndex: index,
   }))
 
-  return normalizedItems.map((item, index) => createWorkoutItemPayload({
+  const orderedItems = [...normalizedItems].sort((left, right) => {
+    const leftSortOrder = typeof left.sortOrder === 'number' ? left.sortOrder : left.originalIndex
+    const rightSortOrder = typeof right.sortOrder === 'number' ? right.sortOrder : right.originalIndex
+
+    if (leftSortOrder !== rightSortOrder) {
+      return leftSortOrder - rightSortOrder
+    }
+
+    return left.originalIndex - right.originalIndex
+  })
+
+  return orderedItems.map((item, index) => createWorkoutItemPayload({
     sessionId: input.sessionId,
     userId: input.userId,
     index,
