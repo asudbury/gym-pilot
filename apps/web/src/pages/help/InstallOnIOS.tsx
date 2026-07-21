@@ -62,15 +62,14 @@ export function InstallOnIOSPage() {
             </ol>
           </Panel>
 
-            <p className="text-sm text-slate-600">
-              <BackLink
-                to="/help"
-                label="Back to help"
-                variant="inline"
-                className="text-emerald-600"
-              />
-            </p>
-
+          <p className="text-sm text-slate-600">
+            <BackLink
+              to="/help"
+              label="Back to help"
+              variant="inline"
+              className="text-emerald-600"
+            />
+          </p>
         </div>
       </PageCardLayout>
     </PageLayout>

@@ -70,9 +70,7 @@ export function PageCardLayout({
             <div className="shrink-0">
               <DecorativeIcon icon={resolvedIcon} className="h-5 w-5" />
             </div>
-              <UpperCaseParagraph>
-                {title}
-              </UpperCaseParagraph>
+            <UpperCaseParagraph>{title}</UpperCaseParagraph>
           </div>
           <div className="flex flex-col items-start">
             {subtitle ? (
