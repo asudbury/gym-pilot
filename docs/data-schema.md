@@ -100,14 +100,14 @@
 | created_at    | string        | Creation timestamp          |
 | updated_at    | string        | Last update timestamp       |
 
-### PlanItem
+### PlanItem — embedded in gym_pilot_plan
 
 | Field      | Type   | Notes               |
 | ---------- | ------ | ------------------- |
 | exerciseId | string | Referenced exercise |
 | note       | string | Optional note       |
 
-### PlanItem — embedded in gym_pilot_plan
+### Profile — gym_pilot_profile
 
 | Field             | Type           | Notes                 |
 | ----------------- | -------------- | --------------------- |
@@ -119,7 +119,7 @@
 | created_at        | string         | Creation timestamp    |
 | updated_at        | string         | Last update timestamp |
 
-### Session workout item
+### Session workout item — gym_pilot_user_session_workout_item
 
 | Field            | Type                                                       | Notes                          |
 | ---------------- | ---------------------------------------------------------- | ------------------------------ |
@@ -141,7 +141,7 @@
 | created_at       | string                                                     | Creation timestamp             |
 | updated_at       | string                                                     | Last update timestamp          |
 
-### Session workout item — gym_pilot_user_session_workout_item
+### User — auth.users
 
 | Field | Type                                | Notes                   |
 | ----- | ----------------------------------- | ----------------------- |
@@ -150,7 +150,7 @@
 | slug  | string                              | URL-friendly identifier |
 | role  | admin \| trainer \| client \| guest | Assigned role           |
 
-### User — auth.users
+### User role — gym_pilot_user_role
 
 | Field      | Type                                | Notes                  |
 | ---------- | ----------------------------------- | ---------------------- |
@@ -160,7 +160,7 @@
 | created_at | string                              | Creation timestamp     |
 | updated_at | string                              | Last update timestamp  |
 
-### User role — gym_pilot_user_role
+### User session — gym_pilot_user_session
 
 | Field            | Type                                                           | Notes                      |
 | ---------------- | -------------------------------------------------------------- | -------------------------- |
@@ -184,10 +184,6 @@
 | attendance_type  | attended \| taught \| null                                     | Attendance classification  |
 | created_at       | string                                                         | Creation timestamp         |
 | updated_at       | string                                                         | Last update timestamp      |
-
-### User session — gym_pilot_user_session
-
-| Field | Type | Notes |
 
 ## Storage model
 
