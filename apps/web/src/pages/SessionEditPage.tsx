@@ -2,13 +2,19 @@ import { useEffect, useMemo, useState } from 'react'
 import { useNavigate, useParams } from 'react-router-dom'
 import { useAuth } from '../auth/AuthContext'
 import { Button } from '../components/Button'
+import { SessionWorkoutEditor } from '../components/SessionWorkoutEditor'
 import { PageCardLayout } from '../layouts/PageCardLayout'
 import { PageLayout } from '../layouts/PageLayout'
 import {
+  buildSessionWorkoutMetadata,
   formatSessionHistoryError,
   loadSessionHistoryEntries,
+  loadWorkoutItemsForSession,
+  parseSessionWorkoutMetadata,
   saveSessionHistoryEntry,
+  saveWorkoutItemsForSession,
   type SessionHistoryEntry,
+  type SessionWorkoutItem,
 } from '@gym-pilot/shared'
 import {
   getSessionEntryRating,
@@ -27,6 +33,7 @@ export function SessionEditPage() {
   const [rating, setRating] = useState<number | null>(null)
   const [durationMinutes, setDurationMinutes] = useState<number | null>(null)
   const [startedAt, setStartedAt] = useState('')
+  const [workoutItems, setWorkoutItems] = useState<SessionWorkoutItem[]>([])
   const [isSaving, setIsSaving] = useState(false)
   const [errorMessage, setErrorMessage] = useState<string | null>(null)
 
@@ -57,6 +64,24 @@ export function SessionEditPage() {
           setRating(getSessionEntryRating(nextEntry))
           setDurationMinutes(nextEntry.durationMinutes ?? null)
           setStartedAt(nextEntry.startedAt ?? '')
+
+          const parsedMetadata = parseSessionWorkoutMetadata(nextEntry.workoutMetadata)
+          if (nextEntry.sessionId) {
+            try {
+              const persistedItems = await loadWorkoutItemsForSession(nextEntry.sessionId, userId ?? undefined)
+              if (persistedItems.length > 0) {
+                setWorkoutItems(persistedItems)
+              } else {
+                setWorkoutItems(parsedMetadata.workoutItems)
+              }
+            } catch {
+              setWorkoutItems(parsedMetadata.workoutItems)
+            }
+          } else {
+            setWorkoutItems(parsedMetadata.workoutItems)
+          }
+        } else {
+          setWorkoutItems([])
         }
         setErrorMessage(null)
       } catch (error) {
@@ -94,6 +119,7 @@ export function SessionEditPage() {
         ...entry,
         rating: rating ?? entry.rating,
       } as SessionHistoryEntry)
+      const parsedWorkoutMetadata = parseSessionWorkoutMetadata(entry.workoutMetadata)
       const nextEntry = {
         ...entry,
         attendanceType,
@@ -101,7 +127,18 @@ export function SessionEditPage() {
         rating: normalizedRating,
         durationMinutes: durationMinutes ?? entry.durationMinutes ?? null,
         startedAt: startedAt || entry.startedAt || null,
+        workoutMetadata: buildSessionWorkoutMetadata({
+          workoutItems,
+          endedAt: parsedWorkoutMetadata.endedAt,
+          activeKwh: parsedWorkoutMetadata.activeKwh,
+          selectedPlanId: parsedWorkoutMetadata.selectedPlanId,
+          selectedPlanName: parsedWorkoutMetadata.selectedPlanName,
+        }),
         updatedAt: new Date().toISOString(),
+      }
+
+      if (entry.sessionId) {
+        await saveWorkoutItemsForSession(entry.sessionId, workoutItems, userId ?? undefined)
       }
 
       await saveSessionHistoryEntry(nextEntry, userId ?? undefined)
@@ -274,6 +311,16 @@ export function SessionEditPage() {
                   className="rounded-2xl border border-slate-300 bg-white px-3 py-2 text-sm text-slate-700 shadow-sm"
                 />
               </label>
+
+              <div className="mt-4 rounded-2xl border border-slate-200 bg-slate-50 p-4">
+                <div className="flex items-center justify-between gap-2">
+                  <span className="text-sm font-medium text-slate-700">Workout log</span>
+                  <span className="text-xs text-slate-500">Add, edit, or remove workout items here</span>
+                </div>
+                <div className="mt-3">
+                  <SessionWorkoutEditor items={workoutItems} onChange={setWorkoutItems} />
+                </div>
+              </div>
 
               <div className="mt-6 flex flex-wrap gap-2">
                 <Button

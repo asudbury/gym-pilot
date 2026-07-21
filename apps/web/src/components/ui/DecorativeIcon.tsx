@@ -387,7 +387,13 @@ const DecorativeIcon = ({
           strokeWidth="1.8"
           strokeLinecap="round"
         />
-        <circle cx="8.2" cy="7.5" r="2.2" stroke="currentColor" strokeWidth="1.8" />
+        <circle
+          cx="8.2"
+          cy="7.5"
+          r="2.2"
+          stroke="currentColor"
+          strokeWidth="1.8"
+        />
         <path
           d="M4 16.5h9.2"
           stroke="currentColor"
@@ -400,7 +406,13 @@ const DecorativeIcon = ({
           strokeWidth="1.8"
           strokeLinecap="round"
         />
-        <circle cx="14.2" cy="16.5" r="2.2" stroke="currentColor" strokeWidth="1.8" />
+        <circle
+          cx="14.2"
+          cy="16.5"
+          r="2.2"
+          stroke="currentColor"
+          strokeWidth="1.8"
+        />
       </svg>
     ),
     lock: (

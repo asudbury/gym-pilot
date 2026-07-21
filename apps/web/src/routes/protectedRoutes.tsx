@@ -6,6 +6,7 @@ import { AssignmentsPage } from '../pages/assignments/AssignmentsPage'
 import { CreateAssignmentPage } from '../pages/assignments/CreateAssignmentPage'
 import { SessionEditPage } from '../pages/SessionEditPage'
 import { SessionHistoryPage } from '../pages/SessionHistoryPage'
+import { SessionWorkoutPage } from '../pages/SessionWorkoutPage'
 import { HomePage } from '../pages/HomePage'
 import { CreatePlanPage } from '../pages/plans/CreatePlanPage'
 import { PlanDetailPage } from '../pages/plans/PlanDetailPage'
@@ -47,6 +48,7 @@ export function createProtectedRoutes({
         <Route path="/record-session" element={<RecordSessionPage />} />
         <Route path="/sessions" element={<SessionHistoryPage />} />
         <Route path="/sessions/:entryId/edit" element={<SessionEditPage />} />
+        <Route path="/sessions/:entryId/workout" element={<SessionWorkoutPage />} />
         <Route path="/trainer-report" element={<TrainerReportPage />} />
       </Route>
       <Route path="/assignments" element={<AssignmentsPage />} />

@@ -32,7 +32,6 @@ type ExerciseSearchPickerProps = {
 
 export function ExerciseSearchField({
   id = 'exercise-search',
-  label = 'Search exercises',
   value = '',
   placeholder = 'Try abs, chest, cable...',
   className,
@@ -41,12 +40,6 @@ export function ExerciseSearchField({
 }: ExerciseSearchFieldProps) {
   return (
     <div className={className}>
-      <label
-        className="mb-2 block text-sm font-medium text-slate-700"
-        htmlFor={id}
-      >
-        {label}
-      </label>
       <div className="relative w-full">
         <input
           id={id}
@@ -54,7 +47,7 @@ export function ExerciseSearchField({
           value={value}
           onChange={(event) => onChange?.(event.target.value)}
           placeholder={placeholder}
-          className={`${appTokens.input} pr-20 outline-none ring-0 focus:border-slate-400 sm:pr-24`}
+          className={`${appTokens.input} h-10 pr-20 text-sm outline-none ring-0 focus:border-slate-400 sm:pr-24`}
         />
         {value && (
           <Button
@@ -105,7 +98,6 @@ export function ExerciseSearchSuggestions({
 
 export function ExerciseSearchPicker({
   id = 'exercise-search',
-  label = 'Search exercises',
   value = '',
   placeholder = 'Try abs, chest, cable...',
   className,
@@ -169,7 +161,6 @@ export function ExerciseSearchPicker({
     <div className={className}>
       <ExerciseSearchField
         id={id}
-        label={label}
         value={draftValue}
         placeholder={placeholder}
         onChange={handleChange}

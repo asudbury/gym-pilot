@@ -1,14 +1,22 @@
-import { useEffect, useState } from 'react'
+import { useEffect, useMemo, useState } from 'react'
 import { useNavigate, useSearchParams } from 'react-router-dom'
 import { useAuth } from '../auth/AuthContext'
 import { Button } from '../components/Button'
 import { PageCard } from '../components/PageCard'
+import { SessionWorkoutEditor } from '../components/SessionWorkoutEditor'
 import { BackLink } from '../components/ui/BackLink'
 import { DecorativeIcon } from '../components/ui/DecorativeIcon'
 import { Heading1, Paragraph } from '../components/Typography'
 import { PageLayout } from '../layouts/PageLayout'
 import { appTokens } from '../constants/tokens'
-import { createSession, recordSession, usePlan } from '@gym-pilot/shared'
+import {
+  buildSessionWorkoutMetadata,
+  buildWorkoutItemsFromPlanSessions,
+  createSession,
+  recordSession,
+  usePlan,
+  type SessionWorkoutItem,
+} from '@gym-pilot/shared'
 
 type SessionType = 'class' | 'solo' | 'personal_training'
 
@@ -26,7 +34,7 @@ function resolveInitialSessionType(value: string | null): SessionType {
 
 export function RecordSessionPage() {
   const { user } = useAuth()
-  const { users } = usePlan()
+  const { users, visiblePlans, visibleAssignments } = usePlan()
   const navigate = useNavigate()
   const [searchParams] = useSearchParams()
   const trainers = users.filter((candidate) =>
@@ -46,9 +54,31 @@ export function RecordSessionPage() {
   >(null)
   const [rating, setRating] = useState<number | null>(null)
   const [duration, setDuration] = useState<number | undefined>(undefined)
+  const [endAt, setEndAt] = useState('')
+  const [activeKwh, setActiveKwh] = useState('')
   const [notes, setNotes] = useState('')
+  const [selectedPlanId, setSelectedPlanId] = useState('')
+  const [workoutItems, setWorkoutItems] = useState<SessionWorkoutItem[]>([])
   const [isSaving, setIsSaving] = useState(false)
   const [error, setError] = useState<string | null>(null)
+
+  const availablePlans = useMemo(() => {
+    const candidates = [...visiblePlans, ...visibleAssignments.map((assignment) => ({
+      id: assignment.id,
+      planName: assignment.assignmentName,
+      planSlug: assignment.planSlug ?? assignment.id,
+      planSessions: assignment.planSessions ?? [],
+      createdByUserId: assignment.assignedUserId,
+    }))]
+
+    return candidates.filter((candidate, index, list) =>
+      list.findIndex((entry) => entry.id === candidate.id) === index,
+    )
+  }, [visiblePlans, visibleAssignments])
+
+  const selectedPlan = useMemo(() => {
+    return availablePlans.find((plan) => plan.id === selectedPlanId)
+  }, [availablePlans, selectedPlanId])
 
   useEffect(() => {
     const now = new Date()
@@ -60,6 +90,15 @@ export function RecordSessionPage() {
     setDatePart(localIso.slice(0, 10))
     setTimePart(localIso.slice(11, 16))
   }, [])
+
+  useEffect(() => {
+    if (!selectedPlan) {
+      setWorkoutItems([])
+      return
+    }
+
+    setWorkoutItems(buildWorkoutItemsFromPlanSessions(selectedPlan.planSessions))
+  }, [selectedPlan])
 
   useEffect(() => {
     if (typeof window === 'undefined') return
@@ -109,11 +148,20 @@ export function RecordSessionPage() {
         throw sessionRes.error || new Error('Could not create session')
       }
 
+      const workoutMetadata = buildSessionWorkoutMetadata({
+        workoutItems,
+        endedAt: endAt || null,
+        activeKwh: activeKwh || null,
+        selectedPlanId: selectedPlan?.id ?? null,
+        selectedPlanName: selectedPlan?.planName ?? null,
+      })
+
       const sessionRecordingResult = await recordSession({
         sessionId: sessionRes.session.id,
         role: 'client',
         notes: notes || null,
         rating: rating ?? null,
+        workoutMetadata,
       })
 
       if (!sessionRecordingResult.success) {
@@ -223,6 +271,43 @@ export function RecordSessionPage() {
               />
             </label>
 
+            <label className="mt-4 block text-sm text-slate-700">
+              <span className="font-medium">End time</span>
+              <input
+                type="datetime-local"
+                value={endAt}
+                onChange={(event) => setEndAt(event.target.value)}
+                className={`${appTokens.input} mt-1 w-full`}
+              />
+            </label>
+
+            <label className="mt-4 block text-sm text-slate-700">
+              <span className="font-medium">Active kWh (optional)</span>
+              <input
+                type="number"
+                step="0.01"
+                value={activeKwh}
+                onChange={(event) => setActiveKwh(event.target.value)}
+                className={`${appTokens.input} mt-1 w-full`}
+              />
+            </label>
+
+            <label className="mt-4 block text-sm text-slate-700">
+              <span className="font-medium">Plan or assignment</span>
+              <select
+                value={selectedPlanId}
+                onChange={(event) => setSelectedPlanId(event.target.value)}
+                className={`${appTokens.input} mt-1 w-full`}
+              >
+                <option value="">No plan selected</option>
+                {availablePlans.map((plan) => (
+                  <option key={plan.id} value={plan.id}>
+                    {plan.planName}
+                  </option>
+                ))}
+              </select>
+            </label>
+
             <div className="mt-4 block text-sm text-slate-700">
               <span className="font-medium">Rating</span>
               <div className="mt-2 flex flex-wrap gap-2">
@@ -243,6 +328,13 @@ export function RecordSessionPage() {
                     </Button>
                   )
                 })}
+              </div>
+            </div>
+
+            <div className="mt-4 block text-sm text-slate-700">
+              <span className="font-medium">Workout log</span>
+              <div className="mt-2">
+                <SessionWorkoutEditor items={workoutItems} onChange={setWorkoutItems} />
               </div>
             </div>
 

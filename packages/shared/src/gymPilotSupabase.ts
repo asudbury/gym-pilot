@@ -10,6 +10,11 @@ import {
   type AppSettingKey,
   type AppSettingValue,
 } from './appSettings'
+import {
+  createSessionWorkoutItem,
+  normalizeSessionWorkoutCategory,
+  type SessionWorkoutItem,
+} from './sessionWorkout'
 
 const DEFAULT_SUPABASE_TABLE = 'gym_pilot_app_state'
 
@@ -1431,6 +1436,7 @@ export type SessionHistoryEntry = {
   notes?: string | null
   rating?: number | null
   durationMinutes?: number | null
+  workoutMetadata?: unknown
   createdAt?: string | null
   updatedAt?: string | null
 }
@@ -1449,6 +1455,7 @@ type SupabaseSessionHistoryRow = {
   notes?: string | null
   rating?: number | null
   duration_minutes?: number | null
+  metadata?: unknown | null
   created_at?: string | null
   updated_at?: string | null
   role?: 'client' | 'trainer' | null
@@ -1477,6 +1484,176 @@ function normalizeSessionRating(value: number | string | null | undefined) {
   return null
 }
 
+function normalizeWorkoutItemRecord(value: unknown): SessionWorkoutItem | null {
+  if (!value || typeof value !== 'object') {
+    return null
+  }
+
+  const candidate = value as Record<string, unknown>
+  const category = typeof candidate.category === 'string'
+    ? normalizeSessionWorkoutCategory(candidate.category)
+    : 'exercise'
+  const exerciseName = typeof candidate.exerciseName === 'string'
+    ? candidate.exerciseName
+    : ''
+
+  if (!exerciseName && typeof candidate.exercise_name === 'string') {
+    return createSessionWorkoutItem({
+      category,
+      exerciseName: candidate.exercise_name,
+      exerciseId: typeof candidate.exercise_id === 'string' ? candidate.exercise_id : undefined,
+      reps: typeof candidate.reps === 'string' ? candidate.reps : '',
+      sets: typeof candidate.sets === 'string' ? candidate.sets : '',
+      weight: typeof candidate.weight === 'string' ? candidate.weight : '',
+      durationMinutes: typeof candidate.duration_minutes === 'string' ? candidate.duration_minutes : '',
+      distanceKm: typeof candidate.distance_km === 'string' ? candidate.distance_km : '',
+      speedKph: typeof candidate.speed_kph === 'string' ? candidate.speed_kph : '',
+      notes: typeof candidate.notes === 'string' ? candidate.notes : '',
+      planItemId: typeof candidate.plan_item_id === 'string' ? candidate.plan_item_id : undefined,
+      sortOrder: typeof candidate.sort_order === 'number'
+        ? candidate.sort_order
+        : typeof candidate.sortOrder === 'number'
+          ? candidate.sortOrder
+          : undefined,
+    })
+  }
+
+  return createSessionWorkoutItem({
+    id: typeof candidate.id === 'string' ? candidate.id : undefined,
+    category,
+    exerciseName,
+    exerciseId: typeof candidate.exercise_id === 'string' ? candidate.exercise_id : undefined,
+    reps: typeof candidate.reps === 'string' ? candidate.reps : '',
+    sets: typeof candidate.sets === 'string' ? candidate.sets : '',
+    weight: typeof candidate.weight === 'string' ? candidate.weight : '',
+    durationMinutes: typeof candidate.durationMinutes === 'string' ? candidate.durationMinutes : '',
+    distanceKm: typeof candidate.distanceKm === 'string' ? candidate.distanceKm : '',
+    speedKph: typeof candidate.speedKph === 'string' ? candidate.speedKph : '',
+    notes: typeof candidate.notes === 'string' ? candidate.notes : '',
+    planItemId: typeof candidate.planItemId === 'string' ? candidate.planItemId : undefined,
+    sortOrder: typeof candidate.sortOrder === 'number'
+      ? candidate.sortOrder
+      : typeof candidate.sort_order === 'number'
+        ? candidate.sort_order
+        : undefined,
+  })
+}
+
+function createWorkoutItemPayload(input: {
+  sessionId: string
+  userId: string
+  index: number
+  item: SessionWorkoutItem
+}) {
+  return {
+    id: input.item.id || `item-${input.index}`,
+    session_id: input.sessionId,
+    user_id: input.userId,
+    item_index: input.index,
+    category: input.item.category,
+    exercise_name: input.item.exerciseName ?? null,
+    exercise_id: input.item.exerciseId ?? null,
+    reps: input.item.reps ?? null,
+    sets: input.item.sets ?? null,
+    weight: input.item.weight ?? null,
+    duration_minutes: input.item.durationMinutes ?? null,
+    distance_km: input.item.distanceKm ?? null,
+    speed_kph: input.item.speedKph ?? null,
+    notes: input.item.notes ?? null,
+    plan_item_id: input.item.planItemId ?? null,
+    sort_order: input.item.sortOrder ?? input.index,
+    created_at: new Date().toISOString(),
+    updated_at: new Date().toISOString(),
+  }
+}
+
+export function getWorkoutItemsTableName() {
+  return 'gym_pilot_user_session_workout_item'
+}
+
+export async function loadWorkoutItemsForSession(sessionId: string, userId?: string): Promise<SessionWorkoutItem[]> {
+  const client = getSupabaseClient()
+  if (!client) {
+    return []
+  }
+
+  const resolvedUserId = userId || await getAuthenticatedUserId(client)
+  if (!resolvedUserId) {
+    return []
+  }
+
+  const { data, error } = await client
+    .from(getWorkoutItemsTableName())
+    .select('*')
+    .eq('session_id', sessionId)
+    .eq('user_id', resolvedUserId)
+    .order('sort_order', { ascending: true })
+    .order('item_index', { ascending: true })
+
+  if (error) {
+    logger.warn('[Supabase] Could not load workout rows', error)
+    return []
+  }
+
+  return (Array.isArray(data) ? data : []).map((row) => normalizeWorkoutItemRecord(row)).filter((entry): entry is SessionWorkoutItem => Boolean(entry))
+}
+
+export async function saveWorkoutItemsForSession(sessionId: string, workoutItems: SessionWorkoutItem[], userId?: string) {
+  const client = getSupabaseClient()
+  if (!client) {
+    return { success: false as const, error: new Error('Supabase client is not available') }
+  }
+
+  const resolvedUserId = userId || await getAuthenticatedUserId(client)
+  if (!resolvedUserId) {
+    return { success: false as const, error: new Error('Unable to resolve the current user') }
+  }
+
+  const existingRows = await loadWorkoutItemsForSession(sessionId, resolvedUserId)
+  const existingIds = new Set(existingRows.map((item) => item.id))
+
+  const payload = workoutItems.map((item, index) => createWorkoutItemPayload({
+    sessionId,
+    userId: resolvedUserId,
+    index,
+    item: {
+      ...item,
+      id: item.id || `item-${index}`,
+    },
+  }))
+
+  if (payload.length === 0) {
+    const { error } = await client
+      .from(getWorkoutItemsTableName())
+      .delete()
+      .eq('session_id', sessionId)
+      .eq('user_id', resolvedUserId)
+
+    return error
+      ? { success: false as const, error }
+      : { success: true as const }
+  }
+
+  const { error } = await client
+    .from(getWorkoutItemsTableName())
+    .upsert(payload, { onConflict: 'id' })
+
+  if (error) {
+    logger.warn('[Supabase] Could not save workout rows', error)
+    return { success: false as const, error }
+  }
+
+  const staleIds = Array.from(existingIds).filter((id) => !workoutItems.some((item) => item.id === id))
+  if (staleIds.length > 0) {
+    await client
+      .from(getWorkoutItemsTableName())
+      .delete()
+      .in('id', staleIds)
+  }
+
+  return { success: true as const }
+}
+
 export function buildSessionBookingSessionPayload(input: {
   userId: string
   sessionId?: string | number | null
@@ -1488,6 +1665,7 @@ export function buildSessionBookingSessionPayload(input: {
   notes?: string | null
   rating?: number | null
   durationMinutes?: number | null
+  metadata?: unknown | null
   createdAt?: string | null
   updatedAt?: string | null
   role?: 'client' | 'trainer' | null
@@ -1507,6 +1685,7 @@ export function buildSessionBookingSessionPayload(input: {
     notes: input.notes?.trim() ? input.notes.trim() : null,
     rating: normalizeSessionRating(input.rating),
     duration_minutes: input.durationMinutes ?? null,
+    metadata: input.metadata ?? null,
     created_at: input.createdAt ?? new Date().toISOString(),
     updated_at: input.updatedAt ?? new Date().toISOString(),
     role: input.role ?? (input.attendanceType === 'taught' ? 'trainer' : 'client'),
@@ -1526,6 +1705,7 @@ export function buildSessionBookingAttendancePayload(input: {
   notes?: string | null
   rating?: number | null
   durationMinutes?: number | null
+  metadata?: unknown | null
   createdAt?: string | null
   updatedAt?: string | null
   role?: 'client' | 'trainer' | null
@@ -1551,6 +1731,7 @@ export function getSessionHistorySelectColumns() {
     'attendance_type',
     'notes',
     'rating',
+    'metadata',
     'created_at',
     'updated_at',
     'role',
@@ -1584,6 +1765,7 @@ export function mapSessionHistoryEntryFromSupabase(row: SupabaseSessionHistoryRo
     notes: row.notes ?? null,
     rating: normalizeSessionRating(row.rating),
     durationMinutes: typeof row.duration_minutes === 'number' ? row.duration_minutes : null,
+    workoutMetadata: row.metadata ?? null,
     createdAt: row.created_at ?? null,
     updatedAt: row.updated_at ?? null,
   }
@@ -1728,6 +1910,7 @@ export async function saveSessionHistoryEntry(entry: SessionHistoryEntry, userId
           notes: entry.notes,
           rating: entry.rating,
           durationMinutes: entry.durationMinutes ?? null,
+          metadata: entry.workoutMetadata ?? null,
           createdAt: entry.createdAt ?? null,
           updatedAt: entry.updatedAt ?? null,
         }),
@@ -2011,6 +2194,7 @@ export async function bookSession(input: {
   role: 'client' | 'trainer'
   notes?: string | null
   rating?: number | null
+  workoutMetadata?: unknown | null
 }) {
   const client = getSupabaseClient()
   if (!client) {
@@ -2029,6 +2213,7 @@ export async function bookSession(input: {
     status: 'attended',
     notes: input.notes ?? null,
     rating: normalizeSessionRating(input.rating),
+    metadata: input.workoutMetadata ?? null,
     attendance_type: input.role === 'trainer' ? 'taught' : 'attended',
     updated_at: new Date().toISOString(),
   }
@@ -2049,6 +2234,7 @@ export async function recordSession(input: {
   role: 'client' | 'trainer'
   notes?: string | null
   rating?: number | null
+  workoutMetadata?: unknown | null
 }) {
   return bookSession(input)
 }

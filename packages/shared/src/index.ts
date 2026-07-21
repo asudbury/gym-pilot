@@ -50,6 +50,8 @@ export {
   saveAppSettings,
   saveTimetableAttendance,
   loadSessionHistoryEntries,
+  loadWorkoutItemsForSession,
+  saveWorkoutItemsForSession,
   mapSessionHistoryEntryFromSupabase,
   formatSessionHistoryError,
   getSessionHistoryTableName,
@@ -71,3 +73,4 @@ export {
 export * from './utils'
 export * from './repositories'
 export * from './appSettings'
+export * from './sessionWorkout'

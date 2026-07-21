@@ -98,6 +98,26 @@ Represents a saved navigation shortcut or exercise shortcut.
 - created_at: string
 - updated_at: string
 
+### Session workout item
+Represents a single workout entry attached to a session so workout data can be queried independently from the session metadata payload.
+
+- id: string
+- session_id: string
+- user_id: string
+- item_index: number
+- category: exercise | warm_up | stretch | cool_down | run | spin
+- exercise_name: string | null
+- reps: string | null
+- sets: string | null
+- weight: string | null
+- duration_minutes: string | null
+- distance_km: string | null
+- speed_kph: string | null
+- notes: string | null
+- plan_item_id: string | null
+- created_at: string
+- updated_at: string
+
 ### Error log
 Stores application errors when the app setting `error_logging_enabled` is true.
 
@@ -135,6 +155,7 @@ The shared Supabase helpers in [packages/shared/src/gymPilotSupabase.ts](package
 | Favourites and folders | `select`, `insert`, `upsert`, `delete` against remote rows | `gym_pilot_favourite_folder`, `gym_pilot_favourite` |
 | Activity logging | `recordSupabaseUserActivity()` uses `insert` into `gym_pilot_user_activity`; it skips inserts when the app is running on localhost-style hosts | `gym_pilot_user_activity` |
 | Session recording | `saveTimetableAttendance()` inserts role-based session records with optional notes and a 1-5 rating for a session/class | `gym_pilot_session_booking` |
+| Workout items | `loadWorkoutItemsForSession()` and `saveWorkoutItemsForSession()` read/write ordered workout rows for a session | `gym_pilot_session_workout_item` |
 | Error and audit logging | `persistErrorLog()` and `persistAuditLog()` write to `gym_pilot_error_log` and `gym_pilot_audit_log` only when the matching app settings are enabled | `gym_pilot_error_log`, `gym_pilot_audit_log` |
 
 ### Entity relationship overview
@@ -248,6 +269,25 @@ erDiagram
         timestamptz created_at
         timestamptz updated_at
     }
+
+    gym_pilot_session_workout_item {
+        uuid id
+        text session_id
+        uuid user_id
+        int item_index
+        text category
+        text exercise_name
+        text reps
+        text sets
+        text weight
+        text duration_minutes
+        text distance_km
+        text speed_kph
+        text notes
+        text plan_item_id
+        timestamptz created_at
+        timestamptz updated_at
+    }
 ```
 
 ### Notes
@@ -256,6 +296,7 @@ erDiagram
 - a favourites table plus folders for saved exercise and link shortcuts
 - a plans table for plan templates
 - an assignments table for user-specific plan assignments
+- a dedicated workout-item table for session workout rows so workout data can be queried independently from the session metadata payload
 - row-level security policies for authenticated users
 - auth metadata can mark a user as requiring a password change on next sign-in
 

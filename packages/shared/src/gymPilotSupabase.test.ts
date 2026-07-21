@@ -11,6 +11,7 @@ import {
   getSupabaseProfileLocalStorageKey,
   getSupabaseTableName,
   getSessionBookingTableName,
+  getWorkoutItemsTableName,
   getSessionTableName,
   isLocalhostHost,
   listSessions,
@@ -259,6 +260,10 @@ describe('session table naming', () => {
   it('uses the consolidated user session table for session persistence', () => {
     expect(getSessionTableName()).toBe('gym_pilot_user_session')
     expect(getSessionBookingTableName()).toBe('gym_pilot_user_session')
+  })
+
+  it('uses the renamed workout items table for workout persistence', () => {
+    expect(getWorkoutItemsTableName()).toBe('gym_pilot_user_session_workout_item')
   })
 })
 
