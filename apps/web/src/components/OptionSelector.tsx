@@ -16,7 +16,9 @@ export function OptionSelector<T extends string>({
   className = '',
 }: OptionSelectorProps<T>) {
   return (
-    <div className={['flex flex-wrap gap-2', className].filter(Boolean).join(' ')}>
+    <div
+      className={['flex flex-wrap gap-2', className].filter(Boolean).join(' ')}
+    >
       {options.map((option) => {
         const isSelected = value === option
 
@@ -26,7 +28,12 @@ export function OptionSelector<T extends string>({
             type="button"
             onClick={() => onChange(option)}
             tone={isSelected ? 'blue' : 'white'}
-            className={['px-3 py-1.5 text-sm font-semibold shadow-sm', isSelected ? 'ring-2 ring-sky-200' : ''].filter(Boolean).join(' ')}
+            className={[
+              'px-3 py-1.5 text-sm font-semibold shadow-sm',
+              isSelected ? 'ring-2 ring-sky-200' : '',
+            ]
+              .filter(Boolean)
+              .join(' ')}
             aria-pressed={isSelected}
           >
             {getLabel(option)}
