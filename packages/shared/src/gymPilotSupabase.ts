@@ -1445,16 +1445,33 @@ function getDeviceContext() {
   }
 }
 
+function sanitizeActivityValue(key: string, value: unknown) {
+  if (typeof value !== 'string') {
+    return value
+  }
+
+  if (/email/i.test(key) && /.+@.+\..+/.test(value)) {
+    return '*user-email-address'
+  }
+
+  return value
+}
+
 export function buildSupabaseUserActivityEventData(eventData: Record<string, unknown> = {}, friendlyName?: string | null) {
   const sanitizedPayload: Record<string, unknown> = { ...eventData }
 
   for (const key of Object.keys(sanitizedPayload)) {
     if (
       typeof key === 'string' &&
-      /(email|phone|password|pwd|token|secret|api[_-]?key|authorization|cookie|notes|details|message)/i.test(key)
+      /(phone|password|pwd|token|secret|api[_-]?key|authorization|cookie|notes|details|message)/i.test(key)
     ) {
       delete sanitizedPayload[key]
     }
+  }
+
+  for (const key of Object.keys(sanitizedPayload)) {
+    const value = sanitizedPayload[key]
+    sanitizedPayload[key] = sanitizeActivityValue(key, value)
   }
 
   if (typeof friendlyName === 'string') {

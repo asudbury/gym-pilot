@@ -520,7 +520,7 @@ describe('local activity recording guard', () => {
         isMobile: expect.any(Boolean),
       }),
     )
-    expect(result).not.toHaveProperty('email')
+    expect(result).toHaveProperty('email', '*user-email-address')
   })
 
   it('removes password-like fields and drops email fields from activity payloads', () => {
@@ -535,7 +535,7 @@ describe('local activity recording guard', () => {
         isMobile: expect.any(Boolean),
       }),
     )
-    expect(result).not.toHaveProperty('email')
+    expect(result).toHaveProperty('email', '*user-email-address')
     expect(result).not.toHaveProperty('password')
     expect(result).not.toHaveProperty('currentPassword')
   })

@@ -46,11 +46,19 @@ function sanitizeWelcomeJourneyData(eventData: Record<string, unknown>) {
   for (const key of Object.keys(sanitizedPayload)) {
     if (
       typeof key === 'string' &&
-      /(email|phone|password|pwd|token|secret|api[_-]?key|authorization|cookie)/i.test(
+      /(phone|password|pwd|token|secret|api[_-]?key|authorization|cookie)/i.test(
         key,
       )
     ) {
       delete sanitizedPayload[key]
+    }
+  }
+
+  for (const key of Object.keys(sanitizedPayload)) {
+    const value = sanitizedPayload[key]
+
+    if (typeof value === 'string' && /email/i.test(key) && /.+@.+\..+/.test(value)) {
+      sanitizedPayload[key] = '*user-email-address'
     }
   }
 

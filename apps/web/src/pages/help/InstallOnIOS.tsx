@@ -1,10 +1,31 @@
+import { useEffect } from 'react'
 import { PageLayout } from '../../layouts/PageLayout'
 import { PageCardLayout } from '../../layouts/PageCardLayout'
 import { Panel } from '../../components/ui/Panel'
 import { Heading1 } from '../../components/Typography'
 import { BackLink } from '../../components/ui/BackLink'
+import { useAuth } from '../../auth/AuthContext'
+import { recordSupabaseUserActivity } from '@gym-pilot/shared'
+import { buildInstallIosPageActivity } from './installIosActivity'
 
 export function InstallOnIOSPage() {
+  const { user } = useAuth()
+
+  useEffect(() => {
+    if (!user?.id) {
+      return
+    }
+
+    const activity = buildInstallIosPageActivity()
+
+    void recordSupabaseUserActivity(
+      activity.eventType,
+      activity.eventData,
+      user.id,
+      user.name || user.email || null,
+    )
+  }, [user?.id, user?.name, user?.email])
+
   return (
     <PageLayout>
       <PageCardLayout

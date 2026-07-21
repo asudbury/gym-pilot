@@ -121,7 +121,7 @@ export function Header({
 
         <div className="flex flex-wrap items-center gap-2">
           <ResponsiveVisibility visibleOn="desktop">
-            <div className="flex flex-col items-end gap-2">
+            <div className="flex flex-wrap items-end justify-end gap-2">
               <div className="flex items-center gap-2">
                 <FavouriteLinksMenu
                   favorites={favorites}
@@ -157,12 +157,10 @@ export function Header({
                 ) : null}
               </div>
               {showRestrictedBadge ? (
-                <div className="mt-1">
-                  <NotificationPill
-                    message={{ text: 'Password reset required', tone: 'error' }}
-                    className="px-2.5 py-1 text-xs"
-                  />
-                </div>
+                <NotificationPill
+                  message={{ text: 'Password reset required', tone: 'error' }}
+                  className="border-rose-300 bg-rose-100 px-2.5 py-1 text-[11px] font-semibold text-rose-800 shadow-none"
+                />
               ) : null}
             </div>
           </ResponsiveVisibility>

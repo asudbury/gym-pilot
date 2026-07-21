@@ -24,7 +24,7 @@ export function NotificationPill({
 
   const toneClasses =
     resolvedTone === 'error'
-      ? 'border-rose-200 bg-rose-50 text-rose-700'
+      ? 'border-rose-300 bg-rose-100 text-rose-800'
       : resolvedTone === 'success'
         ? 'border-emerald-200 bg-emerald-50 text-emerald-700'
         : 'border-slate-200 bg-slate-50 text-slate-700'
