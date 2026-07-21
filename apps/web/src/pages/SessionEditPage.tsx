@@ -187,7 +187,7 @@ export function SessionEditPage() {
       <PageCardLayout
         title="Edit session"
         subtitle={pageTitle}
-        description="Update the session notes, rating, or role before saving your changes."
+        description=""
         icon="edit"
       >
         {entry ? (
@@ -219,7 +219,7 @@ export function SessionEditPage() {
               ) : null}
 
               <label className="mt-4 flex flex-col gap-1 text-sm text-slate-700">
-                <span className="font-medium">Date and time</span>
+                <span className="font-medium">Start time</span>
                 <input
                   type="datetime-local"
                   value={startedAt ? startedAt.slice(0, 16) : ''}
@@ -233,13 +233,6 @@ export function SessionEditPage() {
                   className="rounded-2xl border border-slate-300 bg-white px-3 py-2 text-sm text-slate-700 shadow-sm"
                 />
               </label>
-
-              <div className="mt-4 flex flex-col gap-2">
-                <span className="text-sm font-medium text-slate-700">
-                  Rating
-                </span>
-                <RatingSelector value={rating} onChange={setRating} />
-              </div>
 
               <label className="mt-4 flex flex-col gap-1 text-sm text-slate-700">
                 <span className="font-medium">Duration (minutes)</span>
@@ -257,6 +250,13 @@ export function SessionEditPage() {
                   className="rounded-2xl border border-slate-300 bg-white px-3 py-2 text-sm text-slate-700 shadow-sm"
                 />
               </label>
+
+              <div className="mt-4 flex flex-col gap-2">
+                <span className="text-sm font-medium text-slate-700">
+                  Rating
+                </span>
+                <RatingSelector value={rating} onChange={setRating} />
+              </div>
 
               <label className="mt-4 flex flex-col gap-1 text-sm text-slate-700">
                 <span className="font-medium">Notes</span>

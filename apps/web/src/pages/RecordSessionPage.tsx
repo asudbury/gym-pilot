@@ -5,7 +5,6 @@ import { Button } from '../components/Button'
 import { PageCard } from '../components/PageCard'
 import { RatingSelector } from '../components/RatingSelector'
 import { SessionWorkoutEditor } from '../components/SessionWorkoutEditor'
-import { BackLink } from '../components/ui/BackLink'
 import { DecorativeIcon } from '../components/ui/DecorativeIcon'
 import { Heading1, UpperCaseParagraph } from '../components/Typography'
 import { PageLayout } from '../layouts/PageLayout'
@@ -56,7 +55,7 @@ export function RecordSessionPage() {
   const [rating, setRating] = useState<number | null>(null)
   const [duration, setDuration] = useState<number | undefined>(undefined)
   const [name, setName] = useState('')
-  const [endAt, setEndAt] = useState('')
+  const [endAt] = useState<string | null>(null)
   const [activeKwh, setActiveKwh] = useState('')
   const [notes, setNotes] = useState('')
   const [selectedPlanId, setSelectedPlanId] = useState('')
@@ -202,10 +201,10 @@ export function RecordSessionPage() {
 
   const title =
     sessionType === 'solo'
-      ? 'Record a solo session'
+      ? 'Solo session'
       : sessionType === 'class'
-        ? 'Book a class session'
-        : 'Record a personal training session'
+        ? 'Class session'
+        : 'PT session'
 
   return (
     <PageLayout className="max-w-4xl">
@@ -218,7 +217,7 @@ export function RecordSessionPage() {
               <Heading1 className="mt-2">{title}</Heading1>
             </div>
           </div>
-          <BackLink to="/" label="Back to dashboard" />
+          {/* <BackLink to="/" label="Back to dashboard" /> */}
         </div>
 
         <div className="mt-4 space-y-2 p-0 md:mt-8 md:space-y-4 md:rounded-2xl md:border md:border-slate-200 md:bg-slate-50 md:p-4">
@@ -254,7 +253,7 @@ export function RecordSessionPage() {
             ) : null}
 
             <label className="mt-4 block text-sm text-slate-700">
-              <span className="font-medium">Start</span>
+              <span className="font-medium">Start time</span>
               {supportsDateTimeLocal === false ? (
                 <div className="mt-1 flex gap-2">
                   <input
@@ -300,7 +299,7 @@ export function RecordSessionPage() {
               />
             </label>
 
-            <label className="mt-4 block text-sm text-slate-700">
+            {/* <label className="mt-4 block text-sm text-slate-700">
               <span className="font-medium">End time</span>
               <input
                 type="datetime-local"
@@ -308,10 +307,10 @@ export function RecordSessionPage() {
                 onChange={(event) => setEndAt(event.target.value)}
                 className={`${appTokens.input} mt-1 w-full`}
               />
-            </label>
+            </label> */}
 
             <label className="mt-4 block text-sm text-slate-700">
-              <span className="font-medium">Active kWh (optional)</span>
+              <span className="font-medium">Active kWh</span>
               <input
                 type="number"
                 step="0.01"

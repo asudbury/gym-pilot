@@ -132,7 +132,7 @@ export function SessionHistoryPage() {
       <PageCardLayout
         title="Session History"
         subtitle="Session History"
-        description="Review the sessions you have recorded, update any notes or rating, or remove entries that no longer apply."
+        description=""
         icon="calendar"
       >
         <SessionActions includeViewSessionsButton={false} />
