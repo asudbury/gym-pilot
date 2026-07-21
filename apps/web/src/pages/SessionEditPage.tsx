@@ -3,7 +3,6 @@ import { useNavigate, useParams } from 'react-router-dom'
 import { useAuth } from '../auth/AuthContext'
 import { Button } from '../components/Button'
 import { OptionSelector } from '../components/OptionSelector'
-import { RatingSelector } from '../components/RatingSelector'
 import { SessionWorkoutEditor } from '../components/SessionWorkoutEditor'
 import { PageCardLayout } from '../layouts/PageCardLayout'
 import { PageLayout } from '../layouts/PageLayout'
@@ -250,14 +249,14 @@ export function SessionEditPage() {
                 />
               </label>
 
-              <div className="mt-4 flex flex-col gap-2">
+              {/* <div className="mt-4 flex flex-col gap-2">
                 <span className="text-sm font-medium text-slate-700">
                   Rating
                 </span>
                 <RatingSelector value={rating} onChange={setRating} />
-              </div>
+              </div> */}
 
-              <label className="mt-4 flex flex-col gap-1 text-sm text-slate-700">
+              {/* <label className="mt-4 flex flex-col gap-1 text-sm text-slate-700">
                 <span className="font-medium">Notes</span>
                 <textarea
                   value={notes}
@@ -266,7 +265,7 @@ export function SessionEditPage() {
                   placeholder="Add any notes about this session"
                   className="rounded-2xl border border-slate-300 bg-white px-3 py-2 text-sm text-slate-700 shadow-sm"
                 />
-              </label>
+              </label> */}
 
               <div className="mt-2 p-0 md:mt-4 md:rounded-2xl md:border md:border-slate-200 md:bg-slate-50 md:p-4">
                 <div className="flex items-center justify-between gap-2">

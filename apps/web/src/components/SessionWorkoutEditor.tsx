@@ -115,13 +115,6 @@ export function SessionWorkoutEditor({
         </div>
       </div>
 
-      {items.length === 0 ? (
-        <p className="text-sm text-slate-600">
-          Select a plan or assignment to prefill workout items, or add them
-          manually below.
-        </p>
-      ) : null}
-
       {items.map((item, index) => {
         const isExpanded = expandedItemId === item.id
 
@@ -369,7 +362,7 @@ export function SessionWorkoutEditor({
 
       <div className="flex flex-wrap gap-2">
         <Button type="button" tone="default" onClick={handleAddItem}>
-          Add item
+          Add new workout item
         </Button>
       </div>
     </div>

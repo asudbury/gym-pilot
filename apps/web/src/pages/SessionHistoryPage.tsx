@@ -135,7 +135,10 @@ export function SessionHistoryPage() {
         description=""
         icon="calendar"
       >
-        <SessionActions includeViewSessionsButton={false} />
+        <SessionActions
+          includeViewSessionsButton={false}
+          showClassSessionAction={Boolean(user?.gymName && user.gymName.trim())}
+        />
         {errorMessage ? (
           <NotificationPill
             message={{ text: errorMessage, tone: 'error' }}

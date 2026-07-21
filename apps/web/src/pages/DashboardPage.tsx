@@ -30,6 +30,7 @@ export function DashboardPage() {
   // If the user does not have a gym/club id (stored in `gymName`), hide
   // timetable and attendance widgets which require a club context.
   const canShowTimetable = Boolean(user?.gymName && user.gymName.trim())
+  const hasTrainerConfigured = Boolean(user?.trainerId?.trim())
 
   const filteredLayouts = layouts.map((layout) => ({
     ...layout,
@@ -83,11 +84,19 @@ export function DashboardPage() {
                 Session actions
               </h2>
               <div className="flex-1">
-                <SessionActions includeViewSessionsButton={true} />
+                <SessionActions
+                  includeViewSessionsButton={true}
+                  showClassSessionAction={canShowTimetable}
+                  showPTSessionAction={hasTrainerConfigured}
+                />
               </div>
             </div>
             <div className="lg:hidden">
-              <SessionActions includeViewSessionsButton={true} />
+              <SessionActions
+                includeViewSessionsButton={true}
+                showClassSessionAction={canShowTimetable}
+                showPTSessionAction={hasTrainerConfigured}
+              />
             </div>
           </PageCard>
         </div>

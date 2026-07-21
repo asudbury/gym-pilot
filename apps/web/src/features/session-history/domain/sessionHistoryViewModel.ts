@@ -27,8 +27,6 @@ export function getSessionEntryTitle(entry: SessionHistoryEntry) {
     if (entry.sessionType === 'class') {
       return `Class Session: ${entry.className}`
     }
-
-    return entry.className
   }
 
   if (entry.sessionType === 'personal_training') {
@@ -40,7 +38,9 @@ export function getSessionEntryTitle(entry: SessionHistoryEntry) {
   }
 
   if (entry.sessionType === 'solo') {
-    return 'Solo Session'
+    return entry.className?.trim()
+      ? `Solo Session: ${entry.className}`
+      : 'Solo Session'
   }
 
   if (entry.attendanceType === 'taught') {

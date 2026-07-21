@@ -6,7 +6,6 @@ import { PageLayout } from '../layouts/PageLayout'
 import { PageCardLayout } from '../layouts/PageCardLayout'
 import { Button } from '../components/Button'
 import { GymClubSelector } from '../components/GymClubSelector'
-import { RatingSelector } from '../components/RatingSelector'
 import { reportUiError } from '../utils/uiErrorLogging'
 import { loadVirginActiveClubs } from '../utils/virginActiveClubs'
 import {
@@ -745,7 +744,7 @@ export function TimetablePage() {
                     </div>
                   </div>
                 ) : null}
-                <div className="flex flex-col gap-2">
+                {/* <div className="flex flex-col gap-2">
                   <span className="text-sm font-medium text-slate-700">
                     Rating
                   </span>
@@ -753,8 +752,8 @@ export function TimetablePage() {
                     value={attendanceRating}
                     onChange={setAttendanceRating}
                   />
-                </div>
-                <label className="flex flex-col gap-1 text-sm text-slate-700">
+                </div> */}
+                {/* <label className="flex flex-col gap-1 text-sm text-slate-700">
                   <span className="font-medium">Notes</span>
                   <textarea
                     value={attendanceNotes}
@@ -763,7 +762,7 @@ export function TimetablePage() {
                     className="rounded-2xl border border-slate-300 bg-white px-3 py-2 text-sm text-slate-700 shadow-sm"
                     placeholder="Add any details about the class"
                   />
-                </label>
+                </label> */}
                 {attendanceMessage ? (
                   <p className="text-sm text-rose-600">{attendanceMessage}</p>
                 ) : null}

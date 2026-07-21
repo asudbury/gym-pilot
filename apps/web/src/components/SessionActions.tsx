@@ -4,10 +4,16 @@ import { DecorativeIcon } from './ui/DecorativeIcon'
 
 type SessionActionsProps = {
   includeViewSessionsButton?: boolean
+  showActions?: boolean
+  showClassSessionAction?: boolean
+  showPTSessionAction?: boolean
 }
 
 export function SessionActions({
   includeViewSessionsButton = false,
+  showActions = true,
+  showClassSessionAction = true,
+  showPTSessionAction = true,
 }: SessionActionsProps) {
   const navigate = useNavigate()
 
@@ -16,29 +22,37 @@ export function SessionActions({
 
   const iconClass = 'h-5 w-5 sm:h-4 sm:w-4'
 
+  if (!showActions) {
+    return null
+  }
+
   return (
     <div className="flex flex-col gap-3 sm:flex-row sm:flex-wrap">
-      <Button
-        className={buttonClass}
-        tone="emerald"
-        onClick={() => navigate('/timetable?prefill=class')}
-      >
-        <span className="inline-flex items-center justify-center gap-2">
-          <DecorativeIcon icon="calendar" className={iconClass} />
-          <span>Record a Class session</span>
-        </span>
-      </Button>
+      {showClassSessionAction ? (
+        <Button
+          className={buttonClass}
+          tone="emerald"
+          onClick={() => navigate('/timetable?prefill=class')}
+        >
+          <span className="inline-flex items-center justify-center gap-2">
+            <DecorativeIcon icon="calendar" className={iconClass} />
+            <span>Record a Class session</span>
+          </span>
+        </Button>
+      ) : null}
 
-      <Button
-        className={buttonClass}
-        tone="emerald"
-        onClick={() => navigate('/record-session?type=personal_training')}
-      >
-        <span className="inline-flex items-center justify-center gap-2">
-          <DecorativeIcon icon="users" className={iconClass} />
-          <span>Record a PT session</span>
-        </span>
-      </Button>
+      {showPTSessionAction ? (
+        <Button
+          className={buttonClass}
+          tone="emerald"
+          onClick={() => navigate('/record-session?type=personal_training')}
+        >
+          <span className="inline-flex items-center justify-center gap-2">
+            <DecorativeIcon icon="users" className={iconClass} />
+            <span>Record a PT session</span>
+          </span>
+        </Button>
+      ) : null}
 
       <Button
         className={buttonClass}

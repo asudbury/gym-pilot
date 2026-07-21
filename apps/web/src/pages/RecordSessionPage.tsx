@@ -3,7 +3,6 @@ import { useNavigate, useSearchParams } from 'react-router-dom'
 import { useAuth } from '../auth/AuthContext'
 import { Button } from '../components/Button'
 import { PageCard } from '../components/PageCard'
-import { RatingSelector } from '../components/RatingSelector'
 import { SessionWorkoutEditor } from '../components/SessionWorkoutEditor'
 import { DecorativeIcon } from '../components/ui/DecorativeIcon'
 import { Heading1, UpperCaseParagraph } from '../components/Typography'
@@ -52,13 +51,13 @@ export function RecordSessionPage() {
   const [supportsDateTimeLocal, setSupportsDateTimeLocal] = useState<
     boolean | null
   >(null)
-  const [rating, setRating] = useState<number | null>(null)
+  const [rating] = useState<number | null>(null)
   const [duration, setDuration] = useState<number | undefined>(undefined)
   const [name, setName] = useState('')
   const [endAt] = useState<string | null>(null)
   const [activeKwh, setActiveKwh] = useState('')
-  const [notes, setNotes] = useState('')
-  const [selectedPlanId, setSelectedPlanId] = useState('')
+  const [notes] = useState('')
+  const [selectedPlanId] = useState('')
   const [workoutItems, setWorkoutItems] = useState<SessionWorkoutItem[]>([])
   const [isSaving, setIsSaving] = useState(false)
   const [error, setError] = useState<string | null>(null)
@@ -134,6 +133,11 @@ export function RecordSessionPage() {
           : sessionType === 'personal_training'
             ? 'personal_training'
             : 'class'
+
+      if (normalizedSessionType === 'personal_training' && !trainerId) {
+        setError('Select a trainer before recording a PT session.')
+        return
+      }
 
       const sessionRes = await createSession({
         sessionType: normalizedSessionType,
@@ -226,10 +230,11 @@ export function RecordSessionPage() {
               <label className="mt-4 block text-sm text-slate-700">
                 <span className="font-medium">Trainer</span>
                 <select
-                  value={trainerId}
+                  value={trainerId ?? ''}
                   onChange={(event) => setTrainerId(event.target.value)}
                   className={`${appTokens.input} mt-1 w-full`}
                 >
+                  <option value="">Select a trainer</option>
                   {trainers.map((trainer) => (
                     <option key={trainer.id} value={trainer.id}>
                       {trainer.name || trainer.id}
@@ -319,7 +324,7 @@ export function RecordSessionPage() {
               />
             </label>
 
-            <label className="mt-4 block text-sm text-slate-700">
+            {/* <label className="mt-4 block text-sm text-slate-700">
               <span className="font-medium">Plan or assignment</span>
               <select
                 value={selectedPlanId}
@@ -333,14 +338,14 @@ export function RecordSessionPage() {
                   </option>
                 ))}
               </select>
-            </label>
-
+            </label> */}
+            {/* 
             <div className="mt-4 block text-sm text-slate-700">
               <span className="font-medium">Rating</span>
               <div className="mt-2">
                 <RatingSelector value={rating} onChange={setRating} />
               </div>
-            </div>
+            </div> */}
 
             <div className="mt-4 block text-sm text-slate-700">
               <span className="font-medium">Workout log</span>
@@ -352,7 +357,7 @@ export function RecordSessionPage() {
               </div>
             </div>
 
-            <label className="mt-4 block text-sm text-slate-700">
+            {/* <label className="mt-4 block text-sm text-slate-700">
               <span className="font-medium">Notes</span>
               <textarea
                 value={notes}
@@ -361,14 +366,21 @@ export function RecordSessionPage() {
                 className={`${appTokens.input} mt-1 w-full`}
                 placeholder="Add any notes for this session"
               />
-            </label>
+            </label> */}
 
             {error ? (
               <div className="mt-3 text-sm text-rose-600">{error}</div>
             ) : null}
 
             <div className="mt-6 flex flex-wrap gap-2">
-              <Button onClick={handleSubmit} tone="emerald" disabled={isSaving}>
+              <Button
+                onClick={handleSubmit}
+                tone="emerald"
+                disabled={
+                  isSaving ||
+                  (sessionType === 'personal_training' && !trainerId)
+                }
+              >
                 <span className="inline-flex items-center gap-2">
                   {isSaving ? (
                     <>
