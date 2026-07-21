@@ -165,6 +165,7 @@ create table if not exists public.gym_pilot_user_session (
 create table if not exists public.gym_pilot_user_session_workout_item (
   id uuid primary key default gen_random_uuid(),
   session_id text not null,
+  session_row_id uuid,
   user_id uuid not null,
   item_index int not null,
   category text not null check (category in ('exercise', 'warm_up', 'stretch', 'cool_down', 'run', 'spin')),
@@ -241,6 +242,11 @@ create index if not exists gym_pilot_user_session_start_at_idx
 on public.gym_pilot_user_session (start_at);
 create index if not exists gym_pilot_user_session_user_id_idx
 on public.gym_pilot_user_session (user_id);
+alter table public.gym_pilot_user_session_workout_item
+add column if not exists session_row_id uuid;
+
+create index if not exists gym_pilot_user_session_workout_item_session_row_id_idx
+on public.gym_pilot_user_session_workout_item (session_row_id);
 create index if not exists gym_pilot_user_session_workout_item_session_id_idx
 on public.gym_pilot_user_session_workout_item (session_id);
 create index if not exists gym_pilot_user_session_workout_item_user_id_idx
@@ -250,46 +256,107 @@ on public.gym_pilot_user_session_workout_item (session_id, user_id, item_index);
 create index if not exists gym_pilot_user_session_workout_item_sort_order_idx
 on public.gym_pilot_user_session_workout_item (session_id, user_id, sort_order);
 
-create trigger if not exists gym_pilot_app_state_set_updated_at
-before update on public.gym_pilot_app_state
-for each row execute function public.set_updated_at();
+do $$
+begin
+  if not exists (
+    select 1
+    from pg_constraint
+    where conname = 'gym_pilot_user_session_workout_item_session_row_id_fkey'
+  ) then
+    alter table public.gym_pilot_user_session_workout_item
+    add constraint gym_pilot_user_session_workout_item_session_row_id_fkey
+    foreign key (session_row_id) references public.gym_pilot_user_session(id)
+    on delete cascade;
+  end if;
+end $$;
 
-create trigger if not exists gym_pilot_user_role_set_updated_at
-before update on public.gym_pilot_user_role
-for each row execute function public.set_updated_at();
+do $$
+begin
+  if not exists (
+    select 1 from pg_trigger where tgname = 'gym_pilot_app_state_set_updated_at'
+  ) then
+    create trigger gym_pilot_app_state_set_updated_at
+    before update on public.gym_pilot_app_state
+    for each row execute function public.set_updated_at();
+  end if;
 
-create trigger if not exists gym_pilot_profile_set_updated_at
-before update on public.gym_pilot_profile
-for each row execute function public.set_updated_at();
+  if not exists (
+    select 1 from pg_trigger where tgname = 'gym_pilot_user_role_set_updated_at'
+  ) then
+    create trigger gym_pilot_user_role_set_updated_at
+    before update on public.gym_pilot_user_role
+    for each row execute function public.set_updated_at();
+  end if;
 
-create trigger if not exists gym_pilot_favourite_folder_set_updated_at
-before update on public.gym_pilot_favourite_folder
-for each row execute function public.set_updated_at();
+  if not exists (
+    select 1 from pg_trigger where tgname = 'gym_pilot_profile_set_updated_at'
+  ) then
+    create trigger gym_pilot_profile_set_updated_at
+    before update on public.gym_pilot_profile
+    for each row execute function public.set_updated_at();
+  end if;
 
-create trigger if not exists gym_pilot_favourite_set_updated_at
-before update on public.gym_pilot_favourite
-for each row execute function public.set_updated_at();
+  if not exists (
+    select 1 from pg_trigger where tgname = 'gym_pilot_favourite_folder_set_updated_at'
+  ) then
+    create trigger gym_pilot_favourite_folder_set_updated_at
+    before update on public.gym_pilot_favourite_folder
+    for each row execute function public.set_updated_at();
+  end if;
 
-create trigger if not exists gym_pilot_plan_set_updated_at
-before update on public.gym_pilot_plan
-for each row execute function public.set_updated_at();
+  if not exists (
+    select 1 from pg_trigger where tgname = 'gym_pilot_favourite_set_updated_at'
+  ) then
+    create trigger gym_pilot_favourite_set_updated_at
+    before update on public.gym_pilot_favourite
+    for each row execute function public.set_updated_at();
+  end if;
 
-create trigger if not exists gym_pilot_assignment_set_updated_at
-before update on public.gym_pilot_assignment
-for each row execute function public.set_updated_at();
+  if not exists (
+    select 1 from pg_trigger where tgname = 'gym_pilot_plan_set_updated_at'
+  ) then
+    create trigger gym_pilot_plan_set_updated_at
+    before update on public.gym_pilot_plan
+    for each row execute function public.set_updated_at();
+  end if;
 
-create trigger if not exists gym_pilot_class_attendance_set_updated_at
-before update on public.gym_pilot_class_attendance
-for each row execute function public.set_updated_at();
+  if not exists (
+    select 1 from pg_trigger where tgname = 'gym_pilot_assignment_set_updated_at'
+  ) then
+    create trigger gym_pilot_assignment_set_updated_at
+    before update on public.gym_pilot_assignment
+    for each row execute function public.set_updated_at();
+  end if;
 
-create trigger if not exists gym_pilot_user_session_set_updated_at
-before update on public.gym_pilot_user_session
-for each row execute function public.set_updated_at();
+  if not exists (
+    select 1 from pg_trigger where tgname = 'gym_pilot_class_attendance_set_updated_at'
+  ) then
+    create trigger gym_pilot_class_attendance_set_updated_at
+    before update on public.gym_pilot_class_attendance
+    for each row execute function public.set_updated_at();
+  end if;
 
-create trigger if not exists gym_pilot_user_session_workout_item_set_updated_at
-before update on public.gym_pilot_user_session_workout_item
-for each row execute function public.set_updated_at();
+  if not exists (
+    select 1 from pg_trigger where tgname = 'gym_pilot_user_session_set_updated_at'
+  ) then
+    create trigger gym_pilot_user_session_set_updated_at
+    before update on public.gym_pilot_user_session
+    for each row execute function public.set_updated_at();
+  end if;
 
-create trigger if not exists gym_pilot_app_setting_set_updated_at
-before update on public.gym_pilot_app_setting
-for each row execute function public.set_updated_at();
+  if not exists (
+    select 1 from pg_trigger where tgname = 'gym_pilot_user_session_workout_item_set_updated_at'
+  ) then
+    create trigger gym_pilot_user_session_workout_item_set_updated_at
+    before update on public.gym_pilot_user_session_workout_item
+    for each row execute function public.set_updated_at();
+  end if;
+
+  if not exists (
+    select 1 from pg_trigger where tgname = 'gym_pilot_app_setting_set_updated_at'
+  ) then
+    create trigger gym_pilot_app_setting_set_updated_at
+    before update on public.gym_pilot_app_setting
+    for each row execute function public.set_updated_at();
+  end if;
+end $$;

@@ -46,6 +46,7 @@ export function SessionWorkoutEditor({
   const [draftExerciseName, setDraftExerciseName] = useState('')
   const [draftSets, setDraftSets] = useState('')
   const [draftReps, setDraftReps] = useState('')
+  const [draftWeight, setDraftWeight] = useState('')
 
   const handleExpandItem = (itemId: string) => {
     setExpandedItemId((current) => (current === itemId ? null : itemId))
@@ -57,6 +58,7 @@ export function SessionWorkoutEditor({
       exerciseName: draftExerciseName.trim() || '',
       reps: draftReps.trim() || '',
       sets: draftSets.trim() || '',
+      weight: draftWeight.trim() || '',
       notes: '',
     })
 
@@ -65,6 +67,7 @@ export function SessionWorkoutEditor({
     setDraftExerciseName('')
     setDraftSets('')
     setDraftReps('')
+    setDraftWeight('')
   }
 
   return (
@@ -86,7 +89,7 @@ export function SessionWorkoutEditor({
               }}
             />
           </div>
-          <div className="flex gap-2">
+          <div className="flex flex-wrap gap-2">
             <input
               value={draftSets}
               onChange={(event) => setDraftSets(event.target.value)}
@@ -98,6 +101,12 @@ export function SessionWorkoutEditor({
               onChange={(event) => setDraftReps(event.target.value)}
               placeholder="Reps"
               className={`${appTokens.input} w-20`}
+            />
+            <input
+              value={draftWeight}
+              onChange={(event) => setDraftWeight(event.target.value)}
+              placeholder="Weight"
+              className={`${appTokens.input} w-24`}
             />
           </div>
           <Button type="button" tone="default" onClick={handleAddItem}>

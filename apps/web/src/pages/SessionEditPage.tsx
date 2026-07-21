@@ -212,7 +212,6 @@ export function SessionEditPage() {
                     type="text"
                     value={sessionName}
                     onChange={(event) => setSessionName(event.target.value)}
-                    placeholder="Add a name for this session"
                     className="rounded-2xl border border-slate-300 bg-white px-3 py-2 text-sm text-slate-700 shadow-sm"
                   />
                 </label>

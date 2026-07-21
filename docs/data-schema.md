@@ -3,6 +3,7 @@
 ## Data types
 
 ### Exercise
+
 Represents a browsable exercise entry used on the home page and exercise detail pages.
 
 - id: string
@@ -22,6 +23,7 @@ Represents a browsable exercise entry used on the home page and exercise detail 
 - attribution: string
 
 ### Plan
+
 Represents a base training plan created by a trainer or user and used as a template.
 
 - id: string
@@ -30,6 +32,7 @@ Represents a base training plan created by a trainer or user and used as a templ
 - exercises: PlanItem[]
 
 ### Assignment
+
 Represents a user-specific assignment that references a Plan and owns completion state for that user.
 
 - id: string
@@ -43,6 +46,7 @@ Represents a user-specific assignment that references a Plan and owns completion
 - per-item user data is stored on each PlanItem, such as reps, weight, or other completion values
 
 ### PlanItem
+
 A plan-specific entry that references an Exercise by ID and can carry assignment-specific values.
 
 - exerciseId: string
@@ -50,6 +54,7 @@ A plan-specific entry that references an Exercise by ID and can carry assignment
 - user data such as reps, weight, or completion values can be stored on this item
 
 ### User
+
 Represents a person who can be assigned to plans and given a role.
 
 - id: string
@@ -58,6 +63,7 @@ Represents a person who can be assigned to plans and given a role.
 - role: admin | trainer | client | guest
 
 ### Profile
+
 Stores optional profile metadata for the authenticated Supabase user.
 
 - id: string
@@ -69,6 +75,7 @@ Stores optional profile metadata for the authenticated Supabase user.
 - updated_at: string
 
 ### User role
+
 Stores one row per assigned role for a user, replacing the previous JSONB roles array on the profile table.
 
 - id: string
@@ -78,6 +85,7 @@ Stores one row per assigned role for a user, replacing the previous JSONB roles 
 - updated_at: string
 
 ### Favourite folder
+
 Groups favourite shortcuts for easier organisation.
 
 - id: string
@@ -87,6 +95,7 @@ Groups favourite shortcuts for easier organisation.
 - updated_at: string
 
 ### Favourite link
+
 Represents a saved navigation shortcut or exercise shortcut.
 
 - id: string
@@ -99,6 +108,7 @@ Represents a saved navigation shortcut or exercise shortcut.
 - updated_at: string
 
 ### Session workout item
+
 Represents a single workout entry attached to a session so workout data can be queried independently from the session metadata payload.
 
 - id: string
@@ -119,6 +129,7 @@ Represents a single workout entry attached to a session so workout data can be q
 - updated_at: string
 
 ### Error log
+
 Stores application errors when the app setting `error_logging_enabled` is true.
 
 - id: string
@@ -127,6 +138,7 @@ Stores application errors when the app setting `error_logging_enabled` is true.
 - created_at: string
 
 ### Audit log
+
 Stores audit events when the app setting `audit_logging_enabled` is true.
 
 - id: string
@@ -135,30 +147,34 @@ Stores audit events when the app setting `audit_logging_enabled` is true.
 - created_at: string
 
 ## Storage model
+
 The app now has a local-first data layer based on Dexie and a query layer based on TanStack Query.
 
 - Dexie stores key/value records in IndexedDB.
 - TanStack Query is used for API-backed state and caching.
 
 ## Supabase schema
+
 The current Supabase schema is defined in the migrations folder [supabase/migrations](supabase/migrations).
 
 ### Supabase call inventory
+
 The shared Supabase helpers in [packages/shared/src/gymPilotSupabase.ts](packages/shared/src/gymPilotSupabase.ts) centralise the app's remote persistence and auth calls. When this surface changes, update this section and the Mermaid diagram below.
 
-| Area | Current call patterns | Tables / resources |
-| --- | --- | --- |
-| Auth and session | `client.auth.getSession()`, `client.auth.signInWithOAuth()`, `client.auth.signInWithPassword()`, `client.auth.signUp()`, `client.auth.resetPasswordForEmail()`, `client.auth.updateUser()`, `client.auth.signOut()` | Supabase Auth users and session state |
-| Profiles and settings | `loadSupabaseProfileSnapshot()`, `saveSupabaseProfileName()`, `saveSupabaseApplicationName()`, `saveSupabaseGymBrand()`, `saveSupabaseGymName()`, `saveSupabaseProfileAccessSettings()`, `saveSupabaseProfileFlag()`, `saveSupabaseProfileLastLoggedIn()`, `loadSupabaseProfileTermsAcceptance()`, `saveSupabaseProfileTermsAcceptance()`, `loadSupabaseProfileRoles()`, `saveSupabaseProfileRoles()` | `gym_pilot_profile`, `gym_pilot_user_role` |
-| Key/value persistence | `loadSupabaseJsonRecord()`, `saveSupabaseJsonRecord()`, `removeSupabaseJsonRecord()` | `gym_pilot_app_state` plus table-specific rows for plans, assignments, favourites, and app state |
-| Plans and assignments | `select`, `insert`, `upsert`, `delete` against remote rows | `gym_pilot_plan`, `gym_pilot_assignment` |
-| Favourites and folders | `select`, `insert`, `upsert`, `delete` against remote rows | `gym_pilot_favourite_folder`, `gym_pilot_favourite` |
-| Activity logging | `recordSupabaseUserActivity()` uses `insert` into `gym_pilot_user_activity`; it skips inserts when the app is running on localhost-style hosts | `gym_pilot_user_activity` |
-| Session recording | `saveTimetableAttendance()` inserts role-based session records with optional notes and a 1-5 rating for a session/class | `gym_pilot_session_booking` |
-| Workout items | `loadWorkoutItemsForSession()` and `saveWorkoutItemsForSession()` read/write ordered workout rows for a session | `gym_pilot_session_workout_item` |
-| Error and audit logging | `persistErrorLog()` and `persistAuditLog()` write to `gym_pilot_error_log` and `gym_pilot_audit_log` only when the matching app settings are enabled | `gym_pilot_error_log`, `gym_pilot_audit_log` |
+| Area                    | Current call patterns                                                                                                                                                                                                                                                                                                                                                                                 | Tables / resources                                                                               |
+| ----------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------ |
+| Auth and session        | `client.auth.getSession()`, `client.auth.signInWithOAuth()`, `client.auth.signInWithPassword()`, `client.auth.signUp()`, `client.auth.resetPasswordForEmail()`, `client.auth.updateUser()`, `client.auth.signOut()`                                                                                                                                                                                   | Supabase Auth users and session state                                                            |
+| Profiles and settings   | `loadSupabaseProfileSnapshot()`, `saveSupabaseProfileName()`, `saveSupabaseApplicationName()`, `saveSupabaseGymBrand()`, `saveSupabaseGymName()`, `saveSupabaseProfileAccessSettings()`, `saveSupabaseProfileFlag()`, `saveSupabaseProfileLastLoggedIn()`, `loadSupabaseProfileTermsAcceptance()`, `saveSupabaseProfileTermsAcceptance()`, `loadSupabaseProfileRoles()`, `saveSupabaseProfileRoles()` | `gym_pilot_profile`, `gym_pilot_user_role`                                                       |
+| Key/value persistence   | `loadSupabaseJsonRecord()`, `saveSupabaseJsonRecord()`, `removeSupabaseJsonRecord()`                                                                                                                                                                                                                                                                                                                  | `gym_pilot_app_state` plus table-specific rows for plans, assignments, favourites, and app state |
+| Plans and assignments   | `select`, `insert`, `upsert`, `delete` against remote rows                                                                                                                                                                                                                                                                                                                                            | `gym_pilot_plan`, `gym_pilot_assignment`                                                         |
+| Favourites and folders  | `select`, `insert`, `upsert`, `delete` against remote rows                                                                                                                                                                                                                                                                                                                                            | `gym_pilot_favourite_folder`, `gym_pilot_favourite`                                              |
+| Activity logging        | `recordSupabaseUserActivity()` uses `insert` into `gym_pilot_user_activity`; it skips inserts when the app is running on localhost-style hosts                                                                                                                                                                                                                                                        | `gym_pilot_user_activity`                                                                        |
+| Session recording       | `saveTimetableAttendance()` inserts role-based session records with optional notes and a 1-5 rating for a session/class                                                                                                                                                                                                                                                                               | `gym_pilot_session_booking`                                                                      |
+| Workout items           | `loadWorkoutItemsForSession()` and `saveWorkoutItemsForSession()` read/write ordered workout rows for a session                                                                                                                                                                                                                                                                                       | `gym_pilot_session_workout_item`                                                                 |
+| Error and audit logging | `persistErrorLog()` and `persistAuditLog()` write to `gym_pilot_error_log` and `gym_pilot_audit_log` only when the matching app settings are enabled                                                                                                                                                                                                                                                  | `gym_pilot_error_log`, `gym_pilot_audit_log`                                                     |
 
 ### Entity relationship overview
+
 ```mermaid
 erDiagram
     auth_users ||--o{ gym_pilot_app_state : owns
@@ -273,6 +289,7 @@ erDiagram
     gym_pilot_session_workout_item {
         uuid id
         text session_id
+        uuid session_row_id
         uuid user_id
         int item_index
         text category
@@ -291,6 +308,7 @@ erDiagram
 ```
 
 ### Notes
+
 - a shared app state table for user-scoped key/value persistence
 - a profile table for friendly names, gym brand/club metadata, optional user settings, and the terms-and-conditions acceptance state used by the welcome flow
 - a favourites table plus folders for saved exercise and link shortcuts
@@ -301,6 +319,7 @@ erDiagram
 - auth metadata can mark a user as requiring a password change on next sign-in
 
 ### Client-side preference storage
+
 The app currently keeps UI preferences such as theme choice and the version banner visibility in browser storage rather than Supabase.
 
 - `gym-pilot-theme-preference` is stored in localStorage and controls the light/dark theme

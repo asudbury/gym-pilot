@@ -247,7 +247,6 @@ export function RecordSessionPage() {
                   value={name}
                   onChange={(event) => setName(event.target.value)}
                   className={`${appTokens.input} mt-1 w-full`}
-                  placeholder="Add a name for this session"
                 />
               </label>
             ) : null}
