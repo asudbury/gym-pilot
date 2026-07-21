@@ -32,6 +32,7 @@ export function SessionEditPage() {
   const [notes, setNotes] = useState('')
   const [rating, setRating] = useState<number | null>(null)
   const [durationMinutes, setDurationMinutes] = useState<number | null>(null)
+  const [sessionName, setSessionName] = useState('')
   const [startedAt, setStartedAt] = useState('')
   const [workoutItems, setWorkoutItems] = useState<SessionWorkoutItem[]>([])
   const [isSaving, setIsSaving] = useState(false)
@@ -64,6 +65,7 @@ export function SessionEditPage() {
           setRating(getSessionEntryRating(nextEntry))
           setDurationMinutes(nextEntry.durationMinutes ?? null)
           setStartedAt(nextEntry.startedAt ?? '')
+          setSessionName(nextEntry.className ?? '')
 
           const parsedMetadata = parseSessionWorkoutMetadata(
             nextEntry.workoutMetadata,
@@ -134,6 +136,10 @@ export function SessionEditPage() {
         rating: normalizedRating,
         durationMinutes: durationMinutes ?? entry.durationMinutes ?? null,
         startedAt: startedAt || entry.startedAt || null,
+        className:
+          entry.sessionType === 'solo'
+            ? sessionName.trim() || null
+            : (entry.className ?? null),
         workoutMetadata: buildSessionWorkoutMetadata({
           workoutItems,
           endedAt: parsedWorkoutMetadata.endedAt,
@@ -257,6 +263,19 @@ export function SessionEditPage() {
                   })}
                 </div>
               </div>
+
+              {entry.sessionType === 'solo' ? (
+                <label className="mt-4 flex flex-col gap-1 text-sm text-slate-700">
+                  <span className="font-medium">Name</span>
+                  <input
+                    type="text"
+                    value={sessionName}
+                    onChange={(event) => setSessionName(event.target.value)}
+                    placeholder="Add a name for this session"
+                    className="rounded-2xl border border-slate-300 bg-white px-3 py-2 text-sm text-slate-700 shadow-sm"
+                  />
+                </label>
+              ) : null}
 
               <label className="mt-4 flex flex-col gap-1 text-sm text-slate-700">
                 <span className="font-medium">Date and time</span>

@@ -91,13 +91,19 @@ export function useAuthModule(users: User[]) {
   const logout = useCallback(
     async (redirectTo?: string) => {
       const currentUserId = user?.id
+      const currentFriendlyName = user?.name
 
       persistLogoutPending(true)
       persistCurrentUserId(null)
       setUser(null)
 
       if (currentUserId) {
-        await recordSupabaseUserActivity('logout', {}, currentUserId)
+        await recordSupabaseUserActivity(
+          'logout',
+          {},
+          currentUserId,
+          currentFriendlyName,
+        )
       }
 
       await signOutFromSupabase()

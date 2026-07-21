@@ -54,6 +54,7 @@ export function RecordSessionPage() {
   >(null)
   const [rating, setRating] = useState<number | null>(null)
   const [duration, setDuration] = useState<number | undefined>(undefined)
+  const [name, setName] = useState('')
   const [endAt, setEndAt] = useState('')
   const [activeKwh, setActiveKwh] = useState('')
   const [notes, setNotes] = useState('')
@@ -145,6 +146,8 @@ export function RecordSessionPage() {
             ? (trainers.find((trainer) => trainer.id === trainerId)?.name ??
               null)
             : null,
+        className:
+          normalizedSessionType === 'solo' ? name.trim() || null : null,
         startAt: new Date(startAt).toISOString(),
         durationMinutes: duration ?? null,
         price: null,
@@ -227,6 +230,19 @@ export function RecordSessionPage() {
                     </option>
                   ))}
                 </select>
+              </label>
+            ) : null}
+
+            {sessionType === 'solo' ? (
+              <label className="mt-4 block text-sm text-slate-700">
+                <span className="font-medium">Name</span>
+                <input
+                  type="text"
+                  value={name}
+                  onChange={(event) => setName(event.target.value)}
+                  className={`${appTokens.input} mt-1 w-full`}
+                  placeholder="Add a name for this session"
+                />
               </label>
             ) : null}
 

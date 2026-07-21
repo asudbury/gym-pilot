@@ -8,6 +8,7 @@ import { DecorativeIcon } from '../components/ui/DecorativeIcon'
 import {
   getSupabaseClient,
   logger,
+  recordSupabaseUserActivity,
   saveSupabaseProfileFlag,
   loadSupabaseProfileTermsAcceptance,
 } from '@gym-pilot/shared'
@@ -133,6 +134,25 @@ export function ResetPasswordPage() {
       setConfirmPassword('')
       return
     }
+    try {
+      const { data: authUserData } = await client.auth.getUser()
+      const currentUserId = authUserData.user?.id ?? null
+
+      if (currentUserId) {
+        await recordSupabaseUserActivity(
+          'password_set',
+          { source: hasResetTokens ? 'reset_link' : 'signed_in_flow' },
+          currentUserId,
+          authUserData.user?.email ?? null,
+        )
+      }
+    } catch (error) {
+      logger.warn(
+        '[ResetPassword] Could not record password set activity',
+        error,
+      )
+    }
+
     // Persist the must_change_password flag, but don't block the UI if
     // local persistence (IndexedDB) hangs — use a short timeout and
     // continue regardless of persistence outcome.

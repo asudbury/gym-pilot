@@ -19,7 +19,7 @@ export function SessionActions({
       >
         <div className="inline-flex items-center gap-2">
           <DecorativeIcon icon="calendar" className="h-4 w-4" />
-          <span>Class session</span>
+          <span>Record a Class session</span>
         </div>
       </Button>
 

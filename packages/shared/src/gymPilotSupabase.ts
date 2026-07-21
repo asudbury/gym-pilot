@@ -957,6 +957,8 @@ export async function saveSupabaseProfileAccessSettings(accountTier: string | nu
   }
 
   await invalidateSupabaseProfileCache(resolvedUserId)
+  const profileSnapshot = await loadSupabaseProfileSnapshot(resolvedUserId)
+  await recordSupabaseUserActivity('profile_access_updated', { accountTier: normalizedTier, isFrozen: Boolean(isFrozen) }, resolvedUserId, profileSnapshot.friendlyName)
 }
 
 export async function saveSupabaseProfileFlag(flag: 'must_change_password', value: boolean, userId?: string) {
@@ -983,6 +985,8 @@ export async function saveSupabaseProfileFlag(flag: 'must_change_password', valu
   }
 
   await invalidateSupabaseProfileCache(resolvedUserId)
+  const profileSnapshot = await loadSupabaseProfileSnapshot(resolvedUserId)
+  await recordSupabaseUserActivity('profile_flag_updated', { flag, value }, resolvedUserId, profileSnapshot.friendlyName)
 }
 
 export async function saveSupabaseProfileTermsAcceptance(accepted: boolean, userId?: string) {
@@ -1025,7 +1029,7 @@ export function shouldRecordLoginActivity(previousLastLoggedInAt: string | null 
   return previousLastLoggedInAt !== nextLastLoggedInAt
 }
 
-export async function saveSupabaseProfileLastLoggedIn(userId?: string) {
+export async function saveSupabaseProfileLastLoggedIn(userId?: string, friendlyName?: string | null) {
   const client = getSupabaseClient()
 
   if (!client) {
@@ -1070,7 +1074,7 @@ export async function saveSupabaseProfileLastLoggedIn(userId?: string) {
   await invalidateSupabaseProfileCache(resolvedUserId)
 
   if (shouldRecord) {
-    await recordSupabaseUserActivity('login', {}, resolvedUserId)
+    await recordSupabaseUserActivity('login', {}, resolvedUserId, friendlyName)
   }
 }
 
@@ -1242,6 +1246,7 @@ export async function saveSupabaseJsonRecord<T>(key: string, value: T) {
       }
     }
 
+    await recordSupabaseUserActivity('plan_saved', { planCount: plans.length }, userId)
     return
   }
 
@@ -1273,6 +1278,7 @@ export async function saveSupabaseJsonRecord<T>(key: string, value: T) {
       }
     }
 
+    await recordSupabaseUserActivity('assignment_saved', { assignmentCount: assignments.length }, userId)
     return
   }
 
@@ -1389,14 +1395,47 @@ export function isLocalhostHost(hostname?: string) {
   return hostname === 'localhost' || hostname === '127.0.0.1' || hostname === '::1' || hostname === '[::1]' || hostname === '0.0.0.0' || hostname.endsWith('.localhost')
 }
 
-export function shouldRecordSupabaseUserActivity() {
-  const hostname = typeof window !== 'undefined' ? window.location.hostname : undefined
-  return !isLocalhostHost(hostname)
+export async function shouldRecordSupabaseUserActivity() {
+  const enabledValue = await loadAppSetting('user_activity_logging_enabled', true)
+  return enabledValue === true || enabledValue === 'true'
 }
 
-export async function recordSupabaseUserActivity(eventType: string, eventData: Record<string, unknown> = {}, userId?: string) {
-  if (!shouldRecordSupabaseUserActivity()) {
-    logger.info('[Supabase] Skipping user activity recording on localhost host')
+export function buildSupabaseUserActivityEventData(eventData: Record<string, unknown> = {}, friendlyName?: string | null) {
+  const sanitizedPayload: Record<string, unknown> = { ...eventData }
+
+  for (const key of Object.keys(sanitizedPayload)) {
+    if (typeof key === 'string' && /email|phone|password|token|secret|api[_-]?key|authorization|cookie|notes|details|message/i.test(key)) {
+      delete sanitizedPayload[key]
+    }
+  }
+
+  if (typeof friendlyName === 'string') {
+    const trimmedFriendlyName = friendlyName.trim()
+
+    if (trimmedFriendlyName) {
+      sanitizedPayload.friendlyName = trimmedFriendlyName
+    }
+  }
+
+  if (!('friendlyName' in sanitizedPayload) && typeof eventData.email === 'string') {
+    const trimmedEmail = eventData.email.trim()
+
+    if (trimmedEmail) {
+      sanitizedPayload.email = trimmedEmail
+    }
+  }
+
+  return sanitizedPayload
+}
+
+export async function recordSupabaseUserActivity(
+  eventType: string,
+  eventData: Record<string, unknown> = {},
+  userId?: string,
+  friendlyName?: string | null,
+) {
+  if (!(await shouldRecordSupabaseUserActivity())) {
+    logger.info('[Supabase] Skipping user activity recording')
     return
   }
 
@@ -1412,10 +1451,12 @@ export async function recordSupabaseUserActivity(eventType: string, eventData: R
     return
   }
 
+  const payload = buildSupabaseUserActivityEventData(eventData, friendlyName)
+
   const { error } = await client.from('gym_pilot_user_activity').insert({
     user_id: resolvedUserId,
     event_type: eventType,
-    event_data: eventData,
+    event_data: payload,
   })
 
   if (error) {
@@ -1917,6 +1958,20 @@ export async function saveSessionHistoryEntry(entry: SessionHistoryEntry, userId
       }, { onConflict: 'id' })
 
     if (!error) {
+      const activityUserId = resolvedUserId
+      if (activityUserId) {
+        const profileSnapshot = await loadSupabaseProfileSnapshot(activityUserId)
+        await recordSupabaseUserActivity('session_updated', {
+          sessionId: entry.sessionId ?? null,
+          sessionType: entry.sessionType ?? null,
+          className: entry.className ?? null,
+          instructorName: entry.instructorName?.trim() ? entry.instructorName.trim() : null,
+          startedAt: entry.startedAt ?? null,
+          attendanceType: entry.attendanceType,
+          durationMinutes: entry.durationMinutes ?? null,
+        }, activityUserId, profileSnapshot.friendlyName)
+      }
+
       return [entry]
     }
 
@@ -2185,7 +2240,20 @@ export async function createSession(input: {
     return { success: false as const, error }
   }
 
-  return { success: true as const, session: data && data[0] }
+  const createdSession = data && data[0]
+
+  if (createdSession && resolvedUserId) {
+    const profileSnapshot = await loadSupabaseProfileSnapshot(resolvedUserId)
+    await recordSupabaseUserActivity('session_created', {
+      sessionId: createdSession.id ?? null,
+      sessionType: input.sessionType,
+      startAt: input.startAt,
+      durationMinutes: input.durationMinutes ?? null,
+      trainerName: input.trainerName?.trim() ? input.trainerName.trim() : null,
+    }, resolvedUserId, profileSnapshot.friendlyName)
+  }
+
+  return { success: true as const, session: createdSession }
 }
 
 export async function bookSession(input: {

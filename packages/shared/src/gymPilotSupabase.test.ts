@@ -3,6 +3,7 @@ import {
   buildSessionBookingAttendancePayload,
   buildSessionRecordPayload,
   buildSupabaseProfileLocalCacheEntry,
+  buildSupabaseUserActivityEventData,
   buildSupabaseUserRoleRows,
   buildSessionHistoryDeleteError,
   formatSessionHistoryError,
@@ -187,6 +188,17 @@ describe('remote session mapping', () => {
     } as any)
 
     expect(entry.sessionType).toBe('personal_training')
+  })
+
+  it('persists a solo session name in the session payload', () => {
+    const payload = buildSessionRecordPayload({
+      userId: 'user-1',
+      sessionType: 'solo',
+      className: 'Morning mobility',
+      startAt: '2026-01-01T10:00:00.000Z',
+    })
+
+    expect(payload.class_name).toBe('Morning mobility')
   })
 
   it('maps rows that use the database trainer_name column', () => {
@@ -418,16 +430,29 @@ describe('local profile snapshot sync', () => {
 })
 
 describe('local activity recording guard', () => {
-  it('treats localhost-style hosts as local and skips recording', () => {
+  it('treats localhost-style hosts as local but still allows activity recording', async () => {
     expect(isLocalhostHost('localhost')).toBe(true)
     expect(isLocalhostHost('127.0.0.1')).toBe(true)
     expect(isLocalhostHost('::1')).toBe(true)
     expect(isLocalhostHost('foo.localhost')).toBe(true)
+    await expect(shouldRecordSupabaseUserActivity()).resolves.toBe(true)
   })
 
-  it('allows recording when the host is not localhost', () => {
+  it('allows recording when the host is not localhost', async () => {
     expect(isLocalhostHost('gym-pilot.example.com')).toBe(false)
-    expect(shouldRecordSupabaseUserActivity()).toBe(true)
+    await expect(shouldRecordSupabaseUserActivity()).resolves.toBe(true)
+  })
+
+  it('keeps activity event data privacy-safe while adding a friendly name', () => {
+    expect(buildSupabaseUserActivityEventData({ email: 'ada@example.com' }, 'Ada')).toEqual({
+      friendlyName: 'Ada',
+    })
+  })
+
+  it('preserves an email when no friendly name is available', () => {
+    expect(buildSupabaseUserActivityEventData({ email: 'ada@example.com' }, null)).toEqual({
+      email: 'ada@example.com',
+    })
   })
 
   it('maps app storage keys to the singular table naming convention', () => {

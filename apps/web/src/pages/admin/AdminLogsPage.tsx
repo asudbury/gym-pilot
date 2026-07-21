@@ -249,31 +249,33 @@ export function AdminLogsPage({ view = 'combined' }: AdminLogsPageProps) {
         description={description}
       >
         <div className="space-y-6">
-          <div className="flex flex-wrap items-center gap-3">
+          <div className="flex flex-wrap items-center justify-between gap-3">
+            <div className="flex flex-wrap items-center gap-3">
+              <button
+                type="button"
+                onClick={() => navigate('/admin/logs/error')}
+                className={`rounded-full border px-3 py-1.5 text-sm font-semibold transition ${view === 'error' || view === 'combined' ? 'border-sky-600 bg-sky-600 text-white shadow-sm' : 'border-slate-300 bg-white text-slate-700 hover:bg-slate-50'}`}
+              >
+                Error log
+              </button>
+              <button
+                type="button"
+                onClick={() => navigate('/admin/logs/audit')}
+                className={`rounded-full border px-3 py-1.5 text-sm font-semibold transition ${view === 'audit' ? 'border-sky-600 bg-sky-600 text-white shadow-sm' : 'border-slate-300 bg-white text-slate-700 hover:bg-slate-50'}`}
+              >
+                Audit log
+              </button>
+              <button
+                type="button"
+                onClick={() => navigate('/admin/logs/activity')}
+                className={`rounded-full border px-3 py-1.5 text-sm font-semibold transition ${view === 'activity' ? 'border-sky-600 bg-sky-600 text-white shadow-sm' : 'border-slate-300 bg-white text-slate-700 hover:bg-slate-50'}`}
+              >
+                Activity log
+              </button>
+            </div>
             <Button type="button" onClick={() => window.location.reload()}>
               Refresh
             </Button>
-            <button
-              type="button"
-              onClick={() => navigate('/admin/logs/error')}
-              className={`rounded-full border px-3 py-1.5 text-sm font-semibold transition ${view === 'error' || view === 'combined' ? 'border-sky-600 bg-sky-600 text-white shadow-sm' : 'border-slate-300 bg-white text-slate-700 hover:bg-slate-50'}`}
-            >
-              Error log
-            </button>
-            <button
-              type="button"
-              onClick={() => navigate('/admin/logs/audit')}
-              className={`rounded-full border px-3 py-1.5 text-sm font-semibold transition ${view === 'audit' ? 'border-sky-600 bg-sky-600 text-white shadow-sm' : 'border-slate-300 bg-white text-slate-700 hover:bg-slate-50'}`}
-            >
-              Audit log
-            </button>
-            <button
-              type="button"
-              onClick={() => navigate('/admin/logs/activity')}
-              className={`rounded-full border px-3 py-1.5 text-sm font-semibold transition ${view === 'activity' ? 'border-sky-600 bg-sky-600 text-white shadow-sm' : 'border-slate-300 bg-white text-slate-700 hover:bg-slate-50'}`}
-            >
-              Activity log
-            </button>
           </div>
 
           {error ? (
@@ -302,7 +304,7 @@ export function AdminLogsPage({ view = 'combined' }: AdminLogsPageProps) {
                     onClick={() => void handleClearLogs()}
                     disabled={clearing}
                   >
-                    {clearing ? 'Clearing…' : 'Clear logs'}
+                    {clearing ? 'Clearing…' : 'Clear log'}
                   </Button>
                 </div>
               </div>
@@ -349,7 +351,7 @@ export function AdminLogsPage({ view = 'combined' }: AdminLogsPageProps) {
                     onClick={() => void handleClearLogs()}
                     disabled={clearing}
                   >
-                    {clearing ? 'Clearing…' : 'Clear logs'}
+                    {clearing ? 'Clearing…' : 'Clear log'}
                   </Button>
                 </div>
               </div>

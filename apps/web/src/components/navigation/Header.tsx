@@ -192,7 +192,7 @@ export function Header({
                         <Button
                           type="button"
                           onClick={handleAuthAction}
-                          className="inline-flex items-center gap-2 rounded-xl px-3 py-2 text-left text-sm font-medium text-slate-700 transition hover:bg-slate-50"
+                          className="inline-flex items-center justify-start gap-2 rounded-xl px-3 py-2 text-left text-sm font-medium text-slate-700 transition hover:bg-slate-50"
                         >
                           <DecorativeIcon
                             icon={user ? 'lock' : 'user'}
@@ -244,7 +244,7 @@ export function Header({
                         <Button
                           type="button"
                           onClick={handleAuthAction}
-                          className="inline-flex items-center gap-2 rounded-xl px-3 py-2 text-left text-sm font-medium text-slate-700 transition hover:bg-slate-50"
+                          className="inline-flex items-center justify-start gap-2 rounded-xl px-3 py-2 text-left text-sm font-medium text-slate-700 transition hover:bg-slate-50"
                         >
                           <DecorativeIcon
                             icon={user ? 'lock' : 'user'}

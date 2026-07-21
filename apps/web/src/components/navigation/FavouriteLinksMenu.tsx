@@ -233,10 +233,10 @@ export function FavouriteLinksMenu({
     variant === 'header'
       ? getToneClass(
           'default',
-          'w-full px-4 py-2 text-left text-sm font-medium',
+          'w-full justify-start px-4 py-2 text-left text-sm font-medium',
         )
       : classNames(
-          'w-full rounded-xl px-3 py-2 text-left text-sm font-medium transition',
+          'w-full justify-start rounded-xl px-3 py-2 text-left text-sm font-medium transition',
           menuOpen
             ? 'bg-slate-900 text-white'
             : 'text-slate-700 hover:bg-slate-50',

@@ -3,6 +3,7 @@ import { useNavigate, useSearchParams, Link } from 'react-router-dom'
 import {
   loadSupabaseProfileTermsAcceptance,
   logger,
+  recordSupabaseUserActivity,
   saveSupabaseProfileTermsAcceptance,
   signOutFromSupabase,
 } from '@gym-pilot/shared'
@@ -36,6 +37,13 @@ export function WelcomePage() {
       }
 
       try {
+        await recordSupabaseUserActivity(
+          'welcome_page_viewed',
+          { returnTo },
+          user.id,
+          user.name || user.email || null,
+        )
+
         // If the user must change password, redirect them to the reset
         // password flow before allowing terms acceptance.
         const requiresPasswordChange = await loadSupabaseProfileFlag(

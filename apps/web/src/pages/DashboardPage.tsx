@@ -98,13 +98,6 @@ export function DashboardPage() {
 
         <div className="mt-4">
           <PageCard as="section">
-            <div className="mb-1 flex items-start gap-3">
-              <DecorativeIcon icon="calendar" />
-              <p className="text-sm font-semibold uppercase tracking-[0.24em] text-slate-500">
-                Record a session
-              </p>
-            </div>
-
             <SessionActions includeViewSessionsButton={true} />
           </PageCard>
         </div>
