@@ -176,9 +176,11 @@ export function RecordSessionPage() {
 
       if (!sessionRecordingResult.success) {
         const persistenceError = sessionRecordingResult.error
-        const userMessage = persistenceError instanceof Error && persistenceError.message.includes('workout')
-          ? 'The session was recorded, but your workout details could not be saved. Please try again.'
-          : 'We could not record the session right now. Please try again.'
+        const userMessage =
+          persistenceError instanceof Error &&
+          persistenceError.message.includes('workout')
+            ? 'The session was recorded, but your workout details could not be saved. Please try again.'
+            : 'We could not record the session right now. Please try again.'
 
         throw persistenceError || new Error(userMessage)
       }

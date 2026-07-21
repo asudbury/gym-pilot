@@ -217,7 +217,10 @@ export function AdminLogsPage({ view = 'combined' }: AdminLogsPageProps) {
   const clearTargetTable = resolveLogTableName(view)
   const filteredErrorLogs = filterLogEntriesByText(errorLogs, logFilterText)
   const filteredAuditLogs = filterLogEntriesByText(auditLogs, logFilterText)
-  const filteredActivityLogs = filterLogEntriesByText(activityLogs, logFilterText)
+  const filteredActivityLogs = filterLogEntriesByText(
+    activityLogs,
+    logFilterText,
+  )
 
   const title =
     view === 'audit'

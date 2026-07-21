@@ -13,11 +13,27 @@ describe('filterLogEntriesByText', () => {
   it('filters log entries by name or text content', () => {
     const entries = [
       { id: '1', message: 'User login', details: { friendly_name: 'Ada' } },
-      { id: '2', message: 'Password reset', details: { friendly_name: 'Grace' } },
+      {
+        id: '2',
+        message: 'Password reset',
+        details: { friendly_name: 'Grace' },
+      },
     ]
 
-    expect(filterLogEntriesByText(entries as Array<Record<string, unknown>>, 'ada')).toHaveLength(1)
-    expect(filterLogEntriesByText(entries as Array<Record<string, unknown>>, 'grace')).toHaveLength(1)
-    expect(filterLogEntriesByText(entries as Array<Record<string, unknown>>, 'missing')).toHaveLength(0)
+    expect(
+      filterLogEntriesByText(entries as Array<Record<string, unknown>>, 'ada'),
+    ).toHaveLength(1)
+    expect(
+      filterLogEntriesByText(
+        entries as Array<Record<string, unknown>>,
+        'grace',
+      ),
+    ).toHaveLength(1)
+    expect(
+      filterLogEntriesByText(
+        entries as Array<Record<string, unknown>>,
+        'missing',
+      ),
+    ).toHaveLength(0)
   })
 })

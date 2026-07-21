@@ -145,7 +145,10 @@ export function AdminUserActivityPage() {
       activity.eventType,
       Object.entries(activity.eventData ?? {})
         .filter(([key]) => !['email', 'source'].includes(key))
-        .map(([key, value]) => `${key}: ${typeof value === 'string' ? value : JSON.stringify(value)}`)
+        .map(
+          ([key, value]) =>
+            `${key}: ${typeof value === 'string' ? value : JSON.stringify(value)}`,
+        )
         .join(' '),
     ]
       .join(' ')
@@ -232,7 +235,9 @@ export function AdminUserActivityPage() {
                   <input
                     type="text"
                     value={friendlyNameFilter}
-                    onChange={(event) => setFriendlyNameFilter(event.target.value)}
+                    onChange={(event) =>
+                      setFriendlyNameFilter(event.target.value)
+                    }
                     placeholder="Filter activities"
                     className="rounded-full border border-slate-300 bg-white px-3 py-1.5 text-sm text-slate-700 shadow-sm"
                   />

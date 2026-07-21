@@ -186,7 +186,10 @@ export function SessionHistoryPage() {
           </Link>
         </div>
         {errorMessage ? (
-          <NotificationPill message={{ text: errorMessage, tone: 'error' }} className="mb-3" />
+          <NotificationPill
+            message={{ text: errorMessage, tone: 'error' }}
+            className="mb-3"
+          />
         ) : null}
         {sortedEntries.length === 0 ? (
           <div className="rounded-2xl border border-slate-200 bg-slate-50 p-4 text-sm text-slate-600">

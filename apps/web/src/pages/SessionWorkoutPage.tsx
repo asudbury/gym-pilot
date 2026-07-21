@@ -145,7 +145,10 @@ export function SessionWorkoutPage() {
         icon="edit"
       >
         {errorMessage ? (
-          <NotificationPill message={{ text: errorMessage, tone: 'error' }} className="mb-3" />
+          <NotificationPill
+            message={{ text: errorMessage, tone: 'error' }}
+            className="mb-3"
+          />
         ) : null}
 
         {entry ? (

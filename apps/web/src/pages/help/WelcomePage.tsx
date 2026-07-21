@@ -154,7 +154,10 @@ export function WelcomePage() {
         </div>
 
         {errorMessage ? (
-          <NotificationPill message={{ text: errorMessage, tone: 'error' }} className="mt-4" />
+          <NotificationPill
+            message={{ text: errorMessage, tone: 'error' }}
+            className="mt-4"
+          />
         ) : null}
 
         <div className="mt-6 flex flex-wrap gap-3">
