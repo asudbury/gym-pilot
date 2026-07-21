@@ -2,7 +2,6 @@ import { useEffect, useMemo, useState } from 'react'
 import { useNavigate, useParams } from 'react-router-dom'
 import { useAuth } from '../auth/AuthContext'
 import { Button } from '../components/Button'
-import { NotificationPill } from '../components/NotificationPill'
 import { OptionSelector } from '../components/OptionSelector'
 import { RatingSelector } from '../components/RatingSelector'
 import { SessionWorkoutEditor } from '../components/SessionWorkoutEditor'
@@ -191,13 +190,6 @@ export function SessionEditPage() {
         description="Update the session notes, rating, or role before saving your changes."
         icon="edit"
       >
-        {errorMessage ? (
-          <NotificationPill
-            message={{ text: errorMessage, tone: 'error' }}
-            className="mb-3"
-          />
-        ) : null}
-
         {entry ? (
           <div className="space-y-4 rounded-2xl border border-slate-200 bg-slate-50 p-4">
             <div className="rounded-2xl border border-slate-200 bg-white p-4">
@@ -294,22 +286,29 @@ export function SessionEditPage() {
                 </div>
               </div>
 
-              <div className="mt-6 flex flex-wrap gap-2">
-                <Button
-                  tone="emerald"
-                  type="button"
-                  onClick={handleSave}
-                  isLoading={isSaving}
-                >
-                  Save changes
-                </Button>
-                <Button
-                  type="button"
-                  tone="default"
-                  onClick={() => navigate('/sessions')}
-                >
-                  Cancel
-                </Button>
+              <div className="mt-6 flex flex-col gap-2">
+                <div className="flex flex-wrap gap-2">
+                  <Button
+                    tone="emerald"
+                    type="button"
+                    onClick={handleSave}
+                    isLoading={isSaving}
+                  >
+                    Save changes
+                  </Button>
+                  <Button
+                    type="button"
+                    tone="default"
+                    onClick={() => navigate('/sessions')}
+                  >
+                    Cancel
+                  </Button>
+                </div>
+                {errorMessage ? (
+                  <div className="rounded-2xl border border-rose-200 bg-rose-50 px-3 py-2 text-sm font-medium text-rose-700">
+                    {errorMessage}
+                  </div>
+                ) : null}
               </div>
             </div>
           </div>

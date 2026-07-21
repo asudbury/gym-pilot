@@ -72,7 +72,7 @@ function createWorkoutItemPayload(input: {
     id: input.item.id || `item-${input.index}`,
     session_id: input.sessionId,
     user_id: input.userId,
-    item_index: input.index,
+    item_index: input.index + 1000000,
     category: input.item.category,
     exercise_name: input.item.exerciseName ?? null,
     exercise_id: input.item.exerciseId ?? null,
@@ -154,8 +154,7 @@ export async function saveWorkoutItemsForSession(sessionId: string, workoutItems
     return { success: false as const, error: new Error('Unable to resolve the authenticated user for workout persistence') }
   }
 
-  const existingRows = await loadWorkoutItemsForSession(sessionId, resolvedUserId)
-  const existingIds = new Set(existingRows.map((item) => item.id))
+  await loadWorkoutItemsForSession(sessionId, resolvedUserId)
 
   const payload = buildWorkoutItemsPersistencePayloads({
     sessionId,
@@ -177,19 +176,27 @@ export async function saveWorkoutItemsForSession(sessionId: string, workoutItems
 
   const { error } = await client
     .from(getWorkoutItemsTableName())
-    .upsert(payload, { onConflict: 'id' })
+    .delete()
+    .eq('session_id', sessionId)
+    .eq('user_id', resolvedUserId)
+
+  if (error) {
+    logger.warn('[Supabase] Could not clear existing workout rows before save', error)
+    return { success: false as const, error }
+  }
+
+  const { error: insertError } = await client
+    .from(getWorkoutItemsTableName())
+    .insert(payload)
+
+  if (insertError) {
+    logger.warn('[Supabase] Could not save workout rows', insertError)
+    return { success: false as const, error: insertError }
+  }
 
   if (error) {
     logger.warn('[Supabase] Could not save workout rows', error)
     return { success: false as const, error }
-  }
-
-  const staleIds = Array.from(existingIds).filter((id) => !workoutItems.some((item) => item.id === id))
-  if (staleIds.length > 0) {
-    await client
-      .from(getWorkoutItemsTableName())
-      .delete()
-      .in('id', staleIds)
   }
 
   return { success: true as const }

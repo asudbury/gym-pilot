@@ -12,7 +12,7 @@ describe('session workout persistence payloads', () => {
       ],
     })
 
-    expect(payloads.map((payload) => payload.item_index)).toEqual([0, 1])
+    expect(payloads.map((payload) => payload.item_index)).toEqual([1000000, 1000001])
     expect(new Set(payloads.map((payload) => payload.id)).size).toBe(2)
   })
 })
