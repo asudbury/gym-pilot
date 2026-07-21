@@ -913,20 +913,19 @@ export function TimetablePage() {
                       ))}
                     </select>
                   </label>
-
-                  <label className="flex flex-col sm:flex-row sm:items-center gap-1 sm:gap-3 text-sm text-slate-700">
+                  <label className="flex flex-col gap-1 text-sm text-slate-700 sm:flex-row sm:items-center sm:gap-3">
                     <span className="font-medium">Class</span>
+
                     <select
                       value={activeClassName}
-                      onChange={(event) =>
-                        setActiveClassName(event.target.value)
-                      }
+                      onChange={(event) => setActiveClassName(event.target.value)}
                       ref={classSelectRef}
-                      className={`min-w-36 rounded-full border border-slate-300 bg-white px-3 py-1.5 text-sm text-slate-700 shadow-sm ${
+                      className={`w-full min-w-0 sm:w-auto sm:min-w-36 rounded-full border border-slate-300 bg-white px-3 py-1.5 text-sm text-slate-700 shadow-sm ${
                         highlightClassFilter ? 'ring-2 ring-amber-300' : ''
                       }`}
                     >
                       <option value="all">All</option>
+
                       {classOptions.map((className) => (
                         <option key={className} value={className}>
                           {className}

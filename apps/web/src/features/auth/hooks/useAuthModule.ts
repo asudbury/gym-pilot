@@ -1,5 +1,6 @@
 import { useCallback, useMemo, useRef, useState } from 'react'
 import type { User, UserRole } from '@gym-pilot/types'
+import { shouldPersistAuthSession } from '../../../auth/authPersistence'
 import {
   logger,
   recordSupabaseUserActivity,
@@ -36,6 +37,8 @@ import {
 export function useAuthModule(users: User[]) {
   const [user, setUser] = useState<AuthUser | null>(null)
   const userRef = useRef<AuthUser | null>(null)
+  const hasHydratedSessionRef = useRef(false)
+  const hadAuthenticatedUserRef = useRef(false)
 
   const hydrateSession = useCallback(async () => {
     const storedUser = await readStoredSession()
@@ -43,7 +46,9 @@ export function useAuthModule(users: User[]) {
     if (storedUser) {
       userRef.current = storedUser
       setUser(storedUser)
+      hadAuthenticatedUserRef.current = true
       persistCurrentUserId(storedUser.id)
+      hasHydratedSessionRef.current = true
       return
     }
 
@@ -52,8 +57,11 @@ export function useAuthModule(users: User[]) {
     if (supabaseUser) {
       userRef.current = supabaseUser
       setUser(supabaseUser)
+      hadAuthenticatedUserRef.current = true
       persistCurrentUserId(supabaseUser.id)
     }
+
+    hasHydratedSessionRef.current = true
   }, [users])
 
   const refreshSupabaseSession = useCallback(async () => {
@@ -70,6 +78,7 @@ export function useAuthModule(users: User[]) {
     if (supabaseUser) {
       userRef.current = supabaseUser
       setUser(supabaseUser)
+      hadAuthenticatedUserRef.current = true
       persistCurrentUserId(supabaseUser.id)
       return
     }
@@ -82,6 +91,16 @@ export function useAuthModule(users: User[]) {
   }, [users])
 
   const persistAuthState = useCallback(async () => {
+    if (
+      !shouldPersistAuthSession(
+        hasHydratedSessionRef.current,
+        user,
+        hadAuthenticatedUserRef.current,
+      )
+    ) {
+      return
+    }
+
     await persistSession(user)
   }, [user])
 
@@ -94,6 +113,7 @@ export function useAuthModule(users: User[]) {
       }
 
       userRef.current = nextUser
+      hadAuthenticatedUserRef.current = true
       persistCurrentUserId(resolvePersistedUserId(nextUser))
       setUser(nextUser)
 
@@ -121,6 +141,7 @@ export function useAuthModule(users: User[]) {
       persistCurrentUserId(null)
       userRef.current = null
       setUser(null)
+      hasHydratedSessionRef.current = true
 
       if (currentUserId) {
         await recordSupabaseUserActivity(
