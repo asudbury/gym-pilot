@@ -5,12 +5,16 @@ const {
   mockLoadSupabaseProfileSnapshot,
   mockLoadSupabaseProfileAccessState,
   mockSaveSupabaseProfileLastLoggedIn,
+  mockSaveSupabaseProfileName,
+  mockSaveSupabaseProfileEmail,
   mockSignOutFromSupabase,
 } = vi.hoisted(() => ({
   mockGetSession: vi.fn(),
   mockLoadSupabaseProfileSnapshot: vi.fn(),
   mockLoadSupabaseProfileAccessState: vi.fn(),
   mockSaveSupabaseProfileLastLoggedIn: vi.fn(),
+  mockSaveSupabaseProfileName: vi.fn(),
+  mockSaveSupabaseProfileEmail: vi.fn(),
   mockSignOutFromSupabase: vi.fn(),
 }))
 
@@ -43,10 +47,10 @@ vi.mock('@gym-pilot/shared', async () => {
     },
     saveSupabaseApplicationName: vi.fn(),
     saveSupabaseGymBrand: vi.fn(),
-    saveSupabaseProfileEmail: vi.fn(),
+    saveSupabaseProfileEmail: mockSaveSupabaseProfileEmail,
     saveSupabaseGymName: vi.fn(),
     saveSupabaseProfileLastLoggedIn: mockSaveSupabaseProfileLastLoggedIn,
-    saveSupabaseProfileName: vi.fn(),
+    saveSupabaseProfileName: mockSaveSupabaseProfileName,
     signOutFromSupabase: mockSignOutFromSupabase,
   }
 })
@@ -62,6 +66,8 @@ const mockedLoadSupabaseProfileAccessState = vi.mocked(
 const mockedSaveSupabaseProfileLastLoggedIn = vi.mocked(
   mockSaveSupabaseProfileLastLoggedIn,
 )
+const mockedSaveSupabaseProfileName = vi.mocked(mockSaveSupabaseProfileName)
+const mockedSaveSupabaseProfileEmail = vi.mocked(mockSaveSupabaseProfileEmail)
 
 describe('resolveSupabaseAuthUser', () => {
   beforeEach(() => {
@@ -108,5 +114,12 @@ describe('resolveSupabaseAuthUser', () => {
     await resolveSupabaseAuthUser([])
 
     expect(mockedSaveSupabaseProfileLastLoggedIn).not.toHaveBeenCalled()
+  })
+
+  it('does not re-upsert the same profile name or email during session restoration', async () => {
+    await resolveSupabaseAuthUser([])
+
+    expect(mockedSaveSupabaseProfileName).not.toHaveBeenCalled()
+    expect(mockedSaveSupabaseProfileEmail).not.toHaveBeenCalled()
   })
 })

@@ -1,4 +1,4 @@
-import { useCallback, useMemo, useState } from 'react'
+import { useCallback, useMemo, useRef, useState } from 'react'
 import type { User, UserRole } from '@gym-pilot/types'
 import {
   logger,
@@ -35,11 +35,13 @@ import {
 
 export function useAuthModule(users: User[]) {
   const [user, setUser] = useState<AuthUser | null>(null)
+  const userRef = useRef<AuthUser | null>(null)
 
   const hydrateSession = useCallback(async () => {
     const storedUser = await readStoredSession()
 
     if (storedUser) {
+      userRef.current = storedUser
       setUser(storedUser)
       persistCurrentUserId(storedUser.id)
       return
@@ -48,6 +50,7 @@ export function useAuthModule(users: User[]) {
     const supabaseUser = await resolveSupabaseAuthUser(users)
 
     if (supabaseUser) {
+      userRef.current = supabaseUser
       setUser(supabaseUser)
       persistCurrentUserId(supabaseUser.id)
     }
@@ -61,20 +64,22 @@ export function useAuthModule(users: User[]) {
       return
     }
 
-    const currentUser = user
+    const currentUser = userRef.current
     const supabaseUser = await resolveSupabaseAuthUser(users)
 
     if (supabaseUser) {
+      userRef.current = supabaseUser
       setUser(supabaseUser)
       persistCurrentUserId(supabaseUser.id)
       return
     }
 
     if (currentUser) {
+      userRef.current = currentUser
       setUser(currentUser)
       persistCurrentUserId(currentUser.id)
     }
-  }, [user, users])
+  }, [users])
 
   const persistAuthState = useCallback(async () => {
     await persistSession(user)
@@ -88,6 +93,7 @@ export function useAuthModule(users: User[]) {
         return false
       }
 
+      userRef.current = nextUser
       persistCurrentUserId(resolvePersistedUserId(nextUser))
       setUser(nextUser)
 
@@ -113,6 +119,7 @@ export function useAuthModule(users: User[]) {
 
       persistLogoutPending(true)
       persistCurrentUserId(null)
+      userRef.current = null
       setUser(null)
 
       if (currentUserId) {
@@ -160,6 +167,7 @@ export function useAuthModule(users: User[]) {
         return
       }
 
+      userRef.current = nextState.user
       setUser(nextState.user)
       persistCurrentUserId(nextState.persistedUserId)
       await updateApplicationNameOnSupabase(nextState.user, applicationName)
@@ -175,6 +183,7 @@ export function useAuthModule(users: User[]) {
         return
       }
 
+      userRef.current = nextState.user
       setUser(nextState.user)
       persistCurrentUserId(nextState.persistedUserId)
       await updateGymBrandOnSupabase(nextState.user, gymBrand)
@@ -197,6 +206,7 @@ export function useAuthModule(users: User[]) {
         return
       }
 
+      userRef.current = nextState.user
       setUser(nextState.user)
       persistCurrentUserId(nextState.persistedUserId)
       await updateGymNameOnSupabase(

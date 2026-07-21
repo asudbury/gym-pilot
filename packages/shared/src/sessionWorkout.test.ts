@@ -7,6 +7,7 @@ import {
   parseSessionWorkoutMetadata,
   removeSessionWorkoutItem,
   reorderSessionWorkoutItem,
+  summarizeSessionWorkoutItem,
   updateSessionWorkoutItem,
 } from './sessionWorkout'
 
@@ -99,6 +100,19 @@ describe('session workout helpers', () => {
       exerciseName: 'Deadlift',
       category: 'exercise',
     })
+  })
+
+  it('summarises workout items for compact mobile views', () => {
+    const summary = summarizeSessionWorkoutItem({
+      id: 'item-1',
+      category: 'exercise',
+      exerciseName: 'Back squat',
+      sets: '4',
+      reps: '5',
+      durationMinutes: '20',
+    })
+
+    expect(summary).toBe('Back squat • 4 × 5 • 20 min')
   })
 
   it('supports reordering workout items', () => {

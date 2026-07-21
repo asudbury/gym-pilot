@@ -70,8 +70,13 @@ export async function resolveSupabaseAuthUser(
       return null
     }
 
-    await saveSupabaseProfileName(displayName)
-    await saveSupabaseProfileEmail(supabaseUser.email ?? null)
+    if (displayName !== (profileSnapshot.friendlyName ?? null)) {
+      await saveSupabaseProfileName(displayName)
+    }
+
+    if ((supabaseUser.email ?? null) !== (profileSnapshot.email ?? null)) {
+      await saveSupabaseProfileEmail(supabaseUser.email ?? null)
+    }
 
     return {
       id: supabaseUser.id,

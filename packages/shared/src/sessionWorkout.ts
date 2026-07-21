@@ -88,6 +88,32 @@ export function addSessionWorkoutItem(
   return [...items, createSessionWorkoutItem(input)]
 }
 
+export function summarizeSessionWorkoutItem(item: Partial<SessionWorkoutItem>): string {
+  const parts: string[] = []
+
+  if (item.exerciseName?.trim()) {
+    parts.push(item.exerciseName.trim())
+  }
+
+  const sets = item.sets?.trim()
+  const reps = item.reps?.trim()
+  const durationMinutes = item.durationMinutes?.trim()
+
+  if (sets && reps) {
+    parts.push(`${sets} × ${reps}`)
+  } else if (sets) {
+    parts.push(sets)
+  } else if (reps) {
+    parts.push(reps)
+  }
+
+  if (durationMinutes) {
+    parts.push(`${durationMinutes} min`)
+  }
+
+  return parts.join(' • ')
+}
+
 export function updateSessionWorkoutItem(
   items: SessionWorkoutItem[],
   itemId: string,

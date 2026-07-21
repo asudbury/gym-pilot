@@ -22,8 +22,21 @@ export interface PersistenceRepository<TListResponse = unknown> {
   list<TResponse = TListResponse>(): Promise<TResponse>
 }
 
+function areValuesEqual(a: unknown, b: unknown): boolean {
+  if (a === b) {
+    return true
+  }
+
+  try {
+    return JSON.stringify(a) === JSON.stringify(b)
+  } catch {
+    return false
+  }
+}
+
 export function createPersistenceRepository<TListResponse = unknown>(dependencies: PersistenceRepositoryDependencies<TListResponse>): PersistenceRepository<TListResponse> {
   const { loadLocal, saveLocal, removeLocal, listLocal, loadRemote, saveRemote, removeRemote, isRemoteEnabled, shouldUseRemoteForKey } = dependencies
+  const lastSavedValues = new Map<string, unknown>()
 
   return {
     async load<T>(key: string, fallback: T): Promise<T> {
@@ -60,12 +73,37 @@ export function createPersistenceRepository<TListResponse = unknown>(dependencie
       }
     },
     async save<T>(key: string, value: T): Promise<void> {
+      const previousValue = lastSavedValues.get(key)
+      const missingMarker = Symbol('missing')
+
+      let shouldSkipRemoteSave = false
+
+      if (previousValue !== undefined && areValuesEqual(previousValue, value)) {
+        shouldSkipRemoteSave = true
+      } else {
+        try {
+          const existingValue = await loadLocal<T>(key, missingMarker as T)
+
+          if (existingValue !== missingMarker && areValuesEqual(existingValue, value)) {
+            shouldSkipRemoteSave = true
+          }
+        } catch {
+          // fall back to attempting the local save and remote save
+        }
+      }
+
       await saveLocal(key, value)
+      lastSavedValues.set(key, value)
+
+      if (shouldSkipRemoteSave) {
+        return
+      }
 
       if (isRemoteEnabled() && shouldUseRemoteForKey(key)) {
         try {
           await saveRemote(key, value)
         } catch {
+          lastSavedValues.delete(key)
           // keep local persistence authoritative
         }
       }

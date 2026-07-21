@@ -22,4 +22,27 @@ describe('createPersistenceRepository', () => {
     expect(loadLocal).toHaveBeenCalledWith('demo', { ok: false })
     expect(loadRemote).toHaveBeenCalledWith('demo')
   })
+
+  it('skips remote saves when the incoming value matches the existing local value', async () => {
+    const saveLocal = vi.fn().mockResolvedValue(undefined)
+    const saveRemote = vi.fn().mockResolvedValue(undefined)
+    const loadLocal = vi.fn().mockResolvedValue({ ok: true })
+
+    const repository = createPersistenceRepository({
+      loadLocal,
+      saveLocal,
+      removeLocal: vi.fn(),
+      listLocal: vi.fn().mockResolvedValue([]),
+      loadRemote: vi.fn(),
+      saveRemote,
+      removeRemote: vi.fn(),
+      isRemoteEnabled: () => true,
+      shouldUseRemoteForKey: () => true,
+    })
+
+    await repository.save('demo', { ok: true })
+
+    expect(saveLocal).toHaveBeenCalledWith('demo', { ok: true })
+    expect(saveRemote).not.toHaveBeenCalled()
+  })
 })
