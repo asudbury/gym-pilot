@@ -3,6 +3,8 @@ import { Link } from 'react-router-dom'
 import { useAuth } from '../auth/AuthContext'
 import { Button } from '../components/Button'
 import { NotificationPill } from '../components/NotificationPill'
+import { OptionSelector } from '../components/OptionSelector'
+import { RatingSelector } from '../components/RatingSelector'
 import { DecorativeIcon } from '../components/ui/DecorativeIcon'
 import { PageCardLayout } from '../layouts/PageCardLayout'
 import { PageLayout } from '../layouts/PageLayout'
@@ -211,41 +213,23 @@ export function SessionHistoryPage() {
                         <span className="text-sm font-medium text-slate-700">
                           Role
                         </span>
-                        <div className="flex flex-wrap gap-2">
-                          {(['attended', 'taught'] as const).map((option) => {
-                            const isSelected = editAttendanceType === option
-                            return (
-                              <button
-                                key={option}
-                                type="button"
-                                onClick={() => setEditAttendanceType(option)}
-                                className={`rounded-full border px-3 py-1.5 text-sm font-semibold transition ${isSelected ? 'border-sky-600 bg-sky-600 text-white shadow-sm' : 'border-slate-300 bg-white text-slate-700 hover:bg-slate-50'}`}
-                              >
-                                {option === 'attended' ? 'Attended' : 'Taught'}
-                              </button>
-                            )
-                          })}
-                        </div>
+                        <OptionSelector
+                          options={['attended', 'taught'] as const}
+                          value={editAttendanceType}
+                          onChange={setEditAttendanceType}
+                          getLabel={(option) =>
+                            option === 'attended' ? 'Attended' : 'Taught'
+                          }
+                        />
                       </div>
                       <div className="flex flex-col gap-2">
                         <span className="text-sm font-medium text-slate-700">
                           Rating
                         </span>
-                        <div className="flex flex-wrap gap-2">
-                          {[1, 2, 3, 4, 5].map((value) => {
-                            const isSelected = editRating === value
-                            return (
-                              <button
-                                key={value}
-                                type="button"
-                                onClick={() => setEditRating(value)}
-                                className={`rounded-full border px-3 py-1.5 text-sm font-semibold transition ${isSelected ? 'border-sky-600 bg-sky-600 text-white shadow-sm' : 'border-slate-300 bg-white text-slate-700 hover:bg-slate-50'}`}
-                              >
-                                {value} / 5
-                              </button>
-                            )
-                          })}
-                        </div>
+                        <RatingSelector
+                          value={editRating}
+                          onChange={setEditRating}
+                        />
                       </div>
                       <label className="flex flex-col gap-1 text-sm text-slate-700">
                         <span className="font-medium">Notes</span>

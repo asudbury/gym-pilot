@@ -3,6 +3,7 @@ import { useNavigate, useSearchParams } from 'react-router-dom'
 import { useAuth } from '../auth/AuthContext'
 import { Button } from '../components/Button'
 import { PageCard } from '../components/PageCard'
+import { RatingSelector } from '../components/RatingSelector'
 import { SessionWorkoutEditor } from '../components/SessionWorkoutEditor'
 import { BackLink } from '../components/ui/BackLink'
 import { DecorativeIcon } from '../components/ui/DecorativeIcon'
@@ -338,24 +339,8 @@ export function RecordSessionPage() {
 
             <div className="mt-4 block text-sm text-slate-700">
               <span className="font-medium">Rating</span>
-              <div className="mt-2 flex flex-wrap gap-2">
-                {[1, 2, 3, 4, 5].map((value) => {
-                  const isSelected = rating === value
-                  return (
-                    <Button
-                      key={value}
-                      type="button"
-                      onClick={() => setRating(value)}
-                      className={
-                        isSelected
-                          ? 'rounded-full border border-sky-600 bg-sky-600 px-3 py-1.5 text-sm font-semibold text-white shadow-sm'
-                          : 'rounded-full border border-slate-300 bg-white px-3 py-1.5 text-sm font-semibold text-slate-700'
-                      }
-                    >
-                      {value} / 5
-                    </Button>
-                  )
-                })}
+              <div className="mt-2">
+                <RatingSelector value={rating} onChange={setRating} />
               </div>
             </div>
 

@@ -6,6 +6,7 @@ import { PageLayout } from '../layouts/PageLayout'
 import { PageCardLayout } from '../layouts/PageCardLayout'
 import { Button } from '../components/Button'
 import { GymClubSelector } from '../components/GymClubSelector'
+import { RatingSelector } from '../components/RatingSelector'
 import { reportUiError } from '../utils/uiErrorLogging'
 import { loadVirginActiveClubs } from '../utils/virginActiveClubs'
 import {
@@ -748,21 +749,10 @@ export function TimetablePage() {
                   <span className="text-sm font-medium text-slate-700">
                     Rating
                   </span>
-                  <div className="flex flex-wrap gap-2">
-                    {[1, 2, 3, 4, 5].map((value) => {
-                      const isSelected = attendanceRating === value
-                      return (
-                        <button
-                          key={value}
-                          type="button"
-                          onClick={() => setAttendanceRating(value)}
-                          className={`rounded-full border px-3 py-1.5 text-sm font-semibold transition-all duration-200 ${isSelected ? 'border-sky-600 bg-sky-600 text-white shadow-sm' : 'border-slate-300 bg-white text-slate-700 hover:border-slate-400 hover:bg-slate-50 hover:shadow-md'}`}
-                        >
-                          {value} / 5
-                        </button>
-                      )
-                    })}
-                  </div>
+                  <RatingSelector
+                    value={attendanceRating}
+                    onChange={setAttendanceRating}
+                  />
                 </div>
                 <label className="flex flex-col gap-1 text-sm text-slate-700">
                   <span className="font-medium">Notes</span>

@@ -3,6 +3,8 @@ import { useNavigate, useParams } from 'react-router-dom'
 import { useAuth } from '../auth/AuthContext'
 import { Button } from '../components/Button'
 import { NotificationPill } from '../components/NotificationPill'
+import { OptionSelector } from '../components/OptionSelector'
+import { RatingSelector } from '../components/RatingSelector'
 import { SessionWorkoutEditor } from '../components/SessionWorkoutEditor'
 import { PageCardLayout } from '../layouts/PageCardLayout'
 import { PageLayout } from '../layouts/PageLayout'
@@ -201,21 +203,14 @@ export function SessionEditPage() {
             <div className="rounded-2xl border border-slate-200 bg-white p-4">
               <div className="mt-4 flex flex-col gap-2">
                 <span className="text-sm font-medium text-slate-700">Role</span>
-                <div className="flex flex-wrap gap-2">
-                  {(['attended', 'taught'] as const).map((option) => {
-                    const isSelected = attendanceType === option
-                    return (
-                      <button
-                        key={option}
-                        type="button"
-                        onClick={() => setAttendanceType(option)}
-                        className={`rounded-full border px-3 py-1.5 text-sm font-semibold transition ${isSelected ? 'border-sky-600 bg-sky-600 text-white shadow-sm' : 'border-slate-300 bg-white text-slate-700 hover:bg-slate-50'}`}
-                      >
-                        {option === 'attended' ? 'Attended' : 'Taught'}
-                      </button>
-                    )
-                  })}
-                </div>
+                <OptionSelector
+                  options={['attended', 'taught'] as const}
+                  value={attendanceType}
+                  onChange={setAttendanceType}
+                  getLabel={(option) =>
+                    option === 'attended' ? 'Attended' : 'Taught'
+                  }
+                />
               </div>
 
               {entry.sessionType === 'solo' ? (
@@ -251,21 +246,7 @@ export function SessionEditPage() {
                 <span className="text-sm font-medium text-slate-700">
                   Rating
                 </span>
-                <div className="flex flex-wrap gap-2">
-                  {[1, 2, 3, 4, 5].map((value) => {
-                    const isSelected = rating === value
-                    return (
-                      <button
-                        key={value}
-                        type="button"
-                        onClick={() => setRating(value)}
-                        className={`rounded-full border px-3 py-1.5 text-sm font-semibold transition ${isSelected ? 'border-sky-600 bg-sky-600 text-white shadow-sm' : 'border-slate-300 bg-white text-slate-700 hover:bg-slate-50'}`}
-                      >
-                        {value} / 5
-                      </button>
-                    )
-                  })}
-                </div>
+                <RatingSelector value={rating} onChange={setRating} />
               </div>
 
               <label className="mt-4 flex flex-col gap-1 text-sm text-slate-700">
