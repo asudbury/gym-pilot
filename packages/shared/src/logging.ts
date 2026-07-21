@@ -2,6 +2,53 @@ import type { AppSettingValue } from './appSettings'
 
 const loggerAppName = 'gym-pilot'
 
+function buildErrorLogDetails(details?: Record<string, unknown> | unknown) {
+  const currentUserContext = typeof window !== 'undefined'
+    ? (() => {
+        try {
+          const storedUser = window.sessionStorage?.getItem('gym-pilot-auth-session')
+
+          if (!storedUser) {
+            return null
+          }
+
+          const parsedUser = JSON.parse(storedUser) as Record<string, unknown> | null
+
+          if (!parsedUser || typeof parsedUser !== 'object') {
+            return null
+          }
+
+          return {
+            userId: typeof parsedUser.id === 'string' ? parsedUser.id : null,
+            friendlyName: typeof parsedUser.name === 'string' ? parsedUser.name : null,
+          }
+        } catch {
+          return null
+        }
+      })()
+    : null
+
+  if (!currentUserContext && !details) {
+    return undefined
+  }
+
+  if (!details) {
+    return currentUserContext
+  }
+
+  if (typeof details === 'object' && details !== null && !Array.isArray(details)) {
+    return {
+      ...currentUserContext,
+      ...details,
+    }
+  }
+
+  return {
+    userContext: currentUserContext,
+    details,
+  }
+}
+
 export interface LogEntry {
   id: string
   level: 'trace' | 'debug' | 'info' | 'warn' | 'error' | 'silent'
@@ -75,7 +122,7 @@ export function shouldPersistAuditLogs(settings?: Record<string, AppSettingValue
 
 export async function persistErrorLog(message: string, details?: Record<string, unknown> | unknown): Promise<void> {
   const { getSupabaseClient } = await import('./supabase')
-  const { loadAppSettings } = await import('./gymPilotSupabase')
+  const { loadAppSettings } = await import('./appSettingsService')
   const settings = await loadAppSettings()
 
   if (!shouldPersistErrorLogs(settings)) {
@@ -91,7 +138,7 @@ export async function persistErrorLog(message: string, details?: Record<string, 
   try {
     const { error } = await client.from('gym_pilot_error_log').insert({
       message,
-      details: details ?? null,
+      details: buildErrorLogDetails(details) ?? null,
       created_at: new Date().toISOString(),
     })
 
@@ -105,7 +152,7 @@ export async function persistErrorLog(message: string, details?: Record<string, 
 
 export async function persistAuditLog(message: string, details?: Record<string, unknown> | unknown): Promise<void> {
   const { getSupabaseClient } = await import('./supabase')
-  const { loadAppSettings } = await import('./gymPilotSupabase')
+  const { loadAppSettings } = await import('./appSettingsService')
   const settings = await loadAppSettings()
 
   if (!shouldPersistAuditLogs(settings)) {
@@ -121,7 +168,7 @@ export async function persistAuditLog(message: string, details?: Record<string, 
   try {
     const { error } = await client.from('gym_pilot_audit_log').insert({
       message,
-      details: details ?? null,
+      details: buildErrorLogDetails(details) ?? null,
       created_at: new Date().toISOString(),
     })
 

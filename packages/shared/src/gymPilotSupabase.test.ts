@@ -518,6 +518,7 @@ describe('local activity recording guard', () => {
         friendlyName: 'Ada',
         deviceType: expect.any(String),
         isMobile: expect.any(Boolean),
+        isLocalHost: expect.any(Boolean),
       }),
     )
     expect(result).toHaveProperty('email', '*user-email-address')
@@ -533,6 +534,7 @@ describe('local activity recording guard', () => {
       expect.objectContaining({
         deviceType: expect.any(String),
         isMobile: expect.any(Boolean),
+        isLocalHost: expect.any(Boolean),
       }),
     )
     expect(result).toHaveProperty('email', '*user-email-address')

@@ -8,7 +8,6 @@ import {
   saveSupabaseGymBrand,
   saveSupabaseProfileEmail,
   saveSupabaseGymName,
-  saveSupabaseProfileLastLoggedIn,
   saveSupabaseProfileName,
   signOutFromSupabase,
 } from '@gym-pilot/shared'
@@ -73,7 +72,6 @@ export async function resolveSupabaseAuthUser(
 
     await saveSupabaseProfileName(displayName)
     await saveSupabaseProfileEmail(supabaseUser.email ?? null)
-    await saveSupabaseProfileLastLoggedIn(supabaseUser.id, displayName)
 
     return {
       id: supabaseUser.id,

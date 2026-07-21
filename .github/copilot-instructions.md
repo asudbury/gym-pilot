@@ -30,6 +30,8 @@
 - Treat hooks as orchestration layers: React state and effects stay in the hook, while reusable business rules live in pure functions that can be unit tested.
 - Preserve current user-facing behavior while improving testability and readability.
 - If persistence logic is shared across features, move it behind a repository-style abstraction in packages/shared before adding more ad-hoc storage calls.
+- For shared Supabase work, prefer extracting focused modules by responsibility (for example auth/session helpers, activity logging, session history, workout persistence) instead of expanding one large module. Keep the main shared module as a compatibility surface and re-export the extracted helpers from dedicated files.
+- When splitting a large shared module, preserve the existing public API for consumers and update exports in a backward-compatible way. Avoid creating new duplicate implementations when a helper can be moved to a new module and re-exported.
 
 ## Testing expectations
 - Add or update tests for extracted helpers whenever behavior changes or new domain logic is introduced.
@@ -46,6 +48,8 @@
 - Use explicit types for shared data structures and helper return values.
 - Prefer reusable domain types over ad-hoc inline object shapes.
 - Keep imports aligned with the new architecture: feature modules for domain logic, shared packages for shared contracts.
+- Add JSDoc comments for exported functions, shared helpers, and service modules, especially in packages/shared, describing purpose, inputs, outputs, side effects, and important assumptions.
+- Prefer concise JSDoc blocks like `/** ... */` above exported symbols rather than leaving complex logic undocumented.
 
 ## Existing conventions to preserve
 - Continue to support the current routing, Supabase-backed data flows, and plan/assignment builder experience.

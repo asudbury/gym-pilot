@@ -159,7 +159,7 @@ export function Header({
               {showRestrictedBadge ? (
                 <NotificationPill
                   message={{ text: 'Password reset required', tone: 'error' }}
-                  className="border-rose-300 bg-rose-100 px-2.5 py-1 text-[11px] font-semibold text-rose-800 shadow-none"
+                  className="border-red-300 bg-red-100 px-2.5 py-1 text-[11px] font-semibold text-red-700 shadow-none"
                 />
               ) : null}
             </div>

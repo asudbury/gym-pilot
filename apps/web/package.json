@@ -7,7 +7,7 @@
     "dev": "vite",
     "build": "tsc -b && vite build",
     "preview": "vite preview",
-    "format": "prettier --write .",
+    "format": "prettier --write src tests",
     "lint": "eslint .",
     "test": "vitest run"
   },

@@ -3,77 +3,38 @@ import type { Assignment, Plan, UserRole } from '@gym-pilot/types'
 import { getSupabaseClient, isSupabasePersistenceEnabled as isSupabasePersistenceEnabledBase } from './supabase'
 import { logger } from './logging'
 import { normalizeUserRoles } from './utils'
-import { saveJsonRecord as saveDexieJsonRecord, loadJsonRecord as loadDexieJsonRecord } from './dexie'
+import { getAuthenticatedUserId } from './supabaseAuth'
+import { recordSupabaseUserActivity } from './userActivity'
+import { saveWorkoutItemsForSession } from './sessionWorkoutPersistence'
 import {
-  buildAppSettingsMap,
-  getDefaultAppSettings,
-  type AppSettingKey,
-  type AppSettingValue,
-} from './appSettings'
-import {
-  createSessionWorkoutItem,
-  normalizeSessionWorkoutCategory,
-  type SessionWorkoutItem,
-} from './sessionWorkout'
+  invalidateSupabaseProfileCache as invalidateSupabaseProfileCacheFromProfilePersistence,
+  loadSupabaseProfileAccessState as loadSupabaseProfileAccessStateFromProfilePersistence,
+  loadSupabaseProfileApplicationName as loadSupabaseProfileApplicationNameFromProfilePersistence,
+  loadSupabaseProfileFlag as loadSupabaseProfileFlagFromProfilePersistence,
+  loadSupabaseProfileLoginHistory as loadSupabaseProfileLoginHistoryFromProfilePersistence,
+  loadSupabaseProfileName as loadSupabaseProfileNameFromProfilePersistence,
+  loadSupabaseProfileRoles as loadSupabaseProfileRolesFromProfilePersistence,
+  loadSupabaseProfileSnapshot as loadSupabaseProfileSnapshotFromProfilePersistence,
+  loadSupabaseProfileTermsAcceptance as loadSupabaseProfileTermsAcceptanceFromProfilePersistence,
+  loadSupabaseGymBrand as loadSupabaseGymBrandFromProfilePersistence,
+  loadSupabaseGymName as loadSupabaseGymNameFromProfilePersistence,
+  saveSupabaseApplicationName as saveSupabaseApplicationNameFromProfilePersistence,
+  saveSupabaseGymBrand as saveSupabaseGymBrandFromProfilePersistence,
+  saveSupabaseGymName as saveSupabaseGymNameFromProfilePersistence,
+  saveSupabaseProfileAccessSettings as saveSupabaseProfileAccessSettingsFromProfilePersistence,
+  saveSupabaseProfileEmail as saveSupabaseProfileEmailFromProfilePersistence,
+  saveSupabaseProfileFlag as saveSupabaseProfileFlagFromProfilePersistence,
+  saveSupabaseProfileName as saveSupabaseProfileNameFromProfilePersistence,
+  saveSupabaseProfileRoles as saveSupabaseProfileRolesFromProfilePersistence,
+  saveSupabaseProfileTermsAcceptance as saveSupabaseProfileTermsAcceptanceFromProfilePersistence,
+  buildSupabaseProfileTermsAcceptancePayload as buildSupabaseProfileTermsAcceptancePayloadFromProfilePersistence,
+  type SupabaseProfile,
+  type SupabaseProfileSnapshot,
+  type SupabaseAccessTier,
+} from './profilePersistence'
+import { type SessionWorkoutItem } from './sessionWorkout'
 
 const DEFAULT_SUPABASE_TABLE = 'gym_pilot_app_state'
-
-type SupabaseAccessTier = 'free' | 'bronze' | 'silver' | 'gold'
-
-type SupabaseProfileSnapshot = {
-  friendlyName: string | null
-  applicationName: string | null
-  gymBrand: string | null
-  email: string | null
-  gymName: string | null
-  gymClubId: string | null
-  accountTier: SupabaseAccessTier
-  accessEndsAt: string | null
-  isFrozen: boolean
-  lastLoggedInAt: string | null
-  previousLastLoggedInAt: string | null
-  mustChangePassword: boolean
-  termsAccepted: boolean
-  termsAcceptedAt: string | null
-  roles: UserRole[]
-  trainerId: string | null
-}
-
-const profileSnapshotCache = new Map<string, Promise<SupabaseProfileSnapshot>>()
-
-export function getSupabaseProfileLocalStorageKey(userId: string) {
-  return `profile:${userId}`
-}
-
-export function buildSupabaseProfileLocalCacheEntry(userId: string, snapshot: SupabaseProfileSnapshot) {
-  return {
-    userId,
-    snapshot,
-    storedAt: new Date().toISOString(),
-  }
-}
-
-async function persistSupabaseProfileSnapshotToLocalCache(userId: string, snapshot: SupabaseProfileSnapshot) {
-  try {
-    await saveDexieJsonRecord(getSupabaseProfileLocalStorageKey(userId), buildSupabaseProfileLocalCacheEntry(userId, snapshot))
-  } catch (error) {
-    logger.warn('[Supabase] Could not persist profile snapshot to local cache', error)
-  }
-}
-
-async function loadSupabaseProfileSnapshotFromLocalCache(userId: string): Promise<SupabaseProfileSnapshot | null> {
-  try {
-    const cachedEntry = await loadDexieJsonRecord<{ userId: string; snapshot: SupabaseProfileSnapshot; storedAt: string } | null>(getSupabaseProfileLocalStorageKey(userId), null)
-    if (!cachedEntry?.snapshot) {
-      return null
-    }
-
-    return cachedEntry.snapshot
-  } catch (error) {
-    logger.warn('[Supabase] Could not load profile snapshot from local cache', error)
-    return null
-  }
-}
 
 // The app persists arbitrary JSON payloads as { user_id, key, value } rows.
 // These records are stored in the shared app_state table rather than the
@@ -168,28 +129,6 @@ export function buildSupabaseUserRoleRows(userId: string, roles: Array<UserRole 
   return normalizedRoles.map((role) => ({ user_id: userId, role }))
 }
 
-async function loadSupabaseUserRoles(client: ReturnType<typeof getSupabaseClient>, userId: string): Promise<UserRole[]> {
-  if (!client) {
-    return []
-  }
-
-  const { data, error } = await client
-    .from('gym_pilot_user_role')
-    .select('user_id, role')
-    .eq('user_id', userId)
-
-  if (error) {
-    if (isMissingProfileColumnError(error, ['role'])) {
-      return []
-    }
-
-    logger.warn('[Supabase] Could not load user roles', error)
-    return []
-  }
-
-  return normalizeSupabaseUserRoleRows(data ?? [])
-}
-
 async function loadSupabaseUserRolesByUserIds(client: ReturnType<typeof getSupabaseClient>, userIds: string[]): Promise<Map<string, UserRole[]>> {
   const roleLookup = new Map<string, UserRole[]>()
 
@@ -253,27 +192,6 @@ function normalizeProfileAccessTier(value: unknown): SupabaseAccessTier {
   }
 }
 
-function createEmptyProfileSnapshot(): SupabaseProfileSnapshot {
-  return {
-    friendlyName: null,
-    applicationName: null,
-    gymBrand: null,
-    email: null,
-    gymName: null,
-    gymClubId: null,
-    accountTier: 'free',
-    accessEndsAt: null,
-    isFrozen: false,
-    lastLoggedInAt: null,
-    previousLastLoggedInAt: null,
-    mustChangePassword: false,
-    termsAccepted: false,
-    termsAcceptedAt: null,
-    roles: [],
-    trainerId: null,
-  }
-}
-
 function isMissingProfileColumnError(error: { message?: string } | null | undefined, columns: string[]) {
   const message = error?.message ?? ''
 
@@ -323,173 +241,34 @@ function mapSupabaseProfile(profile: {
   }
 }
 
-async function getAuthenticatedUserId(client: ReturnType<typeof getSupabaseClient>): Promise<string | null> {
-  if (!client) {
-    return null
-  }
-
-  try {
-    const { data: { session }, error } = await client.auth.getSession()
-
-    if (error) {
-      logger.warn('[Supabase] Could not resolve authenticated session', error)
-      return null
-    }
-
-    const userId = session?.user?.id ?? null
-
-    if (!userId) {
-      logger.info('[Supabase] No active session yet; skipping remote persistence work')
-      return null
-    }
-
-    logger.info('[Supabase] Resolved authenticated user', { userId })
-    return userId
-  } catch (error) {
-    logger.warn('[Supabase] Session lookup failed', error)
-    return null
-  }
-}
-
-export type SupabaseProfile = {
-  id: string
-  user_id: string
-  friendly_name: string | null
-  application_name: string | null
-  gym_brand: string | null
-  gym_name: string | null
-  account_tier: SupabaseAccessTier
-  access_ends_at: string | null
-  is_frozen: boolean
-  roles: UserRole[]
-  trainer_id: string | null
-  must_change_password: boolean
-  created_at?: string
-  updated_at?: string
-}
+export type { SupabaseProfile, SupabaseProfileSnapshot, SupabaseAccessTier } from './profilePersistence'
 
 export async function loadSupabaseProfileSnapshot(userId?: string): Promise<SupabaseProfileSnapshot> {
-  const client = getSupabaseClient()
-
-  if (!client) {
-    return createEmptyProfileSnapshot()
-  }
-
-  const resolvedUserId = userId || await getAuthenticatedUserId(client)
-
-  if (!resolvedUserId) {
-    return createEmptyProfileSnapshot()
-  }
-
-  const cacheKey = `profile:${resolvedUserId}`
-  const cachedPromise = profileSnapshotCache.get(cacheKey)
-
-  if (cachedPromise) {
-    return cachedPromise
-  }
-
-  const requestPromise = (async () => {
-    const localCachedSnapshot = await loadSupabaseProfileSnapshotFromLocalCache(resolvedUserId)
-
-    const { data, error } = await client
-      .from('gym_pilot_profile')
-      .select('friendly_name, application_name, gym_brand, email, gym_name, gym_club_id, account_tier, access_ends_at, is_frozen, last_logged_in_at, previous_last_logged_in_at, trainer_id, must_change_password, terms_accepted, terms_accepted_at')
-      .eq('user_id', resolvedUserId)
-      .maybeSingle()
-
-    if (error) {
-      if (isMissingProfileColumnError(error, ['friendly_name', 'application_name', 'gym_brand', 'gym_club_id', 'last_logged_in_at', 'previous_last_logged_in_at', 'roles', 'trainer_id', 'must_change_password', 'terms_accepted', 'terms_accepted_at'])) {
-        return createEmptyProfileSnapshot()
-      }
-
-      logger.error('[Supabase] Could not load profile snapshot', error)
-      return createEmptyProfileSnapshot()
-    }
-
-    const profileData = data && typeof data === 'object' ? data as Record<string, unknown> : null
-    const gymBrand = typeof profileData?.gym_brand === 'string' ? profileData.gym_brand.trim() || null : null
-    const gymName = typeof profileData?.gym_name === 'string' ? profileData.gym_name.trim() || null : null
-    const gymClubId = typeof profileData?.gym_club_id === 'number' && Number.isFinite(profileData.gym_club_id)
-      ? String(profileData.gym_club_id)
-      : null
-    const profileRoles = await loadSupabaseUserRoles(client, resolvedUserId)
-
-    const snapshot = {
-      friendlyName: typeof profileData?.friendly_name === 'string' ? profileData.friendly_name.trim() || null : null,
-      applicationName: typeof profileData?.application_name === 'string' ? profileData.application_name.trim() || null : null,
-      email: typeof profileData?.email === 'string' ? profileData.email.trim() || null : null,
-      gymBrand,
-      gymName: gymName ?? gymClubId,
-      gymClubId,
-      accountTier: normalizeProfileAccessTier(profileData?.account_tier),
-      accessEndsAt: typeof profileData?.access_ends_at === 'string' ? profileData.access_ends_at : null,
-      isFrozen: Boolean(profileData?.is_frozen),
-      lastLoggedInAt: typeof profileData?.last_logged_in_at === 'string' ? profileData.last_logged_in_at : null,
-      previousLastLoggedInAt: typeof profileData?.previous_last_logged_in_at === 'string' ? profileData.previous_last_logged_in_at : null,
-      mustChangePassword: Boolean(profileData?.must_change_password),
-      termsAccepted: Boolean(profileData?.terms_accepted),
-      termsAcceptedAt: typeof profileData?.terms_accepted_at === 'string' ? profileData.terms_accepted_at : null,
-      roles: profileRoles,
-      trainerId: typeof profileData?.trainer_id === 'string' ? profileData.trainer_id : null,
-    }
-
-    if (localCachedSnapshot && (!data || error)) {
-      return localCachedSnapshot
-    }
-
-    await persistSupabaseProfileSnapshotToLocalCache(resolvedUserId, snapshot)
-    return snapshot
-  })()
-
-  profileSnapshotCache.set(cacheKey, requestPromise)
-  return requestPromise
+  return loadSupabaseProfileSnapshotFromProfilePersistence(userId)
 }
 
 export async function loadSupabaseProfileName(): Promise<string | null> {
-  const snapshot = await loadSupabaseProfileSnapshot()
-  return snapshot.friendlyName
+  return loadSupabaseProfileNameFromProfilePersistence()
 }
 
 export async function loadSupabaseProfileAccessState(userId?: string): Promise<{ accountTier: SupabaseAccessTier; accessEndsAt: string | null; isFrozen: boolean; isBlocked: boolean; blockReason: 'frozen' | 'expired' | null }> {
-  const snapshot = await loadSupabaseProfileSnapshot(userId)
-  const now = Date.now()
-
-  if (snapshot.isFrozen) {
-    return { accountTier: snapshot.accountTier, accessEndsAt: snapshot.accessEndsAt, isFrozen: snapshot.isFrozen, isBlocked: true, blockReason: 'frozen' }
-  }
-
-  if (snapshot.accessEndsAt) {
-    const accessEndsAt = new Date(snapshot.accessEndsAt)
-
-    if (!Number.isNaN(accessEndsAt.getTime()) && accessEndsAt.getTime() <= now) {
-      return { accountTier: snapshot.accountTier, accessEndsAt: snapshot.accessEndsAt, isFrozen: snapshot.isFrozen, isBlocked: true, blockReason: 'expired' }
-    }
-  }
-
-  return { accountTier: snapshot.accountTier, accessEndsAt: snapshot.accessEndsAt, isFrozen: snapshot.isFrozen, isBlocked: false, blockReason: null }
+  return loadSupabaseProfileAccessStateFromProfilePersistence(userId)
 }
 
 export async function loadSupabaseApplicationName(): Promise<string | null> {
-  const snapshot = await loadSupabaseProfileSnapshot()
-  return snapshot.applicationName
+  return loadSupabaseProfileApplicationNameFromProfilePersistence()
 }
 
 export async function loadSupabaseGymBrand(): Promise<string | null> {
-  const snapshot = await loadSupabaseProfileSnapshot()
-  return snapshot.gymBrand
+  return loadSupabaseGymBrandFromProfilePersistence()
 }
 
 export async function loadSupabaseGymName(): Promise<string | null> {
-  const snapshot = await loadSupabaseProfileSnapshot()
-  return snapshot.gymName
+  return loadSupabaseGymNameFromProfilePersistence()
 }
 
 export async function loadSupabaseProfileLoginHistory(): Promise<{ lastLoggedInAt: string | null; previousLastLoggedInAt: string | null }> {
-  const snapshot = await loadSupabaseProfileSnapshot()
-  return {
-    lastLoggedInAt: snapshot.lastLoggedInAt,
-    previousLastLoggedInAt: snapshot.previousLastLoggedInAt,
-  }
+  return loadSupabaseProfileLoginHistoryFromProfilePersistence()
 }
 
 export async function listSupabaseProfiles(): Promise<SupabaseProfile[]> {
@@ -632,13 +411,7 @@ export async function listSupabaseProfiles(): Promise<SupabaseProfile[]> {
 }
 
 export async function loadSupabaseProfileRoles(userId: string): Promise<UserRole[]> {
-  const client = getSupabaseClient()
-
-  if (!client) {
-    return []
-  }
-
-  return loadSupabaseUserRoles(client, userId)
+  return loadSupabaseProfileRolesFromProfilePersistence(userId)
 }
 
 export async function saveSupabaseProfileRoles(
@@ -646,442 +419,61 @@ export async function saveSupabaseProfileRoles(
   userId?: string,
   clientOverride?: SupabaseClient,
 ) {
-  const client = clientOverride ?? getSupabaseClient()
-
-  if (!client) {
-    return
-  }
-
-  const resolvedUserId = userId || await getAuthenticatedUserId(client)
-
-  if (!resolvedUserId) {
-    return
-  }
-
-  const roleRows = buildSupabaseUserRoleRows(resolvedUserId, roles)
-
-  const { error: deleteError } = await client
-    .from('gym_pilot_user_role')
-    .delete()
-    .eq('user_id', resolvedUserId)
-
-  if (deleteError) {
-    if (isMissingProfileColumnError(deleteError, ['role'])) {
-      return
-    }
-
-    logger.error('[Supabase] Could not clear existing user roles', deleteError)
-    return
-  }
-
-  if (roleRows.length === 0) {
-    await invalidateSupabaseProfileCache(resolvedUserId)
-    return
-  }
-
-  const { error: insertError } = await client
-    .from('gym_pilot_user_role')
-    .insert(roleRows)
-
-  if (insertError) {
-    if (isMissingProfileColumnError(insertError, ['role'])) {
-      return
-    }
-
-    logger.error('[Supabase] Could not save user roles', insertError)
-    return
-  }
-
-  await invalidateSupabaseProfileCache(resolvedUserId)
-}
-
-export async function loadAppSettings(): Promise<Record<string, AppSettingValue>> {
-  const client = getSupabaseClient()
-
-  if (!client) {
-    return getDefaultAppSettings()
-  }
-
-  const { data, error } = await client
-    .from('gym_pilot_app_setting')
-    .select('setting_key, setting_value')
-
-  if (error) {
-    logger.warn('[Supabase] Could not load app settings', error)
-    return getDefaultAppSettings()
-  }
-
-  return buildAppSettingsMap((data ?? []) as Array<Partial<{ setting_key: AppSettingKey; setting_value: AppSettingValue }>>)
-}
-
-export async function loadAppSetting(key: AppSettingKey, fallback?: AppSettingValue): Promise<AppSettingValue> {
-  const settings = await loadAppSettings()
-  const defaultSettings = getDefaultAppSettings()
-  const resolvedValue = settings[key] ?? defaultSettings[key]
-
-  return typeof resolvedValue === 'undefined' ? (fallback ?? null) : resolvedValue
-}
-
-export async function saveAppSetting(key: AppSettingKey, value: AppSettingValue) {
-  const client = getSupabaseClient()
-
-  if (!client) {
-    return
-  }
-
-  const { error } = await client.from('gym_pilot_app_setting').upsert(
-    { setting_key: key, setting_value: value },
-    { onConflict: 'setting_key' },
-  )
-
-  if (error) {
-    logger.error('[Supabase] Could not save app setting', error)
-  }
-}
-
-export async function saveAppSettings(settings: Record<string, AppSettingValue>) {
-  const client = getSupabaseClient()
-
-  if (!client) {
-    return
-  }
-
-  await Promise.all(
-    Object.entries(settings).map(([key, value]) => saveAppSetting(key as AppSettingKey, value)),
-  )
+  return saveSupabaseProfileRolesFromProfilePersistence(roles, userId, clientOverride)
 }
 
 export async function loadSupabaseProfileFlag(flag: 'must_change_password', userId?: string): Promise<boolean> {
-  if (flag !== 'must_change_password') {
-    return false
-  }
-
-  const snapshot = await loadSupabaseProfileSnapshot(userId)
-  return snapshot.mustChangePassword
+  return loadSupabaseProfileFlagFromProfilePersistence(flag, userId)
 }
 
 export async function loadSupabaseProfileTermsAcceptance(userId?: string): Promise<boolean> {
-  const snapshot = await loadSupabaseProfileSnapshot(userId)
-  return snapshot.termsAccepted
+  return loadSupabaseProfileTermsAcceptanceFromProfilePersistence(userId)
 }
 
 export function buildSupabaseProfileTermsAcceptancePayload(userId: string, accepted: boolean, acceptedAt?: string | null) {
-  return {
-    user_id: userId,
-    terms_accepted: Boolean(accepted),
-    terms_accepted_at: accepted ? acceptedAt ?? new Date().toISOString() : null,
-  }
+  return buildSupabaseProfileTermsAcceptancePayloadFromProfilePersistence(userId, accepted, acceptedAt)
 }
 
-async function invalidateSupabaseProfileCache(userId?: string) {
-  if (!userId) {
-    profileSnapshotCache.clear()
-    return
-  }
-
-  profileSnapshotCache.delete(`profile:${userId}`)
-
-  try {
-    await saveDexieJsonRecord(getSupabaseProfileLocalStorageKey(userId), null)
-  } catch (error) {
-    logger.warn('[Supabase] Could not clear local profile snapshot cache', error)
-  }
+export async function invalidateSupabaseProfileCache(userId?: string) {
+  return invalidateSupabaseProfileCacheFromProfilePersistence(userId)
 }
 
 export async function saveSupabaseProfileName(
   friendlyName: string | null,
   userId?: string,
 ) {
-  const client = getSupabaseClient()
-
-  if (!client) {
-    return
-  }
-
-  const resolvedUserId = userId || await getAuthenticatedUserId(client)
-
-  if (!resolvedUserId) {
-    return
-  }
-
-  const normalizedName = friendlyName?.trim() ? friendlyName.trim() : null
-
-  const { error } = await client.from('gym_pilot_profile').upsert(
-    { user_id: resolvedUserId, friendly_name: normalizedName },
-    { onConflict: 'user_id' },
-  )
-
-  if (error) {
-    logger.error('[Supabase] Could not save profile name', error)
-    return
-  }
-
-  await invalidateSupabaseProfileCache(resolvedUserId)
+  return saveSupabaseProfileNameFromProfilePersistence(friendlyName, userId)
 }
 
 export async function saveSupabaseProfileEmail(
   email: string | null,
   userId?: string,
 ) {
-  const client = getSupabaseClient()
-
-  if (!client) {
-    return
-  }
-
-  const resolvedUserId = userId || await getAuthenticatedUserId(client)
-
-  if (!resolvedUserId) {
-    return
-  }
-
-  const normalizedEmail = email?.trim() ? email.trim() : null
-
-  const { error } = await client.from('gym_pilot_profile').upsert(
-    { user_id: resolvedUserId, email: normalizedEmail },
-    { onConflict: 'user_id' },
-  )
-
-  if (error) {
-    if (isMissingProfileColumnError(error, ['email'])) {
-      return
-    }
-
-    logger.error('[Supabase] Could not save profile email', error)
-    return
-  }
-
-  await invalidateSupabaseProfileCache(resolvedUserId)
-}
-
-async function saveSupabaseProfileTextValue(fieldName: 'application_name' | 'gym_brand' | 'gym_name' | 'gym_club_id', value: string | null, userId?: string) {
-  const client = getSupabaseClient()
-
-  if (!client) {
-    return
-  }
-
-  const resolvedUserId = userId || await getAuthenticatedUserId(client)
-
-  if (!resolvedUserId) {
-    return
-  }
-
-  const normalizedValue = fieldName === 'gym_club_id'
-    ? (() => {
-        const parsedValue = Number(value)
-        return Number.isFinite(parsedValue) ? parsedValue : null
-      })()
-    : value?.trim() ? value.trim() : null
-
-  const { error } = await client.from('gym_pilot_profile').upsert(
-    { user_id: resolvedUserId, [fieldName]: normalizedValue },
-    { onConflict: 'user_id' },
-  )
-
-  if (error) {
-    if (isMissingProfileColumnError(error, [fieldName])) {
-      return
-    }
-
-    logger.error(`[Supabase] Could not save profile field ${fieldName}`, error)
-    return
-  }
-
-  invalidateSupabaseProfileCache(resolvedUserId)
+  return saveSupabaseProfileEmailFromProfilePersistence(email, userId)
 }
 
 export async function saveSupabaseApplicationName(applicationName: string | null) {
-  return saveSupabaseProfileTextValue('application_name', applicationName)
+  return saveSupabaseApplicationNameFromProfilePersistence(applicationName)
 }
 
 export async function saveSupabaseGymBrand(gymBrand: string | null) {
-  return saveSupabaseProfileTextValue('gym_brand', gymBrand)
+  return saveSupabaseGymBrandFromProfilePersistence(gymBrand)
 }
 
 export async function saveSupabaseGymName(gymName: string | null, gymBrand?: string | null) {
-  const client = getSupabaseClient()
-
-  if (!client) {
-    return
-  }
-
-  const resolvedUserId = await getAuthenticatedUserId(client)
-
-  if (!resolvedUserId) {
-    return
-  }
-
-  const trimmedGymBrand = gymBrand?.trim().toLowerCase() ?? ''
-  const isVirginBrand = trimmedGymBrand === 'virgin'
-  const normalizedGymName = gymName?.trim() ? gymName.trim() : null
-  const normalizedClubId = isVirginBrand && normalizedGymName && /^\d+$/.test(normalizedGymName)
-    ? Number(normalizedGymName)
-    : null
-
-  const { error } = await client.from('gym_pilot_profile').upsert(
-    { user_id: resolvedUserId, gym_name: normalizedGymName, gym_club_id: normalizedClubId },
-    { onConflict: 'user_id' },
-  )
-
-  if (error) {
-    if (isMissingProfileColumnError(error, ['gym_name', 'gym_club_id'])) {
-      return
-    }
-
-    logger.error('[Supabase] Could not save profile gym name', error)
-    return
-  }
-
-  invalidateSupabaseProfileCache(resolvedUserId)
+  return saveSupabaseGymNameFromProfilePersistence(gymName, gymBrand)
 }
 
 export async function saveSupabaseProfileAccessSettings(accountTier: string | null, accessEndsAt: string | null, isFrozen: boolean, userId?: string) {
-  const client = getSupabaseClient()
-
-  if (!client) {
-    return
-  }
-
-  const resolvedUserId = userId || await getAuthenticatedUserId(client)
-
-  if (!resolvedUserId) {
-    return
-  }
-
-  const normalizedTier = normalizeProfileAccessTier(accountTier)
-  const trimmedAccessEndsAt = typeof accessEndsAt === 'string' ? accessEndsAt.trim() : ''
-
-  const { error } = await client.from('gym_pilot_profile').upsert(
-    { user_id: resolvedUserId, account_tier: normalizedTier, access_ends_at: trimmedAccessEndsAt || null, is_frozen: Boolean(isFrozen) },
-    { onConflict: 'user_id' },
-  )
-
-  if (error) {
-    logger.error('[Supabase] Could not save profile access settings', error)
-    return
-  }
-
-  await invalidateSupabaseProfileCache(resolvedUserId)
-  const profileSnapshot = await loadSupabaseProfileSnapshot(resolvedUserId)
-  await recordSupabaseUserActivity('profile_access_updated', { accountTier: normalizedTier, isFrozen: Boolean(isFrozen) }, resolvedUserId, profileSnapshot.friendlyName)
+  return saveSupabaseProfileAccessSettingsFromProfilePersistence(accountTier, accessEndsAt, isFrozen, userId)
 }
 
 export async function saveSupabaseProfileFlag(flag: 'must_change_password', value: boolean, userId?: string) {
-  const client = getSupabaseClient()
-
-  if (!client) {
-    return
-  }
-
-  const resolvedUserId = userId || await getAuthenticatedUserId(client)
-
-  if (!resolvedUserId) {
-    return
-  }
-
-  const { error } = await client.from('gym_pilot_profile').upsert(
-    { user_id: resolvedUserId, [flag]: value },
-    { onConflict: 'user_id' },
-  )
-
-  if (error) {
-    logger.error('[Supabase] Could not save profile flag', error)
-    return
-  }
-
-  await invalidateSupabaseProfileCache(resolvedUserId)
-  const profileSnapshot = await loadSupabaseProfileSnapshot(resolvedUserId)
-  await recordSupabaseUserActivity('profile_flag_updated', { flag, value }, resolvedUserId, profileSnapshot.friendlyName)
+  return saveSupabaseProfileFlagFromProfilePersistence(flag, value, userId)
 }
 
 export async function saveSupabaseProfileTermsAcceptance(accepted: boolean, userId?: string) {
-  const client = getSupabaseClient()
-
-  if (!client) {
-    return
-  }
-
-  const resolvedUserId = userId || await getAuthenticatedUserId(client)
-
-  if (!resolvedUserId) {
-    return
-  }
-
-  const payload = buildSupabaseProfileTermsAcceptancePayload(resolvedUserId, accepted)
-  const { error } = await client.from('gym_pilot_profile').upsert(payload, { onConflict: 'user_id' })
-
-  if (error) {
-    if (isMissingProfileColumnError(error, ['terms_accepted', 'terms_accepted_at'])) {
-      return
-    }
-
-    logger.error('[Supabase] Could not save terms acceptance', error)
-    return
-  }
-
-  invalidateSupabaseProfileCache(resolvedUserId)
-}
-
-export function shouldRecordLoginActivity(previousLastLoggedInAt: string | null | undefined, nextLastLoggedInAt: string | null | undefined) {
-  if (!nextLastLoggedInAt) {
-    return false
-  }
-
-  if (!previousLastLoggedInAt) {
-    return true
-  }
-
-  return previousLastLoggedInAt !== nextLastLoggedInAt
-}
-
-export async function saveSupabaseProfileLastLoggedIn(userId?: string, friendlyName?: string | null) {
-  const client = getSupabaseClient()
-
-  if (!client) {
-    return
-  }
-
-  const resolvedUserId = userId || await getAuthenticatedUserId(client)
-
-  if (!resolvedUserId) {
-    return
-  }
-
-  const { data: existingProfile, error: loadError } = await client
-    .from('gym_pilot_profile')
-    .select('last_logged_in_at')
-    .eq('user_id', resolvedUserId)
-    .maybeSingle()
-
-  if (loadError) {
-    logger.error('[Supabase] Could not load existing profile login timestamp', loadError)
-    return
-  }
-
-  const previousLastLoggedInAt = existingProfile?.last_logged_in_at ?? null
-  const nextLastLoggedInAt = new Date().toISOString()
-  const shouldRecord = shouldRecordLoginActivity(previousLastLoggedInAt, nextLastLoggedInAt)
-
-  const { error } = await client.from('gym_pilot_profile').upsert(
-    {
-      user_id: resolvedUserId,
-      last_logged_in_at: nextLastLoggedInAt,
-      previous_last_logged_in_at: previousLastLoggedInAt,
-    },
-    { onConflict: 'user_id' },
-  )
-
-  if (error) {
-    logger.error('[Supabase] Could not save profile last logged in timestamp', error)
-    return
-  }
-
-  await invalidateSupabaseProfileCache(resolvedUserId)
-
-  if (shouldRecord) {
-    await recordSupabaseUserActivity('login', {}, resolvedUserId, friendlyName)
-  }
+  return saveSupabaseProfileTermsAcceptanceFromProfilePersistence(accepted, userId)
 }
 
 export async function loadSupabaseJsonRecord<T>(key: string): Promise<SupabaseRecordResponse<T>> {
@@ -1252,7 +644,6 @@ export async function saveSupabaseJsonRecord<T>(key: string, value: T) {
       }
     }
 
-    await recordSupabaseUserActivity('plan_saved', { planCount: plans.length }, userId)
     return
   }
 
@@ -1284,7 +675,6 @@ export async function saveSupabaseJsonRecord<T>(key: string, value: T) {
       }
     }
 
-    await recordSupabaseUserActivity('assignment_saved', { assignmentCount: assignments.length }, userId)
     return
   }
 
@@ -1401,176 +791,14 @@ export function isLocalhostHost(hostname?: string) {
   return hostname === 'localhost' || hostname === '127.0.0.1' || hostname === '::1' || hostname === '[::1]' || hostname === '0.0.0.0' || hostname.endsWith('.localhost')
 }
 
-export async function shouldRecordSupabaseUserActivity() {
-  const enabledValue = await loadAppSetting('user_activity_logging_enabled', true)
-  return enabledValue === true || enabledValue === 'true'
-}
+export {
+  buildSupabaseUserActivityEventData,
+  recordSupabaseUserActivity,
+  saveSupabaseProfileLastLoggedIn,
+  shouldRecordLoginActivity,
+  shouldRecordSupabaseUserActivity,
+} from './userActivity'
 
-function getDeviceContext() {
-  if (typeof window === 'undefined' || typeof navigator === 'undefined') {
-    return {
-      deviceType: 'unknown',
-      isMobile: false,
-    }
-  }
-
-  const userAgent = navigator.userAgent || ''
-  const hasTouch = Boolean(
-    typeof navigator.maxTouchPoints === 'number' && navigator.maxTouchPoints > 0,
-  )
-  const hasCoarsePointer =
-    typeof window.matchMedia === 'function' &&
-    window.matchMedia('(pointer: coarse)').matches
-
-  const isMobileUserAgent = /android|iphone|ipod|ipad|mobile/i.test(userAgent)
-  const isTabletUserAgent = /ipad|tablet/i.test(userAgent)
-
-  if (isTabletUserAgent) {
-    return {
-      deviceType: 'tablet',
-      isMobile: true,
-    }
-  }
-
-  if (isMobileUserAgent || hasTouch || hasCoarsePointer) {
-    return {
-      deviceType: 'mobile',
-      isMobile: true,
-    }
-  }
-
-  return {
-    deviceType: 'desktop',
-    isMobile: false,
-  }
-}
-
-function sanitizeActivityValue(key: string, value: unknown) {
-  if (typeof value !== 'string') {
-    return value
-  }
-
-  if (/email/i.test(key) && /.+@.+\..+/.test(value)) {
-    return '*user-email-address'
-  }
-
-  return value
-}
-
-export function buildSupabaseUserActivityEventData(eventData: Record<string, unknown> = {}, friendlyName?: string | null) {
-  const sanitizedPayload: Record<string, unknown> = { ...eventData }
-
-  for (const key of Object.keys(sanitizedPayload)) {
-    if (
-      typeof key === 'string' &&
-      /(phone|password|pwd|token|secret|api[_-]?key|authorization|cookie|notes|details|message)/i.test(key)
-    ) {
-      delete sanitizedPayload[key]
-    }
-  }
-
-  for (const key of Object.keys(sanitizedPayload)) {
-    const value = sanitizedPayload[key]
-    sanitizedPayload[key] = sanitizeActivityValue(key, value)
-  }
-
-  if (typeof friendlyName === 'string') {
-    const trimmedFriendlyName = friendlyName.trim()
-
-    if (trimmedFriendlyName) {
-      sanitizedPayload.friendlyName = trimmedFriendlyName
-    }
-  }
-
-  const deviceContext = getDeviceContext()
-
-  return {
-    ...sanitizedPayload,
-    ...deviceContext,
-  }
-}
-
-export async function recordSupabaseUserActivity(
-  eventType: string,
-  eventData: Record<string, unknown> = {},
-  userId?: string,
-  friendlyName?: string | null,
-) {
-  if (!(await shouldRecordSupabaseUserActivity())) {
-    logger.info('[Supabase] Skipping user activity recording')
-    return
-  }
-
-  const client = getSupabaseClient()
-
-  if (!client) {
-    return
-  }
-
-  const resolvedUserId = userId || await getAuthenticatedUserId(client)
-
-  if (!resolvedUserId) {
-    return
-  }
-
-  const payload = buildSupabaseUserActivityEventData(eventData, friendlyName)
-
-  const { error } = await client.from('gym_pilot_user_activity').insert({
-    user_id: resolvedUserId,
-    event_type: eventType,
-    event_data: payload,
-  })
-
-  if (error) {
-    logger.error('[Supabase] Could not record user activity', error)
-  }
-}
-
-export type SessionHistoryEntry = {
-  id: string
-  userId?: string
-  sessionId?: string | null
-  classId?: string | null
-  className?: string | null
-  instructorName?: string | null
-  startedAt?: string | null
-  sessionType?: 'class' | 'personal_training' | 'solo' | null
-  attendanceType: 'attended' | 'taught'
-  notes?: string | null
-  rating?: number | null
-  durationMinutes?: number | null
-  workoutMetadata?: unknown
-  createdAt?: string | null
-  updatedAt?: string | null
-}
-
-type SupabaseSessionHistoryRow = {
-  id: string
-  user_id?: string | null
-  session_id?: string | null
-  class_id?: string | null
-  class_name?: string | null
-  trainer_name?: string | null
-  session_type?: 'class' | 'personal_training' | 'solo' | null
-  start_at?: string | null
-  started_at?: string | null
-  attendance_type?: 'attended' | 'taught' | null
-  notes?: string | null
-  rating?: number | null
-  duration_minutes?: number | null
-  metadata?: unknown | null
-  created_at?: string | null
-  updated_at?: string | null
-  role?: 'client' | 'trainer' | null
-  status?: 'booked' | 'cancelled' | 'attended' | 'no_show' | 'declined' | null
-  session?: {
-    class_name?: string | null
-    trainer_name?: string | null
-    start_at?: string | null
-    started_at?: string | null
-    session_type?: 'class' | 'personal_training' | 'solo' | null
-  } | null
-}
 
 function normalizeSessionRating(value: number | string | null | undefined) {
   if (typeof value === 'number' && Number.isFinite(value) && value >= 1 && value <= 5) {
@@ -1587,187 +815,12 @@ function normalizeSessionRating(value: number | string | null | undefined) {
   return null
 }
 
-function normalizeWorkoutItemRecord(value: unknown): SessionWorkoutItem | null {
-  if (!value || typeof value !== 'object') {
-    return null
-  }
-
-  const candidate = value as Record<string, unknown>
-  const category = typeof candidate.category === 'string'
-    ? normalizeSessionWorkoutCategory(candidate.category)
-    : 'exercise'
-  const exerciseName = typeof candidate.exerciseName === 'string'
-    ? candidate.exerciseName
-    : ''
-
-  if (!exerciseName && typeof candidate.exercise_name === 'string') {
-    return createSessionWorkoutItem({
-      category,
-      exerciseName: candidate.exercise_name,
-      exerciseId: typeof candidate.exercise_id === 'string' ? candidate.exercise_id : undefined,
-      reps: typeof candidate.reps === 'string' ? candidate.reps : '',
-      sets: typeof candidate.sets === 'string' ? candidate.sets : '',
-      weight: typeof candidate.weight === 'string' ? candidate.weight : '',
-      durationMinutes: typeof candidate.duration_minutes === 'string' ? candidate.duration_minutes : '',
-      distanceKm: typeof candidate.distance_km === 'string' ? candidate.distance_km : '',
-      speedKph: typeof candidate.speed_kph === 'string' ? candidate.speed_kph : '',
-      notes: typeof candidate.notes === 'string' ? candidate.notes : '',
-      planItemId: typeof candidate.plan_item_id === 'string' ? candidate.plan_item_id : undefined,
-      sortOrder: typeof candidate.sort_order === 'number'
-        ? candidate.sort_order
-        : typeof candidate.sortOrder === 'number'
-          ? candidate.sortOrder
-          : undefined,
-    })
-  }
-
-  return createSessionWorkoutItem({
-    id: typeof candidate.id === 'string' ? candidate.id : undefined,
-    category,
-    exerciseName,
-    exerciseId: typeof candidate.exercise_id === 'string' ? candidate.exercise_id : undefined,
-    reps: typeof candidate.reps === 'string' ? candidate.reps : '',
-    sets: typeof candidate.sets === 'string' ? candidate.sets : '',
-    weight: typeof candidate.weight === 'string' ? candidate.weight : '',
-    durationMinutes: typeof candidate.durationMinutes === 'string' ? candidate.durationMinutes : '',
-    distanceKm: typeof candidate.distanceKm === 'string' ? candidate.distanceKm : '',
-    speedKph: typeof candidate.speedKph === 'string' ? candidate.speedKph : '',
-    notes: typeof candidate.notes === 'string' ? candidate.notes : '',
-    planItemId: typeof candidate.planItemId === 'string' ? candidate.planItemId : undefined,
-    sortOrder: typeof candidate.sortOrder === 'number'
-      ? candidate.sortOrder
-      : typeof candidate.sort_order === 'number'
-        ? candidate.sort_order
-        : undefined,
-  })
-}
-
-function createWorkoutItemPayload(input: {
-  sessionId: string
-  userId: string
-  index: number
-  item: SessionWorkoutItem
-}) {
-  return {
-    id: input.item.id || `item-${input.index}`,
-    session_id: input.sessionId,
-    user_id: input.userId,
-    item_index: input.index,
-    category: input.item.category,
-    exercise_name: input.item.exerciseName ?? null,
-    exercise_id: input.item.exerciseId ?? null,
-    reps: input.item.reps ?? null,
-    sets: input.item.sets ?? null,
-    weight: input.item.weight ?? null,
-    duration_minutes: input.item.durationMinutes ?? null,
-    distance_km: input.item.distanceKm ?? null,
-    speed_kph: input.item.speedKph ?? null,
-    notes: input.item.notes ?? null,
-    plan_item_id: input.item.planItemId ?? null,
-    sort_order: input.item.sortOrder ?? input.index,
-    created_at: new Date().toISOString(),
-    updated_at: new Date().toISOString(),
-  }
-}
-
-export function buildWorkoutItemsPersistencePayloads(input: {
-  sessionId: string
-  userId: string
-  workoutItems: SessionWorkoutItem[]
-}) {
-  return input.workoutItems.map((item, index) => createWorkoutItemPayload({
-    sessionId: input.sessionId,
-    userId: input.userId,
-    index,
-    item: {
-      ...item,
-      id: item.id || `item-${index}`,
-    },
-  }))
-}
-
-export function getWorkoutItemsTableName() {
-  return 'gym_pilot_user_session_workout_item'
-}
-
-export async function loadWorkoutItemsForSession(sessionId: string, userId?: string): Promise<SessionWorkoutItem[]> {
-  const client = getSupabaseClient()
-  if (!client) {
-    return []
-  }
-
-  const resolvedUserId = userId || await getAuthenticatedUserId(client)
-  if (!resolvedUserId) {
-    return []
-  }
-
-  const { data, error } = await client
-    .from(getWorkoutItemsTableName())
-    .select('*')
-    .eq('session_id', sessionId)
-    .eq('user_id', resolvedUserId)
-    .order('sort_order', { ascending: true })
-    .order('item_index', { ascending: true })
-
-  if (error) {
-    logger.warn('[Supabase] Could not load workout rows', error)
-    return []
-  }
-
-  return (Array.isArray(data) ? data : []).map((row) => normalizeWorkoutItemRecord(row)).filter((entry): entry is SessionWorkoutItem => Boolean(entry))
-}
-
-export async function saveWorkoutItemsForSession(sessionId: string, workoutItems: SessionWorkoutItem[], userId?: string) {
-  const client = getSupabaseClient()
-  if (!client) {
-    return { success: false as const, error: new Error('Supabase client is not available') }
-  }
-
-  const resolvedUserId = userId || await getAuthenticatedUserId(client)
-  if (!resolvedUserId) {
-    return { success: false as const, error: new Error('Unable to resolve the authenticated user for workout persistence') }
-  }
-
-  const existingRows = await loadWorkoutItemsForSession(sessionId, resolvedUserId)
-  const existingIds = new Set(existingRows.map((item) => item.id))
-
-  const payload = buildWorkoutItemsPersistencePayloads({
-    sessionId,
-    userId: resolvedUserId,
-    workoutItems,
-  })
-
-  if (payload.length === 0) {
-    const { error } = await client
-      .from(getWorkoutItemsTableName())
-      .delete()
-      .eq('session_id', sessionId)
-      .eq('user_id', resolvedUserId)
-
-    return error
-      ? { success: false as const, error }
-      : { success: true as const }
-  }
-
-  const { error } = await client
-    .from(getWorkoutItemsTableName())
-    .upsert(payload, { onConflict: 'id' })
-
-  if (error) {
-    logger.warn('[Supabase] Could not save workout rows', error)
-    return { success: false as const, error }
-  }
-
-  const staleIds = Array.from(existingIds).filter((id) => !workoutItems.some((item) => item.id === id))
-  if (staleIds.length > 0) {
-    await client
-      .from(getWorkoutItemsTableName())
-      .delete()
-      .in('id', staleIds)
-  }
-
-  return { success: true as const }
-}
+export {
+  buildWorkoutItemsPersistencePayloads,
+  getWorkoutItemsTableName,
+  loadWorkoutItemsForSession,
+  saveWorkoutItemsForSession,
+} from './sessionWorkoutPersistence'
 
 export function buildSessionBookingSessionPayload(input: {
   userId: string
@@ -1855,246 +908,16 @@ export function getSessionHistorySelectColumns() {
   ]
 }
 
-export function mapSessionHistoryEntryFromSupabase(row: SupabaseSessionHistoryRow): SessionHistoryEntry {
-  const mappedAttendanceType = row.attendance_type === 'taught'
-    ? 'taught'
-    : row.role === 'trainer'
-      ? 'taught'
-      : 'attended'
+export { mapSessionHistoryEntryFromSupabase } from './sessionHistory'
 
-  const explicitSessionType = row.session_type ?? row.session?.session_type
-  const normalizedSessionType = normalizeSessionTypeForPersistence(
-    explicitSessionType ?? (row.class_id || row.class_name ? 'class' : row.trainer_name ? 'personal_training' : 'solo'),
-  )
+export { upsertSessionHistoryEntry, removeSessionHistoryEntry, formatSessionHistoryError, type SessionHistoryEntry } from './sessionHistory'
 
-  return {
-    id: row.id,
-    userId: row.user_id ?? undefined,
-    sessionId: row.session_id ?? null,
-    classId: row.class_id ?? null,
-    className: row.class_name ?? row.session?.class_name ?? null,
-    instructorName: row.trainer_name ?? row.session?.trainer_name ?? null,
-    startedAt: row.start_at ?? row.started_at ?? row.session?.start_at ?? row.session?.started_at ?? null,
-    sessionType: normalizedSessionType,
-    attendanceType: mappedAttendanceType,
-    notes: row.notes ?? null,
-    rating: normalizeSessionRating(row.rating),
-    durationMinutes: typeof row.duration_minutes === 'number' ? row.duration_minutes : null,
-    workoutMetadata: row.metadata ?? null,
-    createdAt: row.created_at ?? null,
-    updatedAt: row.updated_at ?? null,
-  }
-}
-
-function matchesSessionIdentity(left: SessionHistoryEntry, right: SessionHistoryEntry) {
-  const leftSessionId = left.sessionId?.trim()
-  const rightSessionId = right.sessionId?.trim()
-
-  if (leftSessionId && rightSessionId && leftSessionId === rightSessionId) {
-    return true
-  }
-
-  const leftClassId = left.classId?.trim()
-  const rightClassId = right.classId?.trim()
-  const leftStartedAt = left.startedAt?.trim()
-  const rightStartedAt = right.startedAt?.trim()
-
-  if (leftClassId && rightClassId && leftStartedAt && rightStartedAt && leftClassId === rightClassId && leftStartedAt === rightStartedAt) {
-    return true
-  }
-
-  const leftUserId = left.userId?.trim()
-  const rightUserId = right.userId?.trim()
-
-  if (leftUserId && rightUserId && leftUserId === rightUserId && leftStartedAt && rightStartedAt && leftStartedAt === rightStartedAt) {
-    return true
-  }
-
-  return false
-}
-
-export function upsertSessionHistoryEntry(
-  records: SessionHistoryEntry[],
-  entry: SessionHistoryEntry,
-): SessionHistoryEntry[] {
-  const next = records.filter((candidate) => {
-    if (candidate.id === entry.id) {
-      return false
-    }
-
-    if (matchesSessionIdentity(candidate, entry)) {
-      return false
-    }
-
-    return true
-  })
-
-  return [...next, entry]
-}
-
-export function removeSessionHistoryEntry(
-  records: SessionHistoryEntry[],
-  entryId: string,
-): SessionHistoryEntry[] {
-  return records.filter((candidate) => candidate.id !== entryId)
-}
-
-export function formatSessionHistoryError(error: unknown): string {
-  if (error && typeof error === 'object' && 'message' in error && typeof (error as { message?: unknown }).message === 'string') {
-    const message = (error as { message: string }).message
-    if (message.trim().length > 0) {
-      return message
-    }
-  }
-
-  return 'We could not load your session history right now.'
-}
-
-export function wasSessionHistoryDeleteSuccessful(
-  error: unknown,
-  deletedRows: Array<{ id?: string | null } | null> | null | undefined,
-): boolean {
-  if (error) {
-    return false
-  }
-
-  return Array.isArray(deletedRows) && deletedRows.some((row) => Boolean(row?.id))
-}
-
-export function buildSessionHistoryDeleteError(entryId: string): Error {
-  return new Error(`We could not delete this session history entry (${entryId}). Please try again.`)
-}
-
-export async function loadSessionHistoryEntries(userId?: string): Promise<SessionHistoryEntry[]> {
-  const client = getSupabaseClient()
-
-  if (client) {
-    const resolvedUserId = userId || await getAuthenticatedUserId(client)
-
-    if (resolvedUserId) {
-      const { data, error } = await client
-        .from(getSessionHistoryTableName())
-        .select(getSessionHistorySelectColumns().join(', '))
-        .or(`user_id.eq.${resolvedUserId},user_id.is.null`)
-        .order('created_at', { ascending: false })
-
-      if (!error && Array.isArray(data)) {
-        return data
-          .filter((row) => Boolean(row) && typeof row === 'object')
-          .map((row) => {
-            const candidate = row as SupabaseSessionHistoryRow
-            const mappedRow = mapSessionHistoryEntryFromSupabase(candidate)
-
-            if (!mappedRow.sessionType && candidate.session_type == null && candidate.class_id == null && candidate.class_name == null && candidate.trainer_name == null) {
-              return {
-                ...mappedRow,
-                sessionType: 'solo',
-              }
-            }
-
-            return mappedRow
-          })
-      }
-
-      if (error) {
-        logger.warn('[Supabase] Could not load session history', error)
-      }
-    }
-  }
-
-  return []
-}
-
-export async function saveSessionHistoryEntry(entry: SessionHistoryEntry, userId?: string): Promise<SessionHistoryEntry[]> {
-  const client = getSupabaseClient()
-  const resolvedUserId = userId || (client ? await getAuthenticatedUserId(client) : null)
-
-  if (client && resolvedUserId) {
-    const { error } = await client
-      .from(getSessionHistoryTableName())
-      .upsert({
-        id: entry.id,
-        ...buildSessionBookingSessionPayload({
-          userId: resolvedUserId,
-          sessionId: entry.sessionId,
-          classId: entry.classId,
-          className: entry.className,
-          instructorName: entry.instructorName,
-          startedAt: entry.startedAt,
-          attendanceType: entry.attendanceType,
-          notes: entry.notes,
-          rating: entry.rating,
-          durationMinutes: entry.durationMinutes ?? null,
-          metadata: entry.workoutMetadata ?? null,
-          createdAt: entry.createdAt ?? null,
-          updatedAt: entry.updatedAt ?? null,
-        }),
-      }, { onConflict: 'id' })
-
-    if (!error) {
-      const activityUserId = resolvedUserId
-      if (activityUserId) {
-        const profileSnapshot = await loadSupabaseProfileSnapshot(activityUserId)
-        await recordSupabaseUserActivity('session_updated', {
-          sessionId: entry.sessionId ?? null,
-          sessionType: entry.sessionType ?? null,
-          className: entry.className ?? null,
-          instructorName: entry.instructorName?.trim() ? entry.instructorName.trim() : null,
-          startedAt: entry.startedAt ?? null,
-          attendanceType: entry.attendanceType,
-          durationMinutes: entry.durationMinutes ?? null,
-        }, activityUserId, profileSnapshot.friendlyName)
-      }
-
-      return [entry]
-    }
-
-    logger.warn('[Supabase] Could not persist updated session history entry', error)
-  }
-
-  return [entry]
-}
-
-export async function deleteSessionHistoryEntry(entryId: string, userId?: string): Promise<SessionHistoryEntry[]> {
-  const client = getSupabaseClient()
-  const resolvedUserId = userId || (client ? await getAuthenticatedUserId(client) : null)
-
-  if (client && resolvedUserId) {
-    const { data, error } = await client
-      .from(getSessionHistoryTableName())
-      .delete()
-      .eq('id', entryId)
-      .eq('user_id', resolvedUserId)
-      .select('id')
-
-    if (!error && wasSessionHistoryDeleteSuccessful(error, data)) {
-      return []
-    }
-
-    if (!error) {
-      const { data: fallbackData, error: fallbackError } = await client
-        .from(getSessionHistoryTableName())
-        .delete()
-        .eq('id', entryId)
-        .select('id')
-
-      if (!fallbackError && wasSessionHistoryDeleteSuccessful(fallbackError, fallbackData)) {
-        return []
-      }
-
-      if (fallbackError) {
-        logger.warn('[Supabase] Could not delete session history entry', fallbackError)
-      }
-
-      throw buildSessionHistoryDeleteError(entryId)
-    }
-
-    logger.warn('[Supabase] Could not delete session history entry', error)
-    throw buildSessionHistoryDeleteError(entryId)
-  }
-
-  throw buildSessionHistoryDeleteError(entryId)
-}
+export {
+  buildSessionHistoryDeleteError,
+  deleteSessionHistoryEntry,
+  loadSessionHistoryEntries,
+  saveSessionHistoryEntry,
+} from './sessionHistory'
 
 export async function saveTimetableAttendance(input: {
   userId?: string

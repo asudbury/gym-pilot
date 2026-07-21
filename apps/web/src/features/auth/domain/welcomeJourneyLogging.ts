@@ -57,7 +57,11 @@ function sanitizeWelcomeJourneyData(eventData: Record<string, unknown>) {
   for (const key of Object.keys(sanitizedPayload)) {
     const value = sanitizedPayload[key]
 
-    if (typeof value === 'string' && /email/i.test(key) && /.+@.+\..+/.test(value)) {
+    if (
+      typeof value === 'string' &&
+      /email/i.test(key) &&
+      /.+@.+\..+/.test(value)
+    ) {
       sanitizedPayload[key] = '*user-email-address'
     }
   }

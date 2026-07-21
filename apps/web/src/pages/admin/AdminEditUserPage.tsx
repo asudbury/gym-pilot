@@ -157,7 +157,9 @@ export function AdminEditUserPage() {
       await saveSupabaseProfileRoles(draft.roles, profile.id)
       await saveSupabaseProfileName(trimmedName, profile.id)
       await saveSupabaseProfileEmail(draft?.email ?? null, profile.id)
-      await saveSupabaseProfileLastLoggedIn(profile.id)
+      await saveSupabaseProfileLastLoggedIn(profile.id, null, {
+        shouldRecordActivity: false,
+      })
 
       setStatusMessage('Profile updated.')
       setStatusType('success')

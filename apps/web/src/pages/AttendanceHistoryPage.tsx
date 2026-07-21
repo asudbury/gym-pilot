@@ -153,11 +153,11 @@ export function SessionHistoryPage() {
 
   const deleteEntry = async (entryId: string) => {
     try {
-      const nextEntries = await deleteSessionHistoryEntry(
-        entryId,
+      await deleteSessionHistoryEntry(entryId, userId ?? undefined)
+      const refreshedEntries = await loadSessionHistoryEntries(
         userId ?? undefined,
       )
-      setEntries(sortSessionEntries(nextEntries))
+      setEntries(sortSessionEntries(refreshedEntries))
       window.dispatchEvent(
         new CustomEvent('gym-pilot-notification', {
           detail: { text: 'Session deleted.', tone: 'success' },

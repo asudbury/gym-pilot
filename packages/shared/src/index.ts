@@ -44,10 +44,6 @@ export {
   saveSupabaseJsonRecord,
   removeSupabaseJsonRecord,
   recordSupabaseUserActivity,
-  loadAppSettings,
-  loadAppSetting,
-  saveAppSetting,
-  saveAppSettings,
   saveTimetableAttendance,
   loadSessionHistoryEntries,
   loadWorkoutItemsForSession,
@@ -73,4 +69,9 @@ export {
 export * from './utils'
 export * from './repositories'
 export * from './appSettings'
+export * from './appSettingsService'
+export * from './userActivity'
+export * from './sessionHistory'
 export * from './sessionWorkout'
+export * from './sessionWorkoutPersistence'
+export * from './profilePersistence'

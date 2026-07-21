@@ -7,6 +7,7 @@ import {
   loadSupabaseProfileTermsAcceptance,
   logger,
   resetSupabasePassword,
+  saveSupabaseProfileLastLoggedIn,
   signInWithPassword,
   signOutFromSupabase,
 } from '@gym-pilot/shared'
@@ -162,6 +163,16 @@ export function LoginPage() {
     }
 
     persistRememberedEmail(email, true)
+
+    if (response.data?.user?.id) {
+      await saveSupabaseProfileLastLoggedIn(
+        response.data.user.id,
+        email.trim() || null,
+        {
+          shouldRecordActivity: true,
+        },
+      )
+    }
 
     const postLoginMessage = String(
       await loadAppSetting('post_login_message', ''),
