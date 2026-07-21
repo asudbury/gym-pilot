@@ -1,6 +1,5 @@
 import { useEffect, useState } from 'react'
 import { useNavigate, Link } from 'react-router-dom'
-import { BackLink } from '../components/ui/BackLink'
 import { PageLayout } from '../layouts/PageLayout'
 import { PageCardLayout } from '../layouts/PageCardLayout'
 import { useAuth } from '../auth/AuthContext'
@@ -41,7 +40,6 @@ export function PreferencesPage() {
   }, [user?.name, user?.applicationName, user?.gymBrand, user?.gymName])
 
   const displayRoles = getDisplayRoles(user?.roles, user?.role)
-  const isAdmin = displayRoles.includes('admin')
   const isTrainer = displayRoles.includes('trainer')
   const isVirginGymBrand = (gymBrand || '').trim().toLowerCase() === 'virgin'
 
@@ -79,14 +77,6 @@ export function PreferencesPage() {
         description="Update your profile and account preferences."
         icon="preferences"
       >
-        <div className="flex flex-wrap items-center justify-end gap-2">
-          {isAdmin ? (
-            <BackLink to="/admin" label="Back to admin" />
-          ) : (
-            <BackLink to="/" label="Back to home" />
-          )}
-        </div>
-
         <form onSubmit={handleSubmit} className="flex flex-col gap-4">
           <div className="flex flex-col gap-2 rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3 text-sm text-slate-700">
             <p className="font-medium">Your roles</p>

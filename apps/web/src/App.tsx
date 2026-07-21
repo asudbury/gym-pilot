@@ -14,6 +14,11 @@ import { Button } from './components/Button'
 import { formatLabel } from './utils/formatUtils'
 import { useAuth } from './auth/AuthContext'
 import { buildNavigationMenuItems } from './utils/navigationUtils'
+import { useDeviceType } from './components/tierDeviceVisibility'
+import {
+  isVisibleForAppRules,
+  type AppVisibilityRules,
+} from './components/appVisibility'
 import { logger } from '@gym-pilot/shared'
 import {
   getHashHomeUrl,
@@ -46,6 +51,8 @@ function App() {
   const { users, visiblePlans, visibleAssignments } = usePlan()
   const SHOW_AUTH_BUTTON = true
   const { user, logout } = useAuth()
+  const deviceType = useDeviceType()
+  const currentTier = user?.accountTier ?? 'free'
   const { favorites, folders, setFavorites, setFolders } =
     useFavouritesFeature()
 
@@ -254,6 +261,8 @@ function App() {
     showTimetable: hasTimetableAccess,
     itemClassName: 'px-2 py-1.5 text-sm font-medium',
     userRoles,
+    tier: currentTier,
+    deviceType,
   })
   const tabletMenuItems = buildNavigationMenuItems({
     plansCount,
@@ -264,6 +273,8 @@ function App() {
     itemClassName:
       'rounded-xl px-3 py-2 text-sm font-medium text-slate-700 transition hover:bg-slate-50',
     userRoles,
+    tier: currentTier,
+    deviceType,
   })
   const mobileMenuItems = buildNavigationMenuItems({
     plansCount,
@@ -274,11 +285,25 @@ function App() {
     itemClassName:
       'rounded-xl px-3 py-2 text-sm font-medium text-slate-700 transition hover:bg-slate-50',
     userRoles,
+    tier: currentTier,
+    deviceType,
   })
 
   const desktopMenuItemsFinal = desktopMenuItems
   const tabletMenuItemsFinal = tabletMenuItems
   const mobileMenuItemsFinal = mobileMenuItems
+
+  const routeVisibilityRules: Record<string, AppVisibilityRules | undefined> = {
+    '/record-session': { minTier: 'bronze', visibleOn: ['desktop', 'tablet'] },
+    '/sessions': { minTier: 'bronze', visibleOn: ['desktop', 'tablet'] },
+  }
+
+  const currentRouteVisibility = routeVisibilityRules[pathname]
+  const isCurrentRouteVisible = isVisibleForAppRules(
+    currentTier,
+    deviceType,
+    currentRouteVisibility,
+  )
 
   return (
     <div className="min-h-screen bg-slate-50 text-slate-900 transition-colors dark:bg-slate-950 dark:text-slate-100">
@@ -330,20 +355,28 @@ function App() {
         onToggleMobileMenu={() => setMobileMenuOpen((current) => !current)}
       />
 
-      <Routes>
-        {createAuthRoutes()}
-        {createPublicRoutes({
-          user,
-          homeFilters,
-          onHomeFiltersChange: setHomeFilters,
-          onToggleFavoriteExercise: handleToggleFavoriteExercise,
-          isExerciseFavorite,
-          favorites,
-          folders,
-          onFoldersChange: setFolders,
-          onFavoritesChange: setFavorites,
-        })}
-      </Routes>
+      {currentRouteVisibility && !isCurrentRouteVisible ? (
+        <div className="mx-auto flex max-w-6xl flex-col gap-3 px-4 py-8 sm:px-6 lg:px-8">
+          <h1 className="text-2xl font-semibold">
+            This screen is not available for your current tier or device.
+          </h1>
+        </div>
+      ) : (
+        <Routes>
+          {createAuthRoutes()}
+          {createPublicRoutes({
+            user,
+            homeFilters,
+            onHomeFiltersChange: setHomeFilters,
+            onFavoritesChange: setFavorites,
+            onFoldersChange: setFolders,
+            onToggleFavoriteExercise: handleToggleFavoriteExercise,
+            isExerciseFavorite,
+            favorites,
+            folders,
+          })}
+        </Routes>
+      )}
     </div>
   )
 }

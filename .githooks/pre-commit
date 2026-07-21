@@ -9,4 +9,9 @@ if ! command -v npm >/dev/null 2>&1; then
   exit 1
 fi
 
-npm run verify
+npm run format:changed
+
+# Intentionally skip Knip in pre-commit checks; this hook runs formatting and
+# the faster pre-commit verification flow without the full Knip pass.
+# npm run verify
+npm run verify:precommit

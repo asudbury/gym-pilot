@@ -4,6 +4,8 @@ import type { DecorativeIconProps } from '../components/ui/DecorativeIcon'
 import { getExercisePath, getExerciseSlug } from './exerciseRouteUtils'
 import { exercises, exercisesSchema } from '@gym-pilot/shared'
 import { navigationMeta } from './navigationMeta'
+import { isVisibleForAppRules } from '../components/appVisibility'
+import type { DeviceType } from '../components/tierDeviceVisibility'
 
 export type NavigationMenuItemProps = {
   to: string
@@ -34,6 +36,8 @@ export type BuildNavigationMenuItemsOptions = {
   isAuthenticated?: boolean
   showTimetable?: boolean
   userRoles?: UserRole[]
+  tier?: string | null
+  deviceType?: DeviceType
 }
 
 export function buildNavigationMenuItems({
@@ -42,11 +46,15 @@ export function buildNavigationMenuItems({
   isAuthenticated = false,
   showTimetable = true,
   userRoles = [],
+  tier = 'free',
+  deviceType = 'desktop',
 }: BuildNavigationMenuItemsOptions): NavigationMenuListItem[] {
   const items: NavigationMenuListItem[] = []
 
   for (const meta of navigationMeta) {
     if (meta.requireAuth && !isAuthenticated) continue
+
+    if (!isVisibleForAppRules(tier, deviceType, meta.visibility)) continue
 
     if (meta.requiredRole) {
       const required = Array.isArray(meta.requiredRole)

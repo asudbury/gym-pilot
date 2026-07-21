@@ -1,4 +1,5 @@
 import type { UserRole } from '@gym-pilot/types'
+import type { AppVisibilityRules } from '../components/appVisibility'
 
 export type NavMetaItem = {
   key: string
@@ -8,6 +9,7 @@ export type NavMetaItem = {
   requireAuth?: boolean
   requiredRole?: UserRole | UserRole[]
   requireClubId?: boolean
+  visibility?: AppVisibilityRules
 }
 
 export const navigationMeta: NavMetaItem[] = [
@@ -17,6 +19,10 @@ export const navigationMeta: NavMetaItem[] = [
     to: '/exercises',
     icon: 'dumbbell',
     requireAuth: true,
+    visibility: {
+      minTier: 'free',
+      visibleOn: ['desktop', 'tablet', 'mobile'],
+    },
   },
   // {
   //   key: 'plans',
@@ -39,6 +45,10 @@ export const navigationMeta: NavMetaItem[] = [
     icon: 'calendar',
     requireAuth: true,
     requireClubId: true,
+    visibility: {
+      minTier: 'free',
+      visibleOn: ['desktop', 'tablet', 'mobile'],
+    },
   },
   {
     key: 'preferences',
@@ -46,6 +56,10 @@ export const navigationMeta: NavMetaItem[] = [
     to: '/preferences',
     icon: 'settings',
     requireAuth: true,
+    visibility: {
+      minTier: 'free',
+      visibleOn: ['desktop', 'tablet', 'mobile'],
+    },
   },
   {
     key: 'admin',
@@ -54,6 +68,19 @@ export const navigationMeta: NavMetaItem[] = [
     icon: 'settings',
     requiredRole: 'admin',
     requireAuth: true,
+    visibility: {
+      minTier: 'free',
+      visibleOn: ['desktop', 'tablet', 'mobile'],
+    },
   },
-  { key: 'help', label: 'Help', to: '/help', icon: 'help' },
+  {
+    key: 'help',
+    label: 'Help',
+    to: '/help',
+    icon: 'help',
+    visibility: {
+      minTier: 'free',
+      visibleOn: ['desktop', 'tablet', 'mobile'],
+    },
+  },
 ]
