@@ -2,6 +2,7 @@ import { useEffect, useMemo, useState } from 'react'
 import { Link } from 'react-router-dom'
 import { useAuth } from '../auth/AuthContext'
 import { Button } from '../components/Button'
+import { NotificationPill } from '../components/NotificationPill'
 import { DecorativeIcon } from '../components/ui/DecorativeIcon'
 import { PageCardLayout } from '../layouts/PageCardLayout'
 import { PageLayout } from '../layouts/PageLayout'
@@ -72,7 +73,6 @@ export function SessionHistoryPage() {
   >('attended')
   const [editNotes, setEditNotes] = useState('')
   const [editRating, setEditRating] = useState<number | null>(null)
-  const [statusMessage, setStatusMessage] = useState<string | null>(null)
   const [errorMessage, setErrorMessage] = useState<string | null>(null)
 
   const userId = user?.id ?? null
@@ -140,7 +140,11 @@ export function SessionHistoryPage() {
       )
       setEntries(sortSessionEntries(nextEntries))
       setEditingEntryId(null)
-      setStatusMessage('Session updated.')
+      window.dispatchEvent(
+        new CustomEvent('gym-pilot-notification', {
+          detail: { text: 'Session updated.', tone: 'success' },
+        }),
+      )
       setErrorMessage(null)
     } catch (error) {
       setErrorMessage(formatSessionHistoryError(error))
@@ -154,7 +158,11 @@ export function SessionHistoryPage() {
         userId ?? undefined,
       )
       setEntries(sortSessionEntries(nextEntries))
-      setStatusMessage('Session deleted.')
+      window.dispatchEvent(
+        new CustomEvent('gym-pilot-notification', {
+          detail: { text: 'Session deleted.', tone: 'success' },
+        }),
+      )
       setErrorMessage(null)
     } catch (error) {
       setErrorMessage(formatSessionHistoryError(error))
@@ -178,12 +186,7 @@ export function SessionHistoryPage() {
           </Link>
         </div>
         {errorMessage ? (
-          <p className="rounded-2xl border border-rose-200 bg-rose-50 p-3 text-sm font-medium text-rose-700">
-            {errorMessage}
-          </p>
-        ) : null}
-        {statusMessage ? (
-          <p className="text-sm text-emerald-700">{statusMessage}</p>
+          <NotificationPill message={{ text: errorMessage, tone: 'error' }} className="mb-3" />
         ) : null}
         {sortedEntries.length === 0 ? (
           <div className="rounded-2xl border border-slate-200 bg-slate-50 p-4 text-sm text-slate-600">

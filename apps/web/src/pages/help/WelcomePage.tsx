@@ -14,6 +14,7 @@ import { appTokens } from '../../constants/tokens'
 import { useAuth } from '../../auth/AuthContext'
 import { DecorativeIcon } from '../../components/ui/DecorativeIcon'
 import { Button } from '../../components/Button'
+import { NotificationPill } from '../../components/NotificationPill'
 
 export function WelcomePage() {
   const navigate = useNavigate()
@@ -153,9 +154,7 @@ export function WelcomePage() {
         </div>
 
         {errorMessage ? (
-          <div className="mt-4 rounded-2xl border border-rose-200 bg-rose-50 px-4 py-3 text-sm font-medium text-rose-700">
-            {errorMessage}
-          </div>
+          <NotificationPill message={{ text: errorMessage, tone: 'error' }} className="mt-4" />
         ) : null}
 
         <div className="mt-6 flex flex-wrap gap-3">

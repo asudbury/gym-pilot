@@ -171,12 +171,16 @@ export function RecordSessionPage() {
         notes: notes || null,
         rating: rating ?? null,
         workoutMetadata,
+        workoutItems,
       })
 
       if (!sessionRecordingResult.success) {
-        throw (
-          sessionRecordingResult.error || new Error('Could not record session')
-        )
+        const persistenceError = sessionRecordingResult.error
+        const userMessage = persistenceError instanceof Error && persistenceError.message.includes('workout')
+          ? 'The session was recorded, but your workout details could not be saved. Please try again.'
+          : 'We could not record the session right now. Please try again.'
+
+        throw persistenceError || new Error(userMessage)
       }
 
       window.dispatchEvent(

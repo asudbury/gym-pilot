@@ -1608,6 +1608,22 @@ function createWorkoutItemPayload(input: {
   }
 }
 
+export function buildWorkoutItemsPersistencePayloads(input: {
+  sessionId: string
+  userId: string
+  workoutItems: SessionWorkoutItem[]
+}) {
+  return input.workoutItems.map((item, index) => createWorkoutItemPayload({
+    sessionId: input.sessionId,
+    userId: input.userId,
+    index,
+    item: {
+      ...item,
+      id: item.id || `item-${index}`,
+    },
+  }))
+}
+
 export function getWorkoutItemsTableName() {
   return 'gym_pilot_user_session_workout_item'
 }
@@ -1647,21 +1663,17 @@ export async function saveWorkoutItemsForSession(sessionId: string, workoutItems
 
   const resolvedUserId = userId || await getAuthenticatedUserId(client)
   if (!resolvedUserId) {
-    return { success: false as const, error: new Error('Unable to resolve the current user') }
+    return { success: false as const, error: new Error('Unable to resolve the authenticated user for workout persistence') }
   }
 
   const existingRows = await loadWorkoutItemsForSession(sessionId, resolvedUserId)
   const existingIds = new Set(existingRows.map((item) => item.id))
 
-  const payload = workoutItems.map((item, index) => createWorkoutItemPayload({
+  const payload = buildWorkoutItemsPersistencePayloads({
     sessionId,
     userId: resolvedUserId,
-    index,
-    item: {
-      ...item,
-      id: item.id || `item-${index}`,
-    },
-  }))
+    workoutItems,
+  })
 
   if (payload.length === 0) {
     const { error } = await client
@@ -2303,8 +2315,53 @@ export async function recordSession(input: {
   notes?: string | null
   rating?: number | null
   workoutMetadata?: unknown | null
+  workoutItems?: SessionWorkoutItem[]
 }) {
-  return bookSession(input)
+  const client = getSupabaseClient()
+  if (!client) {
+    return { success: false as const, error: new Error('Supabase client is not available') }
+  }
+
+  const bookingResult = await bookSession(input)
+  if (!bookingResult.success) {
+    logger.error('[Supabase] Session booking failed before workout persistence', bookingResult.error)
+    return bookingResult
+  }
+
+  const resolvedUserId = input.userId || await getAuthenticatedUserId(client)
+  if (!resolvedUserId || !input.workoutItems?.length) {
+    const fallbackError = resolvedUserId
+      ? bookingResult.error
+      : new Error('No authenticated user available to persist workout rows')
+
+    logger.error('[Supabase] Workout rows were not persisted because no authenticated user was available', fallbackError)
+
+    return {
+      ...bookingResult,
+      error: fallbackError,
+    }
+  }
+
+  const saveResult = await saveWorkoutItemsForSession(
+    input.sessionId,
+    input.workoutItems,
+    resolvedUserId,
+  )
+
+  if (!saveResult.success) {
+    const workoutPersistenceError = saveResult.error instanceof Error
+      ? saveResult.error
+      : new Error('Could not persist workout rows for recorded session')
+
+    logger.error('[Supabase] Could not persist workout rows for recorded session', workoutPersistenceError)
+    return {
+      ...bookingResult,
+      success: false,
+      error: workoutPersistenceError,
+    }
+  }
+
+  return bookingResult
 }
 
 export async function cancelBooking(input: { bookingId?: string; sessionId?: string; userId?: string }) {

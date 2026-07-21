@@ -25,7 +25,7 @@ export function getSessionEntryRating(
 export function getSessionEntryTitle(entry: SessionHistoryEntry) {
   if (entry.className?.trim()) {
     if (entry.sessionType === 'class') {
-      return `Class: ${entry.className}`
+      return `Class Session: ${entry.className}`
     }
 
     return entry.className

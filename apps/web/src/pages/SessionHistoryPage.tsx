@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { SessionActions } from '../components/SessionActions'
+import { NotificationPill } from '../components/NotificationPill'
 import { DecorativeIcon } from '../components/ui/DecorativeIcon'
 import { useAuth } from '../auth/AuthContext'
 import { PageCardLayout } from '../layouts/PageCardLayout'
@@ -44,7 +45,6 @@ export function SessionHistoryPage() {
   const [pendingDeleteEntryId, setPendingDeleteEntryId] = useState<
     string | null
   >(null)
-  const [statusMessage, setStatusMessage] = useState<string | null>(null)
   const [errorMessage, setErrorMessage] = useState<string | null>(null)
 
   const userId = user?.id ?? null
@@ -113,7 +113,11 @@ export function SessionHistoryPage() {
         await deleteSessionHistoryEntry(entryId, userId ?? undefined)
         await refreshEntries()
         setPendingDeleteEntryId(null)
-        setStatusMessage('Session deleted.')
+        window.dispatchEvent(
+          new CustomEvent('gym-pilot-notification', {
+            detail: { text: 'Session deleted.', tone: 'success' },
+          }),
+        )
       } catch (error) {
         setErrorMessage(formatSessionHistoryError(error))
       }
@@ -133,12 +137,7 @@ export function SessionHistoryPage() {
       >
         <SessionActions includeViewSessionsButton={false} />
         {errorMessage ? (
-          <p className="rounded-2xl border border-rose-200 bg-rose-50 p-3 text-sm font-medium text-rose-700">
-            {errorMessage}
-          </p>
-        ) : null}
-        {statusMessage ? (
-          <p className="text-sm text-emerald-700">{statusMessage}</p>
+          <NotificationPill message={{ text: errorMessage, tone: 'error' }} className="mb-3" />
         ) : null}
         {sortedEntries.length === 0 ? (
           <div className="rounded-2xl border border-slate-200 bg-slate-50 p-4 text-sm text-slate-600">

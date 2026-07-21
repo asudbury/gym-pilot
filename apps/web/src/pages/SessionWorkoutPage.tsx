@@ -4,6 +4,7 @@ import { useAuth } from '../auth/AuthContext'
 import { Button } from '../components/Button'
 import { PageCardLayout } from '../layouts/PageCardLayout'
 import { PageLayout } from '../layouts/PageLayout'
+import { NotificationPill } from '../components/NotificationPill'
 import { SessionWorkoutEditor } from '../components/SessionWorkoutEditor'
 import {
   buildSessionWorkoutMetadata,
@@ -49,22 +50,23 @@ export function SessionWorkoutPage() {
           loadedEntries.find((candidate) => candidate.id === entryId) ?? null
         setEntry(nextEntry)
 
+        const parsed = parseSessionWorkoutMetadata(nextEntry?.workoutMetadata)
+        const fallbackWorkoutItems = parsed.workoutItems
+
         if (nextEntry?.sessionId) {
-          const persistedItems = await loadWorkoutItemsForSession(
-            nextEntry.sessionId,
-            userId ?? undefined,
-          )
-          if (persistedItems.length > 0) {
-            setWorkoutItems(persistedItems)
-          } else {
-            const parsed = parseSessionWorkoutMetadata(
-              nextEntry.workoutMetadata,
+          try {
+            const persistedItems = await loadWorkoutItemsForSession(
+              nextEntry.sessionId,
+              userId ?? undefined,
             )
-            setWorkoutItems(parsed.workoutItems)
+            setWorkoutItems(
+              persistedItems.length > 0 ? persistedItems : fallbackWorkoutItems,
+            )
+          } catch {
+            setWorkoutItems(fallbackWorkoutItems)
           }
         } else {
-          const parsed = parseSessionWorkoutMetadata(nextEntry?.workoutMetadata)
-          setWorkoutItems(parsed.workoutItems)
+          setWorkoutItems(fallbackWorkoutItems)
         }
 
         setErrorMessage(null)
@@ -143,9 +145,7 @@ export function SessionWorkoutPage() {
         icon="edit"
       >
         {errorMessage ? (
-          <p className="rounded-2xl border border-rose-200 bg-rose-50 p-3 text-sm font-medium text-rose-700">
-            {errorMessage}
-          </p>
+          <NotificationPill message={{ text: errorMessage, tone: 'error' }} className="mb-3" />
         ) : null}
 
         {entry ? (

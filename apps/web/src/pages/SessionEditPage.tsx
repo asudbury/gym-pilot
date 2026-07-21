@@ -2,6 +2,7 @@ import { useEffect, useMemo, useState } from 'react'
 import { useNavigate, useParams } from 'react-router-dom'
 import { useAuth } from '../auth/AuthContext'
 import { Button } from '../components/Button'
+import { NotificationPill } from '../components/NotificationPill'
 import { SessionWorkoutEditor } from '../components/SessionWorkoutEditor'
 import { PageCardLayout } from '../layouts/PageCardLayout'
 import { PageLayout } from '../layouts/PageLayout'
@@ -70,22 +71,22 @@ export function SessionEditPage() {
           const parsedMetadata = parseSessionWorkoutMetadata(
             nextEntry.workoutMetadata,
           )
+          const fallbackWorkoutItems = parsedMetadata.workoutItems
+
           if (nextEntry.sessionId) {
             try {
               const persistedItems = await loadWorkoutItemsForSession(
                 nextEntry.sessionId,
                 userId ?? undefined,
               )
-              if (persistedItems.length > 0) {
-                setWorkoutItems(persistedItems)
-              } else {
-                setWorkoutItems(parsedMetadata.workoutItems)
-              }
+              setWorkoutItems(
+                persistedItems.length > 0 ? persistedItems : fallbackWorkoutItems,
+              )
             } catch {
-              setWorkoutItems(parsedMetadata.workoutItems)
+              setWorkoutItems(fallbackWorkoutItems)
             }
           } else {
-            setWorkoutItems(parsedMetadata.workoutItems)
+            setWorkoutItems(fallbackWorkoutItems)
           }
         } else {
           setWorkoutItems([])
@@ -181,70 +182,12 @@ export function SessionEditPage() {
         icon="edit"
       >
         {errorMessage ? (
-          <p className="rounded-2xl border border-rose-200 bg-rose-50 p-3 text-sm font-medium text-rose-700">
-            {errorMessage}
-          </p>
+          <NotificationPill message={{ text: errorMessage, tone: 'error' }} className="mb-3" />
         ) : null}
 
         {entry ? (
           <div className="space-y-4 rounded-2xl border border-slate-200 bg-slate-50 p-4">
             <div className="rounded-2xl border border-slate-200 bg-white p-4">
-              <div className="rounded-2xl border border-slate-200 bg-slate-50 p-4">
-                <div className="flex flex-col gap-2 text-sm text-slate-700">
-                  <div className="flex flex-wrap items-center gap-2">
-                    <span className="font-semibold text-slate-900">
-                      Session details
-                    </span>
-                  </div>
-                  {entry.className ? (
-                    <p>
-                      <span className="font-medium text-slate-800">Class:</span>{' '}
-                      {entry.className}
-                    </p>
-                  ) : null}
-                  {entry.instructorName ? (
-                    <p>
-                      <span className="font-medium text-slate-800">
-                        Instructor:
-                      </span>{' '}
-                      {entry.instructorName}
-                    </p>
-                  ) : null}
-                  <p>
-                    <span className="font-medium text-slate-800">Started:</span>{' '}
-                    {new Date(
-                      entry.startedAt ?? entry.createdAt ?? '',
-                    ).toLocaleString()}
-                  </p>
-                  {entry.notes ? (
-                    <p>
-                      <span className="font-medium text-slate-800">
-                        Current notes:
-                      </span>{' '}
-                      {entry.notes}
-                    </p>
-                  ) : null}
-                  {typeof entry.rating === 'number' &&
-                  entry.rating >= 1 &&
-                  entry.rating <= 5 ? (
-                    <p>
-                      <span className="font-medium text-slate-800">
-                        Current rating:
-                      </span>{' '}
-                      {entry.rating} / 5
-                    </p>
-                  ) : null}
-                  {entry.durationMinutes != null ? (
-                    <p>
-                      <span className="font-medium text-slate-800">
-                        Current duration:
-                      </span>{' '}
-                      {entry.durationMinutes} min
-                    </p>
-                  ) : null}
-                </div>
-              </div>
-
               <div className="mt-4 flex flex-col gap-2">
                 <span className="text-sm font-medium text-slate-700">Role</span>
                 <div className="flex flex-wrap gap-2">

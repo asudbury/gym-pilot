@@ -1,6 +1,28 @@
 import { useEffect, useState } from 'react'
+import { appTokens } from '../constants/tokens'
 
 type Toast = { id: number; text: string; tone?: 'success' | 'error' }
+
+type NotificationPillProps = {
+  text: string
+  tone?: 'success' | 'error'
+}
+
+function NotificationPill({ text, tone }: NotificationPillProps) {
+  const isError = tone === 'error'
+
+  return (
+    <div
+      className={`max-w-xs rounded-full border px-4 py-2 text-sm font-medium shadow-sm ${
+        isError
+          ? 'border-rose-200 bg-rose-50 text-rose-700'
+          : 'border-emerald-200 bg-emerald-50 text-emerald-700'
+      } ${appTokens.pill}`}
+    >
+      {text}
+    </div>
+  )
+}
 
 export default function ToastContainer() {
   const [toasts, setToasts] = useState<Toast[]>([])
@@ -29,16 +51,7 @@ export default function ToastContainer() {
   return (
     <div className="fixed right-4 bottom-4 z-50 flex flex-col items-end gap-2">
       {toasts.map((t) => (
-        <div
-          key={t.id}
-          className={`max-w-xs rounded-lg px-3 py-2 text-sm shadow ${
-            t.tone === 'error'
-              ? 'bg-rose-50 text-rose-800 border border-rose-100'
-              : 'bg-emerald-50 text-emerald-800 border border-emerald-100'
-          }`}
-        >
-          {t.text}
-        </div>
+        <NotificationPill key={t.id} text={t.text} tone={t.tone} />
       ))}
     </div>
   )

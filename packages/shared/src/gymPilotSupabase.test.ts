@@ -1,8 +1,9 @@
-import { describe, expect, it } from 'vitest'
+import { describe, expect, it, vi } from 'vitest'
 import {
   buildSessionBookingAttendancePayload,
   buildSessionRecordPayload,
   buildSupabaseProfileLocalCacheEntry,
+  buildWorkoutItemsPersistencePayloads,
   buildSupabaseUserActivityEventData,
   buildSupabaseUserRoleRows,
   buildSessionHistoryDeleteError,
@@ -266,6 +267,38 @@ describe('session-based shared helpers', () => {
     expect(typeof listSessions).toBe('function')
     expect(typeof recordSession).toBe('function')
   })
+
+  it('returns a failure when workout persistence fails', async () => {
+    const mockClient = {
+      from: vi.fn(() => ({
+        update: vi.fn(() => ({
+          eq: vi.fn(() => ({
+            select: vi.fn().mockResolvedValue({ data: [{ id: 'session-1' }], error: null }),
+          })),
+        })),
+        delete: vi.fn(() => ({ eq: vi.fn(() => ({}) ) })),
+      })),
+    }
+
+    vi.doMock('./gymPilotSupabase', async () => {
+      const actual = await vi.importActual<typeof import('./gymPilotSupabase')>('./gymPilotSupabase')
+      return {
+        ...actual,
+        getSupabaseClient: () => mockClient,
+        getAuthenticatedUserId: vi.fn().mockResolvedValue('user-1'),
+      }
+    })
+
+    const module = await import('./gymPilotSupabase')
+    const result = await module.recordSession({
+      sessionId: 'session-1',
+      role: 'client',
+      workoutItems: [{ id: 'item-1', category: 'exercise', exerciseName: 'Squat' } as any],
+    })
+
+    expect(result.success).toBe(false)
+    expect(result.error).toBeInstanceOf(Error)
+  })
 })
 
 describe('session table naming', () => {
@@ -274,8 +307,42 @@ describe('session table naming', () => {
     expect(getSessionBookingTableName()).toBe('gym_pilot_user_session')
   })
 
-  it('uses the renamed workout items table for workout persistence', () => {
+  it('uses the locally available workout items table for workout persistence', () => {
     expect(getWorkoutItemsTableName()).toBe('gym_pilot_user_session_workout_item')
+  })
+})
+
+describe('workout item persistence payloads', () => {
+  it('builds rows that can be upserted for a session and user', () => {
+    const payloads = buildWorkoutItemsPersistencePayloads({
+      sessionId: 'session-1',
+      userId: 'user-1',
+      workoutItems: [
+        {
+          id: 'item-1',
+          category: 'exercise',
+          exerciseName: 'Squat',
+          exerciseId: 'exercise-1',
+          reps: '3',
+          sets: '10',
+          sortOrder: 0,
+        },
+      ],
+    })
+
+    expect(payloads).toHaveLength(1)
+    expect(payloads[0]).toMatchObject({
+      id: 'item-1',
+      session_id: 'session-1',
+      user_id: 'user-1',
+      item_index: 0,
+      category: 'exercise',
+      exercise_name: 'Squat',
+      exercise_id: 'exercise-1',
+      reps: '3',
+      sets: '10',
+      sort_order: 0,
+    })
   })
 })
 

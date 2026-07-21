@@ -87,6 +87,34 @@ function formatActivityDetails(details: unknown): string {
   }
 }
 
+export function filterLogEntriesByText<T extends Record<string, unknown>>(
+  entries: T[],
+  filterText: string,
+): T[] {
+  const normalizedFilter = filterText.trim().toLowerCase()
+
+  if (!normalizedFilter) {
+    return entries
+  }
+
+  return entries.filter((entry) => {
+    const searchableText = [
+      typeof entry.message === 'string' ? entry.message : '',
+      typeof entry.details === 'string'
+        ? entry.details
+        : JSON.stringify(entry.details ?? {}),
+      typeof entry.event_type === 'string' ? entry.event_type : '',
+      typeof entry.event_data === 'string'
+        ? entry.event_data
+        : JSON.stringify(entry.event_data ?? {}),
+    ]
+      .join(' ')
+      .toLowerCase()
+
+    return searchableText.includes(normalizedFilter)
+  })
+}
+
 export function AdminLogsPage({ view = 'combined' }: AdminLogsPageProps) {
   const navigate = useNavigate()
   const [errorLogs, setErrorLogs] = useState<LogEntryRow[]>([])
@@ -95,6 +123,7 @@ export function AdminLogsPage({ view = 'combined' }: AdminLogsPageProps) {
   const [loading, setLoading] = useState(true)
   const [clearing, setClearing] = useState(false)
   const [error, setError] = useState('')
+  const [logFilterText, setLogFilterText] = useState('')
 
   useEffect(() => {
     let isActive = true
@@ -186,6 +215,9 @@ export function AdminLogsPage({ view = 'combined' }: AdminLogsPageProps) {
   }, [view])
 
   const clearTargetTable = resolveLogTableName(view)
+  const filteredErrorLogs = filterLogEntriesByText(errorLogs, logFilterText)
+  const filteredAuditLogs = filterLogEntriesByText(auditLogs, logFilterText)
+  const filteredActivityLogs = filterLogEntriesByText(activityLogs, logFilterText)
 
   const title =
     view === 'audit'
@@ -273,9 +305,21 @@ export function AdminLogsPage({ view = 'combined' }: AdminLogsPageProps) {
                 Activity log
               </button>
             </div>
-            <Button type="button" onClick={() => window.location.reload()}>
-              Refresh
-            </Button>
+            <div className="flex items-center gap-2">
+              <label className="flex items-center gap-2 rounded-full border border-slate-300 bg-white px-3 py-1.5 text-sm text-slate-700 shadow-sm">
+                <span className="font-medium">Filter</span>
+                <input
+                  type="text"
+                  value={logFilterText}
+                  onChange={(event) => setLogFilterText(event.target.value)}
+                  placeholder="Search logs"
+                  className="min-w-[180px] border-0 bg-transparent p-0 text-sm text-slate-700 outline-none"
+                />
+              </label>
+              <Button type="button" onClick={() => window.location.reload()}>
+                Refresh
+              </Button>
+            </div>
           </div>
 
           {error ? (
@@ -296,7 +340,7 @@ export function AdminLogsPage({ view = 'combined' }: AdminLogsPageProps) {
                 </h2>
                 <div className="flex items-center gap-2">
                   <span className="text-sm text-slate-500">
-                    {auditLogs.length} rows
+                    {filteredAuditLogs.length} / {auditLogs.length} rows
                   </span>
                   <Button
                     type="button"
@@ -313,8 +357,12 @@ export function AdminLogsPage({ view = 'combined' }: AdminLogsPageProps) {
                   <div className="rounded-xl border border-dashed border-slate-200 p-4 text-sm text-slate-600">
                     No audit log entries yet.
                   </div>
+                ) : filteredAuditLogs.length === 0 ? (
+                  <div className="rounded-xl border border-dashed border-slate-200 p-4 text-sm text-slate-600">
+                    No audit log entries match this filter.
+                  </div>
                 ) : (
-                  auditLogs.map((entry) => (
+                  filteredAuditLogs.map((entry) => (
                     <article
                       key={entry.id}
                       className="rounded-xl border border-slate-200 bg-slate-50 p-3"
@@ -343,7 +391,7 @@ export function AdminLogsPage({ view = 'combined' }: AdminLogsPageProps) {
                 </h2>
                 <div className="flex items-center gap-2">
                   <span className="text-sm text-slate-500">
-                    {activityLogs.length} rows
+                    {filteredActivityLogs.length} / {activityLogs.length} rows
                   </span>
                   <Button
                     type="button"
@@ -360,8 +408,12 @@ export function AdminLogsPage({ view = 'combined' }: AdminLogsPageProps) {
                   <div className="rounded-xl border border-dashed border-slate-200 p-4 text-sm text-slate-600">
                     No activity log entries yet.
                   </div>
+                ) : filteredActivityLogs.length === 0 ? (
+                  <div className="rounded-xl border border-dashed border-slate-200 p-4 text-sm text-slate-600">
+                    No activity log entries match this filter.
+                  </div>
                 ) : (
-                  activityLogs.map((entry) => (
+                  filteredActivityLogs.map((entry) => (
                     <article
                       key={entry.id}
                       className="rounded-xl border border-slate-200 bg-slate-50 p-3"
@@ -390,7 +442,7 @@ export function AdminLogsPage({ view = 'combined' }: AdminLogsPageProps) {
                 </h2>
                 <div className="flex items-center gap-2">
                   <span className="text-sm text-slate-500">
-                    {errorLogs.length} rows
+                    {filteredErrorLogs.length} / {errorLogs.length} rows
                   </span>
                   <Button
                     type="button"
@@ -407,8 +459,12 @@ export function AdminLogsPage({ view = 'combined' }: AdminLogsPageProps) {
                   <div className="rounded-xl border border-dashed border-slate-200 p-4 text-sm text-slate-600">
                     No error log entries yet.
                   </div>
+                ) : filteredErrorLogs.length === 0 ? (
+                  <div className="rounded-xl border border-dashed border-slate-200 p-4 text-sm text-slate-600">
+                    No error log entries match this filter.
+                  </div>
                 ) : (
-                  errorLogs.map((entry) => (
+                  filteredErrorLogs.map((entry) => (
                     <article
                       key={entry.id}
                       className="rounded-xl border border-slate-200 bg-slate-50 p-3"

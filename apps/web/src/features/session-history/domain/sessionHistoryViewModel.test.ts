@@ -14,7 +14,7 @@ describe('session history view model', () => {
       attendanceType: 'attended' as const,
     } satisfies SessionHistoryEntry
 
-    expect(getSessionEntryTitle(entry)).toBe('Class: Yoga Flow')
+    expect(getSessionEntryTitle(entry)).toBe('Class Session: Yoga Flow')
   })
 
   it('falls back to a generic title for solo sessions', () => {

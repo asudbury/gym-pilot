@@ -38,6 +38,7 @@ export function AdminUserActivityPage() {
     'info',
   )
   const [isLoading, setIsLoading] = useState(false)
+  const [friendlyNameFilter, setFriendlyNameFilter] = useState('')
 
   const refreshProfileAndActivity = async (profileId: string) => {
     setIsLoading(true)
@@ -132,6 +133,27 @@ export function AdminUserActivityPage() {
 
   const selectedTitle = profile ? `Activity: ${profile.name}` : 'User activity'
 
+  const filteredActivityRows = activityRows.filter((activity) => {
+    const normalizedFilter = friendlyNameFilter.trim().toLowerCase()
+
+    if (!normalizedFilter) {
+      return true
+    }
+
+    const activityText = [
+      profile?.name ?? '',
+      activity.eventType,
+      Object.entries(activity.eventData ?? {})
+        .filter(([key]) => !['email', 'source'].includes(key))
+        .map(([key, value]) => `${key}: ${typeof value === 'string' ? value : JSON.stringify(value)}`)
+        .join(' '),
+    ]
+      .join(' ')
+      .toLowerCase()
+
+    return activityText.includes(normalizedFilter)
+  })
+
   return (
     <AdminSectionShell
       title={selectedTitle}
@@ -201,13 +223,20 @@ export function AdminUserActivityPage() {
             </div>
 
             <div className="mt-4 rounded-2xl border border-slate-200 bg-white p-3">
-              <div className="flex items-center justify-between gap-2">
+              <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
                 <p className="text-sm font-medium text-slate-700">
                   User activity
                 </p>
-                <span className="text-xs font-medium uppercase tracking-[0.24em] text-slate-400">
-                  Recent
-                </span>
+                <label className="flex items-center gap-2 text-sm text-slate-600">
+                  <span className="font-medium">Friendly name</span>
+                  <input
+                    type="text"
+                    value={friendlyNameFilter}
+                    onChange={(event) => setFriendlyNameFilter(event.target.value)}
+                    placeholder="Filter activities"
+                    className="rounded-full border border-slate-300 bg-white px-3 py-1.5 text-sm text-slate-700 shadow-sm"
+                  />
+                </label>
               </div>
 
               {isLoading ? (
@@ -216,9 +245,13 @@ export function AdminUserActivityPage() {
                 <p className="mt-2 text-sm text-slate-500">
                   No activity logged yet.
                 </p>
+              ) : filteredActivityRows.length === 0 ? (
+                <p className="mt-2 text-sm text-slate-500">
+                  No activity matches this filter.
+                </p>
               ) : (
                 <ul className="mt-3 space-y-2">
-                  {activityRows.map((activity) => {
+                  {filteredActivityRows.map((activity) => {
                     const activityDetails = Object.entries(
                       activity.eventData ?? {},
                     )
