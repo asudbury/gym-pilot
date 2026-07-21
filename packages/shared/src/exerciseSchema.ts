@@ -1,4 +1,4 @@
-import { z } from 'zod'
+import { z } from "zod";
 
 export const exerciseSchema = z.object({
   id: z.string(),
@@ -20,8 +20,8 @@ export const exerciseSchema = z.object({
   media_id: z.string().min(1),
   created_at: z.string().datetime({ offset: true }).or(z.string()),
   attribution: z.string().min(1),
-})
+});
 
-export const exercisesSchema = z.array(exerciseSchema)
+export const exercisesSchema = z.array(exerciseSchema);
 
-export type Exercise = z.infer<typeof exerciseSchema>
+export type Exercise = z.infer<typeof exerciseSchema>;
