@@ -38,6 +38,8 @@ export function LoginPage() {
   )
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [isResetting, setIsResetting] = useState(false)
+  const [showPassword, setShowPassword] = useState(false)
+  const [capsLockOn, setCapsLockOn] = useState(false)
 
   const emailParam = useMemo(() => {
     const rawValue =
@@ -57,6 +59,26 @@ export function LoginPage() {
     persistRememberEmailPreference(true)
     persistRememberedEmail(email, true)
   }, [email])
+
+  useEffect(() => {
+    const handleKeyDown = (event: KeyboardEvent) => {
+      if (event.getModifierState?.('CapsLock')) {
+        setCapsLockOn(true)
+      }
+    }
+
+    const handleKeyUp = (event: KeyboardEvent) => {
+      setCapsLockOn(Boolean(event.getModifierState?.('CapsLock')))
+    }
+
+    window.addEventListener('keydown', handleKeyDown)
+    window.addEventListener('keyup', handleKeyUp)
+
+    return () => {
+      window.removeEventListener('keydown', handleKeyDown)
+      window.removeEventListener('keyup', handleKeyUp)
+    }
+  }, [])
 
   const from = useMemo(() => {
     const state = location.state as {
@@ -277,17 +299,31 @@ export function LoginPage() {
           <label className="flex flex-col gap-2 text-sm font-medium text-slate-700">
             <span>Password</span>
 
-            <input
-              ref={passwordRef}
-              id="password"
-              name="password"
-              type="password"
-              autoComplete="current-password"
-              enterKeyHint="done"
-              required
-              className={`${appTokens.input} w-full`}
-              placeholder="Enter your password"
-            />
+            <div className="relative">
+              <input
+                ref={passwordRef}
+                id="password"
+                name="password"
+                type={showPassword ? 'text' : 'password'}
+                autoComplete="current-password"
+                enterKeyHint="done"
+                required
+                className={`${appTokens.input} w-full pr-24`}
+                placeholder="Enter your password"
+              />
+              <button
+                type="button"
+                onClick={() => setShowPassword((value) => !value)}
+                className="absolute inset-y-0 right-3 flex items-center text-sm font-semibold text-slate-600 transition hover:text-slate-900"
+              >
+                {showPassword ? 'Hide' : 'Show'}
+              </button>
+            </div>
+            {capsLockOn ? (
+              <span className="text-xs font-medium text-amber-700">
+                Caps Lock is on
+              </span>
+            ) : null}
           </label>
 
           <Button

@@ -46,6 +46,7 @@ export function AdminCreateUserPage() {
   const [mustChangePasswordFlag, setMustChangePasswordFlag] = useState(true)
   const [selectedGymClubId, setSelectedGymClubId] = useState<string>('')
   const [sendInviteLink, setSendInviteLink] = useState(false)
+  const [showTempPassword, setShowTempPassword] = useState(false)
   const [statusMessage, setStatusMessage] = useState<StatusMessageState | null>(
     null,
   )
@@ -407,19 +408,34 @@ export function AdminCreateUserPage() {
             value={newUserEmail}
             onChange={(event) => setNewUserEmail(event.target.value)}
             placeholder="Email address or login name"
-            autoComplete="email"
-            name="email"
-            className="w-full rounded-full border border-slate-200 bg-white px-4 py-2 text-sm text-slate-700"
-          />
-          <input
-            type="password"
-            value={tempPassword}
-            onChange={(event) => setTempPassword(event.target.value)}
-            placeholder="Temporary password"
             autoComplete="off"
-            name="temporary-password"
+            name="new-user-email"
+            spellCheck={false}
+            data-lpignore="true"
+            data-form-type="other"
             className="w-full rounded-full border border-slate-200 bg-white px-4 py-2 text-sm text-slate-700"
           />
+          <div className="relative">
+            <input
+              type={showTempPassword ? 'text' : 'password'}
+              value={tempPassword}
+              onChange={(event) => setTempPassword(event.target.value)}
+              placeholder="Temporary password"
+              autoComplete="new-password"
+              name="temporary-password"
+              spellCheck={false}
+              data-lpignore="true"
+              data-form-type="other"
+              className="w-full rounded-full border border-slate-200 bg-white px-4 py-2 pr-20 text-sm text-slate-700"
+            />
+            <button
+              type="button"
+              onClick={() => setShowTempPassword((value) => !value)}
+              className="absolute inset-y-0 right-3 flex items-center text-sm font-semibold text-slate-600 transition hover:text-slate-900"
+            >
+              {showTempPassword ? 'Hide' : 'Show'}
+            </button>
+          </div>
           <input
             type="text"
             value={newUserName}

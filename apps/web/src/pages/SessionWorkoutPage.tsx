@@ -114,12 +114,16 @@ export function SessionWorkoutPage() {
         updatedAt: new Date().toISOString(),
       }
 
-      if (entry.sessionId) {
-        await saveWorkoutItemsForSession(
+      if (userId && entry.sessionId) {
+        const workoutSaveResult = await saveWorkoutItemsForSession(
           entry.sessionId,
           workoutItems,
-          userId ?? undefined,
+          userId,
         )
+
+        if (!workoutSaveResult.success) {
+          throw workoutSaveResult.error ?? new Error('Could not save workout items')
+        }
       }
 
       await saveSessionHistoryEntry(nextEntry, userId ?? undefined)
