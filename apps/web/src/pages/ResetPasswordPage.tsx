@@ -4,6 +4,7 @@ import { PageCard } from '../components/PageCard'
 import { Heading1 } from '../components/Typography'
 import { appTokens } from '../constants/tokens'
 import { Button } from '../components/Button'
+import { NotificationPill } from '../components/NotificationPill'
 import { DecorativeIcon } from '../components/ui/DecorativeIcon'
 import {
   getSupabaseClient,
@@ -212,6 +213,14 @@ export function ResetPasswordPage() {
         </div>
 
         <form onSubmit={handleSubmit} className="mt-8 flex flex-col gap-4">
+          {statusMessage ? (
+            <NotificationPill
+              message={{
+                text: statusMessage,
+                tone: statusTone === 'error' ? 'error' : 'info',
+              }}
+            />
+          ) : null}
           <label className="flex flex-col gap-2 text-sm font-medium text-slate-700">
             <span>New password</span>
             <input

@@ -7,6 +7,7 @@ import { ResponsiveVisibility } from '../ResponsiveVisibility'
 import { DecorativeIcon } from '../ui/DecorativeIcon'
 import { getToneClass } from '../toneClasses'
 import { Button } from '../Button'
+import { NotificationPill } from '../NotificationPill'
 import {
   navigationItemBaseClassName,
   navigationItemIconClassName,
@@ -156,8 +157,11 @@ export function Header({
                 ) : null}
               </div>
               {showRestrictedBadge ? (
-                <div className="mt-1 text-xs font-medium text-rose-700">
-                  Password reset required
+                <div className="mt-1">
+                  <NotificationPill
+                    message={{ text: 'Password reset required', tone: 'error' }}
+                    className="px-2.5 py-1 text-xs"
+                  />
                 </div>
               ) : null}
             </div>
