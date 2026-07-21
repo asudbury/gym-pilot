@@ -10,7 +10,7 @@ import {
   usePlan,
 } from '@gym-pilot/shared'
 import { useAuth } from '../../../auth/AuthContext'
-import { useDeviceType } from '../../../components/tierDeviceVisibility'
+import { useDeviceType } from '../../../components/TierDeviceVisibility'
 import {
   isVisibleForTierAndDevice,
   type TierVisibilityRules,
