@@ -16,7 +16,7 @@ export function Heading1({
 
   return (
     <Component
-      className={`text-3xl font-semibold text-slate-900 transition-colors dark:text-slate-100 ${className}`.trim()}
+      className={`text-2xl sm:text-3xl lg:text-4xl font-semibold leading-tight text-slate-900 transition-colors dark:text-slate-100 ${className}`.trim()}
       {...props}
     >
       {children}
@@ -34,7 +34,7 @@ export function Heading2({
 
   return (
     <Component
-      className={`text-xl font-semibold text-slate-900 transition-colors dark:text-slate-100 ${className}`.trim()}
+      className={`text-xl sm:text-2xl lg:text-3xl font-semibold leading-tight text-slate-900 transition-colors dark:text-slate-100 ${className}`.trim()}
       {...props}
     >
       {children}
@@ -52,7 +52,7 @@ export function Heading3({
 
   return (
     <Component
-      className={`text-lg font-semibold text-slate-900 transition-colors dark:text-slate-100 ${className}`.trim()}
+      className={`text-lg sm:text-xl font-semibold leading-snug text-slate-900 transition-colors dark:text-slate-100 ${className}`.trim()}
       {...props}
     >
       {children}
@@ -70,7 +70,25 @@ export function Paragraph({
 
   return (
     <Component
-      className={`text-sm font-semibold uppercase tracking-[0.35em] text-slate-500 transition-colors dark:text-slate-400 ${className}`.trim()}
+      className={`text-sm font-semibold tracking-[0.25em] text-slate-500 transition-colors dark:text-slate-400 ${className}`.trim()}
+      {...props}
+    >
+      {children}
+    </Component>
+  )
+}
+
+export function UpperCaseParagraph({
+  as,
+  children,
+  className = '',
+  ...props
+}: HeadingProps) {
+  const Component = as ?? 'p'
+
+  return (
+    <Component
+      className={`text-sm font-semibold uppercase tracking-[0.25em] text-slate-500 transition-colors dark:text-slate-400 ${className}`.trim()}
       {...props}
     >
       {children}

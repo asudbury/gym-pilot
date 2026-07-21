@@ -1,6 +1,6 @@
 import type { ReactNode } from 'react'
 import { PageCard } from '../components/PageCard'
-import { Heading1, Paragraph } from '../components/Typography'
+import { Heading1, UpperCaseParagraph } from '../components/Typography'
 import { DecorativeIcon } from '../components/ui/DecorativeIcon'
 import type { DecorativeIconProps } from '../components/ui/DecorativeIcon'
 
@@ -70,11 +70,9 @@ export function PageCardLayout({
             <div className="shrink-0">
               <DecorativeIcon icon={resolvedIcon} className="h-5 w-5" />
             </div>
-            {title ? (
-              <Paragraph className="text-[0.65rem] sm:text-xs">
+              <UpperCaseParagraph>
                 {title}
-              </Paragraph>
-            ) : null}
+              </UpperCaseParagraph>
           </div>
           <div className="flex flex-col items-start">
             {subtitle ? (

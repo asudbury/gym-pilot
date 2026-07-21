@@ -7,7 +7,7 @@ import { RatingSelector } from '../components/RatingSelector'
 import { SessionWorkoutEditor } from '../components/SessionWorkoutEditor'
 import { BackLink } from '../components/ui/BackLink'
 import { DecorativeIcon } from '../components/ui/DecorativeIcon'
-import { Heading1, Paragraph } from '../components/Typography'
+import { Heading1, UpperCaseParagraph } from '../components/Typography'
 import { PageLayout } from '../layouts/PageLayout'
 import { appTokens } from '../constants/tokens'
 import {
@@ -202,10 +202,10 @@ export function RecordSessionPage() {
 
   const title =
     sessionType === 'solo'
-      ? 'Record solo session'
+      ? 'Record a solo session'
       : sessionType === 'class'
-        ? 'Book class session'
-        : 'Record personal training session'
+        ? 'Book a class session'
+        : 'Record a personal training session'
 
   return (
     <PageLayout className="max-w-4xl">
@@ -214,7 +214,7 @@ export function RecordSessionPage() {
           <div className="flex items-start gap-3">
             <DecorativeIcon icon="calendar" />
             <div>
-              <Paragraph>Record session</Paragraph>
+              <UpperCaseParagraph>Record a session</UpperCaseParagraph>
               <Heading1 className="mt-2">{title}</Heading1>
             </div>
           </div>

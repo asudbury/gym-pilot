@@ -112,31 +112,33 @@ export function GymClubSelector({
   }
 
   return (
-    <div className="flex flex-col gap-1">
-      <select
-        value={selectedOptionValue}
-        onFocus={handleFocus}
-        onChange={handleChange}
-        className={className}
-        disabled={disabled}
-      >
-        <option value="">
-          {disabled
-            ? 'Only available for Virgin brand'
-            : (placeholder ?? 'Select a club')}
-        </option>
-        {availableClubs.map((club) => (
-          <option key={club.clubId} value={String(club.clubId)}>
-            {club.name}
-          </option>
-        ))}
-      </select>
-      {isLoadingClubs ? (
-        <p className="text-xs text-slate-500">Loading clubs…</p>
-      ) : null}
-      {clubsError ? (
-        <p className="text-xs text-rose-600">{clubsError}</p>
-      ) : null}
-    </div>
+<div className="flex w-full flex-col gap-2">
+  <select
+    value={selectedOptionValue}
+    onFocus={handleFocus}
+    onChange={handleChange}
+    className={`w-full min-h-11 rounded-lg border border-slate-300 bg-white px-3 py-2 text-base text-slate-900 focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-500/20 disabled:cursor-not-allowed disabled:bg-slate-100 ${className}`}
+    disabled={disabled}
+  >
+    <option value="">
+      {disabled
+        ? 'Only available for Virgin brand'
+        : (placeholder ?? 'Select a club')}
+    </option>
+    {availableClubs.map((club) => (
+      <option key={club.clubId} value={String(club.clubId)}>
+        {club.name}
+      </option>
+    ))}
+  </select>
+
+  {isLoadingClubs && (
+    <p className="text-sm text-slate-500">Loading clubs…</p>
+  )}
+
+  {clubsError && (
+    <p className="text-sm text-rose-600">{clubsError}</p>
+  )}
+</div>
   )
 }

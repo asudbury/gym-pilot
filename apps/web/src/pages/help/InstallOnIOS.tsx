@@ -2,7 +2,7 @@ import { useEffect } from 'react'
 import { PageLayout } from '../../layouts/PageLayout'
 import { PageCardLayout } from '../../layouts/PageCardLayout'
 import { Panel } from '../../components/ui/Panel'
-import { Heading1 } from '../../components/Typography'
+import { Paragraph } from '../../components/Typography'
 import { BackLink } from '../../components/ui/BackLink'
 import { useAuth } from '../../auth/AuthContext'
 import { recordSupabaseUserActivity } from '@gym-pilot/shared'
@@ -34,16 +34,8 @@ export function InstallOnIOSPage() {
         description="Step-by-step, mobile-friendly guidance for adding Gym-Pilot to your iPhone Home Screen."
       >
         <div className="flex flex-col gap-4">
-          <Panel variant="muted" padding="md">
-            <Heading1 as="h1">Install on iPhone</Heading1>
-            <p className="mt-2 text-sm text-slate-600">
-              Follow these steps in Safari on iOS to add Gym-Pilot to your Home
-              Screen — this provides a stand-alone app-like experience.
-            </p>
-          </Panel>
-
           <Panel variant="white" padding="md">
-            <h2 className="text-base font-semibold">Step-by-step guide</h2>
+            <Paragraph>Step-by-step guide</Paragraph>
             <ol className="mt-3 list-decimal pl-5 text-sm leading-7 text-slate-700">
               <li>
                 Open Gym‑Pilot in <strong>Safari</strong> on your iPhone.
@@ -70,7 +62,6 @@ export function InstallOnIOSPage() {
             </ol>
           </Panel>
 
-          <Panel variant="white" padding="md">
             <p className="text-sm text-slate-600">
               <BackLink
                 to="/help"
@@ -79,7 +70,7 @@ export function InstallOnIOSPage() {
                 className="text-emerald-600"
               />
             </p>
-          </Panel>
+
         </div>
       </PageCardLayout>
     </PageLayout>
