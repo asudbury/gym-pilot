@@ -2,149 +2,188 @@
 
 ## Data types
 
-### Exercise
+### App setting
 
-Represents a browsable exercise entry used on the home page and exercise detail pages.
-
-- id: string
-- name: string
-- category: string
-- body_part: string
-- equipment: string
-- instructions: { en: string }
-- instruction_steps: { en: string[] }
-- muscle_group: string
-- secondary_muscles: string[]
-- target: string
-- image: string
-- gif_url: string
-- media_id: string
-- created_at: string
-- attribution: string
-
-### Plan
-
-Represents a base training plan created by a trainer or user and used as a template.
-
-- id: string
-- planName: string
-- planSlug: string
-- exercises: PlanItem[]
+| Field         | Type                    | Notes                     |
+| ------------- | ----------------------- | ------------------------- |
+| id            | string                  | Primary key               |
+| setting_key   | string                  | Unique setting identifier |
+| setting_value | Record<string, unknown> | Stored JSON payload       |
+| created_at    | string                  | Creation timestamp        |
+| updated_at    | string                  | Last update timestamp     |
 
 ### Assignment
 
-Represents a user-specific assignment that references a Plan and owns completion state for that user.
-
-- id: string
-- planId: string
-- planName: string
-- planSlug: string
-- assignedUserId?: string
-- assignedUserName?: string
-- completedExercises?: Record<string, string>
-- planItems: PlanItem[]
-- per-item user data is stored on each PlanItem, such as reps, weight, or other completion values
-
-### PlanItem
-
-A plan-specific entry that references an Exercise by ID and can carry assignment-specific values.
-
-- exerciseId: string
-- note: string
-- user data such as reps, weight, or completion values can be stored on this item
-
-### User
-
-Represents a person who can be assigned to plans and given a role.
-
-- id: string
-- name: string
-- slug: string
-- role: admin | trainer | client | guest
-
-### Profile
-
-Stores optional profile metadata for the authenticated Supabase user.
-
-- id: string
-- user_id: string
-- friendly_name: string | null
-- terms_accepted: boolean
-- terms_accepted_at: string | null
-- created_at: string
-- updated_at: string
-
-### User role
-
-Stores one row per assigned role for a user, replacing the previous JSONB roles array on the profile table.
-
-- id: string
-- user_id: string
-- role: admin | trainer | client | guest
-- created_at: string
-- updated_at: string
-
-### Favourite folder
-
-Groups favourite shortcuts for easier organisation.
-
-- id: string
-- user_id: string
-- name: string
-- created_at: string
-- updated_at: string
-
-### Favourite link
-
-Represents a saved navigation shortcut or exercise shortcut.
-
-- id: string
-- user_id: string
-- path: string
-- label: string
-- folder: string | null
-- folder_id: string | null
-- created_at: string
-- updated_at: string
-
-### Session workout item
-
-Represents a single workout entry attached to a session so workout data can be queried independently from the session metadata payload.
-
-- id: string
-- session_id: string
-- user_id: string
-- item_index: number
-- category: exercise | warm_up | stretch | cool_down | run | spin
-- exercise_name: string | null
-- reps: string | null
-- sets: string | null
-- weight: string | null
-- duration_minutes: string | null
-- distance_km: string | null
-- speed_kph: string | null
-- notes: string | null
-- plan_item_id: string | null
-- created_at: string
-- updated_at: string
-
-### Error log
-
-Stores application errors when the app setting `error_logging_enabled` is true.
-
-- id: string
-- message: string
-- details: Record<string, unknown> | null
-- created_at: string
+| Field               | Type                    | Notes                          |
+| ------------------- | ----------------------- | ------------------------------ |
+| id                  | string                  | Primary key                    |
+| user_id             | string                  | Owner of the assignment        |
+| plan_id             | string                  | Related plan template          |
+| assignment_name     | string                  | Friendly assignment title      |
+| assigned_user_id    | string \| null          | Optional assignee              |
+| assigned_user_name  | string \| null          | Optional assignee display name |
+| completed_exercises | Record<string, unknown> | Completion tracking payload    |
+| plan_items          | PlanItem[]              | Assignment-specific plan rows  |
+| created_at          | string                  | Creation timestamp             |
+| updated_at          | string                  | Last update timestamp          |
 
 ### Audit log
 
-Stores audit events when the app setting `audit_logging_enabled` is true.
+| Field      | Type                            | Notes                   |
+| ---------- | ------------------------------- | ----------------------- |
+| id         | string                          | Primary key             |
+| message    | string                          | Audit event description |
+| details    | Record<string, unknown> \| null | Optional payload        |
+| created_at | string                          | Creation timestamp      |
 
-- id: string
-- message: string
-- details: Record<string, unknown> | null
-- created_at: string
+### Error log
+
+| Field      | Type                            | Notes                  |
+| ---------- | ------------------------------- | ---------------------- |
+| id         | string                          | Primary key            |
+| message    | string                          | Error description      |
+| details    | Record<string, unknown> \| null | Optional error payload |
+| created_at | string                          | Creation timestamp     |
+
+### Exercise
+
+| Field             | Type             | Notes                           |
+| ----------------- | ---------------- | ------------------------------- |
+| id                | string           | Primary key                     |
+| name              | string           | Exercise name                   |
+| category          | string           | Exercise category               |
+| body_part         | string           | Main body part                  |
+| equipment         | string           | Equipment requirement           |
+| instructions      | { en: string }   | Localised instructions          |
+| instruction_steps | { en: string[] } | Localised step-by-step guidance |
+| muscle_group      | string           | Primary muscle group            |
+| secondary_muscles | string[]         | Secondary muscle groups         |
+| target            | string           | Target focus                    |
+| image             | string           | Image path                      |
+| gif_url           | string           | GIF media path                  |
+| media_id          | string           | Media reference                 |
+| created_at        | string           | Creation timestamp              |
+| attribution       | string           | Source attribution              |
+
+### Favourite folder
+
+| Field      | Type   | Notes                 |
+| ---------- | ------ | --------------------- |
+| id         | string | Primary key           |
+| user_id    | string | Owner of the folder   |
+| name       | string | Folder label          |
+| created_at | string | Creation timestamp    |
+| updated_at | string | Last update timestamp |
+
+### Favourite link
+
+| Field      | Type           | Notes                     |
+| ---------- | -------------- | ------------------------- |
+| id         | string         | Primary key               |
+| user_id    | string         | Owner of the link         |
+| path       | string         | Route or target path      |
+| label      | string         | Display label             |
+| folder     | string \| null | Optional folder name      |
+| folder_id  | string \| null | Optional folder reference |
+| created_at | string         | Creation timestamp        |
+| updated_at | string         | Last update timestamp     |
+
+### Plan
+
+| Field         | Type          | Notes                       |
+| ------------- | ------------- | --------------------------- |
+| id            | string        | Primary key                 |
+| user_id       | string        | Plan owner                  |
+| plan_name     | string        | Plan title                  |
+| plan_slug     | string        | URL-friendly slug           |
+| plan_sessions | PlanSession[] | Nested plan session payload |
+| created_at    | string        | Creation timestamp          |
+| updated_at    | string        | Last update timestamp       |
+
+### PlanItem
+
+| Field      | Type   | Notes               |
+| ---------- | ------ | ------------------- |
+| exerciseId | string | Referenced exercise |
+| note       | string | Optional note       |
+
+### Profile
+
+| Field             | Type           | Notes                 |
+| ----------------- | -------------- | --------------------- |
+| id                | string         | Primary key           |
+| user_id           | string         | Supabase auth user    |
+| friendly_name     | string \| null | Display name          |
+| terms_accepted    | boolean        | Acceptance flag       |
+| terms_accepted_at | string \| null | Acceptance timestamp  |
+| created_at        | string         | Creation timestamp    |
+| updated_at        | string         | Last update timestamp |
+
+### Session workout item
+
+| Field            | Type                                                       | Notes                          |
+| ---------------- | ---------------------------------------------------------- | ------------------------------ |
+| id               | string                                                     | Primary key                    |
+| session_id       | string                                                     | Parent session identifier      |
+| session_row_id   | string \| null                                             | Optional session row reference |
+| user_id          | string                                                     | Owner of the workout row       |
+| item_index       | number                                                     | Position within the session    |
+| category         | exercise \| warm_up \| stretch \| cool_down \| run \| spin | Workout item category          |
+| exercise_name    | string \| null                                             | Exercise label                 |
+| reps             | string \| null                                             | Repetition value               |
+| sets             | string \| null                                             | Set count                      |
+| weight           | string \| null                                             | Weight value                   |
+| duration_minutes | string \| null                                             | Duration value                 |
+| distance_km      | string \| null                                             | Distance value                 |
+| speed_kph        | string \| null                                             | Speed value                    |
+| notes            | string \| null                                             | Optional notes                 |
+| plan_item_id     | string \| null                                             | Optional related plan item     |
+| created_at       | string                                                     | Creation timestamp             |
+| updated_at       | string                                                     | Last update timestamp          |
+
+### User
+
+| Field | Type                                | Notes                   |
+| ----- | ----------------------------------- | ----------------------- |
+| id    | string                              | Primary key             |
+| name  | string                              | Display name            |
+| slug  | string                              | URL-friendly identifier |
+| role  | admin \| trainer \| client \| guest | Assigned role           |
+
+### User role
+
+| Field      | Type                                | Notes                  |
+| ---------- | ----------------------------------- | ---------------------- |
+| id         | string                              | Primary key            |
+| user_id    | string                              | User who owns the role |
+| role       | admin \| trainer \| client \| guest | Assigned role          |
+| created_at | string                              | Creation timestamp     |
+| updated_at | string                              | Last update timestamp  |
+
+### User session
+
+| Field            | Type                                                           | Notes                      |
+| ---------------- | -------------------------------------------------------------- | -------------------------- |
+| id               | string                                                         | Primary key                |
+| user_id          | string \| null                                                 | Session owner              |
+| session_type     | class \| personal_training \| solo                             | Session category           |
+| start_at         | string                                                         | Start timestamp            |
+| duration_minutes | number \| null                                                 | Optional duration          |
+| trainer_id       | string \| null                                                 | Optional trainer reference |
+| trainer_name     | string \| null                                                 | Optional trainer label     |
+| class_id         | string \| null                                                 | Optional class reference   |
+| class_name       | string \| null                                                 | Optional class label       |
+| location         | string \| null                                                 | Optional location          |
+| capacity         | number \| null                                                 | Optional capacity          |
+| price            | number \| null                                                 | Optional price             |
+| metadata         | Record<string, unknown> \| null                                | Session metadata payload   |
+| role             | client \| trainer \| null                                      | User role for the session  |
+| status           | booked \| cancelled \| attended \| no_show \| declined \| null | Booking state              |
+| notes            | string \| null                                                 | Optional notes             |
+| rating           | number \| null                                                 | Optional rating            |
+| attendance_type  | attended \| taught \| null                                     | Attendance classification  |
+| created_at       | string                                                         | Creation timestamp         |
+| updated_at       | string                                                         | Last update timestamp      |
 
 ## Storage model
 
@@ -169,8 +208,8 @@ The shared Supabase helpers in [packages/shared/src/gymPilotSupabase.ts](package
 | Plans and assignments   | `select`, `insert`, `upsert`, `delete` against remote rows                                                                                                                                                                                                                                                                                                                                            | `gym_pilot_plan`, `gym_pilot_assignment`                                                         |
 | Favourites and folders  | `select`, `insert`, `upsert`, `delete` against remote rows                                                                                                                                                                                                                                                                                                                                            | `gym_pilot_favourite_folder`, `gym_pilot_favourite`                                              |
 | Activity logging        | `recordSupabaseUserActivity()` uses `insert` into `gym_pilot_user_activity`; it skips inserts when the app is running on localhost-style hosts                                                                                                                                                                                                                                                        | `gym_pilot_user_activity`                                                                        |
-| Session recording       | `saveTimetableAttendance()` inserts role-based session records with optional notes and a 1-5 rating for a session/class                                                                                                                                                                                                                                                                               | `gym_pilot_session_booking`                                                                      |
-| Workout items           | `loadWorkoutItemsForSession()` and `saveWorkoutItemsForSession()` read/write ordered workout rows for a session                                                                                                                                                                                                                                                                                       | `gym_pilot_session_workout_item`                                                                 |
+| Session recording       | `saveTimetableAttendance()` inserts role-based session records with optional notes and a 1-5 rating for a session/class                                                                                                                                                                                                                                                                               | `gym_pilot_user_session`                                                                         |
+| Workout items           | `loadWorkoutItemsForSession()` and `saveWorkoutItemsForSession()` read/write ordered workout rows for a session                                                                                                                                                                                                                                                                                       | `gym_pilot_user_session_workout_item`                                                            |
 | Error and audit logging | `persistErrorLog()` and `persistAuditLog()` write to `gym_pilot_error_log` and `gym_pilot_audit_log` only when the matching app settings are enabled                                                                                                                                                                                                                                                  | `gym_pilot_error_log`, `gym_pilot_audit_log`                                                     |
 
 ### Entity relationship overview
@@ -185,7 +224,9 @@ erDiagram
     auth_users ||--o{ gym_pilot_plan : owns
     auth_users ||--o{ gym_pilot_assignment : creates
     auth_users ||--o{ gym_pilot_user_activity : records
+    auth_users ||--o{ gym_pilot_user_session : records
     gym_pilot_plan ||--o{ gym_pilot_assignment : uses
+    gym_pilot_user_session ||--o{ gym_pilot_user_session_workout_item : contains
 
     gym_pilot_app_state {
         uuid id
@@ -274,19 +315,26 @@ erDiagram
         timestamptz created_at
     }
 
-    gym_pilot_session_booking {
+    gym_pilot_user_session {
         uuid id
-        uuid session_id
         uuid user_id
+        text session_type
+        timestamptz start_at
+        text class_id
+        text class_name
+        uuid trainer_id
+        text trainer_name
         text role
         text status
         text notes
         smallint rating
+        text attendance_type
+        jsonb metadata
         timestamptz created_at
         timestamptz updated_at
     }
 
-    gym_pilot_session_workout_item {
+    gym_pilot_user_session_workout_item {
         uuid id
         text session_id
         uuid session_row_id
@@ -323,7 +371,6 @@ erDiagram
 The app currently keeps UI preferences such as theme choice and the version banner visibility in browser storage rather than Supabase.
 
 - `gym-pilot-theme-preference` is stored in localStorage and controls the light/dark theme
-- `gym-pilot-show-version` is stored in localStorage and controls whether the build/version banner is shown
 
 These values are intentionally kept client-side because they are lightweight UI preferences rather than shared domain data. They are suitable for localStorage unless the product later decides that preferences should follow a user across devices or be managed as part of a broader profile experience.
 

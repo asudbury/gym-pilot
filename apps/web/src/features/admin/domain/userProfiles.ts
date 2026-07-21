@@ -14,7 +14,6 @@ export type ProfileDraft = {
   accountTier: string
   accessEndsAt: string
   isFrozen: boolean
-  showVersion: boolean
   roles: UserRole[]
   trainerId: string | null
   mustChangePassword: boolean
@@ -33,7 +32,6 @@ export function createInitialProfileDraft(
     accountTier: profile.accountTier ?? 'free',
     accessEndsAt: profile.accessEndsAt ?? '',
     isFrozen: profile.isFrozen,
-    showVersion: true,
     roles: [...profile.roles] as UserRole[],
     trainerId: profile.trainerId ?? null,
     mustChangePassword: profile.mustChangePassword,

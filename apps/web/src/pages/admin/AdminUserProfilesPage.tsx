@@ -122,7 +122,6 @@ export function AdminUserProfilesPage() {
         accountTier: current[profileId]?.accountTier ?? 'free',
         accessEndsAt: current[profileId]?.accessEndsAt ?? '',
         isFrozen: current[profileId]?.isFrozen ?? false,
-        showVersion: current[profileId]?.showVersion ?? true,
         roles: current[profileId]?.roles ?? [],
         trainerId: current[profileId]?.trainerId ?? null,
         mustChangePassword: current[profileId]?.mustChangePassword ?? false,
