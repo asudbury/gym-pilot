@@ -95,13 +95,19 @@ export function buildWorkoutItemsPersistencePayloads(input: {
   userId: string
   workoutItems: SessionWorkoutItem[]
 }) {
-  return input.workoutItems.map((item, index) => createWorkoutItemPayload({
+  const normalizedItems = input.workoutItems.map((item, index) => ({
+    ...item,
+    id: item.id || `item-${index}`,
+    sortOrder: item.sortOrder ?? index,
+  }))
+
+  return normalizedItems.map((item, index) => createWorkoutItemPayload({
     sessionId: input.sessionId,
     userId: input.userId,
     index,
     item: {
       ...item,
-      id: item.id || `item-${index}`,
+      sortOrder: index,
     },
   }))
 }
