@@ -155,9 +155,8 @@ export function AdminEditUserPage() {
       }
 
       await saveSupabaseProfileRoles(draft.roles, profile.id)
-      // persist name and email using helpers
-      await saveSupabaseProfileName(trimmedName)
-      await saveSupabaseProfileEmail(draft?.email ?? null)
+      await saveSupabaseProfileName(trimmedName, profile.id)
+      await saveSupabaseProfileEmail(draft?.email ?? null, profile.id)
       await saveSupabaseProfileLastLoggedIn(profile.id)
 
       setStatusMessage('Profile updated.')

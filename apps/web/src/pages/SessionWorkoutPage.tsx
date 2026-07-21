@@ -122,7 +122,9 @@ export function SessionWorkoutPage() {
         )
 
         if (!workoutSaveResult.success) {
-          throw workoutSaveResult.error ?? new Error('Could not save workout items')
+          throw (
+            workoutSaveResult.error ?? new Error('Could not save workout items')
+          )
         }
       }
 

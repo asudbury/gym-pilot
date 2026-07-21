@@ -788,23 +788,26 @@ async function invalidateSupabaseProfileCache(userId?: string) {
   }
 }
 
-export async function saveSupabaseProfileName(friendlyName: string | null) {
+export async function saveSupabaseProfileName(
+  friendlyName: string | null,
+  userId?: string,
+) {
   const client = getSupabaseClient()
 
   if (!client) {
     return
   }
 
-  const userId = await getAuthenticatedUserId(client)
+  const resolvedUserId = userId || await getAuthenticatedUserId(client)
 
-  if (!userId) {
+  if (!resolvedUserId) {
     return
   }
 
   const normalizedName = friendlyName?.trim() ? friendlyName.trim() : null
 
   const { error } = await client.from('gym_pilot_profile').upsert(
-    { user_id: userId, friendly_name: normalizedName },
+    { user_id: resolvedUserId, friendly_name: normalizedName },
     { onConflict: 'user_id' },
   )
 
@@ -813,26 +816,29 @@ export async function saveSupabaseProfileName(friendlyName: string | null) {
     return
   }
 
-  await invalidateSupabaseProfileCache(userId)
+  await invalidateSupabaseProfileCache(resolvedUserId)
 }
 
-export async function saveSupabaseProfileEmail(email: string | null) {
+export async function saveSupabaseProfileEmail(
+  email: string | null,
+  userId?: string,
+) {
   const client = getSupabaseClient()
 
   if (!client) {
     return
   }
 
-  const userId = await getAuthenticatedUserId(client)
+  const resolvedUserId = userId || await getAuthenticatedUserId(client)
 
-  if (!userId) {
+  if (!resolvedUserId) {
     return
   }
 
   const normalizedEmail = email?.trim() ? email.trim() : null
 
   const { error } = await client.from('gym_pilot_profile').upsert(
-    { user_id: userId, email: normalizedEmail },
+    { user_id: resolvedUserId, email: normalizedEmail },
     { onConflict: 'user_id' },
   )
 
@@ -845,7 +851,7 @@ export async function saveSupabaseProfileEmail(email: string | null) {
     return
   }
 
-  await invalidateSupabaseProfileCache(userId)
+  await invalidateSupabaseProfileCache(resolvedUserId)
 }
 
 async function saveSupabaseProfileTextValue(fieldName: 'application_name' | 'gym_brand' | 'gym_name' | 'gym_club_id', value: string | null, userId?: string) {
