@@ -918,7 +918,9 @@ export function TimetablePage() {
 
                     <select
                       value={activeClassName}
-                      onChange={(event) => setActiveClassName(event.target.value)}
+                      onChange={(event) =>
+                        setActiveClassName(event.target.value)
+                      }
                       ref={classSelectRef}
                       className={`w-full min-w-0 sm:w-auto sm:min-w-36 rounded-full border border-slate-300 bg-white px-3 py-1.5 text-sm text-slate-700 shadow-sm ${
                         highlightClassFilter ? 'ring-2 ring-amber-300' : ''
