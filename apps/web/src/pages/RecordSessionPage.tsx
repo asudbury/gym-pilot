@@ -63,16 +63,20 @@ export function RecordSessionPage() {
   const [error, setError] = useState<string | null>(null)
 
   const availablePlans = useMemo(() => {
-    const candidates = [...visiblePlans, ...visibleAssignments.map((assignment) => ({
-      id: assignment.id,
-      planName: assignment.assignmentName,
-      planSlug: assignment.planSlug ?? assignment.id,
-      planSessions: assignment.planSessions ?? [],
-      createdByUserId: assignment.assignedUserId,
-    }))]
+    const candidates = [
+      ...visiblePlans,
+      ...visibleAssignments.map((assignment) => ({
+        id: assignment.id,
+        planName: assignment.assignmentName,
+        planSlug: assignment.planSlug ?? assignment.id,
+        planSessions: assignment.planSessions ?? [],
+        createdByUserId: assignment.assignedUserId,
+      })),
+    ]
 
-    return candidates.filter((candidate, index, list) =>
-      list.findIndex((entry) => entry.id === candidate.id) === index,
+    return candidates.filter(
+      (candidate, index, list) =>
+        list.findIndex((entry) => entry.id === candidate.id) === index,
     )
   }, [visiblePlans, visibleAssignments])
 
@@ -97,7 +101,9 @@ export function RecordSessionPage() {
       return
     }
 
-    setWorkoutItems(buildWorkoutItemsFromPlanSessions(selectedPlan.planSessions))
+    setWorkoutItems(
+      buildWorkoutItemsFromPlanSessions(selectedPlan.planSessions),
+    )
   }, [selectedPlan])
 
   useEffect(() => {
@@ -334,7 +340,10 @@ export function RecordSessionPage() {
             <div className="mt-4 block text-sm text-slate-700">
               <span className="font-medium">Workout log</span>
               <div className="mt-2">
-                <SessionWorkoutEditor items={workoutItems} onChange={setWorkoutItems} />
+                <SessionWorkoutEditor
+                  items={workoutItems}
+                  onChange={setWorkoutItems}
+                />
               </div>
             </div>
 

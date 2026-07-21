@@ -65,10 +65,15 @@ export function SessionEditPage() {
           setDurationMinutes(nextEntry.durationMinutes ?? null)
           setStartedAt(nextEntry.startedAt ?? '')
 
-          const parsedMetadata = parseSessionWorkoutMetadata(nextEntry.workoutMetadata)
+          const parsedMetadata = parseSessionWorkoutMetadata(
+            nextEntry.workoutMetadata,
+          )
           if (nextEntry.sessionId) {
             try {
-              const persistedItems = await loadWorkoutItemsForSession(nextEntry.sessionId, userId ?? undefined)
+              const persistedItems = await loadWorkoutItemsForSession(
+                nextEntry.sessionId,
+                userId ?? undefined,
+              )
               if (persistedItems.length > 0) {
                 setWorkoutItems(persistedItems)
               } else {
@@ -119,7 +124,9 @@ export function SessionEditPage() {
         ...entry,
         rating: rating ?? entry.rating,
       } as SessionHistoryEntry)
-      const parsedWorkoutMetadata = parseSessionWorkoutMetadata(entry.workoutMetadata)
+      const parsedWorkoutMetadata = parseSessionWorkoutMetadata(
+        entry.workoutMetadata,
+      )
       const nextEntry = {
         ...entry,
         attendanceType,
@@ -138,7 +145,11 @@ export function SessionEditPage() {
       }
 
       if (entry.sessionId) {
-        await saveWorkoutItemsForSession(entry.sessionId, workoutItems, userId ?? undefined)
+        await saveWorkoutItemsForSession(
+          entry.sessionId,
+          workoutItems,
+          userId ?? undefined,
+        )
       }
 
       await saveSessionHistoryEntry(nextEntry, userId ?? undefined)
@@ -314,11 +325,18 @@ export function SessionEditPage() {
 
               <div className="mt-4 rounded-2xl border border-slate-200 bg-slate-50 p-4">
                 <div className="flex items-center justify-between gap-2">
-                  <span className="text-sm font-medium text-slate-700">Workout log</span>
-                  <span className="text-xs text-slate-500">Add, edit, or remove workout items here</span>
+                  <span className="text-sm font-medium text-slate-700">
+                    Workout log
+                  </span>
+                  <span className="text-xs text-slate-500">
+                    Add, edit, or remove workout items here
+                  </span>
                 </div>
                 <div className="mt-3">
-                  <SessionWorkoutEditor items={workoutItems} onChange={setWorkoutItems} />
+                  <SessionWorkoutEditor
+                    items={workoutItems}
+                    onChange={setWorkoutItems}
+                  />
                 </div>
               </div>
 

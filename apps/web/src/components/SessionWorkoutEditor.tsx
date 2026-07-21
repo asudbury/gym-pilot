@@ -24,22 +24,30 @@ export function SessionWorkoutEditor({
   className = '',
 }: SessionWorkoutEditorProps) {
   return (
-    <div className={`space-y-3 rounded-2xl border border-slate-200 bg-slate-50 p-3 ${className}`.trim()}>
+    <div
+      className={`space-y-3 rounded-2xl border border-slate-200 bg-slate-50 p-3 ${className}`.trim()}
+    >
       {items.length === 0 ? (
         <p className="text-sm text-slate-600">
-          Select a plan or assignment to prefill workout items, or add them manually below.
+          Select a plan or assignment to prefill workout items, or add them
+          manually below.
         </p>
       ) : null}
 
       {items.map((item, index) => (
-        <div key={item.id} className="rounded-2xl border border-slate-200 bg-white p-3">
+        <div
+          key={item.id}
+          className="rounded-2xl border border-slate-200 bg-white p-3"
+        >
           <div className="flex flex-wrap items-center gap-2">
             <select
               value={item.category}
               onChange={(event) => {
                 onChange(
                   updateSessionWorkoutItem(items, item.id, {
-                    category: normalizeSessionWorkoutCategory(event.target.value),
+                    category: normalizeSessionWorkoutCategory(
+                      event.target.value,
+                    ),
                   }),
                 )
               }}
@@ -93,7 +101,9 @@ export function SessionWorkoutEditor({
               type="button"
               tone="default"
               className="px-2 py-1 text-xs"
-              onClick={() => onChange(reorderSessionWorkoutItem(items, item.id, 'up'))}
+              onClick={() =>
+                onChange(reorderSessionWorkoutItem(items, item.id, 'up'))
+              }
               disabled={index === 0}
               aria-label={`Move ${item.exerciseName || 'item'} up`}
             >
@@ -103,7 +113,9 @@ export function SessionWorkoutEditor({
               type="button"
               tone="default"
               className="px-2 py-1 text-xs"
-              onClick={() => onChange(reorderSessionWorkoutItem(items, item.id, 'down'))}
+              onClick={() =>
+                onChange(reorderSessionWorkoutItem(items, item.id, 'down'))
+              }
               disabled={index === items.length - 1}
               aria-label={`Move ${item.exerciseName || 'item'} down`}
             >
@@ -121,7 +133,10 @@ export function SessionWorkoutEditor({
           {item.category === 'exercise' && item.exerciseId ? (
             <div className="mt-2">
               <a
-                href={getExercisePath({ id: item.exerciseId, name: item.exerciseName })}
+                href={getExercisePath({
+                  id: item.exerciseId,
+                  name: item.exerciseName,
+                })}
                 target="_blank"
                 rel="noreferrer"
                 className="text-sm font-medium text-emerald-700 underline decoration-emerald-600/50 underline-offset-2"

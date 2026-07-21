@@ -38,20 +38,28 @@ export function SessionWorkoutPage() {
 
     void (async () => {
       try {
-        const loadedEntries = await loadSessionHistoryEntries(userId ?? undefined)
+        const loadedEntries = await loadSessionHistoryEntries(
+          userId ?? undefined,
+        )
         if (!isActive) {
           return
         }
 
-        const nextEntry = loadedEntries.find((candidate) => candidate.id === entryId) ?? null
+        const nextEntry =
+          loadedEntries.find((candidate) => candidate.id === entryId) ?? null
         setEntry(nextEntry)
 
         if (nextEntry?.sessionId) {
-          const persistedItems = await loadWorkoutItemsForSession(nextEntry.sessionId, userId ?? undefined)
+          const persistedItems = await loadWorkoutItemsForSession(
+            nextEntry.sessionId,
+            userId ?? undefined,
+          )
           if (persistedItems.length > 0) {
             setWorkoutItems(persistedItems)
           } else {
-            const parsed = parseSessionWorkoutMetadata(nextEntry.workoutMetadata)
+            const parsed = parseSessionWorkoutMetadata(
+              nextEntry.workoutMetadata,
+            )
             setWorkoutItems(parsed.workoutItems)
           }
         } else {
@@ -105,7 +113,11 @@ export function SessionWorkoutPage() {
       }
 
       if (entry.sessionId) {
-        await saveWorkoutItemsForSession(entry.sessionId, workoutItems, userId ?? undefined)
+        await saveWorkoutItemsForSession(
+          entry.sessionId,
+          workoutItems,
+          userId ?? undefined,
+        )
       }
 
       await saveSessionHistoryEntry(nextEntry, userId ?? undefined)
@@ -139,17 +151,31 @@ export function SessionWorkoutPage() {
         {entry ? (
           <div className="space-y-4 rounded-2xl border border-slate-200 bg-slate-50 p-4">
             <div className="rounded-2xl border border-slate-200 bg-white p-4">
-              <p className="text-sm font-medium text-slate-700">Workout items</p>
+              <p className="text-sm font-medium text-slate-700">
+                Workout items
+              </p>
               <div className="mt-3">
-                <SessionWorkoutEditor items={workoutItems} onChange={setWorkoutItems} />
+                <SessionWorkoutEditor
+                  items={workoutItems}
+                  onChange={setWorkoutItems}
+                />
               </div>
             </div>
 
             <div className="flex flex-wrap gap-2">
-              <Button tone="emerald" type="button" onClick={handleSave} isLoading={isSaving}>
+              <Button
+                tone="emerald"
+                type="button"
+                onClick={handleSave}
+                isLoading={isSaving}
+              >
                 Save workout
               </Button>
-              <Button type="button" tone="default" onClick={() => navigate(`/sessions/${entry.id}/edit`)}>
+              <Button
+                type="button"
+                tone="default"
+                onClick={() => navigate(`/sessions/${entry.id}/edit`)}
+              >
                 Back to session
               </Button>
             </div>

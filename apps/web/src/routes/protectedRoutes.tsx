@@ -48,7 +48,10 @@ export function createProtectedRoutes({
         <Route path="/record-session" element={<RecordSessionPage />} />
         <Route path="/sessions" element={<SessionHistoryPage />} />
         <Route path="/sessions/:entryId/edit" element={<SessionEditPage />} />
-        <Route path="/sessions/:entryId/workout" element={<SessionWorkoutPage />} />
+        <Route
+          path="/sessions/:entryId/workout"
+          element={<SessionWorkoutPage />}
+        />
         <Route path="/trainer-report" element={<TrainerReportPage />} />
       </Route>
       <Route path="/assignments" element={<AssignmentsPage />} />
