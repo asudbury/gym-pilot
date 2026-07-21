@@ -10,7 +10,8 @@ function getDeviceContext() {
 
   const userAgent = navigator.userAgent || ''
   const hasTouch = Boolean(
-    typeof navigator.maxTouchPoints === 'number' && navigator.maxTouchPoints > 0,
+    typeof navigator.maxTouchPoints === 'number' &&
+    navigator.maxTouchPoints > 0,
   )
   const hasCoarsePointer =
     typeof window.matchMedia === 'function' &&
@@ -45,7 +46,9 @@ function sanitizeWelcomeJourneyData(eventData: Record<string, unknown>) {
   for (const key of Object.keys(sanitizedPayload)) {
     if (
       typeof key === 'string' &&
-      /(email|phone|password|pwd|token|secret|api[_-]?key|authorization|cookie)/i.test(key)
+      /(email|phone|password|pwd|token|secret|api[_-]?key|authorization|cookie)/i.test(
+        key,
+      )
     ) {
       delete sanitizedPayload[key]
     }
