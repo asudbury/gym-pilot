@@ -44,6 +44,9 @@ const SUPABASE_TABLE_BY_KEY: Record<string, string> = {
   'gym-pilot-assignments': 'gym_pilot_assignment',
 }
 
+/**
+ * Returns whether remote Supabase persistence is enabled for the current app environment.
+ */
 export function isSupabasePersistenceEnabled() {
   return isSupabasePersistenceEnabledBase()
 }
@@ -103,6 +106,9 @@ function normalizeFavoriteStorageValue(value: unknown): FavoriteStorageValue {
   return { favorites: [], folders: [] }
 }
 
+/**
+ * Resolves the Supabase table used for a given persistence key.
+ */
 export function getSupabaseTableName(key: string) {
   if (isFavoritesKey(key)) {
     return 'gym_pilot_favourite'
@@ -476,6 +482,10 @@ export async function saveSupabaseProfileTermsAcceptance(accepted: boolean, user
   return saveSupabaseProfileTermsAcceptanceFromProfilePersistence(accepted, userId)
 }
 
+/**
+ * Loads a remote JSON payload from Supabase for the current user.
+ * Supports app-state rows plus the domain-specific plan, assignment, and favorites tables.
+ */
 export async function loadSupabaseJsonRecord<T>(key: string): Promise<SupabaseRecordResponse<T>> {
   logger.info('[Supabase] Loading remote record', { key })
   const client = getSupabaseClient()
@@ -605,6 +615,11 @@ export async function loadSupabaseJsonRecord<T>(key: string): Promise<SupabaseRe
   }
 }
 
+/**
+ * Persists a JSON payload to Supabase for the current user.
+ * The write route depends on the storage key and may target app-state rows or a
+ * domain-specific table such as plans, assignments, or favorites.
+ */
 export async function saveSupabaseJsonRecord<T>(key: string, value: T) {
   logger.info('[Supabase] Saving remote record', { key, value })
   const client = getSupabaseClient()
@@ -746,6 +761,9 @@ export async function saveSupabaseJsonRecord<T>(key: string, value: T) {
   }
 }
 
+/**
+ * Removes a remote JSON payload from Supabase for the current user.
+ */
 export async function removeSupabaseJsonRecord(key: string) {
   logger.info('[Supabase] Removing remote record', { key })
   const client = getSupabaseClient()

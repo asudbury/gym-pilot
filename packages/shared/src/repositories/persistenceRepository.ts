@@ -1,8 +1,15 @@
+/**
+ * The shape returned when a remote persistence layer has already stored a value.
+ */
 export type RemoteRecordResponse<T> = {
   found: boolean
   value: T | null
 }
 
+/**
+ * The dependencies required to create a persistence repository that can read and
+ * write through local and remote stores.
+ */
 export type PersistenceRepositoryDependencies<TLocalResponse = unknown> = {
   loadLocal: <T>(key: string, fallback: T) => Promise<T>
   saveLocal: <T>(key: string, value: T) => Promise<void>
@@ -15,6 +22,10 @@ export type PersistenceRepositoryDependencies<TLocalResponse = unknown> = {
   shouldUseRemoteForKey: (key: string) => boolean
 }
 
+/**
+ * A small repository abstraction that coordinates storage across local and
+ * remote persistence layers.
+ */
 export interface PersistenceRepository<TListResponse = unknown> {
   load<T>(key: string, fallback: T): Promise<T>
   save<T>(key: string, value: T): Promise<void>
@@ -34,6 +45,10 @@ function areValuesEqual(a: unknown, b: unknown): boolean {
   }
 }
 
+/**
+ * Creates a repository that prefers local storage but can fall back to or sync
+ * with a remote store when enabled for a given key.
+ */
 export function createPersistenceRepository<TListResponse = unknown>(dependencies: PersistenceRepositoryDependencies<TListResponse>): PersistenceRepository<TListResponse> {
   const { loadLocal, saveLocal, removeLocal, listLocal, loadRemote, saveRemote, removeRemote, isRemoteEnabled, shouldUseRemoteForKey } = dependencies
   const lastSavedValues = new Map<string, unknown>()

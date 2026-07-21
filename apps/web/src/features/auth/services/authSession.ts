@@ -14,6 +14,10 @@ import {
 import type { User, UserRole } from '@gym-pilot/types'
 import type { AuthUser } from '../domain/authTypes'
 
+/**
+ * Resolves the authenticated Supabase user into the app's auth user shape,
+ * including profile-derived metadata and role access state.
+ */
 export async function resolveSupabaseAuthUser(
   users: User[] = [],
 ): Promise<AuthUser | null> {
@@ -111,6 +115,9 @@ export async function resolveSupabaseAuthUser(
   }
 }
 
+/**
+ * Persists an updated profile name to Supabase when the user is authenticated.
+ */
 export async function updateProfileNameOnSupabase(
   user: AuthUser | null,
   friendlyName: string,
@@ -123,6 +130,9 @@ export async function updateProfileNameOnSupabase(
   await saveSupabaseProfileName(trimmedName || null)
 }
 
+/**
+ * Persists an updated application name to Supabase when the user is authenticated.
+ */
 export async function updateApplicationNameOnSupabase(
   user: AuthUser | null,
   applicationName: string,
@@ -135,6 +145,9 @@ export async function updateApplicationNameOnSupabase(
   await saveSupabaseApplicationName(trimmedName || null)
 }
 
+/**
+ * Persists an updated gym brand to Supabase when the user is authenticated.
+ */
 export async function updateGymBrandOnSupabase(
   user: AuthUser | null,
   gymBrand: string,
@@ -147,6 +160,9 @@ export async function updateGymBrandOnSupabase(
   await saveSupabaseGymBrand(trimmedValue || null)
 }
 
+/**
+ * Persists an updated gym name to Supabase when the user is authenticated.
+ */
 export async function updateGymNameOnSupabase(
   user: AuthUser | null,
   gymName: string,

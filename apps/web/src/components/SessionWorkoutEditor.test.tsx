@@ -1,5 +1,6 @@
+import { renderToStaticMarkup } from 'react-dom/server'
 import { describe, expect, it } from 'vitest'
-import { resolveExpandedWorkoutItemId } from './SessionWorkoutEditor'
+import { SessionWorkoutEditor, resolveExpandedWorkoutItemId } from './SessionWorkoutEditor'
 
 describe('resolveExpandedWorkoutItemId', () => {
   it('keeps the current active id when it still exists', () => {
@@ -22,5 +23,24 @@ describe('resolveExpandedWorkoutItemId', () => {
 
   it('returns null when there are no items', () => {
     expect(resolveExpandedWorkoutItemId([], 'item-1')).toBeNull()
+  })
+
+  it('renders the exercise lookup picker in the quick-add area', () => {
+    const markup = renderToStaticMarkup(
+      <SessionWorkoutEditor items={[]} onChange={() => undefined} />,
+    )
+
+    expect(markup).toContain('quick-add-exercise-picker')
+  })
+
+  it('renders an explicit details control for workout items', () => {
+    const markup = renderToStaticMarkup(
+      <SessionWorkoutEditor
+        items={[{ id: 'item-1', category: 'exercise', exerciseName: 'Squat' } as any]}
+        onChange={() => undefined}
+      />,
+    )
+
+    expect(markup).toContain('Edit details')
   })
 })

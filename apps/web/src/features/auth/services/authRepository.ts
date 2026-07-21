@@ -14,6 +14,10 @@ import { type AuthUser } from '../domain/authTypes'
 
 const SESSION_STORAGE_KEY = 'gym-pilot-auth-session'
 
+/**
+ * Creates the repository used for reading and writing the auth session through
+ * the local and remote persistence abstractions.
+ */
 export function createAuthSessionRepository() {
   return createPersistenceRepository({
     loadLocal: async <T>(key: string, fallback: T) => {
@@ -76,6 +80,10 @@ export function createAuthSessionRepository() {
   })
 }
 
+/**
+ * Loads the persisted auth session from the repository and validates that it
+ * still contains the minimum fields needed for the current app state.
+ */
 export async function loadAuthSessionWithRepository(): Promise<AuthUser | null> {
   const repository = createAuthSessionRepository()
   const stored = await repository.load<Partial<AuthUser> | null>(
@@ -90,6 +98,9 @@ export async function loadAuthSessionWithRepository(): Promise<AuthUser | null> 
   return stored as AuthUser
 }
 
+/**
+ * Persists the current auth session through the repository-backed storage layer.
+ */
 export async function saveAuthSessionWithRepository(user: AuthUser | null) {
   const repository = createAuthSessionRepository()
   await repository.save(SESSION_STORAGE_KEY, user)

@@ -13,6 +13,9 @@ import {
 import { logger } from './logging'
 import { createPersistenceRepository } from './repositories'
 
+/**
+ * Minimal persistence contract used by the shared storage helpers.
+ */
 export interface IPersistenceStore {
   load<T>(key: string, fallback: T): Promise<T>
   save<T>(key: string, value: T): Promise<void>
@@ -29,6 +32,9 @@ function shouldUseSupabaseForKey(key: string) {
   return true
 }
 
+/**
+ * Local persistence adapter backed by IndexedDB through the Dexie helpers.
+ */
 export class DexiePersistence implements IPersistenceStore {
   async load<T>(key: string, fallback: T): Promise<T> {
     return loadJsonRecord<T>(key, fallback)
@@ -67,6 +73,10 @@ const persistenceRepository = createPersistenceRepository({
   shouldUseRemoteForKey: (key: string) => shouldUseSupabaseForKey(key),
 })
 
+/**
+ * Loads a JSON record from the shared persistence layer, falling back to the
+ * provided value if the record cannot be read.
+ */
 export async function loadJsonRecord<T>(key: string, fallback: T): Promise<T> {
   try {
     const localValue = await persistenceRepository.load<T>(key, fallback)
@@ -77,14 +87,23 @@ export async function loadJsonRecord<T>(key: string, fallback: T): Promise<T> {
   }
 }
 
+/**
+ * Saves a JSON record through the shared persistence repository.
+ */
 export async function saveJsonRecord<T>(key: string, value: T): Promise<void> {
   await persistenceRepository.save(key, value)
 }
 
+/**
+ * Removes a JSON record from the shared persistence layer.
+ */
 export async function removeJsonRecord(key: string): Promise<void> {
   await persistenceRepository.remove(key)
 }
 
+/**
+ * Lists the JSON records currently persisted through the shared repository.
+ */
 export async function listJsonRecords(): Promise<Array<{ key: string; value: unknown }>> {
   return persistenceRepository.list<Array<{ key: string; value: unknown }>>()
 }

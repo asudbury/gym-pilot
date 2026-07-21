@@ -73,12 +73,19 @@ export function SessionWorkoutEditor({
     >
       <div className="rounded-2xl border border-slate-200 bg-white p-3 shadow-sm">
         <div className="flex flex-col gap-2 md:flex-row md:items-center">
-          <input
-            value={draftExerciseName}
-            onChange={(event) => setDraftExerciseName(event.target.value)}
-            placeholder="Quick add exercise"
-            className={`${appTokens.input} flex-1`}
-          />
+          <div className="flex-1" data-testid="quick-add-exercise-picker">
+            <ExerciseSearchPicker
+              id="quick-add-exercise-picker"
+              label="Quick add exercise"
+              value={draftExerciseName}
+              placeholder="Quick add exercise"
+              className="w-full"
+              onChange={(nextValue) => setDraftExerciseName(nextValue)}
+              onSelectExercise={(exercise) => {
+                setDraftExerciseName(formatLabel(exercise.name))
+              }}
+            />
+          </div>
           <div className="flex gap-2">
             <input
               value={draftSets}
@@ -124,6 +131,14 @@ export function SessionWorkoutEditor({
                   aria-label={isExpanded ? 'Collapse item' : 'Expand item'}
                 >
                   {isExpanded ? '−' : '+'}
+                </Button>
+                <Button
+                  type="button"
+                  tone="default"
+                  className="px-2 py-1 text-xs"
+                  onClick={() => handleExpandItem(item.id)}
+                >
+                  Edit details
                 </Button>
                 <div className="min-w-0 flex-1">
                   <div className="text-sm font-semibold text-slate-800">
