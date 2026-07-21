@@ -38,15 +38,10 @@ export function useAuthModule(users: User[]) {
 
   const hydrateSession = useCallback(async () => {
     const storedUser = await readStoredSession()
-    setUser(storedUser)
-    persistCurrentUserId(storedUser?.id ?? null)
-  }, [])
 
-  const refreshSupabaseSession = useCallback(async () => {
-    if (readLogoutPending()) {
-      logger.info(
-        '[Auth] Skipping Supabase session sync while logout is pending',
-      )
+    if (storedUser) {
+      setUser(storedUser)
+      persistCurrentUserId(storedUser.id)
       return
     }
 
@@ -57,6 +52,29 @@ export function useAuthModule(users: User[]) {
       persistCurrentUserId(supabaseUser.id)
     }
   }, [users])
+
+  const refreshSupabaseSession = useCallback(async () => {
+    if (readLogoutPending()) {
+      logger.info(
+        '[Auth] Skipping Supabase session sync while logout is pending',
+      )
+      return
+    }
+
+    const currentUser = user
+    const supabaseUser = await resolveSupabaseAuthUser(users)
+
+    if (supabaseUser) {
+      setUser(supabaseUser)
+      persistCurrentUserId(supabaseUser.id)
+      return
+    }
+
+    if (currentUser) {
+      setUser(currentUser)
+      persistCurrentUserId(currentUser.id)
+    }
+  }, [user, users])
 
   const persistAuthState = useCallback(async () => {
     await persistSession(user)
