@@ -120,13 +120,13 @@ export function getDashboardLayoutDefinitions(
       description:
         'Monitor your clients, plans and assignments from one place.',
       widgets: [
-        {
-          title: 'Sessions',
-          description: 'Review and manage your recorded sessions.',
-          to: '/sessions',
-          tone: 'blue',
-          icon: 'calendar',
-        },
+        // {
+        //   title: 'Sessions',
+        //   description: 'Review and manage your recorded sessions.',
+        //   to: '/sessions',
+        //   tone: 'blue',
+        //   icon: 'calendar',
+        // },
         {
           title: 'Timetable',
           description: 'Open your class timetable and upcoming sessions.',
@@ -174,13 +174,13 @@ export function getDashboardLayoutDefinitions(
       description:
         'Jump back into your exercises, plans and assignments from one place.',
       widgets: [
-        {
-          title: 'Sessions',
-          description: 'Review and manage your recorded sessions.',
-          to: '/sessions',
-          tone: 'blue',
-          icon: 'calendar',
-        },
+        // {
+        //   title: 'Sessions',
+        //   description: 'Review and manage your recorded sessions.',
+        //   to: '/sessions',
+        //   tone: 'blue',
+        //   icon: 'calendar',
+        // },
         {
           title: 'Timetable',
           description: 'Open your class timetable and upcoming sessions.',
