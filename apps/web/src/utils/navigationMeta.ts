@@ -1,5 +1,5 @@
 import type { UserRole } from '@gym-pilot/types'
-import type { AppVisibilityRules } from '../components/appVisibility'
+import type { TierVisibilityRules } from '../features/visibility/domain/tierDeviceVisibility'
 
 export type NavMetaItem = {
   key: string
@@ -9,7 +9,7 @@ export type NavMetaItem = {
   requireAuth?: boolean
   requiredRole?: UserRole | UserRole[]
   requireClubId?: boolean
-  visibility?: AppVisibilityRules
+  visibility?: TierVisibilityRules
 }
 
 export const navigationMeta: NavMetaItem[] = [
