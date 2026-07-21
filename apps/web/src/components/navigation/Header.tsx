@@ -7,6 +7,10 @@ import { ResponsiveVisibility } from '../ResponsiveVisibility'
 import { DecorativeIcon } from '../ui/DecorativeIcon'
 import { getToneClass } from '../toneClasses'
 import { Button } from '../Button'
+import {
+  navigationItemBaseClassName,
+  navigationItemIconClassName,
+} from './navigationItemStyles'
 
 type HeaderProps = {
   appName: string
@@ -72,6 +76,8 @@ export function Header({
     onAuthClick()
   }
 
+  const menuLinkClassName = navigationItemBaseClassName
+
   useEffect(() => {
     if (!mobileMenuOpen) {
       return
@@ -132,20 +138,21 @@ export function Header({
                   />
                 ) : null}
                 {showAuthButton || Boolean(user) ? (
-                  <Button
+                  <button
                     type="button"
                     onClick={handleAuthAction}
-                    className={getToneClass(
-                      'default',
-                      'inline-flex items-center gap-2 px-4 py-2 text-sm font-medium',
-                    )}
+                    className={menuLinkClassName}
                   >
-                    <DecorativeIcon
-                      icon={user ? 'lock' : 'user'}
-                      className="h-4 w-4"
-                    />
-                    <span>{user ? 'Log out' : 'Login'}</span>
-                  </Button>
+                    <span className={navigationItemIconClassName}>
+                      <DecorativeIcon
+                        icon={user ? 'lock' : 'user'}
+                        className="h-4 w-4"
+                      />
+                    </span>
+                    <span className="leading-none">
+                      {user ? 'Log out' : 'Login'}
+                    </span>
+                  </button>
                 ) : null}
               </div>
               {showRestrictedBadge ? (
@@ -189,17 +196,21 @@ export function Header({
                     />
                     <div className="mt-2 flex flex-col gap-2 border-t border-slate-200 pt-3">
                       {showAuthButton || Boolean(user) ? (
-                        <Button
+                        <button
                           type="button"
                           onClick={handleAuthAction}
-                          className="inline-flex items-center justify-start gap-2 rounded-xl px-3 py-2 text-left text-sm font-medium text-slate-700 transition hover:bg-slate-50"
+                          className={menuLinkClassName}
                         >
-                          <DecorativeIcon
-                            icon={user ? 'lock' : 'user'}
-                            className="h-4 w-4"
-                          />
-                          <span>{user ? 'Logout' : 'Login'}</span>
-                        </Button>
+                          <span className={navigationItemIconClassName}>
+                            <DecorativeIcon
+                              icon={user ? 'lock' : 'user'}
+                              className="h-4 w-4"
+                            />
+                          </span>
+                          <span className="leading-none">
+                            {user ? 'Logout' : 'Login'}
+                          </span>
+                        </button>
                       ) : null}
                     </div>
                   </div>
@@ -241,17 +252,21 @@ export function Header({
                     />
                     <div className="mt-2 flex flex-col gap-2 border-t border-slate-200 pt-3">
                       {showAuthButton || Boolean(user) ? (
-                        <Button
+                        <button
                           type="button"
                           onClick={handleAuthAction}
-                          className="inline-flex items-center justify-start gap-2 rounded-xl px-3 py-2 text-left text-sm font-medium text-slate-700 transition hover:bg-slate-50"
+                          className={menuLinkClassName}
                         >
-                          <DecorativeIcon
-                            icon={user ? 'lock' : 'user'}
-                            className="h-4 w-4"
-                          />
-                          <span>{user ? 'Logout' : 'Login'}</span>
-                        </Button>
+                          <span className={navigationItemIconClassName}>
+                            <DecorativeIcon
+                              icon={user ? 'lock' : 'user'}
+                              className="h-4 w-4"
+                            />
+                          </span>
+                          <span className="leading-none">
+                            {user ? 'Logout' : 'Login'}
+                          </span>
+                        </button>
                       ) : null}
                     </div>
                   </div>

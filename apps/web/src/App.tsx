@@ -7,7 +7,6 @@ import {
   loadAppSetting,
   usePlan,
 } from '@gym-pilot/shared'
-import { getToneClass } from './components/toneClasses'
 import { HOME_FILTER_KEY } from './constants/storageKeys'
 import { getExercisePath } from './utils/exerciseRouteUtils'
 import { Header } from './components/navigation/Header'
@@ -253,7 +252,7 @@ function App() {
     assignmentsCount: visibleAssignments.length,
     isAuthenticated: Boolean(user),
     showTimetable: hasTimetableAccess,
-    itemClassName: getToneClass('default', 'px-4 py-2 text-sm font-medium'),
+    itemClassName: 'px-2 py-1.5 text-sm font-medium',
     userRoles,
   })
   const tabletMenuItems = buildNavigationMenuItems({

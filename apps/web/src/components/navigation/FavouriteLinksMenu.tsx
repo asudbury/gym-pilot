@@ -1,8 +1,12 @@
 import { useEffect, useMemo, useState } from 'react'
 import { useLocation, useNavigate } from 'react-router-dom'
-import { getToneClass } from '../toneClasses'
 import { Button } from '../Button'
+import { getToneClass } from '../toneClasses'
 import { DecorativeIcon } from '../ui/DecorativeIcon'
+import {
+  navigationItemBaseClassName,
+  navigationItemIconClassName,
+} from './navigationItemStyles'
 import { classNames, exercises, exercisesSchema } from '@gym-pilot/shared'
 import {
   getQuickLinkForPath,
@@ -230,32 +234,24 @@ export function FavouriteLinksMenu({
   }
 
   const triggerClassName = classNames(
-    variant === 'header'
-      ? getToneClass(
-          'default',
-          'w-full justify-start px-4 py-2 text-left text-sm font-medium',
-        )
-      : classNames(
-          'w-full justify-start rounded-xl px-3 py-2 text-left text-sm font-medium transition',
-          menuOpen
-            ? 'bg-slate-900 text-white'
-            : 'text-slate-700 hover:bg-slate-50',
-        ),
+    navigationItemBaseClassName,
+    variant === 'menu' ? 'w-full' : '',
+    menuOpen ? 'bg-slate-100' : '',
   )
 
   return (
     <div className="relative">
-      <Button
+      <button
         id="quick-links-trigger"
         type="button"
         onClick={() => setMenuOpen((current) => !current)}
         className={triggerClassName}
       >
-        <span className="inline-flex items-center gap-2">
+        <span className={navigationItemIconClassName}>
           <DecorativeIcon icon="star" className="h-4 w-4" />
-          <span>Favourites</span>
         </span>
-      </Button>
+        <span className="leading-none">Favourites</span>
+      </button>
       {menuOpen && (
         <div
           id="quick-links-menu"

@@ -12,14 +12,14 @@ export function SessionActions({
   const navigate = useNavigate()
 
   return (
-    <div className="mt-3 flex flex-wrap gap-3">
+    <div className="flex flex-wrap gap-3">
       <Button
         tone="emerald"
         onClick={() => navigate('/timetable?prefill=class')}
       >
         <div className="inline-flex items-center gap-2">
           <DecorativeIcon icon="calendar" className="h-4 w-4" />
-          <span>Record a Class session</span>
+          <span>Class session</span>
         </div>
       </Button>
 
