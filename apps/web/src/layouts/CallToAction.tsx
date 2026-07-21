@@ -32,7 +32,7 @@ export function CallToAction({
           <div className="mt-2 text-sm text-slate-600">{description}</div>
         ) : null}
         {action ? (
-          <div className="mt-5 flex justify-center">{action}</div>
+          <div className="mt-5 flex w-full justify-center sm:w-auto">{action}</div>
         ) : null}
       </div>
     </div>

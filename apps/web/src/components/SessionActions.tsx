@@ -11,44 +11,56 @@ export function SessionActions({
 }: SessionActionsProps) {
   const navigate = useNavigate()
 
+  const buttonClass =
+    'w-full min-h-12 px-4 text-base sm:w-auto sm:min-h-0 sm:px-3 sm:text-sm'
+
+  const iconClass = 'h-5 w-5 sm:h-4 sm:w-4'
+
   return (
-    <div className="flex flex-wrap gap-3">
+    <div className="flex flex-col gap-3 sm:flex-row sm:flex-wrap">
       <Button
+        className={buttonClass}
         tone="emerald"
         onClick={() => navigate('/timetable?prefill=class')}
       >
-        <div className="inline-flex items-center gap-2">
-          <DecorativeIcon icon="calendar" className="h-4 w-4" />
+        <span className="inline-flex items-center justify-center gap-2">
+          <DecorativeIcon icon="calendar" className={iconClass} />
           <span>Record a Class session</span>
-        </div>
+        </span>
       </Button>
 
       <Button
+        className={buttonClass}
         tone="emerald"
         onClick={() => navigate('/record-session?type=personal_training')}
       >
-        <div className="inline-flex items-center gap-2">
-          <DecorativeIcon icon="users" className="h-4 w-4" />
+        <span className="inline-flex items-center justify-center gap-2">
+          <DecorativeIcon icon="users" className={iconClass} />
           <span>Record a PT session</span>
-        </div>
+        </span>
       </Button>
 
       <Button
+        className={buttonClass}
         tone="emerald"
         onClick={() => navigate('/record-session?type=solo')}
       >
-        <div className="inline-flex items-center gap-2">
-          <DecorativeIcon icon="dumbbell" className="h-4 w-4" />
+        <span className="inline-flex items-center justify-center gap-2">
+          <DecorativeIcon icon="dumbbell" className={iconClass} />
           <span>Record a Solo session</span>
-        </div>
+        </span>
       </Button>
 
       {includeViewSessionsButton ? (
-        <Button tone="default" onClick={() => navigate('/sessions')}>
-          <div className="inline-flex items-center gap-2">
-            <DecorativeIcon icon="tasks" className="h-4 w-4" />
+        <Button
+          className={buttonClass}
+          tone="default"
+          onClick={() => navigate('/sessions')}
+        >
+          <span className="inline-flex items-center justify-center gap-2">
+            <DecorativeIcon icon="tasks" className={iconClass} />
             <span>View sessions</span>
-          </div>
+          </span>
         </Button>
       ) : null}
     </div>

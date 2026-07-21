@@ -76,6 +76,22 @@ export function DashboardPage() {
           </div>
         </div>
 
+        <div className="mt-4">
+          <PageCard as="section">
+            <div className="hidden lg:flex lg:items-center lg:justify-between lg:gap-4">
+              <h2 className="text-lg font-semibold text-slate-900 dark:text-slate-100">
+                Session actions
+              </h2>
+              <div className="flex-1">
+                <SessionActions includeViewSessionsButton={true} />
+              </div>
+            </div>
+            <div className="lg:hidden">
+              <SessionActions includeViewSessionsButton={true} />
+            </div>
+          </PageCard>
+        </div>
+
         {shouldShowRoleSelector ? (
           <div className="flex flex-wrap gap-2">
             {filteredLayouts
@@ -95,23 +111,7 @@ export function DashboardPage() {
               })}
           </div>
         ) : null}
-
-        <div className="mt-4">
-          <PageCard as="section">
-            <div className="hidden lg:flex lg:items-center lg:justify-between lg:gap-4">
-              <h2 className="text-lg font-semibold text-slate-900 dark:text-slate-100">
-                Session actions
-              </h2>
-              <div className="flex-1">
-                <SessionActions includeViewSessionsButton={true} />
-              </div>
-            </div>
-            <div className="lg:hidden">
-              <SessionActions includeViewSessionsButton={true} />
-            </div>
-          </PageCard>
-        </div>
-
+        
         {filteredSelectedLayout ? (
           <div className="space-y-2">
             <div className="space-y-1">

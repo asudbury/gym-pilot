@@ -44,7 +44,7 @@ export function DashboardWidget({
       to={to}
       className={getToneClass(
         tone === 'default' ? 'blue' : tone,
-        'inline-flex items-center rounded-lg px-4 py-2 text-sm font-medium',
+        'flex w-full items-center justify-center rounded-lg px-4 py-3 text-base font-medium sm:w-auto sm:py-2 sm:text-sm',
       )}
     >
       Open
