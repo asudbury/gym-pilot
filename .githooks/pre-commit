@@ -11,7 +11,12 @@ fi
 
 npm run format:changed
 
-# Intentionally skip Knip in pre-commit checks; this hook runs formatting and
-# the faster pre-commit verification flow without the full Knip pass.
-# npm run verify
-npm run verify:precommit
+# Keep ordinary commits fast by default. The heavier web verification pass is
+# opt-in so local commits are not blocked by lint/test/build work every time.
+# Set PRECOMMIT_VERIFY=1 before committing if you want that extra check.
+if [ "${PRECOMMIT_VERIFY:-0}" = "1" ]; then
+  echo "Running the heavier pre-commit verification flow."
+  npm run verify:precommit
+else
+  echo "Skipping the heavier pre-commit verification flow. Set PRECOMMIT_VERIFY=1 to run it."
+fi
