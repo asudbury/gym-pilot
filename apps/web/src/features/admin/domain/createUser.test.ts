@@ -33,7 +33,7 @@ describe('createUser domain helpers', () => {
       displayName: 'ClubUser',
       roles: ['client'],
       selectedTrainerId: 't2',
-      gymClubId: 123,
+      gymClubId: '123',
       gymBrand: 'Virgin',
     })
 

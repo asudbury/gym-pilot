@@ -4,7 +4,6 @@ import { PageCard } from '../PageCard'
 import { PageLayout } from '../../layouts/PageLayout'
 import { Heading1, Paragraph } from '../Typography'
 import { DecorativeIcon } from '../ui/DecorativeIcon'
-import { DesktopOnly } from '../visibility/DeviceVisibility'
 
 type AdminSectionShellProps = {
   title: string
