@@ -14,6 +14,7 @@ import {
   mapAdminProfileRows,
   type AdminProfileRow,
 } from '../../features/admin/domain/adminUtils'
+import { NotificationPill } from '../../components/NotificationPill'
 
 export function AdminUsersPage() {
   const location = useLocation()
@@ -110,7 +111,6 @@ export function AdminUsersPage() {
     const state = location.state as { statusMessage?: string } | undefined
     if (typeof state?.statusMessage === 'string') {
       setSupabaseUsersNotice(state.statusMessage)
-      // Clear the notice from navigation state after reading it
       navigate(location.pathname, { replace: true })
     }
 
@@ -190,6 +190,13 @@ export function AdminUsersPage() {
           </div>
 
           {supabaseUsersNotice ? (
+            <NotificationPill
+              message={{ text: supabaseUsersNotice, tone: 'success' }}
+              className="mt-2"
+            />
+          ) : null}
+
+          {isLoadingSupabaseUsers ? (
             <p className="mt-3 text-sm text-slate-600">{supabaseUsersNotice}</p>
           ) : null}
 

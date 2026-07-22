@@ -2,7 +2,7 @@ import { useEffect, useState } from 'react'
 import { useNavigate, useParams } from 'react-router-dom'
 import { Button } from '../../components/Button'
 import {
-  getSupabaseClient,
+  getSupabaseAdminClient,
   listSupabaseAuthUsers,
   saveSupabaseProfile,
   loadSupabaseProfileRoles,
@@ -179,8 +179,14 @@ export function AdminUserProfilesPage() {
       await saveSupabaseProfile(profilePayload, profile.id)
 
       // Ensure the corresponding auth user exists before saving roles.
-      const authUsers = await listSupabaseAuthUsers()
-      const authUserExists = authUsers.some((u) => u.id === profile.id)
+      const adminClient = getSupabaseAdminClient()
+      let authUserExists = false
+      if (adminClient) {
+        const { data } = await adminClient.auth.admin.getUserById(profile.id)
+        if (data?.user) {
+          authUserExists = true
+        }
+      }
 
       if (!authUserExists) {
         // Avoid attempting the insert which would violate FK constraints.
@@ -589,8 +595,14 @@ export function AdminUserProfilesPage() {
                     </div>
                   </>
                 ) : (
-                  <p className="text-sm text-slate-600">No profile selected.</p>
-                )}
+                <NotificationPill
+                    message={{
+                      text: 'No profile found',
+                      tone: 'error',
+                    }}
+                    className="mt-2"
+                  />
+                  )}
               </div>
             </div>
           )}

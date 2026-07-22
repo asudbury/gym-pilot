@@ -3,8 +3,7 @@ import { useNavigate, useParams } from 'react-router-dom'
 import { Button } from '../../components/Button'
 import {
   getSupabaseClient,
-  listSupabaseAuthUsers,
-  logger,
+  getSupabaseAdminClient,
   loadSupabaseProfileRoles,
   saveSupabaseProfile,
   saveSupabaseProfileRoles,
@@ -12,6 +11,7 @@ import {
 } from '@gym-pilot/shared'
 import { AdminSectionShell } from '../../components/admin/AdminSectionShell'
 import { GymClubSelector } from '../../components/GymClubSelector'
+import { logger } from '@gym-pilot/shared'
 import {
   availableAdminRoles,
   type AdminProfileRow,
@@ -46,6 +46,7 @@ export function AdminEditUserPage() {
   )
   const [saving, setSaving] = useState(false)
   const [copied, setCopied] = useState(false)
+  const [isLoading, setIsLoading] = useState(true)
 
   const refreshProfile = async () => {
     if (!userId) return
@@ -53,6 +54,7 @@ export function AdminEditUserPage() {
     setStatusMessage('')
     setStatusType('info')
 
+    setIsLoading(true)
     const client = getSupabaseClient()
 
     if (!client) {
@@ -61,29 +63,46 @@ export function AdminEditUserPage() {
       return
     }
 
-    const { data, error } = await client
-      .from('gym_pilot_profile')
-      .select(
-        'user_id, friendly_name, email, trainer_id, application_name, gym_brand, gym_club_id, account_tier, access_ends_at, is_frozen, must_change_password, last_logged_in_at, previous_last_logged_in_at',
+    try {
+      const { data, error } = await client
+        .from('gym_pilot_profile')
+        .select('*')
+        .eq('user_id', userId)
+        .maybeSingle()
+
+      if (error) {
+        logger.error('[AdminEditUser] Could not load profile row', error)
+        setStatusMessage(`Could not load profile user: ${error.message}`)
+        setStatusType('error')
+        return
+      }
+
+      const emailLookup = new Map<string, string | null>()
+      const adminClient = getSupabaseAdminClient()
+      if (adminClient) {
+        const { data: authData } = await adminClient.auth.admin.getUserById(
+          userId,
+        )
+        if (authData.user) {
+          emailLookup.set(authData.user.id, authData.user.email ?? null)
+        }
+      }
+
+      const roles = await loadSupabaseProfileRoles(userId)
+      const next = mapProfileRow(
+        { ...(data ?? {}), user_id: userId, roles },
+        emailLookup,
       )
-      .eq('user_id', userId)
-      .maybeSingle()
 
-    if (error) {
-      logger.error('[AdminEditUser] Could not load profile row', error)
-      setStatusMessage(`Could not load profile user: ${error.message}`)
+      setProfile(next)
+      setDraft(createInitialProfileDraft(next))
+    } catch (err) {
+      logger.error('[AdminEditUser] Failed to refresh profile', err)
+      setStatusMessage('An unexpected error occurred while loading the profile.')
       setStatusType('error')
-      return
+    } finally {
+      setIsLoading(false)
     }
-
-    const authUsers = await listSupabaseAuthUsers()
-    const emailLookup = new Map(authUsers.map((u) => [u.id, u.email ?? null]))
-
-    const roles = await loadSupabaseProfileRoles(userId)
-    const next = mapProfileRow({ ...(data ?? { user_id: userId }), roles }, emailLookup)
-
-    setProfile(next)
-    setDraft(createInitialProfileDraft(next))
   }
 
   useEffect(() => {
@@ -126,19 +145,6 @@ export function AdminEditUserPage() {
 
       await saveSupabaseProfile(profilePayload, profile.id)
 
-      // Ensure auth user exists before saving roles
-      const authUsers = await listSupabaseAuthUsers()
-      const authUserExists = authUsers.some((u) => u.id === profile.id)
-
-      if (!authUserExists) {
-        setStatusMessage(
-          `Cannot save roles: no auth user with id ${profile.id} exists.`,
-        )
-        setStatusType('error')
-        setSaving(false)
-        return
-      }
-
       await saveSupabaseProfileRoles(draft.roles, profile.id)
 
       navigate('/admin/users', {
@@ -166,7 +172,11 @@ export function AdminEditUserPage() {
       className="max-w-3xl"
     >
       <div className="space-y-2 p-0 md:space-y-4 md:rounded-2xl md:border md:border-slate-200 md:bg-slate-50 md:p-4">
-        {selectedProfile ? (
+        {isLoading ? (
+          <p className="p-4 text-sm text-slate-600">Loading profile...</p>
+        ) : statusType === 'error' && !profile ? (
+          <p className="p-4 text-sm text-rose-600">{statusMessage}</p>
+        ) : selectedProfile ? (
           <div className="space-y-4 rounded-2xl border border-slate-200 bg-white p-4">
             <label className="block text-sm font-medium text-slate-700">
               Email address
@@ -395,24 +405,26 @@ export function AdminEditUserPage() {
                 <span>Must change password</span>
               </label>
 
-              <Button
-                tone="blue"
-                onClick={handleSave}
-                className="px-4 py-2"
-                disabled={saving}
-                isLoading={saving}
-                loadingLabel="Saving…"
-              >
-                Save profile
-              </Button> 
-              <Button
-                tone="default"
-                onClick={() => navigate('/admin/users')}
-                className="px-3 py-1.5"
-              >
-                Cancel
-              </Button>
+              <div className="flex items-center gap-2">
+                <Button
+                  tone="blue"
+                  onClick={handleSave}
+                  className="px-4 py-2"
+                  disabled={saving}
+                  isLoading={saving}
+                  loadingLabel="Saving…"
+                >
+                  Save profile
+                </Button>
+                <Button
+                  tone="default"
+                  onClick={() => navigate('/admin/users')}
+                  className="px-3 py-1.5"
+                >
+                  Cancel
+                </Button>
               </div>
+            </div>
               <div>
               {statusMessage ? (
                   <NotificationPill
@@ -423,7 +435,13 @@ export function AdminEditUserPage() {
             </div>
           </div>
         ) : (
-          <p className="text-sm text-slate-600">No profile found.</p>
+          <NotificationPill
+            message={{
+              text: 'No profile found',
+              tone: 'error',
+            }}
+            className="mt-2"
+          />
         )}
       </div>
     </AdminSectionShell>

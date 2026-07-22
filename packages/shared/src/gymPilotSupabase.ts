@@ -474,6 +474,9 @@ export async function listSupabaseProfiles(): Promise<SupabaseProfile[]> {
           application_name: null,
           gym_brand: null,
           trainer_id: null,
+          account_tier: "free",
+          access_ends_at: null,
+          is_frozen: false,
           must_change_password: false,
         },
         { onConflict: "user_id" },
@@ -510,9 +513,7 @@ export async function listSupabaseProfiles(): Promise<SupabaseProfile[]> {
 
     const { data: refreshedData, error: refreshError } = await client
       .from("gym_pilot_profile")
-      .select(
-        "id, user_id, friendly_name, application_name, gym_brand, gym_name, account_tier, access_ends_at, is_frozen, trainer_id, must_change_password, created_at, updated_at",
-      );
+      .select("*");
 
     if (refreshError) {
       logger.error(
