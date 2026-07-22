@@ -307,10 +307,11 @@ export function RecordSessionPage() {
               <span className="font-medium">Active kWh</span>
               <input
                 type="number"
-                step="0.01"
                 value={activeKwh}
                 onChange={(event) => setActiveKwh(event.target.value)}
                 className={`${appTokens.input} mt-1 w-full`}
+                inputMode="numeric"
+                pattern="[0-9]*"
               />
             </label>
 
@@ -322,16 +323,6 @@ export function RecordSessionPage() {
                 </div>
               </div>
             </DesktopOnly>
-
-            <div className="mt-4 block text-sm text-slate-700">
-              <span className="font-medium">Workout log</span>
-              <div className="mt-2">
-                <SessionWorkoutEditor
-                  items={workoutItems}
-                  onChange={setWorkoutItems}
-                />
-              </div>
-            </div>
 
             <DesktopOnly>
               <label className="mt-4 block text-sm text-slate-700">
@@ -345,6 +336,16 @@ export function RecordSessionPage() {
                 />
               </label>
             </DesktopOnly>
+
+             <div className="mt-4 block text-sm text-slate-700">
+              <span className="font-medium">Workout log</span>
+              <div className="mt-2">
+                <SessionWorkoutEditor
+                  items={workoutItems}
+                  onChange={setWorkoutItems}
+                />
+              </div>
+            </div>
 
             {error ? (
               <div className="mt-3 text-sm text-rose-600">{error}</div>

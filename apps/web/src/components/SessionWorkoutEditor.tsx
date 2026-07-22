@@ -110,7 +110,7 @@ export function SessionWorkoutEditor({
               value={draftWeight}
               onChange={(event) => setDraftWeight(event.target.value)}
               placeholder="Weight (kg)"
-              className={`${appTokens.input} w-24`}
+              className={`${appTokens.input} w-30`}
               inputMode="numeric"
               pattern="[0-9]*"
             />

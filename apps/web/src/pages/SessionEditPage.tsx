@@ -271,7 +271,6 @@ export function SessionEditPage() {
                 </label>
               </DesktopOnly>
 
-              <div className="mt-2 p-0 md:mt-4 md:rounded-2xl md:border md:border-slate-200 md:bg-slate-50 md:p-4">
                 <div className="flex items-center justify-between gap-2">
                   <span className="text-sm font-medium text-slate-700">
                     Workout log
@@ -286,7 +285,7 @@ export function SessionEditPage() {
                     onChange={setWorkoutItems}
                   />
                 </div>
-              </div>
+
 
               <div className="mt-6 flex flex-col gap-2">
                 <div className="flex flex-wrap gap-2">
