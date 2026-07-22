@@ -236,7 +236,7 @@ export function RecordSessionPage() {
 
             {sessionType === 'solo' ? (
               <label className="mt-4 block text-sm text-slate-700">
-                <span className="font-medium">Name</span>
+                <span className="font-medium pl-1">Name</span>
                 <input
                   type="text"
                   value={name}
@@ -247,7 +247,7 @@ export function RecordSessionPage() {
             ) : null}
 
             <label className="mt-4 block text-sm text-slate-700">
-              <span className="font-medium">Start time</span>
+              <span className="font-medium pl-1">Start time</span>
               {supportsDateTimeLocal === false ? (
                 <div className="mt-1 flex gap-2">
                   <input
@@ -284,11 +284,16 @@ export function RecordSessionPage() {
             </label>
 
             <label className="mt-4 block text-sm text-slate-700">
-              <span className="font-medium">Duration (minutes)</span>
+              <span className="font-medium pl-1">Duration (minutes)</span>
               <input
                 type="number"
                 value={duration ?? ''}
-                onChange={(event) => setDuration(Number(event.target.value))}
+                onChange={(event) => {
+                  const nextValue = event.target.value
+                  setDuration(
+                    nextValue === '' ? undefined : Number(nextValue),
+                  )
+                }}
                 className={`${appTokens.input} mt-1 w-full`}
               />
             </label>
@@ -304,7 +309,7 @@ export function RecordSessionPage() {
             </label> */}
 
             <label className="mt-4 block text-sm text-slate-700">
-              <span className="font-medium">Active kWh</span>
+              <span className="font-medium pl-1">Active kWh</span>
               <input
                 type="number"
                 value={activeKwh}
@@ -317,7 +322,7 @@ export function RecordSessionPage() {
 
             <DesktopOnly>
               <div className="mt-4 block text-sm text-slate-700">
-                <span className="font-medium">Rating</span>
+                <span className="font-medium pl-1">Rating</span>
                 <div className="mt-2">
                   <RatingSelector value={rating} onChange={setRating} />
                 </div>
@@ -326,7 +331,7 @@ export function RecordSessionPage() {
 
             <DesktopOnly>
               <label className="mt-4 block text-sm text-slate-700">
-                <span className="font-medium">Notes</span>
+                <span className="font-medium pl-1">Notes</span>
                 <textarea
                   value={notes}
                   onChange={(event) => setNotes(event.target.value)}
@@ -338,7 +343,7 @@ export function RecordSessionPage() {
             </DesktopOnly>
 
              <div className="mt-4 block text-sm text-slate-700">
-              <span className="font-medium">Workout log</span>
+              <span className="font-medium pl-1">Workout log</span>
               <div className="mt-2">
                 <SessionWorkoutEditor
                   items={workoutItems}
