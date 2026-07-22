@@ -10,11 +10,9 @@ import {
   usePlan,
 } from '@gym-pilot/shared'
 import { useAuth } from '../../../auth/AuthContext'
-import { useDeviceType } from '../../../components/TierDeviceVisibility'
-import {
-  isVisibleForTierAndDevice,
-  type TierVisibilityRules,
-} from '../../../features/visibility/domain/tierDeviceVisibility'
+import { useDeviceType } from '../../../components/visibility/TierDeviceVisibility'
+import { isVisibleForTierAndDevice } from '../../../features/visibility/domain/tierDeviceVisibility'
+import { routeVisibilityRules } from './routeVisibility'
 import { HOME_FILTER_KEY } from '../../../constants/storageKeys'
 import { getExercisePath } from '../../../utils/exerciseRouteUtils'
 import { formatLabel } from '../../../utils/formatUtils'
@@ -272,15 +270,6 @@ export function useAppShell() {
     tier: currentTier,
     deviceType,
   })
-
-  const routeVisibilityRules: Record<string, TierVisibilityRules | undefined> =
-    {
-      '/record-session': {
-        minTier: 'bronze',
-        visibleOn: ['desktop', 'tablet'],
-      },
-      '/sessions': { minTier: 'bronze', visibleOn: ['desktop', 'tablet'] },
-    }
 
   const currentRouteVisibility = routeVisibilityRules[pathname]
   const isCurrentRouteVisible = isVisibleForTierAndDevice(

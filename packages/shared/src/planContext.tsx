@@ -23,7 +23,6 @@ type PlanContextValue = {
   deletePlan: (planId: string) => void
   deleteAssignment: (assignmentId: string) => void
   createUser: (name: string, roles?: UserRole | UserRole[], trainerId?: string | null) => User | undefined
-  deleteUser: (userId: string) => void
 }
 
 type PlanProviderProps = {
@@ -671,20 +670,6 @@ export function PlanProvider({ children, storageKey = PLANS_KEY }: PlanProviderP
     return nextUser
   }
 
-  const deleteUser = (userId: string) => {
-    const trimmedUserId = userId.trim()
-
-    if (!trimmedUserId) {
-      return
-    }
-
-    const nextUsers = users.filter((user) => user.id !== trimmedUserId)
-
-    setUsers(nextUsers)
-    setPlans((current) => current.map((plan) => ({ ...plan })))
-    setAssignments((current) => current.filter((assignment) => assignment.assignedUserId !== trimmedUserId))
-  }
-
   const visiblePlans = useMemo(() => filterPlansForViewer(plans, users, currentUserId, currentUserRole, currentUserRoles), [plans, users, currentUserId, currentUserRole, currentUserRoles])
   const visibleAssignments = useMemo(() => filterAssignmentsForViewer(assignments, users, currentUserId, currentUserRole, currentUserRoles), [assignments, users, currentUserId, currentUserRole, currentUserRoles])
   const visibleUsers = useMemo(() => filterUsersForViewer(users, currentUserId, currentUserRole, currentUserRoles), [users, currentUserId, currentUserRole, currentUserRoles])
@@ -706,7 +691,6 @@ export function PlanProvider({ children, storageKey = PLANS_KEY }: PlanProviderP
       deletePlan,
       deleteAssignment,
       createUser,
-      deleteUser,
     }),
     [plans, assignments, users],
   )

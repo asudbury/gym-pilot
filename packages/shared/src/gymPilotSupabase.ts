@@ -21,6 +21,7 @@ import {
   loadSupabaseProfileTermsAcceptance as loadSupabaseProfileTermsAcceptanceFromProfilePersistence,
   loadSupabaseGymBrand as loadSupabaseGymBrandFromProfilePersistence,
   loadSupabaseGymName as loadSupabaseGymNameFromProfilePersistence,
+  saveSupabaseProfile as saveSupabaseProfileFromProfilePersistence,
   saveSupabaseApplicationName as saveSupabaseApplicationNameFromProfilePersistence,
   saveSupabaseGymBrand as saveSupabaseGymBrandFromProfilePersistence,
   saveSupabaseGymName as saveSupabaseGymNameFromProfilePersistence,
@@ -33,6 +34,7 @@ import {
   buildSupabaseProfileTermsAcceptancePayload as buildSupabaseProfileTermsAcceptancePayloadFromProfilePersistence,
   type SupabaseProfile,
   type SupabaseProfileSnapshot,
+  type SupabaseProfileUpdatePayload,
   type SupabaseAccessTier,
 } from "./profilePersistence";
 import { type SessionWorkoutItem } from "./sessionWorkout";
@@ -310,6 +312,7 @@ function mapSupabaseProfile(
 export type {
   SupabaseProfile,
   SupabaseProfileSnapshot,
+  SupabaseProfileUpdatePayload,
   SupabaseAccessTier,
 } from "./profilePersistence";
 
@@ -611,6 +614,13 @@ export async function saveSupabaseProfileName(
   userId?: string,
 ) {
   return saveSupabaseProfileNameFromProfilePersistence(friendlyName, userId);
+}
+
+export async function saveSupabaseProfile(
+  payload: SupabaseProfileUpdatePayload,
+  userId?: string,
+) {
+  return saveSupabaseProfileFromProfilePersistence(payload, userId);
 }
 
 export async function saveSupabaseProfileEmail(

@@ -1,15 +1,8 @@
 import type { UserRole } from '@gym-pilot/types'
+import type { SupabaseProfileUpdatePayload } from '@gym-pilot/shared'
 
-export type CreateUserProfilePayload = {
-  user_id: string
+export type CreateUserProfilePayload = SupabaseProfileUpdatePayload & {
   friendly_name: string
-  trainer_id: string | null
-  gym_brand: string | null
-  gym_club_id?: string | null
-  account_tier: string
-  access_ends_at: string | null
-  is_frozen: boolean
-  must_change_password: boolean
 }
 
 export type CreateUserFormValues = {
@@ -25,7 +18,7 @@ export function getCreateUserRoleOptions(): UserRole[] {
 }
 
 export function buildCreateUserProfilePayload(values: {
-  userId: string
+  userId?: string
   displayName: string
   roles: UserRole[]
   selectedTrainerId: string
@@ -35,15 +28,17 @@ export function buildCreateUserProfilePayload(values: {
   mustChangePassword?: boolean
   gymBrand?: string | null
   gymClubId?: string | null
-}): CreateUserProfilePayload {
+}): SupabaseProfileUpdatePayload {
   return {
-    user_id: values.userId,
     friendly_name: values.displayName,
     trainer_id: values.roles.includes('client')
       ? values.selectedTrainerId || null
       : null,
     gym_brand: typeof values.gymBrand === 'string' ? values.gymBrand : null,
-    gym_club_id: values.gymClubId ?? null,
+    gym_club_id:
+      values.gymClubId && /^\d+$/.test(values.gymClubId)
+        ? Number(values.gymClubId)
+        : null,
     account_tier: values.accountTier ?? 'free',
     access_ends_at: values.accessEndsAt ?? null,
     is_frozen: Boolean(values.isFrozen),

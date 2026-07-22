@@ -20,17 +20,13 @@ export function AdminUsersPage() {
   const navigate = useNavigate()
   const [isLoadingSupabaseUsers, setIsLoadingSupabaseUsers] = useState(false)
   const [supabaseUsersNotice, setSupabaseUsersNotice] = useState(
-    typeof (location.state as { statusMessage?: string } | undefined)
-      ?.statusMessage === 'string'
-      ? (location.state as { statusMessage?: string }).statusMessage
-      : '',
+    '',
   )
   const [profileUsers, setProfileUsers] = useState<AdminProfileRow[]>([])
   const [copiedUserId, setCopiedUserId] = useState<string | null>(null)
 
   const refreshSupabaseUsers = async () => {
     setIsLoadingSupabaseUsers(true)
-    setSupabaseUsersNotice('')
 
     const client = getSupabaseClient()
 
@@ -111,10 +107,18 @@ export function AdminUsersPage() {
   useEffect(() => {
     let isActive = true
 
-    void (async () => {
-      await refreshSupabaseUsers()
+    const state = location.state as { statusMessage?: string } | undefined
+    if (typeof state?.statusMessage === 'string') {
+      setSupabaseUsersNotice(state.statusMessage)
+      // Clear the notice from navigation state after reading it
+      navigate(location.pathname, { replace: true })
+    }
 
+    void (async () => {
+      setIsLoadingSupabaseUsers(true)
+      await refreshSupabaseUsers()
       if (!isActive) {
+        setIsLoadingSupabaseUsers(false)
         return
       }
     })()
@@ -189,7 +193,9 @@ export function AdminUsersPage() {
             <p className="mt-3 text-sm text-slate-600">{supabaseUsersNotice}</p>
           ) : null}
 
-          {profileUsers.length === 0 ? (
+          {isLoadingSupabaseUsers ? (
+            <p className="mt-3 text-sm text-slate-600">Loading users…</p>
+          ) : profileUsers.length === 0 ? (
             <p className="mt-3 text-sm text-slate-600">
               No users yet. Add someone to get started.
             </p>

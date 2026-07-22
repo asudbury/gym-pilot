@@ -4,6 +4,7 @@ import { useAuth } from '../auth/AuthContext'
 import { Button } from '../components/Button'
 import { PageCard } from '../components/PageCard'
 import { SessionWorkoutEditor } from '../components/SessionWorkoutEditor'
+import { DesktopOnly } from '../components/visibility/DeviceVisibility'
 import { DecorativeIcon } from '../components/ui/DecorativeIcon'
 import { Heading1, UpperCaseParagraph } from '../components/Typography'
 import { PageLayout } from '../layouts/PageLayout'
@@ -16,6 +17,7 @@ import {
   usePlan,
   type SessionWorkoutItem,
 } from '@gym-pilot/shared'
+import { RatingSelector } from '../components/RatingSelector'
 
 type SessionType = 'class' | 'solo' | 'personal_training'
 
@@ -51,12 +53,12 @@ export function RecordSessionPage() {
   const [supportsDateTimeLocal, setSupportsDateTimeLocal] = useState<
     boolean | null
   >(null)
-  const [rating] = useState<number | null>(null)
+  const [rating, setRating] = useState<number | null>(null)
   const [duration, setDuration] = useState<number | undefined>(undefined)
   const [name, setName] = useState('')
   const [endAt] = useState<string | null>(null)
   const [activeKwh, setActiveKwh] = useState('')
-  const [notes] = useState('')
+  const [notes, setNotes] = useState('')
   const [selectedPlanId] = useState('')
   const [workoutItems, setWorkoutItems] = useState<SessionWorkoutItem[]>([])
   const [isSaving, setIsSaving] = useState(false)
@@ -324,28 +326,14 @@ export function RecordSessionPage() {
               />
             </label>
 
-            {/* <label className="mt-4 block text-sm text-slate-700">
-              <span className="font-medium">Plan or assignment</span>
-              <select
-                value={selectedPlanId}
-                onChange={(event) => setSelectedPlanId(event.target.value)}
-                className={`${appTokens.input} mt-1 w-full`}
-              >
-                <option value="">No plan selected</option>
-                {availablePlans.map((plan) => (
-                  <option key={plan.id} value={plan.id}>
-                    {plan.planName}
-                  </option>
-                ))}
-              </select>
-            </label> */}
-            {/* 
-            <div className="mt-4 block text-sm text-slate-700">
-              <span className="font-medium">Rating</span>
-              <div className="mt-2">
-                <RatingSelector value={rating} onChange={setRating} />
+            <DesktopOnly>
+              <div className="mt-4 block text-sm text-slate-700">
+                <span className="font-medium">Rating</span>
+                <div className="mt-2">
+                  <RatingSelector value={rating} onChange={setRating} />
+                </div>
               </div>
-            </div> */}
+            </DesktopOnly>
 
             <div className="mt-4 block text-sm text-slate-700">
               <span className="font-medium">Workout log</span>
@@ -357,16 +345,18 @@ export function RecordSessionPage() {
               </div>
             </div>
 
-            {/* <label className="mt-4 block text-sm text-slate-700">
-              <span className="font-medium">Notes</span>
-              <textarea
-                value={notes}
-                onChange={(event) => setNotes(event.target.value)}
-                rows={4}
-                className={`${appTokens.input} mt-1 w-full`}
-                placeholder="Add any notes for this session"
-              />
-            </label> */}
+            <DesktopOnly>
+              <label className="mt-4 block text-sm text-slate-700">
+                <span className="font-medium">Notes</span>
+                <textarea
+                  value={notes}
+                  onChange={(event) => setNotes(event.target.value)}
+                  rows={4}
+                  className={`${appTokens.input} mt-1 w-full`}
+                  placeholder="Add any notes for this session"
+                />
+              </label>
+            </DesktopOnly>
 
             {error ? (
               <div className="mt-3 text-sm text-rose-600">{error}</div>

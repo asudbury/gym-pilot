@@ -31,7 +31,7 @@ export function NotificationPill({
 
   return (
     <div
-      className={`inline-flex max-w-full items-center rounded-full border px-4 py-2 text-sm font-medium shadow-sm ${toneClasses} ${appTokens.pill} ${className}`.trim()}
+      className={`inline-flex max-w-full items-center rounded-full border px-4 py-2 text-sm font-medium shadow-sm ${toneClasses} ${className}`.trim()}
     >
       {resolvedMessage}
     </div>

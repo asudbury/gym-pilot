@@ -50,6 +50,7 @@
 - If the data model, persistence strategy, storage keys, or schema shape changes, update the relevant documentation immediately so the repo stays consistent.
 - Keep the schema reference, migration notes, and Mermaid diagram aligned with the current code and database model rather than leaving them stale.
 - Document the relevant Supabase call patterns and the target tables in the shared Supabase module so future changes are easy to audit.
+- Prefer explicit `insert` and `update` calls over `upsert` where the intent is clear, to improve readability and avoid unexpected side effects.
 - Keep the shared Supabase interface and persistence boundary documented with concise JSDoc on exported helpers and types, especially where the app talks to the backend.
 - If a change is environment-specific (for example, localhost-only behavior), note that clearly in the docs.
 

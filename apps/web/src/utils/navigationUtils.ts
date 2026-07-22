@@ -3,9 +3,9 @@ import type { UserRole } from '@gym-pilot/types'
 import type { DecorativeIconProps } from '../components/ui/DecorativeIcon'
 import { getExercisePath, getExerciseSlug } from './exerciseRouteUtils'
 import { exercises, exercisesSchema } from '@gym-pilot/shared'
-import { navigationMeta } from './navigationMeta'
 import { isVisibleForTierAndDevice } from '../features/visibility/domain/tierDeviceVisibility'
 import type { DeviceType } from '../features/visibility/domain/tierDeviceVisibility'
+import { navigationMeta } from './navigationMeta'
 
 export type NavigationMenuItemProps = {
   to: string
@@ -61,7 +61,8 @@ export function buildNavigationMenuItems({
         ? meta.requiredRole
         : [meta.requiredRole]
       const has =
-        Array.isArray(userRoles) && required.some((r) => userRoles.includes(r))
+        Array.isArray(userRoles) &&
+        required.some((r: UserRole) => userRoles.includes(r))
       if (!has) continue
     }
 

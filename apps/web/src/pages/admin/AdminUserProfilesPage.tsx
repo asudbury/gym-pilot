@@ -1,9 +1,11 @@
-import { useEffect, useMemo, useState } from 'react'
+import { useEffect, useState } from 'react'
 import { useNavigate, useParams } from 'react-router-dom'
 import { Button } from '../../components/Button'
 import {
   getSupabaseClient,
   listSupabaseAuthUsers,
+  saveSupabaseProfile,
+  loadSupabaseProfileRoles,
   logger,
   saveSupabaseProfileRoles,
   usePlan,
@@ -24,6 +26,7 @@ import {
   type ProfileDraft,
 } from '../../features/admin/domain/userProfiles'
 import { renderDashboardTimestamp } from '../../utils/appUtils'
+import { NotificationPill } from '../../components/NotificationPill'
 
 const formatStoredTimestamp = (value?: string | null) => {
   if (!value) {
@@ -36,7 +39,7 @@ const formatStoredTimestamp = (value?: string | null) => {
 export function AdminUserProfilesPage() {
   const navigate = useNavigate()
   const { userId } = useParams<{ userId: string }>()
-  const { users, deleteUser } = usePlan()
+  const { users } = usePlan()
   const [profileRows, setProfileRows] = useState<AdminProfileRow[]>([])
   const [drafts, setDrafts] = useState<Record<string, ProfileDraft>>({})
   const [localSelectedId, setLocalSelectedId] = useState<string | null>(
@@ -79,7 +82,20 @@ export function AdminUserProfilesPage() {
       authUsers.map((user) => [user.id, user.email ?? null]),
     )
 
-    const nextRows = (data ?? []).map((row) => mapProfileRow(row, emailLookup))
+    const userIds = (data ?? []).map((row) => row.user_id)
+    const rolesLookup = new Map<string, UserRole[]>()
+    for (const userId of userIds) {
+      // eslint-disable-next-line no-await-in-loop
+      const roles = await loadSupabaseProfileRoles(userId)
+      rolesLookup.set(userId, roles)
+    }
+
+    const nextRows = (data ?? []).map((row) =>
+      mapProfileRow(
+        { ...row, roles: rolesLookup.get(row.user_id) ?? [] },
+        emailLookup,
+      ),
+    )
 
     setProfileRows(nextRows)
     setDrafts((current) => {
@@ -101,11 +117,6 @@ export function AdminUserProfilesPage() {
     profileRows.find(
       (profile) => profile.id === (userId ?? localSelectedId ?? ''),
     ) ?? profileRows[0]
-
-  const userLookup = useMemo(
-    () => new Map(users.map((user) => [user.id, user])),
-    [users],
-  )
 
   const getTrainerOptionsForProfile = (profile: AdminProfileRow) =>
     resolveTrainerOptions(profile as AdminProfileRow, users)
@@ -147,14 +158,8 @@ export function AdminUserProfilesPage() {
 
     try {
       setSavingProfileId(profile.id)
-      const client = getSupabaseClient()
-
-      if (!client) {
-        throw new Error('Supabase is not configured for this session.')
-      }
 
       const profilePayload = {
-        user_id: profile.id,
         friendly_name: trimmedName,
         application_name: draft.applicationName.trim() || null,
         gym_brand: draft.gymClubId ? 'Virgin' : draft.gymBrand.trim() || null,
@@ -171,46 +176,7 @@ export function AdminUserProfilesPage() {
         must_change_password: draft.mustChangePassword,
       }
 
-      const { error } = await client
-        .from('gym_pilot_profile')
-        .upsert(profilePayload, { onConflict: 'user_id' })
-
-      if (
-        error &&
-        /trainer_id|roles|does not exist|column .* does not exist|schema cache/i.test(
-          error.message,
-        )
-      ) {
-        const { error: fallbackError } = await client
-          .from('gym_pilot_profile')
-          .upsert(
-            {
-              user_id: profile.id,
-              friendly_name: trimmedName,
-              application_name: draft.applicationName.trim() || null,
-              gym_brand: draft.gymClubId
-                ? 'Virgin'
-                : draft.gymBrand.trim() || null,
-              gym_club_id:
-                draft.gymClubId && /^\d+$/.test(String(draft.gymClubId))
-                  ? Number(draft.gymClubId)
-                  : null,
-              account_tier: draft.accountTier || 'free',
-              access_ends_at: draft.accessEndsAt
-                ? new Date(draft.accessEndsAt).toISOString()
-                : null,
-              is_frozen: draft.isFrozen,
-              must_change_password: draft.mustChangePassword,
-            },
-            { onConflict: 'user_id' },
-          )
-
-        if (fallbackError) {
-          throw fallbackError
-        }
-      } else if (error) {
-        throw error
-      }
+      await saveSupabaseProfile(profilePayload, profile.id)
 
       // Ensure the corresponding auth user exists before saving roles.
       const authUsers = await listSupabaseAuthUsers()
@@ -261,20 +227,6 @@ export function AdminUserProfilesPage() {
       className="max-w-5xl"
     >
       <div className="space-y-2 p-0 md:space-y-4 md:rounded-2xl md:border md:border-slate-200 md:bg-slate-50 md:p-4">
-        {statusMessage ? (
-          <p
-            className={`text-sm ${
-              statusType === 'error'
-                ? 'text-rose-600'
-                : statusType === 'success'
-                  ? 'text-emerald-600'
-                  : 'text-slate-600'
-            }`}
-          >
-            {statusMessage}
-          </p>
-        ) : null}
-
         <div className="rounded-2xl border border-slate-200 bg-white p-4">
           {profileRows.length === 0 ? (
             <p className="mt-3 text-sm text-slate-600">
@@ -614,29 +566,25 @@ export function AdminUserProfilesPage() {
                         />
                         <span>Must change password</span>
                       </label>
-                      <div className="flex flex-wrap items-center gap-2">
+                      <div className="flex flex-col items-start gap-2">
                         <Button
                           tone="blue"
                           onClick={() =>
                             void handleSaveProfile(selectedProfile)
                           }
-                          className="px-3 py-1.5"
+                          className="px-4 py-2"
                           disabled={savingProfileId === selectedProfile.id}
                         >
                           {savingProfileId === selectedProfile.id
                             ? 'Saving…'
                             : 'Save profile'}
                         </Button>
-                        <Button
-                          tone="rose"
-                          onClick={() => {
-                            const localUser = userLookup.get(selectedProfile.id)
-                            if (localUser) deleteUser(localUser.id)
-                          }}
-                          className="px-3 py-1.5"
-                        >
-                          Delete
-                        </Button>
+                        {statusMessage ? (
+                          <NotificationPill
+                            message={{ text: statusMessage, tone: statusType }}
+                            className="mt-2"
+                          />
+                        ) : null}
                       </div>
                     </div>
                   </>

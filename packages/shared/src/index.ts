@@ -1,10 +1,15 @@
-export * from './exerciseSchema'
-export * from './planContext'
-export * from './data'
-export * from './storage'
-export * from './schemaDocs'
-export * from './logging'
-export { shouldPersistErrorLogs, shouldPersistAuditLogs, persistErrorLog, persistAuditLog } from './logging'
+export * from "./exerciseSchema";
+export * from "./planContext";
+export * from "./data";
+export * from "./storage";
+export * from "./schemaDocs";
+export * from "./logging";
+export {
+  shouldPersistErrorLogs,
+  shouldPersistAuditLogs,
+  persistErrorLog,
+  persistAuditLog,
+} from "./logging";
 export {
   ensureAuthenticatedSupabaseSession,
   getSupabaseClient,
@@ -15,8 +20,8 @@ export {
   resetSupabasePassword,
   changeSupabasePassword,
   signOutFromSupabase,
-} from './supabase'
-export { getSupabaseAdminClient } from './supabase'
+} from "./supabase";
+export { getSupabaseAdminClient } from "./supabase";
 export {
   isSupabasePersistenceEnabled,
   loadSupabaseProfileSnapshot,
@@ -30,6 +35,7 @@ export {
   loadSupabaseProfileFlag,
   loadSupabaseProfileRoles,
   loadSupabaseProfileTermsAcceptance,
+  saveSupabaseProfile,
   saveSupabaseProfileName,
   saveSupabaseProfileEmail,
   saveSupabaseApplicationName,
@@ -65,13 +71,14 @@ export {
   cancelBooking,
   listSessions,
   listBookings,
-} from './gymPilotSupabase'
-export * from './utils'
-export * from './repositories'
-export * from './appSettings'
-export * from './appSettingsService'
-export * from './userActivity'
-export * from './sessionHistory'
-export * from './sessionWorkout'
-export * from './sessionWorkoutPersistence'
-export * from './profilePersistence'
+} from "./gymPilotSupabase";
+export * from "./utils";
+export * from "./repositories";
+export * from "./appSettings";
+export * from "./appSettingsService";
+export * from "./userActivity";
+export * from "./sessionHistory";
+export * from "./sessionWorkout";
+export * from "./sessionWorkoutPersistence";
+export * from "./profilePersistence";
+export type { SupabaseProfileUpdatePayload } from "./profilePersistence";

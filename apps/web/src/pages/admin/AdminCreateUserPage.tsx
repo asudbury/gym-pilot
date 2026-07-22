@@ -5,6 +5,7 @@ import {
   getSupabaseClient,
   getSupabaseAdminClient,
   logger,
+  saveSupabaseProfile,
   saveSupabaseProfileRoles,
   signUpWithPassword,
   usePlan,
@@ -18,6 +19,7 @@ import {
   buildCreateUserProfilePayload,
   getCreateUserRoleOptions,
 } from '../../features/admin/domain/createUser'
+import { NotificationPill } from '../../components/NotificationPill'
 
 type StatusMessageState = {
   text: string
@@ -192,18 +194,8 @@ export function AdminCreateUserPage() {
         let attempts = 0
         while (!seen && attempts < 10) {
           try {
-            const lookup =
-              await serviceAdminClient.auth.admin.getUserById(createdUserId)
-            // @ts-expect-error
-            if (lookup?.data?.user || lookup?.user) {
-              seen = true
-              break
-            }
-            if (
-              lookup?.data &&
-              Array.isArray(lookup.data) &&
-              lookup.data.length > 0
-            ) {
+            const { data: lookupData } = await serviceAdminClient.auth.admin.getUserById(createdUserId)
+            if (lookupData?.user) {
               seen = true
               break
             }
@@ -250,7 +242,6 @@ export function AdminCreateUserPage() {
         }
 
         const profilePayload = buildCreateUserProfilePayload({
-          userId: resolvedNewUserId,
           displayName: resolvedDisplayName,
           roles: newUserRoles,
           selectedTrainerId,
@@ -262,41 +253,15 @@ export function AdminCreateUserPage() {
           gymBrand: selectedGymClubId ? 'Virgin' : null,
         })
 
-        let { error: profileError } = await client
-          .from('gym_pilot_profile')
-          .upsert(profilePayload, { onConflict: 'user_id' })
-
-        if (
-          profileError &&
-          /violates foreign key constraint/i.test(profileError.message || '')
-        ) {
-          // transient FK error — retry several times with exponential backoff
-          logger.warn(
-            '[AdminCreateUser] FK constraint when creating profile; retrying',
-            profileError,
-          )
-          let attempts = 0
-          while (attempts < 8 && profileError) {
-            const delay = 150 * Math.pow(1.6, attempts)
-            // eslint-disable-next-line no-await-in-loop
-            await new Promise((res) => setTimeout(res, Math.round(delay)))
-            // eslint-disable-next-line no-await-in-loop
-            const result = await client
-              .from('gym_pilot_profile')
-              .upsert(profilePayload, { onConflict: 'user_id' })
-            profileError = result.error
-            attempts += 1
-          }
-        }
-
-        if (!profileError) {
+        try {
+          await saveSupabaseProfile(profilePayload, resolvedNewUserId)
           await saveSupabaseProfileRoles(
             newUserRoles,
             resolvedNewUserId,
             client,
           )
 
-          // Optionally copy an invite link to clipboard for the new user
+          // Optionally copy an invite link
           if (sendInviteLink) {
             const email = newUserEmail.trim() || resolvedDisplayName
             if (email) {
@@ -320,55 +285,17 @@ export function AdminCreateUserPage() {
               }
             }
           }
-        }
-
-        if (
-          profileError &&
-          /trainer_id|roles|does not exist|column .* does not exist|schema cache/i.test(
-            profileError.message,
-          )
-        ) {
-          const { error: fallbackError } = await client
-            .from('gym_pilot_profile')
-            .upsert(
-              {
-                user_id: resolvedNewUserId,
-                friendly_name: resolvedDisplayName,
-                must_change_password: true,
-              },
-              { onConflict: 'user_id' },
-            )
-
-          if (!fallbackError) {
-            await saveSupabaseProfileRoles(
-              newUserRoles,
-              resolvedNewUserId,
-              client,
-            )
-          }
-
-          if (fallbackError) {
-            logger.error(
-              '[AdminCreateUser] Could not create Supabase profile row',
-              fallbackError,
-            )
-            setStatusMessage({
-              text: `Could not create the profile row: ${fallbackError.message}`,
-              tone: 'error',
-            })
-            return
-          }
-        } else if (profileError) {
+        } catch (profileError) {
           logger.error(
             '[AdminCreateUser] Could not create Supabase profile row',
             profileError,
           )
 
           const profileErrorMessage = isSupabaseAuthCredentialError(
-            profileError.message,
+            (profileError as Error).message,
           )
             ? 'Could not create the profile row: Your admin session has expired. Sign in again and retry.'
-            : `Could not create the profile row: ${profileError.message}`
+            : `Could not create the profile row: ${(profileError as Error).message}`
 
           setStatusMessage({
             text: profileErrorMessage,
@@ -556,21 +483,21 @@ export function AdminCreateUserPage() {
             <span>Copy invite link to clipboard after creation</span>
           </label>
 
-          <Button
-            tone="emerald"
-            onClick={() => void handleCreateUser()}
-            className="px-4 py-2"
-          >
-            Create user
-          </Button>
-
-          {statusMessage ? (
-            <p
-              className={`text-sm ${statusMessage.tone === 'error' ? 'text-red-600' : 'text-slate-600'}`}
+          <div className="flex flex-col items-start gap-2">
+            <Button
+              tone="emerald"
+              onClick={() => void handleCreateUser()}
+              className="px-4 py-2"
             >
-              {statusMessage.text}
-            </p>
-          ) : null}
+              Create user
+            </Button>
+            {statusMessage ? (
+              <NotificationPill
+                message={statusMessage}
+                className="mt-2"
+              />
+            ) : null}
+          </div>
         </Panel>
       </SectionPanel>
     </AdminSectionShell>

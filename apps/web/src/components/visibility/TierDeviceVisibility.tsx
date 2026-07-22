@@ -4,7 +4,7 @@ import {
   isVisibleForTierAndDevice,
   type DeviceType,
   type TierVisibilityRules,
-} from '../features/visibility/domain/tierDeviceVisibility'
+} from '../../features/visibility/domain/tierDeviceVisibility'
 
 type TierDeviceVisibilityProps = TierVisibilityRules & {
   children: ReactNode
