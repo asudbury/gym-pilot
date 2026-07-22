@@ -8,6 +8,7 @@ import { GymClubSelector } from '../components/GymClubSelector'
 import { logger } from '@gym-pilot/shared'
 import { Button } from '../components/Button'
 import { getDisplayRoles } from '../features/admin/domain/adminUtils'
+import { UserRolesDisplay } from '../components/UserRolesDisplay'
 
 export function PreferencesPage() {
   const {
@@ -78,22 +79,7 @@ export function PreferencesPage() {
         icon="preferences"
       >
         <form onSubmit={handleSubmit} className="flex flex-col gap-4">
-          <div className="flex flex-col gap-2 rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3 text-sm text-slate-700">
-            <p className="font-medium">Your roles</p>
-            <p className="text-sm text-slate-400">
-              These are the permissions currently assigned to your account.
-            </p>
-            <div className="mt-1 flex flex-wrap gap-2">
-              {displayRoles.map((role) => (
-                <span
-                  key={role}
-                  className="rounded-full bg-slate-900 px-3 py-1 text-xs font-semibold uppercase tracking-[0.2em] text-white"
-                >
-                  {role}
-                </span>
-              ))}
-            </div>
-          </div>
+          <UserRolesDisplay displayRoles={displayRoles} />
 
           {isTrainer ? (
             <>

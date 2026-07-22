@@ -6,7 +6,7 @@ export const routeVisibilityRules: Record<
 > = {
   '/record-session': {
     minTier: 'free',
-    visibleOn: ['desktop', 'tablet'],
+    visibleOn: ['desktop', 'tablet', 'mobile'],
   },
   '/sessions': {
     minTier: 'free',

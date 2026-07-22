@@ -3,6 +3,8 @@ import { PageCardLayout } from '../../layouts/PageCardLayout'
 import { Panel } from '../../components/ui/Panel'
 import { useAuth } from '../../auth/AuthContext'
 import { helpSections } from '../../utils/helpUtils'
+import { getDisplayRoles } from '../../features/admin/domain/adminUtils'
+import { UserRolesDisplay } from '../../components/UserRolesDisplay'
 import { Link } from 'react-router-dom'
 import { getBuildMetadata } from '../../utils/buildInfo'
 
@@ -158,16 +160,10 @@ export function HelpPage() {
             </p>
           </Panel>
           <Panel variant="white" padding="md">
-            {isAuthenticated && user ? (
+            {isAuthenticated && user && (user.roles?.length > 0 || user.role) ? (
               <>
-                <h3 className="text-sm font-semibold">Roles</h3>
-                <p className="mt-2">
-                  {Array.isArray(user.roles) && user.roles.length > 0
-                    ? user.roles.join(', ')
-                    : user.role
-                      ? String(user.role)
-                      : 'None'}
-                </p>
+                <UserRolesDisplay displayRoles={getDisplayRoles(user.roles, user.role)} />
+                <br />
               </>
             ) : null}
             <br />
