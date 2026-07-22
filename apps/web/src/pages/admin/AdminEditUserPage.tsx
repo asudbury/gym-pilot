@@ -10,21 +10,17 @@ import {
   usePlan,
 } from '@gym-pilot/shared'
 import { AdminSectionShell } from '../../components/admin/AdminSectionShell'
-import { GymClubSelector } from '../../components/GymClubSelector'
 import { logger } from '@gym-pilot/shared'
-import {
-  availableAdminRoles,
-  type AdminProfileRow,
-} from '../../features/admin/domain/adminUtils'
+import { type AdminProfileRow } from '../../features/admin/domain/adminUtils'
 import {
   createInitialProfileDraft,
   mapProfileRow,
-  resolveTrainerOptions,
-  toggleRoleSelection,
   type ProfileDraft,
 } from '../../features/admin/domain/userProfiles'
 import { renderDashboardTimestamp } from '../../utils/appUtils'
 import { NotificationPill } from '../../components/NotificationPill'
+import { UserProfileForm } from './UserProfileForm'
+import { useCopyToClipboard } from './useCopyToClipboard'
 
 const formatStoredTimestamp = (value?: string | null) => {
   if (!value) {
@@ -45,7 +41,7 @@ export function AdminEditUserPage() {
     'info',
   )
   const [saving, setSaving] = useState(false)
-  const [copied, setCopied] = useState(false)
+  const { copy, copied: linkCopied, error: copyError } = useCopyToClipboard()
   const [isLoading, setIsLoading] = useState(true)
 
   const refreshProfile = async () => {
@@ -108,6 +104,13 @@ export function AdminEditUserPage() {
   useEffect(() => {
     void refreshProfile()
   }, [userId])
+
+  useEffect(() => {
+    if (copyError) {
+      setStatusMessage(copyError)
+      setStatusType('error')
+    }
+  }, [copyError])
 
   const updateDraft = (patch: Partial<ProfileDraft>) => {
     setDraft((current) => ({ ...(current ?? ({} as ProfileDraft)), ...patch }))
@@ -190,110 +193,14 @@ export function AdminEditUserPage() {
               />
             </label>
 
-            <div className="mt-3 rounded-2xl border border-slate-200 bg-white p-3">
-              <p className="text-sm font-medium text-slate-700">Roles</p>
-              <div className="mt-2 flex flex-wrap gap-2">
-                {availableAdminRoles.map((role) => {
-                  const checked =
-                    draft?.roles.includes(role) ??
-                    selectedProfile.roles.includes(role)
-                  return (
-                    <label
-                      key={role}
-                      className="flex items-center gap-2 rounded-full border border-slate-200 bg-slate-50 px-3 py-1.5 text-base font-medium text-slate-700"
-                    >
-                      <input
-                        type="checkbox"
-                        checked={checked}
-                        onChange={() =>
-                          updateDraft({
-                            roles: toggleRoleSelection(
-                              draft?.roles ?? selectedProfile.roles,
-                              role,
-                            ),
-                          })
-                        }
-                      />
-                      <span className="capitalize">{role}</span>
-                    </label>
-                  )
-                })}
-              </div>
-            </div>
-
-            <label className="mt-3 block text-sm font-medium text-slate-700">
-              Display name
-              <input
-                type="text"
-                value={draft?.name ?? selectedProfile.name}
-                onChange={(e) => updateDraft({ name: e.target.value })}
-                className="mt-1 w-full rounded-full border border-slate-200 bg-white px-3 py-2 text-sm text-slate-700"
+            {draft && (
+              <UserProfileForm
+                profile={selectedProfile}
+                draft={draft}
+                users={users}
+                onUpdate={updateDraft}
               />
-            </label>
-
-            <label className="mt-3 block text-sm font-medium text-slate-700">
-              Application name
-              <input
-                type="text"
-                value={draft?.applicationName ?? ''}
-                onChange={(e) =>
-                  updateDraft({ applicationName: e.target.value })
-                }
-                placeholder="Enter a custom app name"
-                className="mt-1 w-full rounded-full border border-slate-200 bg-white px-3 py-2 text-sm text-slate-700"
-              />
-            </label>
-
-            <label className="mt-3 block text-sm font-medium text-slate-700">
-              Gym club (optional)
-              <div className="mt-1">
-                <GymClubSelector
-                  value={draft?.gymClubId ?? draft?.gymName ?? ''}
-                  onChange={(nextValue) =>
-                    updateDraft({
-                      gymClubId: nextValue,
-                      gymBrand: nextValue ? 'Virgin' : (draft?.gymBrand ?? ''),
-                      gymName: nextValue || (draft?.gymName ?? ''),
-                    })
-                  }
-                  placeholder="Search for club (Virgin only)"
-                  className="w-full rounded-full border border-slate-200 bg-white px-3 py-2 text-sm text-slate-700"
-                />
-              </div>
-            </label>
-
-            <label className="mt-3 block text-sm font-medium text-slate-700">
-              Account tier
-              <select
-                value={draft?.accountTier ?? 'free'}
-                onChange={(e) => updateDraft({ accountTier: e.target.value })}
-                className="mt-1 w-full rounded-full border border-slate-200 bg-white px-3 py-2 text-sm text-slate-700"
-              >
-                <option value="free">Free</option>
-                <option value="bronze">Bronze</option>
-                <option value="silver">Silver</option>
-                <option value="gold">Gold</option>
-              </select>
-            </label>
-
-            <label className="mt-3 block text-sm font-medium text-slate-700">
-              Access end date
-              <input
-                type="date"
-                value={draft?.accessEndsAt ?? ''}
-                onChange={(e) => updateDraft({ accessEndsAt: e.target.value })}
-                className="mt-1 w-full rounded-full border border-slate-200 bg-white px-3 py-2 text-sm text-slate-700"
-              />
-            </label>
-
-            <label className="mt-3 flex items-center gap-2 rounded-full border border-slate-200 bg-white px-3 py-2 text-sm font-medium text-slate-700">
-              <input
-                type="checkbox"
-                checked={draft?.isFrozen ?? false}
-                onChange={(e) => updateDraft({ isFrozen: e.target.checked })}
-              />
-              <span>Freeze account</span>
-            </label>
+            )}
 
             <div className="mt-3 rounded-2xl border border-slate-200 bg-white p-3">
               <p className="text-sm font-medium text-slate-700">
@@ -320,7 +227,7 @@ export function AdminEditUserPage() {
             <div className="mt-3 flex flex-wrap items-center gap-2">
               <Button
                 tone="emerald"
-                onClick={async () => {
+                onClick={() => {
                   const email =
                     draft?.email?.trim() ?? selectedProfile.email?.trim()
                   if (!email) {
@@ -330,28 +237,19 @@ export function AdminEditUserPage() {
                     setStatusType('error')
                     return
                   }
-                  try {
-                    const basePath =
-                      import.meta.env.BASE_URL === '/'
-                        ? ''
-                        : import.meta.env.BASE_URL
-                    const inviteUrl = new URL(
-                      `${window.location.origin}${basePath}#${encodeURIComponent('/login')}`,
-                    )
-                    inviteUrl.hash = `#/login?email=${encodeURIComponent(email)}`
-                    await navigator.clipboard.writeText(inviteUrl.toString())
-                    setCopied(true)
-                    setTimeout(() => setCopied(false), 1500)
-                  } catch {
-                    setStatusMessage(
-                      'Could not copy the invite link. Please try again.',
-                    )
-                    setStatusType('error')
-                  }
+                  const basePath =
+                    import.meta.env.BASE_URL === '/'
+                      ? ''
+                      : import.meta.env.BASE_URL
+                  const inviteUrl = new URL(
+                    `${window.location.origin}${basePath}#${encodeURIComponent('/login')}`,
+                  )
+                  inviteUrl.hash = `#/login?email=${encodeURIComponent(email)}`
+                  void copy(inviteUrl.toString())
                 }}
                 className="px-3 py-1.5"
               >
-                {copied ? 'Invite link copied' : 'Copy invite link'}
+                {linkCopied ? 'Invite link copied' : 'Copy invite link'}
               </Button>
 
               <Button
@@ -367,44 +265,7 @@ export function AdminEditUserPage() {
               </Button>
             </div>
 
-            {(draft?.roles.includes('client') ??
-            selectedProfile.roles.includes('client')) ? (
-              <label className="mt-3 block text-sm font-medium text-slate-700">
-                Assigned trainer
-                <select
-                  value={draft?.trainerId ?? selectedProfile.trainerId ?? ''}
-                  onChange={(e) =>
-                    updateDraft({ trainerId: e.target.value || null })
-                  }
-                  className="mt-1 w-full rounded-full border border-slate-200 bg-white px-3 py-2 text-sm text-slate-700"
-                >
-                  <option value="">No trainer assigned</option>
-                  {resolveTrainerOptions(selectedProfile, users).map(
-                    (trainer) => (
-                      <option key={trainer.id} value={trainer.id}>
-                        {trainer.name}
-                      </option>
-                    ),
-                  )}
-                </select>
-              </label>
-            ) : null}
-
             <div className="flex flex-col items-start gap-2 mt-4">
-              <label className="flex items-center gap-2 rounded-full border border-slate-200 bg-white px-3 py-2 text-sm text-slate-700">
-                <input
-                  type="checkbox"
-                  checked={
-                    draft?.mustChangePassword ??
-                    selectedProfile.mustChangePassword
-                  }
-                  onChange={(e) =>
-                    updateDraft({ mustChangePassword: e.target.checked })
-                  }
-                />
-                <span>Must change password</span>
-              </label>
-
               <div className="flex items-center gap-2">
                 <Button
                   tone="blue"

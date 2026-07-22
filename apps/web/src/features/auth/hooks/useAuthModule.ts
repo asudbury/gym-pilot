@@ -152,6 +152,9 @@ export function useAuthModule(users: User[]) {
         )
       }
 
+      // Explicitly persist null session to trigger removal from IndexedDB and Supabase
+      await persistSession(null)
+
       await signOutFromSupabase()
       persistLogoutPending(false)
 

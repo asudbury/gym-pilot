@@ -22,21 +22,3 @@ export function toAuthUser(user: User | null | undefined): AuthUser | null {
     email: null,
   }
 }
-
-export function toAuthUserFromBypass(): AuthUser {
-  return {
-    id: 'mvp-bypass',
-    name: 'MVP Admin',
-    slug: 'mvp-admin',
-    role: 'admin',
-    roles: ['admin'],
-    trainerId: null,
-    applicationName: null,
-    gymBrand: null,
-    gymName: null,
-    accountTier: null,
-    accessEndsAt: null,
-    isFrozen: false,
-    email: null,
-  }
-}

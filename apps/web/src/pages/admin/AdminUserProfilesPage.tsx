@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react'
+import { useEffect, useMemo, useState } from 'react'
 import { useNavigate, useParams } from 'react-router-dom'
 import { Button } from '../../components/Button'
 import {
@@ -9,24 +9,22 @@ import {
   logger,
   saveSupabaseProfileRoles,
   usePlan,
+  getSupabaseClient,
 } from '@gym-pilot/shared'
 import type { UserRole } from '@gym-pilot/types'
 import { AdminSectionShell } from '../../components/admin/AdminSectionShell'
-import { GymClubSelector } from '../../components/GymClubSelector'
 import {
-  availableAdminRoles,
   getDisplayEmail,
   type AdminProfileRow,
 } from '../../features/admin/domain/adminUtils'
 import {
   createInitialProfileDraft,
   mapProfileRow,
-  resolveTrainerOptions,
-  toggleRoleSelection,
   type ProfileDraft,
 } from '../../features/admin/domain/userProfiles'
 import { renderDashboardTimestamp } from '../../utils/appUtils'
 import { NotificationPill } from '../../components/NotificationPill'
+import { UserProfileForm } from './UserProfileForm'
 
 const formatStoredTimestamp = (value?: string | null) => {
   if (!value) {
@@ -66,9 +64,7 @@ export function AdminUserProfilesPage() {
 
     const { data, error } = await client
       .from('gym_pilot_profile')
-      .select(
-        'user_id, friendly_name, trainer_id, application_name, gym_brand, gym_club_id, account_tier, access_ends_at, is_frozen, must_change_password, last_logged_in_at, previous_last_logged_in_at',
-      )
+      .select('*')
 
     if (error) {
       logger.error('[AdminUserProfiles] Could not load profile rows', error)
@@ -118,9 +114,10 @@ export function AdminUserProfilesPage() {
       (profile) => profile.id === (userId ?? localSelectedId ?? ''),
     ) ?? profileRows[0]
 
-  const getTrainerOptionsForProfile = (profile: AdminProfileRow) =>
-    resolveTrainerOptions(profile as AdminProfileRow, users)
-
+  const selectedDraft = useMemo(() => {
+    if (!selectedProfile) return null
+    return drafts[selectedProfile.id] ?? null
+  }, [selectedProfile, drafts])
   const updateDraft = (profileId: string, patch: Partial<ProfileDraft>) => {
     setDrafts((current) => ({
       ...current,
@@ -291,154 +288,16 @@ export function AdminUserProfilesPage() {
                         </p>
                       </label>
 
-                      <div className="mt-3 rounded-2xl border border-slate-200 bg-white p-3">
-                        <p className="text-sm font-medium text-slate-700">
-                          Roles
-                        </p>
-                        <div className="mt-2 flex flex-wrap gap-2">
-                          {availableAdminRoles.map((role) => {
-                            const checked =
-                              drafts[selectedProfile.id]?.roles.includes(
-                                role,
-                              ) ?? selectedProfile.roles.includes(role)
-
-                            return (
-                              <label
-                                key={role}
-                                className="flex items-center gap-2 rounded-full border border-slate-200 bg-slate-50 px-3 py-1.5 text-base font-medium text-slate-700"
-                              >
-                                <input
-                                  type="checkbox"
-                                  checked={checked}
-                                  onChange={() => {
-                                    const nextRoles = (drafts[
-                                      selectedProfile.id
-                                    ]?.roles ??
-                                      selectedProfile.roles) as UserRole[]
-                                    updateDraft(selectedProfile.id, {
-                                      roles: toggleRoleSelection(
-                                        nextRoles,
-                                        role,
-                                      ),
-                                    })
-                                  }}
-                                />
-                                <span className="capitalize">{role}</span>
-                              </label>
-                            )
-                          })}
-                        </div>
-                      </div>
-
-                      <label className="mt-3 block text-sm font-medium text-slate-700">
-                        Display name
-                        <input
-                          type="text"
-                          value={
-                            drafts[selectedProfile.id]?.name ??
-                            selectedProfile.name
-                          }
-                          onChange={(event) =>
-                            updateDraft(selectedProfile.id, {
-                              name: event.target.value,
-                            })
-                          }
-                          className="mt-1 w-full rounded-full border border-slate-200 bg-white px-3 py-2 text-sm text-slate-700"
-                        />
-                      </label>
-
-                      <label className="mt-3 block text-sm font-medium text-slate-700">
-                        Application name
-                        <input
-                          type="text"
-                          value={
-                            drafts[selectedProfile.id]?.applicationName ?? ''
-                          }
-                          onChange={(event) =>
-                            updateDraft(selectedProfile.id, {
-                              applicationName: event.target.value,
-                            })
-                          }
-                          placeholder="Enter a custom app name"
-                          className="mt-1 w-full rounded-full border border-slate-200 bg-white px-3 py-2 text-sm text-slate-700"
-                        />
-                      </label>
-
-                      <label className="mt-3 block text-sm font-medium text-slate-700">
-                        Gym club (optional)
-                        <div className="mt-1">
-                          <GymClubSelector
-                            value={
-                              drafts[selectedProfile.id]?.gymClubId ??
-                              drafts[selectedProfile.id]?.gymName ??
-                              ''
-                            }
-                            onChange={(nextValue) =>
-                              updateDraft(selectedProfile.id, {
-                                gymClubId: nextValue,
-                                gymBrand: nextValue
-                                  ? 'Virgin'
-                                  : (drafts[selectedProfile.id]?.gymBrand ??
-                                    ''),
-                                gymName:
-                                  nextValue ||
-                                  (drafts[selectedProfile.id]?.gymName ?? ''),
-                              })
-                            }
-                            placeholder="Search for club (Virgin only)"
-                            className="w-full rounded-full border border-slate-200 bg-white px-3 py-2 text-sm text-slate-700"
-                          />
-                        </div>
-                      </label>
-
-                      <label className="mt-3 block text-sm font-medium text-slate-700">
-                        Account tier
-                        <select
-                          value={
-                            drafts[selectedProfile.id]?.accountTier ?? 'free'
-                          }
-                          onChange={(event) =>
-                            updateDraft(selectedProfile.id, {
-                              accountTier: event.target.value,
-                            })
-                          }
-                          className="mt-1 w-full rounded-full border border-slate-200 bg-white px-3 py-2 text-sm text-slate-700"
-                        >
-                          <option value="free">Free</option>
-                          <option value="bronze">Bronze</option>
-                          <option value="silver">Silver</option>
-                          <option value="gold">Gold</option>
-                        </select>
-                      </label>
-
-                      <label className="mt-3 block text-sm font-medium text-slate-700">
-                        Access end date
-                        <input
-                          type="date"
-                          value={drafts[selectedProfile.id]?.accessEndsAt ?? ''}
-                          onChange={(event) =>
-                            updateDraft(selectedProfile.id, {
-                              accessEndsAt: event.target.value,
-                            })
-                          }
-                          className="mt-1 w-full rounded-full border border-slate-200 bg-white px-3 py-2 text-sm text-slate-700"
-                        />
-                      </label>
-
-                      <label className="mt-3 flex items-center gap-2 rounded-full border border-slate-200 bg-white px-3 py-2 text-sm font-medium text-slate-700">
-                        <input
-                          type="checkbox"
-                          checked={
-                            drafts[selectedProfile.id]?.isFrozen ?? false
-                          }
-                          onChange={(event) =>
-                            updateDraft(selectedProfile.id, {
-                              isFrozen: event.target.checked,
-                            })
+                      {selectedDraft ? (
+                        <UserProfileForm
+                          profile={selectedProfile}
+                          draft={selectedDraft}
+                          users={users}
+                          onUpdate={(patch) =>
+                            updateDraft(selectedProfile.id, patch)
                           }
                         />
-                        <span>Freeze account</span>
-                      </label>
+                      ) : null}
 
                       <div className="mt-3 rounded-2xl border border-slate-200 bg-white p-3">
                         <p className="text-sm font-medium text-slate-700">
@@ -526,52 +385,9 @@ export function AdminUserProfilesPage() {
                         </Button>
                       </div>
 
-                      {(drafts[selectedProfile.id]?.roles.includes('client') ??
-                      selectedProfile.roles.includes('client')) ? (
-                        <label className="mt-3 block text-sm font-medium text-slate-700">
-                          Assigned trainer
-                          <select
-                            value={
-                              drafts[selectedProfile.id]?.trainerId ??
-                              selectedProfile.trainerId ??
-                              ''
-                            }
-                            onChange={(event) =>
-                              updateDraft(selectedProfile.id, {
-                                trainerId: event.target.value || null,
-                              })
-                            }
-                            className="mt-1 w-full rounded-full border border-slate-200 bg-white px-3 py-2 text-sm text-slate-700"
-                          >
-                            <option value="">No trainer assigned</option>
-                            {getTrainerOptionsForProfile(selectedProfile).map(
-                              (trainer) => (
-                                <option key={trainer.id} value={trainer.id}>
-                                  {trainer.name}
-                                </option>
-                              ),
-                            )}
-                          </select>
-                        </label>
-                      ) : null}
                     </div>
 
                     <div className="flex flex-col items-start gap-2">
-                      <label className="flex items-center gap-2 rounded-full border border-slate-200 bg-white px-3 py-2 text-sm text-slate-700">
-                        <input
-                          type="checkbox"
-                          checked={
-                            drafts[selectedProfile.id]?.mustChangePassword ??
-                            selectedProfile.mustChangePassword
-                          }
-                          onChange={(event) =>
-                            updateDraft(selectedProfile.id, {
-                              mustChangePassword: event.target.checked,
-                            })
-                          }
-                        />
-                        <span>Must change password</span>
-                      </label>
                       <div className="flex flex-col items-start gap-2">
                         <Button
                           tone="blue"

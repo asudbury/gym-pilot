@@ -7,7 +7,7 @@ import {
   type ReactNode,
 } from 'react'
 import type { UserRole } from '@gym-pilot/types'
-import { logger, usePlan } from '@gym-pilot/shared'
+import { logger, usePlan, DexiePersistence } from '@gym-pilot/shared'
 import { getHashHomeUrl } from '../utils/appUtils'
 import { useAuthModule } from '../features/auth/hooks/useAuthModule'
 import type { AuthUser } from '../features/auth/domain/authTypes'
@@ -37,6 +37,8 @@ type AuthProviderProps = {
 }
 
 const AuthContext = createContext<AuthContextValue | undefined>(undefined)
+
+const persistence = new DexiePersistence();
 
 export function AuthProvider({ children }: AuthProviderProps) {
   const { users } = usePlan()
@@ -110,6 +112,15 @@ export function AuthProvider({ children }: AuthProviderProps) {
 
   const logout = () => {
     logger.info('[Auth] Logout requested')
+    // Delete the profile record from IndexedDB
+    if (user?.id) {
+      const profileKey = `profile:${user.id}`;
+      void persistence.remove(profileKey).then(() => {
+        logger.info(`[Auth] Deleted profile record for user ${user.id}`);
+      }).catch((error) => {
+        logger.error(`[Auth] Failed to delete profile record for user ${user.id}`, error);
+      });
+    }
     void logoutFromModule(getHashHomeUrl())
   }
 

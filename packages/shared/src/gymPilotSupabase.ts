@@ -266,20 +266,20 @@ function isMissingProfileColumnError(
 function mapSupabaseProfile(
   profile: {
     id: string;
-    user_id: string;
-    friendly_name: string | null;
-    application_name?: string | null;
-    gym_brand?: string | null;
-    gym_name?: string | null;
-    gym_club_id?: number | null;
-    account_tier?: string | null;
-    access_ends_at?: string | null;
-    is_frozen?: boolean | null;
+    user_id: string; // Always present
+    friendly_name: string | null; // Always present
+    application_name: string | null; // Always present, can be null
+    gym_brand: string | null; // Always present, can be null
+    gym_name: string | null; // Always present, can be null
+    gym_club_id: number | null; // Always present, can be null
+    account_tier: string | null; // Always present, can be null
+    access_ends_at: string | null; // Always present, can be null
+    is_frozen: boolean | null; // Always present, can be null
     roles?: unknown;
-    trainer_id?: string | null;
-    must_change_password: boolean;
-    created_at?: string;
-    updated_at?: string;
+    trainer_id: string | null; // Always present, can be null
+    must_change_password: boolean; // Always present
+    created_at: string; // Always present
+    updated_at: string; // Always present
   },
   roleOverride?: UserRole[],
 ): SupabaseProfile {
@@ -288,24 +288,17 @@ function mapSupabaseProfile(
     user_id: profile.user_id,
     friendly_name:
       typeof profile.friendly_name === "string" ? profile.friendly_name : null,
-    application_name:
-      typeof profile.application_name === "string"
-        ? profile.application_name
-        : null,
-    gym_brand: typeof profile.gym_brand === "string" ? profile.gym_brand : null,
-    gym_name: typeof profile.gym_name === "string" ? profile.gym_name : null,
+    application_name: profile.application_name ?? null,
+    gym_brand: profile.gym_brand ?? null,
+    gym_name: profile.gym_name ?? null,
     account_tier: normalizeProfileAccessTier(profile.account_tier),
-    access_ends_at:
-      typeof profile.access_ends_at === "string"
-        ? profile.access_ends_at
-        : null,
-    is_frozen: Boolean(profile.is_frozen),
+    access_ends_at: profile.access_ends_at ?? null,
+    is_frozen: Boolean(profile.is_frozen), // Coerce to boolean, default false
     roles: roleOverride ?? normalizeProfileRoles(profile.roles),
-    trainer_id:
-      typeof profile.trainer_id === "string" ? profile.trainer_id : null,
+    trainer_id: profile.trainer_id ?? null,
     must_change_password: Boolean(profile.must_change_password),
-    created_at: profile.created_at,
-    updated_at: profile.updated_at,
+    created_at: profile.created_at, // Assuming always present from DB
+    updated_at: profile.updated_at, // Assuming always present from DB
   };
 }
 
@@ -368,56 +361,7 @@ export async function listSupabaseProfiles(): Promise<SupabaseProfile[]> {
     return [];
   }
 
-  const { data, error } = await client
-    .from("gym_pilot_profile")
-    .select(
-      "id, user_id, friendly_name, application_name, gym_brand, gym_name, account_tier, access_ends_at, is_frozen, trainer_id, must_change_password, created_at, updated_at",
-    );
-
-  if (
-    error &&
-    isMissingProfileColumnError(error, ["trainer_id", "gym_brand"])
-  ) {
-    const fallback = await client
-      .from("gym_pilot_profile")
-      .select(
-        "id, user_id, friendly_name, application_name, gym_name, account_tier, access_ends_at, is_frozen, must_change_password, created_at, updated_at",
-      );
-
-    if (fallback.error) {
-      logger.error("[Supabase] Could not load profiles", fallback.error);
-      return [];
-    }
-
-    const fallbackProfiles = (
-      (fallback.data ?? []) as Array<{
-        id: string;
-        user_id: string;
-        friendly_name: string | null;
-        must_change_password: boolean;
-        created_at?: string;
-        updated_at?: string;
-      }>
-    ).filter((profile) => typeof profile.user_id === "string");
-
-    return fallbackProfiles.map((profile) =>
-      mapSupabaseProfile({
-        id: profile.id,
-        user_id: profile.user_id,
-        friendly_name:
-          typeof profile.friendly_name === "string"
-            ? profile.friendly_name
-            : null,
-        application_name: null,
-        gym_brand: null,
-        gym_name: null,
-        trainer_id: null,
-        must_change_password: Boolean(profile.must_change_password),
-        created_at: profile.created_at,
-        updated_at: profile.updated_at,
-      }),
-    );
-  }
+  const { data, error } = await client.from("gym_pilot_profile").select("*");
 
   if (error) {
     logger.error("[Supabase] Could not load profiles", error);
@@ -429,9 +373,17 @@ export async function listSupabaseProfiles(): Promise<SupabaseProfile[]> {
       id: string;
       user_id: string;
       friendly_name: string | null;
+      application_name: string | null;
+      gym_brand: string | null;
+      gym_name: string | null;
+      gym_club_id: number | null;
+      account_tier: string | null;
+      access_ends_at: string | null;
+      is_frozen: boolean | null;
+      trainer_id: string | null;
       must_change_password: boolean;
-      created_at?: string;
-      updated_at?: string;
+      created_at: string;
+      updated_at: string;
     }>
   ).filter((profile) => typeof profile.user_id === "string");
 
@@ -451,13 +403,17 @@ export async function listSupabaseProfiles(): Promise<SupabaseProfile[]> {
             typeof profile.friendly_name === "string"
               ? profile.friendly_name
               : null,
-          application_name: null,
-          gym_brand: null,
-          gym_name: null,
-          trainer_id: null,
+          application_name: profile.application_name,
+          gym_brand: profile.gym_brand,
+          gym_name: profile.gym_name,
+          gym_club_id: profile.gym_club_id,
+          account_tier: profile.account_tier,
+          access_ends_at: profile.access_ends_at,
+          is_frozen: profile.is_frozen,
+          trainer_id: profile.trainer_id,
           must_change_password: Boolean(profile.must_change_password),
-          created_at: profile.created_at,
-          updated_at: profile.updated_at,
+          created_at: profile.created_at, // Assuming always present from DB
+          updated_at: profile.updated_at, // Assuming always present from DB
         },
         roleLookup.get(profile.user_id) ?? [],
       ),
@@ -482,28 +438,7 @@ export async function listSupabaseProfiles(): Promise<SupabaseProfile[]> {
         { onConflict: "user_id" },
       );
 
-    if (
-      upsertError &&
-      isMissingProfileColumnError(upsertError, ["trainer_id", "gym_brand"])
-    ) {
-      const fallback = await client.from("gym_pilot_profile").upsert(
-        {
-          user_id: userId,
-          friendly_name: null,
-          application_name: null,
-          must_change_password: false,
-        },
-        { onConflict: "user_id" },
-      );
-
-      if (fallback.error) {
-        logger.error(
-          "[Supabase] Could not create profile row for current user",
-          fallback.error,
-        );
-        return profiles;
-      }
-    } else if (upsertError) {
+    if (upsertError) {
       logger.error(
         "[Supabase] Could not create profile row for current user",
         upsertError,
@@ -528,9 +463,17 @@ export async function listSupabaseProfiles(): Promise<SupabaseProfile[]> {
         id: string;
         user_id: string;
         friendly_name: string | null;
+        application_name: string | null;
+        gym_brand: string | null;
+        gym_name: string | null;
+        gym_club_id: number | null;
+        account_tier: string | null;
+        access_ends_at: string | null;
+        is_frozen: boolean | null;
+        trainer_id: string | null;
         must_change_password: boolean;
-        created_at?: string;
-        updated_at?: string;
+        created_at: string;
+        updated_at: string;
       }>
     ).filter((profile) => typeof profile.user_id === "string");
     const refreshedRoleLookup = await loadSupabaseUserRolesByUserIds(
@@ -547,10 +490,14 @@ export async function listSupabaseProfiles(): Promise<SupabaseProfile[]> {
             typeof profile.friendly_name === "string"
               ? profile.friendly_name
               : null,
-          application_name: null,
-          gym_brand: null,
-          gym_name: null,
-          trainer_id: null,
+          application_name: profile.application_name,
+          gym_brand: profile.gym_brand,
+          gym_name: profile.gym_name,
+          gym_club_id: profile.gym_club_id,
+          account_tier: profile.account_tier,
+          access_ends_at: profile.access_ends_at,
+          is_frozen: profile.is_frozen,
+          trainer_id: profile.trainer_id,
           must_change_password: Boolean(profile.must_change_password),
           created_at: profile.created_at,
           updated_at: profile.updated_at,

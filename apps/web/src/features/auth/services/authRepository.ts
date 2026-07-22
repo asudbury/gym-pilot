@@ -103,5 +103,10 @@ export async function loadAuthSessionWithRepository(): Promise<AuthUser | null> 
  */
 export async function saveAuthSessionWithRepository(user: AuthUser | null) {
   const repository = createAuthSessionRepository()
+  if (!user) {
+    await repository.remove(SESSION_STORAGE_KEY)
+    return
+  }
+
   await repository.save(SESSION_STORAGE_KEY, user)
 }

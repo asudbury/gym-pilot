@@ -17,6 +17,7 @@ import {
   getSessionTableName,
   isLocalhostHost,
   listSessions,
+  listSupabaseProfiles,
   mapSessionHistoryEntryFromSupabase,
   normalizeSessionTypeForPersistence,
   normalizeSupabaseUserRoleRows,
@@ -24,6 +25,7 @@ import {
   removeSessionHistoryEntry,
   shouldRecordLoginActivity,
   shouldRecordSupabaseUserActivity,
+  SupabaseProfile,
   upsertSessionHistoryEntry,
 } from "./gymPilotSupabase";
 

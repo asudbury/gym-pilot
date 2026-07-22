@@ -152,7 +152,7 @@ function normalizeProfileAccessTier(value: unknown): SupabaseAccessTier {
   return "free";
 }
 
-function normalizeProfileRoles(roles: unknown): UserRole[] {
+export function normalizeProfileRoles(roles: unknown): UserRole[] {
   if (Array.isArray(roles)) {
     return roles.filter(
       (role): role is UserRole => typeof role === "string" && role.length > 0,

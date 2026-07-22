@@ -15,16 +15,16 @@ import {
   type AdminProfileRow,
 } from '../../features/admin/domain/adminUtils'
 import { NotificationPill } from '../../components/NotificationPill'
+import { useCopyToClipboard } from './useCopyToClipboard'
 
 export function AdminUsersPage() {
   const location = useLocation()
   const navigate = useNavigate()
   const [isLoadingSupabaseUsers, setIsLoadingSupabaseUsers] = useState(false)
-  const [supabaseUsersNotice, setSupabaseUsersNotice] = useState(
-    '',
-  )
+  const [supabaseUsersNotice, setSupabaseUsersNotice] = useState('')
   const [profileUsers, setProfileUsers] = useState<AdminProfileRow[]>([])
-  const [copiedUserId, setCopiedUserId] = useState<string | null>(null)
+  const { copy, copied: linkCopied, error: copyError } = useCopyToClipboard()
+  const [lastCopiedUserId, setLastCopiedUserId] = useState<string | null>(null)
 
   const refreshSupabaseUsers = async () => {
     setIsLoadingSupabaseUsers(true)
@@ -128,6 +128,12 @@ export function AdminUsersPage() {
     }
   }, [])
 
+  useEffect(() => {
+    if (copyError) {
+      setSupabaseUsersNotice(copyError)
+    }
+  }, [copyError])
+
   const handleCopyInviteLink = async (user: AdminProfileRow) => {
     const email = user.email?.trim()
 
@@ -145,19 +151,8 @@ export function AdminUsersPage() {
     )
     inviteUrl.hash = `#/login?email=${encodeURIComponent(email)}`
 
-    try {
-      await navigator.clipboard.writeText(inviteUrl.toString())
-      setCopiedUserId(user.id)
-      window.setTimeout(
-        () =>
-          setCopiedUserId((current) => (current === user.id ? null : current)),
-        1500,
-      )
-    } catch {
-      setSupabaseUsersNotice(
-        'Could not copy the invite link. Please try again.',
-      )
-    }
+    await copy(inviteUrl.toString())
+    setLastCopiedUserId(user.id)
   }
 
   return (
@@ -242,7 +237,7 @@ export function AdminUsersPage() {
                       onClick={() => void handleCopyInviteLink(user)}
                       className="px-3 py-1.5"
                     >
-                      {copiedUserId === user.id
+                      {linkCopied && lastCopiedUserId === user.id
                         ? 'Invite link copied'
                         : 'Copy invite link'}
                     </Button>

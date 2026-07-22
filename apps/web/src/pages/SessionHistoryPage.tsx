@@ -138,6 +138,7 @@ export function SessionHistoryPage() {
         <SessionActions
           includeViewSessionsButton={false}
           showClassSessionAction={Boolean(user?.gymName && user.gymName.trim())}
+          showPTSessionAction={Boolean(user?.trainerId?.trim()) || Boolean(user?.roles?.includes('trainer'))}
         />
         {errorMessage ? (
           <NotificationPill
