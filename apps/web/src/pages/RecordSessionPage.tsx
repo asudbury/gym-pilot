@@ -41,12 +41,12 @@ export function RecordSessionPage() {
   const trainers = users.filter((candidate) =>
     candidate.roles.includes('trainer'),
   )
+
+  const trainer = trainers.find((trainer) => trainer.id === user?.id)
+
   const initialSessionType = resolveInitialSessionType(searchParams.get('type'))
 
   const [sessionType] = useState<SessionType>(initialSessionType)
-  const [trainerId, setTrainerId] = useState<string | undefined>(
-    trainers[0]?.id,
-  )
   const [startAt, setStartAt] = useState('')
   const [datePart, setDatePart] = useState('')
   const [timePart, setTimePart] = useState('')
@@ -136,7 +136,7 @@ export function RecordSessionPage() {
             ? 'personal_training'
             : 'class'
 
-      if (normalizedSessionType === 'personal_training' && !trainerId) {
+      if (normalizedSessionType === 'personal_training' && !trainer) {
         setError('Select a trainer before recording a PT session.')
         return
       }
@@ -145,12 +145,11 @@ export function RecordSessionPage() {
         sessionType: normalizedSessionType,
         trainerId:
           normalizedSessionType === 'personal_training'
-            ? (trainerId ?? null)
+            ? (trainer?.id ?? null)
             : null,
         trainerName:
           normalizedSessionType === 'personal_training'
-            ? (trainers.find((trainer) => trainer.id === trainerId)?.name ??
-              null)
+            ? (trainer?.name ?? null)
             : null,
         className:
           normalizedSessionType === 'solo' ? name.trim() || null : null,
@@ -231,18 +230,7 @@ export function RecordSessionPage() {
             {sessionType === 'personal_training' ? (
               <label className="mt-4 block text-sm text-slate-700">
                 <span className="font-medium">Trainer</span>
-                <select
-                  value={trainerId ?? ''}
-                  onChange={(event) => setTrainerId(event.target.value)}
-                  className={`${appTokens.input} mt-1 w-full`}
-                >
-                  <option value="">Select a trainer</option>
-                  {trainers.map((trainer) => (
-                    <option key={trainer.id} value={trainer.id}>
-                      {trainer.name || trainer.id}
-                    </option>
-                  ))}
-                </select>
+                <p>{trainer?.name ?? 'Select a trainer'}</p>
               </label>
             ) : null}
 
@@ -366,10 +354,7 @@ export function RecordSessionPage() {
               <Button
                 onClick={handleSubmit}
                 tone="emerald"
-                disabled={
-                  isSaving ||
-                  (sessionType === 'personal_training' && !trainerId)
-                }
+                disabled={isSaving}
               >
                 <span className="inline-flex items-center gap-2">
                   {isSaving ? (

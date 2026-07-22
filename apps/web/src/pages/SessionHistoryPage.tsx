@@ -113,11 +113,6 @@ export function SessionHistoryPage() {
         await deleteSessionHistoryEntry(entryId, userId ?? undefined)
         await refreshEntries()
         setPendingDeleteEntryId(null)
-        window.dispatchEvent(
-          new CustomEvent('gym-pilot-notification', {
-            detail: { text: 'Session deleted.', tone: 'success' },
-          }),
-        )
       } catch (error) {
         setErrorMessage(formatSessionHistoryError(error))
       }
@@ -200,14 +195,16 @@ export function SessionHistoryPage() {
                       })()}
                     </div>
                     <div className="flex flex-wrap gap-2">
-                      <button
-                        type="button"
-                        onClick={() => navigate(`/sessions/${entry.id}/edit`)}
-                        className="inline-flex items-center gap-2 rounded-full border border-slate-300 bg-white px-3 py-1.5 text-sm font-medium text-slate-700 transition-all duration-200 hover:border-slate-400 hover:bg-slate-50 hover:font-semibold hover:shadow-sm"
-                      >
-                        <DecorativeIcon icon="edit" className="h-4 w-4" />
-                        <span>Edit</span>
-                      </button>
+                      {pendingDeleteEntryId !== entry.id ? (
+                        <button
+                          type="button"
+                          onClick={() => navigate(`/sessions/${entry.id}/edit`)}
+                          className="inline-flex items-center gap-2 rounded-full border border-slate-300 bg-white px-3 py-1.5 text-sm font-medium text-slate-700 transition-all duration-200 hover:border-slate-400 hover:bg-slate-50 hover:font-semibold hover:shadow-sm"
+                        >
+                          <DecorativeIcon icon="edit" className="h-4 w-4" />
+                          <span>Edit</span>
+                        </button>
+                      ) : null}
                       {pendingDeleteEntryId === entry.id ? (
                         <>
                           <button

@@ -95,18 +95,24 @@ export function SessionWorkoutEditor({
               onChange={(event) => setDraftSets(event.target.value)}
               placeholder="Sets"
               className={`${appTokens.input} w-20`}
+              inputMode="numeric"
+              pattern="[0-9]*"
             />
             <input
               value={draftReps}
               onChange={(event) => setDraftReps(event.target.value)}
               placeholder="Reps"
               className={`${appTokens.input} w-20`}
+              inputMode="numeric"
+              pattern="[0-9]*"
             />
             <input
               value={draftWeight}
               onChange={(event) => setDraftWeight(event.target.value)}
-              placeholder="Weight"
+              placeholder="Weight (kg)"
               className={`${appTokens.input} w-24`}
+              inputMode="numeric"
+              pattern="[0-9]*"
             />
           </div>
           <Button type="button" tone="default" onClick={handleAddItem}>
