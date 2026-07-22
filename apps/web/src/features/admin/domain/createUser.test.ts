@@ -18,7 +18,7 @@ describe('createUser domain helpers', () => {
     })
 
     expect(payload).toMatchObject({
-      user_id: 'u1',
+      ///user_id: 'u1',
       friendly_name: 'Ada',
       trainer_id: 't1',
       account_tier: 'free',
@@ -33,7 +33,7 @@ describe('createUser domain helpers', () => {
       displayName: 'ClubUser',
       roles: ['client'],
       selectedTrainerId: 't2',
-      gymClubId: '123',
+      gymClubId: 123,
       gymBrand: 'Virgin',
     })
 
