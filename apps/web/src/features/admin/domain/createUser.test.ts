@@ -37,7 +37,7 @@ describe('createUser domain helpers', () => {
       gymBrand: 'Virgin',
     })
 
-    expect(payload.gym_club_id).toBe('123')
+    expect(payload.gym_club_id).toBe(123)
     expect(payload.gym_brand).toBe('Virgin')
   })
 })

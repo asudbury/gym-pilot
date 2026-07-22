@@ -1,5 +1,3 @@
-import { appTokens } from '../constants/tokens'
-
 export type NotificationTone = 'success' | 'error' | 'info'
 
 type NotificationMessage =

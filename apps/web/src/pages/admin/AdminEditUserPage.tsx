@@ -404,7 +404,7 @@ export function AdminEditUserPage() {
                 loadingLabel="Saving…"
               >
                 Save profile
-              </Button>
+              </Button> 
               <Button
                 tone="default"
                 onClick={() => navigate('/admin/users')}
