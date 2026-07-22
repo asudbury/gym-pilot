@@ -77,35 +77,6 @@ export function getFallbackVirginActiveClubs(): VirginActiveClub[] {
   return fallbackClubs
 }
 
-export function resolveVirginActiveClubName(
-  value: string | null | undefined,
-  clubs: VirginActiveClub[] = [],
-): string {
-  const trimmedValue = value?.trim() ?? ''
-
-  if (!trimmedValue) {
-    return ''
-  }
-
-  const matchingClub = clubs.find(
-    (club) =>
-      String(club.clubId) === trimmedValue ||
-      club.name.trim().toLowerCase() === trimmedValue.toLowerCase(),
-  )
-
-  if (matchingClub) {
-    return matchingClub.name
-  }
-
-  const fallbackMatch = fallbackClubs.find(
-    (club) =>
-      String(club.clubId) === trimmedValue ||
-      club.name.trim().toLowerCase() === trimmedValue.toLowerCase(),
-  )
-
-  return fallbackMatch?.name ?? trimmedValue
-}
-
 export async function loadVirginActiveClubs(): Promise<VirginActiveClub[]> {
   if (clubCache) {
     return clubCache

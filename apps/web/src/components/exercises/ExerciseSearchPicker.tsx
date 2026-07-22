@@ -64,7 +64,7 @@ export function ExerciseSearchField({
   )
 }
 
-export function ExerciseSearchSuggestions({
+function ExerciseSearchSuggestions({
   suggestions,
   onSelectExercise,
 }: ExerciseSearchSuggestionsProps) {

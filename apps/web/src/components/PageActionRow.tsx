@@ -30,23 +30,3 @@ export function PageActionGroup({
     </div>
   )
 }
-
-export function ModalShell({ children, className = '' }: PageActionRowProps) {
-  return (
-    <div
-      className={`fixed inset-0 z-50 flex items-end sm:items-center justify-center bg-slate-950/50 p-0 sm:p-4 ${className}`.trim()}
-    >
-      {children}
-    </div>
-  )
-}
-
-export function ModalPanel({ children, className = '' }: PageActionRowProps) {
-  return (
-    <div
-      className={`w-full max-w-md sm:rounded-2xl rounded-t-2xl max-h-[90vh] overflow-auto ${className}`.trim()}
-    >
-      {children}
-    </div>
-  )
-}

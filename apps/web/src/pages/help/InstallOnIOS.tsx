@@ -8,7 +8,7 @@ import { useAuth } from '../../auth/AuthContext'
 import { recordSupabaseUserActivity } from '@gym-pilot/shared'
 import { buildInstallIosPageActivity } from './installIosActivity'
 
-export function InstallOnIOSPage() {
+function InstallOnIOSPage() {
   const { user } = useAuth()
 
   useEffect(() => {

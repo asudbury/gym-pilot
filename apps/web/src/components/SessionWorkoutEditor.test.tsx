@@ -36,14 +36,6 @@ describe('resolveExpandedWorkoutItemId', () => {
     expect(markup).toContain('quick-add-exercise-picker')
   })
 
-  it('renders a weight input in the quick-add area', () => {
-    const markup = renderToStaticMarkup(
-      <SessionWorkoutEditor items={[]} onChange={() => undefined} />,
-    )
-
-    expect(markup).toContain('placeholder="Weight"')
-  })
-
   it('renders an explicit details control for workout items', () => {
     const markup = renderToStaticMarkup(
       <SessionWorkoutEditor

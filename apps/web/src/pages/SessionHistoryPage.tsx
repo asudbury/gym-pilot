@@ -1,6 +1,5 @@
 import { useEffect, useMemo, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { SessionActions } from '../components/SessionActions'
 import { NotificationPill } from '../components/NotificationPill'
 import { DecorativeIcon } from '../components/ui/DecorativeIcon'
 import { useAuth } from '../auth/AuthContext'
@@ -17,6 +16,7 @@ import {
   getSessionEntryRating,
   getSessionEntryTitle,
 } from '../features/session-history/domain/sessionHistoryViewModel'
+import SessionActions from '../components/SessionActions'
 
 function sortSessionEntries(entries: SessionHistoryEntry[]) {
   return [...entries].sort((left, right) =>

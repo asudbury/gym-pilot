@@ -4,7 +4,7 @@ import {
   type QuickLink,
 } from '../../../utils/favouriteUtils'
 
-export type FavouritesPageViewModel = {
+type FavouritesPageViewModel = {
   folderOptions: string[]
   groupedFavorites: Array<[string, QuickLink[]]>
 }
@@ -23,7 +23,7 @@ export function resolveFavouritesPageViewModel(
   }
 }
 
-export function getFolderOptions(folders: string[], favorites: QuickLink[]) {
+function getFolderOptions(folders: string[], favorites: QuickLink[]) {
   const names = new Set<string>(folders)
 
   favorites.forEach((link) => {
@@ -37,7 +37,7 @@ export function getFolderOptions(folders: string[], favorites: QuickLink[]) {
   return Array.from(names).sort((left, right) => left.localeCompare(right))
 }
 
-export function groupFavorites(favorites: QuickLink[], folders: string[]) {
+function groupFavorites(favorites: QuickLink[], folders: string[]) {
   const folderNames = new Set<string>()
   const hasUnfiledFavorites = favorites.some(
     (link) => !normalizeFolderName(link.folder ?? ''),

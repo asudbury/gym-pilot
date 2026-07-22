@@ -9,7 +9,7 @@ type InfoPillProps = {
   className?: string
 }
 
-export function InfoPill({
+function InfoPill({
   children,
   tone = 'default',
   className,

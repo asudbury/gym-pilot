@@ -9,7 +9,7 @@ type SessionActionsProps = {
   showPTSessionAction?: boolean
 }
 
-export function SessionActions({
+function SessionActions({
   includeViewSessionsButton = false,
   showActions = true,
   showClassSessionAction = true,

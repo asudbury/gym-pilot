@@ -7,63 +7,10 @@ export type QuickLink = {
   folder?: string
 }
 
-export type FavouritesStorageValue = {
-  favorites: QuickLink[]
-  folders: string[]
-}
-
 export type HomeFilters = {
   searchTerm: string
   selectedCategory: string | null
   showImages: boolean
-}
-
-export function normalizeFavouriteStorageValue(
-  value: unknown,
-): FavouritesStorageValue {
-  if (Array.isArray(value)) {
-    return {
-      favorites: value.filter((item): item is QuickLink =>
-        Boolean(
-          item &&
-          typeof item === 'object' &&
-          typeof (item as QuickLink).path === 'string' &&
-          typeof (item as QuickLink).label === 'string',
-        ),
-      ),
-      folders: [],
-    }
-  }
-
-  if (value && typeof value === 'object') {
-    const candidate = value as Partial<FavouritesStorageValue>
-    const folders = Array.isArray(candidate.folders)
-      ? candidate.folders.filter(
-          (folder): folder is string =>
-            typeof folder === 'string' && folder.trim().length > 0,
-        )
-      : []
-
-    const favorites = Array.isArray(candidate.favorites)
-      ? candidate.favorites.filter((item): item is QuickLink =>
-          Boolean(
-            item &&
-            typeof item === 'object' &&
-            typeof (item as QuickLink).path === 'string' &&
-            typeof (item as QuickLink).label === 'string',
-          ),
-        )
-      : []
-
-    return {
-      favorites,
-      folders: Array.from(new Set(folders.map((folder) => folder.trim()))).sort(
-        (left, right) => left.localeCompare(right),
-      ),
-    }
-  }
-
-  return { favorites: [], folders: [] }
 }
 
 export function normalizeHomeFilters(
@@ -85,12 +32,6 @@ export function normalizeHomeFilters(
     showImages:
       typeof filters?.showImages === 'boolean' ? filters.showImages : true,
   }
-}
-
-export function sortQuickLinks(items: QuickLink[]) {
-  return [...items].sort((left, right) =>
-    left.label.localeCompare(right.label, undefined, { sensitivity: 'base' }),
-  )
 }
 
 export function formatDashboardTimestamp(value?: string | null) {

@@ -1,6 +1,6 @@
 import { formatLabel } from './formatUtils'
 
-export function slugify(value: string) {
+function slugify(value: string) {
   return value
     .normalize('NFKD')
     .replace(/[\u0300-\u036f]/g, '')

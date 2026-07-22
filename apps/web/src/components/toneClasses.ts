@@ -1,7 +1,7 @@
 export type ToneName =
   'default' | 'white' | 'emerald' | 'orange' | 'rose' | 'blue' | 'destructive'
 
-export const toneClasses: Record<ToneName, string> = {
+const toneClasses: Record<ToneName, string> = {
   default:
     'cursor-pointer rounded-full border border-slate-200 bg-slate-50 px-4 py-2 text-base font-medium text-slate-700 transition-all duration-200 hover:border-slate-400 hover:bg-white hover:font-semibold hover:shadow-md dark:border-slate-700 dark:bg-slate-800 dark:text-slate-100',
   white:

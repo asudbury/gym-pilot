@@ -1,19 +1,19 @@
 import type { Assignment, Plan } from '@gym-pilot/types'
 import { exercises } from '@gym-pilot/shared'
 
-export type PlanDetailItem = {
+type PlanDetailItem = {
   id: string
   exercise_id: string
   exercise_name: string
 }
 
-export type PlanDetailSession = {
+type PlanDetailSession = {
   id: string
   title: string
   planItems: PlanDetailItem[]
 }
 
-export type PlanDetailViewModel = {
+type PlanDetailViewModel = {
   title: string
   description: string
   editPath: string

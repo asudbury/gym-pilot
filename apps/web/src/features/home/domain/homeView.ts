@@ -2,7 +2,7 @@ import { exercises, exercisesSchema } from '@gym-pilot/shared'
 import { formatLabel } from '../../../utils/formatUtils'
 import { MIN_SEARCH_CHARS } from '../../../constants/home'
 
-export type HomeExercise = (typeof exercises)[number]
+type HomeExercise = (typeof exercises)[number]
 
 export type HomeFilters = {
   searchTerm: string
@@ -10,7 +10,7 @@ export type HomeFilters = {
   showImages: boolean
 }
 
-export type HomeViewModel = {
+type HomeViewModel = {
   exerciseList: HomeExercise[]
   categories: string[]
   totalExercises: number

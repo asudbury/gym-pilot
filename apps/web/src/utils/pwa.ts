@@ -14,28 +14,6 @@ export function isInstalledAsApp(
   )
 }
 
-export function isLocalhostPreview(): boolean {
-  if (typeof window === 'undefined') {
-    return false
-  }
-
-  return /^(localhost|127\.0\.0\.1|0\.0\.0\.0|::1)$/.test(
-    window.location.hostname,
-  )
-}
-
-export function shouldShowInstallHint(): boolean {
-  if (typeof window === 'undefined') {
-    return false
-  }
-
-  if (isInstalledAsApp()) {
-    return false
-  }
-
-  return isAppleDevice()
-}
-
 export function getInstallHint(isApple: boolean, isInstalled: boolean): string {
   if (isInstalled) {
     return 'You already have this app installed.'

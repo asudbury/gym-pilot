@@ -21,7 +21,6 @@
     "build": "npm run build:web"
   },
   "dependencies": {
-    "@tanstack/react-query": "^5.101.2",
     "dexie": "^4.4.4",
     "react-window": "^2.2.7"
   },

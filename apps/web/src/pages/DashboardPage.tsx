@@ -7,7 +7,7 @@ import { renderDashboardTimestamp } from '../utils/appUtils'
 import { resolveDashboardViewModel } from '../features/dashboard/domain/dashboardLayout'
 import { DecorativeIcon } from '../components/ui/DecorativeIcon'
 import { Button } from '../components/Button'
-import { SessionActions } from '../components/SessionActions'
+import SessionActions from '../components/SessionActions'
 
 export function DashboardPage() {
   const { user } = useAuth()
