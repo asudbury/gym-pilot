@@ -1,4 +1,4 @@
-import { useEffect, useRef } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import { NavLink } from 'react-router-dom'
 import { FavouriteLinksMenu } from './FavouriteLinksMenu'
 import { NavigationMenuList } from './NavigationMenuList'
@@ -57,7 +57,6 @@ export function Header({
   onFoldersChange,
   onHomeFiltersChange,
   onAuthClick,
-  mobileMenuOpen,
   onToggleMobileMenu,
 }: HeaderProps) {
   const menuContainerRef = useRef<HTMLDivElement | null>(null)
@@ -70,6 +69,7 @@ export function Header({
       ? String((user as { email?: string }).email)
       : ''
   const headerUserLabel = headerUser || headerUserEmail || 'Signed in'
+  const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
   const showRestrictedBadge = Boolean(mustChangePassword)
   const showUserBadge = Boolean(headerUser || headerUserEmail)
 
@@ -78,6 +78,24 @@ export function Header({
   }
 
   const menuLinkClassName = navigationItemBaseClassName
+
+  const [isFullscreen, setIsFullscreen] = useState(false)
+
+  useEffect(() => {
+    const handleFullscreenChange = (event: Event) => {
+      const customEvent = event as CustomEvent<boolean>
+      setIsFullscreen(customEvent.detail)
+    }
+
+    window.addEventListener(
+      'gym-pilot-fullscreen-changed',
+      handleFullscreenChange as EventListener,
+    )
+
+    return () => {
+      window.removeEventListener('gym-pilot-fullscreen-changed', handleFullscreenChange as EventListener)
+    }
+  }, [])
 
   useEffect(() => {
     if (!mobileMenuOpen) {
@@ -89,18 +107,23 @@ export function Header({
         menuContainerRef.current &&
         !menuContainerRef.current.contains(event.target as Node)
       ) {
-        onToggleMobileMenu()
+        setMobileMenuOpen(false)
       }
     }
 
     document.addEventListener('mousedown', handlePointerDown)
 
     return () => {
-      document.removeEventListener('mousedown', handlePointerDown)
+      document.removeEventListener('mousedown', handlePointerDown) // eslint-disable-line @typescript-eslint/no-unsafe-argument
     }
-  }, [mobileMenuOpen, onToggleMobileMenu])
+  }, [mobileMenuOpen])
 
-  return (
+
+    if (isFullscreen) {
+      return null // Don't render the header in fullscreen mode
+    }
+    
+  return ( 
     <nav className="sticky top-0 z-30 h-16 border-b border-slate-200 bg-white text-slate-900 shadow-sm transition-colors dark:border-slate-700 dark:bg-slate-950 dark:text-slate-100">
       <div className="mx-auto flex h-full max-w-6xl items-center justify-between px-4 sm:px-6 lg:px-8">
         <div className="flex flex-col">
@@ -169,7 +192,7 @@ export function Header({
             <div className="relative">
               <Button
                 type="button"
-                onClick={onToggleMobileMenu}
+                onClick={() => setMobileMenuOpen((current) => !current)}
                 className={getToneClass(
                   'default',
                   'inline-flex items-center gap-2 px-4 py-2 text-sm font-medium',
@@ -225,7 +248,7 @@ export function Header({
             <div className="relative">
               <Button
                 type="button"
-                onClick={onToggleMobileMenu}
+                onClick={() => setMobileMenuOpen((current) => !current)}
                 className={getToneClass(
                   'default',
                   'inline-flex items-center gap-2 px-4 py-2 text-sm font-medium',

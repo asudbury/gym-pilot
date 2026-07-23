@@ -15,6 +15,7 @@ import { TimetablePage } from '../pages/TimetablePage'
 import { RecordSessionPage } from '../pages/RecordSessionPage'
 import { TrainerReportPage } from '../pages/TrainerReportPage'
 import { type HomeFilters } from '../utils/appUtils'
+import { PageLayout } from '../layouts/PageLayout'
 
 interface ProtectedRoutesProps {
   homeFilters: HomeFilters
@@ -41,8 +42,8 @@ export function createProtectedRoutes({
             isExerciseFavorite={isExerciseFavorite}
           />
         }
-      />
-      <Route path="/plans" element={<PlansPage />} />
+      /> 
+      <Route path="/plans" element={<PageLayout><PlansPage /></PageLayout>} />
       <Route element={<RequireAuth requireClubId />}>
         <Route path="/timetable" element={<TimetablePage />} />
         <Route path="/record-session" element={<RecordSessionPage />} />
@@ -81,11 +82,11 @@ export function createProtectedRoutes({
       />
       <Route
         path="/users/:userSlug/assignments/:planSlug"
-        element={<AssignmentDetailPage />}
+        element={<PageLayout><AssignmentDetailPage /></PageLayout>}
       />
       <Route
         path="/users/:userSlug/assignments/:planSlug/edit"
-        element={<CreateAssignmentPage />}
+        element={<PageLayout><CreateAssignmentPage /></PageLayout>}
       />
     </Route>
   )

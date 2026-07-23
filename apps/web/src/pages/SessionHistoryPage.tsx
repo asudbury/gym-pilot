@@ -129,6 +129,7 @@ export function SessionHistoryPage() {
         subtitle="Session History"
         description=""
         icon="calendar"
+
       >
         <SessionActions
           includeViewSessionsButton={false}

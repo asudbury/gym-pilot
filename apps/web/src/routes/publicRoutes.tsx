@@ -8,6 +8,7 @@ import { type HomeFilters } from '../utils/appUtils'
 import { type QuickLink } from '../features/favourites/domain/quickLinks'
 import { createProtectedRoutes } from './protectedRoutes'
 import { createAdminRoutes } from './adminRoutes'
+import { PageLayout } from '../layouts/PageLayout'
 
 interface PublicRoutesProps {
   user: any
@@ -36,38 +37,41 @@ export function createPublicRoutes({
     <>
       <Route
         path="/"
-        element={
-          user ? (
-            <DashboardPage />
-          ) : (
-            <HomePage
-              filters={homeFilters}
-              onFiltersChange={onHomeFiltersChange}
-              onToggleFavoriteExercise={onToggleFavoriteExercise}
-              isExerciseFavorite={isExerciseFavorite}
-            />
-          )
+        element={<PageLayout>
+            {user ? (
+              <DashboardPage />
+            ) : (
+              <HomePage
+                filters={homeFilters}
+                onFiltersChange={onHomeFiltersChange}
+                onToggleFavoriteExercise={onToggleFavoriteExercise}
+                isExerciseFavorite={isExerciseFavorite}
+              />
+            )}
+          </PageLayout>
         }
       />
       <Route
         path="/exercise/:slug"
-        element={
-          <ExercisePage
-            onToggleFavoriteExercise={onToggleFavoriteExercise}
-            isExerciseFavorite={isExerciseFavorite}
-          />
+        element={<PageLayout>
+            <ExercisePage
+              onToggleFavoriteExercise={onToggleFavoriteExercise}
+              isExerciseFavorite={isExerciseFavorite}
+            />
+          </PageLayout>
         }
       />
-      <Route path="/help" element={<HelpPage />} />
+      <Route path="/help" element={<PageLayout><HelpPage /></PageLayout>} />
       <Route
         path="/favourites"
-        element={
-          <FavouritesPage
-            favorites={favorites}
-            folders={folders}
-            onFoldersChange={onFoldersChange}
-            onFavoritesChange={onFavoritesChange}
-          />
+        element={<PageLayout>
+            <FavouritesPage
+              favorites={favorites}
+              folders={folders}
+              onFoldersChange={onFoldersChange}
+              onFavoritesChange={onFavoritesChange}
+            />
+          </PageLayout>
         }
       />
       {createProtectedRoutes({
@@ -76,7 +80,8 @@ export function createPublicRoutes({
         onToggleFavoriteExercise,
         isExerciseFavorite,
       })}
-      {createAdminRoutes()}
+      {createAdminRoutes({
+      })}
     </>
   )
 }

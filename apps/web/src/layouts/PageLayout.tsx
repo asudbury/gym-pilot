@@ -1,5 +1,5 @@
-import { NavLink, useLocation } from 'react-router-dom';
-import { useState, type ReactNode } from 'react';
+import { useEffect, useState, type ReactNode } from 'react'
+import { NavLink, useLocation } from 'react-router-dom'
 import { appTokens } from '../constants/tokens'
 import { getToneClass } from '../components/toneClasses'
 import { DecorativeIcon } from '../components/ui/DecorativeIcon'
@@ -13,12 +13,25 @@ type PageLayoutProps = {
 export function PageLayout({ children, className = '' }: PageLayoutProps) {
   const location = useLocation()
   const isHomePage = location.pathname === '/'
-  const [isFullscreen, setIsFullscreen] = useState(false);
+  const [isFullscreen, setIsFullscreen] = useState(false)
 
-  const toggleFullscreen = () => {
-    setIsFullscreen((prev) => !prev);
-  };
+  useEffect(() => {
+    const handleFullscreenChange = (event: Event) => {
+      const customEvent = event as CustomEvent<boolean>
+      setIsFullscreen(customEvent.detail)
+    }
 
+    window.addEventListener(
+      'gym-pilot-fullscreen-changed',
+      handleFullscreenChange as EventListener,
+    )
+
+    return () => {
+      window.removeEventListener('gym-pilot-fullscreen-changed', handleFullscreenChange as EventListener)
+    }
+  }, [])
+
+  
   return (
     <main className={appTokens.pageShell}>
       <div
@@ -42,9 +55,11 @@ export function PageLayout({ children, className = '' }: PageLayoutProps) {
                   <span>Go Home</span>
                 </NavLink>
               )}
-                <NavLink
-                  to="#"
-                  onClick={toggleFullscreen}
+                <button
+                  type="button"
+                  onClick={() =>
+                    window.dispatchEvent(new CustomEvent('gym-pilot-request-toggle-fullscreen'))
+                  }
                   className={getToneClass(
                     'default',
                     `inline-flex items-center gap-2 px-4 py-2 text-sm font-medium ${
@@ -63,7 +78,7 @@ export function PageLayout({ children, className = '' }: PageLayoutProps) {
                       <span>Full screen</span>
                     </>
                   )}
-              </NavLink>
+                </button>
           </div>
         )}
         <div

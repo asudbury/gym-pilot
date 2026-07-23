@@ -46,6 +46,37 @@
         dataLayer.push(arguments)
       }
       gtag('js', new Date())
+
+      // Store the default header height to restore it when exiting full screen
+      let defaultHeaderHeight = 50 // A common default, or retrieve from gridOptions if available
+
+      document.addEventListener('fullscreenchange', () => {
+        // Find the AG Grid root element within the #root div
+        const gridElement = document
+          .getElementById('root')
+          ?.querySelector('.ag-root-wrapper')
+        if (!gridElement) {
+          console.warn(
+            'AG Grid element not found. Ensure the grid is rendered and has the class "ag-root-wrapper".',
+          )
+          return
+        }
+        // Assuming agGrid is globally available and getGridApi exists
+        const gridApi = window.agGrid.getGridApi(gridElement)
+        if (!gridApi) {
+          console.warn(
+            'AG Grid API not found. Ensure agGrid is loaded and the grid is initialized.',
+          )
+          return
+        }
+
+        if (document.fullscreenElement) {
+          defaultHeaderHeight = gridApi.getGridOption('headerHeight') || 50 // Capture current height if it was customized
+          gridApi.setGridOption('headerHeight', 0) // Hide header
+        } else {
+          gridApi.setGridOption('headerHeight', defaultHeaderHeight) // Restore header height
+        }
+      })
     </script>
     <div id="root"></div>
     <script type="module" src="/src/main.tsx"></script>

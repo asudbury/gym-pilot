@@ -1,4 +1,4 @@
-import { useEffect } from 'react'
+import { useEffect, useState } from 'react'
 import { Routes, useLocation } from 'react-router-dom'
 import { Header } from './components/navigation/Header'
 import { Button } from './components/Button'
@@ -6,6 +6,7 @@ import { createAuthRoutes } from './routes/authRoutes'
 import { createPublicRoutes } from './routes/publicRoutes'
 import { useAppShell } from './features/app-shell/hooks/useAppShell'
 import { getInstallHint } from './utils/pwa'
+import { logger } from '@gym-pilot/shared/src/logging'
 
 function ScrollToTop() {
   const { pathname } = useLocation()
@@ -18,6 +19,36 @@ function ScrollToTop() {
 }
 
 function App() {
+  const [isFullscreen, setIsFullscreen] = useState(false);
+
+  useEffect(() => {
+    // Broadcast fullscreen state changes
+    window.dispatchEvent(
+      new CustomEvent('gym-pilot-fullscreen-changed', { detail: isFullscreen }),
+    )
+  }, [isFullscreen])
+
+  useEffect(() => {
+    // Listen for requests to toggle fullscreen
+    const handleToggleRequest = () => {
+      logger.info(`Toggling fullscreen mode. Current state: ${isFullscreen}`)
+      setIsFullscreen((prev) => !prev)
+    }
+
+    window.addEventListener(
+      'gym-pilot-request-toggle-fullscreen',
+      handleToggleRequest,
+    )
+
+    return () => {
+      window.removeEventListener('gym-pilot-request-toggle-fullscreen', handleToggleRequest)
+    }
+  }, [isFullscreen]) // Re-run effect if isFullscreen changes to ensure logger has latest state
+
+  const toggleFullscreen = () => { // This function is now only used internally by the event listener
+    setIsFullscreen((prev) => !prev);
+  };
+
   const {
     appName,
     broadcastMessage,
@@ -37,7 +68,6 @@ function App() {
     setFolders,
     setHomeFilters,
     setMobileMenuOpen,
-    setShowInstallHint,
     showInstallHint,
     tabletMenuItems,
     user,
@@ -80,9 +110,8 @@ function App() {
         onFoldersChange={setFolders}
         onFavoritesChange={setFavorites}
         onHomeFiltersChange={setHomeFilters}
-        onAuthClick={handleAuthClick}
-        mobileMenuOpen={mobileMenuOpen}
-        onToggleMobileMenu={() => setMobileMenuOpen((current) => !current)}
+        onAuthClick={handleAuthClick} // This prop is still needed for auth actions
+        onToggleMobileMenu={() => setMobileMenuOpen((current) => !current)} // This prop is still needed for mobile menu
       />
 
       {currentRouteVisibility && !isCurrentRouteVisible ? (

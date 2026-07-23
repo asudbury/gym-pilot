@@ -9,46 +9,47 @@ import { AdminUserActivityPage } from '../pages/admin/AdminUserActivityPage'
 import { AdminDatabasePage } from '../pages/admin/AdminDatabasePage'
 import { AdminAppSettingsPage } from '../pages/admin/AdminAppSettingsPage'
 import { AdminLogsPage } from '../pages/admin/AdminLogsPage'
+import { PageLayout } from '../layouts/PageLayout' // Keep this import, it's already there
 
 export function createAdminRoutes() {
   return (
     <>
       <Route element={<RequireAuth requiredRole="admin" />}>
-        <Route path="/admin" element={<AdminPage />} />
+        <Route path="/admin" element={<PageLayout><AdminPage /></PageLayout>} />
         <Route
           path="/admin/preferences"
-          element={<Navigate to="/preferences" replace />}
+          element={<PageLayout><Navigate to="/preferences" replace /></PageLayout>}
         />
       </Route>
       <Route element={<RequireAuth requiredRole="admin" />}>
-        <Route path="/admin/users" element={<AdminUsersPage />} />
-        <Route path="/admin/users/create" element={<AdminCreateUserPage />} />
+        <Route path="/admin/users" element={<PageLayout><AdminUsersPage /></PageLayout>} />
+        <Route path="/admin/users/create" element={<PageLayout><AdminCreateUserPage /></PageLayout>} />
         <Route
           path="/admin/users/profiles/:userId"
-          element={<AdminUserProfilesPage />}
+          element={<PageLayout><AdminUserProfilesPage /></PageLayout>}
         />
         <Route
           path="/admin/users/edit/:userId"
-          element={<AdminEditUserPage />}
+          element={<PageLayout><AdminEditUserPage /></PageLayout>}
         />
         <Route
           path="/admin/users/profiles/:userId/activity"
-          element={<AdminUserActivityPage />}
+          element={<PageLayout><AdminUserActivityPage /></PageLayout>}
         />
-        <Route path="/admin/app-settings" element={<AdminAppSettingsPage />} />
-        <Route path="/admin/database" element={<AdminDatabasePage />} />
-        <Route path="/admin/logs" element={<AdminLogsPage />} />
+        <Route path="/admin/app-settings" element={<PageLayout><AdminAppSettingsPage /></PageLayout>} />
+        <Route path="/admin/database" element={<PageLayout><AdminDatabasePage /></PageLayout>} />
+        <Route path="/admin/logs" element={<PageLayout><AdminLogsPage /></PageLayout>} />
         <Route
           path="/admin/logs/error"
-          element={<AdminLogsPage view="error" />}
+          element={<PageLayout><AdminLogsPage view="error" /></PageLayout>}
         />
         <Route
           path="/admin/logs/audit"
-          element={<AdminLogsPage view="audit" />}
+          element={<PageLayout><AdminLogsPage view="audit" /></PageLayout>}
         />
         <Route
           path="/admin/logs/activity"
-          element={<AdminLogsPage view="activity" />}
+          element={<PageLayout><AdminLogsPage view="activity" /></PageLayout>}
         />
       </Route>
     </>
