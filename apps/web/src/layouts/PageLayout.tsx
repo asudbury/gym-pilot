@@ -4,7 +4,6 @@ import { appTokens } from '../constants/tokens'
 import { getToneClass } from '../components/toneClasses'
 import { DecorativeIcon } from '../components/ui/DecorativeIcon'
 import ToastContainer from '../components/ToastContainer'
-import { NotOnDesktop } from '../components/visibility/DeviceVisibility';
 
 type PageLayoutProps = {
   children: ReactNode
