@@ -24,6 +24,8 @@ export type DecorativeIconProps = {
     | 'trash'
     | 'check'
     | 'close'
+    | 'fullscreen'
+    | 'fullscreenExit'
     | null
   className?: string
   withContainer?: boolean
@@ -497,6 +499,22 @@ const DecorativeIcon = ({
           stroke="currentColor"
           strokeWidth="1.8"
           strokeLinecap="round"
+        />
+      </svg>
+    ),
+    fullscreen: (
+      <svg viewBox="0 0 24 24" fill="none" className={iconClassName}>
+        <path
+          d="M4 4h6v2H6v4H4V4Zm16 0v6h-2V6h-4V4h6ZM4 20v-6h2v4h4v2H4Zm16 0h-6v-2h4v-4h2v6Z"
+          fill="currentColor"
+        />
+      </svg>
+    ),
+    fullscreenExit: (
+      <svg viewBox="0 0 24 24" fill="none" className={iconClassName}>
+        <path
+          d="M10 4H4v6h2V6h4V4Zm10 0v6h-2V6h-4V4h6ZM10 20H4v-6h2v4h4v2Zm10 0h-6v-2h4v-4h2v6Z"
+          fill="currentColor"
         />
       </svg>
     ),
