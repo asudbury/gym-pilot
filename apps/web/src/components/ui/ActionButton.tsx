@@ -12,7 +12,13 @@ type ActionButtonProps = {
   tone: ToneName
   to: string
 }
-const ActionButton = ({ icon, label, mobileLabel, tone, to }: ActionButtonProps) => (
+const ActionButton = ({
+  icon,
+  label,
+  mobileLabel,
+  tone,
+  to,
+}: ActionButtonProps) => (
   <NavLink
     to={to}
     className={getToneClass(
@@ -33,4 +39,3 @@ const ActionButton = ({ icon, label, mobileLabel, tone, to }: ActionButtonProps)
 )
 
 export default ActionButton
-
