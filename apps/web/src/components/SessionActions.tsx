@@ -61,7 +61,7 @@ function SessionActions({
       {showViewWorkoutsTemplateButton ? (
         <ActionButton
           icon="clipboard"
-          label="View workout templates"
+          label="Workout templates"
           tone="default"
           onClick={() => navigate('/session-templates')}
         />
