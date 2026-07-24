@@ -3,6 +3,7 @@ import { PageCard } from '../components/PageCard'
 import { Heading1, UpperCaseParagraph } from '../components/Typography'
 import { DecorativeIcon } from '../components/ui/DecorativeIcon'
 import type { DecorativeIconProps } from '../components/ui/DecorativeIcon'
+import { DesktopOnly } from '../components/visibility/DeviceVisibility'
 
 type PageCardLayoutProps = {
   title?: string
@@ -76,18 +77,20 @@ export function PageCardLayout({
             </div>
             <UpperCaseParagraph>{title}</UpperCaseParagraph>
           </div>
-          <div className="flex flex-col items-start">
-            {subtitle ? (
-              <Heading1 className="text-xl font-semibold tracking-tight text-slate-900 sm:text-2xl md:text-3xl dark:text-slate-100">
-                {subtitle}
-              </Heading1>
-            ) : null}
-            {description ? (
-              <p className="max-w-2xl text-sm leading-6 text-slate-600 dark:text-slate-300">
-                {description}
-              </p>
-            ) : null}
-          </div>
+          <DesktopOnly>
+            <div className="flex flex-col items-start">
+              {subtitle ? (
+                <Heading1 className="text-xl font-semibold tracking-tight text-slate-900 sm:text-2xl md:text-3xl dark:text-slate-100">
+                  {subtitle}
+                </Heading1>
+              ) : null}
+              {description ? (
+                <p className="max-w-2xl text-sm leading-6 text-slate-600 dark:text-slate-300">
+                  {description}
+                </p>
+              ) : null}
+            </div>
+          </DesktopOnly>
         </div>
         {children ? (
           <div className="flex flex-col gap-4">{children}</div>

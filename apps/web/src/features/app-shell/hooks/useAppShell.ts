@@ -245,6 +245,7 @@ export function useAppShell() {
     userRoles,
     tier: currentTier,
     deviceType,
+    onItemClick: () => setMobileMenuOpen(false),
   })
   const tabletMenuItems = buildNavigationMenuItems({
     plansCount,

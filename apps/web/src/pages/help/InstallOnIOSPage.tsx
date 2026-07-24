@@ -7,6 +7,7 @@ import { BackLink } from '../../components/ui/BackLink'
 import { useAuth } from '../../auth/AuthContext'
 import { recordSupabaseUserActivity } from '@gym-pilot/shared'
 import { buildInstallIosPageActivity } from './installIosActivity'
+import { DecorativeIcon } from '../../components/ui/DecorativeIcon'
 
 function InstallOnIOSPage() {
   const { user } = useAuth()
@@ -31,7 +32,6 @@ function InstallOnIOSPage() {
       <PageCardLayout
         title="Install Gym-Pilot on iPhone (iOS)"
         subtitle="Turn Gym-Pilot into an app on your Home Screen"
-        description="Step-by-step, mobile-friendly guidance for adding Gym-Pilot to your iPhone Home Screen."
       >
         <div className="flex flex-col gap-4">
           <Panel variant="white" padding="md">
@@ -41,7 +41,11 @@ function InstallOnIOSPage() {
                 Open Gym‑Pilot in <strong>Safari</strong> on your iPhone.
               </li>
               <li className="mt-2">
-                Tap the <strong>Share</strong> button (square with an up-arrow)
+                Tap the <strong>Share</strong> button{' '}
+                <DecorativeIcon
+                  icon="share"
+                  className="inline-block h-4 w-4"
+                />{' '}
                 at the bottom of the screen.
               </li>
               <li className="mt-2">

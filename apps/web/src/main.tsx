@@ -28,15 +28,15 @@ void initializeSupabaseAuth()
 
 createRoot(document.getElementById('root')!).render(
   <StrictMode>
-    <ErrorBoundary>
-      <HashRouter>
+    <HashRouter>
+      <ErrorBoundary>
         <GoogleAnalytics />
         <PlanProvider storageKey={PLANS_KEY}>
           <AuthProvider>
             <App />
           </AuthProvider>
         </PlanProvider>
-      </HashRouter>
-    </ErrorBoundary>
+      </ErrorBoundary>
+    </HashRouter>
   </StrictMode>,
 )

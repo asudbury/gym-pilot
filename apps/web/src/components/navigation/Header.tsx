@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from 'react'
+import { useEffect, useRef } from 'react'
 import { NavLink } from 'react-router-dom'
 import { FavouriteLinksMenu } from './FavouriteLinksMenu'
 import { NavigationMenuList } from './NavigationMenuList'
@@ -25,6 +25,7 @@ type HeaderProps = {
   desktopMenuItems: NavigationMenuListItem[]
   tabletMenuItems: NavigationMenuListItem[]
   mobileMenuItems: NavigationMenuListItem[]
+  mobileMenuOpen: boolean
   showAuthButton: boolean
   user: unknown
   mustChangePassword?: boolean
@@ -48,6 +49,7 @@ export function Header({
   desktopMenuItems,
   tabletMenuItems,
   mobileMenuItems,
+  mobileMenuOpen,
   showAuthButton,
   user,
   mustChangePassword,
@@ -56,6 +58,7 @@ export function Header({
   onFoldersChange,
   onHomeFiltersChange,
   onAuthClick,
+  onToggleMobileMenu,
 }: HeaderProps) {
   const menuContainerRef = useRef<HTMLDivElement | null>(null)
   const headerUser =
@@ -67,7 +70,6 @@ export function Header({
       ? String((user as { email?: string }).email)
       : ''
   const headerUserLabel = headerUser || headerUserEmail || 'Signed in'
-  const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
   const showRestrictedBadge = Boolean(mustChangePassword)
   const showUserBadge = Boolean(headerUser || headerUserEmail)
 
@@ -87,7 +89,7 @@ export function Header({
         menuContainerRef.current &&
         !menuContainerRef.current.contains(event.target as Node)
       ) {
-        setMobileMenuOpen(false)
+        onToggleMobileMenu()
       }
     }
 
@@ -96,7 +98,7 @@ export function Header({
     return () => {
       document.removeEventListener('mousedown', handlePointerDown) // eslint-disable-line @typescript-eslint/no-unsafe-argument
     }
-  }, [mobileMenuOpen])
+  }, [mobileMenuOpen, onToggleMobileMenu])
 
   return (
     <nav className="sticky top-0 z-30 h-16 border-b border-slate-200 bg-white text-slate-900 shadow-sm transition-colors dark:border-slate-700 dark:bg-slate-950 dark:text-slate-100">
@@ -167,7 +169,7 @@ export function Header({
             <div className="relative">
               <Button
                 type="button"
-                onClick={() => setMobileMenuOpen((current) => !current)}
+                onClick={onToggleMobileMenu}
                 className={getToneClass(
                   'default',
                   'inline-flex items-center gap-2 px-4 py-2 text-sm font-medium',
@@ -223,7 +225,7 @@ export function Header({
             <div className="relative">
               <Button
                 type="button"
-                onClick={() => setMobileMenuOpen((current) => !current)}
+                onClick={onToggleMobileMenu}
                 className={getToneClass(
                   'default',
                   'inline-flex items-center gap-2 px-4 py-2 text-sm font-medium',

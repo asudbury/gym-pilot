@@ -41,6 +41,7 @@ function App() {
     setShowInstallHint,
     tabletMenuItems,
     user,
+    mobileMenuOpen,
   } = useAppShell()
   const SHOW_AUTH_BUTTON = true
 
@@ -73,6 +74,7 @@ function App() {
         desktopMenuItems={desktopMenuItems}
         tabletMenuItems={tabletMenuItems}
         mobileMenuItems={mobileMenuItems}
+        mobileMenuOpen={mobileMenuOpen}
         showAuthButton={SHOW_AUTH_BUTTON}
         user={user}
         mustChangePassword={mustChangePassword}
