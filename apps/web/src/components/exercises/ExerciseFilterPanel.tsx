@@ -1,7 +1,7 @@
-import { ExerciseSearchPicker } from './ExerciseSearchPicker'
 import { getToneClass } from '../toneClasses'
 import { Button } from '../ui/Button'
 import { formatLabel } from '../../utils/formatUtils'
+import { MobileExerciseSearchPicker } from './MobileExerciseSearchPicker'
 
 type ExerciseFilterPanelProps = {
   draftSearchTerm: string
@@ -16,26 +16,22 @@ type ExerciseFilterPanelProps = {
 }
 
 export function ExerciseFilterPanel({
-  draftSearchTerm,
   selectedCategory,
   categories,
   normalizedCategory,
   showExerciseImages,
-  onSearchChange,
   onSelectExercise,
   onCategoryChange,
   onToggleImages,
 }: ExerciseFilterPanelProps) {
+  
   return (
     <div className="space-y-4">
       <div className="mb-5">
-        <ExerciseSearchPicker
-          id="exercise-search"
-          value={draftSearchTerm}
-          onChange={onSearchChange}
-          onSelectExercise={(exercise) =>
+        <MobileExerciseSearchPicker
+          onSelectExercise={(exercise) => {
             onSelectExercise(formatLabel(exercise.name))
-          }
+          }}
         />
       </div>
 

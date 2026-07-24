@@ -1,6 +1,5 @@
 import { useState } from 'react'
 import { PageLayout } from '../layouts/PageLayout'
-import { ExerciseSearchPicker } from '../components/exercises/ExerciseSearchPicker'
 import { PageCard } from '../components/PageCard'
 import { Heading1, Paragraph } from '../components/Typography'
 import { DecorativeIcon } from '../components/ui/DecorativeIcon'
@@ -8,15 +7,10 @@ import { BackLink } from '../components/ui/BackLink'
 import { Button } from '../components/ui/Button'
 import type { Exercise } from '@gym-pilot/shared'
 import { useNavigate } from 'react-router-dom'
-import {
-  DesktopOnly,
-  NotOnDesktop,
-} from '../components/visibility/DeviceVisibility'
 import { MobileExerciseSearchPicker } from '../components/exercises/MobileExerciseSearchPicker'
 
 function SessionTemplateCreatePage() {
   const [selectedExercises, setSelectedExercises] = useState<Exercise[]>([])
-  const [searchValue, setSearchValue] = useState('')
   const navigate = useNavigate()
 
   function reorder<T extends { id: string }>(
@@ -44,7 +38,6 @@ function SessionTemplateCreatePage() {
 
   const addExercise = (exercise: Exercise) => {
     setSelectedExercises((prev) => [...prev, exercise])
-    setSearchValue('')
   }
 
   const removeExercise = (exercise: Exercise) => {
@@ -72,22 +65,11 @@ function SessionTemplateCreatePage() {
         <div className="mt-6 grid grid-cols-1 gap-6">
           <div>
             <div className="mt-4 space-y-2">
-              <DesktopOnly>
-                <ExerciseSearchPicker
-                  value={searchValue}
-                  onChange={setSearchValue}
-                  onSelectExercise={(exercise) => {
-                    addExercise(exercise)
-                  }}
-                />
-              </DesktopOnly>
-              <NotOnDesktop>
-                <MobileExerciseSearchPicker
-                  onSelectExercise={(exercise) => {
-                    addExercise(exercise)
-                  }}
-                />
-              </NotOnDesktop>
+              <MobileExerciseSearchPicker
+                onSelectExercise={(exercise) => {
+                  addExercise(exercise)
+                }}
+              />
             </div>
           </div>
           <div>

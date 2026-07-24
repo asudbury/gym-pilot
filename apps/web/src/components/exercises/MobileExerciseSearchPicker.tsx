@@ -99,8 +99,10 @@ export function MobileExerciseSearchPicker({
                         className="mr-2 inline-block h-4 w-4 text-slate-400"
                       />
                       <span className="font-medium text-slate-800 group-hover:font-semibold">
-                        {formatLabel(exercise.name)} - (
-                        {formatLabel(exercise.category)})
+                        {formatLabel(exercise.name)}
+                      </span>
+                      <span className="font-medium text-slate-400 group-hover:font-semibold">
+                        ({formatLabel(exercise.category)})
                       </span>
                     </div>
                   </button>
