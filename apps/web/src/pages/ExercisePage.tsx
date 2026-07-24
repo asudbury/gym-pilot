@@ -80,7 +80,7 @@ export function ExercisePage({
                   formatLabel(exercise.equipment),
                   formatLabel(exercise.target),
                 ]}
-                tones={['blue', 'orange', 'default']}
+                tones={['orange', 'orange', 'orange']}
               />
             </div>
           </div>

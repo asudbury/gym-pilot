@@ -160,7 +160,7 @@ export function ExerciseList({
                                 formatLabel(exercise.category),
                                 formatLabel(exercise.equipment),
                               ]}
-                              tones={['blue', 'orange']}
+                              tones={['orange', 'orange']}
                               className="mt-2"
                               pillClassName="text-xs"
                             />

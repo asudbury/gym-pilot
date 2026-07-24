@@ -6,7 +6,6 @@ import { MIN_SEARCH_CHARS } from '../../constants/home'
 import { Modal } from '../ui/Modal'
 import { ExerciseSearchField } from './ExerciseSearchPicker'
 import { DecorativeIcon } from '../ui/DecorativeIcon'
-import { getToneClass } from '../toneClasses'
 
 type Exercise = (typeof exercises)[number]
 
@@ -59,7 +58,7 @@ export function MobileExerciseSearchPicker({
 
   return (
     <>
-      <Button onClick={() => setIsOpen(true)} className={getToneClass('blue')}>
+      <Button onClick={() => setIsOpen(true)} tone="blue">
         Search for Exercise
       </Button>
       <Modal isOpen={isOpen} onClose={() => setIsOpen(false)}>
@@ -98,10 +97,10 @@ export function MobileExerciseSearchPicker({
                         icon="dumbbell"
                         className="mr-2 inline-block h-4 w-4 text-slate-400"
                       />
-                      <span className="font-medium text-slate-800 group-hover:font-semibold">
+                      <span className="font-medium text-slate-800 group-hover:text-blue-500">
                         {formatLabel(exercise.name)}
                       </span>
-                      <span className="font-medium text-slate-400 group-hover:font-semibold">
+                      <span className="font-medium text-slate-400 group-hover:text-blue-500">
                         ({formatLabel(exercise.category)})
                       </span>
                     </div>
