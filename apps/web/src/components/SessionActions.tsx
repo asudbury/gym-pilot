@@ -25,6 +25,7 @@ function SessionActions({
         <ActionButton
           icon="calendar"
           label="Record a Class session"
+          mobileLabel="Record a Class"
           tone="emerald"
           to="/timetable?prefill=class"
         />
@@ -34,6 +35,7 @@ function SessionActions({
         <ActionButton
           icon="users"
           label="Record a PT session"
+          mobileLabel="Record a PT"
           tone="emerald"
           to="/record-session?type=personal_training"
         />
@@ -42,6 +44,7 @@ function SessionActions({
       <ActionButton
         icon="dumbbell"
         label="Record a Solo session"
+        mobileLabel="Record a Solo"
         tone="emerald"
         to="/record-session?type=solo"
       />
@@ -50,6 +53,7 @@ function SessionActions({
         <ActionButton
           icon="tasks"
           label="View sessions"
+          mobileLabel="View sessions"
           tone="default"
           to="/sessions"
         />
@@ -59,6 +63,7 @@ function SessionActions({
         <ActionButton
           icon="clipboard"
           label="Workout templates"
+          mobileLabel="Workout templates"
           tone="default"
           to="/session-templates"
         />
