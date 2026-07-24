@@ -12,8 +12,7 @@ export function SessionTemplatesPage() {
   const { visibleAssignments, deleteAssignment } = usePlan()
   const cards = resolveAssignmentListViewModels(visibleAssignments)
 
-  const description =
-    'Create a workout template to define exercises.'
+  const description = 'Create a workout template to define exercises.'
 
   return (
     <PageLayout>

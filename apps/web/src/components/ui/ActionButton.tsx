@@ -1,26 +1,28 @@
-import { type ToneName } from '../toneClasses'
-import { Button } from './Button'
+import { NavLink } from 'react-router-dom'
+import { getToneClass, type ToneName } from '../toneClasses'
 import { DecorativeIcon, type DecorativeIconProps } from './DecorativeIcon'
 
-const buttonClass = 'w-full md:w-auto h-14 px-4'
 const iconClass = 'w-5 h-5 shrink-0'
 
 type ActionButtonProps = {
   icon: DecorativeIconProps['icon']
   label: string
   tone: ToneName
-  onClick: () => void
+  to: string
 }
-const ActionButton = ({ icon, label, tone, onClick }: ActionButtonProps) => (
-  <Button className={buttonClass} tone={tone} onClick={onClick}>
-    <span className="flex w-full items-center">
-      <span className="flex w-8 justify-center shrink-0">
+const ActionButton = ({ icon, label, tone, to }: ActionButtonProps) => (
+    <NavLink
+      to={to}
+      className={getToneClass(
+        tone,
+        'flex w-full items-center justify-center rounded-lg px-4 py-3 text-base font-medium sm:w-auto sm:py-2 sm:text-sm',
+      )}
+    >
+      <span>
         <DecorativeIcon icon={icon} className={iconClass} />
       </span>
-
-      <span className="ml-2">{label}</span>
-    </span>
-  </Button>
+      <span>{label}</span>
+    </NavLink>
 )
 
 export default ActionButton

@@ -1,4 +1,3 @@
-import { useNavigate } from 'react-router-dom'
 import ActionButton from './ui/ActionButton'
 
 type SessionActionsProps = {
@@ -16,7 +15,6 @@ function SessionActions({
   showClassSessionAction = true,
   showPTSessionAction = true,
 }: SessionActionsProps) {
-  const navigate = useNavigate()
 
   if (!showActions) {
     return null
@@ -29,7 +27,7 @@ function SessionActions({
           icon="calendar"
           label="Record a Class session"
           tone="emerald"
-          onClick={() => navigate('/timetable?prefill=class')}
+          to="/timetable?prefill=class"
         />
       ) : null}
 
@@ -38,7 +36,7 @@ function SessionActions({
           icon="users"
           label="Record a PT session"
           tone="emerald"
-          onClick={() => navigate('/record-session?type=personal_training')}
+          to="/record-session?type=personal_training"
         />
       ) : null}
 
@@ -46,7 +44,7 @@ function SessionActions({
         icon="dumbbell"
         label="Record a Solo session"
         tone="emerald"
-        onClick={() => navigate('/record-session?type=solo')}
+        to="/record-session?type=solo"
       />
 
       {showViewSessionsButton ? (
@@ -54,7 +52,7 @@ function SessionActions({
           icon="tasks"
           label="View sessions"
           tone="default"
-          onClick={() => navigate('/sessions')}
+          to="/sessions"
         />
       ) : null}
 
@@ -63,7 +61,7 @@ function SessionActions({
           icon="clipboard"
           label="Workout templates"
           tone="default"
-          onClick={() => navigate('/session-templates')}
+          to="/session-templates"
         />
       ) : null}
     </div>
