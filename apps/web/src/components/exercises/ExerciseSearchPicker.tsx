@@ -62,6 +62,10 @@ export const ExerciseSearchField = forwardRef<
             value={value}
             onChange={(event) => onChange?.(event.target.value)}
             placeholder={placeholder}
+            autoComplete="off"
+            autoCorrect="off"
+            autoCapitalize="none"
+            enterKeyHint="done"
             className={`${appTokens.input} h-10 w-full pr-16 text-sm outline-none ring-0 focus:border-slate-400 sm:pr-24`}
           />
 
