@@ -7,8 +7,8 @@ import { PlanProvider } from '@gym-pilot/shared'
 import { PLANS_KEY } from './constants/storageKeys'
 import { GoogleAnalytics } from './components/GoogleAnalytics.tsx'
 import { AuthProvider } from './auth/AuthContext.tsx'
-import { ErrorBoundary } from './components/ErrorBoundary.tsx'
 import { getSupabaseClient, logger } from '@gym-pilot/shared'
+import ErrorBoundary from './components/ErrorBoundary.tsx'
 
 async function initializeSupabaseAuth() {
   const client = getSupabaseClient()

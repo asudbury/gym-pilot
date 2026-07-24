@@ -9,6 +9,7 @@ import { type QuickLink } from '../features/favourites/domain/quickLinks'
 import { createProtectedRoutes } from './protectedRoutes'
 import { createAdminRoutes } from './adminRoutes'
 import InstallOnIOSPage from '../pages/help/InstallOnIOSPage'
+import { NotFoundPage } from '../pages/NotFoundPage'
 
 interface PublicRoutesProps {
   user: any
@@ -79,6 +80,7 @@ export function createPublicRoutes({
         isExerciseFavorite,
       })}
       {createAdminRoutes()}
+      <Route path="*" element={<NotFoundPage />} />
     </>
   )
 }

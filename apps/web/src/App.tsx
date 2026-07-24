@@ -6,6 +6,7 @@ import { createAuthRoutes } from './routes/authRoutes'
 import { createPublicRoutes } from './routes/publicRoutes'
 import { useAppShell } from './features/app-shell/hooks/useAppShell'
 import { getInstallHint } from './utils/pwa'
+import ErrorBoundary from './components/ErrorBoundary'
 
 function ScrollToTop() {
   const { pathname } = useLocation()
@@ -90,20 +91,22 @@ function App() {
           </h1>
         </div>
       ) : (
-        <Routes>
-          {createAuthRoutes()}
-          {createPublicRoutes({
-            user,
-            homeFilters,
-            onHomeFiltersChange: setHomeFilters,
-            onFavoritesChange: setFavorites,
-            onFoldersChange: setFolders,
-            onToggleFavoriteExercise: handleToggleFavoriteExercise,
-            isExerciseFavorite,
-            favorites,
-            folders,
-          })}
-        </Routes>
+        <ErrorBoundary>
+          <Routes>
+            {createAuthRoutes()}
+            {createPublicRoutes({
+              user,
+              homeFilters,
+              onHomeFiltersChange: setHomeFilters,
+              onFavoritesChange: setFavorites,
+              onFoldersChange: setFolders,
+              onToggleFavoriteExercise: handleToggleFavoriteExercise,
+              isExerciseFavorite,
+              favorites,
+              folders,
+            })}
+          </Routes>
+        </ErrorBoundary>
       )}
     </div>
   )

@@ -1,31 +1,34 @@
-import { Component } from 'react'
-import { logger } from '@gym-pilot/shared'
+import { Component, type ErrorInfo, type ReactNode } from 'react'
+import { InternalServerErrorPage } from '../pages/InternalServerErrorPage'
 
-export class ErrorBoundary extends Component<
-  React.PropsWithChildren,
-  { hasError: boolean }
-> {
-  state = {
+interface Props {
+  children: ReactNode
+}
+
+interface State {
+  hasError: boolean
+}
+
+class ErrorBoundary extends Component<Props, State> {
+  public state: State = {
     hasError: false,
   }
 
-  static getDerivedStateFromError() {
+  public static getDerivedStateFromError(_: Error): State {
     return { hasError: true }
   }
 
-  componentDidCatch(error: Error, errorInfo: React.ErrorInfo) {
-    logger.error('React Error Boundary', {
-      message: error instanceof Error ? error.message : String(error),
-      stack: error instanceof Error ? error.stack : undefined,
-      errorInfo,
-    })
+  public componentDidCatch(error: Error, errorInfo: ErrorInfo) {
+    console.error('Uncaught error:', error, errorInfo)
   }
 
-  render() {
+  public render() {
     if (this.state.hasError) {
-      return <h1>Something went wrong.</h1>
+      return <InternalServerErrorPage />
     }
 
     return this.props.children
   }
 }
+
+export default ErrorBoundary

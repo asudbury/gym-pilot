@@ -8,9 +8,14 @@ import ToastContainer from '../components/ToastContainer'
 type PageLayoutProps = {
   children: ReactNode
   className?: string
+  goHomeLink?: boolean
 }
 
-export function PageLayout({ children, className = '' }: PageLayoutProps) {
+export function PageLayout({
+  children,
+  className = '',
+  goHomeLink = true,
+}: PageLayoutProps) {
   const location = useLocation()
   const isHomePage = location.pathname === '/'
 
@@ -19,7 +24,7 @@ export function PageLayout({ children, className = '' }: PageLayoutProps) {
       <div
         className={`flex flex-col ${className} ${'mx-auto max-w-6xl'}`.trim()}
       >
-        {!isHomePage && (
+        {goHomeLink && !isHomePage && (
           <div className="mb-4 flex flex-wrap gap-2">
             <NavLink
               to="/"
