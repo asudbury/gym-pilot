@@ -1,11 +1,19 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" role="img" aria-label="Gym-Pilot app icon">
-  <rect width="512" height="512" rx="140" fill="#863bff"/>
-  <path d="M168 182h48v148h-48z" fill="#ffffff"/>
-  <path d="M296 182h48v148h-48z" fill="#ffffff"/>
-  <path d="M216 218h80v76h-80z" fill="#ffffff"/>
-  <path d="M96 220h48v72H96z" fill="#ffffff"/>
-  <path d="M368 220h48v72h-48z" fill="#ffffff"/>
-  <path d="M144 206h24v100h-24z" fill="#863bff"/>
-  <path d="M344 206h24v100h-24z" fill="#863bff"/>
-  <path d="M216 206h80v100h-80z" fill="#863bff"/>
+  <!-- Background -->
+  <rect width="512" height="512" rx="115" fill="#863bff"/>
+
+  <!-- Center Bar -->
+  <rect x="96" y="236" width="320" height="40" rx="8" fill="#ffffff"/>
+
+  <!-- Inner Plates -->
+  <rect x="180" y="156" width="40" height="200" rx="12" fill="#ffffff"/>
+  <rect x="292" y="156" width="40" height="200" rx="12" fill="#ffffff"/>
+
+  <!-- Outer Plates -->
+  <rect x="132" y="186" width="32" height="140" rx="10" fill="#ffffff"/>
+  <rect x="348" y="186" width="32" height="140" rx="10" fill="#ffffff"/>
+
+  <!-- Outer Bar Ends -->
+  <rect x="96" y="240" width="20" height="32" rx="6" fill="#ffffff"/>
+  <rect x="396" y="240" width="20" height="32" rx="6" fill="#ffffff"/>
 </svg>
