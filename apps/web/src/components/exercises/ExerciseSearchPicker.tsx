@@ -56,6 +56,7 @@ export const ExerciseSearchField = forwardRef<
       <div className={className}>
         <div className="relative w-full">
           <input
+            type="search"
             ref={ref}
             id={id}
             value={value}
