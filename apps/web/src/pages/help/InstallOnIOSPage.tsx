@@ -42,10 +42,7 @@ function InstallOnIOSPage() {
               </li>
               <li className="mt-2">
                 Tap the <strong>Share</strong> button{' '}
-                <DecorativeIcon
-                  icon="share"
-                  className="inline-block h-4 w-4"
-                />{' '}
+                <DecorativeIcon icon="share" className="inline-block h-4 w-4" />{' '}
                 at the bottom of the screen.
               </li>
               <li className="mt-2">
