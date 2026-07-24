@@ -15,7 +15,6 @@ function SessionActions({
   showClassSessionAction = true,
   showPTSessionAction = true,
 }: SessionActionsProps) {
-
   if (!showActions) {
     return null
   }
