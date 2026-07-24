@@ -24,7 +24,6 @@ export function ExerciseFilterPanel({
   onCategoryChange,
   onToggleImages,
 }: ExerciseFilterPanelProps) {
-  
   return (
     <div className="space-y-4">
       <div className="mb-5">
