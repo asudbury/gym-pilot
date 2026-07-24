@@ -186,7 +186,6 @@ export function WelcomePage() {
       >
         <div className="flex items-start gap-3">
           <DecorativeIcon icon="document" />{' '}
-          {/* Changed from 'clipboard' to 'document' */}
           <div className="flex flex-col gap-2">
             <Heading1 as="h1">Welcome to Gym-Pilot</Heading1>
             <p className="text-sm text-slate-600">

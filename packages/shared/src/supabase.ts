@@ -15,7 +15,7 @@ export type SupabaseAuthUser = {
 function getSupabaseUrl() {
   return (
     (import.meta.env?.VITE_SUPABASE_URL as string | undefined)?.trim() ||
-    "http://127.0.0.1:54321"
+    undefined
   );
 }
 
@@ -90,25 +90,6 @@ export function getSupabaseClient(options?: SupabaseClientOptions) {
   }
 
   return targetClient;
-}
-
-export async function signInWithGoogle() {
-  logger.info("[Supabase] Starting Google OAuth sign-in");
-  const client = getSupabaseClient();
-
-  if (!client) {
-    logger.error(
-      "[Supabase] Google sign-in skipped because client is unavailable",
-    );
-    return { error: new Error("Supabase client is not available") };
-  }
-
-  return client.auth.signInWithOAuth({
-    provider: "google",
-    options: {
-      redirectTo: `${window.location.origin}/auth/callback`,
-    },
-  });
 }
 
 export async function signInWithPassword(email: string, password: string) {

@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react'
-import { useNavigate } from 'react-router-dom'
+import { useLocation, useNavigate } from 'react-router-dom'
 import { PageLayout } from '../../layouts/PageLayout'
 import { PageCardLayout } from '../../layouts/PageCardLayout'
 import { Button } from '../../components/ui/Button'
@@ -117,6 +117,7 @@ export function filterLogEntriesByText<T extends Record<string, unknown>>(
 
 export function AdminLogsPage({ view = 'combined' }: AdminLogsPageProps) {
   const navigate = useNavigate()
+  const location = useLocation()
   const [errorLogs, setErrorLogs] = useState<LogEntryRow[]>([])
   const [auditLogs, setAuditLogs] = useState<LogEntryRow[]>([])
   const [activityLogs, setActivityLogs] = useState<ActivityLogEntryRow[]>([])
@@ -124,6 +125,7 @@ export function AdminLogsPage({ view = 'combined' }: AdminLogsPageProps) {
   const [clearing, setClearing] = useState(false)
   const [error, setError] = useState('')
   const [logFilterText, setLogFilterText] = useState('')
+  const [reloadCounter, setReloadCounter] = useState(0)
 
   useEffect(() => {
     let isActive = true
@@ -212,7 +214,7 @@ export function AdminLogsPage({ view = 'combined' }: AdminLogsPageProps) {
     return () => {
       isActive = false
     }
-  }, [view])
+  }, [view, reloadCounter])
 
   const clearTargetTable = resolveLogTableName(view)
   const filteredErrorLogs = filterLogEntriesByText(errorLogs, logFilterText)
@@ -319,7 +321,13 @@ export function AdminLogsPage({ view = 'combined' }: AdminLogsPageProps) {
                   className="min-w-45 border-0 bg-transparent p-0 text-sm text-slate-700 outline-none"
                 />
               </label>
-              <Button type="button" onClick={() => window.location.reload()}>
+              <Button
+                type="button"
+                onClick={() => {
+                  navigate(location.pathname, { replace: true })
+                  setReloadCounter((prev) => prev + 1)
+                }}
+              >
                 Refresh
               </Button>
             </div>

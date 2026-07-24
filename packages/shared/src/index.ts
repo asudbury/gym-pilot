@@ -13,7 +13,6 @@ export {
 export {
   ensureAuthenticatedSupabaseSession,
   getSupabaseClient,
-  signInWithGoogle,
   signInWithPassword,
   signUpWithPassword,
   listSupabaseAuthUsers,
