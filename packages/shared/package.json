@@ -1,0 +1,12 @@
+{
+  "name": "@gym-pilot/shared",
+  "version": "1.0.0",
+  "private": true,
+  "main": "./src/index.ts",
+  "type": "module",
+  "dependencies": {
+    "@gym-pilot/types": "1.0.0",
+    "@supabase/supabase-js": "^2.49.1",
+    "zod": "^4.4.3"
+  }
+}

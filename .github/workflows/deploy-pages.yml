@@ -1,0 +1,71 @@
+name: Deploy web app to GitHub Pages
+
+on:
+  push:
+    branches: [main, master]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+concurrency:
+  group: pages
+  cancel-in-progress: true
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    environment: dev
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+
+      - name: Install dependencies
+        run: npm install
+
+      - name: Create web env file from GitHub Environment variables
+        run: |
+          mkdir -p apps/web
+          APP_VERSION=$(node -p "require('./apps/web/package.json').version")
+          BUILD_DATE=$(date -u +'%Y-%m-%d')
+          BUILD_TIME=$(date -u +'%H:%M:%S UTC')
+          COMMIT_SHA=${GITHUB_SHA:-unknown}
+          BRANCH_NAME=${GITHUB_REF_NAME:-unknown}
+          cat > apps/web/.env <<EOF
+          VITE_SUPABASE_URL=${{ vars.VITE_SUPABASE_URL }}
+          VITE_SUPABASE_ANON_KEY=${{ vars.VITE_SUPABASE_ANON_KEY }}
+          VITE_AUTH_PROTECTION_ENABLED=${{ vars.VITE_AUTH_PROTECTION_ENABLED || 'true' }}
+          VITE_MIN_SEARCH_CHARS=${{ vars.VITE_MIN_SEARCH_CHARS || '3' }}
+          VITE_APP_VERSION=${APP_VERSION}
+          VITE_BUILD_DATE=${BUILD_DATE}
+          VITE_BUILD_TIME=${BUILD_TIME}
+          VITE_GIT_COMMIT_SHA=${COMMIT_SHA}
+          VITE_GIT_BRANCH=${BRANCH_NAME}
+          EOF
+
+      - name: Build web app
+        run: npm run build:web
+
+      - name: Upload Pages artifact
+        uses: actions/upload-pages-artifact@v3
+        with:
+          path: apps/web/dist
+
+  deploy:
+    needs: build
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - name: Deploy to GitHub Pages
+        id: deployment
+        uses: actions/deploy-pages@v4

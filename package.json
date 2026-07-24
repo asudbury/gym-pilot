@@ -1,0 +1,31 @@
+{
+  "name": "gym-pilot-monorepo",
+  "private": true,
+  "workspaces": [
+    "apps/*",
+    "packages/*"
+  ],
+  "scripts": {
+    "dev:web": "npm --workspace apps/web run dev",
+    "build:web": "npm --workspace apps/web run build",
+    "format:web": "npm --workspace apps/web run format",
+    "format:changed": "node scripts/check-prettier-changed.cjs",
+    "lint:web": "npm --workspace apps/web run lint",
+    "test:web": "npm --workspace apps/web run test",
+    "knip": "knip || true",
+    "verify": "npm run format:web && npm run lint:web && npm run test:web && npm run build && npm run knip",
+    "verify:precommit": "npm run format:web && npm run lint:web && npm run test:web && npm run build",
+    "sonar:up": "bash scripts/run-sonar-local.sh",
+    "sonar:analyze": "bash scripts/analyze-with-sonar.sh",
+    "prepare": "git config core.hooksPath .githooks || true",
+    "build": "npm run build:web"
+  },
+  "dependencies": {
+    "dexie": "^4.4.4",
+    "react-window": "^2.2.7"
+  },
+  "devDependencies": {
+    "@vitest/coverage-v8": "^4.1.10",
+    "knip": "^6.27.0"
+  }
+}

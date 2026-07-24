@@ -1,0 +1,123 @@
+import type { UserRole } from '@gym-pilot/types'
+import { normalizeUserRoles } from '@gym-pilot/shared'
+
+export type AdminProfileRow = {
+  id: string
+  name: string
+  applicationName?: string | null
+  roles: UserRole[]
+  email?: string | null
+  trainerId?: string | null
+  gymBrand?: string | null
+  gymName?: string | null
+  accountTier?: string | null
+  accessEndsAt?: string | null
+  isFrozen: boolean
+  mustChangePassword: boolean
+  lastLoggedInAt?: string | null
+  previousLastLoggedInAt?: string | null
+}
+
+export type AdminActionCard = {
+  title: string
+  description: string
+  href: string
+  label: string
+}
+
+export const adminCards: AdminActionCard[] = [
+  {
+    title: 'Preferences',
+    description: 'Manage your preferences.',
+    href: '/preferences',
+    label: 'Preferences',
+  },
+  {
+    title: 'Manage users',
+    description: 'Add, edit, or remove users from the application.',
+    href: '/admin/users',
+    label: 'Manage users',
+  },
+  {
+    title: 'App settings',
+    description:
+      'Update login, messaging, and logging settings for the whole application.',
+    href: '/admin/app-settings',
+    label: 'App settings',
+  },
+  {
+    title: 'Database',
+    description: "Manage the application's database.",
+    href: '/admin/database',
+    label: 'Database',
+  },
+  {
+    title: 'Logs',
+    description:
+      'Inspect persisted error and audit events for the application.',
+    href: '/admin/logs/error',
+    label: 'Logs',
+  },
+]
+
+export const availableAdminRoles: UserRole[] = ['admin', 'trainer', 'client']
+
+export function getDisplayEmail(email?: string | null): string {
+  return email?.trim() ? email.trim() : 'No email available'
+}
+
+export function getDisplayRoles(
+  roles?: Array<UserRole | string> | null,
+  fallbackRole?: UserRole,
+): UserRole[] {
+  return normalizeUserRoles(roles, fallbackRole)
+}
+
+export function mapAdminProfileRows(
+  rows: Array<{
+    user_id: string
+    friendly_name: string | null
+    email?: string | null
+    roles?: unknown
+    trainer_id?: string | null
+    application_name?: string | null
+    gym_brand?: string | null
+    account_tier?: string | null
+    access_ends_at?: string | null
+    is_frozen?: boolean
+    must_change_password?: boolean
+    last_logged_in_at?: string | null
+    previous_last_logged_in_at?: string | null
+  }>,
+  emailLookup: Map<string, string | null>,
+): AdminProfileRow[] {
+  return rows.map((row) => ({
+    id: row.user_id,
+    name:
+      typeof row.friendly_name === 'string' && row.friendly_name.trim()
+        ? row.friendly_name.trim()
+        : row.user_id,
+    roles: getDisplayRoles(Array.isArray(row.roles) ? row.roles : undefined),
+    applicationName:
+      typeof row.application_name === 'string' ? row.application_name : null,
+    gymBrand: typeof row.gym_brand === 'string' ? row.gym_brand : null,
+    gymName: null,
+    accountTier:
+      typeof row.account_tier === 'string' ? row.account_tier : 'free',
+    accessEndsAt:
+      typeof row.access_ends_at === 'string' ? row.access_ends_at : null,
+    isFrozen: Boolean(row.is_frozen),
+    email:
+      typeof row.email === 'string' && row.email.trim()
+        ? row.email.trim()
+        : (emailLookup.get(row.user_id) ?? null),
+    trainerId: typeof row.trainer_id === 'string' ? row.trainer_id : null,
+    mustChangePassword: Boolean(row.must_change_password),
+    lastLoggedInAt:
+      typeof row.last_logged_in_at === 'string' ? row.last_logged_in_at : null,
+    previousLastLoggedInAt:
+      typeof row.previous_last_logged_in_at === 'string'
+        ? row.previous_last_logged_in_at
+        : null,
+  }))
+}

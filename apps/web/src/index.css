@@ -1,0 +1,191 @@
+@import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap');
+@import 'tailwindcss';
+
+@custom-variant dark (&:where(.dark, .dark *));
+
+:root {
+  color-scheme: light;
+  --app-bg: #f8fafc;
+  --app-surface: #ffffff;
+  --app-surface-soft: #f8fafc;
+  --app-surface-muted: #f1f5f9;
+  --app-border: #e2e8f0;
+  --app-text: #0f172a;
+  --app-text-muted: #475569;
+  --app-text-subtle: #64748b;
+  font-family:
+    'Plus Jakarta Sans',
+    Inter,
+    system-ui,
+    -apple-system,
+    BlinkMacSystemFont,
+    'Segoe UI',
+    sans-serif;
+  line-height: 1.5;
+  font-weight: 400;
+  font-synthesis: none;
+  text-rendering: optimizeLegibility;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+html.dark {
+  color-scheme: dark;
+  --app-bg: #020617;
+  --app-surface: #0f172a;
+  --app-surface-soft: #111827;
+  --app-surface-muted: #1f2937;
+  --app-border: #334155;
+  --app-text: #f8fafc;
+  --app-text-muted: #cbd5e1;
+  --app-text-subtle: #94a3b8;
+}
+
+body {
+  margin: 0;
+  min-width: 320px;
+  min-height: 100vh;
+  background:
+    radial-gradient(
+      circle at top left,
+      rgba(59, 130, 246, 0.16),
+      transparent 30%
+    ),
+    radial-gradient(
+      circle at top right,
+      rgba(167, 139, 250, 0.16),
+      transparent 28%
+    ),
+    linear-gradient(135deg, #f8fafc 0%, #eff6ff 100%);
+  background-attachment: fixed;
+  color: var(--app-text);
+  transition:
+    background-color 200ms ease,
+    color 200ms ease;
+}
+
+html.dark body {
+  background:
+    radial-gradient(
+      circle at top left,
+      rgba(59, 130, 246, 0.24),
+      transparent 30%
+    ),
+    radial-gradient(
+      circle at top right,
+      rgba(236, 72, 153, 0.18),
+      transparent 28%
+    ),
+    linear-gradient(135deg, #020617 0%, #0f172a 100%);
+}
+
+html {
+  scroll-behavior: smooth;
+}
+
+#root {
+  min-height: 100vh;
+}
+
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+/* Ensure buttons show a pointer cursor by default and a not-allowed cursor when disabled. */
+button {
+  cursor: pointer;
+}
+
+button:disabled,
+button[disabled] {
+  cursor: not-allowed;
+}
+
+/* Base appearance for native button elements to match component buttons */
+button {
+  @apply rounded-full text-sm font-medium px-2 py-1 transition-colors;
+}
+
+/* Helper for destructive/outline rose buttons (Delete style) */
+.btn-destructive {
+  @apply rounded-full border border-rose-300 bg-rose-50 px-3 py-1.5 text-sm font-medium text-rose-700;
+}
+
+/* Generic helper so anchors can match Button look: use like <a class="btn">Open</a> */
+.btn {
+  @apply cursor-pointer inline-flex items-center rounded-full px-2 py-1 text-sm font-medium;
+}
+
+/* Tone helpers to match Button tones */
+.btn-default {
+  @apply border border-slate-200 bg-slate-50 text-slate-700 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-100;
+}
+.btn-white {
+  @apply border border-slate-200 bg-white text-slate-700 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-100;
+}
+.btn-emerald {
+  @apply border border-emerald-300 bg-emerald-50 text-emerald-700 px-2 py-1;
+}
+.btn-orange {
+  @apply border border-orange-300 bg-orange-50 text-orange-700;
+}
+.btn-rose {
+  @apply border border-rose-300 bg-rose-50 text-rose-700;
+}
+.btn-blue {
+  @apply border border-blue-300 bg-blue-50 text-blue-700;
+}
+.btn-destructive {
+  @apply border border-rose-300 bg-rose-50 text-rose-700 px-2 py-1;
+}
+
+html.dark .bg-white {
+  background-color: var(--app-surface) !important;
+}
+
+html.dark .bg-slate-50 {
+  background-color: var(--app-surface-soft) !important;
+}
+
+html.dark .bg-slate-100 {
+  background-color: var(--app-surface-muted) !important;
+}
+
+html.dark .border-slate-200 {
+  border-color: var(--app-border) !important;
+}
+
+html.dark .border-slate-300 {
+  border-color: var(--app-border) !important;
+}
+
+html.dark .text-slate-900 {
+  color: var(--app-text) !important;
+}
+
+html.dark .text-slate-800 {
+  color: var(--app-text-muted) !important;
+}
+
+html.dark .text-slate-700 {
+  color: var(--app-text-muted) !important;
+}
+
+html.dark .text-slate-600 {
+  color: var(--app-text-subtle) !important;
+}
+
+html.dark .text-slate-500 {
+  color: var(--app-text-subtle) !important;
+}
+
+html.dark .text-slate-400 {
+  color: #64748b !important;
+}
+
+html.dark .bg-slate-900 {
+  background-color: var(--app-surface-muted) !important;
+  color: var(--app-text) !important;
+}

@@ -1,0 +1,19 @@
+{
+  "name": "Gym-Pilot",
+  "short_name": "Gym-Pilot",
+  "description": "Gym-Pilot planning and training workspace",
+  "id": "./",
+  "start_url": "./",
+  "scope": "./",
+  "display": "standalone",
+  "background_color": "#f8f5ff",
+  "theme_color": "#863bff",
+  "icons": [
+    {
+      "src": "./app-icon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any"
+    }
+  ]
+}

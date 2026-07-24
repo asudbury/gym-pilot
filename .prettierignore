@@ -1,0 +1,15 @@
+node_modules/
+dist/
+dist-ssr/
+coverage/
+.next/
+.turbo/
+.cache/
+.parcel-cache/
+.eslintcache/
+apps/web/dist/
+apps/web/coverage/
+apps/mobile/dist/
+apps/mobile/.expo/
+apps/mobile/android/
+apps/mobile/ios/
