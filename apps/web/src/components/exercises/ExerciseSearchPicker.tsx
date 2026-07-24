@@ -58,7 +58,6 @@ export const ExerciseSearchField = forwardRef<
           <input
             ref={ref}
             id={id}
-            type="text"
             value={value}
             onChange={(event) => onChange?.(event.target.value)}
             placeholder={placeholder}
