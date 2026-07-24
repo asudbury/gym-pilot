@@ -1,4 +1,4 @@
-import type { ToneName } from '../toneClasses'
+import { type ToneName } from '../toneClasses'
 import { Button } from './Button'
 import { DecorativeIcon, type DecorativeIconProps } from './DecorativeIcon'
 
