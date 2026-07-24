@@ -15,7 +15,6 @@ $$;
 -- matches the new schema layout. Auth tables under auth.* are preserved.
 do $$
 begin
-  drop table if exists public.gym_pilot_class_attendance cascade;
   drop table if exists public.gym_pilot_user_activity cascade;
   drop table if exists public.gym_pilot_assignment cascade;
   drop table if exists public.gym_pilot_plan cascade;
@@ -25,7 +24,6 @@ begin
   drop table if exists public.gym_pilot_user_role cascade;
   drop table if exists public.gym_pilot_app_state cascade;
 
-  drop table if exists public.class_attendance cascade;
   drop table if exists public.favorite cascade;
   drop table if exists public.favorite_folder cascade;
 end
@@ -551,70 +549,13 @@ begin
 end
 $$;
 
-create table public.gym_pilot_class_attendance (
-  id uuid primary key default gen_random_uuid(),
-  user_id uuid references auth.users(id) on delete cascade not null,
-  session_id text null,
-  class_id text null,
-  class_name text null,
-  instructor_name text null,
-  started_at timestamptz null,
-  attendance_type text not null check (attendance_type in ('attended', 'taught')),
-  notes text null,
-  created_at timestamptz not null default now(),
-  updated_at timestamptz not null default now()
-);
 
-drop trigger if exists set_updated_at on public.gym_pilot_class_attendance;
-create trigger set_updated_at
-before update on public.gym_pilot_class_attendance
-for each row execute function public.set_updated_at();
 
-alter table public.gym_pilot_class_attendance enable row level security;
 
-do $$
-begin
-  if not exists (
-    select 1
-    from pg_policies
-    where schemaname = 'public'
-      and tablename = 'gym_pilot_class_attendance'
-      and policyname = 'class_attendance_select_own'
-  ) then
-    create policy class_attendance_select_own
-      on public.gym_pilot_class_attendance
-      for select
-      using (auth.uid() = user_id);
-  end if;
 
-  if not exists (
-    select 1
-    from pg_policies
-    where schemaname = 'public'
-      and tablename = 'gym_pilot_class_attendance'
-      and policyname = 'class_attendance_insert_own'
-  ) then
-    create policy class_attendance_insert_own
-      on public.gym_pilot_class_attendance
-      for insert
-      with check (auth.uid() = user_id);
-  end if;
 
-  if not exists (
-    select 1
-    from pg_policies
-    where schemaname = 'public'
-      and tablename = 'gym_pilot_class_attendance'
-      and policyname = 'class_attendance_update_own'
-  ) then
-    create policy class_attendance_update_own
-      on public.gym_pilot_class_attendance
-      for update
-      using (auth.uid() = user_id)
-      with check (auth.uid() = user_id);
-  end if;
-end
-$$;
+
+
 
 -- Legacy rename support for older databases that still have the american-spelling names.
 do $$

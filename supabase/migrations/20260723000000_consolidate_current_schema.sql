@@ -122,20 +122,6 @@ create table if not exists public.gym_pilot_user_activity (
   created_at timestamptz not null default now()
 );
 
-create table if not exists public.gym_pilot_class_attendance (
-  id uuid primary key default gen_random_uuid(),
-  user_id uuid references auth.users(id) on delete cascade not null,
-  session_id text,
-  class_id text,
-  class_name text,
-  instructor_name text,
-  started_at timestamptz,
-  attendance_type text not null check (attendance_type in ('attended', 'taught')),
-  notes text,
-  rating smallint,
-  created_at timestamptz not null default now(),
-  updated_at timestamptz not null default now()
-);
 
 create table if not exists public.gym_pilot_user_session (
   id uuid primary key default gen_random_uuid(),
@@ -214,7 +200,6 @@ alter table public.gym_pilot_favourite enable row level security;
 alter table public.gym_pilot_plan enable row level security;
 alter table public.gym_pilot_assignment enable row level security;
 alter table public.gym_pilot_user_activity enable row level security;
-alter table public.gym_pilot_class_attendance enable row level security;
 alter table public.gym_pilot_user_session enable row level security;
 alter table public.gym_pilot_user_session_workout_item enable row level security;
 alter table public.gym_pilot_app_setting enable row level security;
@@ -325,14 +310,6 @@ begin
   ) then
     create trigger gym_pilot_assignment_set_updated_at
     before update on public.gym_pilot_assignment
-    for each row execute function public.set_updated_at();
-  end if;
-
-  if not exists (
-    select 1 from pg_trigger where tgname = 'gym_pilot_class_attendance_set_updated_at'
-  ) then
-    create trigger gym_pilot_class_attendance_set_updated_at
-    before update on public.gym_pilot_class_attendance
     for each row execute function public.set_updated_at();
   end if;
 
