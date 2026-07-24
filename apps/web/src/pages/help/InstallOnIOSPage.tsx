@@ -30,7 +30,7 @@ function InstallOnIOSPage() {
   return (
     <PageLayout>
       <PageCardLayout
-        title="Install Gym-Pilot on iPhone (iOS)"
+        title="Install on iPhone"
         subtitle="Turn Gym-Pilot into an app on your Home Screen"
       >
         <div className="flex flex-col gap-4">
