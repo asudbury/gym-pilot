@@ -27,9 +27,9 @@ const ActionButton = ({
     )}
   >
     <DesktopOnly>
-    <span>
-      <DecorativeIcon icon={icon} className={iconClass} />
-    </span>
+      <span>
+        <DecorativeIcon icon={icon} className={iconClass} />
+      </span>
     </DesktopOnly>
 
     <DesktopOnly>
