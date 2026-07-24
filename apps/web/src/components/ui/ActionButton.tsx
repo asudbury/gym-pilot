@@ -26,9 +26,12 @@ const ActionButton = ({
       'flex w-full items-center justify-center rounded-lg px-4 py-3 text-base font-medium sm:w-auto sm:py-2 sm:text-sm',
     )}
   >
+    <DesktopOnly>
     <span>
       <DecorativeIcon icon={icon} className={iconClass} />
     </span>
+    </DesktopOnly>
+
     <DesktopOnly>
       <span>{label}</span>
     </DesktopOnly>
