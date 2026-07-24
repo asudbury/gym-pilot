@@ -8,6 +8,11 @@ import { BackLink } from '../components/ui/BackLink'
 import { Button } from '../components/ui/Button'
 import type { Exercise } from '@gym-pilot/shared'
 import { useNavigate } from 'react-router-dom'
+import {
+  DesktopOnly,
+  NotOnDesktop,
+} from '../components/visibility/DeviceVisibility'
+import { MobileExerciseSearchPicker } from '../components/exercises/MobileExerciseSearchPicker'
 
 function SessionTemplateCreatePage() {
   const [selectedExercises, setSelectedExercises] = useState<Exercise[]>([])
@@ -66,15 +71,23 @@ function SessionTemplateCreatePage() {
 
         <div className="mt-6 grid grid-cols-1 gap-6">
           <div>
-            <h2 className="text-lg font-semibold">Available Exercises</h2>
             <div className="mt-4 space-y-2">
-              <ExerciseSearchPicker
-                value={searchValue}
-                onChange={setSearchValue}
-                onSelectExercise={(exercise) => {
-                  addExercise(exercise)
-                }}
-              />
+              <DesktopOnly>
+                <ExerciseSearchPicker
+                  value={searchValue}
+                  onChange={setSearchValue}
+                  onSelectExercise={(exercise) => {
+                    addExercise(exercise)
+                  }}
+                />
+              </DesktopOnly>
+              <NotOnDesktop>
+                <MobileExerciseSearchPicker
+                  onSelectExercise={(exercise) => {
+                    addExercise(exercise)
+                  }}
+                />
+              </NotOnDesktop>
             </div>
           </div>
           <div>

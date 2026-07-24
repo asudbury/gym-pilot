@@ -9,6 +9,8 @@ import {
 } from '@gym-pilot/shared'
 import { Button } from './ui/Button'
 import { ExerciseSearchPicker } from './exercises/ExerciseSearchPicker'
+import { MobileExerciseSearchPicker } from './exercises/MobileExerciseSearchPicker'
+import { DesktopOnly, NotOnDesktop } from './visibility/DeviceVisibility'
 import { appTokens } from '../constants/tokens'
 import { formatLabel } from '../utils/formatUtils'
 import { getExercisePath } from '../utils/exerciseRouteUtils'
@@ -76,17 +78,26 @@ export function SessionWorkoutEditor({
       <div className="rounded-2xl border border-slate-200 bg-white p-3 shadow-sm">
         <div className="flex flex-col gap-2 md:flex-row md:items-center">
           <div className="flex-1" data-testid="quick-add-exercise-picker">
-            <ExerciseSearchPicker
-              id="quick-add-exercise-picker"
-              label="Quick add exercise"
-              value={draftExerciseName}
-              placeholder="Quick add exercise"
-              className="w-full"
-              onChange={(nextValue) => setDraftExerciseName(nextValue)}
-              onSelectExercise={(exercise) => {
-                setDraftExerciseName(formatLabel(exercise.name))
-              }}
-            />
+            <DesktopOnly>
+              <ExerciseSearchPicker
+                id="quick-add-exercise-picker"
+                label="Quick add exercise"
+                value={draftExerciseName}
+                placeholder="Quick add exercise"
+                className="w-full"
+                onChange={(nextValue) => setDraftExerciseName(nextValue)}
+                onSelectExercise={(exercise) => {
+                  setDraftExerciseName(formatLabel(exercise.name))
+                }}
+              />
+            </DesktopOnly>
+            <NotOnDesktop>
+              <MobileExerciseSearchPicker
+                onSelectExercise={(exercise) => {
+                  setDraftExerciseName(formatLabel(exercise.name))
+                }}
+              />
+            </NotOnDesktop>
           </div>
           <div className="flex flex-wrap gap-2">
             <input

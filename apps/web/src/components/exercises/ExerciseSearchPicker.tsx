@@ -45,10 +45,9 @@ export const ExerciseSearchField = forwardRef<
     {
       id = 'exercise-search',
       value = '',
-      placeholder = 'Try abs, chest, cable...',
+      placeholder = 'Search for exercise...',
       className,
       onChange,
-      onClear,
     },
     ref,
   ) => {
@@ -68,18 +67,7 @@ export const ExerciseSearchField = forwardRef<
             spellCheck={false}
             enterKeyHint="search"
             className={`${appTokens.input} h-10 w-full pr-16 text-sm outline-none ring-0 focus:border-slate-400 sm:pr-24`}
-          />  
-
-          {value && (
-            <Button
-              type="button"
-              onClick={onClear}
-              className="absolute inset-y-0 right-2 flex items-center px-2 text-xs text-slate-400 transition hover:text-slate-600 sm:right-3 sm:text-sm"
-              aria-label="Clear search"
-            >
-              Clear
-            </Button>
-          )}
+          />
         </div>
       </div>
     )
@@ -121,7 +109,7 @@ function ExerciseSearchSuggestions({
 export function ExerciseSearchPicker({
   id = 'exercise-search',
   value = '',
-  placeholder = 'Try abs, chest, cable...',
+  placeholder = 'Search for exercise...',
   className,
   onChange,
   onSelectExercise,
