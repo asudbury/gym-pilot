@@ -1,4 +1,11 @@
-import { useDeferredValue, useEffect, useMemo, useState } from 'react'
+import {
+  useDeferredValue,
+  useEffect,
+  useMemo,
+  useState,
+  forwardRef,
+  useRef,
+} from 'react'
 import { exercises } from '@gym-pilot/shared'
 import { formatLabel } from '../../utils/formatUtils'
 import { Button } from '../ui/Button'
@@ -30,40 +37,49 @@ type ExerciseSearchPickerProps = {
   onSelectExercise?: (exercise: (typeof exercises)[number]) => void
 }
 
-export function ExerciseSearchField({
-  id = 'exercise-search',
-  value = '',
-  placeholder = 'Try abs, chest, cable...',
-  className,
-  onChange,
-  onClear,
-}: ExerciseSearchFieldProps) {
-  return (
-    <div className={className}>
-      <div className="relative w-full">
-        <input
-          id={id}
-          type="text"
-          value={value}
-          onChange={(event) => onChange?.(event.target.value)}
-          placeholder={placeholder}
-          className={`${appTokens.input} h-10 w-full pr-16 text-sm outline-none ring-0 focus:border-slate-400 sm:pr-24`}
-        />
+export const ExerciseSearchField = forwardRef<
+  HTMLInputElement,
+  ExerciseSearchFieldProps
+>(
+  (
+    {
+      id = 'exercise-search',
+      value = '',
+      placeholder = 'Try abs, chest, cable...',
+      className,
+      onChange,
+      onClear,
+    },
+    ref,
+  ) => {
+    return (
+      <div className={className}>
+        <div className="relative w-full">
+          <input
+            ref={ref}
+            id={id}
+            type="text"
+            value={value}
+            onChange={(event) => onChange?.(event.target.value)}
+            placeholder={placeholder}
+            className={`${appTokens.input} h-10 w-full pr-16 text-sm outline-none ring-0 focus:border-slate-400 sm:pr-24`}
+          />
 
-        {value && (
-          <Button
-            type="button"
-            onClick={onClear}
-            className="absolute inset-y-0 right-2 flex items-center px-2 text-xs text-slate-400 transition hover:text-slate-600 sm:right-3 sm:text-sm"
-            aria-label="Clear search"
-          >
-            Clear
-          </Button>
-        )}
+          {value && (
+            <Button
+              type="button"
+              onClick={onClear}
+              className="absolute inset-y-0 right-2 flex items-center px-2 text-xs text-slate-400 transition hover:text-slate-600 sm:right-3 sm:text-sm"
+              aria-label="Clear search"
+            >
+              Clear
+            </Button>
+          )}
+        </div>
       </div>
-    </div>
-  )
-}
+    )
+  },
+)
 
 function ExerciseSearchSuggestions({
   suggestions,
@@ -105,6 +121,7 @@ export function ExerciseSearchPicker({
   onChange,
   onSelectExercise,
 }: ExerciseSearchPickerProps) {
+  const inputRef = useRef<HTMLInputElement>(null)
   const [draftValue, setDraftValue] = useState(value)
   const [showSuggestions, setShowSuggestions] = useState(false)
   const deferredValue = useDeferredValue(draftValue)
@@ -112,7 +129,10 @@ export function ExerciseSearchPicker({
 
   useEffect(() => {
     setDraftValue(value)
-  }, [value])
+    if (value === '' && draftValue === '') {
+      inputRef.current?.focus()
+    }
+  }, [value, draftValue])
 
   const hasSearchThreshold = trimmedValue.length >= MIN_SEARCH_CHARS
 
@@ -151,16 +171,14 @@ export function ExerciseSearchPicker({
   }
 
   const handleSelectExercise = (exercise: (typeof exercises)[number]) => {
-    const nextValue = formatLabel(exercise.name)
-    setDraftValue(nextValue)
     setShowSuggestions(false)
-    onChange?.(nextValue)
     onSelectExercise?.(exercise)
   }
 
   return (
     <div className={className}>
       <ExerciseSearchField
+        ref={inputRef}
         id={id}
         value={draftValue}
         placeholder={placeholder}
