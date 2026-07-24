@@ -27,10 +27,6 @@ export function DashboardPage() {
       ? selectedRole
       : viewModel.selectedLayoutKey
 
-  // If the user does not have a gym/club id (stored in `gymName`), hide
-  // timetable and attendance widgets which require a club context.
-
-  console.log(JSON.stringify(user))
 
   const canShowTimetable = Boolean(user?.gymName && user.gymName.trim())
   const hasTrainerConfigured = Boolean(user?.trainerId?.trim())
@@ -126,14 +122,6 @@ export function DashboardPage() {
 
         {filteredSelectedLayout ? (
           <div className="space-y-2">
-            <div className="space-y-1">
-              {/* <h2 className="text-xl font-semibold text-slate-900 dark:text-slate-100">
-                {filteredSelectedLayout.title}
-              </h2>
-              <p className="text-sm text-slate-600 dark:text-slate-300">
-                {filteredSelectedLayout.description}
-              </p> */}
-            </div>
             {renderDashboardWidgets(filteredLayouts, selectedLayoutKey)}
           </div>
         ) : null}
