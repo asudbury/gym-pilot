@@ -9,8 +9,8 @@ import {
 } from '@gym-pilot/shared'
 import { Button } from './ui/Button'
 import { ExerciseSearchPicker } from './exercises/ExerciseSearchPicker'
+import { ItemControls } from './ItemControls'
 import { MobileExerciseSearchPicker } from './exercises/MobileExerciseSearchPicker'
-import { DesktopOnly, NotOnDesktop } from './visibility/DeviceVisibility'
 import { appTokens } from '../constants/tokens'
 import { formatLabel } from '../utils/formatUtils'
 import { getExercisePath } from '../utils/exerciseRouteUtils'
@@ -73,31 +73,16 @@ export function SessionWorkoutEditor({
 
   return (
     <div
-      className={`space-y-3 rounded-2xl border border-slate-200 bg-slate-50 p-3 ${className}`.trim()}
+      className={`space-y-3 rounded-2xl border border-slate-200 bg-slate-50 p-3 ${className}`}
     >
       <div className="rounded-2xl border border-slate-200 bg-white p-3 shadow-sm">
         <div className="flex flex-col gap-2 md:flex-row md:items-center">
           <div className="flex-1" data-testid="quick-add-exercise-picker">
-            <DesktopOnly>
-              <ExerciseSearchPicker
-                id="quick-add-exercise-picker"
-                label="Quick add exercise"
-                value={draftExerciseName}
-                placeholder="Quick add exercise"
-                className="w-full"
-                onChange={(nextValue) => setDraftExerciseName(nextValue)}
-                onSelectExercise={(exercise) => {
-                  setDraftExerciseName(formatLabel(exercise.name))
-                }}
-              />
-            </DesktopOnly>
-            <NotOnDesktop>
-              <MobileExerciseSearchPicker
-                onSelectExercise={(exercise) => {
-                  setDraftExerciseName(formatLabel(exercise.name))
-                }}
-              />
-            </NotOnDesktop>
+            <MobileExerciseSearchPicker
+              onSelectExercise={(exercise) => {
+                setDraftExerciseName(formatLabel(exercise.name))
+              }}
+            />
           </div>
           <div className="flex flex-wrap gap-2">
             <input
@@ -164,41 +149,16 @@ export function SessionWorkoutEditor({
                   </div>
                 </div>
               </div>
-              <div className="flex flex-wrap gap-2 md:justify-end">
-                <Button
-                  type="button"
-                  tone="default"
-                  className="px-2 py-1 text-xs"
-                  onClick={() =>
-                    onChange(reorderSessionWorkoutItem(items, item.id, 'up'))
-                  }
-                  disabled={index === 0}
-                  aria-label={`Move ${item.exerciseName || 'item'} up`}
-                >
-                  ↑
-                </Button>
-                <Button
-                  type="button"
-                  tone="default"
-                  className="px-2 py-1 text-xs"
-                  onClick={() =>
-                    onChange(reorderSessionWorkoutItem(items, item.id, 'down'))
-                  }
-                  disabled={index === items.length - 1}
-                  aria-label={`Move ${item.exerciseName || 'item'} down`}
-                >
-                  ↓
-                </Button>
-                <Button
-                  type="button"
-                  tone="destructive"
-                  onClick={() =>
-                    onChange(removeSessionWorkoutItem(items, item.id))
-                  }
-                >
-                  Remove
-                </Button>
-              </div>
+              <ItemControls
+                item={item}
+                onReorder={(id, direction) =>
+                  onChange(reorderSessionWorkoutItem(items, id, direction))
+                }
+                onRemove={(id) => onChange(removeSessionWorkoutItem(items, id))}
+                getItemName={(item) => item.exerciseName || 'item'}
+                isFirst={index === 0}
+                isLast={index === items.length - 1}
+              />
             </div>
 
             {isExpanded ? (

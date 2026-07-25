@@ -8,6 +8,7 @@ import { Button } from '../components/ui/Button'
 import type { Exercise } from '@gym-pilot/shared'
 import { useNavigate } from 'react-router-dom'
 import { MobileExerciseSearchPicker } from '../components/exercises/MobileExerciseSearchPicker'
+import { ItemControls } from '../components/ItemControls'
 
 function SessionTemplateCreatePage() {
   const [selectedExercises, setSelectedExercises] = useState<Exercise[]>([])
@@ -38,10 +39,6 @@ function SessionTemplateCreatePage() {
 
   const addExercise = (exercise: Exercise) => {
     setSelectedExercises((prev) => [...prev, exercise])
-  }
-
-  const removeExercise = (exercise: Exercise) => {
-    setSelectedExercises((prev) => prev.filter((e) => e.id !== exercise.id))
   }
 
   const handleReorder = (exerciseId: string, direction: 'up' | 'down') => {
@@ -77,29 +74,22 @@ function SessionTemplateCreatePage() {
             <div className="mt-4 space-y-2">
               {selectedExercises.map((exercise, index) => (
                 <div
-                  key={exercise.id}
+                  key={exercise.id + index}
                   className="flex items-center justify-between rounded-md border p-2"
                 >
                   <span>{exercise.name}</span>
-                  <div className="flex items-center gap-2">
-                    <Button
-                      onClick={() => handleReorder(exercise.id, 'up')}
-                      disabled={index === 0}
-                      aria-label="Move up"
-                    >
-                      ↑
-                    </Button>
-                    <Button
-                      onClick={() => handleReorder(exercise.id, 'down')}
-                      disabled={index === selectedExercises.length - 1}
-                      aria-label="Move down"
-                    >
-                      ↓
-                    </Button>
-                    <Button onClick={() => removeExercise(exercise)}>
-                      Remove
-                    </Button>
-                  </div>
+                  <ItemControls
+                    item={exercise}
+                    onRemove={(id) =>
+                      setSelectedExercises((prev) =>
+                        prev.filter((e) => e.id + index !== id + index),
+                      )
+                    }
+                    onReorder={handleReorder}
+                    getItemName={(item) => item.name || 'item'}
+                    isFirst={false}
+                    isLast={false}
+                  />
                 </div>
               ))}
             </div>
