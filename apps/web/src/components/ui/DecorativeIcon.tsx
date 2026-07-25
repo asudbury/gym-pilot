@@ -1,31 +1,32 @@
 export type DecorativeIconProps = {
   icon?:
-    | 'spark'
-    | 'dumbbell'
-    | 'search'
-    | 'star'
+    | 'back'
+    | 'calendar'
     | 'chart'
-    | 'lock'
+    | 'check'
+    | 'clipboard'
+    | 'close'
+    | 'database'
+    | 'document'
+    | 'dumbbell'
+    | 'edit'
     | 'grid'
     | 'heart'
-    | 'clipboard'
-    | 'shield'
-    | 'calendar'
     | 'help'
     | 'home'
-    | 'tasks'
-    | 'users'
-    | 'database'
-    | 'settings'
     | 'key'
-    | 'user'
+    | 'lock'
     | 'preferences'
-    | 'document'
-    | 'edit'
-    | 'trash'
-    | 'check'
-    | 'close'
+    | 'search'
+    | 'settings'
     | 'share'
+    | 'shield'
+    | 'spark'
+    | 'star'
+    | 'tasks'
+    | 'trash'
+    | 'user'
+    | 'users'
     | null
   className?: string
   withContainer?: boolean
@@ -42,6 +43,7 @@ import {
   HeartIcon,
   ClipboardIcon,
   ShieldIcon,
+  BackIcon,
   CalendarIcon,
   HelpIcon,
   HomeIcon,
@@ -64,6 +66,7 @@ const baseClasses =
   'flex h-11 w-11 items-center justify-center rounded-2xl border border-slate-200 bg-slate-50 text-slate-700 shadow-sm dark:border-slate-700 dark:bg-slate-900/70 dark:text-slate-200'
 
 const iconComponents = {
+  back: BackIcon,
   calendar: CalendarIcon,
   chart: ChartIcon,
   check: CheckIcon,

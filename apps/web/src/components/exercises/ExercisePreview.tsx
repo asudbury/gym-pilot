@@ -4,6 +4,7 @@ import { Button } from '../ui/Button'
 import { ExerciseImage } from './ExerciseImage'
 import { ExerciseMetaBadges } from './ExerciseMetaBadges'
 import { ExerciseSteps } from './ExerciseSteps'
+import { DecorativeIcon } from '../ui/DecorativeIcon'
 
 type Exercise = (typeof exercises)[number]
 
@@ -26,7 +27,8 @@ export function ExercisePreview({
           onClick={onClose}
           className="text-sm text-slate-600"
         >
-          &larr; Back to Search
+          <DecorativeIcon icon="back" className="mr-2 h-4 w-4" />
+          Back to Search
         </Button>
         <Button type="button" onClick={() => onSelect(exercise)} tone="blue">
           Select Exercise
