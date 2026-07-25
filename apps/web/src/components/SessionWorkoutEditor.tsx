@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import {
   addSessionWorkoutItem,
   normalizeSessionWorkoutCategory,
@@ -15,6 +15,7 @@ import { appTokens } from '../constants/tokens'
 import { formatLabel } from '../utils/formatUtils'
 import { getExercisePath } from '../utils/exerciseRouteUtils'
 import { useIsDesktop } from '../utils/useMediaQuery'
+import clsx from 'clsx'
 
 type SessionWorkoutEditorProps = {
   items: SessionWorkoutItem[]
@@ -46,10 +47,20 @@ export function SessionWorkoutEditor({
   const [expandedItemId, setExpandedItemId] = useState<string | null>(() =>
     resolveExpandedWorkoutItemId(items, null),
   )
+  const [moved, setMoved] = useState<string | null>(null)
   const [draftExerciseName, setDraftExerciseName] = useState('')
   const [draftSets, setDraftSets] = useState('')
   const [draftReps, setDraftReps] = useState('')
   const [draftWeight, setDraftWeight] = useState('')
+
+  useEffect(() => {
+    if (moved) {
+      const timer = setTimeout(() => {
+        setMoved(null)
+      }, 500)
+      return () => clearTimeout(timer)
+    }
+  }, [moved])
 
   const handleExpandItem = (itemId: string) => {
     setExpandedItemId((current) => (current === itemId ? null : itemId))
@@ -124,7 +135,12 @@ export function SessionWorkoutEditor({
         return (
           <div
             key={item.id}
-            className="rounded-2xl border border-slate-200 bg-white p-3"
+            className={clsx(
+              'rounded-2xl border border-slate-200 bg-white p-3 transition-colors',
+              {
+                'bg-yellow-100': moved === item.id,
+              },
+            )}
           >
             <div className="flex flex-col gap-2 md:flex-row md:items-center">
               <div className="flex flex-1 items-center gap-2">
@@ -156,9 +172,19 @@ export function SessionWorkoutEditor({
                 onRemove={() =>
                   onChange(removeSessionWorkoutItem(items, index))
                 }
-                onReorder={(direction) =>
-                  onChange(reorderSessionWorkoutItem(items, index, direction))
-                }
+                onReorder={(direction) => {
+                  const reorderedItems = reorderSessionWorkoutItem(
+                    items,
+                    index,
+                    direction,
+                  )
+                  const movedItem =
+                    reorderedItems[direction === 'up' ? index - 1 : index + 1]
+                  if (movedItem) {
+                    setMoved(movedItem.id)
+                  }
+                  onChange(reorderedItems)
+                }}
                 isFirst={index === 0}
                 isLast={index === items.length - 1}
                 removeText={isDesktop}
@@ -345,3 +371,4 @@ export function SessionWorkoutEditor({
     </div>
   )
 }
+

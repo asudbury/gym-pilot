@@ -6,6 +6,7 @@ import { MIN_SEARCH_CHARS } from '../../constants/home'
 import { Modal } from '../ui/Modal'
 import { ExerciseSearchField } from './ExerciseSearchPicker'
 import { DecorativeIcon } from '../ui/DecorativeIcon'
+import quickPickExercises from '../../constants/quickPickExercises.json'
 import { ExercisePreview } from './ExercisePreview'
 
 type Exercise = (typeof exercises)[number]
@@ -65,6 +66,10 @@ export function MobileExerciseSearchPicker({
     setPreviewExercise(null)
   }
 
+  const handleQuickPick = (exercise: Exercise) => {
+    handleSelectExercise(exercise)
+  }
+
   return (
     <>
       <Button onClick={() => setIsOpen(true)} tone="blue">
@@ -95,6 +100,18 @@ export function MobileExerciseSearchPicker({
               >
                 Cancel
               </Button>
+            </div>
+            <div className="flex flex-wrap gap-2 p-4 border-b border-slate-200">
+              {(quickPickExercises as Exercise[]).map((category) => (
+                <Button
+                  key={category.id}
+                  type="button"
+                  className="px-3 py-1 text-sm"
+                  onClick={() => handleQuickPick(category)}
+                >
+                  {category.name}
+                </Button>
+              ))}
             </div>
             <div className="flex-1 overflow-y-auto">
               {suggestions.length > 0 ? (

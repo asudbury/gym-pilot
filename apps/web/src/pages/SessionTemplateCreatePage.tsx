@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { PageLayout } from '../layouts/PageLayout'
 import { PageCard } from '../components/PageCard'
 import { Heading1, Paragraph } from '../components/Typography'
@@ -10,14 +10,25 @@ import { useNavigate } from 'react-router-dom'
 import { MobileExerciseSearchPicker } from '../components/exercises/MobileExerciseSearchPicker'
 import { ItemControls } from '../components/ItemControls'
 import { useIsDesktop } from '../utils/useMediaQuery'
+import clsx from 'clsx'
 
 function SessionTemplateCreatePage() {
   const [selectedExercises, setSelectedExercises] = useState<
     { id: string; name: string }[]
   >([])
+  const [moved, setMoved] = useState<string | null>(null)
 
   const navigate = useNavigate()
   const isDesktop = useIsDesktop()
+
+  useEffect(() => {
+    if (moved) {
+      const timer = setTimeout(() => {
+        setMoved(null)
+      }, 500)
+      return () => clearTimeout(timer)
+    }
+  }, [moved])
 
   function reorder<T>(
     items: T[],
@@ -47,7 +58,14 @@ function SessionTemplateCreatePage() {
   }
 
   const handleReorder = (index: number, direction: 'up' | 'down') => {
-    setSelectedExercises((prev) => reorder(prev, index, direction))
+    setSelectedExercises((prev) => {
+      const reordered = reorder(prev, index, direction)
+      const movedItem = reordered[direction === 'up' ? index - 1 : index + 1]
+      if (movedItem) {
+        setMoved(movedItem.id)
+      }
+      return reordered
+    })
   }
 
   return (
@@ -80,7 +98,12 @@ function SessionTemplateCreatePage() {
               {selectedExercises.map((exercise, i) => (
                 <div
                   key={exercise.id}
-                  className="flex items-center justify-between rounded-md border p-2"
+                  className={clsx(
+                    'flex items-center justify-between rounded-md border p-2 transition-colors',
+                    {
+                      'bg-blue-100': moved === exercise.id,
+                    },
+                  )}
                 >
                   <span>{exercise.name}</span>
                   <ItemControls
