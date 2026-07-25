@@ -66,3 +66,8 @@
 
 - Continue to support the current routing, Supabase-backed data flows, and plan/assignment builder experience.
 - Preserve the current app behavior for auth, favorites, plans, assignments, admin, and timetable features while improving structure.
+
+## UI and component conventions
+
+- When adding new icons to `DecorativeIcon.tsx`, please ensure the `iconComponents` object remains alphabetized by key.
+
