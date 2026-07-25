@@ -85,6 +85,14 @@ export function addSessionWorkoutItem(
   return [...items, createSessionWorkoutItem(input)];
 }
 
+export function addSessionWorkoutItems(
+  items: SessionWorkoutItem[],
+  inputs: (Partial<SessionWorkoutItem> &
+    Pick<SessionWorkoutItem, "category" | "exerciseName">)[],
+): SessionWorkoutItem[] {
+  return [...items, ...inputs.map(createSessionWorkoutItem)];
+}
+
 export function summarizeSessionWorkoutItem(
   item: Partial<SessionWorkoutItem>,
 ): string {

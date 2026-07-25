@@ -6,10 +6,12 @@ import { DecorativeIcon } from '../components/ui/DecorativeIcon'
 import { BackLink } from '../components/ui/BackLink'
 import { Button } from '../components/ui/Button'
 import type { Exercise } from '@gym-pilot/shared'
-import { useNavigate } from 'react-router-dom'
-import { MobileExerciseSearchPicker } from '../components/exercises/MobileExerciseSearchPicker'
+import { useNavigate, NavLink } from 'react-router-dom'
+import { ExerciseMultiPicker } from '../components/exercises/ExerciseMultiPicker'
 import { ItemControls } from '../components/ItemControls'
 import { useIsDesktop } from '../utils/useMediaQuery'
+import { getExercisePath } from '../utils/exerciseRouteUtils'
+import { formatLabel } from '../utils/formatUtils'
 import clsx from 'clsx'
 
 function SessionTemplateCreatePage() {
@@ -17,6 +19,7 @@ function SessionTemplateCreatePage() {
     { id: string; name: string }[]
   >([])
   const [moved, setMoved] = useState<string | null>(null)
+  const [showExercisePicker, setShowExercisePicker] = useState(false)
 
   const navigate = useNavigate()
   const isDesktop = useIsDesktop()
@@ -53,8 +56,8 @@ function SessionTemplateCreatePage() {
     return nextItems
   }
 
-  const addExercise = (exercise: Exercise) => {
-    setSelectedExercises((prev) => [...prev, exercise])
+  const addExercises = (exercises: Exercise[]) => {
+    setSelectedExercises((prev) => [...prev, ...exercises])
   }
 
   const handleReorder = (index: number, direction: 'up' | 'down') => {
@@ -84,13 +87,21 @@ function SessionTemplateCreatePage() {
 
         <div className="mt-6 grid grid-cols-1 gap-6">
           <div>
-            <div className="mt-4 space-y-2">
-              <MobileExerciseSearchPicker
-                onSelectExercise={(exercise) => {
-                  addExercise(exercise)
-                }}
-              />
-            </div>
+            <Button
+              type="button"
+              tone="blue"
+              onClick={() => setShowExercisePicker(true)}
+            >
+              Add Exercises
+            </Button>
+            <ExerciseMultiPicker
+              isOpen={showExercisePicker}
+              onSelectExercises={(exercises) => {
+                addExercises(exercises)
+                setShowExercisePicker(false)
+              }}
+              onCancel={() => setShowExercisePicker(false)}
+            />
           </div>
           <div>
             <h2 className="text-lg font-semibold">Selected Exercises</h2>
@@ -105,19 +116,27 @@ function SessionTemplateCreatePage() {
                     },
                   )}
                 >
-                  <span>{exercise.name}</span>
-                  <ItemControls
-                    itemName={exercise.name || 'item'}
-                    onRemove={() =>
-                      setSelectedExercises((prev) =>
-                        prev.filter((_, idx) => idx !== i),
-                      )
-                    }
-                    onReorder={(direction) => handleReorder(i, direction)}
-                    isFirst={i === 0}
-                    isLast={i === selectedExercises.length - 1}
-                    removeText={isDesktop}
-                  />
+                  <NavLink
+                    to={getExercisePath(exercise)}
+                    className="text-sm font-medium text-blue-700 underline decoration-blue-600/50 underline-offset-2 hover:text-blue-800"
+                  >
+                    {formatLabel(exercise.name)}
+                  </NavLink>
+
+                  <div className="flex items-center gap-2">
+                    <ItemControls
+                      itemName={exercise.name || 'item'}
+                      onRemove={() =>
+                        setSelectedExercises((prev) =>
+                          prev.filter((_, idx) => idx !== i),
+                        )
+                      }
+                      onReorder={(direction) => handleReorder(i, direction)}
+                      isFirst={i === 0}
+                      isLast={i === selectedExercises.length - 1}
+                      removeText={isDesktop}
+                    />
+                  </div>
                 </div>
               ))}
             </div>

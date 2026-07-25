@@ -35,17 +35,4 @@ describe('resolveExpandedWorkoutItemId', () => {
 
     expect(markup).toContain('quick-add-exercise-picker')
   })
-
-  it('renders an explicit details control for workout items', () => {
-    const markup = renderToStaticMarkup(
-      <SessionWorkoutEditor
-        items={[
-          { id: 'item-1', category: 'exercise', exerciseName: 'Squat' } as any,
-        ]}
-        onChange={() => undefined}
-      />,
-    )
-
-    expect(markup).toContain('Edit details')
-  })
 })

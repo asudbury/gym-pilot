@@ -10,7 +10,6 @@ import { PageLayout } from '../layouts/PageLayout'
 import { Heading1, Paragraph } from '../components/Typography'
 import { ExerciseMetaBadges } from '../components/exercises/ExerciseMetaBadges'
 import { formatLabel } from '../utils/formatUtils'
-import { logger } from '@gym-pilot/shared'
 import { copyExerciseLinkToClipboard } from '../utils/navigationUtils'
 import { resolveExercisePageViewModel } from '../features/exercises/domain/exerciseView'
 import { Button } from '../components/ui/Button'
@@ -24,8 +23,6 @@ export function ExercisePage({
   onToggleFavoriteExercise,
   isExerciseFavorite,
 }: ExercisePageProps) {
-  logger.debug('Rendering ExercisePage')
-
   const { slug } = useParams()
   const [copied, setCopied] = useState(false)
 

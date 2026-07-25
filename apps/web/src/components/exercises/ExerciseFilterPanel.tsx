@@ -1,7 +1,7 @@
 import { getToneClass } from '../toneClasses'
 import { Button } from '../ui/Button'
 import { formatLabel } from '../../utils/formatUtils'
-import { MobileExerciseSearchPicker } from './MobileExerciseSearchPicker'
+import { ExercisePicker } from './ExercisePicker'
 
 type ExerciseFilterPanelProps = {
   draftSearchTerm: string
@@ -27,10 +27,16 @@ export function ExerciseFilterPanel({
   return (
     <div className="space-y-4">
       <div className="mb-5">
-        <MobileExerciseSearchPicker
+        <ExercisePicker
           onSelectExercise={(exercise) => {
             onSelectExercise(formatLabel(exercise.name))
           }}
+          value={''}
+          placeholder={''}
+          onChange={function (_nextValue: string): void {
+            throw new Error('Function not implemented.')
+          }}
+          isOpen={false}
         />
       </div>
 

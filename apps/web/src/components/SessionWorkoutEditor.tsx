@@ -1,19 +1,16 @@
 import { useState, useEffect } from 'react'
 import {
-  addSessionWorkoutItem,
-  normalizeSessionWorkoutCategory,
+  addSessionWorkoutItems,
   removeSessionWorkoutItem,
   reorderSessionWorkoutItem,
   updateSessionWorkoutItem,
   type SessionWorkoutItem,
 } from '@gym-pilot/shared'
 import { Button } from './ui/Button'
-import { ExerciseSearchPicker } from './exercises/ExerciseSearchPicker'
+import { ExerciseMultiPicker } from './exercises/ExerciseMultiPicker'
 import { ItemControls } from './ItemControls'
-import { MobileExerciseSearchPicker } from './exercises/MobileExerciseSearchPicker'
 import { appTokens } from '../constants/tokens'
 import { formatLabel } from '../utils/formatUtils'
-import { getExercisePath } from '../utils/exerciseRouteUtils'
 import { useIsDesktop } from '../utils/useMediaQuery'
 import clsx from 'clsx'
 
@@ -48,10 +45,10 @@ export function SessionWorkoutEditor({
     resolveExpandedWorkoutItemId(items, null),
   )
   const [moved, setMoved] = useState<string | null>(null)
-  const [draftExerciseName, setDraftExerciseName] = useState('')
-  const [draftSets, setDraftSets] = useState('')
-  const [draftReps, setDraftReps] = useState('')
-  const [draftWeight, setDraftWeight] = useState('')
+  const [showExercisePicker, setShowExercisePicker] = useState(false)
+  const [showEditExercisePicker, setShowEditExercisePicker] = useState<
+    string | null
+  >(null)
 
   useEffect(() => {
     if (moved) {
@@ -66,67 +63,35 @@ export function SessionWorkoutEditor({
     setExpandedItemId((current) => (current === itemId ? null : itemId))
   }
 
-  const handleAddItem = () => {
-    const nextItems = addSessionWorkoutItem(items, {
-      category: 'exercise',
-      exerciseName: draftExerciseName.trim() || '',
-      reps: draftReps.trim() || '',
-      sets: draftSets.trim() || '',
-      weight: draftWeight.trim() || '',
-      notes: '',
-    })
-
-    onChange(nextItems)
-    setExpandedItemId(nextItems[nextItems.length - 1]?.id ?? null)
-    setDraftExerciseName('')
-    setDraftSets('')
-    setDraftReps('')
-    setDraftWeight('')
-  }
-
   return (
     <div
       className={`space-y-3 rounded-2xl border border-slate-200 bg-slate-50 p-3 ${className}`}
     >
-      <div className="rounded-2xl border border-slate-200 bg-white p-3 shadow-sm">
-        <div className="flex flex-col gap-2 md:flex-row md:items-center">
-          <div className="flex-1" data-testid="quick-add-exercise-picker">
-            <MobileExerciseSearchPicker
-              onSelectExercise={(exercise) => {
-                setDraftExerciseName(formatLabel(exercise.name))
-              }}
-            />
-          </div>
-          <div className="flex flex-wrap gap-2">
-            <input
-              value={draftSets}
-              onChange={(event) => setDraftSets(event.target.value)}
-              placeholder="Sets"
-              className={`${appTokens.input} w-20`}
-              inputMode="numeric"
-              pattern="[0-9]*"
-            />
-            <input
-              value={draftReps}
-              onChange={(event) => setDraftReps(event.target.value)}
-              placeholder="Reps"
-              className={`${appTokens.input} w-20`}
-              inputMode="numeric"
-              pattern="[0-9]*"
-            />
-            <input
-              value={draftWeight}
-              onChange={(event) => setDraftWeight(event.target.value)}
-              placeholder="Weight (kg)"
-              className={`${appTokens.input} w-30`}
-              inputMode="numeric"
-              pattern="[0-9]*"
-            />
-          </div>
-          <Button type="button" tone="default" onClick={handleAddItem}>
-            Add item
-          </Button>
-        </div>
+      <div className="flex-1" data-testid="quick-add-exercise-picker">
+        <Button
+          type="button"
+          tone="blue"
+          onClick={() => setShowExercisePicker(true)}
+        >
+          Add Exercises
+        </Button>
+        <ExerciseMultiPicker
+          isOpen={showExercisePicker}
+          onSelectExercises={(exercises) => {
+            const newItems = addSessionWorkoutItems(
+              items,
+              exercises.map((exercise) => ({
+                category: 'exercise',
+                exerciseName: formatLabel(exercise.name),
+                exerciseId: exercise.id,
+              })),
+            )
+            onChange(newItems)
+            setExpandedItemId(newItems[newItems.length - 1]?.id ?? null)
+            setShowExercisePicker(false)
+          }}
+          onCancel={() => setShowExercisePicker(false)}
+        />
       </div>
 
       {items.map((item, index) => {
@@ -152,14 +117,6 @@ export function SessionWorkoutEditor({
                   aria-label={isExpanded ? 'Collapse item' : 'Expand item'}
                 >
                   {isExpanded ? '−' : '+'}
-                </Button>
-                <Button
-                  type="button"
-                  tone="default"
-                  className="px-2 py-1 text-xs"
-                  onClick={() => handleExpandItem(item.id)}
-                >
-                  Edit details
                 </Button>
                 <div className="min-w-0 flex-1">
                   <div className="text-sm font-semibold text-slate-800">
@@ -194,49 +151,33 @@ export function SessionWorkoutEditor({
             {isExpanded ? (
               <div className="mt-3 space-y-2 rounded-2xl border border-slate-200 bg-slate-50 p-3">
                 <div className="flex flex-col gap-2 md:flex-row">
-                  <select
-                    value={item.category}
-                    onChange={(event) => {
-                      onChange(
-                        updateSessionWorkoutItem(items, item.id, {
-                          category: normalizeSessionWorkoutCategory(
-                            event.target.value,
-                          ),
-                        }),
-                      )
-                    }}
-                    className={`${appTokens.input} md:min-w-32`}
-                  >
-                    <option value="exercise">Exercise</option>
-                    <option value="warm_up">Warm up</option>
-                    <option value="stretch">Stretch</option>
-                    <option value="cool_down">Cool down</option>
-                    <option value="run">Run</option>
-                    <option value="spin">Spin</option>
-                  </select>
                   {item.category === 'exercise' ? (
-                    <ExerciseSearchPicker
-                      label="Find exercise"
-                      value={item.exerciseName}
-                      placeholder="Exercise or activity"
-                      className="flex-1 min-w-12"
-                      onChange={(nextValue) => {
-                        onChange(
-                          updateSessionWorkoutItem(items, item.id, {
-                            exerciseName: nextValue,
-                            exerciseId: '',
-                          }),
-                        )
-                      }}
-                      onSelectExercise={(exercise) => {
-                        onChange(
-                          updateSessionWorkoutItem(items, item.id, {
+                    <>
+                      <ExerciseMultiPicker
+                        isOpen={showEditExercisePicker === item.id}
+                        onSelectExercises={(exercises) => {
+                          const newItems = exercises.map((exercise) => ({
+                            category: 'exercise' as const,
                             exerciseName: formatLabel(exercise.name),
                             exerciseId: exercise.id,
-                          }),
-                        )
-                      }}
-                    />
+                          }))
+                          const itemsWithoutOld = removeSessionWorkoutItem(
+                            items,
+                            index,
+                          )
+                          const finalItems = addSessionWorkoutItems(
+                            itemsWithoutOld,
+                            newItems,
+                          )
+                          onChange(finalItems)
+                          setExpandedItemId(
+                            finalItems[finalItems.length - 1]?.id ?? null,
+                          )
+                          setShowEditExercisePicker(null)
+                        }}
+                        onCancel={() => setShowEditExercisePicker(null)}
+                      />
+                    </>
                   ) : (
                     <input
                       value={item.exerciseName}
@@ -252,22 +193,6 @@ export function SessionWorkoutEditor({
                     />
                   )}
                 </div>
-
-                {item.category === 'exercise' && item.exerciseId ? (
-                  <div>
-                    <a
-                      href={getExercisePath({
-                        id: item.exerciseId,
-                        name: item.exerciseName,
-                      })}
-                      target="_blank"
-                      rel="noreferrer"
-                      className="text-sm font-medium text-emerald-700 underline decoration-emerald-600/50 underline-offset-2"
-                    >
-                      Open exercise card
-                    </a>
-                  </div>
-                ) : null}
 
                 <div className="grid gap-2 md:grid-cols-2">
                   <input
@@ -362,12 +287,6 @@ export function SessionWorkoutEditor({
           </div>
         )
       })}
-
-      <div className="flex flex-wrap gap-2">
-        <Button type="button" tone="default" onClick={handleAddItem}>
-          Add new workout item
-        </Button>
-      </div>
     </div>
   )
 }

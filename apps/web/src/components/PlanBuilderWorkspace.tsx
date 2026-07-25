@@ -10,7 +10,7 @@ import 'ag-grid-community/styles/ag-grid.css'
 import 'ag-grid-community/styles/ag-theme-quartz.css'
 import { exercises } from '@gym-pilot/shared'
 import { Button } from './ui/Button'
-import { ExerciseSearchPicker } from './exercises/ExerciseSearchPicker'
+import { ExercisePicker } from './exercises/ExercisePicker'
 import { formatLabel } from '../utils/formatUtils'
 import { type QuickLink } from '../utils/favouriteUtils'
 import { type PlanGridRow, type PlanTab } from '../utils/planBuilderUtils'
@@ -230,12 +230,13 @@ export function PlanBuilderWorkspace({
         <div className="flex flex-col gap-3 rounded-2xl border border-slate-200 bg-slate-50 p-3 sm:flex-row sm:items-end sm:justify-between">
           <div className="flex flex-col gap-3 sm:flex-row sm:items-end sm:gap-3">
             <div className="w-full min-w-0 sm:min-w-72 sm:flex-1">
-              <ExerciseSearchPicker
+              <ExercisePicker
                 id="plan-exercise-search"
                 label="Exercise"
                 value={selectedExerciseName}
                 placeholder="Search exercises"
-                onChange={(nextValue) => {
+                isOpen={false} // Assuming it's not open by default in this context
+                onChange={(nextValue: string) => {
                   onSearchChange?.(nextValue)
                 }}
                 onSelectExercise={(exercise) => {
@@ -272,11 +273,12 @@ export function PlanBuilderWorkspace({
           <div className="flex flex-col gap-3 border-b border-slate-200 bg-slate-50 p-3 sm:flex-row sm:items-end sm:justify-between">
             <div className="flex flex-col gap-3 sm:flex-row sm:items-end sm:gap-3">
               <div className="w-full min-w-0 sm:min-w-72 sm:flex-1">
-                <ExerciseSearchPicker
+                <ExercisePicker
                   label="Exercise"
                   value={selectedExerciseName}
                   placeholder="Search exercises"
-                  onChange={(nextValue) => {
+                  isOpen={false} // Assuming it's not open by default in this context
+                  onChange={(nextValue: string) => {
                     onSearchChange?.(nextValue)
                   }}
                   onSelectExercise={(exercise) => {

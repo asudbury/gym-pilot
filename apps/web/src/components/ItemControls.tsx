@@ -29,6 +29,15 @@ export const ItemControls = ({
         <>
           <Button
             type="button"
+            onClick={() => setIsConfirmingDelete(false)}
+            tone="default"
+            className="ml-2"
+          >
+            <DecorativeIcon icon="close" className="h-4 w-4" />
+            <span>Cancel</span>
+          </Button>
+          <Button
+            type="button"
             onClick={() => {
               onRemove()
               setIsConfirmingDelete(false)
@@ -37,15 +46,6 @@ export const ItemControls = ({
           >
             <DecorativeIcon icon="check" className="h-4 w-4" />
             <span>Confirm</span>
-          </Button>
-          <Button
-            type="button"
-            onClick={() => setIsConfirmingDelete(false)}
-            tone="default"
-            className="ml-2"
-          >
-            <DecorativeIcon icon="close" className="h-4 w-4" />
-            <span>Cancel</span>
           </Button>
         </>
       ) : (
