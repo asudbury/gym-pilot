@@ -31,7 +31,7 @@ export const ItemControls = ({
             type="button"
             onClick={() => setIsConfirmingDelete(false)}
             tone="default"
-            className="ml-2"
+            className="mr-2"
           >
             <DecorativeIcon icon="close" className="h-4 w-4" />
             <span>Cancel</span>
