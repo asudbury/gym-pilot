@@ -371,4 +371,3 @@ export function SessionWorkoutEditor({
     </div>
   )
 }
-
