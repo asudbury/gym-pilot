@@ -27,7 +27,6 @@ export function DashboardPage() {
       ? selectedRole
       : viewModel.selectedLayoutKey
 
-
   const canShowTimetable = Boolean(user?.gymName && user.gymName.trim())
   const hasTrainerConfigured = Boolean(user?.trainerId?.trim())
   const isTrainer = Boolean(user?.roles?.includes('trainer'))
