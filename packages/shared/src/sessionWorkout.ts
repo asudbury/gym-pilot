@@ -89,11 +89,6 @@ export function summarizeSessionWorkoutItem(
   item: Partial<SessionWorkoutItem>,
 ): string {
   const parts: string[] = [];
-
-  // if (item.exerciseName?.trim()) {
-  //   parts.push(item.exerciseName.trim())
-  // }
-
   const sets = item.sets?.trim();
   const reps = item.reps?.trim();
   const weight = item.weight?.trim();
@@ -149,17 +144,17 @@ export function updateSessionWorkoutItem(
 
 export function removeSessionWorkoutItem(
   items: SessionWorkoutItem[],
-  itemId: string,
+  index: number,
 ): SessionWorkoutItem[] {
-  return items.filter((item) => item.id !== itemId);
+  return items.filter((_, i) => i !== index);
 }
 
 export function reorderSessionWorkoutItem(
   items: SessionWorkoutItem[],
-  itemId: string,
+  index: number,
   direction: "up" | "down",
 ): SessionWorkoutItem[] {
-  const currentIndex = items.findIndex((item) => item.id === itemId);
+  const currentIndex = index;
 
   if (currentIndex < 0) {
     return items;

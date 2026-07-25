@@ -9,17 +9,22 @@ import type { Exercise } from '@gym-pilot/shared'
 import { useNavigate } from 'react-router-dom'
 import { MobileExerciseSearchPicker } from '../components/exercises/MobileExerciseSearchPicker'
 import { ItemControls } from '../components/ItemControls'
+import { useIsDesktop } from '../utils/useMediaQuery'
 
 function SessionTemplateCreatePage() {
-  const [selectedExercises, setSelectedExercises] = useState<Exercise[]>([])
-  const navigate = useNavigate()
+  const [selectedExercises, setSelectedExercises] = useState<
+    { id: string; name: string }[]
+  >([])
 
-  function reorder<T extends { id: string }>(
+  const navigate = useNavigate()
+  const isDesktop = useIsDesktop()
+
+  function reorder<T>(
     items: T[],
-    itemId: string,
+    index: number,
     direction: 'up' | 'down',
   ): T[] {
-    const currentIndex = items.findIndex((item) => item.id === itemId)
+    const currentIndex = index
 
     if (currentIndex < 0) {
       return items
@@ -41,8 +46,8 @@ function SessionTemplateCreatePage() {
     setSelectedExercises((prev) => [...prev, exercise])
   }
 
-  const handleReorder = (exerciseId: string, direction: 'up' | 'down') => {
-    setSelectedExercises((prev) => reorder(prev, exerciseId, direction))
+  const handleReorder = (index: number, direction: 'up' | 'down') => {
+    setSelectedExercises((prev) => reorder(prev, index, direction))
   }
 
   return (
@@ -72,23 +77,23 @@ function SessionTemplateCreatePage() {
           <div>
             <h2 className="text-lg font-semibold">Selected Exercises</h2>
             <div className="mt-4 space-y-2">
-              {selectedExercises.map((exercise, index) => (
+              {selectedExercises.map((exercise, i) => (
                 <div
-                  key={exercise.id + index}
+                  key={exercise.id}
                   className="flex items-center justify-between rounded-md border p-2"
                 >
                   <span>{exercise.name}</span>
                   <ItemControls
-                    item={exercise}
-                    onRemove={(id) =>
+                    itemName={exercise.name || "item"}
+                    onRemove={() =>
                       setSelectedExercises((prev) =>
-                        prev.filter((e) => e.id + index !== id + index),
+                        prev.filter((_, idx) => idx !== i),
                       )
                     }
-                    onReorder={handleReorder}
-                    getItemName={(item) => item.name || 'item'}
-                    isFirst={false}
-                    isLast={false}
+                    onReorder={(direction) => handleReorder(i, direction)}
+                    isFirst={i === 0}
+                    isLast={i === selectedExercises.length - 1}
+                    removeText={isDesktop}
                   />
                 </div>
               ))}

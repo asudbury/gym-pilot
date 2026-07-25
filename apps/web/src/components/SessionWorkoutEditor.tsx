@@ -14,6 +14,7 @@ import { MobileExerciseSearchPicker } from './exercises/MobileExerciseSearchPick
 import { appTokens } from '../constants/tokens'
 import { formatLabel } from '../utils/formatUtils'
 import { getExercisePath } from '../utils/exerciseRouteUtils'
+import { useIsDesktop } from '../utils/useMediaQuery'
 
 type SessionWorkoutEditorProps = {
   items: SessionWorkoutItem[]
@@ -41,6 +42,7 @@ export function SessionWorkoutEditor({
   onChange,
   className = '',
 }: SessionWorkoutEditorProps) {
+  const isDesktop = useIsDesktop()
   const [expandedItemId, setExpandedItemId] = useState<string | null>(() =>
     resolveExpandedWorkoutItemId(items, null),
   )
@@ -150,14 +152,16 @@ export function SessionWorkoutEditor({
                 </div>
               </div>
               <ItemControls
-                item={item}
-                onReorder={(id, direction) =>
-                  onChange(reorderSessionWorkoutItem(items, id, direction))
+                itemName={item.exerciseName || 'item'}
+                onRemove={() =>
+                  onChange(removeSessionWorkoutItem(items, index))
                 }
-                onRemove={(id) => onChange(removeSessionWorkoutItem(items, id))}
-                getItemName={(item) => item.exerciseName || 'item'}
+                onReorder={(direction) =>
+                  onChange(reorderSessionWorkoutItem(items, index, direction))
+                }
                 isFirst={index === 0}
                 isLast={index === items.length - 1}
+                removeText={isDesktop}
               />
             </div>
 

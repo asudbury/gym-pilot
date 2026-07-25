@@ -1,5 +1,7 @@
 export type DecorativeIconProps = {
   icon?:
+    | 'arrowDown'
+    | 'arrowUp'
     | 'back'
     | 'calendar'
     | 'chart'
@@ -60,6 +62,8 @@ import {
   CheckIcon,
   CloseIcon,
   DocumentIcon,
+  ArrowUpIcon,
+  ArrowDownIcon,
 } from './icons'
 
 const baseClasses =
@@ -93,23 +97,21 @@ const iconComponents = {
   trash: TrashIcon,
   user: UserIcon,
   users: UsersIcon,
+  arrowUp: ArrowUpIcon,
+  arrowDown: ArrowDownIcon,
 }
 
 const DecorativeIcon = ({
-  icon = 'spark',
+  icon,
   className = '',
   withContainer = false,
 }: DecorativeIconProps) => {
-  if (icon === null) {
-    return null
-  }
-
   const iconClassName = className || 'h-5 w-5'
   const containerClassName = withContainer
     ? `${baseClasses} ${className}`.trim()
     : className
 
-  const IconComponent = iconComponents[icon]
+  const IconComponent = icon ? iconComponents[icon] : undefined
 
   return (
     <div className={containerClassName} aria-hidden="true">

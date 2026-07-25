@@ -14,6 +14,13 @@ export const TrashIcon = ({ className }: { className?: string }) => (
       strokeLinecap="round"
     />
     <path
+      d="M5 8h14v11a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V8z"
+      stroke="currentColor"
+      strokeWidth="1.8"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+    />
+    <path
       d="M8 10v8m4-8v8m4-8v8"
       stroke="currentColor"
       strokeWidth="1.8"

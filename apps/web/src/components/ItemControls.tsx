@@ -1,53 +1,104 @@
+import { useState } from 'react'
 import { Button } from './ui/Button'
+import { DecorativeIcon } from './ui/DecorativeIcon'
 
-interface ItemControlsProps<T extends { id: string }> {
-  item: T
-  onReorder: (id: string, direction: 'up' | 'down') => void
-  onRemove: (id: string) => void
-  getItemName?: (item: T) => string
+interface ItemControlsProps {
+  itemName: string
+  onReorder: (direction: 'up' | 'down') => void
+  onRemove: () => void
   isFirst: boolean
   isLast: boolean
+  removeText: boolean
+  className?: string
 }
 
-export const ItemControls = <T extends { id: string }>({
-  item,
+export const ItemControls = ({
+  itemName,
   onReorder,
   onRemove,
-  getItemName,
   isFirst,
   isLast,
-}: ItemControlsProps<T>) => {
-  const itemName = getItemName ? getItemName(item) : 'item'
+  removeText,
+  className,
+}: ItemControlsProps) => {
+  const [isConfirmingDelete, setIsConfirmingDelete] = useState(false)
 
   return (
-    <div className="flex flex-wrap gap-2 md:justify-end">
-      <Button
-        type="button"
-        tone="default"
-        className="px-2 py-1 text-xs"
-        onClick={() => onReorder(item.id, 'up')}
-        disabled={isFirst}
-        aria-label={`Move ${itemName} up`}
-      >
-        ↑
-      </Button>
-      <Button
-        type="button"
-        tone="default"
-        className="px-2 py-1 text-xs"
-        onClick={() => onReorder(item.id, 'down')}
-        disabled={isLast}
-        aria-label={`Move ${itemName} down`}
-      >
-        ↓
-      </Button>
-      <Button
-        type="button"
-        tone="destructive"
-        onClick={() => onRemove(item.id)}
-      >
-        Remove
-      </Button>
+    <div className={className ?? ''}>
+      {isConfirmingDelete ? (
+        <>
+          <Button
+            type="button"
+            onClick={() => {
+              onRemove()
+              setIsConfirmingDelete(false)
+            }}
+            tone="destructive"
+           >
+            <DecorativeIcon icon="check" className="h-4 w-4" />
+            <span>Confirm</span>
+          </Button>
+          <Button
+            type="button"
+            onClick={() => setIsConfirmingDelete(false)}
+            tone="default"
+            className="ml-2"
+           >
+            <DecorativeIcon icon="close" className="h-4 w-4" />
+            <span>Cancel</span>
+          </Button>
+        </>
+      ) : (
+        <>
+           {isFirst ? (
+                <span/>
+              ) : (
+                <Button
+                  type="button"
+                  tone="default"
+                  onClick={() => onReorder('up')}
+                  disabled={isFirst}
+                  aria-label={`Move ${itemName} up`}
+                  className="mr-2"
+                >
+                  {isFirst ? (
+                      <DecorativeIcon className="h-4 w-4" />
+                    ) : (
+                      <DecorativeIcon icon="arrowUp" className="h-4 w-4" />
+                    )
+                  }
+                </Button>
+              )
+            }
+  
+          {isLast ? (
+            <span/>
+          ) : (
+            <Button
+              type="button"
+              tone="default"
+              onClick={() => onReorder('down')}
+            disabled={isLast}
+              aria-label={`Move ${itemName} down`}
+              className="mr-2"
+            >
+              {isLast ? (
+                <DecorativeIcon className="h-4 w-4" />
+              ) : (
+                <DecorativeIcon icon="arrowDown" className="h-4 w-4" />
+              )}
+            </Button>
+          )}  
+          <Button
+            type="button"
+            tone="destructive"
+            onClick={() => setIsConfirmingDelete(true)}
+          >
+            <DecorativeIcon icon="trash" className="h-4 w-4" />
+            {removeText && 'Remove'}
+          </Button>
+        </>
+      )}
     </div>
   )
 }
