@@ -84,7 +84,7 @@ function SessionTemplateCreatePage() {
                 >
                   <span>{exercise.name}</span>
                   <ItemControls
-                    itemName={exercise.name || "item"}
+                    itemName={exercise.name || 'item'}
                     onRemove={() =>
                       setSelectedExercises((prev) =>
                         prev.filter((_, idx) => idx !== i),

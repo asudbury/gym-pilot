@@ -18,5 +18,6 @@ export function useMediaQuery(query: string) {
 
 // Pre-defined media queries for Tailwind CSS breakpoints
 export const useIsDesktop = () => useMediaQuery('(min-width: 1024px)') // lg breakpoint
-export const useIsTablet = () => useMediaQuery('(min-width: 768px) and (max-width: 1023px)') // md breakpoint
+export const useIsTablet = () =>
+  useMediaQuery('(min-width: 768px) and (max-width: 1023px)') // md breakpoint
 export const useIsMobile = () => useMediaQuery('(max-width: 767px)') // sm breakpoint

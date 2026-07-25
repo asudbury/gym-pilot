@@ -34,7 +34,7 @@ export const ItemControls = ({
               setIsConfirmingDelete(false)
             }}
             tone="destructive"
-           >
+          >
             <DecorativeIcon icon="check" className="h-4 w-4" />
             <span>Confirm</span>
           </Button>
@@ -43,42 +43,40 @@ export const ItemControls = ({
             onClick={() => setIsConfirmingDelete(false)}
             tone="default"
             className="ml-2"
-           >
+          >
             <DecorativeIcon icon="close" className="h-4 w-4" />
             <span>Cancel</span>
           </Button>
         </>
       ) : (
         <>
-           {isFirst ? (
-                <span/>
+          {isFirst ? (
+            <span />
+          ) : (
+            <Button
+              type="button"
+              tone="default"
+              onClick={() => onReorder('up')}
+              disabled={isFirst}
+              aria-label={`Move ${itemName} up`}
+              className="mr-2"
+            >
+              {isFirst ? (
+                <DecorativeIcon className="h-4 w-4" />
               ) : (
-                <Button
-                  type="button"
-                  tone="default"
-                  onClick={() => onReorder('up')}
-                  disabled={isFirst}
-                  aria-label={`Move ${itemName} up`}
-                  className="mr-2"
-                >
-                  {isFirst ? (
-                      <DecorativeIcon className="h-4 w-4" />
-                    ) : (
-                      <DecorativeIcon icon="arrowUp" className="h-4 w-4" />
-                    )
-                  }
-                </Button>
-              )
-            }
-  
+                <DecorativeIcon icon="arrowUp" className="h-4 w-4" />
+              )}
+            </Button>
+          )}
+
           {isLast ? (
-            <span/>
+            <span />
           ) : (
             <Button
               type="button"
               tone="default"
               onClick={() => onReorder('down')}
-            disabled={isLast}
+              disabled={isLast}
               aria-label={`Move ${itemName} down`}
               className="mr-2"
             >
@@ -88,7 +86,7 @@ export const ItemControls = ({
                 <DecorativeIcon icon="arrowDown" className="h-4 w-4" />
               )}
             </Button>
-          )}  
+          )}
           <Button
             type="button"
             tone="destructive"
