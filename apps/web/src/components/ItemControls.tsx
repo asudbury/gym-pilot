@@ -63,11 +63,7 @@ export const ItemControls = ({
           )}
 
           {isLast ? (
-            <Button
-              tone="default"
-              disabled={isLast}
-              className="mr-2"
-            >
+            <Button tone="default" disabled={isLast} className="mr-2">
               <DecorativeIcon className="h-4 w-4" />
             </Button>
           ) : (

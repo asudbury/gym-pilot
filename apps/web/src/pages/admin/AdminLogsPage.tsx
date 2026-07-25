@@ -322,7 +322,6 @@ export function AdminLogsPage({ view = 'combined' }: AdminLogsPageProps) {
                 />
               </label>
               <Button
-
                 onClick={() => {
                   navigate(location.pathname, { replace: true })
                   setReloadCounter((prev) => prev + 1)

@@ -291,10 +291,7 @@ export function SessionEditPage() {
                   >
                     Save changes
                   </Button>
-                  <Button
-                    tone="default"
-                    onClick={() => navigate('/sessions')}
-                  >
+                  <Button tone="default" onClick={() => navigate('/sessions')}>
                     Cancel
                   </Button>
                 </div>

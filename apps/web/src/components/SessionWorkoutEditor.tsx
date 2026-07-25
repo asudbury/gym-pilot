@@ -68,10 +68,7 @@ export function SessionWorkoutEditor({
       className={`space-y-3 rounded-2xl border border-slate-200 bg-slate-50 p-3 ${className}`}
     >
       <div className="flex-1" data-testid="quick-add-exercise-picker">
-        <Button
-          tone="blue"
-          onClick={() => setShowExercisePicker(true)}
-        >
+        <Button tone="blue" onClick={() => setShowExercisePicker(true)}>
           Add Exercises
         </Button>
         <ExerciseMultiPicker

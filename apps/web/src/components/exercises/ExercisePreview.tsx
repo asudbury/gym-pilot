@@ -22,10 +22,7 @@ export function ExercisePreview({
   return (
     <div className="flex h-full flex-col bg-white">
       <div className="flex items-center justify-between border-b border-slate-200 p-4">
-        <Button
-          onClick={onClose}
-          className="text-sm text-slate-600"
-        >
+        <Button onClick={onClose} className="text-sm text-slate-600">
           <DecorativeIcon icon="back" className="h-4 w-4" />
           Back to Search
         </Button>

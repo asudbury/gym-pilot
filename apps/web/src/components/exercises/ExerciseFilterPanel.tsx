@@ -25,24 +25,20 @@ export function ExerciseFilterPanel({
   onCategoryChange,
   onToggleImages,
 }: ExerciseFilterPanelProps) {
-
   const [showExercisePicker, setShowExercisePicker] = useState(false)
 
   return (
     <div className="space-y-4">
       <div className="mb-5">
-        <Button
-              tone="blue"
-              onClick={() => setShowExercisePicker(true)}
-            >
-              Pick Exercise
-            </Button>
+        <Button tone="blue" onClick={() => setShowExercisePicker(true)}>
+          Pick Exercise
+        </Button>
         <ExercisePicker
           onSelectExercise={(exercise) => {
             onSelectExercise(formatLabel(exercise.name))
             setShowExercisePicker(false)
-          } }
-          isOpen={showExercisePicker}     
+          }}
+          isOpen={showExercisePicker}
         />
       </div>
 

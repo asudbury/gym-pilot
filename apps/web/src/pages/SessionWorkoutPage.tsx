@@ -172,11 +172,7 @@ export function SessionWorkoutPage() {
             </div>
 
             <div className="flex flex-wrap gap-2">
-              <Button
-                tone="emerald"
-                onClick={handleSave}
-                isLoading={isSaving}
-              >
+              <Button tone="emerald" onClick={handleSave} isLoading={isSaving}>
                 Save workout
               </Button>
               <Button

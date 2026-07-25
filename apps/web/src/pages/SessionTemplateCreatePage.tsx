@@ -87,10 +87,7 @@ function SessionTemplateCreatePage() {
 
         <div className="mt-6 grid grid-cols-1 gap-6">
           <div>
-            <Button
-              tone="blue"
-              onClick={() => setShowExercisePicker(true)}
-            >
+            <Button tone="blue" onClick={() => setShowExercisePicker(true)}>
               Add Exercises
             </Button>
             <ExerciseMultiPicker

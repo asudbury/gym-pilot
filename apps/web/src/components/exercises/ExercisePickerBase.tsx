@@ -62,10 +62,7 @@ export function ExercisePickerBase({
       className="group flex items-center justify-between border-b border-slate-100 px-4 py-3 text-left"
     >
       <div className="flex-1">{customRender(exercise)}</div>
-      <Button
-        onClick={() => setPreviewExercise(exercise)}
-        tone="default"
-      >
+      <Button onClick={() => setPreviewExercise(exercise)} tone="default">
         View
       </Button>
     </div>
