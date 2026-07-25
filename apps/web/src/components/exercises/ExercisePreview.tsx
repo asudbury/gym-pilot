@@ -27,7 +27,7 @@ export function ExercisePreview({
           onClick={onClose}
           className="text-sm text-slate-600"
         >
-          <DecorativeIcon icon="back" className="mr-2 h-4 w-4" />
+          <DecorativeIcon icon="back" className="h-4 w-4" />
           Back to Search
         </Button>
         <Button type="button" onClick={() => onSelect(exercise)} tone="blue">
