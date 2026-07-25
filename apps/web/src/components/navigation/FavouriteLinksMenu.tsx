@@ -281,7 +281,6 @@ export function FavouriteLinksMenu({
                   </select>
                 </label>
                 <Button
-                  type="button"
                   onClick={handleToggleCurrentFavorite}
                   className={getToneClass(
                     'blue',
@@ -293,7 +292,6 @@ export function FavouriteLinksMenu({
               </div>
             </div>
             <Button
-              type="button"
               onClick={handleOpenFavouritesPage}
               className={getToneClass(
                 'default',
@@ -321,7 +319,6 @@ export function FavouriteLinksMenu({
                         className="flex flex-col gap-2 rounded-xl border border-slate-200 bg-white p-2 sm:flex-row sm:items-center"
                       >
                         <Button
-                          type="button"
                           onClick={() => handleOpenQuickLink(item)}
                           className="w-full rounded-lg px-3 py-2 text-left text-sm text-slate-700 transition hover:bg-slate-50 hover:text-slate-900 sm:flex-1"
                         >
@@ -329,7 +326,6 @@ export function FavouriteLinksMenu({
                         </Button>
                         <div className="flex items-center gap-2 self-end sm:self-auto">
                           <Button
-                            type="button"
                             onClick={() => handleRemoveFavoriteLink(item)}
                             className="rounded-lg border border-slate-200 bg-white px-2 py-2 text-xs text-slate-600"
                             aria-label="Remove favorite"

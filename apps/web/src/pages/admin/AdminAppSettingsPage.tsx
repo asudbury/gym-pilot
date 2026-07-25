@@ -133,7 +133,6 @@ export function AdminAppSettingsPage() {
 
             <div className="flex items-center gap-3">
               <Button
-                type="submit"
                 tone="emerald"
                 disabled={saving}
                 isLoading={saving}

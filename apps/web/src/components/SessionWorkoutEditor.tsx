@@ -69,7 +69,6 @@ export function SessionWorkoutEditor({
     >
       <div className="flex-1" data-testid="quick-add-exercise-picker">
         <Button
-          type="button"
           tone="blue"
           onClick={() => setShowExercisePicker(true)}
         >
@@ -87,7 +86,6 @@ export function SessionWorkoutEditor({
               })),
             )
             onChange(newItems)
-            setExpandedItemId(newItems[newItems.length - 1]?.id ?? null)
             setShowExercisePicker(false)
           }}
           onCancel={() => setShowExercisePicker(false)}
@@ -110,7 +108,6 @@ export function SessionWorkoutEditor({
             <div className="flex flex-col gap-2 md:flex-row md:items-center">
               <div className="flex flex-1 items-center gap-2">
                 <Button
-                  type="button"
                   tone="default"
                   className="px-2 py-1 text-xs"
                   onClick={() => handleExpandItem(item.id)}

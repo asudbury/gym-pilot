@@ -174,14 +174,12 @@ export function SessionWorkoutPage() {
             <div className="flex flex-wrap gap-2">
               <Button
                 tone="emerald"
-                type="button"
                 onClick={handleSave}
                 isLoading={isSaving}
               >
                 Save workout
               </Button>
               <Button
-                type="button"
                 tone="default"
                 onClick={() => navigate(`/sessions/${entry.id}/edit`)}
               >

@@ -9,7 +9,7 @@ type ButtonProps<T extends ElementType = 'button'> = {
   children: ReactNode
   isLoading?: boolean
   loadingLabel?: string
-} & Omit<ComponentPropsWithoutRef<T>, 'as' | 'children' | 'className'>
+} & Omit<ComponentPropsWithoutRef<T>, 'as' | 'children' | 'className' | 'type'>
 
 export function Button<T extends ElementType = 'button'>({
   as,

@@ -58,7 +58,6 @@ function App() {
           <div className="mx-auto flex max-w-6xl items-center justify-between gap-3">
             <span>{getInstallHint(true, false)}</span>
             <Button
-              type="button"
               onClick={() => setShowInstallHint(false)}
               className="rounded-full bg-white/15 px-3 py-1 text-xs font-semibold text-white transition hover:bg-white/25"
             >

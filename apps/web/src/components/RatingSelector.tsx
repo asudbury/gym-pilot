@@ -21,7 +21,6 @@ export function RatingSelector({
         return (
           <Button
             key={rating}
-            type="button"
             onClick={() => onChange(rating)}
             tone={isSelected ? 'blue' : 'white'}
             className={[

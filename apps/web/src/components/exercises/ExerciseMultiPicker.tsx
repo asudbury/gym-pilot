@@ -51,7 +51,6 @@ export function ExerciseMultiPicker({
             {(quickPickExercises as Exercise[]).map((category) => (
               <Button
                 key={category.id}
-                type="button"
                 tone={
                   selectedExercises.some((e) => e.id === category.id)
                     ? 'blue'
@@ -76,7 +75,6 @@ export function ExerciseMultiPicker({
                 >
                   {formatLabel(exercise.name)}
                   <button
-                    type="button"
                     className="text-blue-500 hover:text-blue-700"
                     onClick={() => handleToggleExercise(exercise)}
                   >
@@ -91,7 +89,6 @@ export function ExerciseMultiPicker({
       footer={
         <div className="p-4 border-t border-slate-200">
           <Button
-            type="button"
             tone="blue"
             onClick={handleSelectExercises}
             disabled={selectedExercises.length === 0}

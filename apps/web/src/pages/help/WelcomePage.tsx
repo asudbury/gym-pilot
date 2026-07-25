@@ -226,7 +226,6 @@ export function WelcomePage() {
 
         <div className="mt-6 flex flex-wrap gap-3">
           <Button
-            type="button"
             tone="emerald"
             onClick={handleAccept}
             disabled={isAccepting || hasAccepted}

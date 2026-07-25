@@ -23,14 +23,13 @@ export function ExercisePreview({
     <div className="flex h-full flex-col bg-white">
       <div className="flex items-center justify-between border-b border-slate-200 p-4">
         <Button
-          type="button"
           onClick={onClose}
           className="text-sm text-slate-600"
         >
           <DecorativeIcon icon="back" className="h-4 w-4" />
           Back to Search
         </Button>
-        <Button type="button" onClick={() => onSelect(exercise)} tone="blue">
+        <Button onClick={() => onSelect(exercise)} tone="blue">
           Select Exercise
         </Button>
       </div>

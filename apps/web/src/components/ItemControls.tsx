@@ -28,7 +28,6 @@ export const ItemControls = ({
       {isConfirmingDelete ? (
         <>
           <Button
-            type="button"
             onClick={() => setIsConfirmingDelete(false)}
             tone="default"
             className="mr-2"
@@ -37,7 +36,6 @@ export const ItemControls = ({
             <span>Cancel</span>
           </Button>
           <Button
-            type="button"
             onClick={() => {
               onRemove()
               setIsConfirmingDelete(false)
@@ -54,41 +52,36 @@ export const ItemControls = ({
             <span />
           ) : (
             <Button
-              type="button"
               tone="default"
               onClick={() => onReorder('up')}
               disabled={isFirst}
               aria-label={`Move ${itemName} up`}
               className="mr-2"
             >
-              {isFirst ? (
-                <DecorativeIcon className="h-4 w-4" />
-              ) : (
-                <DecorativeIcon icon="arrowUp" className="h-4 w-4" />
-              )}
+              <DecorativeIcon icon="arrowUp" className="h-4 w-4" />
             </Button>
           )}
 
           {isLast ? (
-            <span />
+            <Button
+              tone="default"
+              disabled={isLast}
+              className="mr-2"
+            >
+              <DecorativeIcon className="h-4 w-4" />
+            </Button>
           ) : (
             <Button
-              type="button"
               tone="default"
               onClick={() => onReorder('down')}
               disabled={isLast}
               aria-label={`Move ${itemName} down`}
               className="mr-2"
             >
-              {isLast ? (
-                <DecorativeIcon className="h-4 w-4" />
-              ) : (
-                <DecorativeIcon icon="arrowDown" className="h-4 w-4" />
-              )}
+              <DecorativeIcon icon="arrowDown" className="h-4 w-4" />
             </Button>
           )}
           <Button
-            type="button"
             tone="destructive"
             onClick={() => setIsConfirmingDelete(true)}
           >

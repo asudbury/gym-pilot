@@ -611,7 +611,6 @@ export function TimetablePage() {
             />
           </div>
           <Button
-            type="button"
             tone="blue"
             onClick={handleClubChange}
             disabled={isChangingClub}
@@ -669,7 +668,6 @@ export function TimetablePage() {
                 </div>
                 <div className="flex flex-col items-end gap-1">
                   <Button
-                    type="button"
                     tone="emerald"
                     onClick={() =>
                       navigate('/record-session?type=personal_training')
@@ -784,7 +782,6 @@ export function TimetablePage() {
                 )}
                 <div className="flex flex-wrap gap-2">
                   <Button
-                    type="button"
                     tone="emerald"
                     onClick={handleAttendanceSubmit}
                     disabled={attendanceSaving}
@@ -793,7 +790,6 @@ export function TimetablePage() {
                     {attendanceSaving ? 'Saving…' : 'Save session'}
                   </Button>
                   <Button
-                    type="button"
                     tone="default"
                     onClick={() => {
                       setAttendancePendingSession(null)
@@ -1035,7 +1031,6 @@ export function TimetablePage() {
                           </div>
                           {attendanceAction.canShow ? (
                             <Button
-                              type="button"
                               tone="emerald"
                               onClick={() => handleAttendanceAction(session)}
                               disabled={Boolean(
@@ -1141,7 +1136,6 @@ export function TimetablePage() {
                           </div>
                           {attendanceAction.canShow ? (
                             <Button
-                              type="button"
                               tone="emerald"
                               onClick={() => handleAttendanceAction(session)}
                               disabled={Boolean(

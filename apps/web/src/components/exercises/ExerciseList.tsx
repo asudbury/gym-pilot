@@ -40,7 +40,6 @@ function ExerciseActionButtons({
   return (
     <div className="flex shrink-0 flex-col gap-2 self-start">
       <Button
-        type="button"
         onClick={(event) => {
           event.preventDefault()
           event.stopPropagation()
@@ -52,7 +51,6 @@ function ExerciseActionButtons({
         {isFavorite ? '★ Favourited' : '☆ Favourite'}
       </Button>
       <Button
-        type="button"
         onClick={(event) => {
           event.preventDefault()
           event.stopPropagation()

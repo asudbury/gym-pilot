@@ -110,7 +110,6 @@ export function AdminChangePasswordPage() {
           </label>
 
           <Button
-            type="submit"
             disabled={isSaving}
             className={getToneClass(
               'blue',

@@ -286,14 +286,12 @@ export function SessionEditPage() {
                 <div className="flex flex-wrap gap-2">
                   <Button
                     tone="emerald"
-                    type="button"
                     onClick={handleSave}
                     isLoading={isSaving}
                   >
                     Save changes
                   </Button>
                   <Button
-                    type="button"
                     tone="default"
                     onClick={() => navigate('/sessions')}
                   >

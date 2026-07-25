@@ -33,7 +33,6 @@ export function CreateFolderForm({
         />
       </Panel>
       <Button
-        type="submit"
         className="rounded-xl px-4 py-2 text-sm font-medium"
       >
         Add folder

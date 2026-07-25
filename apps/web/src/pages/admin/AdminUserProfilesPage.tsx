@@ -262,7 +262,6 @@ export function AdminUserProfilesPage() {
                     </button>
 
                     <Button
-                      type="button"
                       onClick={() => {
                         setLocalSelectedId(p.id)
                         navigate(`/admin/users/profiles/${p.id}`)

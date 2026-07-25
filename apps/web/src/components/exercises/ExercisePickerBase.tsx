@@ -63,7 +63,6 @@ export function ExercisePickerBase({
     >
       <div className="flex-1">{customRender(exercise)}</div>
       <Button
-        type="button"
         onClick={() => setPreviewExercise(exercise)}
         tone="default"
       >
@@ -92,7 +91,6 @@ export function ExercisePickerBase({
               />
             </div>
             <Button
-              type="button"
               onClick={handleCancel}
               className="ml-4 text-sm text-slate-600"
             >

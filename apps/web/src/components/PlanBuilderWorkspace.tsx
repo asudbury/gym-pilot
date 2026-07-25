@@ -54,12 +54,10 @@ export function PlanBuilderWorkspace({
   activeRows,
   favoriteExercises,
   favoriteLinks = [],
-  selectedExerciseName,
   selectedExerciseId,
   onExportToExcel,
   onExerciseSelection,
   onAddLinkRows,
-  onSearchChange,
   onActivateTab,
   onAddRow,
   onAddTab,
@@ -231,14 +229,7 @@ export function PlanBuilderWorkspace({
           <div className="flex flex-col gap-3 sm:flex-row sm:items-end sm:gap-3">
             <div className="w-full min-w-0 sm:min-w-72 sm:flex-1">
               <ExercisePicker
-                id="plan-exercise-search"
-                label="Exercise"
-                value={selectedExerciseName}
-                placeholder="Search exercises"
                 isOpen={false} // Assuming it's not open by default in this context
-                onChange={(nextValue: string) => {
-                  onSearchChange?.(nextValue)
-                }}
                 onSelectExercise={(exercise) => {
                   onExerciseSelection(exercise.id, exercise.name)
                 }}
@@ -274,13 +265,7 @@ export function PlanBuilderWorkspace({
             <div className="flex flex-col gap-3 sm:flex-row sm:items-end sm:gap-3">
               <div className="w-full min-w-0 sm:min-w-72 sm:flex-1">
                 <ExercisePicker
-                  label="Exercise"
-                  value={selectedExerciseName}
-                  placeholder="Search exercises"
                   isOpen={false} // Assuming it's not open by default in this context
-                  onChange={(nextValue: string) => {
-                    onSearchChange?.(nextValue)
-                  }}
                   onSelectExercise={(exercise) => {
                     onExerciseSelection(exercise.id, exercise.name)
                   }}
@@ -310,7 +295,6 @@ export function PlanBuilderWorkspace({
               {favoriteExercises.map((exercise) => (
                 <Button
                   key={exercise.id}
-                  type="button"
                   onClick={() => onAddRow(exercise.id)}
                   className="rounded-full border px-3 py-1.5 text-sm font-medium"
                 >
@@ -328,7 +312,6 @@ export function PlanBuilderWorkspace({
               {groupedFavoriteLinks.map((group) => (
                 <Button
                   key={group.folderName}
-                  type="button"
                   onClick={() =>
                     onAddLinkRows?.(
                       group.links.map((link) => ({

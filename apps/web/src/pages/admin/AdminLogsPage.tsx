@@ -322,7 +322,7 @@ export function AdminLogsPage({ view = 'combined' }: AdminLogsPageProps) {
                 />
               </label>
               <Button
-                type="button"
+
                 onClick={() => {
                   navigate(location.pathname, { replace: true })
                   setReloadCounter((prev) => prev + 1)
@@ -354,7 +354,6 @@ export function AdminLogsPage({ view = 'combined' }: AdminLogsPageProps) {
                     {filteredAuditLogs.length} / {auditLogs.length} rows
                   </span>
                   <Button
-                    type="button"
                     tone="default"
                     onClick={() => void handleClearLogs()}
                     disabled={clearing}
@@ -405,7 +404,6 @@ export function AdminLogsPage({ view = 'combined' }: AdminLogsPageProps) {
                     {filteredActivityLogs.length} / {activityLogs.length} rows
                   </span>
                   <Button
-                    type="button"
                     tone="default"
                     onClick={() => void handleClearLogs()}
                     disabled={clearing}
@@ -456,7 +454,6 @@ export function AdminLogsPage({ view = 'combined' }: AdminLogsPageProps) {
                     {filteredErrorLogs.length} / {errorLogs.length} rows
                   </span>
                   <Button
-                    type="button"
                     tone="default"
                     onClick={() => void handleClearLogs()}
                     disabled={clearing}

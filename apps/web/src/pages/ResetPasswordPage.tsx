@@ -483,7 +483,6 @@ export function ResetPasswordPage() {
           </div>
 
           <Button
-            type="submit"
             tone="emerald"
             disabled={isSubmitting}
             className="self-start w-full sm:w-auto text-sm font-semibold shadow-sm"

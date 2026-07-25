@@ -6,11 +6,6 @@ import { ExercisePickerBase } from './ExercisePickerBase'
 export type Exercise = (typeof exercises)[number]
 
 export interface ExercisePickerProps {
-  id?: string
-  label?: string
-  value: string
-  placeholder: string
-  onChange: (nextValue: string) => void
   isOpen: boolean
   onSelectExercise: (exercise: Exercise) => void
 }

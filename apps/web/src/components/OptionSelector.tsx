@@ -25,7 +25,6 @@ export function OptionSelector<T extends string>({
         return (
           <Button
             key={option}
-            type="button"
             onClick={() => onChange(option)}
             tone={isSelected ? 'blue' : 'white'}
             className={[

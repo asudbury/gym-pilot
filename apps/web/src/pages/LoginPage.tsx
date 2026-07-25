@@ -416,7 +416,6 @@ export function LoginPage() {
           </label>
 
           <Button
-            type="submit"
             tone="emerald"
             className="self-start w-full sm:w-auto shadow-sm disabled:cursor-not-allowed disabled:border-emerald-300 disabled:bg-emerald-300 disabled:text-emerald-950"
             disabled={isSubmitting}
@@ -435,7 +434,6 @@ export function LoginPage() {
           {authMessageTone === 'error' &&
           authMessage.toLowerCase().includes('confirm') ? (
             <Button
-              type="button"
               onClick={handleResendConfirmation}
               disabled={isResetting}
               className="w-full sm:w-auto px-3 py-2 text-sm"

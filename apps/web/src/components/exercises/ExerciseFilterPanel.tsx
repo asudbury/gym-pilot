@@ -1,3 +1,4 @@
+import { useState } from 'react'
 import { getToneClass } from '../toneClasses'
 import { Button } from '../ui/Button'
 import { formatLabel } from '../../utils/formatUtils'
@@ -24,19 +25,24 @@ export function ExerciseFilterPanel({
   onCategoryChange,
   onToggleImages,
 }: ExerciseFilterPanelProps) {
+
+  const [showExercisePicker, setShowExercisePicker] = useState(false)
+
   return (
     <div className="space-y-4">
       <div className="mb-5">
+        <Button
+              tone="blue"
+              onClick={() => setShowExercisePicker(true)}
+            >
+              Pick Exercise
+            </Button>
         <ExercisePicker
           onSelectExercise={(exercise) => {
             onSelectExercise(formatLabel(exercise.name))
-          }}
-          value={''}
-          placeholder={''}
-          onChange={function (_nextValue: string): void {
-            throw new Error('Function not implemented.')
-          }}
-          isOpen={false}
+            setShowExercisePicker(false)
+          } }
+          isOpen={showExercisePicker}     
         />
       </div>
 
@@ -96,7 +102,6 @@ export function ExerciseFilterPanel({
           })}
         </div>
         <Button
-          type="button"
           onClick={onToggleImages}
           className={
             showExerciseImages

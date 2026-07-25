@@ -162,14 +162,12 @@ export function PreferencesPage() {
             </p>
             <div className="mt-4 flex gap-3">
               <Button
-                type="button"
                 onClick={() => setThemePreference('light')}
                 className={`rounded-full px-4 py-2 text-sm font-medium transition ${themePreference === 'light' ? 'bg-slate-900 text-white' : 'bg-white text-slate-700 border border-slate-200'}`}
               >
                 Light
               </Button>
               <Button
-                type="button"
                 onClick={() => setThemePreference('dark')}
                 className={`rounded-full px-4 py-2 text-sm font-medium transition ${themePreference === 'dark' ? 'bg-slate-900 text-white' : 'bg-white text-slate-700 border border-slate-200'}`}
               >
@@ -180,7 +178,6 @@ export function PreferencesPage() {
 
           <div className="flex flex-wrap gap-2">
             <Button
-              type="submit"
               disabled={isSaving}
               tone="emerald"
               isLoading={isSaving}
@@ -189,7 +186,7 @@ export function PreferencesPage() {
             >
               Save preferences
             </Button>
-            <Button type="button" tone="default" onClick={() => navigate('/')}>
+            <Button tone="default" onClick={() => navigate('/')}>
               Cancel
             </Button>
           </div>

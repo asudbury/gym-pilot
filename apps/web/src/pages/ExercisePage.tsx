@@ -91,7 +91,6 @@ export function ExercisePage({
         <ExerciseSteps steps={exercise.instruction_steps.en} className="mt-8" />
         <PageActionGroup className="mt-6 flex-col sm:flex-row sm:justify-end">
           <Button
-            type="button"
             onClick={handleOpenFavouritePicker}
             className={
               isExerciseFavorite?.(exercise.id)
@@ -104,7 +103,6 @@ export function ExercisePage({
               : 'Add to Favourites'}
           </Button>
           <Button
-            type="button"
             onClick={handleCopyUrl}
             className={
               copied

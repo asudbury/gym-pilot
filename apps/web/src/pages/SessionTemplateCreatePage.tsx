@@ -88,7 +88,6 @@ function SessionTemplateCreatePage() {
         <div className="mt-6 grid grid-cols-1 gap-6">
           <div>
             <Button
-              type="button"
               tone="blue"
               onClick={() => setShowExercisePicker(true)}
             >
@@ -146,7 +145,6 @@ function SessionTemplateCreatePage() {
         <div className="mt-6">
           <div className="flex flex-wrap gap-2">
             <Button
-              type="submit"
               tone="emerald"
               className="w-fit rounded-full px-4 py-2.5 text-sm font-semibold transition disabled:cursor-not-allowed disabled:bg-slate-400"
               onClick={() => navigate('/session-templates')}
@@ -154,7 +152,6 @@ function SessionTemplateCreatePage() {
               Save template
             </Button>
             <Button
-              type="button"
               tone="default"
               onClick={() => navigate('/session-templates')}
             >

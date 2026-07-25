@@ -45,7 +45,6 @@ export function FavouriteFolderGroup({
     >
       <div className="mb-3 flex items-center justify-between">
         <Button
-          type="button"
           onClick={() => onToggle(folderName)}
           className="flex items-center gap-2 text-left text-sm font-semibold tracking-wide text-slate-600"
         >
@@ -57,7 +56,6 @@ export function FavouriteFolderGroup({
         <div className="flex items-center gap-2">
           {folderName !== 'No folder' && (
             <Button
-              type="button"
               onClick={() => onDeleteFolder(folderName)}
               className="rounded-lg border border-rose-200 bg-rose-50 px-2 py-1 text-xs font-medium text-rose-700 transition hover:bg-rose-100"
             >
@@ -77,7 +75,6 @@ export function FavouriteFolderGroup({
               className="flex flex-col gap-3 rounded-2xl border border-slate-200 bg-slate-50 p-3 sm:flex-row sm:items-center sm:justify-between"
             >
               <Button
-                type="button"
                 onClick={() => onOpenLink(link)}
                 className="flex-1 text-left"
                 draggable
@@ -118,7 +115,6 @@ export function FavouriteFolderGroup({
                   </select>
                 </label>
                 <Button
-                  type="button"
                   onClick={() => onOpenLink(link)}
                   className={getToneClass(
                     'default',
@@ -128,7 +124,6 @@ export function FavouriteFolderGroup({
                   Open
                 </Button>
                 <Button
-                  type="button"
                   onClick={() => onRemoveLink(link)}
                   className="rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm font-medium text-slate-700 transition hover:bg-slate-100"
                 >

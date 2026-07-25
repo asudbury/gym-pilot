@@ -168,7 +168,6 @@ export function Header({
           <ResponsiveVisibility visibleOn="tablet">
             <div className="relative">
               <Button
-                type="button"
                 onClick={onToggleMobileMenu}
                 className={getToneClass(
                   'default',
@@ -224,7 +223,6 @@ export function Header({
           <ResponsiveVisibility visibleOn="mobile">
             <div className="relative">
               <Button
-                type="button"
                 onClick={onToggleMobileMenu}
                 className={getToneClass(
                   'default',
