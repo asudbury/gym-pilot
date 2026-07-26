@@ -1,0 +1,7 @@
+{
+  "imports": {
+    "hono": "https://deno.land/x/hono@v4.3.11/mod.ts",
+    "@supabase/supabase-js": "npm:@supabase/supabase-js@^2",
+    "@shared": "../_shared/supabaseClient.ts"
+  }
+}
