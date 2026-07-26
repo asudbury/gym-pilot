@@ -1,0 +1,45 @@
+@# @name loginAndGetUser
+
+### @name login
+#
+# Part 1: Log in to the application.
+#
+# This request sends a POST to the login endpoint.
+# The server is expected to return a JSON response
+# containing an 'access_token'.
+#
+POST {{supabase_base_url}}/login
+Content-Type: application/json
+
+{
+  "email": "{{login_email}}",
+  "password": "{{login_password}}"
+}
+
+###
+#
+# This block is executed after the login request completes.
+#
+< {%
+    // Get the response from the 'login' request
+    const response = client.request.response;
+
+    // Capture the access_token from the JSON response body
+    const authToken = JSON.parse(response.body).session.access_token;
+    client.global.set("authToken", authToken);
+
+    // Log the captured token to the output panel
+    client.log("Captured authToken: " + authToken);
+%}
+
+### @name getUser
+#
+# Part 2: Access a protected route.
+#
+# This request uses the 'authToken' captured from the previous step.
+# The token is sent in the Authorization header to authenticate the request.
+#
+GET {{supabase_base_url}}/api
+Apikey: {{supabase_api_key}}
+Authorization: Bearer {{authToken}}
+

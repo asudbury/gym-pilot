@@ -2,6 +2,7 @@ import type { ComponentPropsWithoutRef, ElementType, ReactNode } from 'react'
 import { getToneClass, type ToneName } from '../toneClasses'
 
 type ButtonProps<T extends ElementType = 'button'> = {
+  type?: 'button' | 'submit' | 'reset'
   as?: T
   tone?: ToneName
   className?: string
@@ -13,6 +14,7 @@ type ButtonProps<T extends ElementType = 'button'> = {
 
 export function Button<T extends ElementType = 'button'>({
   as,
+  type = 'button',
   tone = 'default',
   className = '',
   defaultClassName = 'inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-full font-medium shadow-sm transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-slate-400/20 disabled:pointer-events-none disabled:opacity-50',
