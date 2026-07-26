@@ -1,0 +1,8 @@
+
+POST {{supabase_base_url}}/login
+Content-Type: application/json
+
+{
+  "email": "{{login_email}}",
+  "password": "{{login_password}}"
+}

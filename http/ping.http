@@ -1,0 +1,4 @@
+### Health check
+GET {{supabase_base_url}}/ping
+
+### Login
