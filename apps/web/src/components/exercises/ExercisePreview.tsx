@@ -13,10 +13,7 @@ type ExercisePreviewProps = {
   onClose: () => void
 }
 
-export function ExercisePreview({
-  exercise,
-  onClose,
-}: ExercisePreviewProps) {
+export function ExercisePreview({ exercise, onClose }: ExercisePreviewProps) {
   return (
     <div className="flex h-full flex-col bg-white">
       <div className="flex items-center justify-between border-b border-slate-200 p-4">

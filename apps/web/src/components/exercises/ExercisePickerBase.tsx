@@ -14,8 +14,11 @@ type ExercisePickerBaseProps = {
   onSelect: (exercise: Exercise) => void
   children: (
     suggestions: Exercise[],
-    renderSuggestion: (exercise: Exercise, customRender: (exercise: Exercise) => ReactNode) => ReactNode,
-    triggerPreview: (exercise: Exercise) => void, 
+    renderSuggestion: (
+      exercise: Exercise,
+      customRender: (exercise: Exercise) => ReactNode,
+    ) => ReactNode,
+    triggerPreview: (exercise: Exercise) => void,
   ) => ReactNode
   footer?: ReactNode
   header?: ReactNode
@@ -44,7 +47,8 @@ export function ExercisePickerBase({
     onCancel()
   }
 
-  const renderSuggestion = ( // This is the function passed to children
+  const renderSuggestion = (
+    // This is the function passed to children
     exercise: Exercise,
     customRender: (exercise: Exercise) => ReactNode,
   ) => (
@@ -52,7 +56,7 @@ export function ExercisePickerBase({
       key={exercise.id}
       className="group flex items-center justify-between border-b border-slate-100 px-4 py-3 text-left"
     >
-      <div className="flex-1">{customRender(exercise)}</div> 
+      <div className="flex-1">{customRender(exercise)}</div>
       <button
         type="button"
         onClick={() => setPreviewExercise(exercise)}
@@ -93,9 +97,9 @@ export function ExercisePickerBase({
           </div>
           <div className="flex-1 overflow-y-auto">
             {header}
-            {suggestions.length > 0 ? ( 
+            {suggestions.length > 0 ? (
               <div className="flex flex-col">
-                {children(suggestions, renderSuggestion, setPreviewExercise)} 
+                {children(suggestions, renderSuggestion, setPreviewExercise)}
               </div>
             ) : (
               <div className="flex h-full items-start justify-center align-text-top mt-4">

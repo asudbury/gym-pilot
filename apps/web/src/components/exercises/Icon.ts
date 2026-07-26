@@ -22,4 +22,4 @@ export type IconName =
   | 'users'
   | 'tasks'
   // Add any other icon names used in your project here
-  | undefined;
+  | undefined

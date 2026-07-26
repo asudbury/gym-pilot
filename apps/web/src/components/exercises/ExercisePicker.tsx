@@ -21,11 +21,16 @@ export function ExercisePicker({
       onSelect={handleSelect}
       isOpen={isOpen}
       {...rest}
-    > 
-      {(suggestions, renderSuggestion, _triggerPreview) => ( // Destructure _triggerPreview to match signature
-        <> {/* Wrap the mapped elements in a React.Fragment */}
-          {suggestions.map((exercise: Exercise) => // Explicitly type exercise
-            renderSuggestion(exercise, (exercise: Exercise) => ( // Explicitly type exercise
+    >
+      {(suggestions, renderSuggestion, _triggerPreview) => (
+        // Destructure _triggerPreview to match signature
+        <>
+          {' '}
+          {/* Wrap the mapped elements in a React.Fragment */}
+          {suggestions.map((exercise: Exercise) =>
+            // Explicitly type exercise
+            renderSuggestion(exercise, (exercise: Exercise) => (
+              // Explicitly type exercise
               <button
                 type="button"
                 onClick={() => handleSelect(exercise)}

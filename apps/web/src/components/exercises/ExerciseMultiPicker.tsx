@@ -98,10 +98,13 @@ export function ExerciseMultiPicker({
         </div>
       }
     >
-      {(suggestions, renderSuggestion, triggerPreview) => ( // Destructure triggerPreview from ExercisePickerBase's children prop
+      {(suggestions, renderSuggestion, triggerPreview) => (
+        // Destructure triggerPreview from ExercisePickerBase's children prop
         <>
-          {suggestions.map((exercise: Exercise) => // Explicitly type exercise
-            renderSuggestion(exercise, (exercise: Exercise) => ( // customRender now expects 1 arg
+          {suggestions.map((exercise: Exercise) =>
+            // Explicitly type exercise
+            renderSuggestion(exercise, (exercise: Exercise) => (
+              // customRender now expects 1 arg
               // customRender now expects 1 arg
               <div
                 className="flex items-center w-full cursor-pointer" // Entire row is clickable for checkbox
