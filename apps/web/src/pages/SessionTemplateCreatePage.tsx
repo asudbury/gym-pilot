@@ -14,10 +14,22 @@ import { getExercisePath } from '../utils/exerciseRouteUtils'
 import { formatLabel } from '../utils/formatUtils'
 import clsx from 'clsx'
 
+// Define a key for local storage
+const LOCAL_STORAGE_KEY = 'gym-pilot-selected-template-exercises'
+
 function SessionTemplateCreatePage() {
   const [selectedExercises, setSelectedExercises] = useState<
     { id: string; name: string }[]
-  >([])
+  >(() => {
+    // Initialize state from local storage
+    if (typeof window !== 'undefined') {
+      const savedExercises = localStorage.getItem(LOCAL_STORAGE_KEY)
+      if (savedExercises) {
+        return JSON.parse(savedExercises)
+      }
+    }
+    return []
+  })
   const [moved, setMoved] = useState<string | null>(null)
   const [showExercisePicker, setShowExercisePicker] = useState(false)
 
@@ -32,6 +44,13 @@ function SessionTemplateCreatePage() {
       return () => clearTimeout(timer)
     }
   }, [moved])
+
+  // Effect to save selectedExercises to local storage whenever it changes
+  useEffect(() => {
+    if (typeof window !== 'undefined') {
+      localStorage.setItem(LOCAL_STORAGE_KEY, JSON.stringify(selectedExercises))
+    }
+  }, [selectedExercises]) // Dependency array includes selectedExercises
 
   function reorder<T>(
     items: T[],
@@ -57,7 +76,12 @@ function SessionTemplateCreatePage() {
   }
 
   const addExercises = (exercises: Exercise[]) => {
-    setSelectedExercises((prev) => [...prev, ...exercises])
+    // Filter out exercises that are already selected to avoid duplicates
+    const newExercises = exercises.filter(
+      (newEx) =>
+        !selectedExercises.some((existingEx) => existingEx.id === newEx.id),
+    )
+    setSelectedExercises((prev) => [...prev, ...newExercises])
   }
 
   const handleReorder = (index: number, direction: 'up' | 'down') => {
@@ -78,7 +102,7 @@ function SessionTemplateCreatePage() {
           <div className="flex items-start gap-3">
             <DecorativeIcon icon="clipboard" />{' '}
             <div>
-              <Paragraph>Session Templates</Paragraph>
+              <Paragraph>Workout Templates</Paragraph>
               <Heading1 className="mt-2">Create Workout Template</Heading1>
             </div>
           </div>
@@ -100,41 +124,50 @@ function SessionTemplateCreatePage() {
             />
           </div>
           <div>
-            <h2 className="text-lg font-semibold">Selected Exercises</h2>
+            <h2 className="text-lg font-semibold">
+              Selected Exercises ({selectedExercises.length})
+            </h2>
             <div className="mt-4 space-y-2">
-              {selectedExercises.map((exercise, i) => (
-                <div
-                  key={exercise.id}
-                  className={clsx(
-                    'flex items-center justify-between rounded-md border p-2 transition-colors',
-                    {
-                      'bg-blue-100': moved === exercise.id,
-                    },
-                  )}
-                >
-                  <NavLink
-                    to={getExercisePath(exercise)}
-                    className="text-sm font-medium text-blue-700 underline decoration-blue-600/50 underline-offset-2 hover:text-blue-800"
+              {selectedExercises.length === 0 ? (
+                <p className="text-slate-500">
+                  No exercises selected yet. Add some using the "Add Exercises"
+                  button.
+                </p>
+              ) : (
+                selectedExercises.map((exercise, i) => (
+                  <div
+                    key={exercise.id}
+                    className={clsx(
+                      'flex items-center justify-between rounded-md border p-2 transition-colors',
+                      {
+                        'bg-blue-100': moved === exercise.id,
+                      },
+                    )}
                   >
-                    {formatLabel(exercise.name)}
-                  </NavLink>
+                    <NavLink
+                      to={`${getExercisePath(exercise)}?backTo=${encodeURIComponent('/session-templates/create')}&backLabel=${encodeURIComponent('Back to Create Template')}`}
+                      className="text-sm font-medium text-blue-700 underline decoration-blue-600/50 underline-offset-2 hover:text-blue-800"
+                    >
+                      {formatLabel(exercise.name)}
+                    </NavLink>
 
-                  <div className="flex items-center gap-2">
-                    <ItemControls
-                      itemName={exercise.name || 'item'}
-                      onRemove={() =>
-                        setSelectedExercises((prev) =>
-                          prev.filter((_, idx) => idx !== i),
-                        )
-                      }
-                      onReorder={(direction) => handleReorder(i, direction)}
-                      isFirst={i === 0}
-                      isLast={i === selectedExercises.length - 1}
-                      removeText={isDesktop}
-                    />
+                    <div className="flex items-center gap-2">
+                      <ItemControls
+                        itemName={exercise.name || 'item'}
+                        onRemove={() =>
+                          setSelectedExercises((prev) =>
+                            prev.filter((_, idx) => idx !== i),
+                          )
+                        }
+                        onReorder={(direction) => handleReorder(i, direction)}
+                        isFirst={i === 0}
+                        isLast={i === selectedExercises.length - 1}
+                        removeText={isDesktop}
+                      />
+                    </div>
                   </div>
-                </div>
-              ))}
+                ))
+              )}
             </div>
           </div>
         </div>

@@ -10,13 +10,11 @@ type Exercise = (typeof exercises)[number]
 
 type ExercisePreviewProps = {
   exercise: Exercise
-  onSelect: (exercise: Exercise) => void
   onClose: () => void
 }
 
 export function ExercisePreview({
   exercise,
-  onSelect,
   onClose,
 }: ExercisePreviewProps) {
   return (
@@ -25,9 +23,6 @@ export function ExercisePreview({
         <Button onClick={onClose} className="text-sm text-slate-600">
           <DecorativeIcon icon="back" className="h-4 w-4" />
           Back to Search
-        </Button>
-        <Button onClick={() => onSelect(exercise)} tone="blue">
-          Select Exercise
         </Button>
       </div>
       <div className="flex-1 overflow-y-auto p-4">

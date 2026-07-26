@@ -1,5 +1,5 @@
 import { useMemo, useState } from 'react'
-import { useParams } from 'react-router-dom'
+import { useParams, useSearchParams } from 'react-router-dom'
 import { ExerciseImage } from '../components/exercises/ExerciseImage'
 import { ExerciseSteps } from '../components/exercises/ExerciseSteps'
 import { YouTubeExerciseSearchButton } from '../components/exercises/YouTubeExerciseSearchButton'
@@ -13,6 +13,7 @@ import { formatLabel } from '../utils/formatUtils'
 import { copyExerciseLinkToClipboard } from '../utils/navigationUtils'
 import { resolveExercisePageViewModel } from '../features/exercises/domain/exerciseView'
 import { Button } from '../components/ui/Button'
+import BackLink from '../components/ui/BackLink'
 
 type ExercisePageProps = {
   onToggleFavoriteExercise?: (exerciseId: string) => void
@@ -24,7 +25,11 @@ export function ExercisePage({
   isExerciseFavorite,
 }: ExercisePageProps) {
   const { slug } = useParams()
+  const [searchParams] = useSearchParams()
   const [copied, setCopied] = useState(false)
+
+  const backTo = searchParams.get('backTo')
+  const backLabel = searchParams.get('backLabel')
 
   const viewModel = useMemo(() => {
     const parsed = exercisesSchema.parse(exercises)
@@ -67,9 +72,13 @@ export function ExercisePage({
   return (
     <PageLayout className="max-w-6xl">
       <PageCard padding="spacious">
-        <PageActionRow className="items-start gap-4 border-b-2 border-slate-200 pb-3">
-          <div className="min-w-0">
-            <Heading1 className="mt-0">{formatLabel(exercise.name)}</Heading1>
+        <PageActionRow className="flex-wrap items-start gap-4 border-b-2 border-slate-200 pb-3">
+          <div className="flex min-w-0 flex-col">
+            <div className="flex items-center gap-2">
+              {' '}
+              {/* This div is for the Heading1 and potentially other inline elements */}
+              <Heading1 className="mt-0">{formatLabel(exercise.name)}</Heading1>
+            </div>
             <div className="mt-3 flex flex-wrap items-center gap-2">
               <ExerciseMetaBadges
                 values={[
@@ -81,6 +90,16 @@ export function ExercisePage({
               />
             </div>
           </div>
+          {/* The BackLink is now a direct child of PageActionRow and right-aligned */}
+          {backTo && backLabel ? (
+            <BackLink to={backTo} label={backLabel} className="ml-auto" />
+          ) : (
+            <BackLink
+              to="/exercises"
+              label="Back to exercises"
+              className="ml-auto"
+            />
+          )}
         </PageActionRow>
         <ExerciseImage
           mediaGif={mediaGif}

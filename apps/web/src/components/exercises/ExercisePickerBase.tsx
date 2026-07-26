@@ -1,13 +1,12 @@
 import { useState, useRef, useEffect, type ReactNode } from 'react'
-import { exercises } from '@gym-pilot/shared'
 import { Button } from '../ui/Button'
 import { Modal } from '../ui/Modal'
 import { ExerciseSearchField } from './ExerciseSearchField'
 import { ExercisePreview } from './ExercisePreview'
+import { DecorativeIcon } from '../ui/DecorativeIcon'
 import { useExerciseSearch } from '../../hooks/useExerciseSearch'
 import { MIN_SEARCH_CHARS } from '../../constants/home'
-
-type Exercise = (typeof exercises)[number]
+import type { Exercise } from '@gym-pilot/shared'
 
 type ExercisePickerBaseProps = {
   isOpen: boolean
@@ -15,10 +14,8 @@ type ExercisePickerBaseProps = {
   onSelect: (exercise: Exercise) => void
   children: (
     suggestions: Exercise[],
-    renderSuggestion: (
-      exercise: Exercise,
-      customRender: (exercise: Exercise) => ReactNode,
-    ) => ReactNode,
+    renderSuggestion: (exercise: Exercise, customRender: (exercise: Exercise) => ReactNode) => ReactNode,
+    triggerPreview: (exercise: Exercise) => void, 
   ) => ReactNode
   footer?: ReactNode
   header?: ReactNode
@@ -27,7 +24,6 @@ type ExercisePickerBaseProps = {
 export function ExercisePickerBase({
   isOpen,
   onCancel,
-  onSelect,
   children,
   footer,
   header,
@@ -48,12 +44,7 @@ export function ExercisePickerBase({
     onCancel()
   }
 
-  const handleSelect = (exercise: Exercise) => {
-    setPreviewExercise(null)
-    onSelect(exercise)
-  }
-
-  const renderSuggestion = (
+  const renderSuggestion = ( // This is the function passed to children
     exercise: Exercise,
     customRender: (exercise: Exercise) => ReactNode,
   ) => (
@@ -61,10 +52,17 @@ export function ExercisePickerBase({
       key={exercise.id}
       className="group flex items-center justify-between border-b border-slate-100 px-4 py-3 text-left"
     >
-      <div className="flex-1">{customRender(exercise)}</div>
-      <Button onClick={() => setPreviewExercise(exercise)} tone="default">
-        View
-      </Button>
+      <div className="flex-1">{customRender(exercise)}</div> 
+      <button
+        type="button"
+        onClick={() => setPreviewExercise(exercise)}
+        className="p-1 -mr-1"
+      >
+        <DecorativeIcon
+          icon="back"
+          className="h-5 w-5 text-slate-400 group-hover:text-blue-500"
+        />
+      </button>
     </div>
   )
 
@@ -73,7 +71,6 @@ export function ExercisePickerBase({
       {previewExercise ? (
         <ExercisePreview
           exercise={previewExercise}
-          onSelect={handleSelect}
           onClose={() => setPreviewExercise(null)}
         />
       ) : (
@@ -96,9 +93,9 @@ export function ExercisePickerBase({
           </div>
           <div className="flex-1 overflow-y-auto">
             {header}
-            {suggestions.length > 0 ? (
+            {suggestions.length > 0 ? ( 
               <div className="flex flex-col">
-                {children(suggestions, renderSuggestion)}
+                {children(suggestions, renderSuggestion, setPreviewExercise)} 
               </div>
             ) : (
               <div className="flex h-full items-start justify-center align-text-top mt-4">
