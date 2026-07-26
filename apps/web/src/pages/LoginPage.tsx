@@ -24,6 +24,7 @@ import {
 import { recordWelcomeJourneyActivity } from '../features/auth/domain/welcomeJourneyLogging'
 import { DecorativeIcon } from '../components/ui/DecorativeIcon'
 import { Button } from '../components/ui/Button'
+import { getToneClass } from '../components/toneClasses'
 
 export function LoginPage() {
   const navigate = useNavigate()
@@ -159,7 +160,7 @@ export function LoginPage() {
   }
 
   const handlePasswordSignIn = async (
-    event: React.MouseEvent<HTMLButtonElement>,
+    event: React.FormEvent<HTMLFormElement>,
   ) => {
     event.preventDefault()
     console.log('[Login] Attempting password sign-in...')
@@ -439,7 +440,14 @@ export function LoginPage() {
           </div>
         </div>
 
-        <div className="mt-8 flex flex-col gap-4" data-form-type="login">
+        <form
+          onSubmit={handlePasswordSignIn}
+          className="mt-8 flex flex-col gap-4"
+          autoComplete="on"
+          method="post"
+          action="/login"
+          data-form-type="login"
+        >
           <label className="flex flex-col gap-2 text-sm font-medium text-slate-700">
             <span>Email address</span>
 
@@ -509,14 +517,14 @@ export function LoginPage() {
             </div>
           ) : null}
 
-          <Button
-            tone="emerald"
-            className="self-start w-full sm:w-auto shadow-sm disabled:cursor-not-allowed disabled:border-emerald-300 disabled:bg-emerald-300 disabled:text-emerald-950"
+          <button
+            type="submit"
+            className={getToneClass('emerald', 'w-full sm:w-auto px-3 py-2 text-sm')}
+
             disabled={isSubmitting}
-            onClick={handlePasswordSignIn}
           >
             {isSubmitting ? 'Logging in…' : 'Login'}
-          </Button>
+          </button>
 
           <button
             type="button"
@@ -536,7 +544,7 @@ export function LoginPage() {
               {isResetting ? 'Sending…' : 'Resend confirmation / reset'}
             </Button>
           ) : null}
-        </div>
+        </form>
 
         {authMessage ? (
           <div
