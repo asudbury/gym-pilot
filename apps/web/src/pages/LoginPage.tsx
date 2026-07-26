@@ -519,7 +519,10 @@ export function LoginPage() {
 
           <button
             type="submit"
-            className={getToneClass('emerald', 'w-full sm:w-auto px-3 py-2 text-sm')}
+            className={getToneClass(
+              'emerald',
+              'w-full sm:w-auto px-3 py-2 text-sm',
+            )}
 
             disabled={isSubmitting}
           >
