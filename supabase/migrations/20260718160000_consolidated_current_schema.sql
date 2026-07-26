@@ -11,24 +11,6 @@ begin
 end;
 $$;
 
--- Recreate the app-owned public tables from scratch so the remote project
--- matches the new schema layout. Auth tables under auth.* are preserved.
-do $$
-begin
-  drop table if exists public.gym_pilot_user_activity cascade;
-  drop table if exists public.gym_pilot_assignment cascade;
-  drop table if exists public.gym_pilot_plan cascade;
-  drop table if exists public.gym_pilot_favourite cascade;
-  drop table if exists public.gym_pilot_favourite_folder cascade;
-  drop table if exists public.gym_pilot_profile cascade;
-  drop table if exists public.gym_pilot_user_role cascade;
-  drop table if exists public.gym_pilot_app_state cascade;
-
-  drop table if exists public.favorite cascade;
-  drop table if exists public.favorite_folder cascade;
-end
-$$;
-
 -- Access model:
 -- - users manage their own rows by default
 -- - admins can manage profiles and roles
