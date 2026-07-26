@@ -47,27 +47,18 @@ export function ExerciseMultiPicker({
       onSelect={handleToggleExercise}
       header={
         <>
-          <div className="flex flex-wrap gap-2 p-4 border-b border-slate-200">
-            {(quickPickExercises as Exercise[]).map((category) => (
-              <Button
-                key={category.id}
-                tone={
-                  selectedExercises.some((e) => e.id === category.id)
-                    ? 'blue'
-                    : 'default'
-                }
-                className="px-3 py-1 text-sm"
-                onClick={() => handleToggleExercise(category)}
-              >
-                {category.name}
-              </Button>
-            ))}
-          </div>
-          {selectedExercises.length > 0 && (
+          <div className="p-4 border-t border-slate-200">
+          <Button
+            tone="emerald"
+            onClick={handleSelectExercises}
+            disabled={selectedExercises.length === 0}
+          >
+            Add {selectedExercises.length} exercise
+            {selectedExercises.length === 1 ? '' : 's'}
+          </Button>
+        </div>
+                  {selectedExercises.length > 0 && (
             <div className="flex flex-wrap gap-2 p-4 border-b border-slate-200">
-              <span className="text-sm font-medium text-slate-500">
-                Selected:
-              </span>
               {selectedExercises.map((exercise) => (
                 <span
                   key={exercise.id}
@@ -84,19 +75,23 @@ export function ExerciseMultiPicker({
               ))}
             </div>
           )}
+          <div className="flex flex-wrap gap-2 p-4 border-b border-slate-200">
+            {(quickPickExercises as Exercise[]).map((category) => (
+              <Button
+                key={category.id}
+                tone={
+                  selectedExercises.some((e) => e.id === category.id)
+                    ? 'blue'
+                    : 'default'
+                }
+                className="px-3 py-1 text-sm"
+                onClick={() => handleToggleExercise(category)}
+              >
+                {category.name}
+              </Button>
+            ))}
+          </div>
         </>
-      }
-      footer={
-        <div className="p-4 border-t border-slate-200">
-          <Button
-            tone="blue"
-            onClick={handleSelectExercises}
-            disabled={selectedExercises.length === 0}
-          >
-            Add {selectedExercises.length} exercise
-            {selectedExercises.length === 1 ? '' : 's'}
-          </Button>
-        </div>
       }
     >
       {(suggestions, renderSuggestion) => (
