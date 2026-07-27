@@ -19,11 +19,11 @@ export function SessionTemplatesPage() {
       {visibleAssignments.length === 0 ? (
         <PageCardLayout
           title="Workout Templates"
-          subtitle="Workout Templates Dashboard"
+          subtitle="Dashboard"
           description={description}
         >
           <CallToAction
-            title="Manage workout templates"
+            title="Manage templates"
             action={
               <Link
                 to="/session-templates/create"
@@ -32,7 +32,7 @@ export function SessionTemplatesPage() {
                   'inline-flex items-center rounded-lg px-4 py-2 text-sm font-medium',
                 )}
               >
-                Create a new workout template
+                Create a new template
               </Link>
             }
           />
@@ -40,7 +40,7 @@ export function SessionTemplatesPage() {
       ) : (
         <PageCardLayout
           title="Workout Templates"
-          subtitle="Workout Templates Dashboard"
+          subtitle="Dashboard"
           description={description}
         >
           <div className="flex justify-end">
@@ -51,7 +51,7 @@ export function SessionTemplatesPage() {
                 'inline-flex items-center rounded-lg px-4 py-2 text-sm font-medium',
               )}
             >
-              Create a new workout template
+              Create a new template
             </Link>
           </div>
           <div className="grid gap-4 md:grid-cols-2">

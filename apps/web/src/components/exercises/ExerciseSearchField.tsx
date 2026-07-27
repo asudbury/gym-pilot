@@ -19,7 +19,7 @@ export const ExerciseSearchField = forwardRef<
     {
       id = 'exercise-search',
       value = '',
-      placeholder = 'Search for exercise...',
+      placeholder = 'Search for exercise... (BB, DB, etc.)',
       className,
       onChange,
     },

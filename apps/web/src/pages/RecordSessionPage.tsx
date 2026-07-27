@@ -343,9 +343,11 @@ export function RecordSessionPage() {
             </DesktopOnly>
 
             <div className="mt-4 block text-sm text-slate-700">
-              <span className="font-medium pl-1">Workout log</span>
               <div className="text-sm font-medium text-slate-700 pl-1 mt-1">
-                Pick workout template
+                <Button onClick={() => navigate('/')} tone="default">
+                  Pick workout template
+               </Button>
+
               </div>
 
               <div className="mt-2">

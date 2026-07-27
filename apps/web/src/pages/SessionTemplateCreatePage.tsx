@@ -103,7 +103,7 @@ function SessionTemplateCreatePage() {
             <DecorativeIcon icon="clipboard" />{' '}
             <div>
               <Paragraph>Workout Templates</Paragraph>
-              <Heading1 className="mt-2">Create Workout Template</Heading1>
+              <Heading1 className="mt-2">Create Template</Heading1>
             </div>
           </div>
           <BackLink to="/session-templates" label="Back to Templates" />
@@ -111,8 +111,11 @@ function SessionTemplateCreatePage() {
 
         <div className="mt-6 grid grid-cols-1 gap-6">
           <div>
-            <Button tone="blue" onClick={() => setShowExercisePicker(true)}>
+            <Button tone="blue" className="mr-2" onClick={() => setShowExercisePicker(true)}>
               Add Exercises
+            </Button>
+            <Button tone="default" onClick={() => setSelectedExercises([])}>
+              Clear Exercises
             </Button>
             <ExerciseMultiPicker
               isOpen={showExercisePicker}
