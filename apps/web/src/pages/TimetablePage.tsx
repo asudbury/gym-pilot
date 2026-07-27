@@ -23,7 +23,7 @@ import {
   resolveTimetableViewModel,
   type TimetableSession,
 } from '../features/timetable/domain/timetableView'
-import { StatusMessage } from '../components/ui/StatusMessage'
+import { StatusMessageNotification } from '../components/ui/StatusMessageNotification'
 
 const TIMETABLE_ENDPOINT =
   'https://czasc5rowjxovhkdbd6p6jdtky0hnqas.lambda-url.eu-west-2.on.aws/'
@@ -506,19 +506,14 @@ export function TimetablePage() {
       setActiveDayKey('all')
       setActiveInstructor('all')
       setActiveClassName('all')
-    } catch (error) {
-      const message =
-        error instanceof Error
-          ? error.message
-          : 'Could not update the club right now.'
-
+    } catch (error: unknown) {
       reportUiError('Timetable club change failed', error, {
         nextClubId,
         currentClubId: rawGymName,
         rawGymBrand,
       })
 
-      setClubChangeMessage(message)
+      setClubChangeMessage(String(error)) // StatusMessageNotification will handle parsing
     } finally {
       setIsChangingClub(false)
     }
@@ -573,10 +568,10 @@ export function TimetablePage() {
         setAttendancePendingSession(null)
         setAttendanceNotes('')
         setAttendanceRating(null)
-        setAttendanceSelection(null)
-        navigate('/sessions', { replace: true })
-      } else {
-        setAttendanceMessage(result.error?.message ?? 'Could not save session.')
+        setAttendanceSelection(null) // StatusMessage will handle parsing
+        navigate('/sessions', { replace: true }) // StatusMessage will handle parsing
+      } else { // StatusMessage will handle parsing
+        setAttendanceMessage(result.error ?? 'Could not save session.') // StatusMessage will handle parsing
       }
     } catch (err: any) {
       const rawMessage = err?.message ?? 'An unexpected error occurred.'
@@ -775,7 +770,7 @@ export function TimetablePage() {
                   </label>
                 </DesktopOnly>
                 {attendanceMessage && (
-                  <StatusMessage
+                  <StatusMessageNotification
                     message={attendanceMessage}
                     tone="error"
                     className="mt-2"

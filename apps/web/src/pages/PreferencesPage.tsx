@@ -57,11 +57,8 @@ export function PreferencesPage() {
       navigate('/')
     } catch (error) {
       logger.error('[Preferences] Failed to save preferences', error)
-      const message =
-        error instanceof Error
-          ? error.message
-          : 'Could not save the preferences right now.'
-      setStatusMessage(message)
+      // StatusMessage component will now handle parsing the error object
+      setStatusMessage(String(error))
       setStatusType('error')
     } finally {
       setIsSaving(false)

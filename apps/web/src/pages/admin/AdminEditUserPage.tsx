@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react'
+import type { DisplayableError } from '../../components/ui/StatusMessageNotification'
 import { useNavigate, useParams } from 'react-router-dom'
 import { Button } from '../../components/ui/Button'
 import {
@@ -16,9 +17,9 @@ import {
   createInitialProfileDraft,
   mapProfileRow,
   type ProfileDraft,
-} from '../../features/admin/domain/userProfiles'
+} from '../../features/admin/domain/userProfiles' 
 import { renderDashboardTimestamp } from '../../utils/appUtils'
-import { StatusMessage } from '../../components/ui/StatusMessage'
+import { StatusMessageNotification } from '../../components/ui/StatusMessageNotification'
 import { UserProfileForm } from './UserProfileForm'
 import { useCopyToClipboard } from './useCopyToClipboard'
 
@@ -36,7 +37,7 @@ export function AdminEditUserPage() {
   const { users } = usePlan()
   const [profile, setProfile] = useState<AdminProfileRow | null>(null)
   const [draft, setDraft] = useState<ProfileDraft | null>(null)
-  const [statusMessage, setStatusMessage] = useState('')
+  const [statusMessage, setStatusMessage] = useState<DisplayableError>(null)
   const [statusType, setStatusType] = useState<'info' | 'error' | 'success'>(
     'info',
   )
@@ -68,16 +69,15 @@ export function AdminEditUserPage() {
 
       if (error) {
         logger.error('[AdminEditUser] Could not load profile row', error)
-        setStatusMessage(`Could not load profile user: ${error.message}`)
+        setStatusMessage(error.message)
         setStatusType('error')
         return
       }
 
       const emailLookup = new Map<string, string | null>()
       const adminClient = getSupabaseAdminClient()
-      if (adminClient) {
-        const { data: authData } =
-          await adminClient.auth.admin.getUserById(userId)
+      if (adminClient) { // This check is valid and necessary
+        const { data: authData } = await adminClient.auth.admin.getUserById(userId)
         if (authData.user) {
           emailLookup.set(authData.user.id, authData.user.email ?? null)
         }
@@ -108,7 +108,7 @@ export function AdminEditUserPage() {
 
   useEffect(() => {
     if (copyError) {
-      setStatusMessage(copyError)
+      setStatusMessage(copyError || 'An unknown error occurred during copy.')
       setStatusType('error')
     }
   }, [copyError])
@@ -152,10 +152,10 @@ export function AdminEditUserPage() {
       await saveSupabaseProfileRoles(draft.roles, profile.id)
 
       navigate('/admin/users', {
-        state: { statusMessage: `Profile for ${trimmedName} updated.` },
+        state: { statusMessage: `Profile for ${trimmedName} updated.` }, // This is a string, so it's fine.
       })
     } catch (err) {
-      logger.error('[AdminEditUser] Could not save profile', err)
+      logger.error('[AdminEditUser] Could not save profile', err as Error)
       setStatusMessage('Could not save the profile changes.')
       setStatusType('error')
     } finally {
@@ -179,7 +179,7 @@ export function AdminEditUserPage() {
         {isLoading ? (
           <p className="p-4 text-sm text-slate-600">Loading profile...</p>
         ) : statusType === 'error' && !profile ? (
-          <p className="p-4 text-sm text-rose-600">{statusMessage}</p>
+          <p className="p-4 text-sm text-rose-600">{String(statusMessage)}</p>
         ) : selectedProfile ? (
           <div className="space-y-4 m-0 bg-white p-0 sm:m-4 sm:rounded-2xl sm:border sm:border-slate-200 sm:p-4">
             <label className="block text-sm font-medium text-slate-700">
@@ -289,7 +289,7 @@ export function AdminEditUserPage() {
             </div>
             <div>
               {statusMessage ? (
-                <StatusMessage
+                <StatusMessageNotification
                   message={statusMessage}
                   tone={statusType}
                   className="mt-2"
@@ -298,7 +298,7 @@ export function AdminEditUserPage() {
             </div>
           </div>
         ) : (
-          <StatusMessage
+          <StatusMessageNotification
             message="No profile found"
             tone="error"
             className="mt-2"

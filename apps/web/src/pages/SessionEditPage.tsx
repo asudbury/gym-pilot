@@ -10,7 +10,6 @@ import { PageLayout } from '../layouts/PageLayout'
 import { DesktopOnly } from '../components/visibility/DeviceVisibility'
 import {
   buildSessionWorkoutMetadata,
-  formatSessionHistoryError,
   loadSessionHistoryEntries,
   loadWorkoutItemsForSession,
   parseSessionWorkoutMetadata,
@@ -101,7 +100,7 @@ export function SessionEditPage() {
           return
         }
 
-        setErrorMessage(formatSessionHistoryError(error))
+        setErrorMessage(String(error))
       }
     })()
 
@@ -177,7 +176,7 @@ export function SessionEditPage() {
       )
       navigate('/sessions')
     } catch (error) {
-      setErrorMessage(formatSessionHistoryError(error))
+      setErrorMessage(String(error))
     } finally {
       setIsSaving(false)
     }

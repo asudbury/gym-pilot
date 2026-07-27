@@ -13,7 +13,7 @@ import {
 } from '@gym-pilot/shared'
 import { recordWelcomeJourneyActivity } from '../features/auth/domain/welcomeJourneyLogging'
 import { handlePostSignInLogic } from '../features/auth/domain/postSignInLogic'
-import { StatusMessage } from '../components/ui/StatusMessage'
+import { StatusMessageNotification } from '../components/ui/StatusMessageNotification'
 
 export function ResetPasswordPage() {
   const navigate = useNavigate()
@@ -149,11 +149,9 @@ export function ResetPasswordPage() {
           source: hasResetTokens ? 'reset_link' : 'signed_in_flow',
         },
         null,
-        null,
       )
-      setStatusMessageText(
-        updateError.message || 'Could not update your password.',
-      )
+      // StatusMessage component will now handle parsing the error object
+      setStatusMessageText(updateError.message)
       setStatusTone('error')
       setPassword('')
       setConfirmPassword('')
@@ -250,7 +248,7 @@ export function ResetPasswordPage() {
         </div>
 
         <form onSubmit={handleSubmit} className="mt-8 flex flex-col gap-4">
-          <StatusMessage message={statusMessageText} tone={statusTone} />
+          <StatusMessageNotification message={statusMessageText} tone={statusTone} />
           <label className="flex flex-col gap-2 text-sm font-medium text-slate-700">
             <span>New password</span>
             <input

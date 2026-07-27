@@ -11,7 +11,7 @@ import {
   navigationItemBaseClassName,
   navigationItemIconClassName,
 } from './navigationItemStyles'
-import { StatusMessage } from '../ui/StatusMessage'
+import { StatusMessageNotification } from '../ui/StatusMessageNotification'
 
 type HeaderProps = {
   appName: string
@@ -157,7 +157,7 @@ export function Header({
                 ) : null}
               </div>
               {showRestrictedBadge ? (
-                <StatusMessage message="Password reset required" tone="error" />
+                <StatusMessageNotification message="Password reset required" tone="error" />
               ) : null}
             </div>
           </ResponsiveVisibility>

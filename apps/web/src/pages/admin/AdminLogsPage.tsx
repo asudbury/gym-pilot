@@ -4,6 +4,7 @@ import { PageLayout } from '../../layouts/PageLayout'
 import { PageCardLayout } from '../../layouts/PageCardLayout'
 import { Button } from '../../components/ui/Button'
 import { getSupabaseClient } from '@gym-pilot/shared'
+import { StatusMessageNotification, type DisplayableError } from '../../components/ui/StatusMessageNotification'
 
 type LogEntryRow = {
   id: string
@@ -123,7 +124,7 @@ export function AdminLogsPage({ view = 'combined' }: AdminLogsPageProps) {
   const [activityLogs, setActivityLogs] = useState<ActivityLogEntryRow[]>([])
   const [loading, setLoading] = useState(true)
   const [clearing, setClearing] = useState(false)
-  const [error, setError] = useState('')
+  const [error, setError] = useState<DisplayableError>(null)
   const [logFilterText, setLogFilterText] = useState('')
   const [reloadCounter, setReloadCounter] = useState(0)
 
@@ -333,9 +334,10 @@ export function AdminLogsPage({ view = 'combined' }: AdminLogsPageProps) {
           </div>
 
           {error ? (
-            <div className="rounded-xl border border-amber-200 bg-amber-50 p-3 text-sm text-amber-900">
-              {error}
-            </div>
+            <StatusMessageNotification
+              message={error}
+              tone="error"
+            />
           ) : null}
 
           {loading ? (

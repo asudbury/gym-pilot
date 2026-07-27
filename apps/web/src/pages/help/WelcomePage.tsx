@@ -15,7 +15,7 @@ import { useAuth } from '../../auth/AuthContext'
 import { DecorativeIcon } from '../../components/ui/DecorativeIcon'
 import { Button } from '../../components/ui/Button'
 import { recordWelcomeJourneyActivity } from '../../features/auth/domain/welcomeJourneyLogging'
-import { StatusMessage } from '../../components/ui/StatusMessage'
+import { StatusMessageNotification } from '../../components/ui/StatusMessageNotification'
 
 export function WelcomePage() {
   const navigate = useNavigate()
@@ -218,7 +218,7 @@ export function WelcomePage() {
         </div>
 
         {errorMessage ? (
-          <StatusMessage message={errorMessage} tone="error" />
+          <StatusMessageNotification message={errorMessage} tone="error" />
         ) : null}
 
         <div className="mt-6 flex flex-wrap gap-3">

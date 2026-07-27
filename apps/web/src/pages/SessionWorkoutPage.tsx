@@ -17,7 +17,7 @@ import {
   type SessionWorkoutItem,
 } from '@gym-pilot/shared'
 import { getSessionEntryTitle } from '../features/session-history/domain/sessionHistoryViewModel'
-import { StatusMessage } from '../components/ui/StatusMessage'
+import { StatusMessageNotification } from '../components/ui/StatusMessageNotification'
 
 export function SessionWorkoutPage() {
   const { user } = useAuth()
@@ -151,7 +151,7 @@ export function SessionWorkoutPage() {
         icon="edit"
       >
         {errorMessage ? (
-          <StatusMessage message={errorMessage} tone="error" className="mb-3" />
+          <StatusMessageNotification message={errorMessage} tone="error" className="mb-3" />
         ) : null}
 
         {entry ? (

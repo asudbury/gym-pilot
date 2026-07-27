@@ -24,6 +24,7 @@ export type DecorativeIconProps = {
     | 'share'
     | 'shield'
     | 'spark'
+    | 'spinner'
     | 'star'
     | 'tasks'
     | 'trash'
@@ -38,6 +39,7 @@ import {
   ShareIcon,
   SparkIcon,
   DumbbellIcon,
+  SpinnerIcon,
   SearchIcon,
   StarIcon,
   ChartIcon,
@@ -99,6 +101,7 @@ const iconComponents = {
   users: UsersIcon,
   arrowUp: ArrowUpIcon,
   arrowDown: ArrowDownIcon,
+  spinner: SpinnerIcon,
 }
 
 const DecorativeIcon = ({

@@ -21,9 +21,9 @@ import {
   createInitialProfileDraft,
   mapProfileRow,
   type ProfileDraft,
-} from '../../features/admin/domain/userProfiles'
+} from '../../features/admin/domain/userProfiles' 
 import { renderDashboardTimestamp } from '../../utils/appUtils'
-import { StatusMessage } from '../../components/ui/StatusMessage'
+import { StatusMessageNotification } from '../../components/ui/StatusMessageNotification'
 import { UserProfileForm } from './UserProfileForm'
 
 const formatStoredTimestamp = (value?: string | null) => {
@@ -66,7 +66,7 @@ export function AdminUserProfilesPage() {
 
     if (error) {
       logger.error('[AdminUserProfiles] Could not load profile rows', error)
-      setStatusMessage(`Could not load profile users: ${error.message}`)
+      setStatusMessage(error.message)
       setStatusType('error')
       return
     }
@@ -200,12 +200,11 @@ export function AdminUserProfilesPage() {
         setStatusMessage('Could not save roles: database constraint error.')
         setStatusType('error')
         setSavingProfileId(null)
-        return
       }
       await refreshProfiles()
       setStatusMessage(`Profile updated for ${trimmedName}.`)
       setStatusType('success')
-      navigate('/admin/users', { replace: true })
+      navigate('/admin/users', { replace: true, state: { statusMessage: `Profile updated for ${trimmedName}.` } })
     } catch (err) {
       logger.error('[AdminUserProfiles] Could not save profile', err)
       setStatusMessage('Could not save the profile changes.')
@@ -398,7 +397,7 @@ export function AdminUserProfilesPage() {
                             : 'Save profile'}
                         </Button>
                         {statusMessage ? (
-                          <StatusMessage
+                          <StatusMessageNotification
                             message={statusMessage}
                             tone={statusType}
                             className="mt-2"
@@ -408,7 +407,7 @@ export function AdminUserProfilesPage() {
                     </div>
                   </>
                 ) : (
-                  <StatusMessage
+                  <StatusMessageNotification
                     message="No profile found"
                     tone="error"
                     className="mt-2"

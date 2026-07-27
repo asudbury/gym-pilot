@@ -14,7 +14,7 @@ import {
   mapAdminProfileRows,
   type AdminProfileRow,
 } from '../../features/admin/domain/adminUtils'
-import { StatusMessage } from '../../components/ui/StatusMessage'
+import { StatusMessageNotification } from '../../components/ui/StatusMessageNotification'
 import { useCopyToClipboard } from './useCopyToClipboard'
 
 export function AdminUsersPage() {
@@ -130,7 +130,7 @@ export function AdminUsersPage() {
 
   useEffect(() => {
     if (copyError) {
-      setSupabaseUsersNotice(copyError)
+      setSupabaseUsersNotice(String(copyError))
     }
   }, [copyError])
 
@@ -185,7 +185,7 @@ export function AdminUsersPage() {
           </div>
 
           {supabaseUsersNotice ? (
-            <StatusMessage
+            <StatusMessageNotification
               message={supabaseUsersNotice}
               tone="success"
               className="mt-2"
@@ -193,7 +193,7 @@ export function AdminUsersPage() {
           ) : null}
 
           {isLoadingSupabaseUsers ? (
-            <p className="mt-3 text-sm text-slate-600">{supabaseUsersNotice}</p>
+            <StatusMessageNotification message={supabaseUsersNotice} tone="info" className="mt-3 text-sm text-slate-600" />
           ) : null}
 
           {isLoadingSupabaseUsers ? (

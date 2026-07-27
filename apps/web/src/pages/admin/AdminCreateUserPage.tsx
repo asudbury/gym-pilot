@@ -19,7 +19,7 @@ import {
   buildCreateUserProfilePayload,
   getCreateUserRoleOptions,
 } from '../../features/admin/domain/createUser'
-import { StatusMessage } from '../../components/ui/StatusMessage'
+import { StatusMessageNotification } from '../../components/ui/StatusMessageNotification'
 
 type StatusMessageState = {
   text: string
@@ -292,14 +292,10 @@ export function AdminCreateUserPage() {
             profileError,
           )
 
-          const profileErrorMessage = isSupabaseAuthCredentialError(
-            (profileError as Error).message,
-          )
-            ? 'Could not create the profile row: Your admin session has expired. Sign in again and retry.'
-            : `Could not create the profile row: ${(profileError as Error).message}`
+          const profileErrorMessage = isSupabaseAuthCredentialError((profileError as Error).message) ? 'Could not create the profile row: Your admin session has expired. Sign in again and retry.' : profileError
 
           setStatusMessage({
-            text: profileErrorMessage,
+            text: String(profileErrorMessage),
             tone: 'error',
           })
           return
@@ -492,7 +488,7 @@ export function AdminCreateUserPage() {
               Create user
             </Button>
             {statusMessage ? (
-              <StatusMessage
+              <StatusMessageNotification
                 message={statusMessage.text}
                 tone={statusMessage.tone}
                 className="mt-2"

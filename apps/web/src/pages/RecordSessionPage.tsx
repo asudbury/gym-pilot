@@ -1,7 +1,7 @@
 import { useEffect, useMemo, useState } from 'react'
 import { useNavigate, useSearchParams } from 'react-router-dom'
-import { useAuth } from '../auth/AuthContext'
-import { Button } from '../components/ui/Button'
+import { RatingSelector } from '../components/RatingSelector'
+import { StatusMessageNotification, type DisplayableError } from '../components/ui/StatusMessageNotification'
 import { PageCard } from '../components/PageCard'
 import { SessionWorkoutEditor } from '../components/SessionWorkoutEditor'
 import { DesktopOnly } from '../components/visibility/DeviceVisibility'
@@ -13,11 +13,13 @@ import {
   buildSessionWorkoutMetadata,
   buildWorkoutItemsFromPlanSessions,
   createSession,
+  logger,
   recordSession,
   usePlan,
   type SessionWorkoutItem,
 } from '@gym-pilot/shared'
-import { RatingSelector } from '../components/RatingSelector'
+import { useAuth } from '../auth/AuthContext'
+import { Button } from '../components/ui/Button'
 
 type SessionType = 'class' | 'solo' | 'personal_training'
 
@@ -62,7 +64,7 @@ export function RecordSessionPage() {
   const [selectedPlanId] = useState('')
   const [workoutItems, setWorkoutItems] = useState<SessionWorkoutItem[]>([])
   const [isSaving, setIsSaving] = useState(false)
-  const [error, setError] = useState<string | null>(null)
+  const [error, setError] = useState<DisplayableError>(null)
 
   const availablePlans = useMemo(() => {
     const candidates = [
@@ -198,7 +200,9 @@ export function RecordSessionPage() {
 
       navigate('/sessions')
     } catch (err: unknown) {
-      setError(err instanceof Error ? err.message : String(err))
+      // Log the full error object for debugging purposes
+      logger.error('[RecordSessionPage] Failed to record session', err)
+      setError(err);
     } finally {
       setIsSaving(false)
     }
@@ -358,7 +362,11 @@ export function RecordSessionPage() {
             </div>
 
             {error ? (
-              <div className="mt-3 text-sm text-rose-600">{error}</div>
+              <StatusMessageNotification
+                message={error}
+                tone="error"
+                className="mt-2"
+              />
             ) : null}
 
             <div className="mt-6 flex flex-wrap gap-2">
@@ -366,28 +374,7 @@ export function RecordSessionPage() {
                 <span className="inline-flex items-center gap-2">
                   {isSaving ? (
                     <>
-                      <svg
-                        className="h-4 w-4 animate-spin"
-                        viewBox="0 0 24 24"
-                        fill="none"
-                        aria-hidden="true"
-                      >
-                        <circle
-                          cx="12"
-                          cy="12"
-                          r="9"
-                          stroke="currentColor"
-                          strokeWidth="2"
-                          strokeLinecap="round"
-                          opacity="0.25"
-                        />
-                        <path
-                          d="M21 12a9 9 0 0 0-9-9"
-                          stroke="currentColor"
-                          strokeWidth="2"
-                          strokeLinecap="round"
-                        />
-                      </svg>
+                      <DecorativeIcon icon="spinner"/>
                       <span>Recording…</span>
                     </>
                   ) : (

@@ -51,11 +51,8 @@ export function AdminChangePasswordPage() {
       navigate('/preferences')
     } catch (error) {
       logger.error('[ChangePassword] Failed to update password', error)
-      const message =
-        error instanceof Error
-          ? error.message
-          : 'Could not update the password right now.'
-      setStatusMessage(message)
+      // StatusMessage component will now handle parsing the error object
+      setStatusMessage(String(error))
       setStatusType('error')
     } finally {
       setIsSaving(false)

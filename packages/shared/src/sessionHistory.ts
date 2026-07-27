@@ -176,6 +176,7 @@ export async function saveSessionHistoryEntry(
           id: entry.id,
           created_at: entry.createdAt ?? new Date().toISOString(),
           updated_at: new Date().toISOString(),
+          user_id: resolvedUserId
         },
         { onConflict: "id" },
       )
