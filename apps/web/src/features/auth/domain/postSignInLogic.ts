@@ -1,10 +1,10 @@
 import {
   loadAppSetting,
   loadSupabaseProfileAccessState,
-loadSupabaseProfileFlag,
-loadSupabaseProfileTermsAcceptance,
-saveSupabaseProfileLastLoggedIn,
-signOutFromSupabase,
+  loadSupabaseProfileFlag,
+  loadSupabaseProfileTermsAcceptance,
+  saveSupabaseProfileLastLoggedIn,
+  signOutFromSupabase,
 } from '@gym-pilot/shared'
 import { persistRememberedEmail } from './loginPreferences'
 import { recordWelcomeJourneyActivity } from './welcomeJourneyLogging'
@@ -33,13 +33,9 @@ export const handlePostSignInLogic = async ({
   persistRememberedEmail(email, true)
 
   if (user?.id) {
-    await saveSupabaseProfileLastLoggedIn(
-      user.id,
-      email.trim() || null,
-      {
-        shouldRecordActivity: true,
-      },
-    )
+    await saveSupabaseProfileLastLoggedIn(user.id, email.trim() || null, {
+      shouldRecordActivity: true,
+    })
   }
 
   const postLoginMessage = String(
@@ -79,7 +75,9 @@ export const handlePostSignInLogic = async ({
   const requiresPasswordChange = await loadSupabaseProfileFlag(
     'must_change_password',
   )
-  console.log(`${logPrefix} 'must_change_password' flag is: ${requiresPasswordChange}`)
+  console.log(
+    `${logPrefix} 'must_change_password' flag is: ${requiresPasswordChange}`,
+  )
 
   if (requiresPasswordChange) {
     void recordWelcomeJourneyActivity(

@@ -158,10 +158,10 @@ export function ResetPasswordPage() {
       return
     }
     try {
-      const { data: authUserData } = await client.auth.getUser();
-      const user = authUserData.user; // Type inferred from client.auth.getUser()
-      const currentUserId = user?.id ?? null; // Access properties directly
-      const currentUserEmail = user?.email ?? null; // Access properties directly
+      const { data: authUserData } = await client.auth.getUser()
+      const user = authUserData.user // Type inferred from client.auth.getUser()
+      const currentUserId = user?.id ?? null // Access properties directly
+      const currentUserEmail = user?.email ?? null // Access properties directly
 
       if (user) {
         if (currentUserId) {
@@ -174,14 +174,14 @@ export function ResetPasswordPage() {
             },
             currentUserId,
             currentUserEmail,
-          );
+          )
 
           await recordSupabaseUserActivity(
             'password_set',
             { source: hasResetTokens ? 'reset_link' : 'signed_in_flow' },
             currentUserId,
             currentUserEmail,
-          );
+          )
         }
 
         // Persist the must_change_password flag to false
@@ -191,12 +191,12 @@ export function ResetPasswordPage() {
           await Promise.race([
             saveSupabaseProfileFlag('must_change_password', false),
             new Promise((res) => setTimeout(res, 2000)),
-          ]);
+          ])
         } catch (err) {
           logger.warn(
             '[ResetPassword] Could not persist must_change_password flag',
             err,
-          );
+          )
         }
 
         // Now call the common post-sign-in logic
@@ -207,13 +207,13 @@ export function ResetPasswordPage() {
           navigate,
           setAuthMessage: setStatusMessage,
           setAuthMessageTone: setStatusTone,
-        });
+        })
       } else {
         // If user data is not available, just navigate to 'from'
-        setStatusMessage('Password updated successfully.');
-        setStatusTone('default');
-        window.dispatchEvent(new Event('gym-pilot-auth-updated'));
-        navigate(from, { replace: true });
+        setStatusMessage('Password updated successfully.')
+        setStatusTone('default')
+        window.dispatchEvent(new Event('gym-pilot-auth-updated'))
+        navigate(from, { replace: true })
       }
     } catch (error) {
       logger.warn(
@@ -221,10 +221,12 @@ export function ResetPasswordPage() {
         error,
       )
       // Fallback navigation if post-sign-in logic fails
-      setStatusMessage('Password updated successfully, but there was an issue with post-login checks. Please refresh or try again.');
-      setStatusTone('error');
-      window.dispatchEvent(new Event('gym-pilot-auth-updated'));
-      navigate(from, { replace: true });
+      setStatusMessage(
+        'Password updated successfully, but there was an issue with post-login checks. Please refresh or try again.',
+      )
+      setStatusTone('error')
+      window.dispatchEvent(new Event('gym-pilot-auth-updated'))
+      navigate(from, { replace: true })
     }
   }
 

@@ -208,7 +208,7 @@ export function LoginPage() {
       setAuthMessage,
       setAuthMessageTone,
       context: 'Login',
-    });
+    })
   }
 
   const handleForgotPassword = async () => {
