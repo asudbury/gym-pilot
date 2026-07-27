@@ -346,8 +346,7 @@ export function RecordSessionPage() {
               <div className="text-sm font-medium text-slate-700 pl-1 mt-1">
                 <Button onClick={() => navigate('/')} tone="default">
                   Pick workout template
-               </Button>
-
+                </Button>
               </div>
 
               <div className="mt-2">
