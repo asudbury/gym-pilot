@@ -1,28 +1,7 @@
 import { useEffect, useState } from 'react'
-import { appTokens } from '../constants/tokens'
+import { StatusMessage } from './ui/StatusMessage'
 
 type Toast = { id: number; text: string; tone?: 'success' | 'error' }
-
-type NotificationPillProps = {
-  text: string
-  tone?: 'success' | 'error'
-}
-
-function NotificationPill({ text, tone }: NotificationPillProps) {
-  const isError = tone === 'error'
-
-  return (
-    <div
-      className={`max-w-xs rounded-full border px-4 py-2 text-sm font-medium shadow-sm ${
-        isError
-          ? 'border-rose-200 bg-rose-50 text-rose-700'
-          : 'border-emerald-200 bg-emerald-50 text-emerald-700'
-      } ${appTokens.pill}`}
-    >
-      {text}
-    </div>
-  )
-}
 
 export default function ToastContainer() {
   const [toasts, setToasts] = useState<Toast[]>([])
@@ -50,8 +29,8 @@ export default function ToastContainer() {
 
   return (
     <div className="fixed right-4 bottom-4 z-50 flex flex-col items-end gap-2">
-      {toasts.map((t) => (
-        <NotificationPill key={t.id} text={t.text} tone={t.tone} />
+      {toasts.map((t) => ( // The `max-w-xs` and `mt-2` classes are added to maintain similar styling to the removed NotificationPill.
+        <StatusMessage key={t.id} message={t.text} tone={t.tone} className="max-w-xs mt-2" />
       ))}
     </div>
   )

@@ -23,7 +23,7 @@ import {
   type ProfileDraft,
 } from '../../features/admin/domain/userProfiles'
 import { renderDashboardTimestamp } from '../../utils/appUtils'
-import { NotificationPill } from '../../components/NotificationPill'
+import { StatusMessage } from '../../components/ui/StatusMessage'
 import { UserProfileForm } from './UserProfileForm'
 
 const formatStoredTimestamp = (value?: string | null) => {
@@ -369,15 +369,7 @@ export function AdminUserProfilesPage() {
                             : 'Copy invite link'}
                         </Button>
 
-                        <Button
-                          tone="blue"
-                          onClick={() =>
-                            navigate(
-                              `/admin/users/profiles/${selectedProfile.id}/activity`,
-                            )
-                          }
-                          className="px-3 py-1.5"
-                        >
+                        <Button tone="blue" onClick={() => navigate(`/admin/users/profiles/${selectedProfile.id}/activity`)} className="px-3 py-1.5">
                           View activity
                         </Button>
                       </div>
@@ -397,23 +389,12 @@ export function AdminUserProfilesPage() {
                             ? 'Saving…'
                             : 'Save profile'}
                         </Button>
-                        {statusMessage ? (
-                          <NotificationPill
-                            message={{ text: statusMessage, tone: statusType }}
-                            className="mt-2"
-                          />
-                        ) : null}
+                        {statusMessage ? <StatusMessage message={statusMessage} tone={statusType} className="mt-2" /> : null}
                       </div>
                     </div>
                   </>
                 ) : (
-                  <NotificationPill
-                    message={{
-                      text: 'No profile found',
-                      tone: 'error',
-                    }}
-                    className="mt-2"
-                  />
+                  <StatusMessage message="No profile found" tone="error" className="mt-2" />
                 )}
               </div>
             </div>

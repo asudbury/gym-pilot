@@ -7,11 +7,11 @@ import { ResponsiveVisibility } from '../visibility/ResponsiveVisibility'
 import { DecorativeIcon } from '../ui/DecorativeIcon'
 import { getToneClass } from '../toneClasses'
 import { Button } from '../ui/Button'
-import { NotificationPill } from '../NotificationPill'
 import {
   navigationItemBaseClassName,
   navigationItemIconClassName,
 } from './navigationItemStyles'
+import { StatusMessage } from '../ui/StatusMessage'
 
 type HeaderProps = {
   appName: string
@@ -157,9 +157,9 @@ export function Header({
                 ) : null}
               </div>
               {showRestrictedBadge ? (
-                <NotificationPill
-                  message={{ text: 'Password reset required', tone: 'error' }}
-                  className="border-red-300 bg-red-100 px-2.5 py-1 text-[11px] font-semibold text-red-700 shadow-none"
+                <StatusMessage
+                  message="Password reset required"
+                  tone="error"
                 />
               ) : null}
             </div>

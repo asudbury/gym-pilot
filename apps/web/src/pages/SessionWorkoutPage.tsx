@@ -4,7 +4,6 @@ import { useAuth } from '../auth/AuthContext'
 import { Button } from '../components/ui/Button'
 import { PageCardLayout } from '../layouts/PageCardLayout'
 import { PageLayout } from '../layouts/PageLayout'
-import { NotificationPill } from '../components/NotificationPill'
 import { SessionWorkoutEditor } from '../components/SessionWorkoutEditor'
 import {
   buildSessionWorkoutMetadata,
@@ -18,6 +17,7 @@ import {
   type SessionWorkoutItem,
 } from '@gym-pilot/shared'
 import { getSessionEntryTitle } from '../features/session-history/domain/sessionHistoryViewModel'
+import { StatusMessage } from '../components/ui/StatusMessage'
 
 export function SessionWorkoutPage() {
   const { user } = useAuth()
@@ -151,10 +151,8 @@ export function SessionWorkoutPage() {
         icon="edit"
       >
         {errorMessage ? (
-          <NotificationPill
-            message={{ text: errorMessage, tone: 'error' }}
-            className="mb-3"
-          />
+          <StatusMessage message={errorMessage} tone="error" className="mb-3" />
+
         ) : null}
 
         {entry ? (

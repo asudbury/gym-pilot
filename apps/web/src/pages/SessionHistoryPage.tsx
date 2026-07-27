@@ -1,10 +1,10 @@
 import { useEffect, useMemo, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { NotificationPill } from '../components/NotificationPill'
 import { DecorativeIcon } from '../components/ui/DecorativeIcon'
 import { useAuth } from '../auth/AuthContext'
 import { PageCardLayout } from '../layouts/PageCardLayout'
 import { PageLayout } from '../layouts/PageLayout'
+import { StatusMessage } from '../components/ui/StatusMessage'
 import {
   deleteSessionHistoryEntry,
   formatSessionHistoryError,
@@ -139,12 +139,7 @@ export function SessionHistoryPage() {
           }
           showViewWorkoutsTemplateButton={true}
         />
-        {errorMessage ? (
-          <NotificationPill
-            message={{ text: errorMessage, tone: 'error' }}
-            className="mb-3"
-          />
-        ) : null}
+        {errorMessage ? <StatusMessage message={errorMessage} tone="error" className="mb-3" /> : null}
         {sortedEntries.length === 0 ? (
           <div className="rounded-none border-0 bg-transparent p-0 text-sm text-slate-600 md:rounded-2xl md:border md:border-slate-200 md:bg-slate-50 md:p-4">
             No session entries yet.

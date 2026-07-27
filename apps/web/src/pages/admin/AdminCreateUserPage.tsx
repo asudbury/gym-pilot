@@ -19,7 +19,7 @@ import {
   buildCreateUserProfilePayload,
   getCreateUserRoleOptions,
 } from '../../features/admin/domain/createUser'
-import { NotificationPill } from '../../components/NotificationPill'
+import { StatusMessage } from '../../components/ui/StatusMessage'
 
 type StatusMessageState = {
   text: string
@@ -492,7 +492,7 @@ export function AdminCreateUserPage() {
               Create user
             </Button>
             {statusMessage ? (
-              <NotificationPill message={statusMessage} className="mt-2" />
+              <StatusMessage message={statusMessage.text} tone={statusMessage.tone} className="mt-2" />
             ) : null}
           </div>
         </Panel>

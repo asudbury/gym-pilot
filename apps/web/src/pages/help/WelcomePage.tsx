@@ -14,8 +14,8 @@ import { appTokens } from '../../constants/tokens'
 import { useAuth } from '../../auth/AuthContext'
 import { DecorativeIcon } from '../../components/ui/DecorativeIcon'
 import { Button } from '../../components/ui/Button'
-import { NotificationPill } from '../../components/NotificationPill'
 import { recordWelcomeJourneyActivity } from '../../features/auth/domain/welcomeJourneyLogging'
+import { StatusMessage } from '../../components/ui/StatusMessage'
 
 export function WelcomePage() {
   const navigate = useNavigate()
@@ -218,9 +218,9 @@ export function WelcomePage() {
         </div>
 
         {errorMessage ? (
-          <NotificationPill
-            message={{ text: errorMessage, tone: 'error' }}
-            className="mt-4"
+          <StatusMessage
+            message={errorMessage}
+            tone="error"
           />
         ) : null}
 

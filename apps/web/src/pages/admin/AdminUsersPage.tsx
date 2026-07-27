@@ -10,11 +10,8 @@ import {
 import { AdminSectionShell } from '../../components/admin/AdminSectionShell'
 import { Panel } from '../../components/ui/Panel'
 import { SectionPanel } from '../../components/ui/SectionPanel'
-import {
-  mapAdminProfileRows,
-  type AdminProfileRow,
-} from '../../features/admin/domain/adminUtils'
-import { NotificationPill } from '../../components/NotificationPill'
+import { mapAdminProfileRows, type AdminProfileRow } from '../../features/admin/domain/adminUtils'
+import { StatusMessage } from '../../components/ui/StatusMessage'
 import { useCopyToClipboard } from './useCopyToClipboard'
 
 export function AdminUsersPage() {
@@ -184,12 +181,7 @@ export function AdminUsersPage() {
             </span>
           </div>
 
-          {supabaseUsersNotice ? (
-            <NotificationPill
-              message={{ text: supabaseUsersNotice, tone: 'success' }}
-              className="mt-2"
-            />
-          ) : null}
+          {supabaseUsersNotice ? <StatusMessage message={supabaseUsersNotice} tone="success" className="mt-2" /> : null}
 
           {isLoadingSupabaseUsers ? (
             <p className="mt-3 text-sm text-slate-600">{supabaseUsersNotice}</p>

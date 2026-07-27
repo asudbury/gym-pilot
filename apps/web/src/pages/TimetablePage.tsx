@@ -7,7 +7,6 @@ import { PageCardLayout } from '../layouts/PageCardLayout'
 import { Button } from '../components/ui/Button'
 import { GymClubSelector } from '../components/GymClubSelector'
 import { RatingSelector } from '../components/RatingSelector'
-import { NotificationPill } from '../components/NotificationPill'
 import { DesktopOnly } from '../components/visibility/DeviceVisibility'
 import { reportUiError } from '../utils/uiErrorLogging'
 import { loadVirginActiveClubs } from '../utils/virginActiveClubs'
@@ -24,6 +23,7 @@ import {
   resolveTimetableViewModel,
   type TimetableSession,
 } from '../features/timetable/domain/timetableView'
+import { StatusMessage } from '../components/ui/StatusMessage'
 
 const TIMETABLE_ENDPOINT =
   'https://czasc5rowjxovhkdbd6p6jdtky0hnqas.lambda-url.eu-west-2.on.aws/'
@@ -775,10 +775,7 @@ export function TimetablePage() {
                   </label>
                 </DesktopOnly>
                 {attendanceMessage && (
-                  <NotificationPill
-                    message={{ text: attendanceMessage, tone: 'error' }}
-                    className="mt-2"
-                  />
+                  <StatusMessage message={attendanceMessage} tone="error" className="mt-2" />
                 )}
                 <div className="flex flex-wrap gap-2">
                   <Button

@@ -4,7 +4,6 @@ import { PageCard } from '../components/PageCard'
 import { Heading1 } from '../components/Typography'
 import { appTokens } from '../constants/tokens'
 import { Button } from '../components/ui/Button'
-import { NotificationPill } from '../components/NotificationPill'
 import { DecorativeIcon } from '../components/ui/DecorativeIcon'
 import {
   getSupabaseClient,
@@ -14,6 +13,7 @@ import {
 } from '@gym-pilot/shared'
 import { recordWelcomeJourneyActivity } from '../features/auth/domain/welcomeJourneyLogging'
 import { handlePostSignInLogic } from '../features/auth/domain/postSignInLogic'
+import { StatusMessage } from '../components/ui/StatusMessage'
 
 export function ResetPasswordPage() {
   const navigate = useNavigate()
@@ -28,7 +28,7 @@ export function ResetPasswordPage() {
     number: false,
     special: false,
   })
-  const [statusMessage, setStatusMessage] = useState('')
+  const [statusMessageText, setStatusMessageText] = useState('')
   const [statusTone, setStatusTone] = useState<'default' | 'error'>('default')
   const [isSubmitting, setIsSubmitting] = useState(false)
 
@@ -49,11 +49,11 @@ export function ResetPasswordPage() {
   const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault()
     setIsSubmitting(true)
-    setStatusMessage('')
+    setStatusMessageText('')
     setStatusTone('default')
 
     if (password.length < 8) {
-      setStatusMessage('Password must be at least 8 characters long.')
+      setStatusMessageText('Password must be at least 8 characters long.')
       setStatusTone('error')
       setIsSubmitting(false)
       setPassword('')
@@ -63,7 +63,7 @@ export function ResetPasswordPage() {
 
     // Ensure password meets rules before submitting
     if (!Object.values(passwordRules).every(Boolean)) {
-      setStatusMessage('Your password does not meet the required criteria.')
+      setStatusMessageText('Your password does not meet the required criteria.')
       setStatusTone('error')
       setIsSubmitting(false)
       setConfirmPassword('')
@@ -71,7 +71,7 @@ export function ResetPasswordPage() {
     }
 
     if (password !== confirmPassword) {
-      setStatusMessage('The passwords do not match.')
+      setStatusMessageText('The passwords do not match.')
       setStatusTone('error')
       setIsSubmitting(false)
       setPassword('')
@@ -82,7 +82,7 @@ export function ResetPasswordPage() {
     const client = getSupabaseClient()
 
     if (!client) {
-      setStatusMessage('Supabase is not available right now.')
+      setStatusMessageText('Supabase is not available right now.')
       setStatusTone('error')
       setIsSubmitting(false)
       return
@@ -124,7 +124,7 @@ export function ResetPasswordPage() {
         null,
         null,
       )
-      setStatusMessage(
+      setStatusMessageText(
         'The password reset link could not be used. Please request a new one or sign in again.',
       )
       setStatusTone('error')
@@ -151,7 +151,7 @@ export function ResetPasswordPage() {
         null,
         null,
       )
-      setStatusMessage(updateError.message || 'Could not update your password.')
+      setStatusMessageText(updateError.message || 'Could not update your password.')
       setStatusTone('error')
       setPassword('')
       setConfirmPassword('')
@@ -205,12 +205,12 @@ export function ResetPasswordPage() {
           email: currentUserEmail || '',
           from,
           navigate,
-          setAuthMessage: setStatusMessage,
+          setAuthMessage: setStatusMessageText,
           setAuthMessageTone: setStatusTone,
         })
       } else {
         // If user data is not available, just navigate to 'from'
-        setStatusMessage('Password updated successfully.')
+        setStatusMessageText('Password updated successfully.')
         setStatusTone('default')
         window.dispatchEvent(new Event('gym-pilot-auth-updated'))
         navigate(from, { replace: true })
@@ -221,7 +221,7 @@ export function ResetPasswordPage() {
         error,
       )
       // Fallback navigation if post-sign-in logic fails
-      setStatusMessage(
+      setStatusMessageText(
         'Password updated successfully, but there was an issue with post-login checks. Please refresh or try again.',
       )
       setStatusTone('error')
@@ -248,14 +248,7 @@ export function ResetPasswordPage() {
         </div>
 
         <form onSubmit={handleSubmit} className="mt-8 flex flex-col gap-4">
-          {statusMessage ? (
-            <NotificationPill
-              message={{
-                text: statusMessage,
-                tone: statusTone === 'error' ? 'error' : 'info',
-              }}
-            />
-          ) : null}
+            <StatusMessage message={statusMessageText} tone={statusTone} />
           <label className="flex flex-col gap-2 text-sm font-medium text-slate-700">
             <span>New password</span>
             <input
@@ -266,8 +259,8 @@ export function ResetPasswordPage() {
                 setPassword(v)
 
                 // Clear any existing status message when the user starts typing
-                if (statusMessage) {
-                  setStatusMessage('')
+                if (statusMessageText) {
+                  setStatusMessageText('')
                   setStatusTone('default')
                 }
 
@@ -296,8 +289,8 @@ export function ResetPasswordPage() {
                 setConfirmPassword(event.target.value)
 
                 // Clear any existing status message when the user starts typing
-                if (statusMessage) {
-                  setStatusMessage('')
+                if (statusMessageText) {
+                  setStatusMessageText('')
                   setStatusTone('default')
                 }
               }}
@@ -493,7 +486,7 @@ export function ResetPasswordPage() {
           </Button>
         </form>
 
-        {statusMessage ? (
+        {statusMessageText ? (
           <div
             className={`mt-4 rounded-2xl border px-4 py-3 text-sm ${
               statusTone === 'error'
@@ -501,7 +494,7 @@ export function ResetPasswordPage() {
                 : 'border-slate-200 bg-slate-50 text-slate-600'
             }`}
           >
-            {statusMessage}
+            {statusMessageText}
           </div>
         ) : null}
       </PageCard>

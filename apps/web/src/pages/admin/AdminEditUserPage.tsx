@@ -18,7 +18,7 @@ import {
   type ProfileDraft,
 } from '../../features/admin/domain/userProfiles'
 import { renderDashboardTimestamp } from '../../utils/appUtils'
-import { NotificationPill } from '../../components/NotificationPill'
+import { StatusMessage } from '../../components/ui/StatusMessage'
 import { UserProfileForm } from './UserProfileForm'
 import { useCopyToClipboard } from './useCopyToClipboard'
 
@@ -288,22 +288,11 @@ export function AdminEditUserPage() {
               </div>
             </div>
             <div>
-              {statusMessage ? (
-                <NotificationPill
-                  message={{ text: statusMessage, tone: statusType }}
-                  className="mt-2"
-                />
-              ) : null}
+              {statusMessage ? <StatusMessage message={statusMessage} tone={statusType} className="mt-2" /> : null}
             </div>
           </div>
         ) : (
-          <NotificationPill
-            message={{
-              text: 'No profile found',
-              tone: 'error',
-            }}
-            className="mt-2"
-          />
+          <StatusMessage message="No profile found" tone="error" className="mt-2" />
         )}
       </div>
     </AdminSectionShell>
