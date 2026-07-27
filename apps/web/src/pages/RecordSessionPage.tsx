@@ -1,7 +1,10 @@
 import { useEffect, useMemo, useState } from 'react'
 import { useNavigate, useSearchParams } from 'react-router-dom'
 import { RatingSelector } from '../components/RatingSelector'
-import { StatusMessageNotification, type DisplayableError } from '../components/ui/StatusMessageNotification'
+import {
+  StatusMessageNotification,
+  type DisplayableError,
+} from '../components/ui/StatusMessageNotification'
 import { PageCard } from '../components/PageCard'
 import { SessionWorkoutEditor } from '../components/SessionWorkoutEditor'
 import { DesktopOnly } from '../components/visibility/DeviceVisibility'
@@ -202,7 +205,7 @@ export function RecordSessionPage() {
     } catch (err: unknown) {
       // Log the full error object for debugging purposes
       logger.error('[RecordSessionPage] Failed to record session', err)
-      setError(err);
+      setError(err)
     } finally {
       setIsSaving(false)
     }
@@ -374,7 +377,7 @@ export function RecordSessionPage() {
                 <span className="inline-flex items-center gap-2">
                   {isSaving ? (
                     <>
-                      <DecorativeIcon icon="spinner"/>
+                      <DecorativeIcon icon="spinner" />
                       <span>Recording…</span>
                     </>
                   ) : (

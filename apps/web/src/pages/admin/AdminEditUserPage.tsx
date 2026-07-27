@@ -17,7 +17,7 @@ import {
   createInitialProfileDraft,
   mapProfileRow,
   type ProfileDraft,
-} from '../../features/admin/domain/userProfiles' 
+} from '../../features/admin/domain/userProfiles'
 import { renderDashboardTimestamp } from '../../utils/appUtils'
 import { StatusMessageNotification } from '../../components/ui/StatusMessageNotification'
 import { UserProfileForm } from './UserProfileForm'
@@ -76,8 +76,10 @@ export function AdminEditUserPage() {
 
       const emailLookup = new Map<string, string | null>()
       const adminClient = getSupabaseAdminClient()
-      if (adminClient) { // This check is valid and necessary
-        const { data: authData } = await adminClient.auth.admin.getUserById(userId)
+      if (adminClient) {
+        // This check is valid and necessary
+        const { data: authData } =
+          await adminClient.auth.admin.getUserById(userId)
         if (authData.user) {
           emailLookup.set(authData.user.id, authData.user.email ?? null)
         }

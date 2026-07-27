@@ -248,7 +248,10 @@ export function ResetPasswordPage() {
         </div>
 
         <form onSubmit={handleSubmit} className="mt-8 flex flex-col gap-4">
-          <StatusMessageNotification message={statusMessageText} tone={statusTone} />
+          <StatusMessageNotification
+            message={statusMessageText}
+            tone={statusTone}
+          />
           <label className="flex flex-col gap-2 text-sm font-medium text-slate-700">
             <span>New password</span>
             <input

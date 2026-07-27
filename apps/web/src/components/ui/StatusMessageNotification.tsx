@@ -3,7 +3,12 @@ import { useMemo } from 'react'
 import { logger } from '@gym-pilot/shared'
 
 // Define a type that StatusMessageNotification can gracefully handle
-export type DisplayableError = string | Error | { message: string; code?: string; details?: unknown; hint?: unknown } | unknown | null;
+export type DisplayableError =
+  | string
+  | Error
+  | { message: string; code?: string; details?: unknown; hint?: unknown }
+  | unknown
+  | null
 type StatusTone = 'default' | 'error' | 'success' | 'info'
 
 interface StatusMessageNotificationProps {
@@ -31,7 +36,12 @@ export function StatusMessageNotification({
     }
 
     // Handle objects with a 'message' property (like the one you provided)
-    if (typeof message === 'object' && message !== null && 'message' in message && typeof (message as { message: unknown }).message === 'string') {
+    if (
+      typeof message === 'object' &&
+      message !== null &&
+      'message' in message &&
+      typeof (message as { message: unknown }).message === 'string'
+    ) {
       return (message as { message: string }).message
     }
 
@@ -40,7 +50,10 @@ export function StatusMessageNotification({
       try {
         return `An unexpected error occurred: ${JSON.stringify(message)}`
       } catch (jsonError) {
-        logger.warn('Failed to JSON.stringify error object in StatusMessage:', jsonError)
+        logger.warn(
+          'Failed to JSON.stringify error object in StatusMessage:',
+          jsonError,
+        )
       }
     }
 

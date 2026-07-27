@@ -570,7 +570,8 @@ export function TimetablePage() {
         setAttendanceRating(null)
         setAttendanceSelection(null) // StatusMessage will handle parsing
         navigate('/sessions', { replace: true }) // StatusMessage will handle parsing
-      } else { // StatusMessage will handle parsing
+      } else {
+        // StatusMessage will handle parsing
         setAttendanceMessage(result.error ?? 'Could not save session.') // StatusMessage will handle parsing
       }
     } catch (err: any) {

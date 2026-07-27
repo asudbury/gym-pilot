@@ -292,7 +292,11 @@ export function AdminCreateUserPage() {
             profileError,
           )
 
-          const profileErrorMessage = isSupabaseAuthCredentialError((profileError as Error).message) ? 'Could not create the profile row: Your admin session has expired. Sign in again and retry.' : profileError
+          const profileErrorMessage = isSupabaseAuthCredentialError(
+            (profileError as Error).message,
+          )
+            ? 'Could not create the profile row: Your admin session has expired. Sign in again and retry.'
+            : profileError
 
           setStatusMessage({
             text: String(profileErrorMessage),

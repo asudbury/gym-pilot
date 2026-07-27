@@ -193,7 +193,11 @@ export function AdminUsersPage() {
           ) : null}
 
           {isLoadingSupabaseUsers ? (
-            <StatusMessageNotification message={supabaseUsersNotice} tone="info" className="mt-3 text-sm text-slate-600" />
+            <StatusMessageNotification
+              message={supabaseUsersNotice}
+              tone="info"
+              className="mt-3 text-sm text-slate-600"
+            />
           ) : null}
 
           {isLoadingSupabaseUsers ? (

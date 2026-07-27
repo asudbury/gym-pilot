@@ -21,7 +21,7 @@ import {
   createInitialProfileDraft,
   mapProfileRow,
   type ProfileDraft,
-} from '../../features/admin/domain/userProfiles' 
+} from '../../features/admin/domain/userProfiles'
 import { renderDashboardTimestamp } from '../../utils/appUtils'
 import { StatusMessageNotification } from '../../components/ui/StatusMessageNotification'
 import { UserProfileForm } from './UserProfileForm'
@@ -204,7 +204,10 @@ export function AdminUserProfilesPage() {
       await refreshProfiles()
       setStatusMessage(`Profile updated for ${trimmedName}.`)
       setStatusType('success')
-      navigate('/admin/users', { replace: true, state: { statusMessage: `Profile updated for ${trimmedName}.` } })
+      navigate('/admin/users', {
+        replace: true,
+        state: { statusMessage: `Profile updated for ${trimmedName}.` },
+      })
     } catch (err) {
       logger.error('[AdminUserProfiles] Could not save profile', err)
       setStatusMessage('Could not save the profile changes.')

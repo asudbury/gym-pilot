@@ -4,7 +4,10 @@ import { PageLayout } from '../../layouts/PageLayout'
 import { PageCardLayout } from '../../layouts/PageCardLayout'
 import { Button } from '../../components/ui/Button'
 import { getSupabaseClient } from '@gym-pilot/shared'
-import { StatusMessageNotification, type DisplayableError } from '../../components/ui/StatusMessageNotification'
+import {
+  StatusMessageNotification,
+  type DisplayableError,
+} from '../../components/ui/StatusMessageNotification'
 
 type LogEntryRow = {
   id: string
@@ -334,10 +337,7 @@ export function AdminLogsPage({ view = 'combined' }: AdminLogsPageProps) {
           </div>
 
           {error ? (
-            <StatusMessageNotification
-              message={error}
-              tone="error"
-            />
+            <StatusMessageNotification message={error} tone="error" />
           ) : null}
 
           {loading ? (
