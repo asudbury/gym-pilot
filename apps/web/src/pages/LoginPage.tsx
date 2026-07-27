@@ -1,17 +1,13 @@
 import { useEffect, useMemo, useRef, useState } from 'react'
 import { useNavigate, useLocation, useSearchParams } from 'react-router-dom'
 import {
-  loadAppSetting,
-  loadSupabaseProfileAccessState,
-  loadSupabaseProfileFlag,
-  loadSupabaseProfileTermsAcceptance,
+  loadAppSetting, // Still used for 'login_enabled' check
   logger,
   resetSupabasePassword,
-  saveSupabaseProfileLastLoggedIn,
   signInWithPassword,
-  signOutFromSupabase,
   getSupabaseClient,
 } from '@gym-pilot/shared'
+import { handlePostSignInLogic } from '../features/auth/domain/postSignInLogic'
 import { PageCard } from '../components/PageCard'
 import { Heading1 } from '../components/Typography'
 import { appTokens } from '../constants/tokens'
@@ -20,7 +16,7 @@ import {
   persistRememberEmailPreference,
   persistRememberedEmail,
   readStoredRememberedEmail,
-} from '../features/auth/domain/loginPreferences'
+} from '../features/auth/domain/loginPreferences' // All functions from here are used
 import { recordWelcomeJourneyActivity } from '../features/auth/domain/welcomeJourneyLogging'
 import { DecorativeIcon } from '../components/ui/DecorativeIcon'
 import { Button } from '../components/ui/Button'
@@ -44,7 +40,7 @@ export function LoginPage() {
   const [isResetting, setIsResetting] = useState(false)
   const [showPassword, setShowPassword] = useState(false)
   const [capsLockOn, setCapsLockOn] = useState(false)
-  const [useEdgeFunctionLogin, setUseEdgeFunctionLogin] = useState(false)
+  const [useEdgeFunctionLogin, setUseEdgeFunctionLogin] = useState(true) // Default to Edge Function
 
   const emailParam = useMemo(() => {
     const rawValue =
@@ -204,117 +200,15 @@ export function LoginPage() {
       return
     }
 
-    persistRememberedEmail(email, true)
-
-    if (response.data?.user?.id) {
-      await saveSupabaseProfileLastLoggedIn(
-        response.data.user.id,
-        email.trim() || null,
-        {
-          shouldRecordActivity: true,
-        },
-      )
-    }
-
-    const postLoginMessage = String(
-      await loadAppSetting('post_login_message', ''),
-    )
-
-    if (postLoginMessage) {
-      setAuthMessageTone('default')
-      setAuthMessage(postLoginMessage)
-    }
-
-    const accessState = await loadSupabaseProfileAccessState()
-    console.log('[Login] Access state:', accessState)
-
-    if (accessState.isBlocked) {
-      void recordWelcomeJourneyActivity(
-        'welcome_journey_error',
-        {
-          step: 'login',
-          outcome: 'access_blocked',
-          returnTo: from,
-        },
-        response.data?.user?.id ?? null,
-        response.data?.user?.email ?? null,
-      )
-
-      await signOutFromSupabase()
-
-      setAuthMessageTone('error')
-      setAuthMessage('This account is frozen or its access has expired.')
-
-      window.dispatchEvent(new Event('gym-pilot-auth-updated'))
-
-      return
-    }
-
-    // If the account requires a password change, force that first so users
-    // cannot continue until they've updated their credentials.
-    const requiresPasswordChange = await loadSupabaseProfileFlag(
-      'must_change_password',
-    )
-    console.log(
-      `[Login] 'must_change_password' flag is: ${requiresPasswordChange}`,
-    )
-
-    if (requiresPasswordChange) {
-      void recordWelcomeJourneyActivity(
-        'welcome_journey_redirected',
-        {
-          step: 'login',
-          outcome: 'password_reset_required',
-          returnTo: from,
-          reason: 'must_change_password',
-        },
-        response.data?.user?.id ?? null,
-        response.data?.user?.email ?? null,
-      )
-
-      setAuthMessageTone('default')
-      setAuthMessage('Please set a new password to continue.')
-
-      window.dispatchEvent(new Event('gym-pilot-auth-updated'))
-
-      navigate('/reset-password', {
-        replace: true,
-        state: { from },
-      })
-
-      return
-    }
-
-    const hasAcceptedTerms = await loadSupabaseProfileTermsAcceptance()
-    console.log(`[Login] User has accepted terms: ${hasAcceptedTerms}`)
-
-    if (!hasAcceptedTerms) {
-      void recordWelcomeJourneyActivity(
-        'welcome_journey_redirected',
-        {
-          step: 'login',
-          outcome: 'terms_required',
-          returnTo: from,
-          reason: 'terms_not_accepted',
-        },
-        response.data?.user?.id ?? null,
-        response.data?.user?.email ?? null,
-      )
-
-      window.dispatchEvent(new Event('gym-pilot-auth-updated'))
-
-      navigate('/welcome', {
-        replace: true,
-        state: { from },
-      })
-
-      return
-    }
-
-    console.log('[Login] All checks passed. Navigating to:', from)
-    window.dispatchEvent(new Event('gym-pilot-auth-updated'))
-
-    navigate(from, { replace: true })
+    await handlePostSignInLogic({
+      user: response.data?.user,
+      email,
+      from,
+      navigate,
+      setAuthMessage,
+      setAuthMessageTone,
+      context: 'Login',
+    });
   }
 
   const handleForgotPassword = async () => {
@@ -504,15 +398,15 @@ export function LoginPage() {
               <input
                 id="useEdgeFunctionLogin"
                 type="checkbox"
-                checked={useEdgeFunctionLogin}
-                onChange={(e) => setUseEdgeFunctionLogin(e.target.checked)}
+                checked={!useEdgeFunctionLogin} // Checkbox is checked when NOT using Edge Function (i.e., using traditional)
+                onChange={(e) => setUseEdgeFunctionLogin(!e.target.checked)} // Invert state based on checkbox
                 className="h-4 w-4 rounded border-gray-300 text-emerald-600 focus:ring-emerald-500"
               />
               <label
                 htmlFor="useEdgeFunctionLogin"
                 className="text-sm font-medium text-slate-700"
               >
-                Use Supabase Edge Function for Login
+                Use supabase password login
               </label>
             </div>
           ) : null}

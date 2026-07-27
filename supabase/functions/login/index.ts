@@ -1,13 +1,12 @@
-import { getSupabaseClient, corsHeaders } from "@shared";
+import { corsHeaders, getSupabaseClient } from "../_shared/supabaseClient.ts";
+import { sendSlackMessage } from "../_shared/slackUtils.ts"; // Import the Slack utility
 
 // Manually defined type, as the import from "@supabase/functions-js/edge-runtime.d.ts" was causing issues.
 type Fetch = (req: Request) => Promise<Response> | Response;
 
 async function signInWithPassword(email: string, password: string) {
   const client = getSupabaseClient();
-  if (!client) {
-    return { error: new Error("Supabase client is not available") };
-  }
+  // getSupabaseClient() will throw if not configured, so client is guaranteed to be available here.
   return client.auth.signInWithPassword({ email, password });
 }
 
@@ -35,12 +34,22 @@ const fetch: Fetch = async (req) => {
       });
     }
 
+    const slackChannel = Deno.env.get("WEB_LOGIN_CHANNEL") || "C0BKX94BJDP";
+    const slackMessage = `User *${data.user?.email || 'Unknown'}* successfully logged in.`;
+    // Sending the Slack message asynchronously to avoid blocking the user's login response.
+    sendSlackMessage(slackChannel, slackMessage)
+      .then((slackResult) => {
+        if (!slackResult.success) {
+          console.error(`Failed to send Slack login alert to channel ${slackChannel}:`, slackResult.error);
+        }
+      });
+    
     return new Response(JSON.stringify(data), {
       headers: { ...corsHeaders, "Content-Type": "application/json" },
       status: 200,
     });
   } catch (err) {
-    return new Response(JSON.stringify({ error: err.message }), {
+    return new Response(JSON.stringify({ error: err instanceof Error ? err.message : String(err) }), {
       headers: { ...corsHeaders, "Content-Type": "application/json" },
       status: 500,
     });

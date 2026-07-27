@@ -11,9 +11,9 @@ import {
   logger,
   recordSupabaseUserActivity,
   saveSupabaseProfileFlag,
-  loadSupabaseProfileTermsAcceptance,
 } from '@gym-pilot/shared'
 import { recordWelcomeJourneyActivity } from '../features/auth/domain/welcomeJourneyLogging'
+import { handlePostSignInLogic } from '../features/auth/domain/postSignInLogic'
 
 export function ResetPasswordPage() {
   const navigate = useNavigate()
@@ -158,73 +158,73 @@ export function ResetPasswordPage() {
       return
     }
     try {
-      const { data: authUserData } = await client.auth.getUser()
-      const currentUserId = authUserData.user?.id ?? null
+      const { data: authUserData } = await client.auth.getUser();
+      const user = authUserData.user; // Type inferred from client.auth.getUser()
+      const currentUserId = user?.id ?? null; // Access properties directly
+      const currentUserEmail = user?.email ?? null; // Access properties directly
 
-      if (currentUserId) {
-        await recordWelcomeJourneyActivity(
-          'welcome_journey_password_reset',
-          {
-            step: 'reset_password',
-            outcome: 'succeeded',
-            source: hasResetTokens ? 'reset_link' : 'signed_in_flow',
-          },
-          currentUserId,
-          authUserData.user?.email ?? null,
-        )
+      if (user) {
+        if (currentUserId) {
+          await recordWelcomeJourneyActivity(
+            'welcome_journey_password_reset',
+            {
+              step: 'reset_password',
+              outcome: 'succeeded',
+              source: hasResetTokens ? 'reset_link' : 'signed_in_flow',
+            },
+            currentUserId,
+            currentUserEmail,
+          );
 
-        await recordSupabaseUserActivity(
-          'password_set',
-          { source: hasResetTokens ? 'reset_link' : 'signed_in_flow' },
-          currentUserId,
-          authUserData.user?.email ?? null,
-        )
+          await recordSupabaseUserActivity(
+            'password_set',
+            { source: hasResetTokens ? 'reset_link' : 'signed_in_flow' },
+            currentUserId,
+            currentUserEmail,
+          );
+        }
+
+        // Persist the must_change_password flag to false
+        // This should happen *before* calling handlePostSignInLogic
+        // so that handlePostSignInLogic doesn't redirect to reset-password again.
+        try {
+          await Promise.race([
+            saveSupabaseProfileFlag('must_change_password', false),
+            new Promise((res) => setTimeout(res, 2000)),
+          ]);
+        } catch (err) {
+          logger.warn(
+            '[ResetPassword] Could not persist must_change_password flag',
+            err,
+          );
+        }
+
+        // Now call the common post-sign-in logic
+        await handlePostSignInLogic({
+          user: user,
+          email: currentUserEmail || '',
+          from,
+          navigate,
+          setAuthMessage: setStatusMessage,
+          setAuthMessageTone: setStatusTone,
+        });
+      } else {
+        // If user data is not available, just navigate to 'from'
+        setStatusMessage('Password updated successfully.');
+        setStatusTone('default');
+        window.dispatchEvent(new Event('gym-pilot-auth-updated'));
+        navigate(from, { replace: true });
       }
     } catch (error) {
       logger.warn(
-        '[ResetPassword] Could not record password set activity',
+        '[ResetPassword] Error during post-password-update logic',
         error,
       )
-    }
-
-    // Persist the must_change_password flag, but don't block the UI if
-    // local persistence (IndexedDB) hangs — use a short timeout and
-    // continue regardless of persistence outcome.
-    try {
-      await Promise.race([
-        saveSupabaseProfileFlag('must_change_password', false),
-        new Promise((res) => setTimeout(res, 2000)),
-      ])
-    } catch (err) {
-      logger.warn(
-        '[ResetPassword] Could not persist must_change_password flag',
-        err,
-      )
-    }
-
-    // After password reset, check terms acceptance but avoid hanging the
-    // flow — default to not-accepted on timeout or error so the user sees
-    // the welcome/terms screen if needed.
-    let hasAcceptedTerms = false
-    try {
-      const result = await Promise.race([
-        loadSupabaseProfileTermsAcceptance(),
-        new Promise<boolean>((res) => setTimeout(() => res(false), 2000)),
-      ])
-      hasAcceptedTerms = Boolean(result)
-    } catch (err) {
-      logger.warn('[ResetPassword] Could not load terms acceptance', err)
-      hasAcceptedTerms = false
-    }
-
-    setStatusMessage('Password updated successfully.')
-    setStatusTone('default')
-    window.dispatchEvent(new Event('gym-pilot-auth-updated'))
-
-    if (!hasAcceptedTerms) {
-      navigate('/welcome', { replace: true, state: { from } })
-    } else {
-      navigate(from, { replace: true })
+      // Fallback navigation if post-sign-in logic fails
+      setStatusMessage('Password updated successfully, but there was an issue with post-login checks. Please refresh or try again.');
+      setStatusTone('error');
+      window.dispatchEvent(new Event('gym-pilot-auth-updated'));
+      navigate(from, { replace: true });
     }
   }
 

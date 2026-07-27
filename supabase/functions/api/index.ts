@@ -1,5 +1,5 @@
 import { Hono, cors } from "hono";
-import { getSupabaseAdminClient } from "@shared";
+import { getSupabaseAdminClient } from "../_shared/supabaseClient";
 
 const app = new Hono();
 
