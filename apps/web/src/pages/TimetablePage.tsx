@@ -775,7 +775,11 @@ export function TimetablePage() {
                   </label>
                 </DesktopOnly>
                 {attendanceMessage && (
-                  <StatusMessage message={attendanceMessage} tone="error" className="mt-2" />
+                  <StatusMessage
+                    message={attendanceMessage}
+                    tone="error"
+                    className="mt-2"
+                  />
                 )}
                 <div className="flex flex-wrap gap-2">
                   <Button

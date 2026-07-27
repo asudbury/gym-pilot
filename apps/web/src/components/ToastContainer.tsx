@@ -29,8 +29,14 @@ export default function ToastContainer() {
 
   return (
     <div className="fixed right-4 bottom-4 z-50 flex flex-col items-end gap-2">
-      {toasts.map((t) => ( // The `max-w-xs` and `mt-2` classes are added to maintain similar styling to the removed NotificationPill.
-        <StatusMessage key={t.id} message={t.text} tone={t.tone} className="max-w-xs mt-2" />
+      {toasts.map((t) => (
+        // The `max-w-xs` and `mt-2` classes are added to maintain similar styling to the removed NotificationPill.
+        <StatusMessage
+          key={t.id}
+          message={t.text}
+          tone={t.tone}
+          className="max-w-xs mt-2"
+        />
       ))}
     </div>
   )

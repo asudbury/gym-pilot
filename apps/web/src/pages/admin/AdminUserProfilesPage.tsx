@@ -369,7 +369,15 @@ export function AdminUserProfilesPage() {
                             : 'Copy invite link'}
                         </Button>
 
-                        <Button tone="blue" onClick={() => navigate(`/admin/users/profiles/${selectedProfile.id}/activity`)} className="px-3 py-1.5">
+                        <Button
+                          tone="blue"
+                          onClick={() =>
+                            navigate(
+                              `/admin/users/profiles/${selectedProfile.id}/activity`,
+                            )
+                          }
+                          className="px-3 py-1.5"
+                        >
                           View activity
                         </Button>
                       </div>
@@ -389,12 +397,22 @@ export function AdminUserProfilesPage() {
                             ? 'Saving…'
                             : 'Save profile'}
                         </Button>
-                        {statusMessage ? <StatusMessage message={statusMessage} tone={statusType} className="mt-2" /> : null}
+                        {statusMessage ? (
+                          <StatusMessage
+                            message={statusMessage}
+                            tone={statusType}
+                            className="mt-2"
+                          />
+                        ) : null}
                       </div>
                     </div>
                   </>
                 ) : (
-                  <StatusMessage message="No profile found" tone="error" className="mt-2" />
+                  <StatusMessage
+                    message="No profile found"
+                    tone="error"
+                    className="mt-2"
+                  />
                 )}
               </div>
             </div>

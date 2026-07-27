@@ -152,7 +152,6 @@ export function SessionWorkoutPage() {
       >
         {errorMessage ? (
           <StatusMessage message={errorMessage} tone="error" className="mb-3" />
-
         ) : null}
 
         {entry ? (

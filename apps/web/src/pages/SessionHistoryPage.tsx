@@ -139,7 +139,9 @@ export function SessionHistoryPage() {
           }
           showViewWorkoutsTemplateButton={true}
         />
-        {errorMessage ? <StatusMessage message={errorMessage} tone="error" className="mb-3" /> : null}
+        {errorMessage ? (
+          <StatusMessage message={errorMessage} tone="error" className="mb-3" />
+        ) : null}
         {sortedEntries.length === 0 ? (
           <div className="rounded-none border-0 bg-transparent p-0 text-sm text-slate-600 md:rounded-2xl md:border md:border-slate-200 md:bg-slate-50 md:p-4">
             No session entries yet.

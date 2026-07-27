@@ -157,10 +157,7 @@ export function Header({
                 ) : null}
               </div>
               {showRestrictedBadge ? (
-                <StatusMessage
-                  message="Password reset required"
-                  tone="error"
-                />
+                <StatusMessage message="Password reset required" tone="error" />
               ) : null}
             </div>
           </ResponsiveVisibility>

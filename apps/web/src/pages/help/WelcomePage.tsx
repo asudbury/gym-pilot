@@ -218,10 +218,7 @@ export function WelcomePage() {
         </div>
 
         {errorMessage ? (
-          <StatusMessage
-            message={errorMessage}
-            tone="error"
-          />
+          <StatusMessage message={errorMessage} tone="error" />
         ) : null}
 
         <div className="mt-6 flex flex-wrap gap-3">

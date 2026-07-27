@@ -288,11 +288,21 @@ export function AdminEditUserPage() {
               </div>
             </div>
             <div>
-              {statusMessage ? <StatusMessage message={statusMessage} tone={statusType} className="mt-2" /> : null}
+              {statusMessage ? (
+                <StatusMessage
+                  message={statusMessage}
+                  tone={statusType}
+                  className="mt-2"
+                />
+              ) : null}
             </div>
           </div>
         ) : (
-          <StatusMessage message="No profile found" tone="error" className="mt-2" />
+          <StatusMessage
+            message="No profile found"
+            tone="error"
+            className="mt-2"
+          />
         )}
       </div>
     </AdminSectionShell>

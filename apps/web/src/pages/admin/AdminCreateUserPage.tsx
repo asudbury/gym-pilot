@@ -492,7 +492,11 @@ export function AdminCreateUserPage() {
               Create user
             </Button>
             {statusMessage ? (
-              <StatusMessage message={statusMessage.text} tone={statusMessage.tone} className="mt-2" />
+              <StatusMessage
+                message={statusMessage.text}
+                tone={statusMessage.tone}
+                className="mt-2"
+              />
             ) : null}
           </div>
         </Panel>
