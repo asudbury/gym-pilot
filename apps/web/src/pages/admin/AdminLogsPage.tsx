@@ -1,41 +1,41 @@
-import { useState } from 'react';
-import { useLocation, useNavigate } from 'react-router-dom';
-import { ActivityLogView, AuditLogView, ErrorLogView } from './logs';
+import { useState } from 'react'
+import { useLocation, useNavigate } from 'react-router-dom'
+import { ActivityLogView, AuditLogView, ErrorLogView } from './logs'
 ///import { StatusMessageNotification } from '../../components/ui/StatusMessageNotification';
-import { Button } from '../../components/ui/Button';
-import { PageCardLayout } from '../../layouts/PageCardLayout';
-import { PageLayout } from '../../layouts/PageLayout';
+import { Button } from '../../components/ui/Button'
+import { PageCardLayout } from '../../layouts/PageCardLayout'
+import { PageLayout } from '../../layouts/PageLayout'
 
-type LogViewMode = 'error' | 'audit' | 'activity' | 'combined';
+type LogViewMode = 'error' | 'audit' | 'activity' | 'combined'
 
 type AdminLogsPageProps = {
-  view?: LogViewMode;
-};
+  view?: LogViewMode
+}
 
 export function AdminLogsPage({ view = 'error' }: AdminLogsPageProps) {
-  const navigate = useNavigate();
-  const location = useLocation();
-  const [logFilterText, setLogFilterText] = useState('');
-  const [reloadCounter, setReloadCounter] = useState(0);
+  const navigate = useNavigate()
+  const location = useLocation()
+  const [logFilterText, setLogFilterText] = useState('')
+  const [reloadCounter, setReloadCounter] = useState(0)
 
   const title =
     view === 'audit'
       ? 'Audit log'
       : view === 'activity'
-      ? 'Activity log'
-      : 'Error log';
+        ? 'Activity log'
+        : 'Error log'
   const subtitle =
     view === 'audit'
       ? 'Inspect audit events'
       : view === 'activity'
-      ? 'Inspect user activity events'
-      : 'Inspect error events';
+        ? 'Inspect user activity events'
+        : 'Inspect error events'
   const description =
     view === 'audit'
       ? 'Review the most recent audit entries captured.'
       : view === 'activity'
-      ? 'Review the most recent user activity entries captured.'
-      : 'Review the most recent error entries captured.';
+        ? 'Review the most recent user activity entries captured.'
+        : 'Review the most recent error entries captured.'
 
   return (
     <PageLayout>
@@ -94,8 +94,8 @@ export function AdminLogsPage({ view = 'error' }: AdminLogsPageProps) {
               </label>
               <Button
                 onClick={() => {
-                  navigate(location.pathname, { replace: true });
-                  setReloadCounter((prev) => prev + 1);
+                  navigate(location.pathname, { replace: true })
+                  setReloadCounter((prev) => prev + 1)
                 }}
               >
                 Refresh
@@ -126,5 +126,5 @@ export function AdminLogsPage({ view = 'error' }: AdminLogsPageProps) {
         </div>
       </PageCardLayout>
     </PageLayout>
-  );
+  )
 }

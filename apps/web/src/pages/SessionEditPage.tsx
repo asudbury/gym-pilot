@@ -34,7 +34,9 @@ export function SessionEditPage() {
   const [durationMinutes, setDurationMinutes] = useState<number | null>(null)
   const [sessionName, setSessionName] = useState('')
   const [startedAt, setStartedAt] = useState('')
-  const [workoutItems, setWorkoutItems] = useState<Partial<UserSessionWorkoutItem>[]>([])
+  const [workoutItems, setWorkoutItems] = useState<
+    Partial<UserSessionWorkoutItem>[]
+  >([])
   const [isSaving, setIsSaving] = useState(false)
   const [errorMessage, setErrorMessage] = useState<string | null>(null)
 

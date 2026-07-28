@@ -1,12 +1,12 @@
-import { useState, useEffect } from 'react';
-import { type UserSessionWorkoutItem } from '@gym-pilot/shared';
-import { Button } from './ui/Button';
-import { ExerciseMultiPicker } from './exercises/ExerciseMultiPicker';
-import { ItemControls } from './ItemControls';
-import { appTokens } from '../constants/tokens';
-import { formatLabel } from '../utils/formatUtils';
-import { useIsDesktop } from '../utils/useMediaQuery';
-import clsx from 'clsx';
+import { useState, useEffect } from 'react'
+import { type UserSessionWorkoutItem } from '@gym-pilot/shared'
+import { Button } from './ui/Button'
+import { ExerciseMultiPicker } from './exercises/ExerciseMultiPicker'
+import { ItemControls } from './ItemControls'
+import { appTokens } from '../constants/tokens'
+import { formatLabel } from '../utils/formatUtils'
+import { useIsDesktop } from '../utils/useMediaQuery'
+import clsx from 'clsx'
 
 function addSessionWorkoutItems(
   items: Partial<UserSessionWorkoutItem>[],
@@ -15,15 +15,15 @@ function addSessionWorkoutItems(
   const newWorkoutItems = newItems.map((item, index) => ({
     id: `new-${Date.now()}-${index}`,
     ...item,
-  }));
-  return [...items, ...newWorkoutItems];
+  }))
+  return [...items, ...newWorkoutItems]
 }
 
 function removeSessionWorkoutItem(
   items: Partial<UserSessionWorkoutItem>[],
   index: number,
 ): Partial<UserSessionWorkoutItem>[] {
-  return items.filter((_, i) => i !== index);
+  return items.filter((_, i) => i !== index)
 }
 
 function reorderSessionWorkoutItem(
@@ -31,11 +31,11 @@ function reorderSessionWorkoutItem(
   index: number,
   direction: 'up' | 'down',
 ): Partial<UserSessionWorkoutItem>[] {
-  const newItems = [...items];
-  const [movedItem] = newItems.splice(index, 1);
-  const newIndex = direction === 'up' ? index - 1 : index + 1;
-  newItems.splice(newIndex, 0, movedItem);
-  return newItems;
+  const newItems = [...items]
+  const [movedItem] = newItems.splice(index, 1)
+  const newIndex = direction === 'up' ? index - 1 : index + 1
+  newItems.splice(newIndex, 0, movedItem)
+  return newItems
 }
 
 function updateSessionWorkoutItem(
@@ -45,28 +45,28 @@ function updateSessionWorkoutItem(
 ): Partial<UserSessionWorkoutItem>[] {
   return items.map((item) =>
     item.id === itemId ? { ...item, ...updates } : item,
-  );
+  )
 }
 
 type SessionWorkoutEditorProps = {
-  items: Partial<UserSessionWorkoutItem>[];
-  onChange: (items: Partial<UserSessionWorkoutItem>[]) => void;
-  className?: string;
-};
+  items: Partial<UserSessionWorkoutItem>[]
+  onChange: (items: Partial<UserSessionWorkoutItem>[]) => void
+  className?: string
+}
 
 export function resolveExpandedWorkoutItemId(
   items: Partial<UserSessionWorkoutItem>[],
   activeItemId: string | null,
 ) {
   if (items.length === 0) {
-    return null;
+    return null
   }
 
   if (activeItemId && items.some((item) => item.id === activeItemId)) {
-    return activeItemId;
+    return activeItemId
   }
 
-  return items[0]?.id ?? null;
+  return items[0]?.id ?? null
 }
 
 export function SessionWorkoutEditor({
@@ -74,28 +74,28 @@ export function SessionWorkoutEditor({
   onChange,
   className = '',
 }: SessionWorkoutEditorProps) {
-  const isDesktop = useIsDesktop();
+  const isDesktop = useIsDesktop()
   const [expandedItemId, setExpandedItemId] = useState<string | null>(() =>
     resolveExpandedWorkoutItemId(items, null),
-  );
-  const [moved, setMoved] = useState<string | null>(null);
-  const [showExercisePicker, setShowExercisePicker] = useState(false);
+  )
+  const [moved, setMoved] = useState<string | null>(null)
+  const [showExercisePicker, setShowExercisePicker] = useState(false)
   const [showEditExercisePicker, setShowEditExercisePicker] = useState<
     string | null
-  >(null);
+  >(null)
 
   useEffect(() => {
     if (moved) {
       const timer = setTimeout(() => {
-        setMoved(null);
-      }, 500);
-      return () => clearTimeout(timer);
+        setMoved(null)
+      }, 500)
+      return () => clearTimeout(timer)
     }
-  }, [moved]);
+  }, [moved])
 
   const handleExpandItem = (itemId: string) => {
-    setExpandedItemId((current) => (current === itemId ? null : itemId));
-  };
+    setExpandedItemId((current) => (current === itemId ? null : itemId))
+  }
 
   return (
     <div
@@ -115,16 +115,16 @@ export function SessionWorkoutEditor({
                 exercise_name: formatLabel(exercise.name),
                 exercise_id: exercise.id,
               })),
-            );
-            onChange(newItems);
-            setShowExercisePicker(false);
+            )
+            onChange(newItems)
+            setShowExercisePicker(false)
           }}
           onCancel={() => setShowExercisePicker(false)}
         />
       </div>
 
       {items.map((item, index) => {
-        const isExpanded = expandedItemId === item.id;
+        const isExpanded = expandedItemId === item.id
 
         return (
           <div
@@ -162,13 +162,13 @@ export function SessionWorkoutEditor({
                     items,
                     index,
                     direction,
-                  );
+                  )
                   const movedItem =
-                    reorderedItems[direction === 'up' ? index - 1 : index + 1];
+                    reorderedItems[direction === 'up' ? index - 1 : index + 1]
                   if (movedItem) {
-                    setMoved(movedItem.id!);
+                    setMoved(movedItem.id!)
                   }
-                  onChange(reorderedItems);
+                  onChange(reorderedItems)
                 }}
                 isFirst={index === 0}
                 isLast={index === items.length - 1}
@@ -188,20 +188,20 @@ export function SessionWorkoutEditor({
                             category: 'exercise' as const,
                             exercise_name: formatLabel(exercise.name),
                             exercise_id: exercise.id,
-                          }));
+                          }))
                           const itemsWithoutOld = removeSessionWorkoutItem(
                             items,
                             index,
-                          );
+                          )
                           const finalItems = addSessionWorkoutItems(
                             itemsWithoutOld,
                             newItems,
-                          );
-                          onChange(finalItems);
+                          )
+                          onChange(finalItems)
                           setExpandedItemId(
                             finalItems[finalItems.length - 1]?.id ?? null,
-                          );
-                          setShowEditExercisePicker(null);
+                          )
+                          setShowEditExercisePicker(null)
                         }}
                         onCancel={() => setShowEditExercisePicker(null)}
                       />
@@ -214,7 +214,7 @@ export function SessionWorkoutEditor({
                           updateSessionWorkoutItem(items, item.id!, {
                             exercise_name: event.target.value,
                           }),
-                        );
+                        )
                       }}
                       placeholder="Exercise or activity"
                       className={`${appTokens.input} flex-1 min-w-12`}
