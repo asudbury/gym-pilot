@@ -3,7 +3,6 @@ import {
   loadSupabaseProfileAccessState,
   loadSupabaseProfileFlag,
   loadSupabaseProfileTermsAcceptance,
-  saveSupabaseProfileLastLoggedIn,
   signOutFromSupabase,
 } from '@gym-pilot/shared'
 import { persistRememberedEmail } from './loginPreferences'
@@ -32,12 +31,6 @@ export const handlePostSignInLogic = async ({
   const logPrefix = `[${context}]`
   persistRememberedEmail(email, true)
 
-  if (user?.id) {
-    await saveSupabaseProfileLastLoggedIn(user.id, email.trim() || null, {
-      shouldRecordActivity: true,
-    })
-  }
-
   const postLoginMessage = String(
     await loadAppSetting('post_login_message', ''),
   )
@@ -48,7 +41,6 @@ export const handlePostSignInLogic = async ({
   }
 
   const accessState = await loadSupabaseProfileAccessState()
-  console.log(`${logPrefix} Access state:`, accessState)
 
   if (accessState.isBlocked) {
     void recordWelcomeJourneyActivity(
@@ -66,17 +58,11 @@ export const handlePostSignInLogic = async ({
 
     setAuthMessageTone('error')
     setAuthMessage('This account is frozen or its access has expired.')
-
-    window.dispatchEvent(new Event('gym-pilot-auth-updated'))
-
     return
   }
 
   const requiresPasswordChange = await loadSupabaseProfileFlag(
     'must_change_password',
-  )
-  console.log(
-    `${logPrefix} 'must_change_password' flag is: ${requiresPasswordChange}`,
   )
 
   if (requiresPasswordChange) {
@@ -94,9 +80,6 @@ export const handlePostSignInLogic = async ({
 
     setAuthMessageTone('default')
     setAuthMessage('Please set a new password to continue.')
-
-    window.dispatchEvent(new Event('gym-pilot-auth-updated'))
-
     navigate('/reset-password', { replace: true, state: { from } })
 
     return
@@ -118,15 +101,10 @@ export const handlePostSignInLogic = async ({
       user?.email ?? null,
     )
 
-    window.dispatchEvent(new Event('gym-pilot-auth-updated'))
-
     navigate('/welcome', { replace: true, state: { from } })
 
     return
   }
-
-  console.log(`${logPrefix} All checks passed. Navigating to:`, from)
-  window.dispatchEvent(new Event('gym-pilot-auth-updated'))
 
   navigate(from, { replace: true })
 }

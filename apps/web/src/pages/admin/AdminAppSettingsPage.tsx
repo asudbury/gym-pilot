@@ -63,7 +63,6 @@ export function AdminAppSettingsPage() {
 
     try {
       await saveAppSettings(settings)
-      window.dispatchEvent(new Event('gym-pilot-settings-updated'))
       setMessage('Settings saved successfully.')
     } catch {
       setMessage('Could not save settings right now.')

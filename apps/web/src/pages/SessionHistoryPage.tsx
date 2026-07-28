@@ -6,7 +6,6 @@ import { PageCardLayout } from '../layouts/PageCardLayout'
 import { PageLayout } from '../layouts/PageLayout'
 import { StatusMessageNotification } from '../components/ui/StatusMessageNotification'
 import {
-  formatSessionHistoryError,
   getUserSessions,
   type UserSession,
   deleteUserSession,
@@ -73,7 +72,7 @@ export function SessionHistoryPage() {
           return
         }
 
-        setErrorMessage(formatSessionHistoryError(error))
+        setErrorMessage(String(error))
       }
     }
 
@@ -107,7 +106,7 @@ export function SessionHistoryPage() {
       setEntries(sortSessionEntries(loadedEntries ?? []))
       setErrorMessage(null)
     } catch (error) {
-      setErrorMessage(formatSessionHistoryError(error))
+      setErrorMessage(String(error))
     }
   }
 

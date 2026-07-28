@@ -88,8 +88,6 @@ export function useAppShell() {
           return
         }
 
-        logger.info('[App] Supabase auth callback succeeded; redirecting home')
-        window.dispatchEvent(new Event('gym-pilot-auth-updated'))
         window.location.assign(getHashHomeUrl())
       })
   }, [pathname, search])

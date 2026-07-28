@@ -55,7 +55,6 @@ export function ExercisePage({
 
   const handleOpenFavouritePicker = () => {
     onToggleFavoriteExercise?.(exercise?.id ?? '')
-    window.dispatchEvent(new Event('gym-pilot-open-favourites-menu'))
   }
 
   if (!exercise) {

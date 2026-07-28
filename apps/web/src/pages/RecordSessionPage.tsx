@@ -13,13 +13,39 @@ import { Heading1, UpperCaseParagraph } from '../components/Typography'
 import { PageLayout } from '../layouts/PageLayout'
 import { appTokens } from '../constants/tokens'
 import {
-  buildWorkoutItemsFromPlanSessions,
   logger,
   usePlan,
-  type SessionWorkoutItem,
   type UserSession,
   updateUserSession,
-} from '@gym-pilot/shared'
+  type UserSessionWorkoutItem,
+} from '@gym-pilot/shared';
+import { type PlanSession } from '@gym-pilot/types';
+
+function buildWorkoutItemsFromPlanSessions(planSessions: PlanSession[]): Partial<UserSessionWorkoutItem>[] {
+    if (!planSessions) {
+        return [];
+    }
+    const items: Partial<UserSessionWorkoutItem>[] = [];
+    let order = 0;
+    for (const session of planSessions) {
+        for (const planItem of session.planItems) {
+            items.push({
+                id: crypto.randomUUID(),
+                item_index: order,
+                category: 'exercise',
+                exercise_name: planItem.exercise_name,
+                exercise_id: planItem.exercise_id,
+                reps: planItem.reps,
+                sets: planItem.workingSets,
+                notes: planItem.notes,
+                plan_item_id: planItem.id,
+                sort_order: order,
+            });
+            order++;
+        }
+    }
+    return items;
+}
 import { useAuth } from '../auth/AuthContext'
 import { Button } from '../components/ui/Button'
 
@@ -64,7 +90,7 @@ export function RecordSessionPage() {
   const [activeKwh, setActiveKwh] = useState('')
   const [notes, setNotes] = useState('')
   const [selectedPlanId] = useState('')
-  const [workoutItems, setWorkoutItems] = useState<SessionWorkoutItem[]>([])
+  const [workoutItems, setWorkoutItems] = useState<Partial<UserSessionWorkoutItem>[]>([])
   const [isSaving, setIsSaving] = useState(false)
   const [error, setError] = useState<DisplayableError>(null)
 

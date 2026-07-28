@@ -11,10 +11,10 @@ import { PageLayout } from '../layouts/PageLayout'
 import { DesktopOnly } from '../components/visibility/DeviceVisibility'
 import {
   getUserSession,
-  loadWorkoutItemsForSession,
+  getUserSessionWorkoutItemsForSession,
   saveWorkoutItemsForSession,
   updateUserSession,
-  type SessionWorkoutItem,
+  type UserSessionWorkoutItem,
 } from '@gym-pilot/shared'
 import {
   getSessionEntryRating,
@@ -34,7 +34,7 @@ export function SessionEditPage() {
   const [durationMinutes, setDurationMinutes] = useState<number | null>(null)
   const [sessionName, setSessionName] = useState('')
   const [startedAt, setStartedAt] = useState('')
-  const [workoutItems, setWorkoutItems] = useState<SessionWorkoutItem[]>([])
+  const [workoutItems, setWorkoutItems] = useState<Partial<UserSessionWorkoutItem>[]>([])
   const [isSaving, setIsSaving] = useState(false)
   const [errorMessage, setErrorMessage] = useState<string | null>(null)
 
@@ -68,11 +68,14 @@ export function SessionEditPage() {
 
           if (nextEntry.session_id) {
             try {
-              const persistedItems = await loadWorkoutItemsForSession(
+              const { data } = await getUserSessionWorkoutItemsForSession(
                 nextEntry.session_id,
-                userId ?? undefined,
               )
-              setWorkoutItems(persistedItems.length > 0 ? persistedItems : [])
+              if (data && data?.length > 0) {
+                setWorkoutItems(data)
+              } else {
+                setWorkoutItems([])
+              }
             } catch {
               setWorkoutItems([])
             }
@@ -127,13 +130,6 @@ export function SessionEditPage() {
           entry.session_type === 'solo'
             ? sessionName.trim() || null
             : (entry.class_name ?? null),
-        // workout_metadata: buildSessionWorkoutMetadata({
-        //   workoutItems,
-        //   endedAt: parsedWorkoutMetadata.endedAt,
-        //   activeKwh: parsedWorkoutMetadata.activeKwh,
-        //   selectedPlanId: parsedWorkoutMetadata.selectedPlanId,
-        //   selectedPlanName: parsedWorkoutMetadata.selectedPlanName,
-        // }),
         updatedAt: new Date().toISOString(),
       }
 

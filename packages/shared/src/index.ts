@@ -43,24 +43,14 @@ export {
   saveSupabaseProfileFlag,
   saveSupabaseProfileRoles,
   saveSupabaseProfileTermsAcceptance,
-  saveSupabaseProfileLastLoggedIn,
   loadSupabaseJsonRecord,
   saveSupabaseJsonRecord,
   removeSupabaseJsonRecord,
   recordSupabaseUserActivity,
   saveTimetableAttendance,
-  loadSessionHistoryEntries,
   loadWorkoutItemsForSession,
   saveWorkoutItemsForSession,
-  mapSessionHistoryEntryFromSupabase,
-  formatSessionHistoryError,
   getSessionHistoryTableName,
-  saveSessionHistoryEntry,
-  deleteSessionHistoryEntry,
-  buildSessionHistoryDeleteError,
-  upsertSessionHistoryEntry,
-  removeSessionHistoryEntry,
-  type SessionHistoryEntry,
   getSessionTableName,
   getSessionBookingTableName,
   createSession,
@@ -75,10 +65,10 @@ export * from "./repositories";
 export * from "./appSettings";
 export * from "./appSettingsService";
 export * from "./userActivity";
-export * from "./sessionHistory";
 export * from "./sessionWorkout";
 export * from "./sessionWorkoutPersistence";
 export * from "./profilePersistence";
 export type { SupabaseProfileUpdatePayload } from "./profilePersistence";
 export * from "./dataServices/userSessionDataService";
+export * from "./dataServices/userSessionWorkItemDataService";
 export * from "./dataServices/types";

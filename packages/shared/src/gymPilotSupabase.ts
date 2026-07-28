@@ -36,7 +36,7 @@ import {
   type SupabaseProfileUpdatePayload,
   type SupabaseAccessTier,
 } from "./profilePersistence";
-import { type SessionWorkoutItem } from "./sessionWorkout";
+import { type UserSessionWorkoutItem } from "./dataServices/types";
 
 const DEFAULT_SUPABASE_TABLE = "gym_pilot_app_state";
 
@@ -994,7 +994,6 @@ export function isLocalhostHost(hostname?: string) {
 export {
   buildSupabaseUserActivityEventData,
   recordSupabaseUserActivity,
-  saveSupabaseProfileLastLoggedIn,
   shouldRecordLoginActivity,
   shouldRecordSupabaseUserActivity,
 } from "./userActivity";
@@ -1020,7 +1019,6 @@ function normalizeSessionRating(value: number | string | null | undefined) {
 }
 
 export {
-  buildWorkoutItemsPersistencePayloads,
   getWorkoutItemsTableName,
   loadWorkoutItemsForSession,
   saveWorkoutItemsForSession,
@@ -1121,22 +1119,6 @@ export function getSessionHistorySelectColumns() {
     "session:session_id",
   ];
 }
-
-export { mapSessionHistoryEntryFromSupabase } from "./sessionHistory";
-
-export {
-  upsertSessionHistoryEntry,
-  removeSessionHistoryEntry,
-  formatSessionHistoryError,
-  type SessionHistoryEntry,
-} from "./sessionHistory";
-
-export {
-  buildSessionHistoryDeleteError,
-  deleteSessionHistoryEntry,
-  loadSessionHistoryEntries,
-  saveSessionHistoryEntry,
-} from "./sessionHistory";
 
 export async function saveTimetableAttendance(input: {
   userId?: string;
@@ -1481,7 +1463,7 @@ export async function recordSession(input: {
   notes?: string | null;
   rating?: number | null;
   workoutMetadata?: unknown | null;
-  workoutItems?: SessionWorkoutItem[];
+  workoutItems?: UserSessionWorkoutItem[];
 }) {
   const client = getSupabaseClient();
   if (!client) {

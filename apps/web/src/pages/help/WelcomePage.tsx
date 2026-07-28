@@ -173,7 +173,6 @@ export function WelcomePage() {
       logger.error('[WelcomePage] Could not sign out after decline', error)
     }
 
-    window.dispatchEvent(new Event('gym-pilot-auth-updated'))
     navigate('/login', { replace: true })
   }
 

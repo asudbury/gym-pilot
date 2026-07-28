@@ -94,19 +94,9 @@ export function AuthProvider({ children }: AuthProviderProps) {
     persistThemePreference(themePreference)
   }, [themePreference])
 
-  const notifyAuthStateChanged = () => {
-    window.dispatchEvent(new Event('gym-pilot-auth-updated'))
-  }
-
   const handleLogin = (userId: string) => {
     logger.info('[Auth] Login requested', { userId })
     const success = login(userId)
-
-    if (success) {
-      logger.info('[Auth] Login succeeded', { userId })
-      notifyAuthStateChanged()
-    }
-
     return success
   }
 
@@ -136,7 +126,6 @@ export function AuthProvider({ children }: AuthProviderProps) {
     }
 
     await updateProfileNameInModule(friendlyName)
-    notifyAuthStateChanged()
   }
 
   const updateApplicationName = async (applicationName: string) => {
@@ -145,7 +134,6 @@ export function AuthProvider({ children }: AuthProviderProps) {
     }
 
     await updateApplicationNameInModule(applicationName)
-    notifyAuthStateChanged()
   }
 
   const updateGymBrand = async (gymBrand: string) => {
@@ -154,7 +142,6 @@ export function AuthProvider({ children }: AuthProviderProps) {
     }
 
     await updateGymBrandInModule(gymBrand)
-    notifyAuthStateChanged()
   }
 
   const updateGymName = async (gymName: string, gymBrand?: string | null) => {
@@ -163,7 +150,6 @@ export function AuthProvider({ children }: AuthProviderProps) {
     }
 
     await updateGymNameInModule(gymName, gymBrand)
-    notifyAuthStateChanged()
   }
 
   const setThemePreference = (theme: 'light' | 'dark') => {

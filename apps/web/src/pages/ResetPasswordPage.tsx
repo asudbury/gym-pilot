@@ -212,7 +212,6 @@ export function ResetPasswordPage() {
         // If user data is not available, just navigate to 'from'
         setStatusMessageText('Password updated successfully.')
         setStatusTone('default')
-        window.dispatchEvent(new Event('gym-pilot-auth-updated'))
         navigate(from, { replace: true })
       }
     } catch (error) {
@@ -225,7 +224,6 @@ export function ResetPasswordPage() {
         'Password updated successfully, but there was an issue with post-login checks. Please refresh or try again.',
       )
       setStatusTone('error')
-      window.dispatchEvent(new Event('gym-pilot-auth-updated'))
       navigate(from, { replace: true })
     }
   }

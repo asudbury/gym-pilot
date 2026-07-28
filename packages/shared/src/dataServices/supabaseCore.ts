@@ -68,15 +68,34 @@ export function getSupabaseClient(options?: SupabaseClientOptions) {
   return targetClient;
 }
 
+export type OrderByOptions = {
+  ascending?: boolean;
+  nullsFirst?: boolean;
+};
+
 export async function getItems<T>(
   tableName: string,
-  userId?: string): Promise<{ data: T[] | null; error: any | null }> {
-
-  const client = getSupabaseClient();
+  options?: {
+    userId?: string;
+    orderBy?: {
+      column: string;
+      options?: OrderByOptions;
+    };
+  }
+): Promise<{ data: T[] | null; error: any | null }> {
   
-  return client.from(tableName)
-    .select('*')
-    .eq("user_id", userId) as unknown as Promise<{ data: T[] | null; error: any | null }>;
+  const client = getSupabaseClient();
+  let query = client.from(tableName).select('*');
+
+  if (options?.userId) {
+    query = query.eq('user_id', options.userId);
+  }
+
+  if (options?.orderBy) {
+    query = query.order(options.orderBy.column, options.orderBy.options);
+  }
+
+  return query as unknown as Promise<{ data: T[] | null; error: any | null }>;
 }
 
 export async function getItem<T>(

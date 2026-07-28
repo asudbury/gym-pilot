@@ -2,7 +2,6 @@ import { getSupabaseClient } from "./supabase";
 import { logger } from "./logging";
 import { loadAppSetting } from "./appSettingsService";
 import { getAuthenticatedUserId } from "./supabaseAuth";
-import { invalidateSupabaseProfileCache } from "./gymPilotSupabase";
 
 function isLocalhostHost(hostname?: string) {
   if (!hostname) {
@@ -168,66 +167,5 @@ export async function recordSupabaseUserActivity(
 
   if (error) {
     logger.error("[Supabase] Could not record user activity", error);
-  }
-}
-
-export async function saveSupabaseProfileLastLoggedIn(
-  userId?: string,
-  friendlyName?: string | null,
-  options?: { shouldRecordActivity?: boolean },
-) {
-  const client = getSupabaseClient();
-
-  if (!client) {
-    return;
-  }
-
-  const resolvedUserId = userId || (await getAuthenticatedUserId(client));
-
-  if (!resolvedUserId) {
-    return;
-  }
-
-  const { data: existingProfile, error: loadError } = await client
-    .from("gym_pilot_profile")
-    .select("last_logged_in_at")
-    .eq("user_id", resolvedUserId)
-    .maybeSingle();
-
-  if (loadError) {
-    logger.error(
-      "[Supabase] Could not load existing profile login timestamp",
-      loadError,
-    );
-    return;
-  }
-
-  const previousLastLoggedInAt = existingProfile?.last_logged_in_at ?? null;
-  const nextLastLoggedInAt = new Date().toISOString();
-  const shouldRecord =
-    options?.shouldRecordActivity !== false &&
-    shouldRecordLoginActivity(previousLastLoggedInAt, nextLastLoggedInAt);
-
-  const { error } = await client.from("gym_pilot_profile").upsert(
-    {
-      user_id: resolvedUserId,
-      last_logged_in_at: nextLastLoggedInAt,
-      previous_last_logged_in_at: previousLastLoggedInAt,
-    },
-    { onConflict: "user_id" },
-  );
-
-  if (error) {
-    logger.error(
-      "[Supabase] Could not save profile last logged in timestamp",
-      error,
-    );
-    return;
-  }
-
-  await invalidateSupabaseProfileCache(resolvedUserId);
-
-  if (shouldRecord) {
-    await recordSupabaseUserActivity("login", {}, resolvedUserId, friendlyName);
   }
 }
