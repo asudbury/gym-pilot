@@ -1,4 +1,5 @@
 import { useEffect, useMemo, useState } from 'react'
+import type { UserSession } from '@gym-pilot/shared'
 import { useNavigate, useParams } from 'react-router-dom'
 import { useAuth } from '../auth/AuthContext'
 import { Button } from '../components/ui/Button'
@@ -9,13 +10,10 @@ import { PageCardLayout } from '../layouts/PageCardLayout'
 import { PageLayout } from '../layouts/PageLayout'
 import { DesktopOnly } from '../components/visibility/DeviceVisibility'
 import {
-  buildSessionWorkoutMetadata,
-  loadSessionHistoryEntries,
+  getUserSession,
   loadWorkoutItemsForSession,
-  parseSessionWorkoutMetadata,
-  saveSessionHistoryEntry,
   saveWorkoutItemsForSession,
-  type SessionHistoryEntry,
+  updateUserSession,
   type SessionWorkoutItem,
 } from '@gym-pilot/shared'
 import {
@@ -27,7 +25,7 @@ export function SessionEditPage() {
   const { user } = useAuth()
   const navigate = useNavigate()
   const { entryId } = useParams<{ entryId: string }>()
-  const [entry, setEntry] = useState<SessionHistoryEntry | null>(null)
+  const [entry, setEntry] = useState<UserSession | null>(null)
   const [attendanceType, setAttendanceType] = useState<'attended' | 'taught'>(
     'attended',
   )
@@ -51,49 +49,36 @@ export function SessionEditPage() {
 
     void (async () => {
       try {
-        const loadedEntries = await loadSessionHistoryEntries(
-          userId ?? undefined,
-        )
+        const { data: nextEntry } = await getUserSession(entryId, userId || '')
+
         if (!isActive) {
           return
         }
 
-        const nextEntry =
-          loadedEntries.find((candidate) => candidate.id === entryId) ?? null
         setEntry(nextEntry)
         if (nextEntry) {
-          setAttendanceType(nextEntry.attendanceType)
+          setAttendanceType(
+            nextEntry.attendance_type === 'taught' ? 'taught' : 'attended',
+          )
           setNotes(nextEntry.notes ?? '')
           setRating(getSessionEntryRating(nextEntry))
-          setDurationMinutes(nextEntry.durationMinutes ?? null)
-          setStartedAt(nextEntry.startedAt ?? '')
-          setSessionName(nextEntry.className ?? '')
+          setDurationMinutes(nextEntry.duration_minutes ?? null)
+          setStartedAt(nextEntry.start_at ?? '')
+          setSessionName(nextEntry.class_name ?? '')
 
-          const parsedMetadata = parseSessionWorkoutMetadata(
-            nextEntry.workoutMetadata,
-          )
-          const fallbackWorkoutItems = parsedMetadata.workoutItems
-
-          if (nextEntry.sessionId) {
+          if (nextEntry.session_id) {
             try {
               const persistedItems = await loadWorkoutItemsForSession(
-                nextEntry.sessionId,
+                nextEntry.session_id,
                 userId ?? undefined,
               )
-              setWorkoutItems(
-                persistedItems.length > 0
-                  ? persistedItems
-                  : fallbackWorkoutItems,
-              )
+              setWorkoutItems(persistedItems.length > 0 ? persistedItems : [])
             } catch {
-              setWorkoutItems(fallbackWorkoutItems)
+              setWorkoutItems([])
             }
-          } else {
-            setWorkoutItems(fallbackWorkoutItems)
           }
-        } else {
-          setWorkoutItems([])
         }
+
         setErrorMessage(null)
       } catch (error) {
         if (!isActive) {
@@ -129,34 +114,32 @@ export function SessionEditPage() {
       const normalizedRating = getSessionEntryRating({
         ...entry,
         rating: rating ?? entry.rating,
-      } as SessionHistoryEntry)
-      const parsedWorkoutMetadata = parseSessionWorkoutMetadata(
-        entry.workoutMetadata,
-      )
+      } as UserSession)
+
       const nextEntry = {
         ...entry,
-        attendanceType,
+        attendance_type: attendanceType,
         notes: notes.trim() ? notes.trim() : null,
         rating: normalizedRating,
-        durationMinutes: durationMinutes ?? entry.durationMinutes ?? null,
-        startedAt: startedAt || entry.startedAt || null,
-        className:
-          entry.sessionType === 'solo'
+        duration_minutes: durationMinutes ?? entry.duration_minutes ?? null,
+        start_at: startedAt || entry.start_at || '',
+        class_name:
+          entry.session_type === 'solo'
             ? sessionName.trim() || null
-            : (entry.className ?? null),
-        workoutMetadata: buildSessionWorkoutMetadata({
-          workoutItems,
-          endedAt: parsedWorkoutMetadata.endedAt,
-          activeKwh: parsedWorkoutMetadata.activeKwh,
-          selectedPlanId: parsedWorkoutMetadata.selectedPlanId,
-          selectedPlanName: parsedWorkoutMetadata.selectedPlanName,
-        }),
+            : (entry.class_name ?? null),
+        // workout_metadata: buildSessionWorkoutMetadata({
+        //   workoutItems,
+        //   endedAt: parsedWorkoutMetadata.endedAt,
+        //   activeKwh: parsedWorkoutMetadata.activeKwh,
+        //   selectedPlanId: parsedWorkoutMetadata.selectedPlanId,
+        //   selectedPlanName: parsedWorkoutMetadata.selectedPlanName,
+        // }),
         updatedAt: new Date().toISOString(),
       }
 
-      if (userId && entry.sessionId) {
+      if (userId && entry.session_id) {
         const workoutSaveResult = await saveWorkoutItemsForSession(
-          entry.sessionId,
+          entry.session_id,
           workoutItems,
           userId,
         )
@@ -168,12 +151,7 @@ export function SessionEditPage() {
         }
       }
 
-      await saveSessionHistoryEntry(nextEntry, userId ?? undefined)
-      window.dispatchEvent(
-        new CustomEvent('gym-pilot-session-history-updated', {
-          detail: { entry: nextEntry },
-        }),
-      )
+      await updateUserSession(nextEntry)
       navigate('/sessions')
     } catch (error) {
       setErrorMessage(String(error))
@@ -193,7 +171,7 @@ export function SessionEditPage() {
         {entry ? (
           <div className="space-y-2 p-0 md:space-y-4 md:rounded-2xl md:border md:border-slate-200 md:bg-slate-50 md:p-4">
             <div className="m-0 bg-white p-0 sm:m-4 sm:rounded-2xl sm:border sm:border-slate-200 sm:p-4">
-              {entry.sessionType !== 'solo' ? (
+              {entry.session_type !== 'solo' ? (
                 <div className="mt-4 flex flex-col gap-2">
                   <span className="text-sm font-medium text-slate-700">
                     Role
@@ -209,7 +187,7 @@ export function SessionEditPage() {
                 </div>
               ) : null}
 
-              {entry.sessionType === 'solo' ? (
+              {entry.session_type === 'solo' ? (
                 <label className="mt-4 flex flex-col gap-1 text-sm text-slate-700">
                   <span className="font-medium">Name</span>
                   <input

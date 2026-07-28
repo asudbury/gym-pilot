@@ -181,10 +181,6 @@ async function loadSupabaseUserRolesByUserIds(
     .in("user_id", userIds);
 
   if (error) {
-    if (isMissingProfileColumnError(error, ["role"])) {
-      return roleLookup;
-    }
-
     logger.warn("[Supabase] Could not load user roles for user list", error);
     return roleLookup;
   }
@@ -234,25 +230,6 @@ function normalizeProfileAccessTier(value: unknown): SupabaseAccessTier {
     default:
       return "free";
   }
-}
-
-function isMissingProfileColumnError(
-  error: { message?: string } | null | undefined,
-  columns: string[],
-) {
-  const message = error?.message ?? "";
-
-  if (!message) {
-    return false;
-  }
-
-  if (/does not exist|column .* does not exist/i.test(message)) {
-    return true;
-  }
-
-  return columns.some((column) =>
-    new RegExp(`\\b${column}\\b`, "i").test(message),
-  );
 }
 
 function mapSupabaseProfile(
@@ -626,7 +603,7 @@ export async function saveSupabaseProfileTermsAcceptance(
 export async function loadSupabaseJsonRecord<T>(
   key: string,
 ): Promise<SupabaseRecordResponse<T>> {
-  logger.info("[Supabase] Loading remote record", { key });
+  ///logger.info("[Supabase] Loading remote record", { key });
   const client = getSupabaseClient();
 
   if (!client) {
@@ -741,11 +718,11 @@ export async function loadSupabaseJsonRecord<T>(
 
     const payload: FavoriteStorageValue = { favorites, folders };
 
-    logger.info("[Supabase] Remote favorites loaded", {
-      key,
-      favorites,
-      folders,
-    });
+    // logger.info("[Supabase] Remote favorites loaded", {
+    //   key,
+    //   favorites,
+    //   folders,
+    // });
     return { found: true, value: payload as T };
   }
 
@@ -766,7 +743,7 @@ export async function loadSupabaseJsonRecord<T>(
     return { found: false, value: null };
   }
 
-  logger.info("[Supabase] Remote record loaded", { key, value: data.value });
+  ///logger.info("[Supabase] Remote record loaded", { key, value: data.value });
   return {
     found: true,
     value: JSON.parse(data.value) as T,

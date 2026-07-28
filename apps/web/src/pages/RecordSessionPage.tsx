@@ -13,13 +13,12 @@ import { Heading1, UpperCaseParagraph } from '../components/Typography'
 import { PageLayout } from '../layouts/PageLayout'
 import { appTokens } from '../constants/tokens'
 import {
-  buildSessionWorkoutMetadata,
   buildWorkoutItemsFromPlanSessions,
-  createSession,
   logger,
-  recordSession,
   usePlan,
   type SessionWorkoutItem,
+  type UserSession,
+  updateUserSession,
 } from '@gym-pilot/shared'
 import { useAuth } from '../auth/AuthContext'
 import { Button } from '../components/ui/Button'
@@ -61,7 +60,7 @@ export function RecordSessionPage() {
   const [rating, setRating] = useState<number | null>(null)
   const [duration, setDuration] = useState<number | undefined>(undefined)
   const [name, setName] = useState('')
-  const [endAt] = useState<string | null>(null)
+  // const [endAt] = useState<string | null>(null)
   const [activeKwh, setActiveKwh] = useState('')
   const [notes, setNotes] = useState('')
   const [selectedPlanId] = useState('')
@@ -146,60 +145,38 @@ export function RecordSessionPage() {
         return
       }
 
-      const sessionRes = await createSession({
-        sessionType: normalizedSessionType,
-        trainerId:
+      const userSession: UserSession = {
+        id: crypto.randomUUID(),
+        user_id: user.id,
+        created_at: new Date().toISOString(),
+        updated_at: new Date().toISOString(),
+        attendance_type: null,
+        capacity: null,
+        class_id: null,
+        class_name: null,
+        duration_minutes: duration ?? null,
+        gym_club_id: null,
+        location: null,
+        metadata: null,
+        notes: notes || null,
+        price: null,
+        rating: rating ?? null,
+        role: 'client',
+        session_id: null,
+        session_type: normalizedSessionType,
+        start_at: startAt,
+        status: null,
+        trainer_id:
           normalizedSessionType === 'personal_training'
             ? (trainer?.id ?? null)
             : null,
-        trainerName:
+        trainer_name:
           normalizedSessionType === 'personal_training'
             ? (trainer?.name ?? null)
             : null,
-        className:
-          normalizedSessionType === 'solo' ? name.trim() || null : null,
-        startAt: new Date(startAt).toISOString(),
-        durationMinutes: duration ?? null,
-        price: null,
-      })
-
-      if (!sessionRes.success || !sessionRes.session) {
-        throw sessionRes.error || new Error('Could not create session')
       }
 
-      const workoutMetadata = buildSessionWorkoutMetadata({
-        workoutItems,
-        endedAt: endAt || null,
-        activeKwh: activeKwh || null,
-        selectedPlanId: selectedPlan?.id ?? null,
-        selectedPlanName: selectedPlan?.planName ?? null,
-      })
-
-      const sessionRecordingResult = await recordSession({
-        sessionId: sessionRes.session.id,
-        role: 'client',
-        notes: notes || null,
-        rating: rating ?? null,
-        workoutMetadata,
-        workoutItems,
-      })
-
-      if (!sessionRecordingResult.success) {
-        const persistenceError = sessionRecordingResult.error
-        const userMessage =
-          persistenceError instanceof Error &&
-          persistenceError.message.includes('workout')
-            ? 'The session was recorded, but your workout details could not be saved. Please try again.'
-            : 'We could not record the session right now. Please try again.'
-
-        throw persistenceError || new Error(userMessage)
-      }
-
-      window.dispatchEvent(
-        new CustomEvent('gym-pilot-notification', {
-          detail: { text: 'Session recorded', tone: 'success' },
-        }),
-      )
+      await updateUserSession(userSession)
 
       navigate('/sessions')
     } catch (err: unknown) {

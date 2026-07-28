@@ -276,11 +276,6 @@ export function AdminCreateUserPage() {
                 )
                 inviteUrl.hash = `#/login?email=${encodeURIComponent(email)}`
                 await navigator.clipboard.writeText(inviteUrl.toString())
-                window.dispatchEvent(
-                  new CustomEvent('gym-pilot-notification', {
-                    detail: { text: 'Invite link copied', tone: 'success' },
-                  }),
-                )
               } catch {
                 // ignore
               }

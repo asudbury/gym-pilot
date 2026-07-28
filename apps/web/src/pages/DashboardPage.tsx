@@ -82,7 +82,7 @@ export function DashboardPage() {
               <div className="flex-1">
                 <SessionActions
                   showViewSessionsButton={true}
-                  showClassSessionAction={canShowTimetable}
+                  showClassSessionAction={canShowTimetable} // This will now navigate to /sessions/new?type=class
                   showPTSessionAction={hasTrainerConfigured || isTrainer}
                   showViewWorkoutsTemplateButton={true}
                 />
@@ -91,7 +91,7 @@ export function DashboardPage() {
             <div className="lg:hidden">
               <SessionActions
                 showViewSessionsButton={true}
-                showClassSessionAction={canShowTimetable}
+                showClassSessionAction={canShowTimetable} // This will now navigate to /sessions/new?type=class
                 showPTSessionAction={hasTrainerConfigured || isTrainer}
                 showViewWorkoutsTemplateButton={true}
               />

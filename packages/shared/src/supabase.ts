@@ -63,7 +63,8 @@ export function getSupabaseClient(options?: SupabaseClientOptions) {
     const anonKey = getSupabaseAnonKey();
 
     if (!url || !anonKey) {
-      return null;
+      throw new Error("Supabase URL or anon key is not configured. Please set VITE_SUPABASE_URL and VITE_SUPABASE_ANON_KEY in your environment."
+      );  
     }
 
     logger.info("[Supabase] Creating client", {

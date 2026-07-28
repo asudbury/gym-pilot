@@ -666,7 +666,7 @@ export function TimetablePage() {
                   <Button
                     tone="emerald"
                     onClick={() =>
-                      navigate('/record-session?type=personal_training')
+                      navigate('/sessions/new?type=personal_training')
                     }
                     className="ml-2"
                   >

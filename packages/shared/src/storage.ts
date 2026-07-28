@@ -9,7 +9,6 @@ import {
   removeSupabaseJsonRecord,
   saveSupabaseJsonRecord,
 } from "./gymPilotSupabase";
-import { logger } from "./logging";
 import { createPersistenceRepository } from "./repositories";
 
 /**
@@ -24,7 +23,7 @@ const LOCAL_ONLY_KEYS = new Set(["gym-pilot-auth-session"]);
 
 function shouldUseSupabaseForKey(key: string) {
   if (LOCAL_ONLY_KEYS.has(key)) {
-    logger.info("[Storage] Skipping Supabase sync for local-only key", { key });
+    ////logger.info("[Storage] Skipping Supabase sync for local-only key", { key });
     return false;
   }
 
@@ -50,23 +49,23 @@ export class DexiePersistence implements IPersistenceStore {
 
 const persistenceRepository = createPersistenceRepository({
   loadLocal: async <T>(key: string, fallback: T) => {
-    logger.info("[Storage] Loading record", { key, fallback });
+    ///logger.info("[Storage] Loading record", { key, fallback });
     return loadDexieJsonRecord<T>(key, fallback);
   },
   saveLocal: async <T>(key: string, value: T) => {
-    logger.info("[Storage] Saving record", { key, value });
+    ///logger.info("[Storage] Saving record", { key, value });
     await saveDexieJsonRecord(key, value);
-    logger.info("[Storage] IndexedDB save completed", { key });
+    ///logger.info("[Storage] IndexedDB save completed", { key });
   },
   removeLocal: async (key: string) => {
-    logger.info("[Storage] Removing record", { key });
+    ///logger.info("[Storage] Removing record", { key });
     await removeDexieJsonRecord(key);
-    logger.info("[Storage] IndexedDB remove completed", { key });
+    ///logger.info("[Storage] IndexedDB remove completed", { key });
   },
   listLocal: async () => listDexieJsonRecords(),
   loadRemote: async <T>(key: string) => loadSupabaseJsonRecord<T>(key),
   saveRemote: async <T>(key: string, value: T) => {
-    logger.info("[Storage] Supabase save completed", { key });
+    ////logger.info("[Storage] Supabase save completed", { key });
     await saveSupabaseJsonRecord(key, value);
   },
   removeRemote: async (key: string) => {
@@ -85,7 +84,7 @@ export async function loadJsonRecord<T>(key: string, fallback: T): Promise<T> {
     const localValue = await persistenceRepository.load<T>(key, fallback);
     return localValue;
   } catch (error) {
-    logger.error("Persistence load failed", key, error);
+    ////logger.error("Persistence load failed", key, error);
     return fallback;
   }
 }

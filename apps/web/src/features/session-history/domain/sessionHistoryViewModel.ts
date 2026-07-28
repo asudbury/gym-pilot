@@ -1,8 +1,6 @@
-import type { SessionHistoryEntry } from '@gym-pilot/shared'
+import type { UserSession } from '@gym-pilot/shared'
 
-export function getSessionEntryRating(
-  entry: SessionHistoryEntry,
-): number | null {
+export function getSessionEntryRating(entry: UserSession): number | null {
   if (
     typeof entry.rating === 'number' &&
     Number.isFinite(entry.rating) &&
@@ -22,28 +20,28 @@ export function getSessionEntryRating(
   return null
 }
 
-export function getSessionEntryTitle(entry: SessionHistoryEntry) {
-  if (entry.className?.trim()) {
-    if (entry.sessionType === 'class') {
-      return `Class Session: ${entry.className}`
+export function getSessionEntryTitle(entry: UserSession) {
+  if (entry.class_name?.trim()) {
+    if (entry.session_type === 'class') {
+      return `Class Session: ${entry.class_name}`
     }
   }
 
-  if (entry.sessionType === 'personal_training') {
+  if (entry.session_type === 'personal_training') {
     return 'PT Session'
   }
 
-  if (entry.sessionType === 'class') {
+  if (entry.session_type === 'class') {
     return 'Class'
   }
 
-  if (entry.sessionType === 'solo') {
-    return entry.className?.trim()
-      ? `Solo Session: ${entry.className}`
+  if (entry.session_type === 'solo') {
+    return entry.class_name?.trim()
+      ? `Solo Session: ${entry.class_name}`
       : 'Solo Session'
   }
 
-  if (entry.attendanceType === 'taught') {
+  if (entry.attendance_type === 'taught') {
     return 'PT Session'
   }
 

@@ -137,14 +137,6 @@ export function AdminLogsPage({ view = 'combined' }: AdminLogsPageProps) {
     void (async () => {
       const client = getSupabaseClient()
 
-      if (!client) {
-        if (isActive) {
-          setError('Supabase client is unavailable.')
-          setLoading(false)
-        }
-        return
-      }
-
       try {
         const shouldFetchErrorLogs = view === 'error' || view === 'combined'
         const shouldFetchAuditLogs = view === 'audit' || view === 'combined'

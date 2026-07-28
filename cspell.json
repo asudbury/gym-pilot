@@ -4,6 +4,8 @@
   "ignorePaths": [],
   "dictionaryDefinitions": [],
   "dictionaries": [],
-  "words": [],
+  "words": [
+    "Supabase"
+  ],
   "import": []
 }

@@ -6,21 +6,20 @@ import { PageCardLayout } from '../layouts/PageCardLayout'
 import { PageLayout } from '../layouts/PageLayout'
 import { StatusMessageNotification } from '../components/ui/StatusMessageNotification'
 import {
-  deleteSessionHistoryEntry,
   formatSessionHistoryError,
-  loadSessionHistoryEntries,
-  type SessionHistoryEntry,
+  getUserSessions,
+  type UserSession,
+  deleteUserSession,
 } from '@gym-pilot/shared'
-import { resolveAttendanceRoleLabel } from '../features/timetable/domain/timetableView'
 import {
   getSessionEntryRating,
   getSessionEntryTitle,
 } from '../features/session-history/domain/sessionHistoryViewModel'
 import SessionActions from '../components/SessionActions'
 
-function sortSessionEntries(entries: SessionHistoryEntry[]) {
+function sortSessionEntries(entries: UserSession[]) {
   return [...entries].sort((left, right) =>
-    (right.createdAt ?? '').localeCompare(left.createdAt ?? ''),
+    (right.created_at ?? '').localeCompare(left.created_at ?? ''),
   )
 }
 
@@ -41,7 +40,7 @@ function formatAttendanceDate(value?: string | null) {
 export function SessionHistoryPage() {
   const { user } = useAuth()
   const navigate = useNavigate()
-  const [entries, setEntries] = useState<SessionHistoryEntry[]>([])
+  const [entries, setEntries] = useState<UserSession[]>([])
   const [pendingDeleteEntryId, setPendingDeleteEntryId] = useState<
     string | null
   >(null)
@@ -54,14 +53,19 @@ export function SessionHistoryPage() {
 
     const loadEntries = async () => {
       try {
-        const loadedEntries = await loadSessionHistoryEntries(
-          userId ?? undefined,
-        )
+        if (userId == null) {
+          setEntries([])
+          setErrorMessage(null)
+          return
+        }
+
+        const { data } = await getUserSessions(userId)
+
         if (!isActive) {
           return
         }
 
-        const sortedLoadedEntries = sortSessionEntries(loadedEntries)
+        const sortedLoadedEntries = sortSessionEntries(data ?? [])
         setEntries(sortedLoadedEntries)
         setErrorMessage(null)
       } catch (error) {
@@ -99,8 +103,8 @@ export function SessionHistoryPage() {
 
   const refreshEntries = async () => {
     try {
-      const loadedEntries = await loadSessionHistoryEntries(userId ?? undefined)
-      setEntries(sortSessionEntries(loadedEntries))
+      const { data: loadedEntries } = await getUserSessions(userId || '')
+      setEntries(sortSessionEntries(loadedEntries ?? []))
       setErrorMessage(null)
     } catch (error) {
       setErrorMessage(formatSessionHistoryError(error))
@@ -110,7 +114,7 @@ export function SessionHistoryPage() {
   const deleteEntry = async (entryId: string) => {
     if (pendingDeleteEntryId === entryId) {
       try {
-        await deleteSessionHistoryEntry(entryId, userId ?? undefined)
+        await deleteUserSession(entryId, userId || '')
         await refreshEntries()
         setPendingDeleteEntryId(null)
       } catch (error) {
@@ -164,30 +168,31 @@ export function SessionHistoryPage() {
                         {getSessionEntryTitle(entry)}
                       </p>
                       {(() => {
-                        const roleLabel = resolveAttendanceRoleLabel(
-                          entry.attendanceType,
-                        )
+                        const roleLabel =
+                          entry.attendance_type === 'taught'
+                            ? 'taught'
+                            : entry.attendance_type === 'attended'
+                              ? 'attended'
+                              : null
 
                         return roleLabel ? (
                           <p className="text-sm text-slate-600">{roleLabel}</p>
                         ) : null
                       })()}
-                      {entry.instructorName ? (
+                      {entry.trainer_name ? (
                         <p className="text-sm text-slate-600">
-                          Instructor: {entry.instructorName}
+                          Instructor: {entry.trainer_name}
                         </p>
                       ) : null}
                       <p className="text-sm text-slate-600">
-                        {formatAttendanceDate(
-                          entry.startedAt ?? entry.createdAt,
-                        )}
+                        {formatAttendanceDate(entry.start_at)}
                       </p>
                       {entry.notes ? (
                         <p className="text-sm text-slate-600">{entry.notes}</p>
                       ) : null}
-                      {entry.durationMinutes != null ? (
+                      {entry.duration_minutes != null ? (
                         <p className="text-sm text-slate-600">
-                          Duration: {entry.durationMinutes} min
+                          Duration: {entry.duration_minutes} min
                         </p>
                       ) : null}
                       {(() => {
@@ -214,19 +219,19 @@ export function SessionHistoryPage() {
                         <>
                           <button
                             type="button"
-                            onClick={() => deleteEntry(entry.id)}
-                            className="inline-flex items-center gap-2 rounded-full border border-rose-600 bg-rose-600 px-3 py-1.5 text-sm font-medium text-white shadow-sm transition-all duration-200 hover:border-rose-700 hover:bg-rose-700 hover:font-semibold"
-                          >
-                            <DecorativeIcon icon="check" className="h-4 w-4" />
-                            <span>Confirm delete</span>
-                          </button>
-                          <button
-                            type="button"
                             onClick={() => setPendingDeleteEntryId(null)}
                             className="inline-flex items-center gap-2 rounded-full border border-slate-300 bg-white px-3 py-1.5 text-sm font-medium text-slate-700 transition-all duration-200 hover:border-slate-400 hover:bg-slate-50 hover:font-semibold hover:shadow-sm"
                           >
                             <DecorativeIcon icon="close" className="h-4 w-4" />
                             <span>Cancel</span>
+                          </button>
+                          <button
+                            type="button"
+                            onClick={() => deleteEntry(entry.id)}
+                            className="inline-flex items-center gap-2 rounded-full border border-rose-600 bg-rose-600 px-3 py-1.5 text-sm font-medium text-white shadow-sm transition-all duration-200 hover:border-rose-700 hover:bg-rose-700 hover:font-semibold"
+                          >
+                            <DecorativeIcon icon="check" className="h-4 w-4" />
+                            <span>Confirm delete</span>
                           </button>
                         </>
                       ) : (

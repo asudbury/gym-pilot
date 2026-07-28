@@ -31,7 +31,6 @@ export async function getAuthenticatedUserId(
       return null;
     }
 
-    logger.info("[Supabase] Resolved authenticated user", { userId });
     return userId;
   } catch (error) {
     logger.warn("[Supabase] Session lookup failed", error);

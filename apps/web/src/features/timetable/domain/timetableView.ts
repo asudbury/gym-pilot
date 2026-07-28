@@ -74,9 +74,9 @@ export function resolveTimetableClubSelectionViewModel(input: {
 }
 
 export function resolveAttendanceRoleLabel(
-  attendanceType: 'attended' | 'taught',
+  attendanceType: 'attended' | 'taught' | null | undefined,
 ): string {
-  return attendanceType === 'taught' ? 'Taught' : ''
+  return attendanceType === 'taught' ? 'Taught' : 'Attended'
 }
 
 export function resolveTimetableErrorMessage(input: {

@@ -80,3 +80,5 @@ export * from "./sessionWorkout";
 export * from "./sessionWorkoutPersistence";
 export * from "./profilePersistence";
 export type { SupabaseProfileUpdatePayload } from "./profilePersistence";
+export * from "./dataServices/userSessionDataService";
+export * from "./dataServices/types";
