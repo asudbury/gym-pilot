@@ -130,6 +130,9 @@ export function LoginPage() {
             access_token: data.session.access_token,
             refresh_token: data.session.refresh_token,
           })
+
+          // Dispatch a custom event to notify the AuthProvider about the change
+          window.dispatchEvent(new CustomEvent('gym-pilot-auth-updated'))
         } else {
           console.error(
             'Supabase client is not available after Edge Function login.',
