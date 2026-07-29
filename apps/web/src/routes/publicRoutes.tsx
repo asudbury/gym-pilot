@@ -9,7 +9,7 @@ import { type QuickLink } from '../features/favourites/domain/quickLinks'
 import { createProtectedRoutes } from './protectedRoutes'
 import { createAdminRoutes } from './adminRoutes'
 import InstallOnIOSPage from '../pages/help/InstallOnIOSPage'
-import HealthDataImporter from '../pages/HealthDataImporter';
+import HealthDataImporter from '../pages/HealthDataImporter'
 import { NotFoundPage } from '../pages/NotFoundPage'
 
 interface PublicRoutesProps {
