@@ -17,8 +17,8 @@ import { RecordSessionPage } from '../pages/RecordSessionPage'
 import { TrainerReportPage } from '../pages/TrainerReportPage'
 import { type HomeFilters } from '../utils/appUtils'
 import { SessionTemplatesPage } from '../pages/SessionTemplatesPage'
-import { ImportedWorkoutsPage } from '../pages/ImportedWorkoutsPage'
-import AppleFitnessDataImporter from '../pages/AppleFitnessDataImporter'
+import { ImportedWorkoutsPage } from '../pages/appleFitness/ImportedWorkoutsPage'
+import AppleFitnessDataImporter from '../pages/appleFitness/AppleFitnessDataImporter'
 
 interface ProtectedRoutesProps {
   homeFilters: HomeFilters

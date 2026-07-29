@@ -1,5 +1,5 @@
 import { Component, type ErrorInfo, type ReactNode } from 'react'
-import { InternalServerErrorPage } from '../pages/InternalServerErrorPage'
+import { InternalServerErrorPage } from '../pages/errors/InternalServerErrorPage'
 
 interface Props {
   children: ReactNode

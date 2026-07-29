@@ -1,18 +1,16 @@
 import React, { useState, useRef } from 'react'
-import { useNavigate } from 'react-router-dom'
-import { PageLayout } from '../layouts/PageLayout'
-import { PageCard } from '../components/PageCard'
-import { Button } from '../components/ui/Button'
-import type { Workout } from '../types/healthData'
-import { getSupabaseClient } from '../../../../packages/shared/src/supabase'
-import { StatusMessageNotification } from '../components/ui/StatusMessageNotification'
+import { PageLayout } from '../../layouts/PageLayout'
+import { PageCard } from '../../components/PageCard'
+import { Button } from '../../components/ui/Button'
+import type { Workout } from '../../types/healthData'
+import { getSupabaseClient } from '@gym-pilot/shared/src/supabase'
+import { StatusMessageNotification } from '../../components/ui/StatusMessageNotification'
 
 const AppleFitnessDataImporter: React.FC = () => {
   const [workouts, setWorkouts] = useState<Workout[]>([])
   const [error, setError] = useState<string | null>(null)
   const [message, setMessage] = useState<string | null>(null)
   const fileInputRef = useRef<HTMLInputElement>(null)
-  const navigate = useNavigate()
 
   const handleFileChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0]
@@ -81,7 +79,8 @@ const AppleFitnessDataImporter: React.FC = () => {
         const errorText = await response.text()
         setError(`Import failed: ${errorText}`)
       } else {
-        navigate('/imported-workouts?message=Import successful')
+        setMessage('Workouts imported successfully!')
+        setWorkouts([])
       }
     } catch (error) {
       setError('An error occurred during import.')
@@ -173,7 +172,15 @@ const AppleFitnessDataImporter: React.FC = () => {
         </div>
 
         {message && (
+        <>
           <StatusMessageNotification tone="success" message={message} />
+          <p>
+            
+            <a href="/loaded-workouts#/imported-workouts?message=Workouts imported successfully!" className="text-blue-500 underline">
+              View your loaded apple fitness data
+            </a>
+          </p>
+          </>
         )}
         {error && <StatusMessageNotification tone="error" message={error} />}
 

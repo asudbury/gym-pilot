@@ -9,8 +9,7 @@ import { type QuickLink } from '../features/favourites/domain/quickLinks'
 import { createProtectedRoutes } from './protectedRoutes'
 import { createAdminRoutes } from './adminRoutes'
 import InstallOnIOSPage from '../pages/help/InstallOnIOSPage'
-
-import { NotFoundPage } from '../pages/NotFoundPage'
+import { NotFoundPage } from '../pages/errors/NotFoundPage'
 
 interface PublicRoutesProps {
   user: any
