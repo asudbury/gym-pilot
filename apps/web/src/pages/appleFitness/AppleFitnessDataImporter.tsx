@@ -172,14 +172,16 @@ const AppleFitnessDataImporter: React.FC = () => {
         </div>
 
         {message && (
-        <>
-          <StatusMessageNotification tone="success" message={message} />
-          <p>
-            
-            <a href="/loaded-workouts#/imported-workouts?message=Workouts imported successfully!" className="text-blue-500 underline">
-              View your loaded apple fitness data
-            </a>
-          </p>
+          <>
+            <StatusMessageNotification tone="success" message={message} />
+            <p>
+              <a
+                href="/loaded-workouts#/imported-workouts?message=Workouts imported successfully!"
+                className="text-blue-500 underline"
+              >
+                View your loaded apple fitness data
+              </a>
+            </p>
           </>
         )}
         {error && <StatusMessageNotification tone="error" message={error} />}
