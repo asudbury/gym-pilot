@@ -176,7 +176,7 @@ const AppleFitnessDataImporter: React.FC = () => {
             <StatusMessageNotification tone="success" message={message} />
             <p>
               <a
-                href="/loaded-workouts#/imported-workouts?message=Workouts imported successfully!"
+                href="/imported-workouts"
                 className="text-blue-500 underline"
               >
                 View your loaded apple fitness data
