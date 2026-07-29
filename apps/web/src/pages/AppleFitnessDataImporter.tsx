@@ -43,7 +43,12 @@ const AppleFitnessDataImporter: React.FC = () => {
       <PageCard as="section" className="space-y-6">
         <h1 className="text-2xl font-bold">Apple Fitness Data Importer</h1>
         <div className="flex items-center space-x-4">
-          <Button onClick={handleButtonClick} tone={workouts.length === 0 ? "emerald" : "default"}>Upload Fitness data file</Button>
+          <Button
+            onClick={handleButtonClick}
+            tone={workouts.length === 0 ? 'emerald' : 'default'}
+          >
+            Upload Fitness data file
+          </Button>
           <input
             type="file"
             accept=".json"
@@ -54,7 +59,10 @@ const AppleFitnessDataImporter: React.FC = () => {
         </div>
         {error && <p className="text-red-500">{error}</p>}
         <div>
-          <h2 className="text-xl font-semibold mb-4">Workouts <span className="ml-2 text-slate-400">({workouts.length})</span></h2>
+          <h2 className="text-xl font-semibold mb-4">
+            Workouts{' '}
+            <span className="ml-2 text-slate-400">({workouts.length})</span>
+          </h2>
           {workouts.length > 0 ? (
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
               {workouts.map((workout) => (
@@ -66,7 +74,7 @@ const AppleFitnessDataImporter: React.FC = () => {
                     {workout.display_name}
                   </div>
                   <div className="text-m font-semibold text-slate-600 dark:text-slate-100">
-                   {workout.energy.toFixed(0)} {workout.energy_unit}
+                    {workout.energy.toFixed(0)} {workout.energy_unit}
                   </div>
                   <div className="text-m text-slate-600 dark:text-slate-400 mt-2">
                     <p>
@@ -101,8 +109,8 @@ const AppleFitnessDataImporter: React.FC = () => {
 
                         return `${weekday} ${dayOfMonth} at ${hour}:${minute}`
                       })()}
-                      <span className="ml-2"/>
-                      ({(workout.duration / 60).toFixed(0)} minutes)
+                      <span className="ml-2" />(
+                      {(workout.duration / 60).toFixed(0)} minutes)
                     </p>
                   </div>
                 </div>
@@ -118,7 +126,6 @@ const AppleFitnessDataImporter: React.FC = () => {
         {workouts.length > 0 && (
           <Button tone="emerald">Import Workouts to Gym-Pilot</Button>
         )}
-
       </PageCard>
     </PageLayout>
   )

@@ -91,10 +91,7 @@ export function createProtectedRoutes({
         path="/session-templates/create"
         element={<SessionTemplateCreatePage />}
       />
-      <Route
-        path="/apple-fitness"
-        element={<AppleFitnessDataImporter />}
-      />
+      <Route path="/apple-fitness" element={<AppleFitnessDataImporter />} />
     </Route>
   )
 }

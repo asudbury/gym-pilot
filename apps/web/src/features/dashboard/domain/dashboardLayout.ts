@@ -167,7 +167,6 @@ export function getDashboardLayoutDefinitions(
       description:
         'Jump back into your exercises, plans and assignments from one place.',
       widgets: [
-       
         {
           title: 'Timetable',
           description: 'Open your class timetable and upcoming sessions.',

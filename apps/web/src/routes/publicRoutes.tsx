@@ -63,7 +63,7 @@ export function createPublicRoutes({
       />
       <Route path="/help" element={<HelpPage />} />
       <Route path="/help/install-ios" element={<InstallOnIOSPage />} />
-      
+
       <Route
         path="/favourites"
         element={
