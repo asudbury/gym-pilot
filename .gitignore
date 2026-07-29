@@ -28,3 +28,5 @@ apps/web/.env
 apps/web/coverage
 
 apps/mobile-expo
+
+!apps/web/src/pages/admin/logs/
