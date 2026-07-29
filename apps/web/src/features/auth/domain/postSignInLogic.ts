@@ -1,4 +1,5 @@
 import {
+  invalidateSupabaseProfileCache,
   loadAppSetting,
   loadSupabaseProfileAccessState,
   loadSupabaseProfileFlag,
@@ -29,6 +30,11 @@ export const handlePostSignInLogic = async ({
   context = 'Auth', // Default context if not provided
 }: PostSignInOptions) => {
   const logPrefix = `[${context}]`
+
+  if (user?.id) {
+    await invalidateSupabaseProfileCache(user.id)
+  }
+
   persistRememberedEmail(email, true)
 
   const postLoginMessage = String(
@@ -81,7 +87,6 @@ export const handlePostSignInLogic = async ({
     setAuthMessageTone('default')
     setAuthMessage('Please set a new password to continue.')
     navigate('/reset-password', { replace: true, state: { from } })
-
     return
   }
 
