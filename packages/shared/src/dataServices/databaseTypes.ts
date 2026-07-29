@@ -241,6 +241,42 @@ export type Database = {
         }
         Relationships: []
       }
+      gym_pilot_imported_workout: {
+        Row: {
+          created_at: string
+          display_name: string
+          duration: number
+          energy: number
+          energy_unit: string
+          id: string
+          original_id: string | null
+          start_date: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          display_name: string
+          duration: number
+          energy: number
+          energy_unit: string
+          id?: string
+          original_id?: string | null
+          start_date: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          display_name?: string
+          duration?: number
+          energy?: number
+          energy_unit?: string
+          id?: string
+          original_id?: string | null
+          start_date?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       gym_pilot_plan: {
         Row: {
           created_at: string

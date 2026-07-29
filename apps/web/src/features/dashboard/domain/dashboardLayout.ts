@@ -182,9 +182,16 @@ export function getDashboardLayoutDefinitions(
           icon: 'dumbbell',
         },
         {
-          title: 'Load Apple Fitness data',
+          title: 'Import your Apple Fitness workouts',
           description: 'Sync your Apple Fitness data with the app.',
           to: '/apple-fitness',
+          tone: 'default',
+          icon: 'tasks',
+        },
+        {
+          title: 'View your Apple Fitness workouts',
+          description: 'View your Apple Fitness workouts synced with the app.',
+          to: '/imported-workouts',
           tone: 'default',
           icon: 'tasks',
         },

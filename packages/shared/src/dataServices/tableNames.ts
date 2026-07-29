@@ -6,6 +6,7 @@ export const TableNames = {
   ErrorLog: "gym_pilot_error_log",
   Favourite: "gym_pilot_favourite",
   FavouriteFolder: "gym_pilot_favourite_folder",
+  ImportedWorkout: "gym_pilot_imported_workout",
   Plan: "gym_pilot_plan",
   Profile: "gym_pilot_profile",
   UserActivity: "gym_pilot_user_activity",

@@ -1,4 +1,5 @@
 import React, { useState, useRef } from 'react'
+import { useNavigate } from 'react-router-dom';
 import { PageLayout } from '../layouts/PageLayout'
 import { PageCard } from '../components/PageCard'
 import { Button } from '../components/ui/Button'
@@ -11,7 +12,8 @@ const AppleFitnessDataImporter: React.FC = () => {
   const [error, setError] = useState<string | null>(null)
   const [message, setMessage] = useState<string | null>(null)
   const fileInputRef = useRef<HTMLInputElement>(null)
-
+  const navigate = useNavigate();
+  
   const handleFileChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0]
     if (file) {
@@ -79,9 +81,7 @@ const AppleFitnessDataImporter: React.FC = () => {
         const errorText = await response.text()
         setError(`Import failed: ${errorText}`)
       } else {
-        // TODO: give user feedback on success
-        setMessage('Import successful')
-        setWorkouts([]) // Clear the list
+        navigate('/imported-workouts?message=Import successful');
       }
     } catch (error) {
       setError('An error occurred during import.')

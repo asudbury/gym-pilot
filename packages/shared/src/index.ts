@@ -71,4 +71,5 @@ export * from "./profilePersistence";
 export type { SupabaseProfileUpdatePayload } from "./profilePersistence";
 export * from "./dataServices/userSessionDataService";
 export * from "./dataServices/userSessionWorkItemDataService";
+export * from "./dataServices/importedWorkoutsDataService";
 export * from "./dataServices/types";

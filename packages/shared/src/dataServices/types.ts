@@ -8,6 +8,7 @@ export type AuditLog = Tables<typeof TableNames.AuditLog>;
 export type ErrorLog = Tables<typeof TableNames.ErrorLog>;
 export type Favourite = Tables<typeof TableNames.Favourite>;
 export type FavouriteFolder = Tables<typeof TableNames.FavouriteFolder>;
+export type ImportedWorkout = Tables<typeof TableNames.ImportedWorkout>;
 export type Plan = Tables<typeof TableNames.Plan>;
 export type Profile = Tables<typeof TableNames.Profile>;
 export type UserActivity = Tables<typeof TableNames.UserActivity>;

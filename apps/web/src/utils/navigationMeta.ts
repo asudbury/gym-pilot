@@ -50,6 +50,17 @@ export const navigationMeta: NavMetaItem[] = [
       visibleOn: ['desktop', 'tablet', 'mobile'],
     },
   },
+  // {
+  //   key: 'imported-workouts',
+  //   label: 'Imported Workouts',
+  //   to: '/imported-workouts',
+  //   icon: 'upload',
+  //   requireAuth: true,
+  //   visibility: {
+  //     minTier: 'free',
+  //     visibleOn: ['desktop', 'tablet', 'mobile'],
+  //   },
+  // },
   {
     key: 'preferences',
     label: 'Preferences',
