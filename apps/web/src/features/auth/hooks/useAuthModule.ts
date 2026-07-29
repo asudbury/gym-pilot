@@ -118,12 +118,7 @@ export function useAuthModule(users: User[]) {
       setUser(nextUser)
 
       // Record login activity
-      void recordSupabaseUserActivity(
-        'login',
-        {},
-        nextUser.id,
-        nextUser.name,
-      )
+      void recordSupabaseUserActivity('login', {}, nextUser.id, nextUser.name)
 
       return true
     },
