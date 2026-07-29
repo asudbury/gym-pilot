@@ -17,6 +17,7 @@ import { RecordSessionPage } from '../pages/RecordSessionPage'
 import { TrainerReportPage } from '../pages/TrainerReportPage'
 import { type HomeFilters } from '../utils/appUtils'
 import { SessionTemplatesPage } from '../pages/SessionTemplatesPage'
+import AppleFitnessDataImporter from '../pages/AppleFitnessDataImporter'
 
 interface ProtectedRoutesProps {
   homeFilters: HomeFilters
@@ -89,6 +90,10 @@ export function createProtectedRoutes({
       <Route
         path="/session-templates/create"
         element={<SessionTemplateCreatePage />}
+      />
+      <Route
+        path="/apple-fitness"
+        element={<AppleFitnessDataImporter />}
       />
     </Route>
   )

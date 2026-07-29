@@ -4,7 +4,7 @@ import { PageCard } from '../components/PageCard'
 import { Button } from '../components/ui/Button'
 import type { Workout } from '../types/healthData'
 
-const HealthDataImporter: React.FC = () => {
+const AppleFitnessDataImporter: React.FC = () => {
   const [workouts, setWorkouts] = useState<Workout[]>([])
   const [error, setError] = useState<string | null>(null)
   const fileInputRef = useRef<HTMLInputElement>(null)
@@ -41,9 +41,9 @@ const HealthDataImporter: React.FC = () => {
   return (
     <PageLayout className="gap-6">
       <PageCard as="section" className="space-y-6">
-        <h1 className="text-2xl font-bold">Health Data Importer</h1>
+        <h1 className="text-2xl font-bold">Apple Fitness Data Importer</h1>
         <div className="flex items-center space-x-4">
-          <Button onClick={handleButtonClick}>Upload Health data file</Button>
+          <Button onClick={handleButtonClick} tone={workouts.length === 0 ? "emerald" : "default"}>Upload Fitness data file</Button>
           <input
             type="file"
             accept=".json"
@@ -54,17 +54,20 @@ const HealthDataImporter: React.FC = () => {
         </div>
         {error && <p className="text-red-500">{error}</p>}
         <div>
-          <h2 className="text-xl font-semibold mb-4">Workouts</h2>
+          <h2 className="text-xl font-semibold mb-4">Workouts <span className="ml-2 text-slate-400">({workouts.length})</span></h2>
           {workouts.length > 0 ? (
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
               {workouts.map((workout) => (
                 <div
                   key={workout.id}
-                  className="bg-white dark:bg-slate-800 p-4 rounded-lg shadow"
+                  className="bg-blue-50 dark:bg-slate-800 p-4 rounded-lg shadow"
                 >
-                  <strong className="text-lg font-semibold text-slate-900 dark:text-slate-100">
+                  <div className="text-lg font-bold text-slate-900 dark:text-slate-100">
                     {workout.display_name}
-                  </strong>
+                  </div>
+                  <div className="text-m font-semibold text-slate-600 dark:text-slate-100">
+                   {workout.energy.toFixed(0)} {workout.energy_unit}
+                  </div>
                   <div className="text-m text-slate-600 dark:text-slate-400 mt-2">
                     <p>
                       {(() => {
@@ -98,10 +101,8 @@ const HealthDataImporter: React.FC = () => {
 
                         return `${weekday} ${dayOfMonth} at ${hour}:${minute}`
                       })()}
-                    </p>
-                    <p>{(workout.duration / 60).toFixed(0)} minutes</p>
-                    <p>
-                      {workout.energy.toFixed(0)} {workout.energy_unit}
+                      <span className="ml-2"/>
+                      ({(workout.duration / 60).toFixed(0)} minutes)
                     </p>
                   </div>
                 </div>
@@ -113,9 +114,14 @@ const HealthDataImporter: React.FC = () => {
             </p>
           )}
         </div>
+
+        {workouts.length > 0 && (
+          <Button tone="emerald">Import Workouts to Gym-Pilot</Button>
+        )}
+
       </PageCard>
     </PageLayout>
   )
 }
 
-export default HealthDataImporter
+export default AppleFitnessDataImporter

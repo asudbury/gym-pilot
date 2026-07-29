@@ -167,6 +167,7 @@ export function getDashboardLayoutDefinitions(
       description:
         'Jump back into your exercises, plans and assignments from one place.',
       widgets: [
+       
         {
           title: 'Timetable',
           description: 'Open your class timetable and upcoming sessions.',
@@ -180,6 +181,13 @@ export function getDashboardLayoutDefinitions(
           to: '/exercises',
           tone: 'default',
           icon: 'dumbbell',
+        },
+        {
+          title: 'Load Apple Fitness data',
+          description: 'Sync your Apple Fitness data with the app.',
+          to: '/apple-fitness',
+          tone: 'default',
+          icon: 'tasks',
         },
         {
           title: 'Preferences',
