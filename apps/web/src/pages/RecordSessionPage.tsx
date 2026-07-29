@@ -206,7 +206,10 @@ export function RecordSessionPage() {
             : null,
       }
 
-      await updateUserSession(userSession)
+      const { error } = await updateUserSession(userSession)
+      if (error) {
+        throw error
+      }
 
       navigate('/sessions')
     } catch (err: unknown) {

@@ -73,7 +73,11 @@ export function formatDashboardTimestamp(value?: string | null) {
     const dayDifference = Math.floor(
       (startOfToday.getTime() - parsedDate.getTime()) / (24 * 60 * 60 * 1000),
     )
-    return `${dayDifference} days ago`
+    if (dayDifference === 1) {
+      return `Yesterday, ${formattedTime}`
+    }
+
+    return `${dayDifference} days ago, ${formattedTime}`
   }
 
   return new Intl.DateTimeFormat(undefined, {
