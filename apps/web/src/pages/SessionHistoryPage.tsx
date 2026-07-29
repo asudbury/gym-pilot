@@ -232,7 +232,7 @@ export function SessionHistoryPage() {
                             className="inline-flex items-center gap-2 rounded-full border border-rose-600 bg-rose-600 px-3 py-1.5 text-sm font-medium text-white shadow-sm transition-all duration-200 hover:border-rose-700 hover:bg-rose-700 hover:font-semibold"
                           >
                             <DecorativeIcon icon="check" className="h-4 w-4" />
-                            <span>Confirm delete</span>
+                            <span>Confirm</span>
                           </button>
                         </>
                       ) : (
