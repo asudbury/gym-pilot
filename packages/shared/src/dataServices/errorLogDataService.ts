@@ -38,5 +38,5 @@ export async function deleteAllErrorLogs(): Promise<{ data: any | null; error: a
     return await client
       .from(tableName)
       .delete()
-      .neq("id", "0"); // Use a condition that is always true to delete all rows
+      .neq("id", "00000000-0000-0000-0000-000000000000"); // Use a condition that is always true to delete all rows
 }

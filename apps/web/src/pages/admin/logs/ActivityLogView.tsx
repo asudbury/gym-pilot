@@ -83,7 +83,7 @@ export function ActivityLogView({
   return (
     <section className="m-0 bg-white p-0 sm:m-4 sm:rounded-2xl sm:border sm:border-slate-200 sm:p-4 shadow-sm">
       <div className="mb-3 flex items-center justify-between gap-3">
-        <h2 className="text-lg font-semibold text-slate-900">Activity logs</h2>
+        <h2 className="text-lg font-semibold text-slate-900">Activity log</h2>
         <div className="flex items-center gap-2">
           <span className="text-sm text-slate-500">
             {filteredActivityLogs.length} / {activityLogs.length} rows
