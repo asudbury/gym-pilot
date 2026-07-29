@@ -175,10 +175,7 @@ const AppleFitnessDataImporter: React.FC = () => {
           <>
             <StatusMessageNotification tone="success" message={message} />
             <p>
-              <a
-                href="/imported-workouts"
-                className="text-blue-500 underline"
-              >
+              <a href="/imported-workouts" className="text-blue-500 underline">
                 View your loaded apple fitness data
               </a>
             </p>
