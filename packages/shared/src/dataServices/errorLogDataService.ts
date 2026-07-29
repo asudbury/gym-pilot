@@ -1,7 +1,8 @@
 import { getItems, getSupabaseClient } from "./supabaseCore";
+import { TableNames } from "./tableNames";
 import type { ErrorLog } from "./types";
 
-const tableName = "gym_pilot_error_log";
+const tableName = TableNames.ErrorLog;
 
 export async function getErrorLogs(
   userId?: string,

@@ -150,9 +150,11 @@ export function SessionHistoryPage() {
           />
         ) : null}
         {sortedEntries.length === 0 ? (
-          <div className="rounded-none border-0 bg-transparent p-0 text-sm text-slate-600 md:rounded-2xl md:border md:border-slate-200 md:bg-slate-50 md:p-4">
-            No session entries yet.
-          </div>
+          <StatusMessageNotification
+            message="No session entries yet."
+            tone="info"
+            className="mb-3"
+          />
         ) : (
           <div className="space-y-3">
             {sortedEntries.map((entry) => {
@@ -169,9 +171,9 @@ export function SessionHistoryPage() {
                       {(() => {
                         const roleLabel =
                           entry.attendance_type === 'taught'
-                            ? 'taught'
+                            ? 'Taught'
                             : entry.attendance_type === 'attended'
-                              ? 'attended'
+                              ? 'Attended'
                               : null
 
                         return roleLabel ? (

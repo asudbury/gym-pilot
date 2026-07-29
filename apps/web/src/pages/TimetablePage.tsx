@@ -179,7 +179,7 @@ export function TimetablePage() {
   )
   const [attendanceSelection, setAttendanceSelection] = useState<
     'attended' | 'taught' | null
-  >(null)
+  >('attended') // Default to 'attended' for better UX)
   const [selectedClubId, setSelectedClubId] = useState(
     () => user?.gymName?.trim() ?? '',
   )
@@ -463,7 +463,7 @@ export function TimetablePage() {
     setAttendanceRating(null)
     setAttendanceMessage(null)
     setAttendanceSelection(
-      attendanceAction.options.length > 1 ? null : attendanceAction.kind,
+      attendanceAction.options.length > 1 ? 'attended' : attendanceAction.kind,
     )
   }
 
@@ -527,9 +527,7 @@ export function TimetablePage() {
     const attendanceKind = attendanceSelection ?? attendanceAction.kind
 
     if (!attendanceKind) {
-      setAttendanceMessage(
-        'Choose whether you attended or taught this session.',
-      )
+      setAttendanceMessage('Choose whether you attended or taught this session')
       return
     }
 
@@ -568,7 +566,7 @@ export function TimetablePage() {
         setAttendancePendingSession(null)
         setAttendanceNotes('')
         setAttendanceRating(null)
-        setAttendanceSelection(null) // StatusMessage will handle parsing
+        setAttendanceSelection('attended') // StatusMessage will handle parsing
         navigate('/sessions', { replace: true }) // StatusMessage will handle parsing
       } else {
         // StatusMessage will handle parsing
@@ -652,7 +650,7 @@ export function TimetablePage() {
           icon="calendar"
         >
           <div className="space-y-6">
-            <div className="m-0 bg-white p-0 sm:m-4 sm:rounded-2xl sm:border sm:border-slate-200 sm:p-4 shadow-sm">
+            <div className="m-0 bg-gray-100 p-0 sm:m-4 sm:rounded-2xl sm:border sm:border-slate-200 sm:p-4 shadow-sm">
               <div className="flex items-start justify-between gap-2">
                 <div>
                   <p className="text-sm font-semibold text-slate-900">
@@ -661,30 +659,6 @@ export function TimetablePage() {
                   <p className="text-sm text-slate-600">
                     {attendancePendingSession.room ?? 'Room TBD'}
                   </p>
-                </div>
-                <div className="flex flex-col items-end gap-1">
-                  <Button
-                    tone="emerald"
-                    onClick={() =>
-                      navigate('/sessions/new?type=personal_training')
-                    }
-                    className="ml-2"
-                  >
-                    Record session
-                  </Button>
-                  {attendancePendingSession.status ? (
-                    <span
-                      className={`rounded-full px-2.5 py-1 text-xs font-semibold ${
-                        attendancePendingSession.status === 'Available'
-                          ? 'bg-emerald-100 text-emerald-700'
-                          : attendancePendingSession.status === 'Waitlist'
-                            ? 'bg-amber-100 text-amber-700'
-                            : 'bg-slate-100 text-slate-700'
-                      }`}
-                    >
-                      {attendancePendingSession.status ?? 'Unknown'}
-                    </span>
-                  ) : null}
                 </div>
               </div>
               <div className="mt-3 space-y-1 text-sm text-slate-600">

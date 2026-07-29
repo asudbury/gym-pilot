@@ -1,7 +1,8 @@
 import { deleteItem, getItem, getItems, getSupabaseClient } from "./supabaseCore";
+import { TableNames } from "./tableNames";
 import type { UserSession } from "./types";
 
-const tableName = "gym_pilot_user_session";
+const tableName = TableNames.UserSession;
 
 export async function getUserSessions(userId: string): 
   Promise<{ data: UserSession[] | null; error: any | null }> {

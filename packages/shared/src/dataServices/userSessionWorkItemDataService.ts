@@ -1,7 +1,8 @@
 import { deleteItem, getItem, getItems, getSupabaseClient } from "./supabaseCore";
+import { TableNames } from "./tableNames";
 import type { UserSessionWorkoutItem } from "./types";
 
-const tableName = "gym_pilot_user_session_workout_item";
+const tableName = TableNames.UserSessionWorkoutItem;
 
 export async function getUserSessionWorkoutItems(
   userId: string,

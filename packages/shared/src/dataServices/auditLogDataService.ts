@@ -1,7 +1,8 @@
 import { getItems, getSupabaseClient } from "./supabaseCore";
+import { TableNames } from "./tableNames";
 import type { AuditLog } from "./types";
 
-const tableName = "gym_pilot_audit_log";
+const tableName = TableNames.AuditLog;
 
 export async function getAuditLogs(
   userId?: string,

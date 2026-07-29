@@ -1,7 +1,8 @@
 import { getItems, getSupabaseClient } from "./supabaseCore";
+import { TableNames } from "./tableNames";
 import type { UserActivity } from "./types";
 
-const tableName = "gym_pilot_user_activity";
+const tableName = TableNames.UserActivity;
 
 export async function getUserActivity(
   userId?: string
