@@ -115,7 +115,7 @@ export function ActivityLogView({
               <div className="mb-2 flex items-center justify-between gap-3">
                 <div className="text-sm font-semibold text-slate-900">
                   {entry.event_type ?? 'activity'}
-                </div> 
+                </div>
                 <div className="text-xs text-slate-500">
                   {formatTimestamp(entry.created_at)}
                 </div>
