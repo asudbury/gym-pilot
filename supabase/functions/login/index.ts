@@ -15,6 +15,8 @@ const fetch: Fetch = async (req) => {
     return new Response("ok", { headers: corsHeaders });
   }
 
+  const slackNotificationsEnabled = Deno.env.get("SLACK_NOTIFICATIONS_ENABLED") === "true";
+
   try {
     const { email, password } = await req.json();
 
@@ -34,21 +36,43 @@ const fetch: Fetch = async (req) => {
       });
     }
 
-    const slackChannel = Deno.env.get("WEB_LOGIN_CHANNEL") || "C0BKX94BJDP";
-    const slackMessage = `User *${data.user?.email || 'Unknown'}* successfully logged in.`;
     // Sending the Slack message asynchronously to avoid blocking the user's login response.
-    sendSlackMessage(slackChannel, slackMessage)
-      .then((slackResult) => {
-        if (!slackResult.success) {
-          console.error(`Failed to send Slack login alert to channel ${slackChannel}:`, slackResult.error);
-        }
-      });
+    if (slackNotificationsEnabled) {
+        const slackChannel = Deno.env.get("WEB_LOGIN_CHANNEL") || "C0BKX94BJDP";
+        const slackMessage = `User *${data.user?.email || 'Unknown'}* successfully logged in.`;
+
+        console.log(slackMessage);
+
+        sendSlackMessage(slackChannel, slackMessage)
+          .then((slackResult) => {
+            if (!slackResult.success) {
+              console.error(`Failed to send Slack login alert to channel ${slackChannel}:`, slackResult.error);
+            }
+          });
+    }
     
     return new Response(JSON.stringify(data), {
       headers: { ...corsHeaders, "Content-Type": "application/json" },
       status: 200,
     });
   } catch (err) {
+
+    console.log("Error during login:", err);
+    
+    if (slackNotificationsEnabled) {
+      const slackChannel = Deno.env.get("WEB_ERROR_LOG_CHANNEL") || "C0BLCEF127J";
+      const slackMessage = `Error logging in: ${err instanceof Error ? err.message : JSON.stringify(err, null, 2)}`; 
+      
+      console.log(slackMessage);
+
+      sendSlackMessage(slackChannel, slackMessage)
+        .then((slackResult) => {
+          if (!slackResult.success) {   
+            console.error(`Failed to send Slack login error alert to channel ${slackChannel}:`, slackResult.error);
+          }
+        });
+    }
+
     return new Response(JSON.stringify({ error: err instanceof Error ? err.message : String(err) }), {
       headers: { ...corsHeaders, "Content-Type": "application/json" },
       status: 500,

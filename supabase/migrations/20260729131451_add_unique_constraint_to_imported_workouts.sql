@@ -1,0 +1,3 @@
+ALTER TABLE gym_pilot_imported_workout
+ADD CONSTRAINT gym_pilot_imported_workout_user_original_id_key 
+UNIQUE (user_id, original_id);

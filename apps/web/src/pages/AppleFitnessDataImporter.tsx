@@ -3,10 +3,13 @@ import { PageLayout } from '../layouts/PageLayout'
 import { PageCard } from '../components/PageCard'
 import { Button } from '../components/ui/Button'
 import type { Workout } from '../types/healthData'
+import { getSupabaseClient } from '../../../../packages/shared/src/supabase'
+import { StatusMessageNotification } from '../components/ui/StatusMessageNotification'
 
 const AppleFitnessDataImporter: React.FC = () => {
   const [workouts, setWorkouts] = useState<Workout[]>([])
   const [error, setError] = useState<string | null>(null)
+  const [message, setMessage] = useState<string | null>(null)
   const fileInputRef = useRef<HTMLInputElement>(null)
 
   const handleFileChange = (event: React.ChangeEvent<HTMLInputElement>) => {
@@ -38,6 +41,51 @@ const AppleFitnessDataImporter: React.FC = () => {
     fileInputRef.current?.click()
   }
 
+  const handleImport = async () => {
+      setMessage(null);
+      setError(null);
+
+      const workoutsToImport = workouts;
+
+      const client = getSupabaseClient();
+      if (!client) {
+        setError("Supabase client not available.");
+        return;
+      }
+      
+      const { data: { session } } = await client.auth.getSession();
+
+      if (!session) {
+          setError("You must be logged in to import workouts.");
+          return;
+      }
+      
+      const supabaseUrl = import.meta.env.VITE_SUPABASE_URL;
+      const functionUrl = `${supabaseUrl}/functions/v1/import-workouts`;
+
+      try {
+        const response = await fetch(functionUrl, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${session.access_token}`
+          },
+          body: JSON.stringify({ workouts: workoutsToImport }),
+        });
+
+        if (!response.ok) {
+          const errorText = await response.text();
+          setError(`Import failed: ${errorText}`);
+        } else {
+          // TODO: give user feedback on success
+          setMessage('Import successful');
+          setWorkouts([]); // Clear the list
+        }
+      } catch (error) {
+        setError('An error occurred during import.');
+      }
+  };
+
   return (
     <PageLayout className="gap-6">
       <PageCard as="section" className="space-y-6">
@@ -57,7 +105,6 @@ const AppleFitnessDataImporter: React.FC = () => {
             className="hidden"
           />
         </div>
-        {error && <p className="text-red-500">{error}</p>}
         <div>
           <h2 className="text-xl font-semibold mb-4">
             Workouts{' '}
@@ -123,8 +170,11 @@ const AppleFitnessDataImporter: React.FC = () => {
           )}
         </div>
 
+        {message && (<StatusMessageNotification tone="success" message={message} />)}
+        {error && (<StatusMessageNotification tone="error" message={error} />)}
+
         {workouts.length > 0 && (
-          <Button tone="emerald">Import Workouts to Gym-Pilot</Button>
+          <Button tone="emerald" onClick={handleImport}>Import Workouts to Gym-Pilot</Button>
         )}
       </PageCard>
     </PageLayout>
