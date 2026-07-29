@@ -9,6 +9,7 @@ import { type QuickLink } from '../features/favourites/domain/quickLinks'
 import { createProtectedRoutes } from './protectedRoutes'
 import { createAdminRoutes } from './adminRoutes'
 import InstallOnIOSPage from '../pages/help/InstallOnIOSPage'
+import HealthDataImporter from '../pages/HealthDataImporter';
 import { NotFoundPage } from '../pages/NotFoundPage'
 
 interface PublicRoutesProps {
@@ -62,6 +63,7 @@ export function createPublicRoutes({
       />
       <Route path="/help" element={<HelpPage />} />
       <Route path="/help/install-ios" element={<InstallOnIOSPage />} />
+      <Route path="/health-data-importer" element={<HealthDataImporter />} />
       <Route
         path="/favourites"
         element={
