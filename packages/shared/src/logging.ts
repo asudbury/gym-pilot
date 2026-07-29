@@ -74,14 +74,6 @@ export function addLog(entry: LogEntry) {
   }
 }
 
-export function getLogs() {
-  return logs
-}
-
-export function clearLogs() {
-  logs.length = 0
-}
-
 export type LogLevel = 'trace' | 'debug' | 'info' | 'warn' | 'error' | 'silent'
 
 export const levels: Record<LogLevel, number> = {

@@ -117,6 +117,14 @@ export function useAuthModule(users: User[]) {
       persistCurrentUserId(resolvePersistedUserId(nextUser))
       setUser(nextUser)
 
+      // Record login activity
+      void recordSupabaseUserActivity(
+        'login',
+        {},
+        nextUser.id,
+        nextUser.name,
+      )
+
       return true
     },
     [users],
