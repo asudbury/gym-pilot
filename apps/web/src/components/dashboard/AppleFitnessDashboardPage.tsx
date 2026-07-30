@@ -137,7 +137,7 @@ export function AppleFitnessDashboardPage() {
             {dashboardData.workoutTrends &&
               dashboardData.workoutTrends.length > 0 && (
                 <WorkoutTrendsChart trends={dashboardData.workoutTrends} />
-            )}
+              )}
 
             <div className="space-y-4">
               <h3 className="text-xl font-semibold text-slate-900 dark:text-slate-100">
