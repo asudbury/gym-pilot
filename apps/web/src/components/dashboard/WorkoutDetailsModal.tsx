@@ -59,7 +59,10 @@ Check out Gym-Pilot for more!
           title: `${workout.display_name} Workout Details`,
           text: shareText,
         })
-        setShareStatus({ message: 'Workout shared successfully!', tone: 'success' })
+        setShareStatus({
+          message: 'Workout shared successfully!',
+          tone: 'success',
+        })
       } catch (err) {
         if ((err as Error).name !== 'AbortError') {
           setShareStatus({ message: 'Failed to share workout.', tone: 'error' })
@@ -70,9 +73,15 @@ Check out Gym-Pilot for more!
       // Fallback for browsers that don't support Web Share API
       try {
         await navigator.clipboard.writeText(shareText)
-        setShareStatus({ message: 'Workout details copied to clipboard!', tone: 'success' })
+        setShareStatus({
+          message: 'Workout details copied to clipboard!',
+          tone: 'success',
+        })
       } catch (err) {
-        setShareStatus({ message: 'Failed to copy to clipboard.', tone: 'error' })
+        setShareStatus({
+          message: 'Failed to copy to clipboard.',
+          tone: 'error',
+        })
         console.error('Clipboard API failed:', err)
       }
     }

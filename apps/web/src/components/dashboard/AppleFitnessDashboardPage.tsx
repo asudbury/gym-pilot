@@ -261,38 +261,37 @@ Check out Gym-Pilot for more!
 
   return (
     <PageLayout className="max-w-6xl">
-            <PageCardLayout
-              title="Apple Fitness Dashboard"
-              subtitle="Dashboard"
-              description="Your Health & Activity Summary"
-              icon="settings"
-            >
-                    {loading && <p>Loading your Apple Fitness data...</p>}
-      {error && <p className="text-red-500">{error}</p>}
-            {dashboardData?.activityRings && (
-              <ActivityRingsDisplay data={dashboardData.activityRings} />
+      <PageCardLayout
+        title="Apple Fitness Dashboard"
+        subtitle="Dashboard"
+        description="Your Health & Activity Summary"
+        icon="settings"
+      >
+        {loading && <p>Loading your Apple Fitness data...</p>}
+        {error && <p className="text-red-500">{error}</p>}
+        {dashboardData?.activityRings && (
+          <ActivityRingsDisplay data={dashboardData.activityRings} />
+        )}
+
+        <WorkoutSummaryCard
+          workoutSummary={workoutSummary}
+          handleShareSummary={handleShareSummary}
+          isSharing={isSharing}
+          shareStatus={shareStatus}
+        />
+
+        <RecentWorkoutsSection
+          initialWorkouts={dashboardData?.recentWorkouts || []}
+          onWorkoutCardClick={handleWorkoutCardClick}
+        />
+        <div className="space-y-6">
+          {dashboardData?.workoutTrends &&
+            dashboardData?.workoutTrends.length > 0 && (
+              <WorkoutTrendsChart trends={dashboardData?.workoutTrends} />
             )}
-
-            <WorkoutSummaryCard
-              workoutSummary={workoutSummary}
-              handleShareSummary={handleShareSummary}
-              isSharing={isSharing}
-              shareStatus={shareStatus}
-            />
-
-            <RecentWorkoutsSection
-            initialWorkouts={dashboardData?.recentWorkouts || []}
-            onWorkoutCardClick={handleWorkoutCardClick}
-          />
-          <div className="space-y-6">
-            {dashboardData?.workoutTrends &&
-              dashboardData?.workoutTrends.length > 0 && (
-                <WorkoutTrendsChart trends={dashboardData?.workoutTrends } />
-              )}
-          </div>
-            </PageCardLayout>
-      <div className="mb-6">
-             </div>
+        </div>
+      </PageCardLayout>
+      <div className="mb-6"></div>
       <WorkoutDetailsModal
         isOpen={isDetailsModalOpen}
         onClose={() => setIsDetailsModalOpen(false)}
