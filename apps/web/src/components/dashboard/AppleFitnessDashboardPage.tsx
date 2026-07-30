@@ -2,12 +2,14 @@ import { useState, useEffect } from 'react'
 import { PageLayout } from '../../layouts/PageLayout'
 import { PageCardLayout } from '../../layouts/PageCardLayout'
 import { AppleFitnessWorkoutCard } from '../../components/AppleFitnessWorkoutCard'
-import { ActivityRingsDisplay } from './ActivityRingsDisplay' // Corrected path
+import { ActivityRingsDisplay } from './ActivityRingsDisplay'
 import type {
   ActivityRingData,
   AppleFitnessDashboardData,
   Workout,
+  WorkoutTrend, // New import
 } from '../../types/healthData' // Corrected import type
+import { WorkoutTrendsChart } from '../../types/WorkoutTrendsChart'
 
 export function AppleFitnessDashboardPage() {
   const [dashboardData, setDashboardData] =
@@ -70,12 +72,39 @@ export function AppleFitnessDashboardPage() {
             type: 'Strength Training',
           },
         ]
+        const mockWorkoutTrends: WorkoutTrend[] = [
+          {
+            id: 'total_calories_weekly',
+            name: 'Total Calories Burned (Weekly)',
+            unit: 'kcal',
+            data: [
+              { date: '2023-W48', value: 1500 },
+              { date: '2023-W49', value: 1800 },
+              { date: '2023-W50', value: 2100 },
+              { date: '2023-W51', value: 1950 },
+              { date: '2023-W52', value: 2300 },
+            ],
+          },
+          {
+            id: 'avg_duration_weekly',
+            name: 'Average Workout Duration (Weekly)',
+            unit: 'minutes',
+            data: [
+              { date: '2023-W48', value: 35 },
+              { date: '2023-W49', value: 40 },
+              { date: '2023-W50', value: 42 },
+              { date: '2023-W51', value: 38 },
+              { date: '2023-W52', value: 45 },
+            ],
+          },
+        ]
 
         await new Promise((resolve) => setTimeout(resolve, 1000)) // Simulate network delay
 
         setDashboardData({
           activityRings: mockActivityRings,
           recentWorkouts: mockWorkouts,
+          workoutTrends: mockWorkoutTrends, // Add trends here
         })
       } catch (err) {
         setError('Failed to load Apple Fitness data.')
@@ -103,6 +132,11 @@ export function AppleFitnessDashboardPage() {
           <div className="space-y-6">
             {dashboardData.activityRings && (
               <ActivityRingsDisplay data={dashboardData.activityRings} />
+            )}
+
+            {dashboardData.workoutTrends &&
+              dashboardData.workoutTrends.length > 0 && (
+                <WorkoutTrendsChart trends={dashboardData.workoutTrends} />
             )}
 
             <div className="space-y-4">
