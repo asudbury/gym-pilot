@@ -31,7 +31,9 @@ export const DataImporterPage: React.FC = () => {
             if (data && data.workouts) {
               setWorkouts(data.workouts)
               setError(null)
-              setMessage('Review the workouts loaded and select "Import Workouts to Gym-Pilot" to proceed')
+              setMessage(
+                'Review the workouts loaded and select "Import Workouts to Gym-Pilot" to proceed',
+              )
             } else {
               setError('Invalid JSON format: "workouts" array not found.')
               setMessage(null)
@@ -105,7 +107,7 @@ export const DataImporterPage: React.FC = () => {
     setError(null)
     setMessage(null)
   }
-  
+
   return (
     <PageLayout className="gap-6">
       <PageCard as="section" className="space-y-6">
@@ -141,11 +143,20 @@ export const DataImporterPage: React.FC = () => {
 
         {workouts.length > 0 && (
           <>
-            <Button tone="emerald" onClick={handleImport} className="mr-4" disabled={isLoading}>
+            <Button
+              tone="emerald"
+              onClick={handleImport}
+              className="mr-4"
+              disabled={isLoading}
+            >
               Import Workouts to Gym-Pilot
             </Button>
-            <Button tone="default" onClick={handleCancelImport} disabled={isLoading}>
-             Cancel and Upload a Different File
+            <Button
+              tone="default"
+              onClick={handleCancelImport}
+              disabled={isLoading}
+            >
+              Cancel and Upload a Different File
             </Button>
           </>
         )}
@@ -153,23 +164,23 @@ export const DataImporterPage: React.FC = () => {
         {error && <StatusMessageNotification tone="error" message={error} />}
 
         <div>
-        {workouts.length > 0 && (
-          <h2 className="text-xl font-semibold mb-4">
-            Workouts{' '}
-            <span className="ml-2 text-slate-400">({workouts.length})</span>
-          </h2>
-        )}
-        {workouts.length > 0 ? (
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-            {workouts.map((workout) => (
-              <AppleFitnessWorkoutCard key={workout.id} workout={workout} />
-            ))}
-          </div>
-        ) : (
-          <p className="text-slate-500 dark:text-slate-400">
-            No workouts to display. Upload a JSON file to see workout data.
-          </p>
-        )}
+          {workouts.length > 0 && (
+            <h2 className="text-xl font-semibold mb-4">
+              Workouts{' '}
+              <span className="ml-2 text-slate-400">({workouts.length})</span>
+            </h2>
+          )}
+          {workouts.length > 0 ? (
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+              {workouts.map((workout) => (
+                <AppleFitnessWorkoutCard key={workout.id} workout={workout} />
+              ))}
+            </div>
+          ) : (
+            <p className="text-slate-500 dark:text-slate-400">
+              No workouts to display. Upload a JSON file to see workout data.
+            </p>
+          )}
         </div>
       </PageCard>
     </PageLayout>

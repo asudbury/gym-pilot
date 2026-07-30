@@ -1,10 +1,12 @@
-import type { Workout } from "../types/healthData"
+import type { Workout } from '../types/healthData'
 
 type AppleFitnessWorkoutCardProps = {
   workout: Workout
 }
 
-export const AppleFitnessWorkoutCard = ({ workout }: AppleFitnessWorkoutCardProps) => {
+export const AppleFitnessWorkoutCard = ({
+  workout,
+}: AppleFitnessWorkoutCardProps) => {
   const getDayWithSuffix = (day: number): string => {
     if (day > 3 && day < 21) return day + 'th'
     switch (day % 10) {
@@ -45,7 +47,8 @@ export const AppleFitnessWorkoutCard = ({ workout }: AppleFitnessWorkoutCardProp
       <div className="text-m text-slate-600 dark:text-slate-400 mt-2">
         <p>
           {`${weekday} ${month} ${dayOfMonth} at ${hour}:${minute}`}
-          <span className="ml-2" />({(workout.duration / 60).toFixed(2)} minutes)
+          <span className="ml-2" />({(workout.duration / 60).toFixed(2)}{' '}
+          minutes)
         </p>
       </div>
     </div>
