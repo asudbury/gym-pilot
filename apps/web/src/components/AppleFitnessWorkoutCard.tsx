@@ -2,10 +2,12 @@ import type { Workout } from '../types/healthData'
 
 type AppleFitnessWorkoutCardProps = {
   workout: Workout
+  onClick?: (workout: Workout) => void
 }
 
 export const AppleFitnessWorkoutCard = ({
   workout,
+  onClick,
 }: AppleFitnessWorkoutCardProps) => {
   const getDayWithSuffix = (day: number): string => {
     if (day > 3 && day < 21) return day + 'th'
@@ -34,9 +36,10 @@ export const AppleFitnessWorkoutCard = ({
   })
 
   return (
-    <div
-      key={workout.id}
-      className="bg-blue-50 dark:bg-slate-800 p-4 rounded-lg shadow"
+    <button
+      type="button"
+      onClick={() => onClick?.(workout)}
+      className="bg-blue-50 dark:bg-slate-800 p-4 rounded-lg shadow hover:shadow-md transition-shadow cursor-pointer"
     >
       <div className="text-lg font-bold text-slate-900 dark:text-slate-100">
         {workout.display_name}
@@ -51,6 +54,6 @@ export const AppleFitnessWorkoutCard = ({
           minutes)
         </p>
       </div>
-    </div>
+    </button>
   )
 }
