@@ -191,7 +191,7 @@ export function getDashboardLayoutDefinitions(
         {
           title: 'View your Apple Fitness workouts',
           description: 'View your Apple Fitness workouts synced with the app.',
-          to: '/imported-workouts',
+          to: '/apple-fitness/imported-workouts',
           tone: 'default',
           icon: 'tasks',
         },
