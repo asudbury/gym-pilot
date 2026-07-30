@@ -16,12 +16,12 @@ export function ConfirmationPage() {
           <p className="mt-4 mb-4">
             Your have successfully imported your Apple Fitness data
           </p>
-          <div className="pt-4 pb-4">
+          <div className="pb-4 pt-4">
             <Link
-              to="/apple-fitness/imported-workouts"
+              to="/apple-fitness/dashboard"
               className={getToneClass('emerald')}
             >
-              View Apple Fitness Data
+              View Apple Fitness Dashboard
             </Link>
           </div>
           <div className="pt-4 pb-4">
