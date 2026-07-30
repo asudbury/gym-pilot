@@ -10,7 +10,7 @@ type DashboardWidgetProps = {
   to?: string
   tone?: 'blue' | 'default' | 'emerald' | 'orange' | 'rose' | 'white'
   children?: ReactNode
-  icon?: DecorativeIconProps['icon']; // Use the icon type from DecorativeIconProps
+  icon?: DecorativeIconProps['icon'] // Use the icon type from DecorativeIconProps
 }
 
 export function DashboardWidget({

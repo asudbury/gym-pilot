@@ -1,5 +1,5 @@
 import type { UserRole } from '@gym-pilot/types'
-import { type DecorativeIconProps } from '../../../components/ui/DecorativeIcon'; // Import the DecorativeIconProps type
+import { type DecorativeIconProps } from '../../../components/ui/DecorativeIcon' // Import the DecorativeIconProps type
 
 export type DashboardLayoutDefinition = {
   key: string
@@ -10,11 +10,11 @@ export type DashboardLayoutDefinition = {
 }
 
 export type DashboardWidgetProps = {
-  title: string;
-  description?: string;
-  to?: string;
-  tone?: 'blue' | 'default' | 'emerald' | 'orange' | 'rose' | 'white';
-  icon?: DecorativeIconProps['icon']; // Use the shared icon type for consistency
+  title: string
+  description?: string
+  to?: string
+  tone?: 'blue' | 'default' | 'emerald' | 'orange' | 'rose' | 'white'
+  icon?: DecorativeIconProps['icon'] // Use the shared icon type for consistency
 }
 
 export type DashboardViewModel = {
