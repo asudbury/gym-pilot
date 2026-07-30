@@ -16,6 +16,7 @@ export const RecentWorkoutsSection: React.FC<RecentWorkoutsSectionProps> = ({
   const [selectedDateRange, setSelectedDateRange] = useState<string>('all')
   const [customStartDate, setCustomStartDate] = useState<string | null>(null)
   const [customEndDate, setCustomEndDate] = useState<string | null>(null)
+  const [isExporting, setIsExporting] = useState(false)
   const [selectedWorkoutType, setSelectedWorkoutType] = useState<string>('All')
 
   // Derive unique workout types for the filter dropdown
@@ -108,6 +109,38 @@ export const RecentWorkoutsSection: React.FC<RecentWorkoutsSectionProps> = ({
     }
   }, [filteredWorkouts, sortOption])
 
+  const handleExportWorkouts = async () => {
+    setIsExporting(true)
+    try {
+      const jsonString = JSON.stringify(sortedWorkouts, null, 2)
+      const blob = new Blob([jsonString], { type: 'application/json' })
+      const url = URL.createObjectURL(blob)
+      const a = document.createElement('a')
+      a.href = url
+      // Generate a filename with the current date
+      const date = new Date().toISOString().split('T')[0] // YYYY-MM-DD
+      a.download = `apple-fitness-workouts-${date}.json`
+      document.body.appendChild(a)
+      a.click()
+      document.body.removeChild(a)
+      URL.revokeObjectURL(url)
+      // In a real app, you might want to show a success toast here
+    } catch (error) {
+      console.error('Failed to export workouts:', error)
+      // In a real app, you might want to show an error toast here
+    } finally {
+      setIsExporting(false)
+    }
+  }
+
+  const handleClearFilters = () => {
+    setSelectedDateRange('all')
+    setCustomStartDate(null)
+    setCustomEndDate(null)
+    setSelectedWorkoutType('All')
+    setSortOption('date_desc') // Reset to default sort
+  }
+
   // Define sort options for the dropdown
   const sortOptions = [
     { value: 'date_desc', label: 'Date (Newest First)' },
@@ -120,11 +153,33 @@ export const RecentWorkoutsSection: React.FC<RecentWorkoutsSectionProps> = ({
 
   return (
     <div className="space-y-4">
-      <h3 className="text-xl font-semibold text-slate-900 dark:text-slate-100">
+      {/* <h3 className="text-xl font-semibold text-slate-900 dark:text-slate-100">
         Apple Fitness
-      </h3>
+      </h3> */}
 
       <div className="flex flex-col gap-4">
+        {/* Actions Row (Export and Clear Filters) */}
+        <div className="flex flex-wrap items-center justify-between gap-4">
+          <div className="flex flex-wrap items-center gap-4">
+            <Button
+              onClick={handleExportWorkouts}
+              tone="default"
+              isLoading={isExporting}
+              loadingLabel="Exporting..."
+            >
+              Export Workouts (JSON)
+            </Button>
+          </div>
+          {/* Clear Filters Button */}
+          {(selectedDateRange !== 'all' ||
+            selectedWorkoutType !== 'All' ||
+            sortOption !== 'date_desc') && (
+            <Button onClick={handleClearFilters} tone="blue">
+              Clear Filters
+            </Button>
+          )}
+        </div>
+
         {/* Date Range Pills */}
         <div className="flex flex-wrap items-center gap-4">
           <label className="text-sm font-medium text-slate-700 dark:text-slate-300">

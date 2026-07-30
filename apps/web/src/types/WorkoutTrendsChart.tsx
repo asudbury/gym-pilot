@@ -32,9 +32,6 @@ export const WorkoutTrendsChart: React.FC<WorkoutTrendsChartProps> = ({
 
   return (
     <div className="flex flex-col gap-4 rounded-lg bg-white p-4 shadow-sm dark:bg-slate-800">
-      <h3 className="text-lg font-semibold text-slate-900 dark:text-slate-100">
-        Workout Trends
-      </h3>
       <div className="grid grid-cols-1 gap-6 md:grid-cols-2">
         {trends.map((trend) => (
           <div

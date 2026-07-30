@@ -11,6 +11,7 @@ import { WorkoutTrendsChart } from './WorkoutTrendsChart' // Corrected import pa
 import { WorkoutSummaryCard } from './WorkoutSummaryCard'
 import { RecentWorkoutsSection } from './RecentWorkoutsSection'
 import { WorkoutDetailsModal } from './WorkoutDetailsModal'
+import { PageCardLayout } from '../../layouts/PageCardLayout'
 
 export function AppleFitnessDashboardPage() {
   const [dashboardData, setDashboardData] =
@@ -260,29 +261,15 @@ Check out Gym-Pilot for more!
 
   return (
     <PageLayout className="max-w-6xl">
-      {/* Moved header content from PageLayout props to its children */}
-      <div className="mb-6">
-        <h1 className="text-3xl font-bold text-slate-900 dark:text-slate-100">
-          Apple Fitness Dashboard
-        </h1>
-        <p className="text-lg text-slate-600 dark:text-slate-400">
-          Your Health & Activity Summary
-        </p>
-        <p className="text-sm text-slate-500 dark:text-slate-500">
-          View your activity rings, workout history, and health trends.
-        </p>
-      </div>
-      {loading && <p>Loading your Apple Fitness data...</p>}
+            <PageCardLayout
+              title="Apple Fitness Dashboard"
+              subtitle="Dashboard"
+              description="Your Health & Activity Summary"
+              icon="settings"
+            >
+                    {loading && <p>Loading your Apple Fitness data...</p>}
       {error && <p className="text-red-500">{error}</p>}
-
-      {dashboardData && (
-        <>
-          <RecentWorkoutsSection
-            initialWorkouts={dashboardData.recentWorkouts}
-            onWorkoutCardClick={handleWorkoutCardClick}
-          />
-          <div className="space-y-6">
-            {dashboardData.activityRings && (
+            {dashboardData?.activityRings && (
               <ActivityRingsDisplay data={dashboardData.activityRings} />
             )}
 
@@ -292,14 +279,20 @@ Check out Gym-Pilot for more!
               isSharing={isSharing}
               shareStatus={shareStatus}
             />
-            {dashboardData.workoutTrends &&
-              dashboardData.workoutTrends.length > 0 && (
-                <WorkoutTrendsChart trends={dashboardData.workoutTrends} />
+
+            <RecentWorkoutsSection
+            initialWorkouts={dashboardData?.recentWorkouts || []}
+            onWorkoutCardClick={handleWorkoutCardClick}
+          />
+          <div className="space-y-6">
+            {dashboardData?.workoutTrends &&
+              dashboardData?.workoutTrends.length > 0 && (
+                <WorkoutTrendsChart trends={dashboardData?.workoutTrends } />
               )}
           </div>
-        </>
-      )}
-      {/* Workout Details Modal */}
+            </PageCardLayout>
+      <div className="mb-6">
+             </div>
       <WorkoutDetailsModal
         isOpen={isDetailsModalOpen}
         onClose={() => setIsDetailsModalOpen(false)}
