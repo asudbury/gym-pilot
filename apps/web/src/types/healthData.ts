@@ -56,3 +56,20 @@ export interface Workout {
   start_date: string
   type: string
 }
+
+export interface ActivityRingData {
+  moveGoal: number; // e.g., kcal or kJ
+  moveProgress: number;
+  exerciseGoal: number; // e.g., minutes
+  exerciseProgress: number;
+  standGoal: number; // e.g., hours or counts
+  standProgress: number;
+}
+
+export interface AppleFitnessDashboardData {
+  activityRings: ActivityRingData | null;
+  recentWorkouts: Workout[];
+}
+
+// Note: The Workout interface already exists and is more comprehensive,
+// so we'll use that one and ensure mock data matches it.
