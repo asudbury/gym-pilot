@@ -65,7 +65,7 @@ export const navigationMeta: NavMetaItem[] = [
     key: 'preferences',
     label: 'Preferences',
     to: '/preferences',
-    icon: 'settings',
+    icon: 'preferences',
     requireAuth: true,
     visibility: {
       minTier: 'free',

@@ -20,7 +20,7 @@ import { SessionTemplatesPage } from '../pages/SessionTemplatesPage'
 import { DataImporterPage } from '../pages/appleFitness/DataImporterPage'
 import { ConfirmationPage } from '../pages/appleFitness/ConfirmationPage'
 import { ImportedWorkoutsPage } from '../pages/appleFitness/ImportedWorkoutsPage'
-
+import { IconShowcasePage } from '../pages/IconShowcasePage'
 interface ProtectedRoutesProps {
   homeFilters: HomeFilters
   onHomeFiltersChange: (filters: HomeFilters) => void
@@ -103,6 +103,7 @@ export function createProtectedRoutes({
         path="/apple-fitness/imported-workouts"
         element={<ImportedWorkoutsPage />}
       />
+      <Route path="/icons" element={<IconShowcasePage />} />
     </Route>
   )
 }

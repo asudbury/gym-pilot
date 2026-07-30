@@ -315,26 +315,11 @@ export function ResetPasswordPage() {
                   }`}
                   aria-hidden
                 >
-                  {passwordRules.length ? (
-                    <svg viewBox="0 0 24 24" className="h-4 w-4" fill="none">
-                      <path
-                        d="M5 13l4 4L19 7"
-                        stroke="currentColor"
-                        strokeWidth="2"
-                        strokeLinecap="round"
-                        strokeLinejoin="round"
-                      />
-                    </svg>
+                  {passwordRules.length ? ( // Use DecorativeIcon for checkmark
+                    <DecorativeIcon icon="check" className="h-4 w-4" />
                   ) : (
-                    <svg viewBox="0 0 24 24" className="h-3 w-3" fill="none">
-                      <circle
-                        cx="12"
-                        cy="12"
-                        r="6"
-                        stroke="currentColor"
-                        strokeWidth="1.5"
-                      />
-                    </svg>
+                    // Use DecorativeIcon for circle
+                    <DecorativeIcon icon="circle" className="h-3 w-3" />
                   )}
                 </span>
                 <span>At least 8 characters</span>
@@ -349,26 +334,11 @@ export function ResetPasswordPage() {
                   }`}
                   aria-hidden
                 >
-                  {passwordRules.lower ? (
-                    <svg viewBox="0 0 24 24" className="h-4 w-4" fill="none">
-                      <path
-                        d="M5 13l4 4L19 7"
-                        stroke="currentColor"
-                        strokeWidth="2"
-                        strokeLinecap="round"
-                        strokeLinejoin="round"
-                      />
-                    </svg>
+                  {passwordRules.lower ? ( // Use DecorativeIcon for checkmark
+                    <DecorativeIcon icon="check" className="h-4 w-4" />
                   ) : (
-                    <svg viewBox="0 0 24 24" className="h-3 w-3" fill="none">
-                      <circle
-                        cx="12"
-                        cy="12"
-                        r="6"
-                        stroke="currentColor"
-                        strokeWidth="1.5"
-                      />
-                    </svg>
+                    // Use DecorativeIcon for circle
+                    <DecorativeIcon icon="circle" className="h-3 w-3" />
                   )}
                 </span>
                 <span>Lowercase letter</span>
@@ -383,26 +353,11 @@ export function ResetPasswordPage() {
                   }`}
                   aria-hidden
                 >
-                  {passwordRules.upper ? (
-                    <svg viewBox="0 0 24 24" className="h-4 w-4" fill="none">
-                      <path
-                        d="M5 13l4 4L19 7"
-                        stroke="currentColor"
-                        strokeWidth="2"
-                        strokeLinecap="round"
-                        strokeLinejoin="round"
-                      />
-                    </svg>
+                  {passwordRules.upper ? ( // Use DecorativeIcon for checkmark
+                    <DecorativeIcon icon="check" className="h-4 w-4" />
                   ) : (
-                    <svg viewBox="0 0 24 24" className="h-3 w-3" fill="none">
-                      <circle
-                        cx="12"
-                        cy="12"
-                        r="6"
-                        stroke="currentColor"
-                        strokeWidth="1.5"
-                      />
-                    </svg>
+                    // Use DecorativeIcon for circle
+                    <DecorativeIcon icon="circle" className="h-3 w-3" />
                   )}
                 </span>
                 <span>Uppercase letter</span>
@@ -417,26 +372,11 @@ export function ResetPasswordPage() {
                   }`}
                   aria-hidden
                 >
-                  {passwordRules.number ? (
-                    <svg viewBox="0 0 24 24" className="h-4 w-4" fill="none">
-                      <path
-                        d="M5 13l4 4L19 7"
-                        stroke="currentColor"
-                        strokeWidth="2"
-                        strokeLinecap="round"
-                        strokeLinejoin="round"
-                      />
-                    </svg>
+                  {passwordRules.number ? ( // Use DecorativeIcon for checkmark
+                    <DecorativeIcon icon="check" className="h-4 w-4" />
                   ) : (
-                    <svg viewBox="0 0 24 24" className="h-3 w-3" fill="none">
-                      <circle
-                        cx="12"
-                        cy="12"
-                        r="6"
-                        stroke="currentColor"
-                        strokeWidth="1.5"
-                      />
-                    </svg>
+                    // Use DecorativeIcon for circle
+                    <DecorativeIcon icon="circle" className="h-3 w-3" />
                   )}
                 </span>
                 <span>A number</span>
@@ -451,26 +391,11 @@ export function ResetPasswordPage() {
                   }`}
                   aria-hidden
                 >
-                  {passwordRules.special ? (
-                    <svg viewBox="0 0 24 24" className="h-4 w-4" fill="none">
-                      <path
-                        d="M5 13l4 4L19 7"
-                        stroke="currentColor"
-                        strokeWidth="2"
-                        strokeLinecap="round"
-                        strokeLinejoin="round"
-                      />
-                    </svg>
+                  {passwordRules.special ? ( // Use DecorativeIcon for checkmark
+                    <DecorativeIcon icon="check" className="h-4 w-4" />
                   ) : (
-                    <svg viewBox="0 0 24 24" className="h-3 w-3" fill="none">
-                      <circle
-                        cx="12"
-                        cy="12"
-                        r="6"
-                        stroke="currentColor"
-                        strokeWidth="1.5"
-                      />
-                    </svg>
+                    // Use DecorativeIcon for circle
+                    <DecorativeIcon icon="circle" className="h-3 w-3" />
                   )}
                 </span>
                 <span>Special character (e.g. !@#$%)</span>

@@ -3,7 +3,7 @@ import { getToneClass, type ToneName } from '../toneClasses'
 import { DecorativeIcon, type DecorativeIconProps } from './DecorativeIcon'
 import { DesktopOnly, NotOnDesktop } from '../visibility/DeviceVisibility'
 
-const iconClass = 'w-5 h-5 shrink-0'
+const iconClass = 'w-5 h-5 shrink-0 mr-2 sm:mr-1'
 
 type ActionButtonProps = {
   icon: DecorativeIconProps['icon']

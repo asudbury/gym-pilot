@@ -1,35 +1,20 @@
 import type { UserRole } from '@gym-pilot/types'
+import { type DecorativeIconProps } from '../../../components/ui/DecorativeIcon'; // Import the DecorativeIconProps type
 
 export type DashboardLayoutDefinition = {
   key: string
   label: string
   title: string
   description: string
-  widgets: Array<{
-    title: string
-    description?: string
-    to?: string
-    tone?: 'blue' | 'default' | 'emerald' | 'orange' | 'rose' | 'white'
-    icon?:
-      | 'spark'
-      | 'dumbbell'
-      | 'search'
-      | 'star'
-      | 'chart'
-      | 'lock'
-      | 'grid'
-      | 'heart'
-      | 'clipboard'
-      | 'shield'
-      | 'calendar'
-      | 'help'
-      | 'tasks'
-      | 'users'
-      | 'database'
-      | 'settings'
-      | 'key'
-      | 'user'
-  }>
+  widgets: DashboardWidgetProps[] // Use the new DashboardWidgetProps type
+}
+
+export type DashboardWidgetProps = {
+  title: string;
+  description?: string;
+  to?: string;
+  tone?: 'blue' | 'default' | 'emerald' | 'orange' | 'rose' | 'white';
+  icon?: DecorativeIconProps['icon']; // Use the shared icon type for consistency
 }
 
 export type DashboardViewModel = {
@@ -82,31 +67,31 @@ export function getDashboardLayoutDefinitions(
       widgets: [
         {
           title: 'Client management',
-          description: 'Create and maintain user records and role assignments.',
+          description: 'Create and maintain user records and role assignments',
           to: '/admin/users',
           tone: 'blue',
           icon: 'users',
         },
         {
           title: 'Admin tools',
-          description: 'Jump into the main admin experience.',
+          description: 'Jump into the main admin experience',
           to: '/admin',
           tone: 'default',
           icon: 'settings',
         },
         {
           title: 'Database',
-          description: 'Inspect the Supabase-backed data store.',
+          description: 'Inspect the Supabase-backed data store',
           to: '/admin/database',
           tone: 'default',
           icon: 'database',
         },
         {
           title: 'Preferences',
-          description: 'Adjust application-wide preferences.',
+          description: 'Adjust application-wide preferences',
           to: '/preferences',
           tone: 'emerald',
-          icon: 'settings',
+          icon: 'preferences',
         },
       ],
     })
@@ -117,40 +102,39 @@ export function getDashboardLayoutDefinitions(
       key: 'trainer',
       label: 'Trainer',
       title: 'Trainer workspace',
-      description:
-        'Monitor your clients, plans and assignments from one place.',
+      description: 'Monitor your clients, plans and assignments from one place',
       widgets: [
         {
           title: 'Timetable',
-          description: 'Open your class timetable and upcoming sessions.',
+          description: 'Open your class timetable and upcoming sessions',
           to: '/timetable',
           tone: 'default',
           icon: 'calendar',
         },
         {
           title: 'Client assignments',
-          description: 'Review work assigned to your clients.',
+          description: 'Review work assigned to your clients',
           to: '/assignments',
           tone: 'default',
           icon: 'clipboard',
         },
         {
           title: 'Plans',
-          description: 'Share and review training plans.',
+          description: 'Share and review training plans',
           to: '/plans',
           tone: 'default',
           icon: 'tasks',
         },
         {
           title: 'Exercises',
-          description: 'Search the exercise library for your next session.',
+          description: 'Search the exercise library for your next session',
           to: '/exercises',
           tone: 'default',
           icon: 'dumbbell',
         },
         {
           title: 'Help',
-          description: 'Find support and guidance.',
+          description: 'Find support and guidance',
           to: '/help',
           tone: 'emerald',
           icon: 'help',
@@ -165,46 +149,46 @@ export function getDashboardLayoutDefinitions(
       label: 'Client',
       title: 'Client workspace',
       description:
-        'Jump back into your exercises, plans and assignments from one place.',
+        'Jump back into your exercises, plans and assignments from one place',
       widgets: [
         {
           title: 'Timetable',
-          description: 'Open your class timetable and upcoming sessions.',
+          description: 'Open your class timetable and upcoming sessions',
           to: '/timetable',
           tone: 'default',
           icon: 'calendar',
         },
         {
           title: 'Exercises',
-          description: 'Browse exercises and favourite your go-tos.',
+          description: 'Browse exercises and favourite your go-tos',
           to: '/exercises',
           tone: 'default',
           icon: 'dumbbell',
         },
         {
           title: 'Import your Apple Fitness workouts',
-          description: 'Sync your Apple Fitness data with the app.',
+          description: 'Sync your Apple Fitness data with the app',
           to: '/apple-fitness',
           tone: 'default',
           icon: 'tasks',
         },
         {
           title: 'View your Apple Fitness workouts',
-          description: 'View your Apple Fitness workouts synced with the app.',
+          description: 'View your Apple Fitness workouts synced with the app',
           to: '/apple-fitness/imported-workouts',
           tone: 'default',
           icon: 'tasks',
         },
         {
           title: 'Preferences',
-          description: 'Review your preferences.',
+          description: 'Review your preferences',
           to: '/preferences',
           tone: 'default',
-          icon: 'tasks',
+          icon: 'preferences',
         },
         {
           title: 'Help',
-          description: 'Find guidance and support for the app.',
+          description: 'Find guidance and support for the app',
           to: '/help',
           tone: 'default',
           icon: 'help',
@@ -218,18 +202,18 @@ export function getDashboardLayoutDefinitions(
       key: 'default',
       label: 'Default',
       title: 'Quick access',
-      description: 'A simple starting point for your dashboard.',
+      description: 'A simple starting point for your dashboard',
       widgets: [
         {
           title: 'Exercises',
-          description: 'Browse the library.',
+          description: 'Browse the library',
           to: '/exercises',
           tone: 'blue',
           icon: 'dumbbell',
         },
         {
           title: 'Help',
-          description: 'Find support and guidance.',
+          description: 'Find support and guidance',
           to: '/help',
           tone: 'default',
           icon: 'help',

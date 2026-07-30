@@ -6,6 +6,7 @@ export type DecorativeIconProps = {
     | 'calendar'
     | 'chart'
     | 'check'
+    | 'circle'
     | 'clipboard'
     | 'close'
     | 'database'
@@ -62,6 +63,7 @@ import {
   EditIcon,
   TrashIcon,
   CheckIcon,
+  CircleIcon,
   CloseIcon,
   DocumentIcon,
   ArrowUpIcon,
@@ -75,6 +77,7 @@ const iconComponents = {
   back: BackIcon,
   calendar: CalendarIcon,
   chart: ChartIcon,
+  circle: CircleIcon,
   check: CheckIcon,
   clipboard: ClipboardIcon,
   close: CloseIcon,

@@ -122,7 +122,7 @@ export function FavouritesPage({
         description="Group favourite pages into folders so they are easier to manage."
       >
         <div className="mb-4 flex items-start gap-3">
-          <DecorativeIcon icon="heart" />
+          <DecorativeIcon icon="star" />
           <div>
             <p className="text-sm font-semibold uppercase tracking-[0.24em] text-slate-500">
               Saved shortcuts

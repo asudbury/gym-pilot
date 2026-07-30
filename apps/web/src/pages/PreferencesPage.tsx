@@ -5,7 +5,6 @@ import { PageCardLayout } from '../layouts/PageCardLayout'
 import { useAuth } from '../auth/AuthContext'
 import { appTokens } from '../constants/tokens'
 import { GymClubSelector } from '../components/GymClubSelector'
-import { logger } from '@gym-pilot/shared'
 import { Button } from '../components/ui/Button'
 import { getDisplayRoles } from '../features/admin/domain/adminUtils'
 import { UserRolesDisplay } from '../components/UserRolesDisplay'
@@ -56,8 +55,6 @@ export function PreferencesPage() {
       await updateGymName(gymName, gymBrand)
       navigate('/')
     } catch (error) {
-      logger.error('[Preferences] Failed to save preferences', error)
-      // StatusMessage component will now handle parsing the error object
       setStatusMessage(String(error))
       setStatusType('error')
     } finally {
@@ -71,7 +68,7 @@ export function PreferencesPage() {
         title="Preferences"
         subtitle="Preferences"
         description="Update your profile and account preferences."
-        icon="preferences"
+        icon="settings"
       >
         <form onSubmit={handleSubmit} className="flex flex-col gap-4">
           <UserRolesDisplay displayRoles={displayRoles} />
