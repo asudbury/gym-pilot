@@ -98,9 +98,9 @@ export function createProtectedRoutes({
         path="/apple-fitness/imported-workouts"
         element={<ImportedWorkoutsPage />}
       />
-      <Route 
-        path="/apple-fitness/link-workout/:workoutId" 
-        element={<LinkAppleWorkoutPage />} 
+      <Route
+        path="/apple-fitness/link-workout/:workoutId"
+        element={<LinkAppleWorkoutPage />}
       />
       <Route path="/icons" element={<IconShowcasePage />} />
     </Route>
