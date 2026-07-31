@@ -60,10 +60,7 @@ export const AppleFitnessWorkoutCard = ({
         </p>
       </div>
 
-    {showAllocateButton && (
-      <Button className="mt-4">Allocate</Button>
-    )}
-
+      {showAllocateButton && <Button className="mt-4">Allocate</Button>}
     </Panel>
   )
 }
