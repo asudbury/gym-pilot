@@ -2,6 +2,7 @@ import React, { useState, useMemo } from 'react'
 import Calendar from 'react-calendar'
 import type { ImportedWorkout } from '@gym-pilot/shared'
 import { AppleFitnessWorkoutCard } from './AppleFitnessWorkoutCard'
+import { StatusMessageNotification } from './ui/StatusMessageNotification'
 
 // Define a type that matches react-calendar's Value for single selection, which can be Date or null
 type CalendarValue = Date | null
@@ -112,12 +113,12 @@ const WorkoutCalendar: React.FC<WorkoutCalendarProps> = ({ workouts }) => {
           </h3>
           {workoutsForSelectedDate.length > 0 ? (
             workoutsForSelectedDate.map((workout) => (
-              <AppleFitnessWorkoutCard key={workout.id} workout={workout} />
+              <div className="mb-4" key={workout.id}>
+              <AppleFitnessWorkoutCard workout={workout} />
+              </div>
             ))
           ) : (
-            <p style={{ fontStyle: 'italic', color: '#888' }}>
-              No workouts on this day.
-            </p>
+            <StatusMessageNotification message="No workouts on this day." tone="info" />
           )}
         </div>
       )}

@@ -128,9 +128,12 @@ export function DashboardPage() {
         </div>
 
         {workouts.length > 0 && (
+          <PageCard>
+            <h2>Workouts</h2>
           <div className="mt-8">
             <WorkoutCalendar workouts={workouts} />
           </div>
+          </PageCard>
         )}
 
         {shouldShowRoleSelector ? (

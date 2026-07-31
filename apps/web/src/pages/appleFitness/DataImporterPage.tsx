@@ -1,19 +1,24 @@
-import React, { useState, useRef } from 'react'
+import React, { useState, useRef, useEffect } from 'react'
 import { PageLayout } from '../../layouts/PageLayout'
 import { PageCard } from '../../components/PageCard'
 import { Button } from '../../components/ui/Button'
-import type { ImportedWorkout as Workout } from '@gym-pilot/shared'
+import { getImportedWorkouts, type ImportedWorkout as Workout } from '@gym-pilot/shared'
 import { getSupabaseClient } from '@gym-pilot/shared/src/supabase'
 import { StatusMessageNotification } from '../../components/ui/StatusMessageNotification'
 import { AppleFitnessWorkoutCard } from '../../components/AppleFitnessWorkoutCard'
 import { DecorativeIcon } from '../../components/ui/DecorativeIcon'
+import WorkoutCalendar from '../../components/WorkoutCalendar'
+import { useAuth } from '../../auth/AuthContext'
 
 export const DataImporterPage: React.FC = () => {
+  const { user } = useAuth()
   const [workouts, setWorkouts] = useState<Workout[]>([])
   const [error, setError] = useState<string | null>(null)
   const [message, setMessage] = useState<string | null>(null)
   const fileInputRef = useRef<HTMLInputElement>(null)
   const [isLoading, setIsLoading] = useState(false)
+  const [currentWorkouts, setCurrentWorkouts] = useState<Workout[]>([])
+  const [importCount, setImportCount] = useState(0)
 
   const handleFileChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0]
@@ -89,6 +94,7 @@ export const DataImporterPage: React.FC = () => {
         setError(`Import failed: ${errorText}`)
       } else {
         setMessage('Workouts imported successfully!')
+        setImportCount((c) => c + 1)
       }
     } catch (error) {
       setError('An error occurred during import.')
@@ -96,6 +102,32 @@ export const DataImporterPage: React.FC = () => {
       setIsLoading(false)
     }
   }
+
+    // Fetch workouts for the calendar
+  useEffect(() => {
+      let isActive = true
+  
+      const loadWorkouts = async () => {
+        try {
+          if (user?.id == null) {
+            setWorkouts([])
+            return
+          }
+  
+          const { data } = await getImportedWorkouts(user.id)
+          if (isActive) {
+            setCurrentWorkouts(data ?? [])
+          }
+        } catch (error) {
+          console.error('Failed to load imported workouts:', error)
+        }
+      }
+      void loadWorkouts()
+      return () => {
+        isActive = false
+      }
+  }, [user?.id, importCount])
+
   return (
     <PageLayout className="gap-6">
       <PageCard as="section" className="space-y-6">
@@ -133,17 +165,22 @@ export const DataImporterPage: React.FC = () => {
           {workouts.length > 0 && (
             <h2 className="text-xl font-semibold mb-4">Workouts </h2>
           )}
-          {workouts.length > 0 ? (
+          {workouts.length > 0 && (
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
               {workouts.map((workout) => (
                 <AppleFitnessWorkoutCard key={workout.id} workout={workout} />
               ))}
             </div>
-          ) : (
-            <p className="text-slate-500 dark:text-slate-400">
-              No workouts to display. Upload a JSON file to see workout data.
-            </p>
           )}
+        </div>
+
+        <div>
+            <div className="mt-8">
+            <WorkoutCalendar
+              workouts={currentWorkouts}
+              title="Workout Overview Calendar"
+            />
+        </div>
         </div>
       </PageCard>
     </PageLayout>

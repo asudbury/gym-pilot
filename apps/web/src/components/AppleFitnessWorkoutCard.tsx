@@ -1,4 +1,5 @@
 import type { ImportedWorkout } from '@gym-pilot/shared' // Use ImportedWorkout from shared package
+import { Panel } from './ui/Panel'
 
 type AppleFitnessWorkoutCardProps = {
   workout: ImportedWorkout // Change to ImportedWorkout
@@ -36,10 +37,11 @@ export const AppleFitnessWorkoutCard = ({
   })
 
   return (
-    <button
-      type="button"
+    <Panel
       onClick={() => onClick?.(workout)}
-      className="bg-blue-50 dark:bg-slate-800 p-4 rounded-lg shadow hover:shadow-md transition-shadow cursor-pointer"
+      className="shadow hover:shadow-md transition-shadow cursor-pointer"
+      padding="md"
+      variant="muted"
     >
       <div className="text-lg font-bold text-slate-900 dark:text-slate-100">
         {workout.display_name}
@@ -54,6 +56,7 @@ export const AppleFitnessWorkoutCard = ({
           minutes)
         </p>
       </div>
-    </button>
+    </Panel>
   )
 }
+
