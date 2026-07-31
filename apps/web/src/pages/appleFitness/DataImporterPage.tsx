@@ -2,7 +2,10 @@ import React, { useState, useRef, useEffect } from 'react'
 import { PageLayout } from '../../layouts/PageLayout'
 import { PageCard } from '../../components/PageCard'
 import { Button } from '../../components/ui/Button'
-import { getImportedWorkouts, type ImportedWorkout as Workout } from '@gym-pilot/shared'
+import {
+  getImportedWorkouts,
+  type ImportedWorkout as Workout,
+} from '@gym-pilot/shared'
 import { getSupabaseClient } from '@gym-pilot/shared/src/supabase'
 import { StatusMessageNotification } from '../../components/ui/StatusMessageNotification'
 import { AppleFitnessWorkoutCard } from '../../components/AppleFitnessWorkoutCard'
@@ -103,29 +106,29 @@ export const DataImporterPage: React.FC = () => {
     }
   }
 
-    // Fetch workouts for the calendar
+  // Fetch workouts for the calendar
   useEffect(() => {
-      let isActive = true
-  
-      const loadWorkouts = async () => {
-        try {
-          if (user?.id == null) {
-            setWorkouts([])
-            return
-          }
-  
-          const { data } = await getImportedWorkouts(user.id)
-          if (isActive) {
-            setCurrentWorkouts(data ?? [])
-          }
-        } catch (error) {
-          console.error('Failed to load imported workouts:', error)
+    let isActive = true
+
+    const loadWorkouts = async () => {
+      try {
+        if (user?.id == null) {
+          setWorkouts([])
+          return
         }
+
+        const { data } = await getImportedWorkouts(user.id)
+        if (isActive) {
+          setCurrentWorkouts(data ?? [])
+        }
+      } catch (error) {
+        console.error('Failed to load imported workouts:', error)
       }
-      void loadWorkouts()
-      return () => {
-        isActive = false
-      }
+    }
+    void loadWorkouts()
+    return () => {
+      isActive = false
+    }
   }, [user?.id, importCount])
 
   return (
@@ -175,12 +178,12 @@ export const DataImporterPage: React.FC = () => {
         </div>
 
         <div>
-            <div className="mt-8">
+          <div className="mt-8">
             <WorkoutCalendar
               workouts={currentWorkouts}
               title="Workout Overview Calendar"
             />
-        </div>
+          </div>
         </div>
       </PageCard>
     </PageLayout>

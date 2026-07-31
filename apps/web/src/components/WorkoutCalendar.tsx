@@ -114,11 +114,14 @@ const WorkoutCalendar: React.FC<WorkoutCalendarProps> = ({ workouts }) => {
           {workoutsForSelectedDate.length > 0 ? (
             workoutsForSelectedDate.map((workout) => (
               <div className="mb-4" key={workout.id}>
-              <AppleFitnessWorkoutCard workout={workout} />
+                <AppleFitnessWorkoutCard workout={workout} />
               </div>
             ))
           ) : (
-            <StatusMessageNotification message="No workouts on this day." tone="info" />
+            <StatusMessageNotification
+              message="No workouts on this day."
+              tone="info"
+            />
           )}
         </div>
       )}
