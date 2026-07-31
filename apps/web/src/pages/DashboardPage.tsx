@@ -5,9 +5,12 @@ import { useAuth } from '../auth/AuthContext'
 import { renderDashboardWidgets } from '../components/dashboard/dashboardLayouts'
 import { renderDashboardTimestamp } from '../utils/appUtils'
 import { resolveDashboardViewModel } from '../features/dashboard/domain/dashboardLayout'
+import { getImportedWorkouts } from '@gym-pilot/shared'
 import { DecorativeIcon } from '../components/ui/DecorativeIcon'
+import type { ImportedWorkout } from '@gym-pilot/shared'
 import { Button } from '../components/ui/Button'
 import SessionActions from '../components/SessionActions'
+import WorkoutCalendar from '../components/WorkoutCalendar'
 
 export function DashboardPage() {
   const { user } = useAuth()
@@ -30,6 +33,31 @@ export function DashboardPage() {
   const canShowTimetable = Boolean(user?.gymName && user.gymName.trim())
   const hasTrainerConfigured = Boolean(user?.trainerId?.trim())
   const isTrainer = Boolean(user?.roles?.includes('trainer'))
+
+  const [workouts, setWorkouts] = useState<ImportedWorkout[]>([])
+
+  // Fetch workouts for the calendar
+  useEffect(() => {
+    let isActive = true
+
+    const loadWorkouts = async () => {
+      try {
+        if (user?.id == null) {
+          setWorkouts([])
+          return
+        }
+
+        const { data } = await getImportedWorkouts(user.id)
+        if (isActive) {
+          setWorkouts(data ?? [])
+        }
+      } catch (error) {
+        console.error('Failed to load imported workouts:', error)
+      }
+    }
+    void loadWorkouts()
+    return () => {}
+  }, [user?.id])
 
   const filteredLayouts = layouts.map((layout) => ({
     ...layout,
@@ -98,6 +126,12 @@ export function DashboardPage() {
             </div>
           </PageCard>
         </div>
+
+        {workouts.length > 0 && (
+          <div className="mt-8">
+            <WorkoutCalendar workouts={workouts} />
+          </div>
+        )}
 
         {shouldShowRoleSelector ? (
           <div className="flex flex-wrap gap-2">

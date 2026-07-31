@@ -1,8 +1,8 @@
-import type { Workout } from '../types/healthData'
+import type { ImportedWorkout } from '@gym-pilot/shared' // Use ImportedWorkout from shared package
 
 type AppleFitnessWorkoutCardProps = {
-  workout: Workout
-  onClick?: (workout: Workout) => void
+  workout: ImportedWorkout // Change to ImportedWorkout
+  onClick?: (workout: ImportedWorkout) => void // Change to ImportedWorkout
 }
 
 export const AppleFitnessWorkoutCard = ({

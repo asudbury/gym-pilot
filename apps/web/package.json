@@ -1,7 +1,7 @@
 {
   "name": "Gym-Pilot",
   "private": true,
-  "version": "0.1.6beta",
+  "version": "0.1.7beta",
   "type": "module",
   "scripts": {
     "dev": "vite",
@@ -21,6 +21,7 @@
     "react": "^19.2.7",
     "react-dom": "^19.2.7",
     "react-router-dom": "^7.18.1",
+    "react-calendar": "^5.0.0",
     "recharts": "^3.10.1"
   },
   "devDependencies": {

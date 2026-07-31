@@ -10,6 +10,7 @@ import { AgGridReact } from 'ag-grid-react'
 import 'ag-grid-community/styles/ag-grid.css'
 import 'ag-grid-community/styles/ag-theme-quartz.css'
 import type { ColDef, ValueSetterParams } from 'ag-grid-community'
+import WorkoutCalendar from '../../components/WorkoutCalendar' // Import the new component
 
 export function ImportedWorkoutsPage() {
   const { user } = useAuth()
@@ -162,6 +163,14 @@ export function ImportedWorkoutsPage() {
             pagination={true}
             paginationPageSize={20}
             onCellValueChanged={onCellValueChanged}
+          />
+        </div>
+
+        {/* Add the WorkoutCalendar component below the grid */}
+        <div className="mt-8">
+          <WorkoutCalendar
+            workouts={workouts}
+            title="Workout Overview Calendar"
           />
         </div>
       </PageCardLayout>
