@@ -1,3 +1,4 @@
+import { SessionEntryCard } from '../../components/session-history/SessionEntryCard'
 import {
   type ImportedWorkout,
   getImportedWorkout,
@@ -139,21 +140,15 @@ export function LinkAppleWorkoutPage() {
               </h3>
               <div className="space-y-2 mt-2">
                 {userSessions.map((session) => (
-                  <div key={session.id} className="flex items-center">
-                    <input
-                      type="radio"
-                      name="session"
-                      id={session.id}
-                      value={session.id}
-                      checked={selectedSession === session.id}
-                      onChange={() => handleSessionSelection(session.id)}
-                      className="mr-2"
-                    />
-                    <label htmlFor={session.id}>
-                      {session.class_name || 'Solo Session'} -{' '}
-                      {new Date(session.start_at).toLocaleString()}
-                    </label>
-                  </div>
+                  <SessionEntryCard
+                    key={session.id}
+                    entry={session}
+                    onSelect={handleSessionSelection}
+                    selected={selectedSession === session.id}
+                    pendingDeleteEntryId={null}
+                    setPendingDeleteEntryId={() => {}}
+                    deleteEntry={() => {}}
+                  />
                 ))}
               </div>
             </div>
