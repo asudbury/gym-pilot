@@ -1,14 +1,17 @@
 import type { ImportedWorkout } from '@gym-pilot/shared' // Use ImportedWorkout from shared package
 import { Panel } from './ui/Panel'
+import { Button } from './ui/Button'
 
 type AppleFitnessWorkoutCardProps = {
   workout: ImportedWorkout // Change to ImportedWorkout
   onClick?: (workout: ImportedWorkout) => void // Change to ImportedWorkout
+  showAllocateButton?: boolean
 }
 
 export const AppleFitnessWorkoutCard = ({
   workout,
   onClick,
+  showAllocateButton = true,
 }: AppleFitnessWorkoutCardProps) => {
   const getDayWithSuffix = (day: number): string => {
     if (day > 3 && day < 21) return day + 'th'
@@ -52,10 +55,15 @@ export const AppleFitnessWorkoutCard = ({
       <div className="text-m text-slate-600 dark:text-slate-400 mt-2">
         <p>
           {`${weekday} ${month} ${dayOfMonth} at ${hour}:${minute}`}
-          <span className="ml-2" />({(workout.duration / 60).toFixed(2)}{' '}
+          <span className="ml-2" />({(workout.duration / 60).toFixed(0)}{' '}
           minutes)
         </p>
       </div>
+
+    {showAllocateButton && (
+      <Button className="mt-4">Allocate</Button>
+    )}
+
     </Panel>
   )
 }

@@ -109,7 +109,7 @@ const WorkoutCalendar: React.FC<WorkoutCalendarProps> = ({ workouts }) => {
       {selectedDate && !Array.isArray(selectedDate) && (
         <div style={{ marginTop: '20px' }}>
           <h3 style={{ marginBottom: '10px', color: '#333' }}>
-            Workouts on {selectedDate.toDateString()}:
+            <b>Workouts on {selectedDate.toDateString()}:</b>
           </h3>
           {workoutsForSelectedDate.length > 0 ? (
             workoutsForSelectedDate.map((workout) => (
