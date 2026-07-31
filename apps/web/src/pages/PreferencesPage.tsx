@@ -43,8 +43,7 @@ export function PreferencesPage() {
   const isTrainer = displayRoles.includes('trainer')
   const isVirginGymBrand = (gymBrand || '').trim().toLowerCase() === 'virgin'
 
-  const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
-    event.preventDefault()
+  const handleSubmit = async () => {
     setIsSaving(true)
     setStatusMessage('')
 
@@ -53,7 +52,7 @@ export function PreferencesPage() {
       await updateApplicationName(applicationName)
       await updateGymBrand(gymBrand)
       await updateGymName(gymName, gymBrand)
-      navigate('/')
+      navigate(-1)
     } catch (error) {
       setStatusMessage(String(error))
       setStatusType('error')
@@ -172,6 +171,7 @@ export function PreferencesPage() {
 
           <div className="flex flex-wrap gap-2">
             <Button
+              onClick={handleSubmit}
               disabled={isSaving}
               tone="emerald"
               isLoading={isSaving}

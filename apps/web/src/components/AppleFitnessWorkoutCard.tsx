@@ -94,7 +94,6 @@ export const AppleFitnessWorkoutCard = ({
       {showLinkButton &&
         (linkedSession ? (
           <div className="mt-4">
-            <p className="text-sm text-slate-500 mb-2">Linked to session:</p>
             <SessionEntryCard entry={linkedSession} />
             <Button tone="blue" className="mt-2" onClick={handleUnlinkClick}>
               Unlink
