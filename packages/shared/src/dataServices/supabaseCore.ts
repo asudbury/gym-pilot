@@ -100,16 +100,25 @@ export async function getItems<T>(
 
 export async function getItem<T>(
   tableName: string,
-  userId?: string,
-  id?: string,
+  options?: {
+    userId?: string;
+    id?: string;
+  }
 ): Promise<{ data: T | null; error: any | null }> {
 
   const client = getSupabaseClient();
+  let query = client.from(tableName)
+    .select('*');
+
+  if (options?.userId) {
+    query = query.eq('user_id', options.userId);
+  }
+
+  if (options?.id) {
+    query = query.eq('id', options.id);
+  }
   
-  return client.from(tableName)
-    .select('*')
-    .eq("user_id", userId)
-    .eq("id", id) as unknown as Promise<{ data: T | null; error: any | null }>
+  return query.single() as unknown as Promise<{ data: T | null; error: any | null }>
 }
 
 export async function deleteItem(

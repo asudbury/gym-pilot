@@ -19,6 +19,7 @@ import { type HomeFilters } from '../utils/appUtils'
 import { SessionTemplatesPage } from '../pages/SessionTemplatesPage'
 import { DataImporterPage } from '../pages/appleFitness/DataImporterPage'
 import { ImportedWorkoutsPage } from '../pages/appleFitness/ImportedWorkoutsPage'
+import { LinkAppleWorkoutPage } from '../pages/appleFitness/LinkAppleWorkoutPage'
 import { IconShowcasePage } from '../pages/IconShowcasePage'
 interface ProtectedRoutesProps {
   homeFilters: HomeFilters
@@ -96,6 +97,10 @@ export function createProtectedRoutes({
       <Route
         path="/apple-fitness/imported-workouts"
         element={<ImportedWorkoutsPage />}
+      />
+      <Route 
+        path="/apple-fitness/link-workout/:workoutId" 
+        element={<LinkAppleWorkoutPage />} 
       />
       <Route path="/icons" element={<IconShowcasePage />} />
     </Route>

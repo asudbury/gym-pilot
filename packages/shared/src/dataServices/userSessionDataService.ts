@@ -19,7 +19,7 @@ export async function getUserSessions(userId: string):
 export async function getUserSession(id: string, userId: string): 
   Promise<{ data: UserSession | null; error: any | null }> {
   
-  return getItem<UserSession>(tableName, userId, id);
+  return getItem<UserSession>(tableName, { userId, id });
 }
 
 export async function deleteUserSession(id: string, userId: string) {

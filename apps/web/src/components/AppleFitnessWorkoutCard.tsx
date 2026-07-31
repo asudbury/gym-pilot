@@ -1,18 +1,25 @@
-import type { ImportedWorkout } from '@gym-pilot/shared' // Use ImportedWorkout from shared package
+import type { ImportedWorkout } from '@gym-pilot/shared'
 import { Panel } from './ui/Panel'
 import { Button } from './ui/Button'
+import { useNavigate } from 'react-router-dom'
 
 type AppleFitnessWorkoutCardProps = {
-  workout: ImportedWorkout // Change to ImportedWorkout
-  onClick?: (workout: ImportedWorkout) => void // Change to ImportedWorkout
-  showAllocateButton?: boolean
+  workout: ImportedWorkout
+  onClick?: (workout: ImportedWorkout) => void
+  showLinkButton?: boolean
 }
 
 export const AppleFitnessWorkoutCard = ({
   workout,
   onClick,
-  showAllocateButton = true,
+  showLinkButton = true,
 }: AppleFitnessWorkoutCardProps) => {
+  const navigate = useNavigate()
+
+  const handleLinkClick = () => {
+    navigate(`/apple-fitness/link-workout/${workout.id}`)
+  }
+
   const getDayWithSuffix = (day: number): string => {
     if (day > 3 && day < 21) return day + 'th'
     switch (day % 10) {
@@ -60,7 +67,11 @@ export const AppleFitnessWorkoutCard = ({
         </p>
       </div>
 
-      {showAllocateButton && <Button className="mt-4">Allocate</Button>}
+      {showLinkButton && (
+        <Button tone="blue" className="mt-4" onClick={handleLinkClick}>
+          Link
+        </Button>
+      )}
     </Panel>
   )
 }

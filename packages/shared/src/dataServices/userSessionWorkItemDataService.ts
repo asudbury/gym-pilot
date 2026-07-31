@@ -33,7 +33,7 @@ export async function getUserSessionWorkoutItem(
   userId: string,
 ): Promise<{ data: UserSessionWorkoutItem | null; error: any | null }> {
   
-  return getItem<UserSessionWorkoutItem>(tableName, userId, id);
+  return getItem<UserSessionWorkoutItem>(tableName, { userId, id });
 }
 
 export async function deleteUserSessionWorkoutItem(id: string, userId: string) {

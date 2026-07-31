@@ -1,4 +1,4 @@
-import { getItems, getSupabaseClient } from "./supabaseCore";
+import { getItem, getItems, getSupabaseClient } from "./supabaseCore";
 import { TableNames } from "./tableNames";
 import type { ImportedWorkout } from "./types";
 
@@ -13,6 +13,15 @@ export async function getImportedWorkouts(userId: string):
       column: 'start_date',
       options: { ascending: false },
     },
+  });
+}
+
+export async function getImportedWorkout(userId: string, id: string):
+  Promise<{ data: ImportedWorkout | null; error: any | null }> {
+  
+  return getItem<ImportedWorkout>(tableName, {
+    userId,
+    id,
   });
 }
 
