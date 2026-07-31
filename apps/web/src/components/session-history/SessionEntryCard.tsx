@@ -27,6 +27,7 @@ type SessionEntryCardProps = {
   deleteEntry?: (entryId: string) => void
   onSelect?: (sessionId: string) => void
   selected?: boolean
+  onCardClick?: (sessionId: string) => void
 }
 
 export function SessionEntryCard({
@@ -36,12 +37,26 @@ export function SessionEntryCard({
   deleteEntry,
   onSelect,
   selected,
-}: SessionEntryCardProps) {
+  onCardClick,
+  children,
+}: SessionEntryCardProps & { children?: React.ReactNode }) {
   const navigate = useNavigate()
+
+  const handleCardClick = () => {
+    if (onCardClick) {
+      onCardClick(entry.id)
+    } else if (onSelect) {
+      onSelect(entry.id)
+    } else {
+      navigate(`/sessions/${entry.id}/edit`)
+    }
+  }
+
   return (
     <div
       key={entry.id}
-      className={`m-0 bg-white p-0 sm:m-4 sm:rounded-2xl sm:border sm:border-slate-200 sm:p-4 shadow-sm ${selected ? 'ring-2 ring-indigo-500' : ''}`}
+      className={`m-0 bg-white p-0 sm:m-4 sm:rounded-2xl sm:border sm:border-slate-200 sm:p-4 shadow-sm ${selected ? 'ring-2 ring-indigo-500' : ''} ${onCardClick || onSelect ? 'cursor-pointer' : ''}`}
+      onClick={handleCardClick}
     >
       <div className="flex flex-col gap-3 md:flex-row md:items-start md:justify-between">
         <div className="flex items-center">
@@ -100,7 +115,10 @@ export function SessionEntryCard({
             {pendingDeleteEntryId !== entry.id ? (
               <button
                 type="button"
-                onClick={() => navigate(`/sessions/${entry.id}/edit`)}
+                onClick={(e) => {
+                  e.stopPropagation()
+                  navigate(`/sessions/${entry.id}/edit`)
+                }}
                 className="inline-flex items-center gap-2 rounded-full border border-slate-300 bg-white px-3 py-1.5 text-sm font-medium text-slate-700 transition-all duration-200 hover:border-slate-400 hover:bg-slate-50 hover:font-semibold hover:shadow-sm"
               >
                 <DecorativeIcon icon="edit" className="h-4 w-4" />
@@ -111,7 +129,10 @@ export function SessionEntryCard({
               <>
                 <button
                   type="button"
-                  onClick={() => setPendingDeleteEntryId?.(null)}
+                  onClick={(e) => {
+                    e.stopPropagation()
+                    setPendingDeleteEntryId?.(null)
+                  }}
                   className="inline-flex items-center gap-2 rounded-full border border-slate-300 bg-white px-3 py-1.5 text-sm font-medium text-slate-700 transition-all duration-200 hover:border-slate-400 hover:bg-slate-50 hover:font-semibold hover:shadow-sm"
                 >
                   <DecorativeIcon icon="close" className="h-4 w-4" />
@@ -119,7 +140,10 @@ export function SessionEntryCard({
                 </button>
                 <button
                   type="button"
-                  onClick={() => deleteEntry(entry.id)}
+                  onClick={(e) => {
+                    e.stopPropagation()
+                    deleteEntry(entry.id)
+                  }}
                   className="inline-flex items-center gap-2 rounded-full border border-rose-600 bg-rose-600 px-3 py-1.5 text-sm font-medium text-white shadow-sm transition-all duration-200 hover:border-rose-700 hover:bg-rose-700 hover:font-semibold"
                 >
                   <DecorativeIcon icon="check" className="h-4 w-4" />
@@ -129,7 +153,10 @@ export function SessionEntryCard({
             ) : (
               <button
                 type="button"
-                onClick={() => deleteEntry(entry.id)}
+                onClick={(e) => {
+                  e.stopPropagation()
+                  deleteEntry(entry.id)
+                }}
                 className="inline-flex items-center gap-2 rounded-full border border-rose-300 bg-rose-50 px-3 py-1.5 text-sm font-medium text-rose-700 transition-all duration-200 hover:border-rose-400 hover:bg-rose-100 hover:font-semibold hover:shadow-sm"
               >
                 <DecorativeIcon icon="trash" className="h-4 w-4" />
@@ -139,6 +166,7 @@ export function SessionEntryCard({
           </div>
         )}
       </div>
+      {children}
     </div>
   )
 }

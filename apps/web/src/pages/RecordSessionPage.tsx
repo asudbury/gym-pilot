@@ -211,7 +211,7 @@ export function RecordSessionPage() {
         throw error
       }
 
-      navigate('/sessions')
+      navigate(-1)
     } catch (err: unknown) {
       // Log the full error object for debugging purposes
       logger.error('[RecordSessionPage] Failed to record session', err)
@@ -395,7 +395,7 @@ export function RecordSessionPage() {
                   )}
                 </span>
               </Button>
-              <Button onClick={() => navigate('/')} tone="default">
+              <Button onClick={() => navigate(-1)} tone="default">
                 Cancel
               </Button>
             </div>

@@ -252,6 +252,7 @@ export type Database = {
           original_id: string | null
           start_date: string
           user_id: string
+          session_id: string | null
         }
         Insert: {
           created_at?: string
@@ -263,6 +264,7 @@ export type Database = {
           original_id?: string | null
           start_date: string
           user_id: string
+          session_id?: string | null
         }
         Update: {
           created_at?: string
@@ -274,6 +276,7 @@ export type Database = {
           original_id?: string | null
           start_date?: string
           user_id?: string
+          session_id?: string | null
         }
         Relationships: []
       }

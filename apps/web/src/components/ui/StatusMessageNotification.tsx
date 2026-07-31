@@ -1,6 +1,7 @@
 import clsx from 'clsx'
 import { useMemo } from 'react'
 import { logger } from '@gym-pilot/shared'
+import { DecorativeIcon } from './DecorativeIcon'
 
 // Define a type that StatusMessageNotification can gracefully handle
 export type DisplayableError =
@@ -15,12 +16,14 @@ interface StatusMessageNotificationProps {
   message: DisplayableError
   tone?: StatusTone
   className?: string
+  onDismiss?: () => void
 }
 
 export function StatusMessageNotification({
   message,
   tone = 'default',
   className,
+  onDismiss,
 }: StatusMessageNotificationProps) {
   const resolvedMessage = useMemo(() => {
     if (message === null || message === undefined) {
@@ -75,12 +78,22 @@ export function StatusMessageNotification({
   return (
     <div
       className={clsx(
-        'mt-4 rounded-2xl border px-4 py-3 text-sm',
+        'mt-4 rounded-2xl border px-4 py-3 text-sm flex items-center justify-between',
         toneClasses[tone],
         className,
       )}
     >
-      {resolvedMessage}
+      <div>{resolvedMessage}</div>
+      {onDismiss && (
+        <button
+          type="button"
+          onClick={onDismiss}
+          className="ml-4 p-1 rounded-full hover:bg-opacity-75 focus:outline-none focus:ring-2 focus:ring-offset-2"
+        >
+          <DecorativeIcon icon="close" className="h-4 w-4" />
+        </button>
+      )}
     </div>
   )
 }
+

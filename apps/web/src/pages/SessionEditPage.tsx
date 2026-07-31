@@ -150,7 +150,7 @@ export function SessionEditPage() {
       }
 
       await updateUserSession(nextEntry)
-      navigate('/sessions')
+      navigate(-1)
     } catch (error) {
       setErrorMessage(String(error))
     } finally {
@@ -266,7 +266,7 @@ export function SessionEditPage() {
                   >
                     Save changes
                   </Button>
-                  <Button tone="default" onClick={() => navigate('/sessions')}>
+                  <Button tone="default" onClick={() => navigate(-1)}>
                     Cancel
                   </Button>
                 </div>

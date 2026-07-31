@@ -1,23 +1,47 @@
-import type { ImportedWorkout } from '@gym-pilot/shared'
+import type { ImportedWorkout, UserSession } from '@gym-pilot/shared'
 import { Panel } from './ui/Panel'
 import { Button } from './ui/Button'
 import { useNavigate } from 'react-router-dom'
+import { SessionEntryCard } from './session-history/SessionEntryCard'
+
+type CalendarValue = Date | null
 
 type AppleFitnessWorkoutCardProps = {
   workout: ImportedWorkout
+  linkedSession?: UserSession
   onClick?: (workout: ImportedWorkout) => void
+  onUnlink?: (workout: ImportedWorkout) => void
   showLinkButton?: boolean
+  selectedDate?: CalendarValue
 }
 
 export const AppleFitnessWorkoutCard = ({
   workout,
+  linkedSession,
   onClick,
+  onUnlink,
   showLinkButton = true,
+  selectedDate,
 }: AppleFitnessWorkoutCardProps) => {
   const navigate = useNavigate()
 
   const handleLinkClick = () => {
-    navigate(`/apple-fitness/link-workout/${workout.id}`)
+    let backDate: string | undefined
+    if (selectedDate) {
+      const date = new Date(selectedDate)
+      const year = date.getFullYear()
+      const month = (date.getMonth() + 1).toString().padStart(2, '0')
+      const day = date.getDate().toString().padStart(2, '0')
+      backDate = `${year}-${month}-${day}`
+    }
+
+    const searchParams = backDate ? `?back_date=${backDate}` : ''
+    navigate(`/apple-fitness/link-workout/${workout.id}${searchParams}`)
+  }
+
+  const handleUnlinkClick = (e: React.MouseEvent) => {
+    e.stopPropagation()
+    onUnlink?.(workout)
   }
 
   const getDayWithSuffix = (day: number): string => {
@@ -67,11 +91,20 @@ export const AppleFitnessWorkoutCard = ({
         </p>
       </div>
 
-      {showLinkButton && (
-        <Button tone="blue" className="mt-4" onClick={handleLinkClick}>
-          Link
-        </Button>
-      )}
+      {showLinkButton &&
+        (linkedSession ? (
+          <div className="mt-4">
+            <p className="text-sm text-slate-500 mb-2">Linked to session:</p>
+            <SessionEntryCard entry={linkedSession} />
+            <Button tone="blue" className="mt-2" onClick={handleUnlinkClick}>
+              Unlink
+            </Button>
+          </div>
+        ) : (
+          <Button tone="blue" className="mt-4" onClick={handleLinkClick}>
+            Link
+          </Button>
+        ))}
     </Panel>
   )
 }

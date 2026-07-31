@@ -7,10 +7,13 @@ import {
   type UserSession,
 } from '@gym-pilot/shared'
 import { useEffect, useState } from 'react'
-import { useParams } from 'react-router-dom'
+import { useNavigate, useParams, useSearchParams } from 'react-router-dom'
 import { useAuth } from '../../auth/AuthContext'
 import { Button } from '../../components/ui/Button'
-import { StatusMessageNotification } from '../../components/ui/StatusMessageNotification'
+import {
+  StatusMessageNotification,
+  type DisplayableError,
+} from '../../components/ui/StatusMessageNotification'
 import { PageCardLayout } from '../../layouts/PageCardLayout'
 import { PageLayout } from '../../layouts/PageLayout'
 import { AppleFitnessWorkoutCard } from '../../components/AppleFitnessWorkoutCard'
@@ -21,8 +24,11 @@ export function LinkAppleWorkoutPage() {
   const [workout, setWorkout] = useState<ImportedWorkout | null>(null)
   const [userSessions, setUserSessions] = useState<UserSession[]>([])
   const [selectedSession, setSelectedSession] = useState<string | null>(null)
-  const [errorMessage, setErrorMessage] = useState<string | null>(null)
-  const [successMessage, setSuccessMessage] = useState<string | null>(null)
+  const [errorMessage, setErrorMessage] = useState<DisplayableError | null>(
+    null,
+  )
+  const navigate = useNavigate()
+  const [searchParams] = useSearchParams()
   const userId = user?.id ?? null
 
   useEffect(() => {
@@ -46,7 +52,7 @@ export function LinkAppleWorkoutPage() {
         }
       } catch (error) {
         if (isActive) {
-          setErrorMessage(String(error))
+          setErrorMessage(error as DisplayableError)
         }
       }
     }
@@ -75,7 +81,7 @@ export function LinkAppleWorkoutPage() {
         }
       } catch (error) {
         if (isActive) {
-          setErrorMessage(String(error))
+          setErrorMessage(error as DisplayableError)
         }
       }
     }
@@ -94,17 +100,30 @@ export function LinkAppleWorkoutPage() {
     }
 
     try {
-      // This is a placeholder for the actual linking logic.
-      // We will update the imported workout with the session id.
+      setErrorMessage(null)
       const updatedWorkout = { ...workout, session_id: selectedSession }
-      await updateImportedWorkout(updatedWorkout)
-
-      setSuccessMessage('Workout linked successfully!')
+      const { error } = await updateImportedWorkout(updatedWorkout)
+      if (error) {
+        throw error
+      }
+      const backDate = searchParams.get('back_date')
+      const targetUrl = backDate
+        ? `/apple-fitness?date=${backDate}`
+        : '/apple-fitness'
+      navigate(targetUrl)
     } catch (error) {
-      setErrorMessage(String(error))
+      setErrorMessage(error)
     }
   }
 
+  const handleCancel = () => {
+    const backDate = searchParams.get('back_date')
+    const targetUrl = backDate
+      ? `/apple-fitness?date=${backDate}`
+      : '/apple-fitness'
+    navigate(targetUrl)
+    setErrorMessage(null)
+  }
   const handleSessionSelection = (sessionId: string) => {
     setSelectedSession(sessionId)
   }
@@ -116,21 +135,6 @@ export function LinkAppleWorkoutPage() {
         subtitle="Link your imported Apple Fitness workout to a user session"
         icon="user"
       >
-        {successMessage && (
-          <StatusMessageNotification
-            message={successMessage}
-            tone="success"
-            className="mb-3"
-          />
-        )}
-        {errorMessage && (
-          <StatusMessageNotification
-            message={errorMessage}
-            tone="error"
-            className="mb-3"
-          />
-        )}
-
         {workout ? (
           <div className="space-y-4">
             <AppleFitnessWorkoutCard workout={workout} showLinkButton={false} />
@@ -145,17 +149,33 @@ export function LinkAppleWorkoutPage() {
                     entry={session}
                     onSelect={handleSessionSelection}
                     selected={selectedSession === session.id}
-                    pendingDeleteEntryId={null}
-                    setPendingDeleteEntryId={() => {}}
-                    deleteEntry={() => {}}
-                  />
+                  >
+                    {selectedSession === session.id && (
+                      <div className="mt-4">
+                        <Button tone="emerald" onClick={handleLinkWorkout}>
+                          Confirm
+                        </Button>
+                        <Button
+                          tone="default"
+                          onClick={handleCancel}
+                          className="ml-2"
+                        >
+                          Cancel
+                        </Button>
+                      </div>
+                    )}
+                  </SessionEntryCard>
                 ))}
               </div>
             </div>
 
-            <Button onClick={handleLinkWorkout} disabled={!selectedSession}>
-              Link Workout
-            </Button>
+            {errorMessage != null && (
+              <StatusMessageNotification
+                message={errorMessage}
+                tone="error"
+                className="mb-3"
+              />
+            )}
           </div>
         ) : (
           <p>Loading workout...</p>

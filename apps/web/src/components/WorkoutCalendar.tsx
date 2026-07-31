@@ -1,8 +1,14 @@
-import React, { useState, useMemo } from 'react'
+import React, { useState, useMemo, useEffect } from 'react'
 import Calendar from 'react-calendar'
-import type { ImportedWorkout } from '@gym-pilot/shared'
+import {
+  type ImportedWorkout,
+  updateImportedWorkout,
+  getSupabaseClient,
+  type UserSession,
+} from '@gym-pilot/shared'
 import { AppleFitnessWorkoutCard } from './AppleFitnessWorkoutCard'
 import { StatusMessageNotification } from './ui/StatusMessageNotification'
+import { Button } from './ui/Button' // Import Button component
 
 // Define a type that matches react-calendar's Value for single selection, which can be Date or null
 type CalendarValue = Date | null
@@ -10,26 +16,95 @@ type CalendarValue = Date | null
 interface WorkoutCalendarProps {
   workouts: ImportedWorkout[]
   title?: string
+  initialDate?: CalendarValue
+  onDateChange?: (date: CalendarValue) => void
 }
 
-const WorkoutCalendar: React.FC<WorkoutCalendarProps> = ({ workouts }) => {
-  const [selectedDate, setSelectedDate] = useState<CalendarValue>(new Date())
+const WorkoutCalendar: React.FC<WorkoutCalendarProps> = ({
+  workouts: initialWorkouts,
+  initialDate,
+  onDateChange,
+}) => {
+  const [selectedDate, setSelectedDate] = useState<CalendarValue>(
+    initialDate || new Date(),
+  )
+  const [localWorkouts, setLocalWorkouts] =
+    useState<ImportedWorkout[]>(initialWorkouts)
+  const [linkedSessionsMap, setLinkedSessionsMap] = useState<
+    Map<string, UserSession>
+  >(new Map())
+  const [error, setError] = useState<string | null>(null)
+
+  useEffect(() => {
+    setLocalWorkouts(initialWorkouts)
+  }, [initialWorkouts])
+
+  useEffect(() => {
+    const fetchLinkedSessions = async () => {
+      const sessionIds = localWorkouts
+        .map((w) => w.session_id)
+        .filter((id): id is string => id !== null)
+      if (sessionIds.length > 0) {
+        const client = getSupabaseClient()
+        if (client) {
+          const { data, error } = await client
+            .from('gym_pilot_user_session')
+            .select('*')
+            .in('id', sessionIds)
+
+          if (error) {
+            setError('Failed to fetch linked sessions.')
+          } else {
+            const sessionMap = new Map<string, UserSession>()
+            data?.forEach((session: UserSession) => {
+              sessionMap.set(session.id, session)
+            })
+            setLinkedSessionsMap(sessionMap)
+          }
+        }
+      }
+    }
+    fetchLinkedSessions()
+  }, [localWorkouts])
+
+  const handleUnlinkWorkout = async (workoutToUnlink: ImportedWorkout) => {
+    try {
+      const updatedWorkout = { ...workoutToUnlink, session_id: null }
+      const { error } = await updateImportedWorkout(updatedWorkout)
+      if (error) {
+        throw new Error(
+          'Failed to unlink workout. Please check the console for details.',
+        )
+      }
+      setLocalWorkouts((prevWorkouts) =>
+        prevWorkouts.map((w) =>
+          w.id === updatedWorkout.id ? updatedWorkout : w,
+        ),
+      )
+    } catch (e: any) {
+      setError(e.message)
+    }
+  }
 
   // Pre-process workouts to easily look up counts per day
   const dailyWorkoutCounts = useMemo(() => {
-    const counts = new Map<string, number>() // Key: YYYY-MM-DD, Value: count
-    workouts.forEach((workout) => {
+    const counts = new Map<string, { count: number; hasUnassigned: boolean }>()
+    localWorkouts.forEach((workout) => {
       const date = new Date(workout.start_date)
-      // Ensure date is valid before proceeding.
-      // Use local date components to avoid timezone issues with toISOString().
-      // toISOString() returns UTC, which can be a day off in local time.
       if (!isNaN(date.getTime())) {
-        const dateKey = date.toISOString().split('T')[0] // Get YYYY-MM-DD
-        counts.set(dateKey, (counts.get(dateKey) || 0) + 1)
+        const dateKey = date.toISOString().split('T')[0]
+        const current = counts.get(dateKey) || {
+          count: 0,
+          hasUnassigned: false,
+        }
+        counts.set(dateKey, {
+          count: current.count + 1,
+          hasUnassigned: current.hasUnassigned || workout.session_id === null,
+        })
       }
     })
     return counts
-  }, [workouts])
+  }, [localWorkouts])
 
   // Function to render custom content on each calendar tile
   const tileContent = ({ date, view }: { date: Date; view: string }) => {
@@ -39,9 +114,12 @@ const WorkoutCalendar: React.FC<WorkoutCalendarProps> = ({ workouts }) => {
       const month = (date.getMonth() + 1).toString().padStart(2, '0') // Month is 0-indexed
       const day = date.getDate().toString().padStart(2, '0')
       const dateKey = `${year}-${month}-${day}`
-      const count = dailyWorkoutCounts.get(dateKey)
+      const dailyData = dailyWorkoutCounts.get(dateKey)
+      const count = dailyData?.count || 0
+      const hasUnassigned = dailyData?.hasUnassigned || false
 
-      if (count && count > 0) {
+      if (count > 0) {
+        const dotColor = hasUnassigned ? '#FFC107' : '#4CAF50' // Amber for unassigned, Green for assigned
         return (
           <div
             className="workout-dot-container"
@@ -55,7 +133,7 @@ const WorkoutCalendar: React.FC<WorkoutCalendarProps> = ({ workouts }) => {
             <span
               className="workout-dot"
               style={{
-                backgroundColor: '#4CAF50', // Green dot for workout days
+                backgroundColor: dotColor,
                 color: 'white',
                 borderRadius: '50%',
                 width: '20px',
@@ -66,10 +144,27 @@ const WorkoutCalendar: React.FC<WorkoutCalendarProps> = ({ workouts }) => {
                 alignItems: 'center',
                 fontWeight: 'bold',
               }}
-              title={`${count} workout(s)`}
+              title={`${count} workout(s) ${
+                hasUnassigned ? '(unassigned)' : ''
+              }`}
             >
               {count}
             </span>
+          </div>
+        )
+      } else {
+        return (
+          <div
+            className="workout-dot-container"
+            style={{
+              display: 'flex',
+              justifyContent: 'center',
+              alignItems: 'center',
+              marginTop: '5px',
+              height: '20px', // Maintain height for alignment
+            }}
+          >
+            {/* Empty span for uniform alignment when no workouts */}
           </div>
         )
       }
@@ -82,6 +177,9 @@ const WorkoutCalendar: React.FC<WorkoutCalendarProps> = ({ workouts }) => {
     const newDate = Array.isArray(value) ? value[0] : value
     if (newDate instanceof Date || newDate === null) {
       setSelectedDate(newDate)
+      if (onDateChange) {
+        onDateChange(newDate)
+      }
     }
   }
 
@@ -89,7 +187,7 @@ const WorkoutCalendar: React.FC<WorkoutCalendarProps> = ({ workouts }) => {
     if (!selectedDate || Array.isArray(selectedDate)) {
       return []
     }
-    return workouts.filter((workout) => {
+    return localWorkouts.filter((workout) => {
       const workoutDate = new Date(workout.start_date)
       return (
         workoutDate.getFullYear() === selectedDate.getFullYear() &&
@@ -97,10 +195,29 @@ const WorkoutCalendar: React.FC<WorkoutCalendarProps> = ({ workouts }) => {
         workoutDate.getDate() === selectedDate.getDate()
       )
     })
-  }, [workouts, selectedDate])
+  }, [localWorkouts, selectedDate])
 
   return (
-    <div style={{ width: '100%', maxWidth: '600px', margin: '20px auto' }}>
+    <div
+      style={{
+        width: '100%',
+        maxWidth: '600px',
+        margin: '20px auto',
+        border: '1px solid #e0e0e0', // Add a border
+        borderRadius: '8px', // Add border radius
+        padding: '10px', // Optional: add some padding inside the border
+      }}
+    >
+      {error && (
+        <StatusMessageNotification
+          message={error}
+          tone="error"
+          onDismiss={() => setError(null)}
+        />
+      )}
+      <div className="text-right mr-3">
+        <Button onClick={() => handleDateChange(new Date())}>Today</Button>
+      </div>
       <Calendar
         onChange={handleDateChange}
         value={selectedDate}
@@ -114,7 +231,16 @@ const WorkoutCalendar: React.FC<WorkoutCalendarProps> = ({ workouts }) => {
           {workoutsForSelectedDate.length > 0 ? (
             workoutsForSelectedDate.map((workout) => (
               <div className="mb-4" key={workout.id}>
-                <AppleFitnessWorkoutCard workout={workout} />
+                <AppleFitnessWorkoutCard
+                  workout={workout}
+                  onUnlink={handleUnlinkWorkout}
+                  linkedSession={
+                    workout.session_id
+                      ? linkedSessionsMap.get(workout.session_id)
+                      : undefined
+                  }
+                  selectedDate={selectedDate}
+                />
               </div>
             ))
           ) : (

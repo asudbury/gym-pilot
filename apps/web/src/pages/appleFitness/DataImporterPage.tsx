@@ -1,4 +1,5 @@
-import React, { useState, useRef, useEffect } from 'react'
+import React, { useState, useRef, useEffect, useMemo } from 'react'
+import { useSearchParams } from 'react-router-dom'
 import { PageLayout } from '../../layouts/PageLayout'
 import { PageCard } from '../../components/PageCard'
 import { Button } from '../../components/ui/Button'
@@ -22,6 +23,34 @@ export const DataImporterPage: React.FC = () => {
   const [isLoading, setIsLoading] = useState(false)
   const [currentWorkouts, setCurrentWorkouts] = useState<Workout[]>([])
   const [importCount, setImportCount] = useState(0)
+  const [searchParams, setSearchParams] = useSearchParams()
+
+  const handleDateChange = (date: Date | null) => {
+    if (date) {
+      const year = date.getFullYear()
+      const month = (date.getMonth() + 1).toString().padStart(2, '0')
+      const day = date.getDate().toString().padStart(2, '0')
+      setSearchParams({ date: `${year}-${month}-${day}` })
+    }
+  }
+
+  const initialDate = useMemo(() => {
+    const dateStr = searchParams.get('date')
+    if (dateStr) {
+      const parts = dateStr.split('-')
+      if (parts.length === 3) {
+        const year = parseInt(parts[0], 10)
+        const month = parseInt(parts[1], 10) - 1 // month is 0-indexed
+        const day = parseInt(parts[2], 10)
+        const date = new Date(year, month, day)
+
+        if (!isNaN(date.getTime())) {
+          return date
+        }
+      }
+    }
+    return new Date()
+  }, [searchParams])
 
   const handleFileChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0]
@@ -182,6 +211,8 @@ export const DataImporterPage: React.FC = () => {
             <WorkoutCalendar
               workouts={currentWorkouts}
               title="Workout Overview Calendar"
+              initialDate={initialDate}
+              onDateChange={handleDateChange}
             />
           </div>
         </div>
