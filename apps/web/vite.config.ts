@@ -37,6 +37,7 @@ export default defineConfig(({ command }) => ({
       },
 
       workbox: {
+        maximumFileSizeToCacheInBytes: 10 * 1024 * 1024,
         clientsClaim: true,
         skipWaiting: true,
 
