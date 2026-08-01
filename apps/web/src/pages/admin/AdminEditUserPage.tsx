@@ -19,7 +19,7 @@ import {
   mapProfileRow,
   type ProfileDraft,
 } from '../../features/admin/domain/userProfiles'
-import { renderDashboardTimestamp } from '../../utils/appUtils'
+import { renderDashboardTimestamp } from '../../features/dashboard/domain/dashboardUtils'
 import { UserProfileForm } from './UserProfileForm'
 import { useCopyToClipboard } from './useCopyToClipboard'
 

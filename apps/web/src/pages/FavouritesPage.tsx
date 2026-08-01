@@ -4,11 +4,11 @@ import { PageCardLayout } from '../layouts/PageCardLayout'
 import { PageLayout } from '../layouts/PageLayout'
 import { CreateFolderForm } from '../components/CreateFolderForm'
 import { FavouriteFolderGroup } from '../components/FavouriteFolderGroup'
+import { type QuickLink } from '../features/favourites/domain/quickLinks'
 import {
   normalizeFolderName,
-  sortFavorites,
-  type QuickLink,
-} from '../utils/favouriteUtils'
+  sortQuickLinks,
+} from '../features/favourites/domain/quickLinks'
 import { resolveFavouritesPageViewModel } from '../features/favourites/domain/favouritesPage'
 import { DecorativeIcon } from '../components/ui/DecorativeIcon'
 
@@ -67,7 +67,7 @@ export function FavouritesPage({
     const normalizedFolder = normalizeFolderName(folderName)
 
     onFavoritesChange(
-      sortFavorites(
+      sortQuickLinks(
         favorites.map((item) =>
           item.path === link.path
             ? { ...item, folder: normalizedFolder || undefined }
@@ -85,7 +85,7 @@ export function FavouritesPage({
     }
 
     onFavoritesChange(
-      sortFavorites(
+      sortQuickLinks(
         favorites.map((item) =>
           item.folder === normalizedFolder
             ? { ...item, folder: undefined }
@@ -110,7 +110,7 @@ export function FavouritesPage({
 
   const handleRemoveLink = (link: QuickLink) => {
     onFavoritesChange(
-      sortFavorites(favorites.filter((item) => item.path !== link.path)),
+      sortQuickLinks(favorites.filter((item) => item.path !== link.path)),
     )
   }
 

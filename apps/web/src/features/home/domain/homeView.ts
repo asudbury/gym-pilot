@@ -1,14 +1,9 @@
 import { exercises, exercisesSchema } from '@gym-pilot/shared'
 import { formatLabel } from '../../../utils/formatUtils'
 import { MIN_SEARCH_CHARS } from '../../../constants/home'
+import { type HomeFilters } from '../../favourites/domain/quickLinks'
 
 type HomeExercise = (typeof exercises)[number]
-
-export type HomeFilters = {
-  searchTerm: string
-  selectedCategory: string | null
-  showImages: boolean
-}
 
 type HomeViewModel = {
   exerciseList: HomeExercise[]

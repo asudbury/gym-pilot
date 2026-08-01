@@ -22,7 +22,7 @@ import {
   mapProfileRow,
   type ProfileDraft,
 } from '../../features/admin/domain/userProfiles'
-import { renderDashboardTimestamp } from '../../utils/appUtils'
+import { renderDashboardTimestamp } from '../../features/dashboard/domain/dashboardUtils'
 import { StatusMessageNotification } from '../../components/ui/StatusMessageNotification'
 import { UserProfileForm } from './UserProfileForm'
 

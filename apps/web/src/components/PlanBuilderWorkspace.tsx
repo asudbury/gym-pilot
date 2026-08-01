@@ -12,8 +12,11 @@ import { exercises } from '@gym-pilot/shared'
 import { Button } from './ui/Button'
 import { ExercisePicker } from './exercises/ExercisePicker'
 import { formatLabel } from '../utils/formatUtils'
-import { type QuickLink } from '../utils/favouriteUtils'
-import { type PlanGridRow, type PlanTab } from '../utils/planBuilderUtils'
+import { type QuickLink } from '../features/favourites/domain/quickLinks'
+import {
+  type PlanGridRow,
+  type PlanTab,
+} from '../features/planBuilder/domain/planBuilderUtils'
 import { resolveFavoriteLinkGroups } from '../features/planBuilder/domain/builderWorkspace'
 
 ModuleRegistry.registerModules([AllCommunityModule])

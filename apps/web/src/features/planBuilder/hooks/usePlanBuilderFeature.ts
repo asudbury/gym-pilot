@@ -23,7 +23,7 @@ import {
   buildPlanSessionsFromTabs,
   sanitizeSheetName,
   type PlanTab,
-} from '../../../utils/planBuilderUtils'
+} from '../domain/planBuilderUtils'
 import type { PlanSession } from '@gym-pilot/types'
 
 export type PlanBuilderFeatureState = {

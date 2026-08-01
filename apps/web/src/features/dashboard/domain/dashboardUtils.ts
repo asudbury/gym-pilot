@@ -1,0 +1,70 @@
+import { createElement, type ReactNode } from 'react'
+
+export function formatDashboardTimestamp(value?: string | null) {
+  if (!value) {
+    return null
+  }
+
+  const parsedDate = new Date(value)
+
+  if (Number.isNaN(parsedDate.getTime())) {
+    return null
+  }
+
+  const now = new Date()
+  const startOfToday = new Date(
+    now.getFullYear(),
+    now.getMonth(),
+    now.getDate(),
+  )
+  const startOfYesterday = new Date(startOfToday)
+  startOfYesterday.setDate(startOfYesterday.getDate() - 1)
+  const startOfSevenDaysAgo = new Date(startOfToday)
+  startOfSevenDaysAgo.setDate(startOfSevenDaysAgo.getDate() - 6)
+
+  const formattedTime = new Intl.DateTimeFormat(undefined, {
+    hour: 'numeric',
+    minute: '2-digit',
+  }).format(parsedDate)
+
+  if (parsedDate >= startOfToday) {
+    return `Today, ${formattedTime}`
+  }
+
+  if (parsedDate >= startOfYesterday) {
+    return `Yesterday, ${formattedTime}`
+  }
+
+  if (parsedDate >= startOfSevenDaysAgo) {
+    const dayDifference = Math.floor(
+      (startOfToday.getTime() - parsedDate.getTime()) / (24 * 60 * 60 * 1000),
+    )
+    if (dayDifference === 1) {
+      return `Yesterday, ${formattedTime}`
+    }
+
+    return `${dayDifference} days ago, ${formattedTime}`
+  }
+
+  return new Intl.DateTimeFormat(undefined, {
+    dateStyle: 'medium',
+    timeStyle: 'short',
+  }).format(parsedDate)
+}
+
+export function renderDashboardTimestamp(
+  value?: string | null,
+  className = 'font-semibold text-slate-900 dark:text-slate-100',
+): ReactNode {
+  const formattedTimestamp = formatDashboardTimestamp(value)
+
+  if (!formattedTimestamp) {
+    return null
+  }
+
+  if (formattedTimestamp.startsWith('Today,')) {
+    return createElement('span', { className }, formattedTimestamp)
+  }
+
+  return formattedTimestamp
+}

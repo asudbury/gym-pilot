@@ -3,18 +3,15 @@ import { useEffect, useMemo, useState } from 'react'
 import { useLocation, useNavigate } from 'react-router-dom'
 import { HOME_FILTER_KEY } from '../../constants/storageKeys'
 import {
-  normalizeFolderName as normalizeFavoriteFolderName,
+  normalizeFolderName,
   sortQuickLinks,
-} from '../../features/favourites/domain/quickLinks'
-import { useFavouritesFeature } from '../../features/favourites/hooks/useFavouritesFeature'
-import { normalizeHomeFilters } from '../../utils/appUtils'
-import {
+  normalizeHomeFilters,
+  type HomeFilters,
+  type QuickLink,
   getQuickLinkForPath,
   groupFavoritesByFolder,
-  normalizeFolderName,
-  sortFavorites,
-  type QuickLink,
-} from '../../utils/favouriteUtils'
+} from '../../features/favourites/domain/quickLinks'
+import { useFavouritesFeature } from '../../features/favourites/hooks/useFavouritesFeature'
 import { getToneClass } from '../toneClasses'
 import { Button } from '../ui/Button'
 import { DecorativeIcon } from '../ui/DecorativeIcon'
@@ -30,11 +27,7 @@ type SavedSearch = {
   selectedCategory: string | null
 }
 
-type HomeFilters = {
-  searchTerm: string
-  selectedCategory: string | null
-  showImages: boolean
-}
+
 
 type FavouriteLinksMenuProps = {
   variant?: 'header' | 'menu'
@@ -206,12 +199,12 @@ export function FavouriteLinksMenu({
 
   const handleUpdateFavoriteLink = (link: QuickLink, folderName?: string) => {
     const normalizedFolder =
-      normalizeFavoriteFolderName(folderName ?? '') || undefined
+      normalizeFolderName(folderName ?? '') || undefined
     const alreadySaved = favorites.some((item) => item.path === link.path)
 
     if (alreadySaved) {
       setFavorites(
-        sortFavorites(
+        sortQuickLinks(
           favorites.map((item) =>
             item.path === link.path
               ? { ...item, folder: normalizedFolder }
@@ -367,4 +360,4 @@ export function FavouriteLinksMenu({
   )
 }
 
-export type { HomeFilters, QuickLink, SavedSearch }
+export type { SavedSearch }

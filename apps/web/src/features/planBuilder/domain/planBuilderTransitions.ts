@@ -1,12 +1,12 @@
 import { exercises } from '@gym-pilot/shared'
+import type { PlanSession } from '@gym-pilot/types'
 import {
+  buildTabsFromSessions,
   createBlankRow,
   createBlankTab,
   createLinkRow,
   type PlanTab,
-} from '../../../utils/planBuilderUtils'
-import type { PlanSession } from '@gym-pilot/types'
-import { buildTabsFromSessions } from '../../../utils/planBuilderUtils'
+} from './planBuilderUtils'
 
 export type PlanBuilderTransitionState = {
   tabs: PlanTab[]

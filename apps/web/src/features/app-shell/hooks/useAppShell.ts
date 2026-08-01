@@ -14,11 +14,11 @@ import { routeVisibilityRules } from './routeVisibility'
 import { HOME_FILTER_KEY } from '../../../constants/storageKeys'
 import { getExercisePath } from '../../../utils/exerciseRouteUtils'
 import { formatLabel } from '../../../utils/formatUtils'
+import { getHashHomeUrl } from '../../auth/domain/authUtils'
 import {
-  getHashHomeUrl,
   normalizeHomeFilters,
   type HomeFilters,
-} from '../../../utils/appUtils'
+} from '../../favourites/domain/quickLinks'
 import {
   buildNavigationMenuItems,
   type NavigationMenuListItem,

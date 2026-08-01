@@ -8,10 +8,10 @@ import { ExerciseFilterPanel } from '../components/exercises/ExerciseFilterPanel
 import { ExerciseResultsHeader } from '../components/exercises/ExerciseResultsHeader'
 import { ExerciseList } from '../components/exercises/ExerciseList'
 import { DecorativeIcon } from '../components/ui/DecorativeIcon'
+import { type HomeFilters } from '../features/favourites/domain/quickLinks'
 import {
   filterExercises,
   resolveHomeViewModel,
-  type HomeFilters,
 } from '../features/home/domain/homeView'
 
 type HomePageProps = {

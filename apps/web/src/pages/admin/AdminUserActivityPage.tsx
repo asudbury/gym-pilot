@@ -14,7 +14,7 @@ import {
   type UserActivityProfileViewModel,
   type UserActivityRowViewModel,
 } from '../../features/admin/domain/userActivity'
-import { renderDashboardTimestamp } from '../../utils/appUtils'
+import { renderDashboardTimestamp } from '../../features/dashboard/domain/dashboardUtils'
 
 const formatStoredTimestamp = (value?: string | null) => {
   if (!value) {

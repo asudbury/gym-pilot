@@ -5,7 +5,7 @@ import {
   resolvePlanBuilderHydrationState,
   resolvePlanBuilderLinkRows,
 } from './planBuilderTransitions'
-import { createBlankTab } from '../../../utils/planBuilderUtils'
+import { createBlankTab } from './planBuilderUtils'
 
 describe('planBuilderTransitions', () => {
   it('creates a tab state with a new tab and selected exercise', () => {

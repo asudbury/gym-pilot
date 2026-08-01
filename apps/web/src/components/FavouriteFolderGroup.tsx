@@ -1,6 +1,6 @@
 import { getToneClass } from './toneClasses'
 import { Button } from './ui/Button'
-import { normalizeFolderName, type QuickLink } from '../utils/favouriteUtils'
+import { normalizeFolderName, type QuickLink } from '../features/favourites/domain/quickLinks'
 
 type FavouriteFolderGroupProps = {
   folderName: string

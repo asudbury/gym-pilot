@@ -8,7 +8,7 @@ import {
 } from 'react'
 import type { UserRole } from '@gym-pilot/types'
 import { logger, usePlan, DexiePersistence } from '@gym-pilot/shared'
-import { getHashHomeUrl } from '../utils/appUtils'
+import { getHashHomeUrl } from '../features/auth/domain/authUtils'
 import { useAuthModule } from '../features/auth/hooks/useAuthModule'
 import type { AuthUser } from '../features/auth/domain/authTypes'
 import { isUserAccessBlocked } from '../features/auth/domain/authTypes'
