@@ -113,9 +113,7 @@ export function SessionEntryCard({
             })()}
           </div>
         </div>
-        {showEditButton && (
-          <Button>Edit</Button>
-        )}
+        {showEditButton && <Button>Edit</Button>}
         {deleteEntry && (
           <div className="flex flex-wrap gap-2">
             {pendingDeleteEntryId !== entry.id ? (

@@ -283,8 +283,7 @@ const WorkoutCalendar: React.FC<WorkoutCalendarProps> = ({
         )
       } else {
         return (
-          <div className="workout-dot-container mt-1.5 flex h-5 items-center justify-center">
-          </div>
+          <div className="workout-dot-container mt-1.5 flex h-5 items-center justify-center"></div>
         )
       }
     }
@@ -296,7 +295,7 @@ const WorkoutCalendar: React.FC<WorkoutCalendarProps> = ({
     if (newDate instanceof Date || newDate === null) {
       setSelectedDate(newDate)
       if (newDate) {
-        setActiveStartDate(newDate) 
+        setActiveStartDate(newDate)
       }
       if (onDateChange) {
         onDateChange(newDate)
@@ -369,7 +368,7 @@ const WorkoutCalendar: React.FC<WorkoutCalendarProps> = ({
                 setActiveStartDate(startOfMonth)
                 setStartDate(startOfMonth)
                 setEndDate(endOfMonth)
-                setSelectedDate(null) 
+                setSelectedDate(null)
               }
             }}
           />
