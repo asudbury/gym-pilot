@@ -1,7 +1,6 @@
 import React, { useState, useRef, useEffect, useMemo } from 'react'
 import { useSearchParams } from 'react-router-dom'
 import { PageLayout } from '../../layouts/PageLayout'
-import { PageCard } from '../../components/PageCard'
 import { Button } from '../../components/ui/Button'
 import {
   getImportedWorkouts,
@@ -13,6 +12,7 @@ import { AppleFitnessWorkoutCard } from '../../components/AppleFitnessWorkoutCar
 import { DecorativeIcon } from '../../components/ui/DecorativeIcon'
 import WorkoutCalendar from '../../components/WorkoutCalendar'
 import { useAuth } from '../../auth/AuthContext'
+import { PageCardLayout } from '../../layouts/PageCardLayout'
 
 export const DataImporterPage: React.FC = () => {
   const { user } = useAuth()
@@ -162,9 +162,11 @@ export const DataImporterPage: React.FC = () => {
 
   return (
     <PageLayout className="gap-6">
-      <PageCard as="section" className="space-y-6">
-        <h1 className="text-2xl font-bold">Apple Fitness</h1>
-
+      <PageCardLayout
+        title="Apple fitness"
+        description="Manage your imported Apple Fitness workouts and link them to user sessions."
+        icon="apple"
+      >
         <div className="flex items-center space-x-4">
           <Button
             onClick={handleButtonClick}
@@ -216,7 +218,7 @@ export const DataImporterPage: React.FC = () => {
             />
           </div>
         </div>
-      </PageCard>
+      </PageCardLayout>
     </PageLayout>
   )
 }

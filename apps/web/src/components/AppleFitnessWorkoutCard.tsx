@@ -3,23 +3,28 @@ import { Panel } from './ui/Panel'
 import { Button } from './ui/Button'
 import { useNavigate } from 'react-router-dom'
 import { SessionEntryCard } from './session-history/SessionEntryCard'
+import { resolveWorkoutLinkState } from './workoutCalendarUtils'
 
 type CalendarValue = Date | null
 
 type AppleFitnessWorkoutCardProps = {
   workout: ImportedWorkout
+  className?: string
   linkedSession?: UserSession
   onClick?: (workout: ImportedWorkout) => void
   onUnlink?: (workout: ImportedWorkout) => void
+  onNoLink?: (workout: ImportedWorkout) => void
   showLinkButton?: boolean
   selectedDate?: CalendarValue
 }
 
 export const AppleFitnessWorkoutCard = ({
   workout,
+  className,
   linkedSession,
   onClick,
   onUnlink,
+  onNoLink,
   showLinkButton = true,
   selectedDate,
 }: AppleFitnessWorkoutCardProps) => {
@@ -70,10 +75,13 @@ export const AppleFitnessWorkoutCard = ({
     minute: '2-digit',
   })
 
+  const linkState = resolveWorkoutLinkState(workout.session_id)
+  const showActions = showLinkButton
+
   return (
     <Panel
       onClick={() => onClick?.(workout)}
-      className="shadow hover:shadow-md transition-shadow cursor-pointer"
+      className={`shadow hover:shadow-md transition-shadow cursor-pointer ${className ?? ''}`}
       padding="md"
       variant="muted"
     >
@@ -91,19 +99,66 @@ export const AppleFitnessWorkoutCard = ({
         </p>
       </div>
 
-      {showLinkButton &&
-        (linkedSession ? (
-          <div className="mt-4">
-            <SessionEntryCard entry={linkedSession} />
-            <Button tone="blue" className="mt-2" onClick={handleUnlinkClick}>
-              Unlink
-            </Button>
-          </div>
-        ) : (
-          <Button tone="blue" className="mt-4" onClick={handleLinkClick}>
-            Link
-          </Button>
-        ))}
+      {showActions && (
+        <div className="mt-4">
+          {linkState === 'no-link' ? (
+            <div className="mb-3 rounded-md border border-blue-200 bg-blue-50 px-3 py-2 text-sm text-blue-700">
+              No link
+            </div>
+          ) : null}
+
+          {linkedSession ? (
+            <>
+              <SessionEntryCard entry={linkedSession} />
+              <Button
+                tone="emerald"
+                className="mt-2 mr-2"
+                onClick={handleUnlinkClick}
+              >
+                Unlink
+              </Button>
+              {linkState === 'no-link' ? null : (
+                <Button
+                  tone="blue"
+                  className="mt-2"
+                  onClick={() => onNoLink?.(workout)}
+                >
+                  No Link
+                </Button>
+              )}
+            </>
+          ) : (
+            <>
+              {linkState === 'no-link' ? (
+                <Button
+                  tone="emerald"
+                  className="mt-4"
+                  onClick={handleLinkClick}
+                >
+                  Link
+                </Button>
+              ) : (
+                <>
+                  <Button
+                    tone="emerald"
+                    className="mt-4 mr-2"
+                    onClick={handleLinkClick}
+                  >
+                    Link
+                  </Button>
+                  <Button
+                    tone="blue"
+                    className="mt-2"
+                    onClick={() => onNoLink?.(workout)}
+                  >
+                    No Link
+                  </Button>
+                </>
+              )}
+            </>
+          )}
+        </div>
+      )}
     </Panel>
   )
 }

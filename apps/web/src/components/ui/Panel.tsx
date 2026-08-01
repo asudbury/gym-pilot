@@ -20,10 +20,12 @@ export function Panel({
   const variantClassName = variant === 'muted' ? 'bg-slate-50' : 'bg-white'
   const paddingClassName =
     padding === 'sm' ? 'p-3' : padding === 'lg' ? 'p-5' : 'p-4'
+  const hasCustomBackgroundClass = /(^|\s)bg-[^\s]+/.test(className)
+  const backgroundClassName = hasCustomBackgroundClass ? '' : variantClassName
 
   return (
     <div
-      className={`rounded-2xl border border-slate-200 ${variantClassName} ${paddingClassName} ${className}`.trim()}
+      className={`rounded-2xl border border-slate-200 ${backgroundClassName} ${paddingClassName} ${className}`.trim()}
       {...props}
     >
       {children}

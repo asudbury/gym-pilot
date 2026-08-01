@@ -31,6 +31,7 @@ export type DecorativeIconProps = {
     | 'trash'
     | 'user'
     | 'users'
+    | 'apple'
     | null
   className?: string
   withContainer?: boolean
@@ -68,6 +69,7 @@ import {
   DocumentIcon,
   ArrowUpIcon,
   ArrowDownIcon,
+  AppleIcon,
 } from './icons'
 
 const baseClasses =
@@ -105,6 +107,7 @@ const iconComponents = {
   arrowUp: ArrowUpIcon,
   arrowDown: ArrowDownIcon,
   spinner: SpinnerIcon,
+  apple: AppleIcon,
 }
 
 const DecorativeIcon = ({

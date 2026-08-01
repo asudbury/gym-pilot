@@ -189,3 +189,34 @@ html.dark .bg-slate-900 {
   background-color: var(--app-surface-muted) !important;
   color: var(--app-text) !important;
 }
+
+/* Styling for calendar tiles based on workout link state */
+.has-no-link-workouts {
+  background-color: #e0f2fe; /* Light blue for 'no link' */
+  border: 1px solid #93c5fd; /* A slightly darker blue border */
+  border-radius: 0;
+}
+
+.has-unassigned-workouts {
+  background-color: #fffbeb; /* Light yellow for 'unassigned' */
+  border: 1px solid #fcd34d; /* A slightly darker yellow border */
+  border-radius: 0;
+}
+
+.has-linked-workouts {
+  background-color: #dcfce7; /* Light green for 'linked' */
+  border: 1px solid #86efad; /* A slightly darker green border */
+  border-radius: 0;
+}
+
+/* Add a border to the current day for better visibility */
+.react-calendar__tile--now {
+  border: 1px solid #3b82f6; /* Blue border for today */
+  /* Removed border-radius to make it squared */
+}
+
+.has-no-workouts {
+  background-color: #ffffff; /* White background for blank days */
+  border: 1px solid #e2e8f0; /* Light gray border */
+  border-radius: 0;
+}

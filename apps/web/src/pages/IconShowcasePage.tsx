@@ -7,6 +7,7 @@ import { PageLayout } from '../layouts/PageLayout'
 // List all icon names as strings, matching the keys expected by DecorativeIcon
 const iconNames: NonNullable<DecorativeIconProps['icon']>[] = [
   // Alphabetically ordered
+  'apple',
   'arrowDown',
   'arrowUp',
   'back',

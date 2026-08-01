@@ -9,6 +9,10 @@ import {
 import { AppleFitnessWorkoutCard } from './AppleFitnessWorkoutCard'
 import { StatusMessageNotification } from './ui/StatusMessageNotification'
 import { Button } from './ui/Button' // Import Button component
+import {
+  NO_LINK_SESSION_ID,
+  resolveWorkoutLinkState,
+} from './workoutCalendarUtils'
 
 // Define a type that matches react-calendar's Value for single selection, which can be Date or null
 type CalendarValue = Date | null
@@ -26,6 +30,9 @@ const WorkoutCalendar: React.FC<WorkoutCalendarProps> = ({
   onDateChange,
 }) => {
   const [selectedDate, setSelectedDate] = useState<CalendarValue>(
+    initialDate || new Date(),
+  )
+  const [activeStartDate, setActiveStartDate] = useState<Date>(
     initialDate || new Date(),
   )
   const [localWorkouts, setLocalWorkouts] =
@@ -86,25 +93,84 @@ const WorkoutCalendar: React.FC<WorkoutCalendarProps> = ({
     }
   }
 
+  const handleNoLinkWorkout = async (workoutToUnlink: ImportedWorkout) => {
+    try {
+      const updatedWorkout = {
+        ...workoutToUnlink,
+        session_id: NO_LINK_SESSION_ID,
+      }
+      const { error } = await updateImportedWorkout(updatedWorkout)
+      if (error) {
+        throw new Error(
+          'Failed to unlink workout. Please check the console for details.',
+        )
+      }
+      setLocalWorkouts((prevWorkouts) =>
+        prevWorkouts.map((w) =>
+          w.id === updatedWorkout.id ? updatedWorkout : w,
+        ),
+      )
+    } catch (e: any) {
+      setError(e.message)
+    }
+  }
+
   // Pre-process workouts to easily look up counts per day
   const dailyWorkoutCounts = useMemo(() => {
-    const counts = new Map<string, { count: number; hasUnassigned: boolean }>()
+    const counts = new Map<
+      string,
+      { count: number; linkState: 'linked' | 'unassigned' | 'no-link' }
+    >()
     localWorkouts.forEach((workout) => {
       const date = new Date(workout.start_date)
       if (!isNaN(date.getTime())) {
         const dateKey = date.toISOString().split('T')[0]
         const current = counts.get(dateKey) || {
           count: 0,
-          hasUnassigned: false,
+          linkState: 'linked' as const,
         }
+        const linkState = resolveWorkoutLinkState(workout.session_id)
         counts.set(dateKey, {
           count: current.count + 1,
-          hasUnassigned: current.hasUnassigned || workout.session_id === null,
+          linkState:
+            current.linkState === 'no-link' || linkState === 'no-link'
+              ? 'no-link'
+              : current.linkState === 'unassigned' || linkState === 'unassigned'
+                ? 'unassigned'
+                : 'linked',
         })
       }
     })
     return counts
   }, [localWorkouts])
+
+  // Function to add custom classes to each calendar tile
+  const tileClassName = ({ date, view }: { date: Date; view: string }) => {
+    if (view === 'month') {
+      const year = date.getFullYear()
+      const month = (date.getMonth() + 1).toString().padStart(2, '0')
+      const day = date.getDate().toString().padStart(2, '0')
+      const dateKey = `${year}-${month}-${day}`
+      const dailyData = dailyWorkoutCounts.get(dateKey)
+
+      if (dailyData) {
+        switch (dailyData.linkState) {
+          case 'no-link':
+            return 'has-no-link-workouts'
+          case 'unassigned':
+            return 'has-unassigned-workouts'
+          case 'linked':
+            return 'has-linked-workouts'
+          default:
+            return null
+        }
+      } else {
+        // Apply a class for days without any workouts
+        return 'has-no-workouts'
+      }
+    }
+    return null
+  }
 
   // Function to render custom content on each calendar tile
   const tileContent = ({ date, view }: { date: Date; view: string }) => {
@@ -116,36 +182,26 @@ const WorkoutCalendar: React.FC<WorkoutCalendarProps> = ({
       const dateKey = `${year}-${month}-${day}`
       const dailyData = dailyWorkoutCounts.get(dateKey)
       const count = dailyData?.count || 0
-      const hasUnassigned = dailyData?.hasUnassigned || false
+      const linkState = dailyData?.linkState || 'linked'
 
       if (count > 0) {
-        const dotColor = hasUnassigned ? '#FFC107' : '#4CAF50' // Amber for unassigned, Green for assigned
+        const dotColor =
+          linkState === 'no-link'
+            ? '#3B82F6'
+            : linkState === 'unassigned'
+              ? '#FFC107'
+              : '#4CAF50'
         return (
-          <div
-            className="workout-dot-container"
-            style={{
-              display: 'flex',
-              justifyContent: 'center',
-              alignItems: 'center',
-              marginTop: '5px',
-            }}
-          >
+          <div className="workout-dot-container mt-1.5 flex items-center justify-center">
             <span
-              className="workout-dot"
-              style={{
-                backgroundColor: dotColor,
-                color: 'white',
-                borderRadius: '50%',
-                width: '20px',
-                height: '20px',
-                fontSize: '0.7em',
-                display: 'flex',
-                justifyContent: 'center',
-                alignItems: 'center',
-                fontWeight: 'bold',
-              }}
+              className="workout-dot flex h-5 w-5 items-center justify-center rounded-full text-[0.7em] font-bold text-white"
+              style={{ backgroundColor: dotColor }}
               title={`${count} workout(s) ${
-                hasUnassigned ? '(unassigned)' : ''
+                linkState === 'no-link'
+                  ? '(no link selected)'
+                  : linkState === 'unassigned'
+                    ? '(unassigned)'
+                    : ''
               }`}
             >
               {count}
@@ -154,16 +210,7 @@ const WorkoutCalendar: React.FC<WorkoutCalendarProps> = ({
         )
       } else {
         return (
-          <div
-            className="workout-dot-container"
-            style={{
-              display: 'flex',
-              justifyContent: 'center',
-              alignItems: 'center',
-              marginTop: '5px',
-              height: '20px', // Maintain height for alignment
-            }}
-          >
+          <div className="workout-dot-container mt-1.5 flex h-5 items-center justify-center">
             {/* Empty span for uniform alignment when no workouts */}
           </div>
         )
@@ -177,9 +224,21 @@ const WorkoutCalendar: React.FC<WorkoutCalendarProps> = ({
     const newDate = Array.isArray(value) ? value[0] : value
     if (newDate instanceof Date || newDate === null) {
       setSelectedDate(newDate)
+      if (newDate) {
+        setActiveStartDate(newDate) // Keep the calendar view in sync
+      }
       if (onDateChange) {
         onDateChange(newDate)
       }
+    }
+  }
+
+  const handleTodayClick = () => {
+    const today = new Date()
+    setSelectedDate(today)
+    setActiveStartDate(today)
+    if (onDateChange) {
+      onDateChange(today)
     }
   }
 
@@ -198,16 +257,7 @@ const WorkoutCalendar: React.FC<WorkoutCalendarProps> = ({
   }, [localWorkouts, selectedDate])
 
   return (
-    <div
-      style={{
-        width: '100%',
-        maxWidth: '600px',
-        margin: '20px auto',
-        border: '1px solid #e0e0e0', // Add a border
-        borderRadius: '8px', // Add border radius
-        padding: '10px', // Optional: add some padding inside the border
-      }}
-    >
+    <div className="mx-auto my-5 w-full max-w-150 rounded-lg border border-slate-200 p-2.5">
       {error && (
         <StatusMessageNotification
           message={error}
@@ -216,17 +266,22 @@ const WorkoutCalendar: React.FC<WorkoutCalendarProps> = ({
         />
       )}
       <div className="text-right mr-3">
-        <Button onClick={() => handleDateChange(new Date())}>Today</Button>
+        <Button onClick={handleTodayClick}>Today</Button>
       </div>
       <Calendar
         onChange={handleDateChange}
         value={selectedDate}
         tileContent={tileContent}
+        tileClassName={tileClassName} // Add this line
+        activeStartDate={activeStartDate}
+        onActiveStartDateChange={({ activeStartDate }) =>
+          setActiveStartDate(activeStartDate ?? new Date())
+        }
       />
       {selectedDate && !Array.isArray(selectedDate) && (
-        <div style={{ marginTop: '20px' }}>
-          <h3 style={{ marginBottom: '10px', color: '#333' }}>
-            <b>Workouts on {selectedDate.toDateString()}:</b>
+        <div className="mt-5">
+          <h3 className="mb-2.5 text-slate-800">
+            <b>Workouts on {selectedDate.toDateString()}</b>
           </h3>
           {workoutsForSelectedDate.length > 0 ? (
             workoutsForSelectedDate.map((workout) => (
@@ -234,6 +289,7 @@ const WorkoutCalendar: React.FC<WorkoutCalendarProps> = ({
                 <AppleFitnessWorkoutCard
                   workout={workout}
                   onUnlink={handleUnlinkWorkout}
+                  onNoLink={handleNoLinkWorkout}
                   linkedSession={
                     workout.session_id
                       ? linkedSessionsMap.get(workout.session_id)
@@ -245,7 +301,7 @@ const WorkoutCalendar: React.FC<WorkoutCalendarProps> = ({
             ))
           ) : (
             <StatusMessageNotification
-              message="No workouts on this day."
+              message="No workouts on this day"
               tone="info"
             />
           )}

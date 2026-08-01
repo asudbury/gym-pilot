@@ -1,4 +1,3 @@
-import { SessionEntryCard } from '../../components/session-history/SessionEntryCard'
 import {
   type ImportedWorkout,
   getImportedWorkout,
@@ -17,6 +16,7 @@ import {
 import { PageCardLayout } from '../../layouts/PageCardLayout'
 import { PageLayout } from '../../layouts/PageLayout'
 import { AppleFitnessWorkoutCard } from '../../components/AppleFitnessWorkoutCard'
+import { SessionEntryCard } from '../../components/session-history/SessionEntryCard'
 
 export function LinkAppleWorkoutPage() {
   const { user } = useAuth()
@@ -133,7 +133,7 @@ export function LinkAppleWorkoutPage() {
       <PageCardLayout
         title="Link Apple Workout"
         subtitle="Link your imported Apple Fitness workout to a user session"
-        icon="user"
+        icon="apple"
       >
         {workout ? (
           <div className="space-y-4">
