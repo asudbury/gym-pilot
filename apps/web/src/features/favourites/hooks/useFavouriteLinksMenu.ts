@@ -161,7 +161,9 @@ export function useFavouriteLinksMenu({
       return
     }
 
-    const isFavorite = favorites.some((item) => item.path === currentQuickLink.path)
+    const isFavorite = favorites.some(
+      (item) => item.path === currentQuickLink.path,
+    )
 
     if (isFavorite) {
       setFavorites((current) =>

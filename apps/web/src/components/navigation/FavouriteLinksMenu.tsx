@@ -97,7 +97,9 @@ export function FavouriteLinksMenu({
                     'px-3 py-1.5 text-xs font-medium',
                   )}
                 >
-                  {isCurrentLinkFavorite ? 'Remove from favourites' : 'Add to favourites'}
+                  {isCurrentLinkFavorite
+                    ? 'Remove from favourites'
+                    : 'Add to favourites'}
                 </Button>
               </div>
             </div>
