@@ -4,8 +4,6 @@ import {
   exercises,
   exercisesSchema,
   getSupabaseClient,
-  loadAppSetting,
-  loadSupabaseProfileFlag,
   logger,
   usePlan,
 } from '@gym-pilot/shared'
@@ -27,7 +25,9 @@ import {
   sortQuickLinks,
   type QuickLink,
 } from '../../favourites/domain/quickLinks'
-import { isAppleDevice, isInstalledAsApp } from '../../../utils/pwa'
+import { useBroadcastMessage } from './useBroadcastMessage'
+import { useInstallHint } from './useInstallHint'
+import { useMustChangePassword } from './useMustChangePassword'
 
 export function useAppShell() {
   const { pathname, search } = useLocation()
@@ -38,6 +38,9 @@ export function useAppShell() {
   const currentTier = user?.accountTier ?? 'free'
   const { favorites, folders, setFavorites, setFolders } =
     useFavouritesFeature()
+  const { broadcastMessage } = useBroadcastMessage()
+  const { showInstallHint, setShowInstallHint } = useInstallHint()
+  const { mustChangePassword } = useMustChangePassword()
 
   const [homeFilters, setHomeFilters] = useState<HomeFilters>(() => {
     if (typeof window === 'undefined') {
@@ -60,9 +63,6 @@ export function useAppShell() {
   })
 
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
-  const [mustChangePassword, setMustChangePassword] = useState(false)
-  const [showInstallHint, setShowInstallHint] = useState(false)
-  const [broadcastMessage, setBroadcastMessage] = useState('')
 
   useEffect(() => {
     window.sessionStorage.setItem(
@@ -95,72 +95,6 @@ export function useAppShell() {
   useEffect(() => {
     setMobileMenuOpen(false)
   }, [pathname, user?.id, user?.email])
-
-  useEffect(() => {
-    let isActive = true
-
-    if (!user?.id) {
-      setMustChangePassword(false)
-      return
-    }
-
-    void (async () => {
-      try {
-        const flag = await loadSupabaseProfileFlag(
-          'must_change_password',
-          user.id,
-        )
-        if (!isActive) return
-        setMustChangePassword(Boolean(flag))
-      } catch {
-        if (isActive) setMustChangePassword(false)
-      }
-    })()
-
-    return () => {
-      isActive = false
-    }
-  }, [user?.id])
-
-  useEffect(() => {
-    let isActive = true
-
-    const refreshBroadcastMessage = async () => {
-      const message = await loadAppSetting('broadcast_messages', '')
-
-      if (isActive) {
-        setBroadcastMessage(typeof message === 'string' ? message : '')
-      }
-    }
-
-    void refreshBroadcastMessage()
-
-    const handleSettingsUpdated = () => {
-      void refreshBroadcastMessage()
-    }
-
-    window.addEventListener('gym-pilot-settings-updated', handleSettingsUpdated)
-
-    return () => {
-      isActive = false
-      window.removeEventListener(
-        'gym-pilot-settings-updated',
-        handleSettingsUpdated,
-      )
-    }
-  }, [])
-
-  useEffect(() => {
-    const isApple = isAppleDevice()
-    const isInstalled = isInstalledAsApp()
-
-    if (isInstalled || !isApple) {
-      setShowInstallHint(false)
-      return
-    }
-
-    setShowInstallHint(true)
-  }, [])
 
   const handleToggleFavoriteExercise = (exerciseId: string) => {
     logger.debug(`Toggling favorite exercise: ${exerciseId}`)

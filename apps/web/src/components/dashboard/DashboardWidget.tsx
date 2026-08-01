@@ -1,7 +1,7 @@
 import type { ReactNode } from 'react'
 import { NavLink } from 'react-router-dom'
 import { CallToAction } from '../../layouts/CallToAction'
-import { DecorativeIcon, type DecorativeIconProps } from '../ui/DecorativeIcon' // Import DecorativeIconProps
+import { DecorativeIcon, type DecorativeIconProps } from '../ui/DecorativeIcon'
 import { getToneClass } from '../toneClasses'
 
 type DashboardWidgetProps = {
@@ -10,7 +10,7 @@ type DashboardWidgetProps = {
   to?: string
   tone?: 'blue' | 'default' | 'emerald' | 'orange' | 'rose' | 'white'
   children?: ReactNode
-  icon?: DecorativeIconProps['icon'] // Use the icon type from DecorativeIconProps
+  icon?: DecorativeIconProps['icon']
 }
 
 export function DashboardWidget({

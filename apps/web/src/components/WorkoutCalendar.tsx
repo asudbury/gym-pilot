@@ -1,14 +1,14 @@
-import React, { useState, useMemo, useEffect } from 'react'
+import React, { useEffect, useMemo, useState } from 'react'
 import Calendar from 'react-calendar'
 import {
-  type ImportedWorkout,
-  updateImportedWorkout,
   getSupabaseClient,
+  type ImportedWorkout,
   type UserSession,
+  updateImportedWorkout,
 } from '@gym-pilot/shared'
 import { AppleFitnessWorkoutCard } from './AppleFitnessWorkoutCard'
-import { StatusMessageNotification } from './ui/StatusMessageNotification'
 import { Button } from './ui/Button'
+import { StatusMessageNotification } from './ui/StatusMessageNotification'
 import {
   NO_LINK_SESSION_ID,
   resolveWorkoutLinkState,
