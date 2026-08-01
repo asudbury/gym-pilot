@@ -106,21 +106,21 @@ export function Header({
                     items={desktopMenuItems}
                   />
                 ) : null}
-                  <button
-                    type="button"
-                    onClick={handleAuthAction}
-                    className={menuLinkClassName}
-                  >
-                    <span className={navigationItemIconClassName}>
-                      <DecorativeIcon
-                        icon={user ? 'lock' : 'user'}
-                        className="h-4 w-4"
-                      />
-                    </span>
-                    <span className="leading-none">
-                      {user ? 'Log out' : 'Login'}
-                    </span>
-                  </button>
+                <button
+                  type="button"
+                  onClick={handleAuthAction}
+                  className={menuLinkClassName}
+                >
+                  <span className={navigationItemIconClassName}>
+                    <DecorativeIcon
+                      icon={user ? 'lock' : 'user'}
+                      className="h-4 w-4"
+                    />
+                  </span>
+                  <span className="leading-none">
+                    {user ? 'Log out' : 'Login'}
+                  </span>
+                </button>
               </div>
               {showRestrictedBadge ? (
                 <StatusMessageNotification
@@ -156,20 +156,20 @@ export function Header({
                     />
                     <div className="mt-2 flex flex-col gap-2 border-t border-slate-200 pt-3">
                       <button
-                          type="button"
-                          onClick={handleAuthAction}
-                          className={menuLinkClassName}
-                        >
-                          <span className={navigationItemIconClassName}>
-                            <DecorativeIcon
-                              icon={user ? 'lock' : 'user'}
-                              className="h-4 w-4"
-                            />
-                          </span>
-                          <span className="leading-none">
-                            {user ? 'Logout' : 'Login'}
-                          </span>
-                        </button>
+                        type="button"
+                        onClick={handleAuthAction}
+                        className={menuLinkClassName}
+                      >
+                        <span className={navigationItemIconClassName}>
+                          <DecorativeIcon
+                            icon={user ? 'lock' : 'user'}
+                            className="h-4 w-4"
+                          />
+                        </span>
+                        <span className="leading-none">
+                          {user ? 'Logout' : 'Login'}
+                        </span>
+                      </button>
                     </div>
                   </div>
                 </div>
@@ -201,20 +201,20 @@ export function Header({
                     />
                     <div className="mt-2 flex flex-col gap-2 border-t border-slate-200 pt-3">
                       <button
-                          type="button"
-                          onClick={handleAuthAction}
-                          className={menuLinkClassName}
-                        >
-                          <span className={navigationItemIconClassName}>
-                            <DecorativeIcon
-                              icon={user ? 'lock' : 'user'}
-                              className="h-4 w-4"
-                            />
-                          </span>
-                          <span className="leading-none">
-                            {user ? 'Logout' : 'Login'}
-                          </span>
-                        </button>
+                        type="button"
+                        onClick={handleAuthAction}
+                        className={menuLinkClassName}
+                      >
+                        <span className={navigationItemIconClassName}>
+                          <DecorativeIcon
+                            icon={user ? 'lock' : 'user'}
+                            className="h-4 w-4"
+                          />
+                        </span>
+                        <span className="leading-none">
+                          {user ? 'Logout' : 'Login'}
+                        </span>
+                      </button>
                     </div>
                   </div>
                 </div>
