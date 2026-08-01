@@ -192,15 +192,15 @@ export function TimetablePage() {
     }
 
     void loadTimetable(
-        clubId,
-        rawGymBrand,
-        rawGymName,
-        setErrorMessage,
-        setIsLoading,
-        setSessions,
-        setActiveInstructor,
-        setActiveClassName,
-        cancelled
+      clubId,
+      rawGymBrand,
+      rawGymName,
+      setErrorMessage,
+      setIsLoading,
+      setSessions,
+      setActiveInstructor,
+      setActiveClassName,
+      cancelled,
     )
 
     return () => {
