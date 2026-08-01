@@ -14,7 +14,7 @@ export function NavigationMenuItem({
       to={to}
       onClick={onClick}
       className={[
-        'inline-flex items-center justify-start gap-2 rounded-lg border border-transparent px-2 py-1.5 text-sm font-medium text-slate-700 transition-all duration-200 hover:border-slate-400 hover:bg-slate-100 hover:font-semibold hover:shadow-sm',
+        'inline-flex items-center justify-start gap-2 rounded-lg border border-transparent px-2 py-1.5 text-sm font-medium text-slate-700 transition-all duration-200 hover:border-slate-400 hover:bg-slate-100 hover:font-semibold hover:shadow-sm dark:text-slate-300 dark:hover:border-slate-600 dark:hover:bg-slate-800',
         className,
       ]
         .filter(Boolean)

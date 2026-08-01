@@ -262,8 +262,8 @@ const WorkoutCalendar: React.FC<WorkoutCalendarProps> = ({
           linkState === 'no-link'
             ? 'dot-no-link'
             : linkState === 'unassigned'
-            ? 'dot-unassigned'
-            : 'dot-linked'
+              ? 'dot-unassigned'
+              : 'dot-linked'
         return (
           <div className="workout-dot-container mt-1.5 flex items-center justify-center">
             <span
@@ -272,8 +272,8 @@ const WorkoutCalendar: React.FC<WorkoutCalendarProps> = ({
                 linkState === 'no-link'
                   ? '(no link selected)'
                   : linkState === 'unassigned'
-                  ? '(unassigned)'
-                  : ''
+                    ? '(unassigned)'
+                    : ''
               }`}
             >
               {count}

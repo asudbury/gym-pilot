@@ -241,7 +241,9 @@ html.dark .bg-slate-900 {
 }
 
 .dark .has-no-workouts {
-  background-color: var(--app-surface-muted); /* Dark background for blank days */
+  background-color: var(
+    --app-surface-muted
+  ); /* Dark background for blank days */
   border: 1px solid var(--app-border);
 }
 

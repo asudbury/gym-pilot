@@ -106,7 +106,6 @@ export function Header({
                     items={desktopMenuItems}
                   />
                 ) : null}
-                {Boolean(user) ? (
                   <button
                     type="button"
                     onClick={handleAuthAction}
@@ -122,7 +121,6 @@ export function Header({
                       {user ? 'Log out' : 'Login'}
                     </span>
                   </button>
-                ) : null}
               </div>
               {showRestrictedBadge ? (
                 <StatusMessageNotification
@@ -157,8 +155,7 @@ export function Header({
                       items={tabletMenuItems}
                     />
                     <div className="mt-2 flex flex-col gap-2 border-t border-slate-200 pt-3">
-                      {Boolean(user) ? (
-                        <button
+                      <button
                           type="button"
                           onClick={handleAuthAction}
                           className={menuLinkClassName}
@@ -173,7 +170,6 @@ export function Header({
                             {user ? 'Logout' : 'Login'}
                           </span>
                         </button>
-                      ) : null}
                     </div>
                   </div>
                 </div>
@@ -204,8 +200,7 @@ export function Header({
                       items={mobileMenuItems}
                     />
                     <div className="mt-2 flex flex-col gap-2 border-t border-slate-200 pt-3">
-                      {Boolean(user) ? (
-                        <button
+                      <button
                           type="button"
                           onClick={handleAuthAction}
                           className={menuLinkClassName}
@@ -220,7 +215,6 @@ export function Header({
                             {user ? 'Logout' : 'Login'}
                           </span>
                         </button>
-                      ) : null}
                     </div>
                   </div>
                 </div>
