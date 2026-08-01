@@ -14,7 +14,7 @@ import WorkoutCalendar from '../../components/WorkoutCalendar'
 import { useAuth } from '../../auth/AuthContext'
 import { PageCardLayout } from '../../layouts/PageCardLayout'
 
-export const DataImporterPage: React.FC = () => {
+export const AppleFitnessPage: React.FC = () => {
   const { user } = useAuth()
   const [workouts, setWorkouts] = useState<Workout[]>([])
   const [error, setError] = useState<string | null>(null)

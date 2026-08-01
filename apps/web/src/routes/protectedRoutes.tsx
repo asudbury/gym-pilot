@@ -17,8 +17,7 @@ import { RecordSessionPage } from '../pages/RecordSessionPage'
 import { TrainerReportPage } from '../pages/TrainerReportPage'
 import { type HomeFilters } from '../utils/appUtils'
 import { SessionTemplatesPage } from '../pages/SessionTemplatesPage'
-import { DataImporterPage } from '../pages/appleFitness/DataImporterPage'
-import { ImportedWorkoutsPage } from '../pages/appleFitness/ImportedWorkoutsPage'
+import { AppleFitnessPage } from '../pages/appleFitness/AppleFitnessPage'
 import { LinkAppleWorkoutPage } from '../pages/appleFitness/LinkAppleWorkoutPage'
 import { IconShowcasePage } from '../pages/IconShowcasePage'
 interface ProtectedRoutesProps {
@@ -93,11 +92,7 @@ export function createProtectedRoutes({
         path="/session-templates/create"
         element={<SessionTemplateCreatePage />}
       />
-      <Route path="/apple-fitness" element={<DataImporterPage />} />
-      <Route
-        path="/apple-fitness/imported-workouts"
-        element={<ImportedWorkoutsPage />}
-      />
+      <Route path="/apple-fitness" element={<AppleFitnessPage />} />
       <Route
         path="/apple-fitness/link-workout/:workoutId"
         element={<LinkAppleWorkoutPage />}
