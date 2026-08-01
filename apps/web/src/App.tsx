@@ -1,12 +1,13 @@
-import { useEffect } from 'react'
-import { Routes, useLocation } from 'react-router-dom'
-import { Header } from './components/navigation/Header'
-import { Button } from './components/ui/Button'
-import { createAuthRoutes } from './routes/authRoutes'
-import { createPublicRoutes } from './routes/publicRoutes'
-import { useAppShell } from './features/app-shell/hooks/useAppShell'
-import { getInstallHint } from './utils/pwa'
-import ErrorBoundary from './components/ErrorBoundary'
+import { useEffect } from 'react';
+import { Routes, useLocation } from 'react-router-dom';
+import ErrorBoundary from './components/ErrorBoundary';
+import { Header } from './components/navigation/Header';
+import { Button } from './components/ui/Button';
+import { BottomNavigation } from './features/app-shell/components/BottomNavigation';
+import { useAppShell } from './features/app-shell/hooks/useAppShell';
+import { createAuthRoutes } from './routes/authRoutes';
+import { createPublicRoutes } from './routes/publicRoutes';
+import { getInstallHint } from './utils/pwa';
 
 function ScrollToTop() {
   const { pathname } = useLocation()
@@ -45,7 +46,7 @@ function App() {
   } = useAppShell()
 
   return (
-    <div className="min-h-screen bg-slate-50 text-slate-900 transition-colors dark:bg-slate-950 dark:text-slate-100">
+    <div className="min-h-screen bg-slate-50 pb-16 text-slate-900 transition-colors dark:bg-slate-950 dark:text-slate-100">
       <ScrollToTop />
       {broadcastMessage.trim() ? (
         <div className="border-b border-amber-200 bg-amber-50 px-4 py-2 text-center text-sm font-medium text-amber-900">
@@ -101,6 +102,7 @@ function App() {
           </Routes>
         </ErrorBoundary>
       )}
+      <BottomNavigation />
     </div>
   )
 }

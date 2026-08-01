@@ -1,17 +1,17 @@
-import { useEffect, useRef } from 'react'
-import { NavLink } from 'react-router-dom'
-import { FavouriteLinksMenu } from './FavouriteLinksMenu'
-import { NavigationMenuList } from './NavigationMenuList'
-import type { NavigationMenuListItem } from '../../utils/navigationUtils'
-import { ResponsiveVisibility } from '../visibility/ResponsiveVisibility'
-import { DecorativeIcon } from '../ui/DecorativeIcon'
-import { getToneClass } from '../toneClasses'
-import { Button } from '../ui/Button'
+import { useEffect, useRef } from 'react';
+import { NavLink } from 'react-router-dom';
+import type { NavigationMenuListItem } from '../../utils/navigationUtils';
+import { getToneClass } from '../toneClasses';
+import { Button } from '../ui/Button';
+import { DecorativeIcon } from '../ui/DecorativeIcon';
+import { StatusMessageNotification } from '../ui/StatusMessageNotification';
+import { ResponsiveVisibility } from '../visibility/ResponsiveVisibility';
+import { FavouriteLinksMenu } from './FavouriteLinksMenu';
 import {
-  navigationItemBaseClassName,
-  navigationItemIconClassName,
-} from './navigationItemStyles'
-import { StatusMessageNotification } from '../ui/StatusMessageNotification'
+    navigationItemBaseClassName,
+    navigationItemIconClassName,
+} from './navigationItemStyles';
+import { NavigationMenuList } from './NavigationMenuList';
 
 type HeaderProps = {
   appName: string
@@ -180,7 +180,6 @@ export function Header({
               ) : null}
             </div>
           </ResponsiveVisibility>
-
           <ResponsiveVisibility visibleOn="mobile">
             <div className="relative">
               <Button

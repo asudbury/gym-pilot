@@ -19,7 +19,10 @@ import {
   normalizeHomeFilters,
   type HomeFilters,
 } from '../../../utils/appUtils'
-import { buildNavigationMenuItems } from '../../../utils/navigationUtils'
+import {
+  buildNavigationMenuItems,
+  type NavigationMenuListItem,
+} from '../../../utils/navigationUtils'
 import { useFavouritesFeature } from '../../favourites/hooks/useFavouritesFeature'
 import {
   sortQuickLinks,
@@ -28,6 +31,7 @@ import {
 import { useBroadcastMessage } from './useBroadcastMessage'
 import { useInstallHint } from './useInstallHint'
 import { useMustChangePassword } from './useMustChangePassword'
+import { navigationMeta } from '../../../utils/navigationMeta'
 
 export function useAppShell() {
   const { pathname, search } = useLocation()
@@ -189,9 +193,67 @@ export function useAppShell() {
       'rounded-xl px-3 py-2 text-sm font-medium text-slate-700 transition hover:bg-slate-50',
     userRoles,
     tier: currentTier,
-    deviceType,
+    deviceType: 'tablet',
   })
-  const mobileMenuItems = tabletMenuItems
+
+  const bottomNavigationItems: NavigationMenuListItem[] = [
+    {
+      to: '/',
+      label: 'Home',
+      icon: 'home',
+    },
+  ]
+
+  const exercisesMeta = navigationMeta.find((item) => item.key === 'exercises')
+  if (
+    exercisesMeta &&
+    isVisibleForTierAndDevice(currentTier, 'mobile', exercisesMeta.visibility)
+  ) {
+    bottomNavigationItems.push({
+      to: exercisesMeta.to,
+      label: exercisesMeta.label,
+      icon: exercisesMeta.icon as NavigationMenuListItem['icon'],
+    })
+  }
+
+  const timetableMeta = navigationMeta.find((item) => item.key === 'timetable')
+  if (
+    timetableMeta &&
+    hasTimetableAccess &&
+    isVisibleForTierAndDevice(currentTier, 'mobile', timetableMeta.visibility)
+  ) {
+    bottomNavigationItems.push({
+      to: timetableMeta.to,
+      label: timetableMeta.label,
+      icon: timetableMeta.icon as NavigationMenuListItem['icon'],
+    })
+  }
+
+  if (user) {
+    const preferencesMeta = navigationMeta.find(
+      (item) => item.key === 'preferences',
+    )
+    if (
+      preferencesMeta &&
+      isVisibleForTierAndDevice(
+        currentTier,
+        'mobile',
+        preferencesMeta.visibility,
+      )
+    ) {
+      bottomNavigationItems.push({
+        to: preferencesMeta.to,
+        label: 'Profile',
+        icon: 'user',
+      })
+    }
+  } else {
+    bottomNavigationItems.push({
+      to: '/login',
+      label: 'Login',
+      icon: 'lock',
+    })
+  }
 
   const currentRouteVisibility = routeVisibilityRules[pathname]
   const isCurrentRouteVisible = isVisibleForTierAndDevice(
@@ -225,7 +287,8 @@ export function useAppShell() {
     homeFilters,
     isCurrentRouteVisible,
     isExerciseFavorite,
-    mobileMenuItems,
+    mobileMenuItems: tabletMenuItems, // For tablet menu
+    bottomNavigationItems, // For mobile bottom nav
     mobileMenuOpen,
     mustChangePassword,
     pathname,
