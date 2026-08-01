@@ -67,18 +67,12 @@ function App() {
       ) : null}
       <Header
         appName={appName}
-        favorites={favorites}
-        homeFilters={homeFilters}
         desktopMenuItems={desktopMenuItems}
         tabletMenuItems={tabletMenuItems}
         mobileMenuItems={mobileMenuItems}
         mobileMenuOpen={mobileMenuOpen}
         user={user}
         mustChangePassword={mustChangePassword}
-        folders={folders}
-        onFoldersChange={setFolders}
-        onFavoritesChange={setFavorites}
-        onHomeFiltersChange={setHomeFilters}
         onAuthClick={handleAuthClick} // This prop is still needed for auth actions
         onToggleMobileMenu={() => setMobileMenuOpen((current) => !current)} // This prop is still needed for mobile menu
       />

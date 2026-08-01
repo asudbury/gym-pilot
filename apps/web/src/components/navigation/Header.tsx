@@ -15,46 +15,24 @@ import { StatusMessageNotification } from '../ui/StatusMessageNotification'
 
 type HeaderProps = {
   appName: string
-  favorites: Array<{ id: string; label: string; path: string }>
-  folders: string[]
-  homeFilters: {
-    searchTerm: string
-    selectedCategory: string | null
-    showImages: boolean
-  }
   desktopMenuItems: NavigationMenuListItem[]
   tabletMenuItems: NavigationMenuListItem[]
   mobileMenuItems: NavigationMenuListItem[]
   mobileMenuOpen: boolean
   user: unknown
   mustChangePassword?: boolean
-  onFavoritesChange: (
-    favorites: Array<{ id: string; label: string; path: string }>,
-  ) => void
-  onFoldersChange: (folders: string[]) => void
-  onHomeFiltersChange: (filters: {
-    searchTerm: string
-    selectedCategory: string | null
-    showImages: boolean
-  }) => void
   onAuthClick: () => void
   onToggleMobileMenu: () => void
 }
 
 export function Header({
   appName,
-  favorites,
-  homeFilters,
   desktopMenuItems,
   tabletMenuItems,
   mobileMenuItems,
   mobileMenuOpen,
   user,
   mustChangePassword,
-  folders,
-  onFavoritesChange,
-  onFoldersChange,
-  onHomeFiltersChange,
   onAuthClick,
   onToggleMobileMenu,
 }: HeaderProps) {
@@ -121,15 +99,7 @@ export function Header({
           <ResponsiveVisibility visibleOn="desktop">
             <div className="flex flex-wrap items-end justify-end gap-2">
               <div className="flex items-center gap-2">
-                <FavouriteLinksMenu
-                  favorites={favorites}
-                  folders={folders}
-                  homeFilters={homeFilters}
-                  variant="header"
-                  onFavoritesChange={onFavoritesChange}
-                  onFoldersChange={onFoldersChange}
-                  onHomeFiltersChange={onHomeFiltersChange}
-                />
+                <FavouriteLinksMenu variant="header" />
                 {!showRestrictedBadge ? (
                   <NavigationMenuList
                     className="flex items-center gap-2"
@@ -181,14 +151,7 @@ export function Header({
                   className="fixed inset-x-3 top-16 z-40 max-h-[min(75vh,32rem)] overflow-y-auto rounded-2xl border border-white/70 bg-white/75 p-3 shadow-xl backdrop-blur-xl sm:absolute sm:right-0 sm:left-auto sm:top-full sm:mt-2 sm:w-80 sm:max-w-[calc(100vw-2rem)]"
                 >
                   <div className="flex flex-col gap-2">
-                    <FavouriteLinksMenu
-                      favorites={favorites}
-                      folders={folders}
-                      homeFilters={homeFilters}
-                      onFavoritesChange={onFavoritesChange}
-                      onFoldersChange={onFoldersChange}
-                      onHomeFiltersChange={onHomeFiltersChange}
-                    />
+                    <FavouriteLinksMenu />
                     <NavigationMenuList
                       className="flex flex-col gap-2"
                       items={tabletMenuItems}
@@ -236,14 +199,7 @@ export function Header({
                   className="fixed inset-x-3 top-16 z-40 max-h-[min(75vh,32rem)] overflow-y-auto rounded-2xl border border-slate-200 bg-white p-3 shadow-lg sm:absolute sm:right-0 sm:left-auto sm:top-full sm:mt-2 sm:w-80 sm:max-w-[calc(100vw-2rem)]"
                 >
                   <div className="flex flex-col gap-2">
-                    <FavouriteLinksMenu
-                      favorites={favorites}
-                      folders={folders}
-                      homeFilters={homeFilters}
-                      onFavoritesChange={onFavoritesChange}
-                      onFoldersChange={onFoldersChange}
-                      onHomeFiltersChange={onHomeFiltersChange}
-                    />
+                    <FavouriteLinksMenu />
                     <NavigationMenuList
                       className="flex flex-col gap-2"
                       items={mobileMenuItems}

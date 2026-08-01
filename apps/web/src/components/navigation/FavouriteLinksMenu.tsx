@@ -1,24 +1,27 @@
-import { useEffect, useMemo, useState } from 'react'
-import { useLocation, useNavigate } from 'react-router-dom'
-import { Button } from '../ui/Button'
-import { getToneClass } from '../toneClasses'
-import { DecorativeIcon } from '../ui/DecorativeIcon'
+import { classNames, exercises, exercisesSchema } from '@gym-pilot/shared';
+import { useEffect, useMemo, useState } from 'react';
+import { useLocation, useNavigate } from 'react-router-dom';
+import { HOME_FILTER_KEY } from '../../constants/storageKeys';
 import {
-  navigationItemBaseClassName,
-  navigationItemIconClassName,
-} from './navigationItemStyles'
-import { classNames, exercises, exercisesSchema } from '@gym-pilot/shared'
+    normalizeFolderName as normalizeFavoriteFolderName,
+    sortQuickLinks,
+} from '../../features/favourites/domain/quickLinks';
+import { useFavouritesFeature } from '../../features/favourites/hooks/useFavouritesFeature';
+import { normalizeHomeFilters } from '../../utils/appUtils';
 import {
-  getQuickLinkForPath,
-  groupFavoritesByFolder,
-  normalizeFolderName,
-  sortFavorites,
-  type QuickLink,
-} from '../../utils/favouriteUtils'
+    getQuickLinkForPath,
+    groupFavoritesByFolder,
+    normalizeFolderName,
+    sortFavorites,
+    type QuickLink,
+} from '../../utils/favouriteUtils';
+import { getToneClass } from '../toneClasses';
+import { Button } from '../ui/Button';
+import { DecorativeIcon } from '../ui/DecorativeIcon';
 import {
-  normalizeFolderName as normalizeFavoriteFolderName,
-  sortQuickLinks,
-} from '../../features/favourites/domain/quickLinks'
+    navigationItemBaseClassName,
+    navigationItemIconClassName,
+} from './navigationItemStyles';
 
 type SavedSearch = {
   id: string
@@ -34,27 +37,45 @@ type HomeFilters = {
 }
 
 type FavouriteLinksMenuProps = {
-  favorites: QuickLink[]
-  folders: string[]
-  homeFilters: HomeFilters
   variant?: 'header' | 'menu'
-  onFavoritesChange: (favorites: QuickLink[]) => void
-  onFoldersChange: (folders: string[]) => void
-  onHomeFiltersChange: (filters: HomeFilters) => void
   onMenuOpenChange?: (open: boolean) => void
 }
 
 export function FavouriteLinksMenu({
-  favorites,
-  folders,
   variant = 'menu',
-  onFavoritesChange,
   onMenuOpenChange,
 }: FavouriteLinksMenuProps) {
   const location = useLocation()
   const navigate = useNavigate()
   const [menuOpen, setMenuOpen] = useState(false)
   const [selectedFolder, setSelectedFolder] = useState('')
+  const { favorites, folders, setFavorites } = useFavouritesFeature()
+  const [homeFilters ] = useState<HomeFilters>(() => {
+    if (typeof window === 'undefined') {
+      return { searchTerm: '', selectedCategory: null, showImages: true }
+    }
+
+    const savedFilters = window.sessionStorage.getItem(HOME_FILTER_KEY)
+
+    if (!savedFilters) {
+      return { searchTerm: '', selectedCategory: null, showImages: true }
+    }
+
+    try {
+      const parsed = JSON.parse(savedFilters) as Partial<HomeFilters>
+      return normalizeHomeFilters(parsed)
+    } catch {
+      window.sessionStorage.removeItem(HOME_FILTER_KEY)
+      return { searchTerm: '', selectedCategory: null, showImages: true }
+    }
+  })
+
+  useEffect(() => {
+    window.sessionStorage.setItem(
+      HOME_FILTER_KEY,
+      JSON.stringify(normalizeHomeFilters(homeFilters)),
+    )
+  }, [homeFilters])
 
   useEffect(() => {
     onMenuOpenChange?.(menuOpen)
@@ -189,7 +210,7 @@ export function FavouriteLinksMenu({
     const alreadySaved = favorites.some((item) => item.path === link.path)
 
     if (alreadySaved) {
-      onFavoritesChange(
+      setFavorites(
         sortFavorites(
           favorites.map((item) =>
             item.path === link.path
@@ -206,11 +227,11 @@ export function FavouriteLinksMenu({
       { ...link, folder: normalizedFolder },
     ]).slice(0, 12)
 
-    onFavoritesChange(nextFavorites)
+    setFavorites(nextFavorites)
   }
 
   const handleRemoveFavoriteLink = (link: QuickLink) => {
-    onFavoritesChange(
+    setFavorites(
       sortQuickLinks(favorites.filter((item) => item.path !== link.path)),
     )
   }
@@ -346,4 +367,4 @@ export function FavouriteLinksMenu({
   )
 }
 
-export type { QuickLink, SavedSearch, HomeFilters }
+export type { HomeFilters, QuickLink, SavedSearch };
