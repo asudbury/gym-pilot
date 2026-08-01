@@ -43,7 +43,6 @@ function App() {
     user,
     mobileMenuOpen,
   } = useAppShell()
-  const SHOW_AUTH_BUTTON = true
 
   return (
     <div className="min-h-screen bg-slate-50 text-slate-900 transition-colors dark:bg-slate-950 dark:text-slate-100">
@@ -74,15 +73,15 @@ function App() {
         tabletMenuItems={tabletMenuItems}
         mobileMenuItems={mobileMenuItems}
         mobileMenuOpen={mobileMenuOpen}
-        showAuthButton={SHOW_AUTH_BUTTON}
+        showAuthButton={true}
         user={user}
         mustChangePassword={mustChangePassword}
         folders={folders}
         onFoldersChange={setFolders}
         onFavoritesChange={setFavorites}
         onHomeFiltersChange={setHomeFilters}
-        onAuthClick={handleAuthClick} // This prop is still needed for auth actions
-        onToggleMobileMenu={() => setMobileMenuOpen((current) => !current)} // This prop is still needed for mobile menu
+        onAuthClick={handleAuthClick}
+        onToggleMobileMenu={() => setMobileMenuOpen((current) => !current)}
       />
 
       {currentRouteVisibility && !isCurrentRouteVisible ? (

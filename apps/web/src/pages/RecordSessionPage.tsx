@@ -53,6 +53,19 @@ import { Button } from '../components/ui/Button'
 
 type SessionType = 'class' | 'solo' | 'personal_training'
 
+function supportsDateTimeLocalInput(): boolean {
+  if (typeof window === 'undefined') return false
+  try {
+    const input = document.createElement('input')
+    input.setAttribute('type', 'datetime-local')
+    return input.type === 'datetime-local'
+  } catch {
+    return false
+  }
+}
+
+const supportsDateTimeLocal = supportsDateTimeLocalInput()
+
 function resolveInitialSessionType(value: string | null): SessionType {
   if (value === 'solo') {
     return 'solo'
@@ -82,13 +95,9 @@ export function RecordSessionPage() {
   const [startAt, setStartAt] = useState('')
   const [datePart, setDatePart] = useState('')
   const [timePart, setTimePart] = useState('')
-  const [supportsDateTimeLocal, setSupportsDateTimeLocal] = useState<
-    boolean | null
-  >(null)
   const [rating, setRating] = useState<number | null>(null)
   const [duration, setDuration] = useState<number | undefined>(undefined)
   const [name, setName] = useState('')
-  // const [endAt] = useState<string | null>(null)
   const [activeKwh, setActiveKwh] = useState('')
   const [notes, setNotes] = useState('')
   const [selectedPlanId] = useState('')
@@ -141,17 +150,6 @@ export function RecordSessionPage() {
       buildWorkoutItemsFromPlanSessions(selectedPlan.planSessions),
     )
   }, [selectedPlan])
-
-  useEffect(() => {
-    if (typeof window === 'undefined') return
-    try {
-      const input = document.createElement('input')
-      input.setAttribute('type', 'datetime-local')
-      setSupportsDateTimeLocal(input.type === 'datetime-local')
-    } catch {
-      setSupportsDateTimeLocal(false)
-    }
-  }, [])
 
   const handleSubmit = async () => {
     if (!startAt || !user) {

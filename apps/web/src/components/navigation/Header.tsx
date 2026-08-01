@@ -84,7 +84,7 @@ export function Header({
       return
     }
 
-    const handlePointerDown = (event: MouseEvent) => {
+    const handlePointerDown = (event: PointerEvent) => {
       if (
         menuContainerRef.current &&
         !menuContainerRef.current.contains(event.target as Node)
@@ -93,10 +93,10 @@ export function Header({
       }
     }
 
-    document.addEventListener('mousedown', handlePointerDown)
+    document.addEventListener('pointerdown', handlePointerDown)
 
     return () => {
-      document.removeEventListener('mousedown', handlePointerDown) // eslint-disable-line @typescript-eslint/no-unsafe-argument
+      document.removeEventListener('pointerdown', handlePointerDown)
     }
   }, [mobileMenuOpen, onToggleMobileMenu])
 
