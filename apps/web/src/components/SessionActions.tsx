@@ -22,7 +22,7 @@ function SessionActions({
   return (
     <div className="flex flex-col gap-3 sm:flex-row sm:flex-wrap">
       <ActionButton
-        icon="calendar"
+        icon="apple"
         label="Apple Fitness"
         mobileLabel="Apple Fitness"
         tone="default"
