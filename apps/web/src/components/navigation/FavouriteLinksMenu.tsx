@@ -1,27 +1,27 @@
-import { classNames, exercises, exercisesSchema } from '@gym-pilot/shared';
-import { useEffect, useMemo, useState } from 'react';
-import { useLocation, useNavigate } from 'react-router-dom';
-import { HOME_FILTER_KEY } from '../../constants/storageKeys';
+import { classNames, exercises, exercisesSchema } from '@gym-pilot/shared'
+import { useEffect, useMemo, useState } from 'react'
+import { useLocation, useNavigate } from 'react-router-dom'
+import { HOME_FILTER_KEY } from '../../constants/storageKeys'
 import {
-    normalizeFolderName as normalizeFavoriteFolderName,
-    sortQuickLinks,
-} from '../../features/favourites/domain/quickLinks';
-import { useFavouritesFeature } from '../../features/favourites/hooks/useFavouritesFeature';
-import { normalizeHomeFilters } from '../../utils/appUtils';
+  normalizeFolderName as normalizeFavoriteFolderName,
+  sortQuickLinks,
+} from '../../features/favourites/domain/quickLinks'
+import { useFavouritesFeature } from '../../features/favourites/hooks/useFavouritesFeature'
+import { normalizeHomeFilters } from '../../utils/appUtils'
 import {
-    getQuickLinkForPath,
-    groupFavoritesByFolder,
-    normalizeFolderName,
-    sortFavorites,
-    type QuickLink,
-} from '../../utils/favouriteUtils';
-import { getToneClass } from '../toneClasses';
-import { Button } from '../ui/Button';
-import { DecorativeIcon } from '../ui/DecorativeIcon';
+  getQuickLinkForPath,
+  groupFavoritesByFolder,
+  normalizeFolderName,
+  sortFavorites,
+  type QuickLink,
+} from '../../utils/favouriteUtils'
+import { getToneClass } from '../toneClasses'
+import { Button } from '../ui/Button'
+import { DecorativeIcon } from '../ui/DecorativeIcon'
 import {
-    navigationItemBaseClassName,
-    navigationItemIconClassName,
-} from './navigationItemStyles';
+  navigationItemBaseClassName,
+  navigationItemIconClassName,
+} from './navigationItemStyles'
 
 type SavedSearch = {
   id: string
@@ -50,7 +50,7 @@ export function FavouriteLinksMenu({
   const [menuOpen, setMenuOpen] = useState(false)
   const [selectedFolder, setSelectedFolder] = useState('')
   const { favorites, folders, setFavorites } = useFavouritesFeature()
-  const [homeFilters ] = useState<HomeFilters>(() => {
+  const [homeFilters] = useState<HomeFilters>(() => {
     if (typeof window === 'undefined') {
       return { searchTerm: '', selectedCategory: null, showImages: true }
     }
@@ -367,4 +367,4 @@ export function FavouriteLinksMenu({
   )
 }
 
-export type { HomeFilters, QuickLink, SavedSearch };
+export type { HomeFilters, QuickLink, SavedSearch }
