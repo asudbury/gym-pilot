@@ -197,10 +197,20 @@ html.dark .bg-slate-900 {
   border-radius: 0;
 }
 
+.dark .has-no-link-workouts {
+  background-color: #1e3a8a; /* Dark blue for 'no link' */
+  border: 1px solid #3b82f6;
+}
+
 .has-unassigned-workouts {
   background-color: #fffbeb; /* Light yellow for 'unassigned' */
   border: 1px solid #fcd34d; /* A slightly darker yellow border */
   border-radius: 0;
+}
+
+.dark .has-unassigned-workouts {
+  background-color: #78350f; /* Dark yellow for 'unassigned' */
+  border: 1px solid #f59e0b;
 }
 
 .has-linked-workouts {
@@ -209,16 +219,75 @@ html.dark .bg-slate-900 {
   border-radius: 0;
 }
 
+.dark .has-linked-workouts {
+  background-color: #166534; /* Dark green for 'linked' */
+  border: 1px solid #4ade80;
+}
+
 /* Add a border to the current day for better visibility */
 .react-calendar__tile--now {
   border: 1px solid #3b82f6; /* Blue border for today */
   /* Removed border-radius to make it squared */
 }
 
+.dark .react-calendar__tile--now {
+  border: 1px solid #60a5fa; /* Lighter blue for today in dark mode */
+}
+
 .has-no-workouts {
   background-color: #ffffff; /* White background for blank days */
   border: 1px solid #e2e8f0; /* Light gray border */
   border-radius: 0;
+}
+
+.dark .has-no-workouts {
+  background-color: var(--app-surface-muted); /* Dark background for blank days */
+  border: 1px solid var(--app-border);
+}
+
+.dot-no-link {
+  background-color: #3b82f6; /* Blue for 'no link' */
+}
+.dark .dot-no-link {
+  background-color: #60a5fa;
+}
+
+.dot-unassigned {
+  background-color: #f59e0b; /* Amber for 'unassigned' */
+}
+.dark .dot-unassigned {
+  background-color: #fbbf24;
+}
+
+.dot-linked {
+  background-color: #22c55e; /* Green for 'linked' */
+}
+.dark .dot-linked {
+  background-color: #4ade80;
+}
+
+.react-calendar {
+  @apply bg-transparent;
+}
+
+.react-calendar__navigation button {
+  @apply text-slate-700 dark:text-slate-300;
+}
+
+.react-calendar__navigation button:hover {
+  @apply bg-slate-100 dark:bg-slate-800;
+}
+
+.react-calendar__navigation button:disabled {
+  @apply bg-transparent;
+}
+
+.react-calendar__month-view__days__day--neighboringMonth {
+  @apply text-slate-400 dark:text-slate-500;
+}
+
+.react-calendar abbr {
+  @apply text-slate-700 dark:text-slate-300;
 }
 
 /* Custom styles for react-calendar to improve responsiveness */

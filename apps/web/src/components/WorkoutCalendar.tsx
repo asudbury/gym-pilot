@@ -258,23 +258,22 @@ const WorkoutCalendar: React.FC<WorkoutCalendarProps> = ({
       const linkState = dailyData?.linkState || 'linked'
 
       if (count > 0) {
-        const dotColor =
+        const dotColorClass =
           linkState === 'no-link'
-            ? '#3B82F6'
+            ? 'dot-no-link'
             : linkState === 'unassigned'
-              ? '#FFC107'
-              : '#4CAF50'
+            ? 'dot-unassigned'
+            : 'dot-linked'
         return (
           <div className="workout-dot-container mt-1.5 flex items-center justify-center">
             <span
-              className="workout-dot flex h-5 w-5 items-center justify-center rounded-full text-[0.7em] font-bold text-white"
-              style={{ backgroundColor: dotColor }}
+              className={`workout-dot flex h-5 w-5 items-center justify-center rounded-full text-[0.7em] font-bold text-white ${dotColorClass}`}
               title={`${count} workout(s) ${
                 linkState === 'no-link'
                   ? '(no link selected)'
                   : linkState === 'unassigned'
-                    ? '(unassigned)'
-                    : ''
+                  ? '(unassigned)'
+                  : ''
               }`}
             >
               {count}
