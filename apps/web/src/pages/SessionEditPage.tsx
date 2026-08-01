@@ -1,25 +1,25 @@
-import type { UserSession } from '@gym-pilot/shared';
+import type { UserSession } from '@gym-pilot/shared'
 import {
-    getUserSession,
-    getUserSessionWorkoutItemsForSession,
-    saveWorkoutItemsForSession,
-    updateUserSession,
-    type UserSessionWorkoutItem,
-} from '@gym-pilot/shared';
-import { useEffect, useMemo, useState } from 'react';
-import { useNavigate, useParams } from 'react-router-dom';
-import { useAuth } from '../auth/AuthContext';
-import { OptionSelector } from '../components/OptionSelector';
-import { RatingSelector } from '../components/RatingSelector';
-import { SessionWorkoutEditor } from '../components/SessionWorkoutEditor';
-import { Button } from '../components/ui/Button';
-import { DesktopOnly } from '../components/visibility/DeviceVisibility';
+  getUserSession,
+  getUserSessionWorkoutItemsForSession,
+  saveWorkoutItemsForSession,
+  updateUserSession,
+  type UserSessionWorkoutItem,
+} from '@gym-pilot/shared'
+import { useEffect, useMemo, useState } from 'react'
+import { useNavigate, useParams } from 'react-router-dom'
+import { useAuth } from '../auth/AuthContext'
+import { OptionSelector } from '../components/OptionSelector'
+import { RatingSelector } from '../components/RatingSelector'
+import { SessionWorkoutEditor } from '../components/SessionWorkoutEditor'
+import { Button } from '../components/ui/Button'
+import { DesktopOnly } from '../components/visibility/DeviceVisibility'
 import {
-    getSessionEntryRating,
-    getSessionEntryTitle,
-} from '../features/session-history/domain/sessionHistoryViewModel';
-import { PageCardLayout } from '../layouts/PageCardLayout';
-import { PageLayout } from '../layouts/PageLayout';
+  getSessionEntryRating,
+  getSessionEntryTitle,
+} from '../features/session-history/domain/sessionHistoryViewModel'
+import { PageCardLayout } from '../layouts/PageCardLayout'
+import { PageLayout } from '../layouts/PageLayout'
 
 export function SessionEditPage() {
   const { user } = useAuth()
@@ -167,116 +167,113 @@ export function SessionEditPage() {
         icon="edit"
       >
         {entry ? (
-            <div className="m-0 bg-white p-0 sm:m-4 sm:rounded-2xl sm:border sm:border-slate-200 sm:p-4">
-              {entry.session_type !== 'solo' ? (
-                <div className="mt-4 flex flex-col gap-2">
-                  <span className="text-sm font-medium text-slate-700">
-                    Role
-                  </span>
-                  <OptionSelector
-                    options={['attended', 'taught'] as const}
-                    value={attendanceType}
-                    onChange={setAttendanceType}
-                    getLabel={(option) =>
-                      option === 'attended' ? 'Attended' : 'Taught'
-                    }
-                  />
-                </div>
-              ) : null}
-
-              {entry.session_type === 'solo' ? (
-                <label className="mt-4 flex flex-col gap-1 text-sm text-slate-700">
-                  <span className="font-medium">Name</span>
-                  <input
-                    type="text"
-                    value={sessionName}
-                    onChange={(event) => setSessionName(event.target.value)}
-                    className="rounded-2xl border border-slate-300 bg-white px-3 py-2 text-sm text-slate-700 shadow-sm"
-                  />
-                </label>
-              ) : null}
-
-              <label className="mt-4 flex flex-col gap-1 text-sm text-slate-700">
-                <span className="font-medium">Start time</span>
-                <input
-                  type="datetime-local"
-                  value={startedAt ? startedAt.slice(0, 16) : ''}
-                  onChange={(event) =>
-                    setStartedAt(
-                      event.target.value
-                        ? new Date(event.target.value).toISOString()
-                        : '',
-                    )
+          <div className="m-0 bg-white p-0 sm:m-4 sm:rounded-2xl sm:border sm:border-slate-200 sm:p-4">
+            {entry.session_type !== 'solo' ? (
+              <div className="mt-4 flex flex-col gap-2">
+                <span className="text-sm font-medium text-slate-700">Role</span>
+                <OptionSelector
+                  options={['attended', 'taught'] as const}
+                  value={attendanceType}
+                  onChange={setAttendanceType}
+                  getLabel={(option) =>
+                    option === 'attended' ? 'Attended' : 'Taught'
                   }
+                />
+              </div>
+            ) : null}
+
+            {entry.session_type === 'solo' ? (
+              <label className="mt-4 flex flex-col gap-1 text-sm text-slate-700">
+                <span className="font-medium">Name</span>
+                <input
+                  type="text"
+                  value={sessionName}
+                  onChange={(event) => setSessionName(event.target.value)}
                   className="rounded-2xl border border-slate-300 bg-white px-3 py-2 text-sm text-slate-700 shadow-sm"
                 />
               </label>
+            ) : null}
+
+            <label className="mt-4 flex flex-col gap-1 text-sm text-slate-700">
+              <span className="font-medium">Start time</span>
+              <input
+                type="datetime-local"
+                value={startedAt ? startedAt.slice(0, 16) : ''}
+                onChange={(event) =>
+                  setStartedAt(
+                    event.target.value
+                      ? new Date(event.target.value).toISOString()
+                      : '',
+                  )
+                }
+                className="rounded-2xl border border-slate-300 bg-white px-3 py-2 text-sm text-slate-700 shadow-sm"
+              />
+            </label>
+
+            <label className="mt-4 flex flex-col gap-1 text-sm text-slate-700">
+              <span className="font-medium">Duration (minutes)</span>
+              <input
+                type="number"
+                min="0"
+                value={durationMinutes ?? ''}
+                onChange={(event) => {
+                  const nextValue = event.target.value
+                  setDurationMinutes(
+                    nextValue === '' ? null : Number(nextValue),
+                  )
+                }}
+                placeholder="Optional"
+                className="rounded-2xl border border-slate-300 bg-white px-3 py-2 text-sm text-slate-700 shadow-sm"
+              />
+            </label>
+
+            <DesktopOnly>
+              <div className="mt-4 flex flex-col gap-2">
+                <span className="text-sm font-medium text-slate-700">
+                  Rating
+                </span>
+                <RatingSelector value={rating} onChange={setRating} />
+              </div>
 
               <label className="mt-4 flex flex-col gap-1 text-sm text-slate-700">
-                <span className="font-medium">Duration (minutes)</span>
-                <input
-                  type="number"
-                  min="0"
-                  value={durationMinutes ?? ''}
-                  onChange={(event) => {
-                    const nextValue = event.target.value
-                    setDurationMinutes(
-                      nextValue === '' ? null : Number(nextValue),
-                    )
-                  }}
-                  placeholder="Optional"
+                <span className="font-medium">Notes</span>
+                <textarea
+                  value={notes}
+                  onChange={(event) => setNotes(event.target.value)}
+                  rows={4}
+                  placeholder="Add any notes about this session"
                   className="rounded-2xl border border-slate-300 bg-white px-3 py-2 text-sm text-slate-700 shadow-sm"
                 />
               </label>
+            </DesktopOnly>
 
-              <DesktopOnly>
-                <div className="mt-4 flex flex-col gap-2">
-                  <span className="text-sm font-medium text-slate-700">
-                    Rating
-                  </span>
-                  <RatingSelector value={rating} onChange={setRating} />
-                </div>
-
-                <label className="mt-4 flex flex-col gap-1 text-sm text-slate-700">
-                  <span className="font-medium">Notes</span>
-                  <textarea
-                    value={notes}
-                    onChange={(event) => setNotes(event.target.value)}
-                    rows={4}
-                    placeholder="Add any notes about this session"
-                    className="rounded-2xl border border-slate-300 bg-white px-3 py-2 text-sm text-slate-700 shadow-sm"
-                  />
-                </label>
-              </DesktopOnly>
-
-              <div className="mt-3">
-                <SessionWorkoutEditor
-                  items={workoutItems}
-                  onChange={setWorkoutItems}
-                />
-              </div>
-
-              <div className="mt-6 flex flex-col gap-2">
-                <div className="flex flex-wrap gap-2">
-                  <Button
-                    tone="emerald"
-                    onClick={handleSave}
-                    isLoading={isSaving}
-                  >
-                    Save changes
-                  </Button>
-                  <Button tone="default" onClick={() => navigate(-1)}>
-                    Cancel
-                  </Button>
-                </div>
-                {errorMessage ? (
-                  <div className="rounded-2xl border border-rose-200 bg-rose-50 px-3 py-2 text-sm font-medium text-rose-700">
-                    {errorMessage}
-                  </div>
-                ) : null}
-              </div>
+            <div className="mt-3">
+              <SessionWorkoutEditor
+                items={workoutItems}
+                onChange={setWorkoutItems}
+              />
             </div>
 
+            <div className="mt-6 flex flex-col gap-2">
+              <div className="flex flex-wrap gap-2">
+                <Button
+                  tone="emerald"
+                  onClick={handleSave}
+                  isLoading={isSaving}
+                >
+                  Save changes
+                </Button>
+                <Button tone="default" onClick={() => navigate(-1)}>
+                  Cancel
+                </Button>
+              </div>
+              {errorMessage ? (
+                <div className="rounded-2xl border border-rose-200 bg-rose-50 px-3 py-2 text-sm font-medium text-rose-700">
+                  {errorMessage}
+                </div>
+              ) : null}
+            </div>
+          </div>
         ) : null}
       </PageCardLayout>
     </PageLayout>

@@ -1,27 +1,27 @@
 import {
-    getSupabaseAdminClient,
-    getSupabaseClient,
-    loadSupabaseProfileRoles,
-    logger,
-    saveSupabaseProfile,
-    saveSupabaseProfileRoles,
-    usePlan,
-} from '@gym-pilot/shared';
-import { useEffect, useState } from 'react';
-import { useNavigate, useParams } from 'react-router-dom';
-import { AdminSectionShell } from '../../components/admin/AdminSectionShell';
-import { Button } from '../../components/ui/Button';
-import type { DisplayableError } from '../../components/ui/StatusMessageNotification';
-import { StatusMessageNotification } from '../../components/ui/StatusMessageNotification';
-import { type AdminProfileRow } from '../../features/admin/domain/adminUtils';
+  getSupabaseAdminClient,
+  getSupabaseClient,
+  loadSupabaseProfileRoles,
+  logger,
+  saveSupabaseProfile,
+  saveSupabaseProfileRoles,
+  usePlan,
+} from '@gym-pilot/shared'
+import { useEffect, useState } from 'react'
+import { useNavigate, useParams } from 'react-router-dom'
+import { AdminSectionShell } from '../../components/admin/AdminSectionShell'
+import { Button } from '../../components/ui/Button'
+import type { DisplayableError } from '../../components/ui/StatusMessageNotification'
+import { StatusMessageNotification } from '../../components/ui/StatusMessageNotification'
+import { type AdminProfileRow } from '../../features/admin/domain/adminUtils'
 import {
-    createInitialProfileDraft,
-    mapProfileRow,
-    type ProfileDraft,
-} from '../../features/admin/domain/userProfiles';
-import { renderDashboardTimestamp } from '../../utils/appUtils';
-import { UserProfileForm } from './UserProfileForm';
-import { useCopyToClipboard } from './useCopyToClipboard';
+  createInitialProfileDraft,
+  mapProfileRow,
+  type ProfileDraft,
+} from '../../features/admin/domain/userProfiles'
+import { renderDashboardTimestamp } from '../../utils/appUtils'
+import { UserProfileForm } from './UserProfileForm'
+import { useCopyToClipboard } from './useCopyToClipboard'
 
 const formatStoredTimestamp = (value?: string | null) => {
   if (!value) {

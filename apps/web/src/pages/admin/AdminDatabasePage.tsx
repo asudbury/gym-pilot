@@ -1,6 +1,6 @@
-import { listJsonRecords } from '@gym-pilot/shared';
-import { useEffect, useMemo, useState } from 'react';
-import { AdminSectionShell } from '../../components/admin/AdminSectionShell';
+import { listJsonRecords } from '@gym-pilot/shared'
+import { useEffect, useMemo, useState } from 'react'
+import { AdminSectionShell } from '../../components/admin/AdminSectionShell'
 
 export function AdminDatabasePage() {
   const [databaseEntries, setDatabaseEntries] = useState<

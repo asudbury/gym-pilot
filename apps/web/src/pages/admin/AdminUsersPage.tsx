@@ -1,20 +1,20 @@
 import {
-    getSupabaseClient,
-    listSupabaseAuthUsers,
-    loadSupabaseProfileRoles,
-    logger,
-} from '@gym-pilot/shared';
-import { useEffect, useState } from 'react';
-import { useLocation, useNavigate } from 'react-router-dom';
-import { AdminSectionShell } from '../../components/admin/AdminSectionShell';
-import { Button } from '../../components/ui/Button';
-import { Panel } from '../../components/ui/Panel';
-import { StatusMessageNotification } from '../../components/ui/StatusMessageNotification';
+  getSupabaseClient,
+  listSupabaseAuthUsers,
+  loadSupabaseProfileRoles,
+  logger,
+} from '@gym-pilot/shared'
+import { useEffect, useState } from 'react'
+import { useLocation, useNavigate } from 'react-router-dom'
+import { AdminSectionShell } from '../../components/admin/AdminSectionShell'
+import { Button } from '../../components/ui/Button'
+import { Panel } from '../../components/ui/Panel'
+import { StatusMessageNotification } from '../../components/ui/StatusMessageNotification'
 import {
-    mapAdminProfileRows,
-    type AdminProfileRow,
-} from '../../features/admin/domain/adminUtils';
-import { useCopyToClipboard } from './useCopyToClipboard';
+  mapAdminProfileRows,
+  type AdminProfileRow,
+} from '../../features/admin/domain/adminUtils'
+import { useCopyToClipboard } from './useCopyToClipboard'
 
 export function AdminUsersPage() {
   const location = useLocation()
@@ -160,104 +160,101 @@ export function AdminUsersPage() {
       subtitle="Review current users and set up profiles"
       className="max-w-5xl"
     >
-        <div className="flex flex-wrap gap-2">
-          <Button
-            tone="emerald"
-            onClick={() => navigate('/admin/users/create')}
-            className="px-4 py-2 mb-2"
-          >
-            Create user
-          </Button>
+      <div className="flex flex-wrap gap-2">
+        <Button
+          tone="emerald"
+          onClick={() => navigate('/admin/users/create')}
+          className="px-4 py-2 mb-2"
+        >
+          Create user
+        </Button>
+      </div>
+
+      <Panel padding="md">
+        <div>
+          <h3 className="text-sm font-semibold text-slate-800">
+            Current users
+          </h3>
+          <span className="text-xs uppercase tracking-[0.2em] text-slate-500">
+            {isLoadingSupabaseUsers
+              ? 'Loading…'
+              : `${profileUsers.length} users`}
+          </span>
         </div>
 
-        <Panel padding="md">
-          <div>
-            <h3 className="text-sm font-semibold text-slate-800">
-              Current users
-            </h3>
-            <span className="text-xs uppercase tracking-[0.2em] text-slate-500">
-              {isLoadingSupabaseUsers
-                ? 'Loading…'
-                : `${profileUsers.length} users`}
-            </span>
-          </div>
+        {supabaseUsersNotice ? (
+          <StatusMessageNotification
+            message={supabaseUsersNotice}
+            tone="success"
+            className="mt-2"
+          />
+        ) : null}
 
-          {supabaseUsersNotice ? (
-            <StatusMessageNotification
-              message={supabaseUsersNotice}
-              tone="success"
-              className="mt-2"
-            />
-          ) : null}
+        {isLoadingSupabaseUsers ? (
+          <StatusMessageNotification
+            message={supabaseUsersNotice}
+            tone="info"
+            className="mt-3 text-sm text-slate-600"
+          />
+        ) : null}
 
-          {isLoadingSupabaseUsers ? (
-            <StatusMessageNotification
-              message={supabaseUsersNotice}
-              tone="info"
-              className="mt-3 text-sm text-slate-600"
-            />
-          ) : null}
-
-          {isLoadingSupabaseUsers ? (
-            <p className="mt-3 text-sm text-slate-600">Loading users…</p>
-          ) : profileUsers.length === 0 ? (
-            <p className="mt-3 text-sm text-slate-600">
-              No users yet. Add someone to get started.
-            </p>
-          ) : (
-            <div className="mt-3 space-y-2">
-              {profileUsers.map((user) => (
-                <div
-                  key={user.id}
-                  className="flex flex-col gap-3 rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3 sm:flex-row sm:items-center sm:justify-between"
-                >
-                  <div className="min-w-0 flex-1">
-                    <p className="text-sm font-semibold text-slate-800">
-                      {user.name}
+        {isLoadingSupabaseUsers ? (
+          <p className="mt-3 text-sm text-slate-600">Loading users…</p>
+        ) : profileUsers.length === 0 ? (
+          <p className="mt-3 text-sm text-slate-600">
+            No users yet. Add someone to get started.
+          </p>
+        ) : (
+          <div className="mt-3 space-y-2">
+            {profileUsers.map((user) => (
+              <div
+                key={user.id}
+                className="flex flex-col gap-3 rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3 sm:flex-row sm:items-center sm:justify-between"
+              >
+                <div className="min-w-0 flex-1">
+                  <p className="text-sm font-semibold text-slate-800">
+                    {user.name}
+                  </p>
+                  <p className="mt-1 text-sm text-slate-600">
+                    {user.email || 'No email available'}
+                  </p>
+                  <p className="mt-1 text-xs uppercase tracking-[0.2em] text-slate-500">
+                    {user.roles.length > 0 ? user.roles.join(', ') : 'No roles'}
+                  </p>
+                  {user.roles.includes('client') ? (
+                    <p className="mt-1 text-xs text-slate-500">
+                      Trainer:{' '}
+                      {user.trainerId
+                        ? (profileUsers.find(
+                            (candidate) => candidate.id === user.trainerId,
+                          )?.name ?? 'Assigned trainer')
+                        : 'No trainer assigned'}
                     </p>
-                    <p className="mt-1 text-sm text-slate-600">
-                      {user.email || 'No email available'}
-                    </p>
-                    <p className="mt-1 text-xs uppercase tracking-[0.2em] text-slate-500">
-                      {user.roles.length > 0
-                        ? user.roles.join(', ')
-                        : 'No roles'}
-                    </p>
-                    {user.roles.includes('client') ? (
-                      <p className="mt-1 text-xs text-slate-500">
-                        Trainer:{' '}
-                        {user.trainerId
-                          ? (profileUsers.find(
-                              (candidate) => candidate.id === user.trainerId,
-                            )?.name ?? 'Assigned trainer')
-                          : 'No trainer assigned'}
-                      </p>
-                    ) : null}
-                  </div>
-                  <div className="flex flex-wrap items-center gap-2">
-                    <Button
-                      tone="emerald"
-                      onClick={() => void handleCopyInviteLink(user)}
-                      className="px-3 py-1.5"
-                    >
-                      {linkCopied && lastCopiedUserId === user.id
-                        ? 'Invite link copied'
-                        : 'Copy invite link'}
-                    </Button>
-                    <Button
-                      tone="blue"
-                      onClick={() => navigate(`/admin/users/edit/${user.id}`)}
-                      className="px-3 py-1.5"
-                    >
-                      Edit user
-                    </Button>
-                  </div>
+                  ) : null}
                 </div>
-              ))}
-            </div>
-          )}
-        </Panel>
-
+                <div className="flex flex-wrap items-center gap-2">
+                  <Button
+                    tone="emerald"
+                    onClick={() => void handleCopyInviteLink(user)}
+                    className="px-3 py-1.5"
+                  >
+                    {linkCopied && lastCopiedUserId === user.id
+                      ? 'Invite link copied'
+                      : 'Copy invite link'}
+                  </Button>
+                  <Button
+                    tone="blue"
+                    onClick={() => navigate(`/admin/users/edit/${user.id}`)}
+                    className="px-3 py-1.5"
+                  >
+                    Edit user
+                  </Button>
+                </div>
+              </div>
+            ))}
+          </div>
+        )}
+      </Panel>
     </AdminSectionShell>
   )
 }
