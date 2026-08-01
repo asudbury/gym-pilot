@@ -27,8 +27,6 @@ type SavedSearch = {
   selectedCategory: string | null
 }
 
-
-
 type FavouriteLinksMenuProps = {
   variant?: 'header' | 'menu'
   onMenuOpenChange?: (open: boolean) => void
@@ -198,8 +196,7 @@ export function FavouriteLinksMenu({
   }, [currentQuickLink, favorites, menuOpen])
 
   const handleUpdateFavoriteLink = (link: QuickLink, folderName?: string) => {
-    const normalizedFolder =
-      normalizeFolderName(folderName ?? '') || undefined
+    const normalizedFolder = normalizeFolderName(folderName ?? '') || undefined
     const alreadySaved = favorites.some((item) => item.path === link.path)
 
     if (alreadySaved) {

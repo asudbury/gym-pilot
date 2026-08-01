@@ -37,5 +37,3 @@ function getFolderOptions(folders: string[], favorites: QuickLink[]) {
 
   return Array.from(names).sort((left, right) => left.localeCompare(right))
 }
-
-
