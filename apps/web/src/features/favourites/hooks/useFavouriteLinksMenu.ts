@@ -1,6 +1,15 @@
 import { useEffect, useMemo, useState } from 'react'
+import { useLocation, useNavigate } from 'react-router-dom'
+import { exercises, exercisesSchema } from '@gym-pilot/shared'
 import { HOME_FILTER_KEY } from '../../../constants/storageKeys'
-import { normalizeHomeFilters, type HomeFilters } from '../domain/quickLinks'
+import {
+  getQuickLinkForPath,
+  groupFavoritesByFolder,
+  normalizeHomeFilters,
+  type HomeFilters,
+  type QuickLink,
+} from '../domain/quickLinks'
+import { useFavouritesFeature } from './useFavouritesFeature'
 
 type UseFavouriteLinksMenuOptions = {
   onMenuOpenChange?: (open: boolean) => void
@@ -30,6 +39,10 @@ export function useFavouriteLinksMenu({
       return { searchTerm: '', selectedCategory: null, showImages: true }
     }
   })
+
+  const { favorites, setFavorites, folders } = useFavouritesFeature()
+  const location = useLocation()
+  const navigate = useNavigate()
 
   useEffect(() => {
     window.sessionStorage.setItem(
@@ -103,15 +116,112 @@ export function useFavouriteLinksMenu({
     }
   }, [menuOpen])
 
+  const exerciseLookup = useMemo(() => {
+    try {
+      const parsedExercises = exercisesSchema.parse(exercises)
+      return new Map(parsedExercises.map((exercise) => [exercise.id, exercise]))
+    } catch {
+      return new Map<string, { id: string; name: string }>()
+    }
+  }, [])
+
+  const currentQuickLink = useMemo(() => {
+    return getQuickLinkForPath(location.pathname, exerciseLookup)
+  }, [exerciseLookup, location.pathname])
+
+  const favoriteGroups = useMemo(() => {
+    const visibleFavorites = selectedFolder
+      ? favorites.filter((item) => (item.folder ?? '') === selectedFolder)
+      : favorites
+
+    return groupFavoritesByFolder(visibleFavorites)
+  }, [favorites, selectedFolder])
+
+  const folderOptions = useMemo(() => {
+    const folderNames = Array.from(
+      new Set([
+        ...folders,
+        ...favorites.flatMap((item) => (item.folder ? [item.folder] : [])),
+      ]),
+    ).filter(Boolean)
+
+    return folderNames.sort((left, right) => left.localeCompare(right))
+  }, [favorites, folders])
+
+  const isCurrentLinkFavorite = useMemo(() => {
+    if (!currentQuickLink) {
+      return false
+    }
+
+    return favorites.some((item) => item.path === currentQuickLink.path)
+  }, [currentQuickLink, favorites])
+
+  const handleToggleCurrentFavorite = () => {
+    if (!currentQuickLink) {
+      return
+    }
+
+    const isFavorite = favorites.some((item) => item.path === currentQuickLink.path)
+
+    if (isFavorite) {
+      setFavorites((current) =>
+        current.filter((item) => item.path !== currentQuickLink.path),
+      )
+      return
+    }
+
+    setFavorites((current) => [
+      ...current,
+      {
+        ...currentQuickLink,
+        folder: selectedFolder || undefined,
+      },
+    ])
+  }
+
+  const handleRemoveFavoriteLink = (link: QuickLink) => {
+    setFavorites((current) =>
+      current.filter((item) => item.path !== link.path && item.id !== link.id),
+    )
+  }
+
+  const handleOpenQuickLink = (link: QuickLink) => {
+    navigate(link.path)
+    setMenuOpen(false)
+  }
+
+  const handleOpenFavouritesPage = () => {
+    navigate('/favourites')
+    setMenuOpen(false)
+  }
+
   return useMemo(
     () => ({
       menuOpen,
       setMenuOpen,
       selectedFolder,
       setSelectedFolder,
+      favorites,
+      currentQuickLink,
+      favoriteGroups,
+      folderOptions,
+      isCurrentLinkFavorite,
+      handleToggleCurrentFavorite,
+      handleRemoveFavoriteLink,
+      handleOpenQuickLink,
+      handleOpenFavouritesPage,
       homeFilters,
       setHomeFilters,
     }),
-    [homeFilters, menuOpen, selectedFolder],
+    [
+      currentQuickLink,
+      favoriteGroups,
+      favorites,
+      folderOptions,
+      homeFilters,
+      isCurrentLinkFavorite,
+      menuOpen,
+      selectedFolder,
+    ],
   )
 }

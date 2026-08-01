@@ -1,15 +1,6 @@
-import { classNames, exercises, exercisesSchema } from '@gym-pilot/shared'
-import { useEffect, useMemo } from 'react'
-import { useLocation, useNavigate } from 'react-router-dom'
-import {
-  getQuickLinkForPath,
-  groupFavoritesByFolder,
-  normalizeFolderName,
-  sortQuickLinks,
-  type QuickLink,
-} from '../../features/favourites/domain/quickLinks'
+import { classNames } from '@gym-pilot/shared'
+import { useMemo } from 'react'
 import { useFavouriteLinksMenu } from '../../features/favourites/hooks/useFavouriteLinksMenu'
-import { useFavouritesFeature } from '../../features/favourites/hooks/useFavouritesFeature'
 import { getToneClass } from '../toneClasses'
 import { Button } from '../ui/Button'
 import { DecorativeIcon } from '../ui/DecorativeIcon'
@@ -34,130 +25,28 @@ export function FavouriteLinksMenu({
   variant = 'menu',
   onMenuOpenChange,
 }: FavouriteLinksMenuProps) {
-  const location = useLocation()
-  const navigate = useNavigate()
-  const { menuOpen, setMenuOpen, selectedFolder, setSelectedFolder } =
-    useFavouriteLinksMenu({
-      onMenuOpenChange,
-    })
-  const { favorites, folders, setFavorites } = useFavouritesFeature()
+  const {
+    menuOpen,
+    setMenuOpen,
+    selectedFolder,
+    setSelectedFolder,
+    favorites,
+    favoriteGroups,
+    folderOptions,
+    isCurrentLinkFavorite,
+    handleToggleCurrentFavorite,
+    handleRemoveFavoriteLink,
+    handleOpenQuickLink,
+    handleOpenFavouritesPage,
+  } = useFavouriteLinksMenu({ onMenuOpenChange })
 
-  const exerciseLookup = useMemo(() => {
-    const parsed = exercisesSchema.parse(exercises)
-    return new Map(parsed.map((exercise) => [exercise.id, exercise]))
-  }, [])
-
-  const currentQuickLink = useMemo(
-    () => getQuickLinkForPath(location.pathname, exerciseLookup),
-    [exerciseLookup, location.pathname],
-  )
-  const favoriteGroups = useMemo(() => {
-    const groups = groupFavoritesByFolder(favorites)
-    const folderGroups = folders.map(
-      (folderName) => [folderName, [] as QuickLink[]] as const,
+  const triggerClassName = useMemo(() => {
+    return classNames(
+      navigationItemBaseClassName,
+      variant === 'menu' ? 'w-full' : '',
+      menuOpen ? 'bg-slate-100' : '',
     )
-    const merged = new Map<string, QuickLink[]>(groups)
-
-    folderGroups.forEach(([folderName]) => {
-      if (!merged.has(folderName)) {
-        merged.set(folderName, [])
-      }
-    })
-
-    return Array.from(merged.entries()).sort(([leftName], [rightName]) => {
-      if (leftName === 'Unfiled') {
-        return 1
-      }
-
-      if (rightName === 'Unfiled') {
-        return -1
-      }
-
-      return leftName.localeCompare(rightName)
-    })
-  }, [favorites, folders])
-
-  const folderOptions = useMemo(() => {
-    const options = new Set<string>(folders)
-
-    favorites.forEach((item) => {
-      const folderName = normalizeFolderName(item.folder ?? '')
-
-      if (folderName) {
-        options.add(folderName)
-      }
-    })
-
-    return Array.from(options).sort((left, right) => left.localeCompare(right))
-  }, [favorites, folders])
-
-  useEffect(() => {
-    if (!menuOpen || !currentQuickLink) {
-      return
-    }
-
-    const existingFavorite = favorites.find(
-      (item) => item.path === currentQuickLink.path,
-    )
-    const folderName = normalizeFolderName(existingFavorite?.folder ?? '')
-
-    setSelectedFolder(folderName)
-  }, [currentQuickLink, favorites, menuOpen])
-
-  const handleUpdateFavoriteLink = (link: QuickLink, folderName?: string) => {
-    const normalizedFolder = normalizeFolderName(folderName ?? '') || undefined
-    const alreadySaved = favorites.some((item) => item.path === link.path)
-
-    if (alreadySaved) {
-      setFavorites(
-        sortQuickLinks(
-          favorites.map((item) =>
-            item.path === link.path
-              ? { ...item, folder: normalizedFolder }
-              : item,
-          ),
-        ),
-      )
-      return
-    }
-
-    const nextFavorites = sortQuickLinks([
-      ...favorites,
-      { ...link, folder: normalizedFolder },
-    ]).slice(0, 12)
-
-    setFavorites(nextFavorites)
-  }
-
-  const handleRemoveFavoriteLink = (link: QuickLink) => {
-    setFavorites(
-      sortQuickLinks(favorites.filter((item) => item.path !== link.path)),
-    )
-  }
-
-  const handleToggleCurrentFavorite = () => {
-    if (!currentQuickLink) {
-      return
-    }
-
-    handleUpdateFavoriteLink(currentQuickLink, selectedFolder)
-  }
-
-  const handleOpenQuickLink = (link: QuickLink) => {
-    navigate(link.path)
-    setMenuOpen(false)
-  }
-
-  const handleOpenFavouritesPage = () => {
-    navigate('/favourites')
-    setMenuOpen(false)
-  }
-
-  const triggerClassName = classNames(
-    navigationItemBaseClassName,
-    variant === 'menu' ? 'w-full' : '',
-    menuOpen ? 'bg-slate-100' : '',
-  )
+  }, [menuOpen, variant])
 
   return (
     <div className="relative">
@@ -172,6 +61,7 @@ export function FavouriteLinksMenu({
         </span>
         <span className="leading-none">Favourites</span>
       </button>
+
       {menuOpen && (
         <div
           id="quick-links-menu"
@@ -207,7 +97,7 @@ export function FavouriteLinksMenu({
                     'px-3 py-1.5 text-xs font-medium',
                   )}
                 >
-                  Add to favourites
+                  {isCurrentLinkFavorite ? 'Remove from favourites' : 'Add to favourites'}
                 </Button>
               </div>
             </div>

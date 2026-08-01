@@ -2,6 +2,7 @@
 
 import { act } from 'react'
 import { createRoot, type Root } from 'react-dom/client'
+import { MemoryRouter } from 'react-router-dom'
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 import { HOME_FILTER_KEY } from '../../../constants/storageKeys'
 import { useFavouriteLinksMenu } from './useFavouriteLinksMenu'
@@ -35,7 +36,11 @@ describe('useFavouriteLinksMenu', () => {
     }
 
     act(() => {
-      root.render(<Harness />)
+      root.render(
+        <MemoryRouter>
+          <Harness />
+        </MemoryRouter>,
+      )
     })
 
     act(() => {
