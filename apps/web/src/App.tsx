@@ -1,13 +1,13 @@
-import { useEffect } from 'react';
-import { Routes, useLocation } from 'react-router-dom';
-import ErrorBoundary from './components/ErrorBoundary';
-import { Header } from './components/navigation/Header';
-import { Button } from './components/ui/Button';
-import { BottomNavigation } from './features/app-shell/components/BottomNavigation';
-import { useAppShell } from './features/app-shell/hooks/useAppShell';
-import { createAuthRoutes } from './routes/authRoutes';
-import { createPublicRoutes } from './routes/publicRoutes';
-import { getInstallHint } from './utils/pwa';
+import { useEffect } from 'react'
+import { Routes, useLocation } from 'react-router-dom'
+import ErrorBoundary from './components/ErrorBoundary'
+import { Header } from './components/navigation/Header'
+import { Button } from './components/ui/Button'
+import { BottomNavigation } from './features/app-shell/components/BottomNavigation'
+import { useAppShell } from './features/app-shell/hooks/useAppShell'
+import { createAuthRoutes } from './routes/authRoutes'
+import { createPublicRoutes } from './routes/publicRoutes'
+import { getInstallHint } from './utils/pwa'
 
 function ScrollToTop() {
   const { pathname } = useLocation()

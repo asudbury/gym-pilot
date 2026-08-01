@@ -1,17 +1,17 @@
-import { useEffect, useRef } from 'react';
-import { NavLink } from 'react-router-dom';
-import type { NavigationMenuListItem } from '../../utils/navigationUtils';
-import { getToneClass } from '../toneClasses';
-import { Button } from '../ui/Button';
-import { DecorativeIcon } from '../ui/DecorativeIcon';
-import { StatusMessageNotification } from '../ui/StatusMessageNotification';
-import { ResponsiveVisibility } from '../visibility/ResponsiveVisibility';
-import { FavouriteLinksMenu } from './FavouriteLinksMenu';
+import { useEffect, useRef } from 'react'
+import { NavLink } from 'react-router-dom'
+import type { NavigationMenuListItem } from '../../utils/navigationUtils'
+import { getToneClass } from '../toneClasses'
+import { Button } from '../ui/Button'
+import { DecorativeIcon } from '../ui/DecorativeIcon'
+import { StatusMessageNotification } from '../ui/StatusMessageNotification'
+import { ResponsiveVisibility } from '../visibility/ResponsiveVisibility'
+import { FavouriteLinksMenu } from './FavouriteLinksMenu'
 import {
-    navigationItemBaseClassName,
-    navigationItemIconClassName,
-} from './navigationItemStyles';
-import { NavigationMenuList } from './NavigationMenuList';
+  navigationItemBaseClassName,
+  navigationItemIconClassName,
+} from './navigationItemStyles'
+import { NavigationMenuList } from './NavigationMenuList'
 
 type HeaderProps = {
   appName: string
@@ -148,7 +148,7 @@ export function Header({
               {mobileMenuOpen ? (
                 <div
                   ref={menuContainerRef}
-                  className="fixed inset-x-3 top-16 z-40 max-h-[min(75vh,32rem)] overflow-y-auto rounded-2xl border border-white/70 bg-white/75 p-3 shadow-xl backdrop-blur-xl sm:absolute sm:right-0 sm:left-auto sm:top-full sm:mt-2 sm:w-80 sm:max-w-[calc(100vw-2rem)]"
+                  className="fixed inset-x-3 top-16 z-40 max-h-[min(75vh,32rem)] overflow-y-auto rounded-2xl border border-white/70 bg-white/75 p-3 shadow-xl backdrop-blur-xl sm:absolute sm:right-0 sm:left-auto sm:top-full sm:mt-2 sm:w-80 sm:max-w-[calc(100vw-2rem)] dark:border-slate-700 dark:bg-slate-900"
                 >
                   <div className="flex flex-col gap-2">
                     <FavouriteLinksMenu />
@@ -195,7 +195,7 @@ export function Header({
               {mobileMenuOpen ? (
                 <div
                   ref={menuContainerRef}
-                  className="fixed inset-x-3 top-16 z-40 max-h-[min(75vh,32rem)] overflow-y-auto rounded-2xl border border-slate-200 bg-white p-3 shadow-lg sm:absolute sm:right-0 sm:left-auto sm:top-full sm:mt-2 sm:w-80 sm:max-w-[calc(100vw-2rem)]"
+                  className="fixed inset-x-3 top-16 z-40 max-h-[min(75vh,32rem)] overflow-y-auto rounded-2xl border border-slate-200 bg-white p-3 shadow-lg sm:absolute sm:right-0 sm:left-auto sm:top-full sm:mt-2 sm:w-80 sm:max-w-[calc(100vw-2rem)] dark:border-slate-700 dark:bg-slate-900"
                 >
                   <div className="flex flex-col gap-2">
                     <FavouriteLinksMenu />
