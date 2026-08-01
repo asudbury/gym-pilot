@@ -5,6 +5,7 @@ import {
   getSessionEntryRating,
   getSessionEntryTitle,
 } from '../../features/session-history/domain/sessionHistoryViewModel'
+import { Button } from '../ui/Button'
 
 function formatAttendanceDate(value?: string | null) {
   if (!value) {
@@ -28,6 +29,7 @@ type SessionEntryCardProps = {
   onSelect?: (sessionId: string) => void
   selected?: boolean
   onCardClick?: (sessionId: string) => void
+  showEditButton?: boolean
 }
 
 export function SessionEntryCard({
@@ -39,6 +41,7 @@ export function SessionEntryCard({
   selected,
   onCardClick,
   children,
+  showEditButton = false,
 }: SessionEntryCardProps & { children?: React.ReactNode }) {
   const navigate = useNavigate()
 
@@ -110,6 +113,9 @@ export function SessionEntryCard({
             })()}
           </div>
         </div>
+        {showEditButton && (
+          <Button>Edit</Button>
+        )}
         {deleteEntry && (
           <div className="flex flex-wrap gap-2">
             {pendingDeleteEntryId !== entry.id ? (

@@ -109,7 +109,7 @@ export const AppleFitnessWorkoutCard = ({
 
           {linkedSession ? (
             <>
-              <SessionEntryCard entry={linkedSession} />
+              <SessionEntryCard entry={linkedSession} showEditButton />
               <Button
                 tone="emerald"
                 className="mt-2 mr-2"

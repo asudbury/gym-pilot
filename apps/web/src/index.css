@@ -240,6 +240,8 @@ html.dark .bg-slate-900 {
 
 /* Hide the day header for the second month in showDoubleView */
 /* This targets the weekdays row of the second calendar instance */
-.react-calendar__viewContainer .react-calendar__month-view:nth-child(2) .react-calendar__month-view__weekdays {
+.react-calendar__viewContainer
+  .react-calendar__month-view:nth-child(2)
+  .react-calendar__month-view__weekdays {
   display: none;
 }

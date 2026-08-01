@@ -9,16 +9,13 @@ import {
 import { AppleFitnessWorkoutCard } from './AppleFitnessWorkoutCard'
 import { StatusMessageNotification } from './ui/StatusMessageNotification'
 import { Button } from './ui/Button'
-import DatePicker from './ui/DatePicker'
 import {
   NO_LINK_SESSION_ID,
   resolveWorkoutLinkState,
 } from './workoutCalendarUtils'
 
-// Define a type that matches react-calendar's Value for single selection, which can be Date or null
 type CalendarValue = Date | null
 type ViewType = 'calendar' | 'list'
-
 interface WorkoutCalendarProps {
   workouts: ImportedWorkout[]
   title?: string
@@ -32,9 +29,6 @@ interface WorkoutListProps {
   handleUnlinkWorkout: (workout: ImportedWorkout) => void
   handleNoLinkWorkout: (workout: ImportedWorkout) => void
   startDate: Date | null
-  endDate: Date | null
-  onStartDateChange: (date: Date | null) => void
-  onEndDateChange: (date: Date | null) => void
 }
 
 const WorkoutList: React.FC<WorkoutListProps> = ({
@@ -43,25 +37,18 @@ const WorkoutList: React.FC<WorkoutListProps> = ({
   handleUnlinkWorkout,
   handleNoLinkWorkout,
   startDate,
-  endDate,
-  onStartDateChange,
-  onEndDateChange,
 }) => {
+  const monthYear = startDate
+    ? startDate.toLocaleString('default', { month: 'long', year: 'numeric' })
+    : 'Selected Month'
+
   return (
     <div className="mt-5">
       <h3 className="mb-2.5 text-slate-800">
-        <b>All Workouts</b>
+        <b>
+          {monthYear} ({workouts.length} Workouts)
+        </b>
       </h3>
-      <div className="flex space-x-4 mb-4">
-        <div>
-          <label htmlFor="start-date" className="block text-sm font-medium text-slate-700">Start Date</label>
-          <DatePicker selected={startDate} onChange={onStartDateChange} />
-        </div>
-        <div>
-          <label htmlFor="end-date" className="block text-sm font-medium text-slate-700">End Date</label>
-          <DatePicker selected={endDate} onChange={onEndDateChange} />
-        </div>
-      </div>
       {workouts.length > 0 ? (
         workouts.map((workout) => (
           <div className="mb-4" key={workout.id}>
@@ -79,7 +66,10 @@ const WorkoutList: React.FC<WorkoutListProps> = ({
           </div>
         ))
       ) : (
-        <StatusMessageNotification message="No workouts found in the selected date range" tone="info" />
+        <StatusMessageNotification
+          message="No workouts found in the selected date range"
+          tone="info"
+        />
       )}
     </div>
   )
@@ -215,7 +205,7 @@ const WorkoutCalendar: React.FC<WorkoutCalendarProps> = ({
   }, [localWorkouts])
 
   const filteredWorkouts = useMemo(() => {
-    return localWorkouts.filter(workout => {
+    return localWorkouts.filter((workout) => {
       const workoutDate = new Date(workout.start_date)
       if (startDate && workoutDate < startDate) {
         return false
@@ -294,21 +284,19 @@ const WorkoutCalendar: React.FC<WorkoutCalendarProps> = ({
       } else {
         return (
           <div className="workout-dot-container mt-1.5 flex h-5 items-center justify-center">
-            {/* Empty span for uniform alignment when no workouts */}
           </div>
         )
       }
     }
-    return null // No custom content for other days or views
+    return null
   }
 
-  // Update handleDateChange to accept CalendarValue (Date | null) and the optional event
   const handleDateChange = (value: any) => {
     const newDate = Array.isArray(value) ? value[0] : value
     if (newDate instanceof Date || newDate === null) {
       setSelectedDate(newDate)
       if (newDate) {
-        setActiveStartDate(newDate) // Keep the calendar view in sync
+        setActiveStartDate(newDate) 
       }
       if (onDateChange) {
         onDateChange(newDate)
@@ -381,7 +369,7 @@ const WorkoutCalendar: React.FC<WorkoutCalendarProps> = ({
                 setActiveStartDate(startOfMonth)
                 setStartDate(startOfMonth)
                 setEndDate(endOfMonth)
-                setSelectedDate(null) // Clear selected date
+                setSelectedDate(null) 
               }
             }}
           />
@@ -422,9 +410,6 @@ const WorkoutCalendar: React.FC<WorkoutCalendarProps> = ({
           handleUnlinkWorkout={handleUnlinkWorkout}
           handleNoLinkWorkout={handleNoLinkWorkout}
           startDate={startDate}
-          endDate={endDate}
-          onStartDateChange={setStartDate}
-          onEndDateChange={setEndDate}
         />
       )}
     </div>

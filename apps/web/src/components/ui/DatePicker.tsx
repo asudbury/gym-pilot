@@ -29,7 +29,6 @@ const DatePicker: React.FC<DatePickerProps> = ({
     return `${year}-${month}-${day}`
   }
 
-
   return (
     <input
       type="date"
