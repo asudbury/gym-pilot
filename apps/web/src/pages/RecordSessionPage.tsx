@@ -1,25 +1,27 @@
-import { useEffect, useMemo, useState } from 'react'
-import { useNavigate, useSearchParams } from 'react-router-dom'
-import { RatingSelector } from '../components/RatingSelector'
 import {
-  StatusMessageNotification,
-  type DisplayableError,
-} from '../components/ui/StatusMessageNotification'
-import { PageCard } from '../components/PageCard'
-import { SessionWorkoutEditor } from '../components/SessionWorkoutEditor'
-import { DesktopOnly } from '../components/visibility/DeviceVisibility'
-import { DecorativeIcon } from '../components/ui/DecorativeIcon'
-import { Heading1, UpperCaseParagraph } from '../components/Typography'
-import { PageLayout } from '../layouts/PageLayout'
-import { appTokens } from '../constants/tokens'
+    logger,
+    updateUserSession,
+    usePlan,
+    type UserSession,
+    type UserSessionWorkoutItem,
+} from '@gym-pilot/shared';
+import { type PlanSession } from '@gym-pilot/types';
+import { useEffect, useMemo, useState } from 'react';
+import { useNavigate, useSearchParams } from 'react-router-dom';
+import { useAuth } from '../auth/AuthContext';
+import { PageCard } from '../components/PageCard';
+import { RatingSelector } from '../components/RatingSelector';
+import { SessionWorkoutEditor } from '../components/SessionWorkoutEditor';
+import { Heading1, UpperCaseParagraph } from '../components/Typography';
+import { Button } from '../components/ui/Button';
+import { DecorativeIcon } from '../components/ui/DecorativeIcon';
 import {
-  logger,
-  usePlan,
-  type UserSession,
-  updateUserSession,
-  type UserSessionWorkoutItem,
-} from '@gym-pilot/shared'
-import { type PlanSession } from '@gym-pilot/types'
+    StatusMessageNotification,
+    type DisplayableError,
+} from '../components/ui/StatusMessageNotification';
+import { DesktopOnly } from '../components/visibility/DeviceVisibility';
+import { appTokens } from '../constants/tokens';
+import { PageLayout } from '../layouts/PageLayout';
 
 function buildWorkoutItemsFromPlanSessions(
   planSessions: PlanSession[],
@@ -48,8 +50,6 @@ function buildWorkoutItemsFromPlanSessions(
   }
   return items
 }
-import { useAuth } from '../auth/AuthContext'
-import { Button } from '../components/ui/Button'
 
 type SessionType = 'class' | 'solo' | 'personal_training'
 
@@ -64,6 +64,24 @@ function resolveInitialSessionType(value: string | null): SessionType {
 
   return 'personal_training'
 }
+
+export function detectDateTimeLocalSupport(windowObject: Window | null): boolean {
+  if (!windowObject?.document) {
+    return true
+  }
+
+  try {
+    const input = windowObject.document.createElement('input')
+    input.setAttribute('type', 'datetime-local')
+    return input.type === 'datetime-local'
+  } catch {
+    return false
+  }
+}
+
+const supportsDateTimeLocal = detectDateTimeLocalSupport(
+  typeof window === 'undefined' ? null : window,
+)
 
 export function RecordSessionPage() {
   const { user } = useAuth()
@@ -82,9 +100,6 @@ export function RecordSessionPage() {
   const [startAt, setStartAt] = useState('')
   const [datePart, setDatePart] = useState('')
   const [timePart, setTimePart] = useState('')
-  const [supportsDateTimeLocal, setSupportsDateTimeLocal] = useState<
-    boolean | null
-  >(null)
   const [rating, setRating] = useState<number | null>(null)
   const [duration, setDuration] = useState<number | undefined>(undefined)
   const [name, setName] = useState('')
@@ -141,17 +156,6 @@ export function RecordSessionPage() {
       buildWorkoutItemsFromPlanSessions(selectedPlan.planSessions),
     )
   }, [selectedPlan])
-
-  useEffect(() => {
-    if (typeof window === 'undefined') return
-    try {
-      const input = document.createElement('input')
-      input.setAttribute('type', 'datetime-local')
-      setSupportsDateTimeLocal(input.type === 'datetime-local')
-    } catch {
-      setSupportsDateTimeLocal(false)
-    }
-  }, [])
 
   const handleSubmit = async () => {
     if (!startAt || !user) {
@@ -267,7 +271,7 @@ export function RecordSessionPage() {
 
             <label className="mt-4 block text-sm text-slate-700">
               <span className="font-medium pl-1">Start time</span>
-              {supportsDateTimeLocal === false ? (
+              {!supportsDateTimeLocal ? (
                 <div className="mt-1 flex flex-col gap-2 sm:flex-row">
                   <input
                     type="date"

@@ -20,6 +20,18 @@ function ScrollToTop() {
 }
 
 function App() {
+  // Add PWA class to HTML element if in standalone mode
+  useEffect(() => {
+    const isPwa =
+      window.matchMedia('(display-mode: standalone)').matches ||
+      (window.navigator as unknown as { standalone: boolean }).standalone
+    if (isPwa) {
+      document.documentElement.classList.add('pwa')
+    } else {
+      document.documentElement.classList.remove('pwa')
+    }
+  }, [])
+
   const {
     appName,
     broadcastMessage,
@@ -46,7 +58,7 @@ function App() {
   } = useAppShell()
 
   return (
-    <div className="min-h-screen bg-slate-50 pb-16 text-slate-900 transition-colors dark:bg-slate-950 dark:text-slate-100">
+    <div className="min-h-screen bg-slate-50 pb-16 text-slate-900 transition-colors dark:bg-slate-950 dark:text-slate-100 pwa:pb-[calc(4rem+env(safe-area-inset-bottom))]">
       <ScrollToTop />
       {broadcastMessage.trim() ? (
         <div className="border-b border-amber-200 bg-amber-50 px-4 py-2 text-center text-sm font-medium text-amber-900">
