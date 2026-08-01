@@ -1,27 +1,27 @@
-import { useEffect, useState } from 'react'
-import type { DisplayableError } from '../../components/ui/StatusMessageNotification'
-import { useNavigate, useParams } from 'react-router-dom'
-import { Button } from '../../components/ui/Button'
 import {
-  getSupabaseClient,
-  getSupabaseAdminClient,
-  loadSupabaseProfileRoles,
-  saveSupabaseProfile,
-  saveSupabaseProfileRoles,
-  usePlan,
-} from '@gym-pilot/shared'
-import { AdminSectionShell } from '../../components/admin/AdminSectionShell'
-import { logger } from '@gym-pilot/shared'
-import { type AdminProfileRow } from '../../features/admin/domain/adminUtils'
+    getSupabaseAdminClient,
+    getSupabaseClient,
+    loadSupabaseProfileRoles,
+    logger,
+    saveSupabaseProfile,
+    saveSupabaseProfileRoles,
+    usePlan,
+} from '@gym-pilot/shared';
+import { useEffect, useState } from 'react';
+import { useNavigate, useParams } from 'react-router-dom';
+import { AdminSectionShell } from '../../components/admin/AdminSectionShell';
+import { Button } from '../../components/ui/Button';
+import type { DisplayableError } from '../../components/ui/StatusMessageNotification';
+import { StatusMessageNotification } from '../../components/ui/StatusMessageNotification';
+import { type AdminProfileRow } from '../../features/admin/domain/adminUtils';
 import {
-  createInitialProfileDraft,
-  mapProfileRow,
-  type ProfileDraft,
-} from '../../features/admin/domain/userProfiles'
-import { renderDashboardTimestamp } from '../../utils/appUtils'
-import { StatusMessageNotification } from '../../components/ui/StatusMessageNotification'
-import { UserProfileForm } from './UserProfileForm'
-import { useCopyToClipboard } from './useCopyToClipboard'
+    createInitialProfileDraft,
+    mapProfileRow,
+    type ProfileDraft,
+} from '../../features/admin/domain/userProfiles';
+import { renderDashboardTimestamp } from '../../utils/appUtils';
+import { UserProfileForm } from './UserProfileForm';
+import { useCopyToClipboard } from './useCopyToClipboard';
 
 const formatStoredTimestamp = (value?: string | null) => {
   if (!value) {
@@ -177,7 +177,7 @@ export function AdminEditUserPage() {
       backLabel="Back to user admin"
       className="max-w-3xl"
     >
-      <div className="space-y-2 p-0 md:space-y-4 md:rounded-2xl md:border md:border-slate-200 md:bg-slate-50 md:p-4">
+      <div>
         {isLoading ? (
           <p className="p-4 text-sm text-slate-600">Loading profile...</p>
         ) : statusType === 'error' && !profile ? (

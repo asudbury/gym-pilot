@@ -1,25 +1,25 @@
-import { useEffect, useMemo, useState } from 'react'
-import type { UserSession } from '@gym-pilot/shared'
-import { useNavigate, useParams } from 'react-router-dom'
-import { useAuth } from '../auth/AuthContext'
-import { Button } from '../components/ui/Button'
-import { OptionSelector } from '../components/OptionSelector'
-import { RatingSelector } from '../components/RatingSelector'
-import { SessionWorkoutEditor } from '../components/SessionWorkoutEditor'
-import { PageCardLayout } from '../layouts/PageCardLayout'
-import { PageLayout } from '../layouts/PageLayout'
-import { DesktopOnly } from '../components/visibility/DeviceVisibility'
+import type { UserSession } from '@gym-pilot/shared';
 import {
-  getUserSession,
-  getUserSessionWorkoutItemsForSession,
-  saveWorkoutItemsForSession,
-  updateUserSession,
-  type UserSessionWorkoutItem,
-} from '@gym-pilot/shared'
+    getUserSession,
+    getUserSessionWorkoutItemsForSession,
+    saveWorkoutItemsForSession,
+    updateUserSession,
+    type UserSessionWorkoutItem,
+} from '@gym-pilot/shared';
+import { useEffect, useMemo, useState } from 'react';
+import { useNavigate, useParams } from 'react-router-dom';
+import { useAuth } from '../auth/AuthContext';
+import { OptionSelector } from '../components/OptionSelector';
+import { RatingSelector } from '../components/RatingSelector';
+import { SessionWorkoutEditor } from '../components/SessionWorkoutEditor';
+import { Button } from '../components/ui/Button';
+import { DesktopOnly } from '../components/visibility/DeviceVisibility';
 import {
-  getSessionEntryRating,
-  getSessionEntryTitle,
-} from '../features/session-history/domain/sessionHistoryViewModel'
+    getSessionEntryRating,
+    getSessionEntryTitle,
+} from '../features/session-history/domain/sessionHistoryViewModel';
+import { PageCardLayout } from '../layouts/PageCardLayout';
+import { PageLayout } from '../layouts/PageLayout';
 
 export function SessionEditPage() {
   const { user } = useAuth()
@@ -167,7 +167,6 @@ export function SessionEditPage() {
         icon="edit"
       >
         {entry ? (
-          <div className="space-y-2 p-0 md:space-y-4 md:rounded-2xl md:border md:border-slate-200 md:bg-slate-50 md:p-4">
             <div className="m-0 bg-white p-0 sm:m-4 sm:rounded-2xl sm:border sm:border-slate-200 sm:p-4">
               {entry.session_type !== 'solo' ? (
                 <div className="mt-4 flex flex-col gap-2">
@@ -277,7 +276,7 @@ export function SessionEditPage() {
                 ) : null}
               </div>
             </div>
-          </div>
+
         ) : null}
       </PageCardLayout>
     </PageLayout>

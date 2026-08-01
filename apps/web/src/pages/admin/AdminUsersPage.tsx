@@ -1,21 +1,20 @@
-import { useEffect, useState } from 'react'
-import { useLocation, useNavigate } from 'react-router-dom'
-import { Button } from '../../components/ui/Button'
 import {
-  getSupabaseClient,
-  listSupabaseAuthUsers,
-  loadSupabaseProfileRoles,
-  logger,
-} from '@gym-pilot/shared'
-import { AdminSectionShell } from '../../components/admin/AdminSectionShell'
-import { Panel } from '../../components/ui/Panel'
-import { SectionPanel } from '../../components/ui/SectionPanel'
+    getSupabaseClient,
+    listSupabaseAuthUsers,
+    loadSupabaseProfileRoles,
+    logger,
+} from '@gym-pilot/shared';
+import { useEffect, useState } from 'react';
+import { useLocation, useNavigate } from 'react-router-dom';
+import { AdminSectionShell } from '../../components/admin/AdminSectionShell';
+import { Button } from '../../components/ui/Button';
+import { Panel } from '../../components/ui/Panel';
+import { StatusMessageNotification } from '../../components/ui/StatusMessageNotification';
 import {
-  mapAdminProfileRows,
-  type AdminProfileRow,
-} from '../../features/admin/domain/adminUtils'
-import { StatusMessageNotification } from '../../components/ui/StatusMessageNotification'
-import { useCopyToClipboard } from './useCopyToClipboard'
+    mapAdminProfileRows,
+    type AdminProfileRow,
+} from '../../features/admin/domain/adminUtils';
+import { useCopyToClipboard } from './useCopyToClipboard';
 
 export function AdminUsersPage() {
   const location = useLocation()
@@ -161,19 +160,18 @@ export function AdminUsersPage() {
       subtitle="Review current users and set up profiles"
       className="max-w-5xl"
     >
-      <SectionPanel>
         <div className="flex flex-wrap gap-2">
           <Button
             tone="emerald"
             onClick={() => navigate('/admin/users/create')}
-            className="px-4 py-2"
+            className="px-4 py-2 mb-2"
           >
             Create user
           </Button>
         </div>
 
         <Panel padding="md">
-          <div className="flex items-center justify-between gap-2">
+          <div>
             <h3 className="text-sm font-semibold text-slate-800">
               Current users
             </h3>
@@ -259,7 +257,7 @@ export function AdminUsersPage() {
             </div>
           )}
         </Panel>
-      </SectionPanel>
+
     </AdminSectionShell>
   )
 }

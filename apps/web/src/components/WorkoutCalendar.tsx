@@ -339,7 +339,7 @@ const WorkoutCalendar: React.FC<WorkoutCalendarProps> = ({
         />
       )}
       <div className="text-right mr-3 flex justify-end space-x-2">
-        <Button onClick={handleTodayClick}>Today</Button>
+        {view === 'calendar' && <Button onClick={handleTodayClick}>Today</Button>}
         <Button onClick={toggleView}>
           {view === 'calendar' ? 'List View' : 'Calendar View'}
         </Button>
