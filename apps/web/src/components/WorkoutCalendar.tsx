@@ -8,7 +8,8 @@ import {
 } from '@gym-pilot/shared'
 import { AppleFitnessWorkoutCard } from './AppleFitnessWorkoutCard'
 import { StatusMessageNotification } from './ui/StatusMessageNotification'
-import { Button } from './ui/Button' // Import Button component
+import { Button } from './ui/Button'
+import DatePicker from './ui/DatePicker'
 import {
   NO_LINK_SESSION_ID,
   resolveWorkoutLinkState,
@@ -16,12 +17,72 @@ import {
 
 // Define a type that matches react-calendar's Value for single selection, which can be Date or null
 type CalendarValue = Date | null
+type ViewType = 'calendar' | 'list'
 
 interface WorkoutCalendarProps {
   workouts: ImportedWorkout[]
   title?: string
   initialDate?: CalendarValue
   onDateChange?: (date: CalendarValue) => void
+}
+
+interface WorkoutListProps {
+  workouts: ImportedWorkout[]
+  linkedSessionsMap: Map<string, UserSession>
+  handleUnlinkWorkout: (workout: ImportedWorkout) => void
+  handleNoLinkWorkout: (workout: ImportedWorkout) => void
+  startDate: Date | null
+  endDate: Date | null
+  onStartDateChange: (date: Date | null) => void
+  onEndDateChange: (date: Date | null) => void
+}
+
+const WorkoutList: React.FC<WorkoutListProps> = ({
+  workouts,
+  linkedSessionsMap,
+  handleUnlinkWorkout,
+  handleNoLinkWorkout,
+  startDate,
+  endDate,
+  onStartDateChange,
+  onEndDateChange,
+}) => {
+  return (
+    <div className="mt-5">
+      <h3 className="mb-2.5 text-slate-800">
+        <b>All Workouts</b>
+      </h3>
+      <div className="flex space-x-4 mb-4">
+        <div>
+          <label htmlFor="start-date" className="block text-sm font-medium text-slate-700">Start Date</label>
+          <DatePicker selected={startDate} onChange={onStartDateChange} />
+        </div>
+        <div>
+          <label htmlFor="end-date" className="block text-sm font-medium text-slate-700">End Date</label>
+          <DatePicker selected={endDate} onChange={onEndDateChange} />
+        </div>
+      </div>
+      {workouts.length > 0 ? (
+        workouts.map((workout) => (
+          <div className="mb-4" key={workout.id}>
+            <AppleFitnessWorkoutCard
+              workout={workout}
+              onUnlink={handleUnlinkWorkout}
+              onNoLink={handleNoLinkWorkout}
+              linkedSession={
+                workout.session_id
+                  ? linkedSessionsMap.get(workout.session_id)
+                  : undefined
+              }
+              selectedDate={new Date(workout.start_date)}
+            />
+          </div>
+        ))
+      ) : (
+        <StatusMessageNotification message="No workouts found in the selected date range" tone="info" />
+      )}
+    </div>
+  )
 }
 
 const WorkoutCalendar: React.FC<WorkoutCalendarProps> = ({
@@ -41,6 +102,15 @@ const WorkoutCalendar: React.FC<WorkoutCalendarProps> = ({
     Map<string, UserSession>
   >(new Map())
   const [error, setError] = useState<string | null>(null)
+  const [view, setView] = useState<ViewType>('calendar')
+  const [startDate, setStartDate] = useState<Date | null>(() => {
+    const d = initialDate || new Date()
+    return new Date(d.getFullYear(), d.getMonth(), 1)
+  })
+  const [endDate, setEndDate] = useState<Date | null>(() => {
+    const d = initialDate || new Date()
+    return new Date(d.getFullYear(), d.getMonth() + 1, 0)
+  })
 
   useEffect(() => {
     setLocalWorkouts(initialWorkouts)
@@ -143,6 +213,19 @@ const WorkoutCalendar: React.FC<WorkoutCalendarProps> = ({
     })
     return counts
   }, [localWorkouts])
+
+  const filteredWorkouts = useMemo(() => {
+    return localWorkouts.filter(workout => {
+      const workoutDate = new Date(workout.start_date)
+      if (startDate && workoutDate < startDate) {
+        return false
+      }
+      if (endDate && workoutDate > endDate) {
+        return false
+      }
+      return true
+    })
+  }, [localWorkouts, startDate, endDate])
 
   // Function to add custom classes to each calendar tile
   const tileClassName = ({ date, view }: { date: Date; view: string }) => {
@@ -256,6 +339,10 @@ const WorkoutCalendar: React.FC<WorkoutCalendarProps> = ({
     })
   }, [localWorkouts, selectedDate])
 
+  const toggleView = () => {
+    setView((prevView) => (prevView === 'calendar' ? 'list' : 'calendar'))
+  }
+
   return (
     <div className="mx-auto my-5 w-full max-w-150 rounded-lg border border-slate-200 p-2.5">
       {error && (
@@ -265,47 +352,80 @@ const WorkoutCalendar: React.FC<WorkoutCalendarProps> = ({
           onDismiss={() => setError(null)}
         />
       )}
-      <div className="text-right mr-3">
+      <div className="text-right mr-3 flex justify-end space-x-2">
         <Button onClick={handleTodayClick}>Today</Button>
+        <Button onClick={toggleView}>
+          {view === 'calendar' ? 'List View' : 'Calendar View'}
+        </Button>
       </div>
-      <Calendar
-        onChange={handleDateChange}
-        value={selectedDate}
-        tileContent={tileContent}
-        tileClassName={tileClassName} // Add this line
-        activeStartDate={activeStartDate}
-        onActiveStartDateChange={({ activeStartDate }) =>
-          setActiveStartDate(activeStartDate ?? new Date())
-        }
-      />
-      {selectedDate && !Array.isArray(selectedDate) && (
-        <div className="mt-5">
-          <h3 className="mb-2.5 text-slate-800">
-            <b>Workouts on {selectedDate.toDateString()}</b>
-          </h3>
-          {workoutsForSelectedDate.length > 0 ? (
-            workoutsForSelectedDate.map((workout) => (
-              <div className="mb-4" key={workout.id}>
-                <AppleFitnessWorkoutCard
-                  workout={workout}
-                  onUnlink={handleUnlinkWorkout}
-                  onNoLink={handleNoLinkWorkout}
-                  linkedSession={
-                    workout.session_id
-                      ? linkedSessionsMap.get(workout.session_id)
-                      : undefined
-                  }
-                  selectedDate={selectedDate}
+      {view === 'calendar' ? (
+        <>
+          <Calendar
+            onChange={handleDateChange}
+            value={selectedDate}
+            tileContent={tileContent}
+            tileClassName={tileClassName} // Add this line
+            activeStartDate={activeStartDate}
+            onActiveStartDateChange={({ activeStartDate }) => {
+              if (activeStartDate) {
+                const startOfMonth = new Date(
+                  activeStartDate.getFullYear(),
+                  activeStartDate.getMonth(),
+                  1,
+                )
+                const endOfMonth = new Date(
+                  activeStartDate.getFullYear(),
+                  activeStartDate.getMonth() + 1,
+                  0,
+                )
+                setActiveStartDate(startOfMonth)
+                setStartDate(startOfMonth)
+                setEndDate(endOfMonth)
+                setSelectedDate(null) // Clear selected date
+              }
+            }}
+          />
+          {selectedDate && !Array.isArray(selectedDate) && (
+            <div className="mt-5">
+              <h3 className="mb-2.5 text-slate-800">
+                <b>Workouts on {selectedDate.toDateString()}</b>
+              </h3>
+              {workoutsForSelectedDate.length > 0 ? (
+                workoutsForSelectedDate.map((workout) => (
+                  <div className="mb-4" key={workout.id}>
+                    <AppleFitnessWorkoutCard
+                      workout={workout}
+                      onUnlink={handleUnlinkWorkout}
+                      onNoLink={handleNoLinkWorkout}
+                      linkedSession={
+                        workout.session_id
+                          ? linkedSessionsMap.get(workout.session_id)
+                          : undefined
+                      }
+                      selectedDate={selectedDate}
+                    />
+                  </div>
+                ))
+              ) : (
+                <StatusMessageNotification
+                  message="No workouts on this day"
+                  tone="info"
                 />
-              </div>
-            ))
-          ) : (
-            <StatusMessageNotification
-              message="No workouts on this day"
-              tone="info"
-            />
+              )}
+            </div>
           )}
-        </div>
+        </>
+      ) : (
+        <WorkoutList
+          workouts={filteredWorkouts}
+          linkedSessionsMap={linkedSessionsMap}
+          handleUnlinkWorkout={handleUnlinkWorkout}
+          handleNoLinkWorkout={handleNoLinkWorkout}
+          startDate={startDate}
+          endDate={endDate}
+          onStartDateChange={setStartDate}
+          onEndDateChange={setEndDate}
+        />
       )}
     </div>
   )

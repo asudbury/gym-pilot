@@ -220,3 +220,26 @@ html.dark .bg-slate-900 {
   border: 1px solid #e2e8f0; /* Light gray border */
   border-radius: 0;
 }
+
+/* Custom styles for react-calendar to improve responsiveness */
+.react-calendar__month-view__weekdays__weekday {
+  text-align: center;
+  font-size: 0.75em; /* Default font size for day headers */
+  color: #64748b; /* Subtle grey color */
+  abbr {
+    text-decoration: none; /* Remove underline from weekday abbreviations */
+  }
+}
+
+/* Media query for smaller screens */
+@media (max-width: 768px) {
+  .react-calendar__month-view__weekdays__weekday {
+    font-size: 0.6em; /* Smaller font size on mobile */
+  }
+}
+
+/* Hide the day header for the second month in showDoubleView */
+/* This targets the weekdays row of the second calendar instance */
+.react-calendar__viewContainer .react-calendar__month-view:nth-child(2) .react-calendar__month-view__weekdays {
+  display: none;
+}
