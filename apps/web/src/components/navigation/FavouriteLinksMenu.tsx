@@ -101,10 +101,10 @@ export function FavouriteLinksMenu({
       }
     }
 
-    document.addEventListener('mousedown', handleOutsideClick)
+    document.addEventListener('pointerdown', handleOutsideClick)
 
     return () => {
-      document.removeEventListener('mousedown', handleOutsideClick)
+      document.removeEventListener('pointerdown', handleOutsideClick)
     }
   }, [menuOpen])
 
