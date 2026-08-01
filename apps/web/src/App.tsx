@@ -43,7 +43,6 @@ function App() {
     user,
     mobileMenuOpen,
   } = useAppShell()
-  const SHOW_AUTH_BUTTON = true
 
   return (
     <div className="min-h-screen bg-slate-50 text-slate-900 transition-colors dark:bg-slate-950 dark:text-slate-100">
@@ -74,7 +73,6 @@ function App() {
         tabletMenuItems={tabletMenuItems}
         mobileMenuItems={mobileMenuItems}
         mobileMenuOpen={mobileMenuOpen}
-        showAuthButton={SHOW_AUTH_BUTTON}
         user={user}
         mustChangePassword={mustChangePassword}
         folders={folders}

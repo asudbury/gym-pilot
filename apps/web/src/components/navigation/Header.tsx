@@ -26,7 +26,6 @@ type HeaderProps = {
   tabletMenuItems: NavigationMenuListItem[]
   mobileMenuItems: NavigationMenuListItem[]
   mobileMenuOpen: boolean
-  showAuthButton: boolean
   user: unknown
   mustChangePassword?: boolean
   onFavoritesChange: (
@@ -50,7 +49,6 @@ export function Header({
   tabletMenuItems,
   mobileMenuItems,
   mobileMenuOpen,
-  showAuthButton,
   user,
   mustChangePassword,
   folders,
@@ -138,7 +136,7 @@ export function Header({
                     items={desktopMenuItems}
                   />
                 ) : null}
-                {showAuthButton || Boolean(user) ? (
+                {Boolean(user) ? (
                   <button
                     type="button"
                     onClick={handleAuthAction}
@@ -196,7 +194,7 @@ export function Header({
                       items={tabletMenuItems}
                     />
                     <div className="mt-2 flex flex-col gap-2 border-t border-slate-200 pt-3">
-                      {showAuthButton || Boolean(user) ? (
+                      {Boolean(user) ? (
                         <button
                           type="button"
                           onClick={handleAuthAction}
@@ -251,7 +249,7 @@ export function Header({
                       items={mobileMenuItems}
                     />
                     <div className="mt-2 flex flex-col gap-2 border-t border-slate-200 pt-3">
-                      {showAuthButton || Boolean(user) ? (
+                      {Boolean(user) ? (
                         <button
                           type="button"
                           onClick={handleAuthAction}
