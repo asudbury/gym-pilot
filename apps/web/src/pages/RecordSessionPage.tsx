@@ -1,27 +1,27 @@
 import {
-    logger,
-    updateUserSession,
-    usePlan,
-    type UserSession,
-    type UserSessionWorkoutItem,
-} from '@gym-pilot/shared';
-import { type PlanSession } from '@gym-pilot/types';
-import { useEffect, useMemo, useState } from 'react';
-import { useNavigate, useSearchParams } from 'react-router-dom';
-import { useAuth } from '../auth/AuthContext';
-import { PageCard } from '../components/PageCard';
-import { RatingSelector } from '../components/RatingSelector';
-import { SessionWorkoutEditor } from '../components/SessionWorkoutEditor';
-import { Heading1, UpperCaseParagraph } from '../components/Typography';
-import { Button } from '../components/ui/Button';
-import { DecorativeIcon } from '../components/ui/DecorativeIcon';
+  logger,
+  updateUserSession,
+  usePlan,
+  type UserSession,
+  type UserSessionWorkoutItem,
+} from '@gym-pilot/shared'
+import { type PlanSession } from '@gym-pilot/types'
+import { useEffect, useMemo, useState } from 'react'
+import { useNavigate, useSearchParams } from 'react-router-dom'
+import { useAuth } from '../auth/AuthContext'
+import { PageCard } from '../components/PageCard'
+import { RatingSelector } from '../components/RatingSelector'
+import { SessionWorkoutEditor } from '../components/SessionWorkoutEditor'
+import { Heading1, UpperCaseParagraph } from '../components/Typography'
+import { Button } from '../components/ui/Button'
+import { DecorativeIcon } from '../components/ui/DecorativeIcon'
 import {
-    StatusMessageNotification,
-    type DisplayableError,
-} from '../components/ui/StatusMessageNotification';
-import { DesktopOnly } from '../components/visibility/DeviceVisibility';
-import { appTokens } from '../constants/tokens';
-import { PageLayout } from '../layouts/PageLayout';
+  StatusMessageNotification,
+  type DisplayableError,
+} from '../components/ui/StatusMessageNotification'
+import { DesktopOnly } from '../components/visibility/DeviceVisibility'
+import { appTokens } from '../constants/tokens'
+import { PageLayout } from '../layouts/PageLayout'
 
 function buildWorkoutItemsFromPlanSessions(
   planSessions: PlanSession[],
@@ -65,7 +65,9 @@ function resolveInitialSessionType(value: string | null): SessionType {
   return 'personal_training'
 }
 
-export function detectDateTimeLocalSupport(windowObject: Window | null): boolean {
+export function detectDateTimeLocalSupport(
+  windowObject: Window | null,
+): boolean {
   if (!windowObject?.document) {
     return true
   }
