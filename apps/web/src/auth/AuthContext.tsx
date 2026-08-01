@@ -1,3 +1,5 @@
+import { DexiePersistence, logger, usePlan } from '@gym-pilot/shared'
+import type { UserRole } from '@gym-pilot/types'
 import {
   createContext,
   useContext,
@@ -6,23 +8,21 @@ import {
   useState,
   type ReactNode,
 } from 'react'
-import type { UserRole } from '@gym-pilot/types'
-import { logger, usePlan, DexiePersistence } from '@gym-pilot/shared'
-import { getHashHomeUrl } from '../features/auth/domain/authUtils'
-import { useAuthModule } from '../features/auth/hooks/useAuthModule'
 import type { AuthUser } from '../features/auth/domain/authTypes'
 import { isUserAccessBlocked } from '../features/auth/domain/authTypes'
+import { getHashHomeUrl } from '../features/auth/domain/authUtils'
 import {
   persistThemePreference,
   readStoredThemePreference,
   type ThemePreference,
 } from '../features/auth/domain/uiPreferences'
+import { useAuthModule } from '../features/auth/hooks/useAuthModule'
 
 type AuthContextValue = {
   user: AuthUser | null
   isAuthenticated: boolean
   themePreference: 'light' | 'dark'
-  login: (userId: string) => boolean
+  login: (email: string, password: string) => Promise<boolean>
   logout: () => void
   updateProfileName: (friendlyName: string) => Promise<void>
   updateApplicationName: (applicationName: string) => Promise<void>
@@ -94,9 +94,9 @@ export function AuthProvider({ children }: AuthProviderProps) {
     persistThemePreference(themePreference)
   }, [themePreference])
 
-  const handleLogin = (userId: string) => {
-    logger.info('[Auth] Login requested', { userId })
-    const success = login(userId)
+  const handleLogin = async (email: string, password: string) => {
+    logger.info('[Auth] Login requested', { email })
+    const success = await login(email, password)
     return success
   }
 

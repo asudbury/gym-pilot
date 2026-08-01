@@ -1,24 +1,32 @@
-import { useCallback, useMemo, useRef, useState } from 'react'
-import type { User, UserRole } from '@gym-pilot/types'
-import { shouldPersistAuthSession } from '../../../auth/authPersistence'
 import {
   logger,
   recordSupabaseUserActivity,
+  signInWithPassword,
   signOutFromSupabase,
 } from '@gym-pilot/shared'
-import type { AuthUser } from '../domain/authTypes'
+import type { User, UserRole } from '@gym-pilot/types'
+import { useCallback, useMemo, useRef, useState } from 'react'
+import { shouldPersistAuthSession } from '../../../auth/authPersistence'
 import {
   resolveIsAuthenticated,
-  resolvePersistedUserId,
-} from '../domain/authState'
+  resolvePersistedUserId, // This function is used for persisting the user ID
+} from '../domain/authState' // Moved from authTransitions to authState
 import {
-  resolveAuthAccessState,
+  resolveAuthAccessState, // These functions are for resolving/transitioning auth state
   resolveAuthUserApplicationNameUpdate,
   resolveAuthUserGymBrandUpdate,
   resolveAuthUserGymNameUpdate,
   resolveAuthUserProfileNameUpdate,
-  resolveLoginAuthUser,
-} from '../domain/authTransitions'
+} from '../domain/authTransitions' // Moved from authSession to authTransitions
+import type { AuthUser } from '../domain/authTypes'
+import {
+  // These are correctly from authSession, dealing with Supabase interaction
+  resolveSupabaseAuthUser,
+  updateApplicationNameOnSupabase,
+  updateGymBrandOnSupabase,
+  updateGymNameOnSupabase,
+  updateProfileNameOnSupabase,
+} from '../services/authSession'
 import {
   persistCurrentUserId,
   persistLogoutPending,
@@ -26,13 +34,6 @@ import {
   readLogoutPending,
   readStoredSession,
 } from '../services/authStorage'
-import {
-  resolveSupabaseAuthUser,
-  updateApplicationNameOnSupabase,
-  updateGymBrandOnSupabase,
-  updateGymNameOnSupabase,
-  updateProfileNameOnSupabase,
-} from '../services/authSession'
 
 export function useAuthModule(users: User[]) {
   const [user, setUser] = useState<AuthUser | null>(null)
@@ -105,22 +106,40 @@ export function useAuthModule(users: User[]) {
   }, [user])
 
   const login = useCallback(
-    (userId: string) => {
-      const nextUser = resolveLoginAuthUser(users, userId)
+    async (email: string, password: string): Promise<boolean> => {
+      try {
+        const response = await signInWithPassword(email, password)
 
-      if (!nextUser) {
-        return false
+        if (response.error) {
+          logger.error('[AuthModule] Sign-in failed:', response.error)
+          // Supabase errors often have a 'message' property
+          throw new Error(response.error.message || 'Sign-in failed')
+        }
+
+        // After successful sign-in, resolve the AuthUser from the new session
+        // resolveSupabaseAuthUser will fetch the current session and user from Supabase
+        // and map it to our AuthUser type, also checking for access blocking.
+        const nextUser = await resolveSupabaseAuthUser(users)
+
+        if (!nextUser) {
+          logger.error(
+            '[AuthModule] Failed to resolve AuthUser after successful sign-in. This might indicate an issue with user data or access blocking.',
+          )
+          throw new Error('Failed to retrieve user information after login.')
+        }
+
+        userRef.current = nextUser
+        hadAuthenticatedUserRef.current = true
+        persistCurrentUserId(resolvePersistedUserId(nextUser))
+        setUser(nextUser)
+
+        void recordSupabaseUserActivity('login', {}, nextUser.id, nextUser.name)
+        return true
+      } catch (error: any) {
+        // Catch any error from signInWithPassword or resolveSupabaseAuthUser
+        logger.error('[AuthModule] Login process failed:', error)
+        throw error // Re-throw the error so the calling component (LoginPage) can handle it
       }
-
-      userRef.current = nextUser
-      hadAuthenticatedUserRef.current = true
-      persistCurrentUserId(resolvePersistedUserId(nextUser))
-      setUser(nextUser)
-
-      // Record login activity
-      void recordSupabaseUserActivity('login', {}, nextUser.id, nextUser.name)
-
-      return true
     },
     [users],
   )

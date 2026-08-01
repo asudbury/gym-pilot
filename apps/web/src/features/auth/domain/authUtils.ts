@@ -12,3 +12,13 @@ export function getHashHomeUrl(
   targetUrl.hash = '#/'
   return targetUrl.toString()
 }
+
+export function resolvePostLoginRedirectPath(from?: string | null) {
+  const normalizedFrom = from?.trim()
+
+  if (!normalizedFrom || normalizedFrom === '/login') {
+    return '/'
+  }
+
+  return normalizedFrom
+}

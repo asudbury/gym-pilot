@@ -1,16 +1,16 @@
-import { useEffect, useState } from 'react'
-import { Button } from '../../../components/ui/Button'
 import {
   deleteAllAuditLogs,
   getAuditLogs,
 } from '@gym-pilot/shared/src/dataServices/auditLogDataService'
+import { useEffect, useState } from 'react'
+import { Button } from '../../../components/ui/Button'
+import type { DisplayableError } from '../../../components/ui/StatusMessageNotification'
 import {
   filterLogEntriesByText,
   formatDetails,
   formatTimestamp,
   type LogEntryRow,
 } from './utils'
-import type { DisplayableError } from '../../../components/ui/StatusMessageNotification'
 
 type AuditLogViewProps = {
   logFilterText: string
@@ -78,7 +78,7 @@ export function AuditLogView({
   }
 
   return (
-    <section className="m-0 bg-white p-0 sm:m-4 sm:rounded-2xl sm:border sm:border-slate-200 sm:p-4 shadow-sm">
+    <section>
       <div className="mb-3 flex items-center justify-between gap-3">
         <h2 className="text-lg font-semibold text-slate-900">Audit log</h2>
         <div className="flex items-center gap-2">

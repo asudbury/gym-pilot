@@ -1,46 +1,40 @@
+import { logger, resetSupabasePassword } from '@gym-pilot/shared'
 import { useEffect, useMemo, useRef, useState } from 'react'
-import { useNavigate, useLocation, useSearchParams } from 'react-router-dom'
-import {
-  loadAppSetting, // Still used for 'login_enabled' check
-  logger,
-  resetSupabasePassword,
-  signInWithPassword,
-  getSupabaseClient,
-} from '@gym-pilot/shared'
-import { handlePostSignInLogic } from '../features/auth/domain/postSignInLogic'
-import { PageCard } from '../components/PageCard'
-import { Heading1 } from '../components/Typography'
-import { appTokens } from '../constants/tokens'
+import { useLocation, useNavigate, useSearchParams } from 'react-router-dom'
 import { useAuth } from '../auth/AuthContext'
+import { PageCard } from '../components/PageCard'
+import { getToneClass } from '../components/toneClasses'
+import { Heading1 } from '../components/Typography'
+import { Button } from '../components/ui/Button'
+import { DecorativeIcon } from '../components/ui/DecorativeIcon'
+import { appTokens } from '../constants/tokens'
+import { resolvePostLoginRedirectPath } from '../features/auth/domain/authUtils'
 import {
   persistRememberEmailPreference,
   persistRememberedEmail,
   readStoredRememberedEmail,
 } from '../features/auth/domain/loginPreferences' // All functions from here are used
 import { recordWelcomeJourneyActivity } from '../features/auth/domain/welcomeJourneyLogging'
-import { DecorativeIcon } from '../components/ui/DecorativeIcon'
-import { Button } from '../components/ui/Button'
-import { getToneClass } from '../components/toneClasses'
 
 export function LoginPage() {
-  const navigate = useNavigate()
   const location = useLocation()
-  useAuth()
+  const navigate = useNavigate()
+  const { login } = useAuth()
   const [searchParams] = useSearchParams()
 
   const passwordRef = useRef<HTMLInputElement>(null)
 
   const [email, setEmail] = useState(() => readStoredRememberedEmail())
+  const [password, setPassword] = useState('')
 
   const [authMessage, setAuthMessage] = useState('')
+  const [isLoading, setIsLoading] = useState(false)
   const [authMessageTone, setAuthMessageTone] = useState<'default' | 'error'>(
     'default',
   )
-  const [isSubmitting, setIsSubmitting] = useState(false)
   const [isResetting, setIsResetting] = useState(false)
   const [showPassword, setShowPassword] = useState(false)
   const [capsLockOn, setCapsLockOn] = useState(false)
-  const [useEdgeFunctionLogin, setUseEdgeFunctionLogin] = useState(true) // Default to Edge Function
 
   const emailParam = useMemo(() => {
     const rawValue =
@@ -89,129 +83,38 @@ export function LoginPage() {
     return state?.from?.pathname || '/'
   }, [location.state])
 
-  const handleEdgeFunctionSignIn = async (
-    email: string,
-    password_val: string,
-  ) => {
-    console.log('[Login] Attempting Edge Function sign-in...')
-    const SUPABASE_URL = import.meta.env.VITE_SUPABASE_URL // Assuming SUPABASE_URL is available from env
-
-    if (!SUPABASE_URL) {
-      console.error(
-        'VITE_SUPABASE_URL is not defined in environment variables.',
-      )
-      setAuthMessageTone('error')
-      setAuthMessage('Supabase URL is not configured.')
-      return { error: { message: 'Supabase URL not configured' } }
-    }
-
-    const edgeFunctionUrl = `${SUPABASE_URL}/functions/v1/login`
-
-    try {
-      const response = await fetch(edgeFunctionUrl, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({ email, password: password_val }),
-      })
-
-      const data = await response.json()
-
-      if (!response.ok) {
-        throw new Error(data.error || 'Edge Function login failed')
-      }
-
-      if (data.session && data.user) {
-        const client = getSupabaseClient()
-        if (client) {
-          // Manually set the session after successful Edge Function login
-          await client.auth.setSession({
-            access_token: data.session.access_token,
-            refresh_token: data.session.refresh_token,
-          })
-
-          // Dispatch a custom event to notify the AuthProvider about the change
-          window.dispatchEvent(new CustomEvent('gym-pilot-auth-updated'))
-        } else {
-          console.error(
-            'Supabase client is not available after Edge Function login.',
-          )
-          return {
-            error: { message: 'Supabase client not available to set session.' },
-          }
-        }
-      } else {
-        console.error(
-          'Edge Function did not return session or user data:',
-          data,
-        )
-        return { error: { message: 'Invalid response from Edge Function.' } }
-      }
-
-      console.log('[Login] Edge Function sign-in successful, response:', data)
-
-      return { data: { user: data.user, session: data.session }, error: null }
-    } catch (err: any) {
-      console.error('[Login] Edge Function sign-in failed:', err.message)
-      return { error: { message: err.message } }
-    }
-  }
-
-  const handlePasswordSignIn = async (
-    event: React.FormEvent<HTMLFormElement>,
-  ) => {
+  const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault()
-    console.log('[Login] Attempting password sign-in...')
-
-    setIsSubmitting(true)
+    setIsLoading(true)
     setAuthMessage('')
     setAuthMessageTone('default')
 
-    const password_val = passwordRef.current?.value ?? ''
+    try {
+      const success = await login(email, password)
 
-    const loginEnabled = Boolean(await loadAppSetting('login_enabled', true))
-    console.log(`[Login] 'login_enabled' setting is: ${loginEnabled}`)
-
-    if (!loginEnabled) {
-      setIsSubmitting(false)
+      if (success) {
+        const nextPath = resolvePostLoginRedirectPath(from)
+        navigate(nextPath, { replace: true, state: { from: location.state } })
+      }
+    } catch (error: any) {
+      logger.error('[Login] Login failed', error)
+      void recordWelcomeJourneyActivity(
+        'welcome_journey_error',
+        {
+          step: 'login',
+          outcome: 'login_failed',
+          returnTo: from,
+        },
+        null,
+        email.trim() || null,
+      )
       setAuthMessageTone('error')
-      setAuthMessage('Login is currently disabled by an administrator.')
-      return
+      setAuthMessage(
+        error.message || 'An unexpected error occurred during login.',
+      )
+    } finally {
+      setIsLoading(false)
     }
-
-    let response: { data?: any; error: any | null }
-
-    if (useEdgeFunctionLogin) {
-      response = await handleEdgeFunctionSignIn(email, password_val)
-    } else {
-      response = await signInWithPassword(email, password_val)
-    }
-    console.log('[Login] signInWithPassword response:', response)
-
-    setIsSubmitting(false)
-
-    if (response.error) {
-      logger.error('[Login] Password sign-in failed', response.error)
-
-      const message = `Sign-in failed: ${response.error.message}`
-
-      // Always surface sign-in errors in the error tone (red).
-      setAuthMessageTone('error')
-      setAuthMessage(message)
-
-      return
-    }
-
-    await handlePostSignInLogic({
-      user: response.data?.user,
-      email,
-      from,
-      navigate,
-      setAuthMessage,
-      setAuthMessageTone,
-      context: 'Login',
-    })
   }
 
   const handleForgotPassword = async () => {
@@ -338,7 +241,7 @@ export function LoginPage() {
         </div>
 
         <form
-          onSubmit={handlePasswordSignIn}
+          onSubmit={handleSubmit}
           className="mt-8 flex flex-col gap-4"
           autoComplete="on"
           method="post"
@@ -375,6 +278,8 @@ export function LoginPage() {
                 id="password"
                 name="password"
                 type={showPassword ? 'text' : 'password'}
+                value={password}
+                onChange={(event) => setPassword(event.target.value)}
                 autoComplete="current-password"
                 enterKeyHint="done"
                 required
@@ -395,35 +300,15 @@ export function LoginPage() {
               </span>
             ) : null}
           </label>
-
-          {window.location.hostname === 'localhost' ? (
-            <div className="flex items-center gap-2">
-              <input
-                id="useEdgeFunctionLogin"
-                type="checkbox"
-                checked={!useEdgeFunctionLogin} // Checkbox is checked when NOT using Edge Function (i.e., using traditional)
-                onChange={(e) => setUseEdgeFunctionLogin(!e.target.checked)} // Invert state based on checkbox
-                className="h-4 w-4 rounded border-gray-300 text-emerald-600 focus:ring-emerald-500"
-              />
-              <label
-                htmlFor="useEdgeFunctionLogin"
-                className="text-sm font-medium text-slate-700"
-              >
-                Use supabase password login
-              </label>
-            </div>
-          ) : null}
-
           <button
             type="submit"
             className={getToneClass(
               'emerald',
               'w-full sm:w-auto px-3 py-2 text-sm',
             )}
-
-            disabled={isSubmitting}
+            disabled={isLoading}
           >
-            {isSubmitting ? 'Logging in…' : 'Login'}
+            {isLoading ? 'Logging in…' : 'Login'}
           </button>
 
           <button
@@ -449,7 +334,7 @@ export function LoginPage() {
         {authMessage ? (
           <div
             className={`mt-4 rounded-2xl border px-4 py-3 text-sm ${
-              authMessageTone === 'error'
+              authMessageTone === 'error' // Removed loginError from this line
                 ? 'border-rose-200 bg-rose-50 text-rose-700'
                 : 'border-slate-200 bg-slate-50 text-slate-600'
             }`}
