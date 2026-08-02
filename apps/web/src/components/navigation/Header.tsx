@@ -1,18 +1,18 @@
-import { useEffect, useRef } from 'react'
-import { NavLink } from 'react-router-dom'
-import type { NavigationMenuListItem } from '../../utils/navigationUtils'
-import { getToneClass } from '../toneClasses'
-import { Button } from '../ui/Button'
-import { DecorativeIcon } from '../ui/DecorativeIcon'
-import { StatusMessageNotification } from '../ui/StatusMessageNotification'
-import { ResponsiveVisibility } from '../visibility/ResponsiveVisibility'
-import { FavouriteLinksMenu } from './FavouriteLinksMenu'
+import { useEffect, useRef } from 'react';
+import { NavLink } from 'react-router-dom';
+import type { NavigationMenuListItem } from '../../utils/navigationUtils';
+import { getToneClass } from '../toneClasses';
+import { Button } from '../ui/Button';
+import { DecorativeIcon } from '../ui/DecorativeIcon';
+import { StatusMessageNotification } from '../ui/StatusMessageNotification';
+import { ResponsiveVisibility } from '../visibility/ResponsiveVisibility';
+import { FavouriteLinksMenu } from './FavouriteLinksMenu';
 import {
-  navigationItemBaseClassName,
-  navigationItemIconClassName,
-} from './navigationItemStyles'
-import { NavigationMenuItem } from './NavigationMenuItem'
-import { NavigationMenuList } from './NavigationMenuList'
+    navigationItemBaseClassName,
+    navigationItemIconClassName,
+} from './navigationItemStyles';
+import { NavigationMenuItem } from './NavigationMenuItem';
+import { NavigationMenuList } from './NavigationMenuList';
 
 type HeaderProps = {
   appName: string
@@ -177,15 +177,7 @@ export function Header({
                     <FavouriteLinksMenu />
                     <NavigationMenuList
                       className="flex flex-col gap-2"
-                      items={[
-                        {
-                          to: '/',
-                          label: 'Home',
-                          onClick: onToggleMobileMenu,
-                          icon: 'home',
-                        },
-                        ...tabletMenuItems,
-                      ]}
+                      items={tabletMenuItems}
                     />
                     <div className="mt-2 flex flex-col gap-2 border-t border-slate-200 pt-3">
                       <button
@@ -240,15 +232,7 @@ export function Header({
                     <FavouriteLinksMenu />
                     <NavigationMenuList
                       className="flex flex-col gap-2"
-                      items={[
-                        {
-                          to: '/',
-                          label: 'Home',
-                          onClick: onToggleMobileMenu,
-                          icon: 'home',
-                        },
-                        ...mobileMenuItems,
-                      ]}
+                      items={mobileMenuItems}
                     />
                     <div className="mt-2 flex flex-col gap-2 border-t border-slate-200 pt-3">
                       <button
