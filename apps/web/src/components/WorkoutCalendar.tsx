@@ -1,19 +1,19 @@
 import {
-    getSupabaseClient,
-    updateImportedWorkout,
-    type ImportedWorkout,
-    type UserSession,
-} from '@gym-pilot/shared';
-import React, { useEffect, useMemo, useState } from 'react';
-import Calendar from 'react-calendar';
-import { useIsDesktop } from '../utils/useMediaQuery';
-import { AppleFitnessWorkoutCard } from './AppleFitnessWorkoutCard';
-import { Button } from './ui/Button';
-import { StatusMessageNotification } from './ui/StatusMessageNotification';
+  getSupabaseClient,
+  updateImportedWorkout,
+  type ImportedWorkout,
+  type UserSession,
+} from '@gym-pilot/shared'
+import React, { useEffect, useMemo, useState } from 'react'
+import Calendar from 'react-calendar'
+import { useIsDesktop } from '../utils/useMediaQuery'
+import { AppleFitnessWorkoutCard } from './AppleFitnessWorkoutCard'
+import { Button } from './ui/Button'
+import { StatusMessageNotification } from './ui/StatusMessageNotification'
 import {
-    NO_LINK_SESSION_ID,
-    resolveWorkoutLinkState,
-} from './workoutCalendarUtils';
+  NO_LINK_SESSION_ID,
+  resolveWorkoutLinkState,
+} from './workoutCalendarUtils'
 
 type CalendarValue = Date | null
 type ViewType = 'calendar' | 'list'
@@ -33,50 +33,56 @@ interface WorkoutListProps {
   isDesktop: boolean
 }
 
-const WorkoutList: React.FC<WorkoutListProps> = React.memo(({ // This is the correct definition
-  workouts,
-  linkedSessionsMap,
-  handleUnlinkWorkout,
-  handleNoLinkWorkout,
-  startDate, // Keep startDate
-  isDesktop,
-}) => {
-  const monthYear = startDate
-    ? startDate.toLocaleString('en-US', { month: isDesktop ? 'long' : 'short', year: 'numeric' })
-    : 'Selected Month'
+const WorkoutList: React.FC<WorkoutListProps> = React.memo(
+  ({
+    // This is the correct definition
+    workouts,
+    linkedSessionsMap,
+    handleUnlinkWorkout,
+    handleNoLinkWorkout,
+    startDate, // Keep startDate
+    isDesktop,
+  }) => {
+    const monthYear = startDate
+      ? startDate.toLocaleString('en-US', {
+          month: isDesktop ? 'long' : 'short',
+          year: 'numeric',
+        })
+      : 'Selected Month'
 
-  return (
-    <div className="mt-5">
-      <h3 className="mb-2.5 text-slate-800">
-        <b>
-          {monthYear} ({workouts.length} Workouts)
-        </b>
-      </h3>
-      {workouts.length > 0 ? (
-        workouts.map((workout) => (
-          <div className="mb-4" key={workout.id}>
-            <AppleFitnessWorkoutCard
-              workout={workout}
-              onUnlink={handleUnlinkWorkout}
-              onNoLink={handleNoLinkWorkout}
-              linkedSession={
-                workout.session_id
-                  ? linkedSessionsMap.get(workout.session_id)
-                  : undefined
-              }
-              selectedDate={new Date(workout.start_date)}
-            />
-          </div>
-        ))
-      ) : (
-        <StatusMessageNotification
-          message="No workouts found in the selected date range"
-          tone="info"
-        />
-      )}
-    </div>
-  )
-})
+    return (
+      <div className="mt-5">
+        <h3 className="mb-2.5 text-slate-800">
+          <b>
+            {monthYear} ({workouts.length} Workouts)
+          </b>
+        </h3>
+        {workouts.length > 0 ? (
+          workouts.map((workout) => (
+            <div className="mb-4" key={workout.id}>
+              <AppleFitnessWorkoutCard
+                workout={workout}
+                onUnlink={handleUnlinkWorkout}
+                onNoLink={handleNoLinkWorkout}
+                linkedSession={
+                  workout.session_id
+                    ? linkedSessionsMap.get(workout.session_id)
+                    : undefined
+                }
+                selectedDate={new Date(workout.start_date)}
+              />
+            </div>
+          ))
+        ) : (
+          <StatusMessageNotification
+            message="No workouts found in the selected date range"
+            tone="info"
+          />
+        )}
+      </div>
+    )
+  },
+)
 
 const WorkoutCalendar: React.FC<WorkoutCalendarProps> = ({
   workouts: initialWorkouts,
@@ -84,7 +90,7 @@ const WorkoutCalendar: React.FC<WorkoutCalendarProps> = ({
   onDateChange,
 }) => {
   const isDesktop = useIsDesktop()
-  console.log('WorkoutCalendar - isDesktop:', isDesktop); // Debugging log
+  console.log('WorkoutCalendar - isDesktop:', isDesktop) // Debugging log
   const [selectedDate, setSelectedDate] = useState<CalendarValue>(
     initialDate || new Date(),
   )
@@ -317,8 +323,10 @@ const WorkoutCalendar: React.FC<WorkoutCalendarProps> = ({
   }
 
   const formatMonth = (locale: string | undefined, date: Date) => {
-    return date.toLocaleString(locale || 'en-US', { month: isDesktop ? 'long' : 'short' });
-  };
+    return date.toLocaleString(locale || 'en-US', {
+      month: isDesktop ? 'long' : 'short',
+    })
+  }
 
   const workoutsForSelectedDate = useMemo(() => {
     if (!selectedDate || Array.isArray(selectedDate)) {
