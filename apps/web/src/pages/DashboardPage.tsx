@@ -1,20 +1,18 @@
-import type { ImportedWorkout } from '@gym-pilot/shared'
-import { getImportedWorkouts } from '@gym-pilot/shared'
-import { useEffect, useMemo, useState } from 'react'
-import { useAuth } from '../auth/AuthContext'
-import { renderDashboardWidgets } from '../components/dashboard/dashboardLayouts'
-import { PageCard } from '../components/PageCard'
-import SessionActions from '../components/SessionActions'
-import { Button } from '../components/ui/Button'
-import { DecorativeIcon } from '../components/ui/DecorativeIcon'
-import WorkoutCalendar from '../components/WorkoutCalendar'
-import { resolveDashboardViewModel } from '../features/dashboard/domain/dashboardLayout'
-import { renderDashboardTimestamp } from '../features/dashboard/domain/dashboardUtils'
-import { PageLayout } from '../layouts/PageLayout'
+import type { ImportedWorkout } from '@gym-pilot/shared';
+import { getImportedWorkouts } from '@gym-pilot/shared';
+import { useEffect, useMemo, useState } from 'react';
+import { useAuth } from '../auth/AuthContext';
+import { renderDashboardWidgets } from '../components/dashboard/dashboardLayouts';
+import { PageCard } from '../components/PageCard';
+import SessionActions from '../components/SessionActions';
+import { Button } from '../components/ui/Button';
+import { DecorativeIcon } from '../components/ui/DecorativeIcon';
+import WorkoutCalendar from '../components/WorkoutCalendar';
+import { resolveDashboardViewModel } from '../features/dashboard/domain/dashboardLayout';
+import { PageLayout } from '../layouts/PageLayout';
 
 export function DashboardPage() {
   const { user } = useAuth()
-  const previousLoginTimestamp = user?.previousLastLoggedInAt ?? null
   const viewModel = useMemo(
     () => resolveDashboardViewModel(user?.role, user?.roles),
     [user?.role, user?.roles],
@@ -92,14 +90,6 @@ export function DashboardPage() {
               <p className="text-sm font-semibold uppercase tracking-[0.24em] text-slate-600 dark:text-slate-300">
                 Dashboard
               </p>
-            </div>
-            <div className="flex flex-col items-start">
-              {previousLoginTimestamp ? (
-                <p className="max-w-2xl text-sm text-slate-500 dark:text-slate-400">
-                  Your last login:{' '}
-                  {renderDashboardTimestamp(previousLoginTimestamp)}.
-                </p>
-              ) : null}
             </div>
           </div>
         </div>
