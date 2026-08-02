@@ -1,13 +1,13 @@
-import type { ImportedWorkout } from '@gym-pilot/shared';
-import { getImportedWorkouts } from '@gym-pilot/shared';
-import { useEffect, useMemo, useState } from 'react';
-import { useAuth } from '../auth/AuthContext';
-import { PageCard } from '../components/PageCard';
-import SessionActions from '../components/SessionActions';
-import { DecorativeIcon } from '../components/ui/DecorativeIcon';
-import WorkoutCalendar from '../components/WorkoutCalendar';
-import { resolveDashboardViewModel } from '../features/dashboard/domain/dashboardLayout';
-import { PageLayout } from '../layouts/PageLayout';
+import type { ImportedWorkout } from '@gym-pilot/shared'
+import { getImportedWorkouts } from '@gym-pilot/shared'
+import { useEffect, useMemo, useState } from 'react'
+import { useAuth } from '../auth/AuthContext'
+import { PageCard } from '../components/PageCard'
+import SessionActions from '../components/SessionActions'
+import { DecorativeIcon } from '../components/ui/DecorativeIcon'
+import WorkoutCalendar from '../components/WorkoutCalendar'
+import { resolveDashboardViewModel } from '../features/dashboard/domain/dashboardLayout'
+import { PageLayout } from '../layouts/PageLayout'
 
 export function DashboardPage() {
   const { user } = useAuth()
