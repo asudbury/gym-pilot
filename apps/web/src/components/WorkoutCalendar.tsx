@@ -1,18 +1,19 @@
-import React, { useEffect, useMemo, useState } from 'react'
-import Calendar from 'react-calendar'
 import {
-  getSupabaseClient,
-  type ImportedWorkout,
-  type UserSession,
-  updateImportedWorkout,
-} from '@gym-pilot/shared'
-import { AppleFitnessWorkoutCard } from './AppleFitnessWorkoutCard'
-import { Button } from './ui/Button'
-import { StatusMessageNotification } from './ui/StatusMessageNotification'
+    getSupabaseClient,
+    updateImportedWorkout,
+    type ImportedWorkout,
+    type UserSession,
+} from '@gym-pilot/shared';
+import React, { useEffect, useMemo, useState } from 'react';
+import Calendar from 'react-calendar';
+import { useIsDesktop } from '../utils/useMediaQuery';
+import { AppleFitnessWorkoutCard } from './AppleFitnessWorkoutCard';
+import { Button } from './ui/Button';
+import { StatusMessageNotification } from './ui/StatusMessageNotification';
 import {
-  NO_LINK_SESSION_ID,
-  resolveWorkoutLinkState,
-} from './workoutCalendarUtils'
+    NO_LINK_SESSION_ID,
+    resolveWorkoutLinkState,
+} from './workoutCalendarUtils';
 
 type CalendarValue = Date | null
 type ViewType = 'calendar' | 'list'
@@ -29,17 +30,19 @@ interface WorkoutListProps {
   handleUnlinkWorkout: (workout: ImportedWorkout) => void
   handleNoLinkWorkout: (workout: ImportedWorkout) => void
   startDate: Date | null
+  isDesktop: boolean
 }
 
-const WorkoutList: React.FC<WorkoutListProps> = ({
+const WorkoutList: React.FC<WorkoutListProps> = React.memo(({ // This is the correct definition
   workouts,
   linkedSessionsMap,
   handleUnlinkWorkout,
   handleNoLinkWorkout,
-  startDate,
+  startDate, // Keep startDate
+  isDesktop,
 }) => {
   const monthYear = startDate
-    ? startDate.toLocaleString('default', { month: 'long', year: 'numeric' })
+    ? startDate.toLocaleString('en-US', { month: isDesktop ? 'long' : 'short', year: 'numeric' })
     : 'Selected Month'
 
   return (
@@ -73,13 +76,15 @@ const WorkoutList: React.FC<WorkoutListProps> = ({
       )}
     </div>
   )
-}
+})
 
 const WorkoutCalendar: React.FC<WorkoutCalendarProps> = ({
   workouts: initialWorkouts,
   initialDate,
   onDateChange,
 }) => {
+  const isDesktop = useIsDesktop()
+  console.log('WorkoutCalendar - isDesktop:', isDesktop); // Debugging log
   const [selectedDate, setSelectedDate] = useState<CalendarValue>(
     initialDate || new Date(),
   )
@@ -311,6 +316,10 @@ const WorkoutCalendar: React.FC<WorkoutCalendarProps> = ({
     }
   }
 
+  const formatMonth = (locale: string | undefined, date: Date) => {
+    return date.toLocaleString(locale || 'en-US', { month: isDesktop ? 'long' : 'short' });
+  };
+
   const workoutsForSelectedDate = useMemo(() => {
     if (!selectedDate || Array.isArray(selectedDate)) {
       return []
@@ -352,10 +361,12 @@ const WorkoutCalendar: React.FC<WorkoutCalendarProps> = ({
             onChange={handleDateChange}
             value={selectedDate}
             tileContent={tileContent}
+            locale="en-US" // Explicitly set locale for Calendar component
             tileClassName={tileClassName} // Add this line
             activeStartDate={activeStartDate}
             onActiveStartDateChange={({ activeStartDate }) => {
               if (activeStartDate) {
+                // ... (rest of the onActiveStartDateChange logic)
                 const startOfMonth = new Date(
                   activeStartDate.getFullYear(),
                   activeStartDate.getMonth(),
@@ -372,6 +383,7 @@ const WorkoutCalendar: React.FC<WorkoutCalendarProps> = ({
                 setSelectedDate(null)
               }
             }}
+            formatMonth={formatMonth} // Correct placement: inside Calendar props
           />
           {selectedDate && !Array.isArray(selectedDate) && (
             <div className="mt-5">
@@ -409,6 +421,7 @@ const WorkoutCalendar: React.FC<WorkoutCalendarProps> = ({
           linkedSessionsMap={linkedSessionsMap}
           handleUnlinkWorkout={handleUnlinkWorkout}
           handleNoLinkWorkout={handleNoLinkWorkout}
+          isDesktop={isDesktop}
           startDate={startDate}
         />
       )}

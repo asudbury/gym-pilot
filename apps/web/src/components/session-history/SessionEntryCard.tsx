@@ -1,11 +1,12 @@
-import type { UserSession } from '@gym-pilot/shared'
-import { useNavigate } from 'react-router-dom'
-import { DecorativeIcon } from '../ui/DecorativeIcon'
+import type { UserSession } from '@gym-pilot/shared';
+import { useNavigate } from 'react-router-dom';
+import { formatDateTime } from '../../dateTimeFormatter';
 import {
-  getSessionEntryRating,
-  getSessionEntryTitle,
-} from '../../features/session-history/domain/sessionHistoryViewModel'
-import { Button } from '../ui/Button'
+    getSessionEntryRating,
+    getSessionEntryTitle,
+} from '../../features/session-history/domain/sessionHistoryViewModel';
+import { Button } from '../ui/Button';
+import { DecorativeIcon } from '../ui/DecorativeIcon';
 
 function formatAttendanceDate(value?: string | null) {
   if (!value) {
@@ -18,8 +19,9 @@ function formatAttendanceDate(value?: string | null) {
     return value
   }
 
-  return parsed.toLocaleString()
+  return formatDateTime(parsed);
 }
+
 
 type SessionEntryCardProps = {
   entry: UserSession
