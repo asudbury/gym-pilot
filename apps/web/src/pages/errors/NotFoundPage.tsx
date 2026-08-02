@@ -1,6 +1,6 @@
-import { Link } from 'react-router-dom';
-import { getToneClass } from '../../components/toneClasses';
-import { PageLayout } from '../../layouts/PageLayout';
+import { Link } from 'react-router-dom'
+import { getToneClass } from '../../components/toneClasses'
+import { PageLayout } from '../../layouts/PageLayout'
 
 export function NotFoundPage() {
   return (

@@ -1,16 +1,16 @@
-import { useEffect, useMemo, useState } from 'react'
-import { PageCard } from '../components/PageCard'
-import { PageLayout } from '../layouts/PageLayout'
-import { useAuth } from '../auth/AuthContext'
-import { renderDashboardWidgets } from '../components/dashboard/dashboardLayouts'
-import { renderDashboardTimestamp } from '../features/dashboard/domain/dashboardUtils'
-import { resolveDashboardViewModel } from '../features/dashboard/domain/dashboardLayout'
-import { getImportedWorkouts } from '@gym-pilot/shared'
-import { DecorativeIcon } from '../components/ui/DecorativeIcon'
-import type { ImportedWorkout } from '@gym-pilot/shared'
-import { Button } from '../components/ui/Button'
-import SessionActions from '../components/SessionActions'
-import WorkoutCalendar from '../components/WorkoutCalendar'
+import type { ImportedWorkout } from '@gym-pilot/shared';
+import { getImportedWorkouts } from '@gym-pilot/shared';
+import { useEffect, useMemo, useState } from 'react';
+import { useAuth } from '../auth/AuthContext';
+import { renderDashboardWidgets } from '../components/dashboard/dashboardLayouts';
+import { PageCard } from '../components/PageCard';
+import SessionActions from '../components/SessionActions';
+import { Button } from '../components/ui/Button';
+import { DecorativeIcon } from '../components/ui/DecorativeIcon';
+import WorkoutCalendar from '../components/WorkoutCalendar';
+import { resolveDashboardViewModel } from '../features/dashboard/domain/dashboardLayout';
+import { renderDashboardTimestamp } from '../features/dashboard/domain/dashboardUtils';
+import { PageLayout } from '../layouts/PageLayout';
 
 export function DashboardPage() {
   const { user } = useAuth()
@@ -128,12 +128,7 @@ export function DashboardPage() {
         </div>
 
         {workouts.length > 0 && (
-          <PageCard>
-            <h2>Workouts</h2>
-            <div className="mt-8">
-              <WorkoutCalendar workouts={workouts} />
-            </div>
-          </PageCard>
+          <WorkoutCalendar workouts={workouts} />
         )}
 
         {shouldShowRoleSelector ? (
