@@ -1,8 +1,8 @@
 export const appTokens = {
   surface:
-    'rounded-[28px] border border-slate-200 bg-white shadow-sm transition-colors dark:border-slate-700 dark:bg-slate-900',
+    'rounded-none border border-slate-200 bg-white shadow-sm transition-colors sm:rounded-[28px] dark:border-slate-700 dark:bg-slate-900',
   surfaceSoft:
-    'rounded-[24px] border border-slate-200 bg-slate-50 shadow-sm transition-colors dark:border-slate-700 dark:bg-slate-800',
+    'rounded-none border border-slate-200 bg-slate-50 shadow-sm transition-colors sm:rounded-[24px] dark:border-slate-700 dark:bg-slate-800',
   input:
     'rounded-2xl border border-slate-200 bg-white px-4 py-3 text-sm text-slate-700 shadow-sm transition-colors dark:border-slate-700 dark:bg-slate-800 dark:text-slate-100',
   pill: 'rounded-full border border-slate-200 bg-white px-3 py-1.5 text-sm text-slate-600 shadow-sm transition-colors dark:border-slate-700 dark:bg-slate-800 dark:text-slate-300',
