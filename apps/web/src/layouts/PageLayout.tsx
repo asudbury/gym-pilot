@@ -1,6 +1,6 @@
-import { type ReactNode } from 'react'
-import ToastContainer from '../components/ToastContainer'
-import { appTokens } from '../constants/tokens'
+import { type ReactNode } from 'react';
+import ToastContainer from '../components/ToastContainer';
+import { appTokens } from '../constants/tokens';
 
 type PageLayoutProps = {
   children: ReactNode
