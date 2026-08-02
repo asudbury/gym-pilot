@@ -11,6 +11,7 @@ import {
   navigationItemBaseClassName,
   navigationItemIconClassName,
 } from './navigationItemStyles'
+import { NavigationMenuItem } from './NavigationMenuItem'
 import { NavigationMenuList } from './NavigationMenuList'
 
 type HeaderProps = {
@@ -99,11 +100,24 @@ export function Header({
           <ResponsiveVisibility visibleOn="desktop">
             <div className="flex flex-wrap items-end justify-end gap-2">
               <div className="flex items-center gap-2">
+                {/* Extract and render Home item first */}
+                {desktopMenuItems.find((item) => item.to === '/') && (
+                  <NavigationMenuItem
+                    key="Home"
+                    to="/"
+                    onClick={() => onToggleMobileMenu()} // Assuming desktop menu items also close mobile menu if open
+                    className="px-2 py-1.5 text-sm font-medium" // Apply desktop item styling
+                    icon="home"
+                  >
+                    Home
+                  </NavigationMenuItem>
+                )}
+
                 <FavouriteLinksMenu variant="header" />
                 {!showRestrictedBadge ? (
                   <NavigationMenuList
                     className="flex items-center gap-2"
-                    items={desktopMenuItems}
+                    items={desktopMenuItems.filter((item) => item.to !== '/')} // Pass remaining items
                   />
                 ) : null}
                 <button
@@ -133,6 +147,17 @@ export function Header({
 
           <ResponsiveVisibility visibleOn="tablet">
             <div className="relative">
+              {/* Home icon for tablet, positioned to the left of the Menu button */}
+              <Button
+                as={NavLink}
+                to="/"
+                tone="default"
+                className="inline-flex items-center justify-center rounded-full px-3 py-2 text-sm font-medium mr-2"
+              >
+                <DecorativeIcon icon="home" className="h-4 w-4" />
+                Home
+              </Button>
+
               <Button
                 onClick={onToggleMobileMenu}
                 className={getToneClass(
@@ -178,6 +203,16 @@ export function Header({
           </ResponsiveVisibility>
           <ResponsiveVisibility visibleOn="mobile">
             <div className="relative">
+              {/* Home icon for mobile, positioned to the left of the Menu button */}
+              <Button
+                as={NavLink}
+                to="/"
+                tone="default"
+                className="inline-flex items-center justify-center rounded-full px-3 py-2 text-sm font-medium mr-2"
+              >
+                <DecorativeIcon icon="home" className="h-4 w-4" />
+              </Button>
+
               <Button
                 onClick={onToggleMobileMenu}
                 className={getToneClass(

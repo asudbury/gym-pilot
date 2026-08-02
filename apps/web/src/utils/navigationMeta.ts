@@ -14,6 +14,17 @@ export type NavMetaItem = {
 
 export const navigationMeta: NavMetaItem[] = [
   {
+    key: 'Home',
+    label: 'Home',
+    to: '/',
+    icon: 'home',
+    requireAuth: false,
+    visibility: {
+      minTier: 'free',
+      visibleOn: ['desktop', 'mobile', 'tablet'],
+    },
+  },
+  {
     key: 'exercises',
     label: 'Exercises',
     to: '/exercises',
