@@ -18,10 +18,10 @@ export function PageCard<T extends ElementType = 'div'>({
   const Component = as ?? 'div'
 
   const paddingClass = {
-    default: 'p-5 sm:p-8',
-    compact: 'p-4 sm:p-5',
-    spacious: 'p-6 sm:p-8',
-    centered: 'p-6 text-center sm:p-8',
+    default: 'px-0 py-5 sm:px-8 sm:py-8',
+    compact: 'px-0 py-4 sm:px-5 sm:py-5',
+    spacious: 'px-0 py-6 sm:px-8 sm:py-8',
+    centered: 'px-0 py-6 text-center sm:px-8 sm:py-8',
   }[padding]
 
   return (
