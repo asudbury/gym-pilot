@@ -1,16 +1,16 @@
-import type { ImportedWorkout } from '@gym-pilot/shared';
-import { getImportedWorkouts } from '@gym-pilot/shared';
-import { useEffect, useMemo, useState } from 'react';
-import { useAuth } from '../auth/AuthContext';
-import { renderDashboardWidgets } from '../components/dashboard/dashboardLayouts';
-import { PageCard } from '../components/PageCard';
-import SessionActions from '../components/SessionActions';
-import { Button } from '../components/ui/Button';
-import { DecorativeIcon } from '../components/ui/DecorativeIcon';
-import WorkoutCalendar from '../components/WorkoutCalendar';
-import { resolveDashboardViewModel } from '../features/dashboard/domain/dashboardLayout';
-import { renderDashboardTimestamp } from '../features/dashboard/domain/dashboardUtils';
-import { PageLayout } from '../layouts/PageLayout';
+import type { ImportedWorkout } from '@gym-pilot/shared'
+import { getImportedWorkouts } from '@gym-pilot/shared'
+import { useEffect, useMemo, useState } from 'react'
+import { useAuth } from '../auth/AuthContext'
+import { renderDashboardWidgets } from '../components/dashboard/dashboardLayouts'
+import { PageCard } from '../components/PageCard'
+import SessionActions from '../components/SessionActions'
+import { Button } from '../components/ui/Button'
+import { DecorativeIcon } from '../components/ui/DecorativeIcon'
+import WorkoutCalendar from '../components/WorkoutCalendar'
+import { resolveDashboardViewModel } from '../features/dashboard/domain/dashboardLayout'
+import { renderDashboardTimestamp } from '../features/dashboard/domain/dashboardUtils'
+import { PageLayout } from '../layouts/PageLayout'
 
 export function DashboardPage() {
   const { user } = useAuth()
@@ -127,9 +127,7 @@ export function DashboardPage() {
           </PageCard>
         </div>
 
-        {workouts.length > 0 && (
-          <WorkoutCalendar workouts={workouts} />
-        )}
+        {workouts.length > 0 && <WorkoutCalendar workouts={workouts} />}
 
         {shouldShowRoleSelector ? (
           <div className="flex flex-wrap gap-2">

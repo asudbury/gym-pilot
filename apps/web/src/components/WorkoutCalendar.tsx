@@ -1,19 +1,19 @@
 import {
-  getSupabaseClient,
-  updateImportedWorkout,
-  type ImportedWorkout,
-  type UserSession,
-} from '@gym-pilot/shared'
-import React, { useEffect, useMemo, useState } from 'react'
-import Calendar from 'react-calendar'
-import { useIsDesktop } from '../utils/useMediaQuery'
-import { AppleFitnessWorkoutCard } from './AppleFitnessWorkoutCard'
-import { Button } from './ui/Button'
-import { StatusMessageNotification } from './ui/StatusMessageNotification'
+    getSupabaseClient,
+    updateImportedWorkout,
+    type ImportedWorkout,
+    type UserSession,
+} from '@gym-pilot/shared';
+import React, { useEffect, useMemo, useState } from 'react';
+import Calendar from 'react-calendar';
+import { useIsDesktop } from '../utils/useMediaQuery';
+import { AppleFitnessWorkoutCard } from './AppleFitnessWorkoutCard';
+import { Button } from './ui/Button';
+import { StatusMessageNotification } from './ui/StatusMessageNotification';
 import {
-  NO_LINK_SESSION_ID,
-  resolveWorkoutLinkState,
-} from './workoutCalendarUtils'
+    NO_LINK_SESSION_ID,
+    resolveWorkoutLinkState,
+} from './workoutCalendarUtils';
 
 type CalendarValue = Date | null
 type ViewType = 'calendar' | 'list'
@@ -347,7 +347,7 @@ const WorkoutCalendar: React.FC<WorkoutCalendarProps> = ({
   }
 
   return (
-    <div className="mx-auto my-5 w-full max-w-150 rounded-lg border border-slate-200 p-2.5">
+    <div className="mx-auto my-5 w-full rounded-lg border border-slate-200 p-2.5">
       {error && (
         <StatusMessageNotification
           message={error}
