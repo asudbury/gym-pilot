@@ -1,7 +1,7 @@
 {
   "name": "Gym-Pilot",
   "private": true,
-  "version": "0.2.3-no-beta",
+  "version": "0.2.4-beta",
   "type": "module",
   "scripts": {
     "dev": "vite",
