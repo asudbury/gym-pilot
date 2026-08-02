@@ -1,11 +1,12 @@
 import {
+  getSupabaseClient,
   logger,
   recordSupabaseUserActivity,
   signInWithPassword,
   signOutFromSupabase,
 } from '@gym-pilot/shared'
 import type { User, UserRole } from '@gym-pilot/types'
-import { useCallback, useMemo, useRef, useState } from 'react'
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { shouldPersistAuthSession } from '../../../auth/authPersistence'
 import {
   resolveIsAuthenticated,
@@ -49,10 +50,9 @@ export function useAuthModule(users: User[]) {
       setUser(storedUser)
       hadAuthenticatedUserRef.current = true
       persistCurrentUserId(storedUser.id)
-      hasHydratedSessionRef.current = true
-      return
     }
 
+    // Always validate against Supabase to detect sessions that expired between visits
     const supabaseUser = await resolveSupabaseAuthUser(users)
 
     if (supabaseUser) {
@@ -60,6 +60,11 @@ export function useAuthModule(users: User[]) {
       setUser(supabaseUser)
       hadAuthenticatedUserRef.current = true
       persistCurrentUserId(supabaseUser.id)
+    } else if (storedUser) {
+      // Stored session is stale – Supabase reports no valid session
+      userRef.current = null
+      setUser(null)
+      persistCurrentUserId(null)
     }
 
     hasHydratedSessionRef.current = true
@@ -73,7 +78,6 @@ export function useAuthModule(users: User[]) {
       return
     }
 
-    const currentUser = userRef.current
     const supabaseUser = await resolveSupabaseAuthUser(users)
 
     if (supabaseUser) {
@@ -84,10 +88,11 @@ export function useAuthModule(users: User[]) {
       return
     }
 
-    if (currentUser) {
-      userRef.current = currentUser
-      setUser(currentUser)
-      persistCurrentUserId(currentUser.id)
+    if (userRef.current) {
+      // Supabase reports no active session – clear stale user state
+      userRef.current = null
+      setUser(null)
+      persistCurrentUserId(null)
     }
   }, [users])
 
@@ -153,6 +158,34 @@ export function useAuthModule(users: User[]) {
   )
 
   const isAuthenticated = useMemo(() => resolveIsAuthenticated(user), [user])
+
+  // Subscribe to Supabase auth state changes so that server-side session
+  // expiry, token revocation, and cross-tab sign-outs are detected promptly.
+  useEffect(() => {
+    let client: ReturnType<typeof getSupabaseClient> | null = null
+
+    try {
+      client = getSupabaseClient()
+    } catch {
+      return
+    }
+
+    if (!client) {
+      return
+    }
+
+    const {
+      data: { subscription },
+    } = client.auth.onAuthStateChange((event) => {
+      if (event === 'SIGNED_OUT' && !readLogoutPending()) {
+        userRef.current = null
+        setUser(null)
+        persistCurrentUserId(null)
+      }
+    })
+
+    return () => subscription.unsubscribe()
+  }, [])
 
   const logout = useCallback(
     async (redirectTo?: string) => {

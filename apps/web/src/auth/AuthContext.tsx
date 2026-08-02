@@ -78,6 +78,18 @@ export function AuthProvider({ children }: AuthProviderProps) {
   }, [hydrateSession, refreshSupabaseSession])
 
   useEffect(() => {
+    const handleVisibilityChange = () => {
+      if (document.visibilityState === 'visible') {
+        void refreshSupabaseSession()
+      }
+    }
+
+    document.addEventListener('visibilitychange', handleVisibilityChange)
+    return () =>
+      document.removeEventListener('visibilitychange', handleVisibilityChange)
+  }, [refreshSupabaseSession])
+
+  useEffect(() => {
     void persistAuthState()
   }, [persistAuthState])
 
