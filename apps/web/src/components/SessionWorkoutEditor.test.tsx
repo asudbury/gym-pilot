@@ -1,10 +1,10 @@
-import { renderToStaticMarkup } from 'react-dom/server';
-import { describe, expect, it } from 'vitest';
+import { renderToStaticMarkup } from 'react-dom/server'
+import { describe, expect, it } from 'vitest'
 import {
-    SessionWorkoutEditor,
-    createSessionWorkoutItemId,
-    resolveExpandedWorkoutItemId,
-} from './SessionWorkoutEditor';
+  SessionWorkoutEditor,
+  createSessionWorkoutItemId,
+  resolveExpandedWorkoutItemId,
+} from './SessionWorkoutEditor'
 
 describe('resolveExpandedWorkoutItemId', () => {
   it('keeps the current active id when it still exists', () => {
