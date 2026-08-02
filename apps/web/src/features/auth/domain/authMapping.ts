@@ -19,6 +19,7 @@ export function toAuthUser(user: User | null | undefined): AuthUser | null {
     accountTier: user.accountTier ?? null,
     accessEndsAt: user.accessEndsAt ?? null,
     isFrozen: user.isFrozen ?? false,
+    lastLoggedInAt: user.last_sign_in_at ?? null, // Map Supabase's last_sign_in_at to AuthUser's lastLoggedInAt
     email: null,
   }
 }

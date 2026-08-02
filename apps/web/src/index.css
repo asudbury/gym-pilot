@@ -109,8 +109,8 @@ button {
 }
 
 /* Helper for destructive/outline rose buttons (Delete style) */
-.btn-destructive {
-  @apply rounded-full border border-rose-300 bg-rose-50 px-3 py-1.5 text-sm font-medium text-rose-700;
+.btn-destructive { /* This class is intended for direct use on buttons or via @apply */
+  @apply border border-rose-300 bg-rose-50 text-rose-700 transition-all duration-200 hover:border-rose-400 hover:bg-rose-100 hover:font-semibold hover:shadow-sm dark:border-rose-700 dark:bg-slate-900 dark:text-rose-500 dark:hover:border-rose-600 dark:hover:bg-slate-800 dark:hover:text-rose-300;
 }
 
 /* Generic helper so anchors can match Button look: use like <a class="btn">Open</a> */
