@@ -1,7 +1,8 @@
-import { getSupabaseClient } from "./supabase";
-import { logger } from "./logging";
-import { getAuthenticatedUserId } from "./supabaseAuth";
 import { type UserSessionWorkoutItem } from "./dataServices/types";
+import { logger } from "./logging";
+import { getSupabaseClient } from "./supabase";
+import { getAuthenticatedUserId } from "./supabaseAuth";
+import { createUUID } from "./utils";
 
 function normalizeSessionRowId(value: string | null | undefined) {
   if (!value) {
@@ -90,17 +91,19 @@ export async function saveWorkoutItemsForSession(
   if (workoutItems.length === 0) {
     return { success: true as const };
   }
-  
+
   const normalizedItems = workoutItems.map((item, index) => ({
-    ...item,
-    id: item.id || `item-${index}`,
+    ...item, // Keep existing properties
+    id: item.id || createUUID(), // Generate UUID if ID is missing
     sort_order: typeof item.sort_order === "number" ? item.sort_order : index,
     originalIndex: index,
   }));
 
   const orderedItems = [...normalizedItems].sort((left, right) => {
     const leftSortOrder =
-      typeof left.sort_order === "number" ? left.sort_order : left.originalIndex;
+      typeof left.sort_order === "number"
+        ? left.sort_order
+        : left.originalIndex;
     const rightSortOrder =
       typeof right.sort_order === "number"
         ? right.sort_order
@@ -112,18 +115,21 @@ export async function saveWorkoutItemsForSession(
 
     return left.originalIndex - right.originalIndex;
   });
-  
-  const payload = orderedItems.map((item, index) => ({
-    ...item,
-    session_id: sessionId,
-    user_id: resolvedUserId,
-    session_row_id: normalizeSessionRowId(sessionId),
-    sort_order: index,
-    item_index: item.item_index ?? index,
-    created_at: item.created_at ?? new Date().toISOString(),
-    updated_at: new Date().toISOString(),
-  }));
 
+  const payload = orderedItems.map((item, index) => {
+    // Destructure originalIndex to exclude it from the payload sent to the database
+    const { originalIndex, ...restOfItem } = item;
+    return {
+      ...restOfItem,
+      session_id: sessionId,
+      user_id: resolvedUserId,
+      session_row_id: normalizeSessionRowId(sessionId),
+      sort_order: index,
+      item_index: item.item_index ?? index,
+      created_at: item.created_at ?? new Date().toISOString(),
+      updated_at: new Date().toISOString(),
+    };
+  });
 
   const { error: insertError } = await client
     .from(getWorkoutItemsTableName())

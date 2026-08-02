@@ -1,6 +1,9 @@
 import { describe, expect, it } from 'vitest'
 
-import { detectDateTimeLocalSupport } from './RecordSessionPage'
+import {
+  detectDateTimeLocalSupport,
+  resolvePersistedSessionId,
+} from './RecordSessionPage'
 
 describe('detectDateTimeLocalSupport', () => {
   it('returns true when the browser reports datetime-local support', () => {
@@ -31,5 +34,20 @@ describe('detectDateTimeLocalSupport', () => {
 
   it('defaults to true when no window object is available', () => {
     expect(detectDateTimeLocalSupport(null)).toBe(true)
+  })
+})
+
+describe('resolvePersistedSessionId', () => {
+  it('uses the persisted id when present', () => {
+    expect(
+      resolvePersistedSessionId(
+        { id: 'persisted-id' } as { id?: string | null },
+        'generated-id',
+      ),
+    ).toBe('persisted-id')
+  })
+
+  it('falls back to the generated id when the response has no id', () => {
+    expect(resolvePersistedSessionId(null, 'generated-id')).toBe('generated-id')
   })
 })

@@ -1,27 +1,28 @@
 import {
-  logger,
-  updateUserSession,
-  usePlan,
-  type UserSession,
-  type UserSessionWorkoutItem,
-} from '@gym-pilot/shared'
-import { type PlanSession } from '@gym-pilot/types'
-import { useEffect, useMemo, useState } from 'react'
-import { useNavigate, useSearchParams } from 'react-router-dom'
-import { useAuth } from '../auth/AuthContext'
-import { PageCard } from '../components/PageCard'
-import { RatingSelector } from '../components/RatingSelector'
-import { SessionWorkoutEditor } from '../components/SessionWorkoutEditor'
-import { Heading1, UpperCaseParagraph } from '../components/Typography'
-import { Button } from '../components/ui/Button'
-import { DecorativeIcon } from '../components/ui/DecorativeIcon'
+    logger,
+    saveWorkoutItemsForSession,
+    updateUserSession,
+    usePlan,
+    type UserSession,
+    type UserSessionWorkoutItem,
+} from '@gym-pilot/shared';
+import { type PlanSession } from '@gym-pilot/types';
+import { useEffect, useMemo, useState } from 'react';
+import { useNavigate, useSearchParams } from 'react-router-dom';
+import { useAuth } from '../auth/AuthContext';
+import { PageCard } from '../components/PageCard';
+import { RatingSelector } from '../components/RatingSelector';
+import { SessionWorkoutEditor } from '../components/SessionWorkoutEditor';
+import { Heading1, UpperCaseParagraph } from '../components/Typography';
+import { Button } from '../components/ui/Button';
+import { DecorativeIcon } from '../components/ui/DecorativeIcon';
 import {
-  StatusMessageNotification,
-  type DisplayableError,
-} from '../components/ui/StatusMessageNotification'
-import { DesktopOnly } from '../components/visibility/DeviceVisibility'
-import { appTokens } from '../constants/tokens'
-import { PageLayout } from '../layouts/PageLayout'
+    StatusMessageNotification,
+    type DisplayableError,
+} from '../components/ui/StatusMessageNotification';
+import { DesktopOnly } from '../components/visibility/DeviceVisibility';
+import { appTokens } from '../constants/tokens';
+import { PageLayout } from '../layouts/PageLayout';
 
 function buildWorkoutItemsFromPlanSessions(
   planSessions: PlanSession[],
@@ -63,6 +64,15 @@ function resolveInitialSessionType(value: string | null): SessionType {
   }
 
   return 'personal_training'
+}
+
+export function resolvePersistedSessionId(
+  savedSession: { id?: string | null } | null | undefined,
+  fallbackId: string,
+): string {
+  return savedSession?.id && typeof savedSession.id === 'string'
+    ? savedSession.id
+    : fallbackId
 }
 
 export function detectDateTimeLocalSupport(
@@ -114,6 +124,8 @@ export function RecordSessionPage() {
   >([])
   const [isSaving, setIsSaving] = useState(false)
   const [error, setError] = useState<DisplayableError>(null)
+
+  const userSessionId = useMemo(() => crypto.randomUUID(), [])
 
   const availablePlans = useMemo(() => {
     const candidates = [
@@ -182,8 +194,8 @@ export function RecordSessionPage() {
       }
 
       const userSession: UserSession = {
-        id: crypto.randomUUID(),
-        user_id: user.id,
+        id: userSessionId,
+        user_id: user!.id,
         created_at: new Date().toISOString(),
         updated_at: new Date().toISOString(),
         attendance_type: null,
@@ -198,7 +210,11 @@ export function RecordSessionPage() {
         price: null,
         rating: rating ?? null,
         role: 'client',
-        session_id: null,
+        session_id:
+          normalizedSessionType === 'solo' ||
+          normalizedSessionType === 'personal_training'
+            ? userSessionId
+            : null,
         session_type: normalizedSessionType,
         start_at: startAt,
         status: null,
@@ -212,9 +228,28 @@ export function RecordSessionPage() {
             : null,
       }
 
-      const { error } = await updateUserSession(userSession)
+      const { data: savedSession, error } = await updateUserSession(userSession)
       if (error) {
         throw error
+      }
+
+      const persistedSessionId = resolvePersistedSessionId(
+        savedSession,
+        userSessionId,
+      )
+
+      if (persistedSessionId && workoutItems.length > 0) {
+        const workoutSaveResult = await saveWorkoutItemsForSession(
+          persistedSessionId,
+          workoutItems,
+          user!.id,
+        )
+
+        if (!workoutSaveResult.success) {
+          throw (
+            workoutSaveResult.error ?? new Error('Could not save workout items')
+          )
+        }
       }
 
       navigate(-1)

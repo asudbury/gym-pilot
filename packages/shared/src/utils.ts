@@ -6,6 +6,13 @@ export function createUUID() {
     : `${Date.now()}-${Math.random()}`;
 }
 
+export function isValidUuid(value: string | null | undefined): boolean {
+  if (!value) {
+    return false;
+  }
+  return /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(value);
+}
+
 export function normalizeUserRoles(
   roles?: Array<UserRole | string> | null,
   fallbackRole?: UserRole,
