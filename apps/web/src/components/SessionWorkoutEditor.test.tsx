@@ -1,9 +1,10 @@
-import { renderToStaticMarkup } from 'react-dom/server'
-import { describe, expect, it } from 'vitest'
+import { renderToStaticMarkup } from 'react-dom/server';
+import { describe, expect, it } from 'vitest';
 import {
-  SessionWorkoutEditor,
-  resolveExpandedWorkoutItemId,
-} from './SessionWorkoutEditor'
+    SessionWorkoutEditor,
+    createSessionWorkoutItemId,
+    resolveExpandedWorkoutItemId,
+} from './SessionWorkoutEditor';
 
 describe('resolveExpandedWorkoutItemId', () => {
   it('keeps the current active id when it still exists', () => {
@@ -26,6 +27,14 @@ describe('resolveExpandedWorkoutItemId', () => {
 
   it('returns null when there are no items', () => {
     expect(resolveExpandedWorkoutItemId([], 'item-1')).toBeNull()
+  })
+
+  it('creates UUID-style ids for newly added workout items', () => {
+    const id = createSessionWorkoutItemId()
+
+    expect(id).toMatch(
+      /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i,
+    )
   })
 
   it('renders the exercise lookup picker in the quick-add area', () => {

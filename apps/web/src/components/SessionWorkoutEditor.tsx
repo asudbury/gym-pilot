@@ -1,19 +1,29 @@
-import { useState, useEffect } from 'react'
-import { type UserSessionWorkoutItem } from '@gym-pilot/shared'
-import { Button } from './ui/Button'
-import { ExerciseMultiPicker } from './exercises/ExerciseMultiPicker'
-import { ItemControls } from './ItemControls'
-import { appTokens } from '../constants/tokens'
-import { formatLabel } from '../utils/formatUtils'
-import { useIsDesktop } from '../utils/useMediaQuery'
-import clsx from 'clsx'
+import { type UserSessionWorkoutItem } from '@gym-pilot/shared';
+import clsx from 'clsx';
+import { useEffect, useState } from 'react';
+import { appTokens } from '../constants/tokens';
+import { formatLabel } from '../utils/formatUtils';
+import { useIsDesktop } from '../utils/useMediaQuery';
+import { ExerciseMultiPicker } from './exercises/ExerciseMultiPicker';
+import { ItemControls } from './ItemControls';
+import { Button } from './ui/Button';
+
+function createUuid() {
+  return '10000000-1000-4000-8000-100000000000'.replace(/[018]/g, (char) =>
+    (Number(char) ^ (crypto.getRandomValues(new Uint8Array(1))[0] & 15) >> Number(char) / 4).toString(16),
+  )
+}
+
+export function createSessionWorkoutItemId() {
+  return createUuid()
+}
 
 function addSessionWorkoutItems(
   items: Partial<UserSessionWorkoutItem>[],
   newItems: Partial<UserSessionWorkoutItem>[],
 ): Partial<UserSessionWorkoutItem>[] {
-  const newWorkoutItems = newItems.map((item, index) => ({
-    id: `new-${Date.now()}-${index}`,
+  const newWorkoutItems = newItems.map((item) => ({
+    id: createSessionWorkoutItemId(),
     ...item,
   }))
   return [...items, ...newWorkoutItems]
