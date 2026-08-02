@@ -1,15 +1,13 @@
-import type { ImportedWorkout } from '@gym-pilot/shared'
-import { getImportedWorkouts } from '@gym-pilot/shared'
-import { useEffect, useMemo, useState } from 'react'
-import { useAuth } from '../auth/AuthContext'
-import { renderDashboardWidgets } from '../components/dashboard/dashboardLayouts'
-import { PageCard } from '../components/PageCard'
-import SessionActions from '../components/SessionActions'
-import { Button } from '../components/ui/Button'
-import { DecorativeIcon } from '../components/ui/DecorativeIcon'
-import WorkoutCalendar from '../components/WorkoutCalendar'
-import { resolveDashboardViewModel } from '../features/dashboard/domain/dashboardLayout'
-import { PageLayout } from '../layouts/PageLayout'
+import type { ImportedWorkout } from '@gym-pilot/shared';
+import { getImportedWorkouts } from '@gym-pilot/shared';
+import { useEffect, useMemo, useState } from 'react';
+import { useAuth } from '../auth/AuthContext';
+import { PageCard } from '../components/PageCard';
+import SessionActions from '../components/SessionActions';
+import { DecorativeIcon } from '../components/ui/DecorativeIcon';
+import WorkoutCalendar from '../components/WorkoutCalendar';
+import { resolveDashboardViewModel } from '../features/dashboard/domain/dashboardLayout';
+import { PageLayout } from '../layouts/PageLayout';
 
 export function DashboardPage() {
   const { user } = useAuth()
@@ -22,11 +20,11 @@ export function DashboardPage() {
   )
 
   const layouts = viewModel.layouts
-  const shouldShowRoleSelector = viewModel.shouldShowRoleSelector
-  const selectedLayoutKey =
-    selectedRole && layouts.some((layout) => layout.key === selectedRole)
-      ? selectedRole
-      : viewModel.selectedLayoutKey
+  // const shouldShowRoleSelector = viewModel.shouldShowRoleSelector
+  // const selectedLayoutKey =
+  //   selectedRole && layouts.some((layout) => layout.key === selectedRole)
+  //     ? selectedRole
+  //     : viewModel.selectedLayoutKey
 
   const canShowTimetable = Boolean(user?.gymName && user.gymName.trim())
   const hasTrainerConfigured = Boolean(user?.trainerId?.trim())
@@ -57,22 +55,22 @@ export function DashboardPage() {
     return () => {}
   }, [user?.id])
 
-  const filteredLayouts = layouts.map((layout) => ({
-    ...layout,
-    widgets: layout.widgets.filter((widget) => {
-      if (canShowTimetable) return true
-      const path = widget.to ?? ''
-      if (path === '/timetable' || path === '/sessions') {
-        return false
-      }
-      return true
-    }),
-  }))
+  // const filteredLayouts = layouts.map((layout) => ({
+  //   ...layout,
+  //   widgets: layout.widgets.filter((widget) => {
+  //     if (canShowTimetable) return true
+  //     const path = widget.to ?? ''
+  //     if (path === '/timetable' || path === '/sessions') {
+  //       return false
+  //     }
+  //     return true
+  //   }),
+  // }))
 
-  const filteredSelectedLayout =
-    filteredLayouts.find((layout) => layout.key === selectedLayoutKey) ??
-    filteredLayouts.find((layout) => layout.widgets.length > 0) ??
-    filteredLayouts[0]
+  // const filteredSelectedLayout =
+  //   filteredLayouts.find((layout) => layout.key === selectedLayoutKey) ??
+  //   filteredLayouts.find((layout) => layout.widgets.length > 0) ??
+  //   filteredLayouts[0]
 
   useEffect(() => {
     if (!layouts.some((layout) => layout.key === selectedRole)) {
@@ -119,7 +117,7 @@ export function DashboardPage() {
 
         {workouts.length > 0 && <WorkoutCalendar workouts={workouts} />}
 
-        {shouldShowRoleSelector ? (
+        {/* {shouldShowRoleSelector ? (
           <div className="flex flex-wrap gap-2">
             {filteredLayouts
               .filter((l) => l.widgets.length > 0)
@@ -142,7 +140,7 @@ export function DashboardPage() {
           <div className="space-y-2">
             {renderDashboardWidgets(filteredLayouts, selectedLayoutKey)}
           </div>
-        ) : null}
+        ) : null} */}
       </PageCard>
     </PageLayout>
   )
