@@ -1,19 +1,21 @@
-import { useMemo, useState } from 'react'
-import Calendar from 'react-calendar'
-import 'react-calendar/dist/Calendar.css'
+import { useMemo, useState } from 'react';
+import Calendar from 'react-calendar';
+import 'react-calendar/dist/Calendar.css';
 import {
-  Bar,
-  BarChart,
-  CartesianGrid,
-  Legend,
-  ResponsiveContainer,
-  Tooltip,
-  XAxis,
-  YAxis,
-} from 'recharts'
-import { PageCard } from '../components/PageCard'
-import { useImportedWorkouts } from '../hooks/useImportedWorkouts'
-import { PageLayout } from '../layouts/PageLayout'
+    Bar,
+    BarChart,
+    CartesianGrid,
+    Legend,
+    Line,
+    LineChart,
+    ResponsiveContainer,
+    Tooltip,
+    XAxis,
+    YAxis
+} from 'recharts';
+import { PageCard } from '../components/PageCard';
+import { useImportedWorkouts } from '../hooks/useImportedWorkouts';
+import { PageLayout } from '../layouts/PageLayout';
 
 type FilterType = 'thisWeek' | 'thisMonth' | 'thisYear' | 'all' | 'custom'
 type DateRange = [Date, Date]
@@ -153,14 +155,14 @@ export function ImportedWorkoutAnalysisPage() {
         <div>
           <h2 className="text-xl font-bold mb-4">Workouts per Week</h2>
           <ResponsiveContainer width="100%" height={300}>
-            <BarChart data={weeklyChartData}>
+            <LineChart data={weeklyChartData}>
               <CartesianGrid strokeDasharray="3 3" />
               <XAxis dataKey="week" />
               <YAxis />
               <Tooltip />
               <Legend />
-              <Bar dataKey="count" fill="#8884d8" name="Workouts" />
-            </BarChart>
+              <Line type="monotone" dataKey="count" stroke="#8884d8" name="Workouts" />
+            </LineChart>
           </ResponsiveContainer>
         </div>
 
