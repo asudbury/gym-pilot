@@ -1,0 +1,149 @@
+import type { ImportedWorkout } from '@gym-pilot/shared'
+import { getImportedWorkouts } from '@gym-pilot/shared'
+import { useEffect, useMemo, useState } from 'react'
+import { useAuth } from '../auth/AuthContext'
+import { PageCard } from '../components/PageCard'
+import SessionActions from '../components/SessionActions'
+import { DecorativeIcon } from '../components/ui/DecorativeIcon'
+import WorkoutCalendar from '../components/WorkoutCalendar'
+import { resolveDashboardViewModel } from '../features/dashboard/domain/dashboardLayout'
+import { PageLayout } from '../layouts/PageLayout'
+
+export function DashboardPage() {
+  const { user } = useAuth()
+  const viewModel = useMemo(
+    () => resolveDashboardViewModel(user?.role, user?.roles),
+    [user?.role, user?.roles],
+  )
+  const [selectedRole, setSelectedRole] = useState<string | null>(
+    () => user?.role ?? viewModel.availableRoles[0] ?? null,
+  )
+
+  const layouts = viewModel.layouts
+  // const shouldShowRoleSelector = viewModel.shouldShowRoleSelector
+  // const selectedLayoutKey =
+  //   selectedRole && layouts.some((layout) => layout.key === selectedRole)
+  //     ? selectedRole
+  //     : viewModel.selectedLayoutKey
+
+  const canShowTimetable = Boolean(user?.gymName && user.gymName.trim())
+  const hasTrainerConfigured = Boolean(user?.trainerId?.trim())
+  const isTrainer = Boolean(user?.roles?.includes('trainer'))
+
+  const [workouts, setWorkouts] = useState<ImportedWorkout[]>([])
+
+  // Fetch workouts for the calendar
+  useEffect(() => {
+    let isActive = true
+
+    const loadWorkouts = async () => {
+      try {
+        if (user?.id == null) {
+          setWorkouts([])
+          return
+        }
+
+        const { data } = await getImportedWorkouts(user.id)
+        if (isActive) {
+          setWorkouts(data ?? [])
+        }
+      } catch (error) {
+        console.error('Failed to load imported workouts:', error)
+      }
+    }
+    void loadWorkouts()
+    return () => {}
+  }, [user?.id])
+
+  // const filteredLayouts = layouts.map((layout) => ({
+  //   ...layout,
+  //   widgets: layout.widgets.filter((widget) => {
+  //     if (canShowTimetable) return true
+  //     const path = widget.to ?? ''
+  //     if (path === '/timetable' || path === '/sessions') {
+  //       return false
+  //     }
+  //     return true
+  //   }),
+  // }))
+
+  // const filteredSelectedLayout =
+  //   filteredLayouts.find((layout) => layout.key === selectedLayoutKey) ??
+  //   filteredLayouts.find((layout) => layout.widgets.length > 0) ??
+  //   filteredLayouts[0]
+
+  useEffect(() => {
+    if (!layouts.some((layout) => layout.key === selectedRole)) {
+      setSelectedRole(layouts[0]?.key ?? null)
+    }
+  }, [layouts, selectedRole])
+
+  return (
+    <PageLayout className="gap-6">
+      <PageCard as="section" className="space-y-6">
+        <div className="flex items-start gap-3">
+          <div className="flex flex-col items-start gap-2">
+            <div className="inline-flex items-center gap-2 pl-2">
+              <DecorativeIcon icon="chart" />
+              <p className="text-sm font-semibold uppercase tracking-[0.24em] text-slate-600 dark:text-slate-300">
+                Dashboard
+              </p>
+            </div>
+          </div>
+        </div>
+
+        <div className="mt-4">
+          <PageCard as="section">
+            {(() => {
+              const sessionActionsProps = {
+                showViewSessionsButton: true,
+                showClassSessionAction: canShowTimetable, // This will now navigate to /sessions/new?type=class
+                showPTSessionAction: hasTrainerConfigured || isTrainer,
+                showViewWorkoutsTemplateButton: true,
+              }
+              return (
+                <>
+                  <div className="hidden lg:flex lg:items-center lg:justify-between lg:gap-4">
+                    <div className="flex-1">
+                      <SessionActions {...sessionActionsProps} />
+                    </div>
+                  </div>
+                  <div className="lg:hidden">
+                    <SessionActions {...sessionActionsProps} />
+                  </div>
+                </>
+              )
+            })()}
+          </PageCard>
+        </div>
+
+        {workouts.length > 0 && <WorkoutCalendar workouts={workouts} />}
+
+        {/* {shouldShowRoleSelector ? (
+          <div className="flex flex-wrap gap-2">
+            {filteredLayouts
+              .filter((l) => l.widgets.length > 0)
+              .map((layout) => {
+                const isActive = selectedLayoutKey === layout.key
+                return (
+                  <Button
+                    key={layout.key}
+                    onClick={() => setSelectedRole(layout.key)}
+                    className={`rounded-full border px-3 py-1.5 text-sm font-medium transition ${isActive ? 'border-slate-900 bg-slate-900 text-white dark:border-slate-100 dark:bg-slate-100 dark:text-slate-950' : 'border-slate-300 bg-white text-slate-700 hover:bg-slate-100 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-200'}`}
+                  >
+                    {layout.label}
+                  </Button>
+                )
+              })}
+          </div>
+        ) : null}
+
+        {filteredSelectedLayout ? (
+          <div className="space-y-2">
+            {renderDashboardWidgets(filteredLayouts, selectedLayoutKey)}
+          </div>
+        ) : null} */}
+      </PageCard>
+    </PageLayout>
+  )
+}

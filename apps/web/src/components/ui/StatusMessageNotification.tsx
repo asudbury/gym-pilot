@@ -1,0 +1,101 @@
+import clsx from 'clsx'
+import { useMemo } from 'react'
+import { logger } from '@gym-pilot/shared'
+import { DecorativeIcon } from './DecorativeIcon'
+
+// Define a type that StatusMessageNotification can gracefully handle
+export type DisplayableError =
+  | string
+  | Error
+  | { message: string; code?: string; details?: unknown; hint?: unknown }
+  | unknown
+  | null
+type StatusTone = 'default' | 'error' | 'success' | 'info'
+
+interface StatusMessageNotificationProps {
+  message: DisplayableError
+  tone?: StatusTone
+  className?: string
+  onDismiss?: () => void
+}
+
+export function StatusMessageNotification({
+  message,
+  tone = 'default',
+  className,
+  onDismiss,
+}: StatusMessageNotificationProps) {
+  const resolvedMessage = useMemo(() => {
+    if (message === null || message === undefined) {
+      return null
+    }
+
+    if (typeof message === 'string') {
+      return message
+    }
+
+    if (message instanceof Error) {
+      return message.message
+    }
+
+    // Handle objects with a 'message' property (like the one you provided)
+    if (
+      typeof message === 'object' &&
+      message !== null &&
+      'message' in message &&
+      typeof (message as { message: unknown }).message === 'string'
+    ) {
+      return (message as { message: string }).message
+    }
+
+    // Fallback for other objects, try to stringify for more info than '[object Object]'
+    if (typeof message === 'object' && message !== null) {
+      try {
+        return `An unexpected error occurred: ${JSON.stringify(message)}`
+      } catch (jsonError) {
+        logger.warn(
+          'Failed to JSON.stringify error object in StatusMessage:',
+          jsonError,
+        )
+      }
+    }
+
+    // Final fallback for primitives or other unexpected types
+    return `An unexpected error occurred: ${String(message)}`
+  }, [message])
+
+  if (!resolvedMessage) {
+    return null
+  }
+
+  const toneClasses = {
+    error:
+      'border-rose-200 bg-rose-50 text-rose-700 dark:border-rose-700 dark:bg-rose-950 dark:text-rose-200',
+    success:
+      'border-emerald-200 bg-emerald-50 text-emerald-700 dark:border-emerald-700 dark:bg-emerald-950 dark:text-emerald-200',
+    info: 'border-blue-200 bg-blue-50 text-blue-700 dark:border-blue-700 dark:bg-blue-950 dark:text-blue-200',
+    default:
+      'border-slate-200 bg-slate-50 text-slate-600 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-300',
+  }
+
+  return (
+    <div
+      className={clsx(
+        'mt-4 rounded-2xl border px-4 py-3 text-sm flex items-center justify-between',
+        toneClasses[tone],
+        className,
+      )}
+    >
+      <div>{resolvedMessage}</div>
+      {onDismiss && (
+        <button
+          type="button"
+          onClick={onDismiss}
+          className="ml-4 p-1 rounded-full hover:bg-opacity-75 focus:outline-none focus:ring-2 focus:ring-offset-2"
+        >
+          <DecorativeIcon icon="close" className="h-4 w-4" />
+        </button>
+      )}
+    </div>
+  )
+}

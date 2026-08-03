@@ -1,0 +1,1 @@
+GET {{supabase_base_url}}/ping

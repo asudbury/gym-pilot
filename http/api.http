@@ -1,0 +1,7 @@
+GET {{supabase_base_url}}/api
+
+Content-Type: application/json
+{
+  "email": "{{login_email}}",
+  "password": "{{login_password}}"
+}

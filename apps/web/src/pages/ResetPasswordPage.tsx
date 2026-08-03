@@ -1,0 +1,429 @@
+import { useMemo, useState } from 'react'
+import { useLocation, useNavigate, useSearchParams } from 'react-router-dom'
+import { PageCard } from '../components/PageCard'
+import { Heading1 } from '../components/Typography'
+import { appTokens } from '../constants/tokens'
+import { Button } from '../components/ui/Button'
+import { DecorativeIcon } from '../components/ui/DecorativeIcon'
+import {
+  getSupabaseClient,
+  logger,
+  recordSupabaseUserActivity,
+  saveSupabaseProfileFlag,
+} from '@gym-pilot/shared'
+import { recordWelcomeJourneyActivity } from '../features/auth/domain/welcomeJourneyLogging'
+import { handlePostSignInLogic } from '../features/auth/domain/postSignInLogic'
+import { StatusMessageNotification } from '../components/ui/StatusMessageNotification'
+
+export function ResetPasswordPage() {
+  const navigate = useNavigate()
+  const location = useLocation()
+  const [searchParams] = useSearchParams()
+  const [password, setPassword] = useState('')
+  const [confirmPassword, setConfirmPassword] = useState('')
+  const [passwordRules, setPasswordRules] = useState({
+    length: false,
+    lower: false,
+    upper: false,
+    number: false,
+    special: false,
+  })
+  const [statusMessageText, setStatusMessageText] = useState('')
+  const [statusTone, setStatusTone] = useState<'default' | 'error'>('default')
+  const [isSubmitting, setIsSubmitting] = useState(false)
+
+  const accessToken = useMemo(
+    () => searchParams.get('access_token') || '',
+    [searchParams],
+  )
+  const refreshToken = useMemo(
+    () => searchParams.get('refresh_token') || '',
+    [searchParams],
+  )
+  const hasResetTokens = Boolean(accessToken && refreshToken)
+  const from = useMemo(() => {
+    const state = location.state as { from?: { pathname?: string } } | null
+    return state?.from?.pathname || '/'
+  }, [location.state])
+
+  const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
+    event.preventDefault()
+    setIsSubmitting(true)
+    setStatusMessageText('')
+    setStatusTone('default')
+
+    if (password.length < 8) {
+      setStatusMessageText('Password must be at least 8 characters long.')
+      setStatusTone('error')
+      setIsSubmitting(false)
+      setPassword('')
+      setConfirmPassword('')
+      return
+    }
+
+    // Ensure password meets rules before submitting
+    if (!Object.values(passwordRules).every(Boolean)) {
+      setStatusMessageText('Your password does not meet the required criteria.')
+      setStatusTone('error')
+      setIsSubmitting(false)
+      setConfirmPassword('')
+      return
+    }
+
+    if (password !== confirmPassword) {
+      setStatusMessageText('The passwords do not match.')
+      setStatusTone('error')
+      setIsSubmitting(false)
+      setPassword('')
+      setConfirmPassword('')
+      return
+    }
+
+    const client = getSupabaseClient()
+
+    if (!client) {
+      setStatusMessageText('Supabase is not available right now.')
+      setStatusTone('error')
+      setIsSubmitting(false)
+      return
+    }
+
+    let sessionError = null
+
+    if (hasResetTokens) {
+      const sessionResponse = await client.auth.setSession({
+        access_token: accessToken,
+        refresh_token: refreshToken,
+      })
+
+      sessionError = sessionResponse.error
+    } else {
+      const {
+        data: { session },
+        error,
+      } = await client.auth.getSession()
+      sessionError = error
+
+      if (!session) {
+        sessionError = new Error('No active session found.')
+      }
+    }
+
+    if (sessionError) {
+      logger.error(
+        '[ResetPassword] Could not restore Supabase session',
+        sessionError,
+      )
+      void recordWelcomeJourneyActivity(
+        'welcome_journey_error',
+        {
+          step: 'reset_password',
+          outcome: 'session_restore_failed',
+          source: hasResetTokens ? 'reset_link' : 'signed_in_flow',
+        },
+        null,
+        null,
+      )
+      setStatusMessageText(
+        'The password reset link could not be used. Please request a new one or sign in again.',
+      )
+      setStatusTone('error')
+      setIsSubmitting(false)
+      setPassword('')
+      setConfirmPassword('')
+      return
+    }
+
+    const { error: updateError } = await client.auth.updateUser({ password })
+
+    setIsSubmitting(false)
+
+    if (updateError) {
+      logger.error('[ResetPassword] Password update failed', updateError)
+
+      void recordWelcomeJourneyActivity(
+        'welcome_journey_password_reset',
+        {
+          step: 'reset_password',
+          outcome: 'failed',
+          source: hasResetTokens ? 'reset_link' : 'signed_in_flow',
+        },
+        null,
+      )
+      // StatusMessage component will now handle parsing the error object
+      setStatusMessageText(updateError.message)
+      setStatusTone('error')
+      setPassword('')
+      setConfirmPassword('')
+      return
+    }
+    try {
+      const { data: authUserData } = await client.auth.getUser()
+      const user = authUserData.user // Type inferred from client.auth.getUser()
+      const currentUserId = user?.id ?? null // Access properties directly
+      const currentUserEmail = user?.email ?? null // Access properties directly
+
+      if (user) {
+        if (currentUserId) {
+          await recordWelcomeJourneyActivity(
+            'welcome_journey_password_reset',
+            {
+              step: 'reset_password',
+              outcome: 'succeeded',
+              source: hasResetTokens ? 'reset_link' : 'signed_in_flow',
+            },
+            currentUserId,
+            currentUserEmail,
+          )
+
+          await recordSupabaseUserActivity(
+            'password_set',
+            { source: hasResetTokens ? 'reset_link' : 'signed_in_flow' },
+            currentUserId,
+            currentUserEmail,
+          )
+        }
+
+        // Persist the must_change_password flag to false
+        // This should happen *before* calling handlePostSignInLogic
+        // so that handlePostSignInLogic doesn't redirect to reset-password again.
+        try {
+          await Promise.race([
+            saveSupabaseProfileFlag('must_change_password', false),
+            new Promise((res) => setTimeout(res, 2000)),
+          ])
+        } catch (err) {
+          logger.warn(
+            '[ResetPassword] Could not persist must_change_password flag',
+            err,
+          )
+        }
+
+        // Now call the common post-sign-in logic
+        await handlePostSignInLogic({
+          user: user,
+          email: currentUserEmail || '',
+          from,
+          navigate,
+          setAuthMessage: setStatusMessageText,
+          setAuthMessageTone: setStatusTone,
+        })
+      } else {
+        // If user data is not available, just navigate to 'from'
+        setStatusMessageText('Password updated successfully.')
+        setStatusTone('default')
+        navigate(from, { replace: true })
+      }
+    } catch (error) {
+      logger.warn(
+        '[ResetPassword] Error during post-password-update logic',
+        error,
+      )
+      // Fallback navigation if post-sign-in logic fails
+      setStatusMessageText(
+        'Password updated successfully, but there was an issue with post-login checks. Please refresh or try again.',
+      )
+      setStatusTone('error')
+      navigate(from, { replace: true })
+    }
+  }
+
+  return (
+    <div className={`${appTokens.pageShell} flex items-start justify-center`}>
+      <PageCard
+        as="section"
+        className="w-full max-w-xl self-start"
+        padding="spacious"
+      >
+        <div className="flex items-start gap-3">
+          <DecorativeIcon icon="lock" />
+          <div className="flex flex-col gap-2">
+            <Heading1 as="h1">Set a new password</Heading1>
+            <p className="text-sm text-slate-600">
+              Choose a new password for your account.
+            </p>
+          </div>
+        </div>
+
+        <form onSubmit={handleSubmit} className="mt-8 flex flex-col gap-4">
+          <StatusMessageNotification
+            message={statusMessageText}
+            tone={statusTone}
+          />
+          <label className="flex flex-col gap-2 text-sm font-medium text-slate-700">
+            <span>New password</span>
+            <input
+              type="password"
+              value={password}
+              onChange={(event) => {
+                const v = event.target.value
+                setPassword(v)
+
+                // Clear any existing status message when the user starts typing
+                if (statusMessageText) {
+                  setStatusMessageText('')
+                  setStatusTone('default')
+                }
+
+                setPasswordRules({
+                  length: v.length >= 8,
+                  lower: /[a-z]/.test(v),
+                  upper: /[A-Z]/.test(v),
+                  number: /[0-9]/.test(v),
+                  special: /[^A-Za-z0-9]/.test(v),
+                })
+              }}
+              required
+              autoComplete="new-password"
+              name="new-password"
+              className={`${appTokens.input} w-full`}
+              placeholder="Enter a new password"
+            />
+          </label>
+
+          <label className="flex flex-col gap-2 text-sm font-medium text-slate-700">
+            <span>Confirm password</span>
+            <input
+              type="password"
+              value={confirmPassword}
+              onChange={(event) => {
+                setConfirmPassword(event.target.value)
+
+                // Clear any existing status message when the user starts typing
+                if (statusMessageText) {
+                  setStatusMessageText('')
+                  setStatusTone('default')
+                }
+              }}
+              required
+              autoComplete="new-password"
+              name="confirm-new-password"
+              className={`${appTokens.input} w-full`}
+              placeholder="Confirm your new password"
+            />
+          </label>
+
+          <div className="mt-2 text-sm text-slate-600">
+            <p className="mb-2">Password must contain:</p>
+            <ul className="flex flex-col gap-1">
+              <li className="flex items-center gap-2">
+                <span
+                  className={`inline-flex h-5 w-5 items-center justify-center rounded-full ${
+                    passwordRules.length
+                      ? 'bg-emerald-100 text-emerald-600'
+                      : 'bg-slate-100 text-slate-400'
+                  }`}
+                  aria-hidden
+                >
+                  {passwordRules.length ? ( // Use DecorativeIcon for checkmark
+                    <DecorativeIcon icon="check" className="h-4 w-4" />
+                  ) : (
+                    // Use DecorativeIcon for circle
+                    <DecorativeIcon icon="circle" className="h-3 w-3" />
+                  )}
+                </span>
+                <span>At least 8 characters</span>
+              </li>
+
+              <li className="flex items-center gap-2">
+                <span
+                  className={`inline-flex h-5 w-5 items-center justify-center rounded-full ${
+                    passwordRules.lower
+                      ? 'bg-emerald-100 text-emerald-600'
+                      : 'bg-slate-100 text-slate-400'
+                  }`}
+                  aria-hidden
+                >
+                  {passwordRules.lower ? ( // Use DecorativeIcon for checkmark
+                    <DecorativeIcon icon="check" className="h-4 w-4" />
+                  ) : (
+                    // Use DecorativeIcon for circle
+                    <DecorativeIcon icon="circle" className="h-3 w-3" />
+                  )}
+                </span>
+                <span>Lowercase letter</span>
+              </li>
+
+              <li className="flex items-center gap-2">
+                <span
+                  className={`inline-flex h-5 w-5 items-center justify-center rounded-full ${
+                    passwordRules.upper
+                      ? 'bg-emerald-100 text-emerald-600'
+                      : 'bg-slate-100 text-slate-400'
+                  }`}
+                  aria-hidden
+                >
+                  {passwordRules.upper ? ( // Use DecorativeIcon for checkmark
+                    <DecorativeIcon icon="check" className="h-4 w-4" />
+                  ) : (
+                    // Use DecorativeIcon for circle
+                    <DecorativeIcon icon="circle" className="h-3 w-3" />
+                  )}
+                </span>
+                <span>Uppercase letter</span>
+              </li>
+
+              <li className="flex items-center gap-2">
+                <span
+                  className={`inline-flex h-5 w-5 items-center justify-center rounded-full ${
+                    passwordRules.number
+                      ? 'bg-emerald-100 text-emerald-600'
+                      : 'bg-slate-100 text-slate-400'
+                  }`}
+                  aria-hidden
+                >
+                  {passwordRules.number ? ( // Use DecorativeIcon for checkmark
+                    <DecorativeIcon icon="check" className="h-4 w-4" />
+                  ) : (
+                    // Use DecorativeIcon for circle
+                    <DecorativeIcon icon="circle" className="h-3 w-3" />
+                  )}
+                </span>
+                <span>A number</span>
+              </li>
+
+              <li className="flex items-center gap-2">
+                <span
+                  className={`inline-flex h-5 w-5 items-center justify-center rounded-full ${
+                    passwordRules.special
+                      ? 'bg-emerald-100 text-emerald-600'
+                      : 'bg-slate-100 text-slate-400'
+                  }`}
+                  aria-hidden
+                >
+                  {passwordRules.special ? ( // Use DecorativeIcon for checkmark
+                    <DecorativeIcon icon="check" className="h-4 w-4" />
+                  ) : (
+                    // Use DecorativeIcon for circle
+                    <DecorativeIcon icon="circle" className="h-3 w-3" />
+                  )}
+                </span>
+                <span>Special character (e.g. !@#$%)</span>
+              </li>
+            </ul>
+          </div>
+
+          <Button
+            tone="emerald"
+            disabled={isSubmitting}
+            className="self-start w-full sm:w-auto text-sm font-semibold shadow-sm"
+          >
+            {isSubmitting ? 'Updating password…' : 'Update password'}
+          </Button>
+        </form>
+
+        {statusMessageText ? (
+          <div
+            className={`mt-4 rounded-2xl border px-4 py-3 text-sm ${
+              statusTone === 'error'
+                ? 'border-rose-200 bg-rose-50 text-rose-700'
+                : 'border-slate-200 bg-slate-50 text-slate-600'
+            }`}
+          >
+            {statusMessageText}
+          </div>
+        ) : null}
+      </PageCard>
+    </div>
+  )
+}

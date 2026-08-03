@@ -1,0 +1,8 @@
+POST {{supabase_url}}/auth/v1/token?grant_type=password
+Content-Type: application/json
+apikey: {{supabase_anon_key}}
+
+{
+  "email": "{{login_email}}",
+  "password": "{{login_password}}"
+}

@@ -1,0 +1,132 @@
+export type DecorativeIconProps = {
+  icon?:
+    | 'arrowDown'
+    | 'arrowUp'
+    | 'back'
+    | 'calendar'
+    | 'chart'
+    | 'check'
+    | 'circle'
+    | 'clipboard'
+    | 'close'
+    | 'database'
+    | 'document'
+    | 'dumbbell'
+    | 'edit'
+    | 'grid'
+    | 'heart'
+    | 'help'
+    | 'home'
+    | 'key'
+    | 'lock'
+    | 'preferences'
+    | 'search'
+    | 'settings'
+    | 'share'
+    | 'shield'
+    | 'spark'
+    | 'spinner'
+    | 'star'
+    | 'tasks'
+    | 'trash'
+    | 'user'
+    | 'users'
+    | 'apple'
+    | null
+  className?: string
+  withContainer?: boolean
+}
+
+import {
+  ShareIcon,
+  SparkIcon,
+  DumbbellIcon,
+  SpinnerIcon,
+  SearchIcon,
+  StarIcon,
+  ChartIcon,
+  GridIcon,
+  HeartIcon,
+  ClipboardIcon,
+  ShieldIcon,
+  BackIcon,
+  CalendarIcon,
+  HelpIcon,
+  HomeIcon,
+  TasksIcon,
+  UsersIcon,
+  DatabaseIcon,
+  SettingsIcon,
+  KeyIcon,
+  UserIcon,
+  PreferencesIcon,
+  LockIcon,
+  EditIcon,
+  TrashIcon,
+  CheckIcon,
+  CircleIcon,
+  CloseIcon,
+  DocumentIcon,
+  ArrowUpIcon,
+  ArrowDownIcon,
+  AppleIcon,
+} from './icons'
+
+const baseClasses =
+  'flex h-11 w-11 items-center justify-center rounded-2xl border border-slate-200 bg-slate-50 text-slate-700 shadow-sm dark:border-slate-700 dark:bg-slate-900/70 dark:text-slate-200'
+
+const iconComponents = {
+  back: BackIcon,
+  calendar: CalendarIcon,
+  chart: ChartIcon,
+  circle: CircleIcon,
+  check: CheckIcon,
+  clipboard: ClipboardIcon,
+  close: CloseIcon,
+  database: DatabaseIcon,
+  document: DocumentIcon,
+  dumbbell: DumbbellIcon,
+  edit: EditIcon,
+  grid: GridIcon,
+  heart: HeartIcon,
+  help: HelpIcon,
+  home: HomeIcon,
+  key: KeyIcon,
+  lock: LockIcon,
+  preferences: PreferencesIcon,
+  search: SearchIcon,
+  settings: SettingsIcon,
+  share: ShareIcon,
+  shield: ShieldIcon,
+  spark: SparkIcon,
+  star: StarIcon,
+  tasks: TasksIcon,
+  trash: TrashIcon,
+  user: UserIcon,
+  users: UsersIcon,
+  arrowUp: ArrowUpIcon,
+  arrowDown: ArrowDownIcon,
+  spinner: SpinnerIcon,
+  apple: AppleIcon,
+}
+
+const DecorativeIcon = ({
+  icon,
+  className = '',
+  withContainer = false,
+}: DecorativeIconProps) => {
+  const iconClassName = className || 'h-5 w-5'
+  const containerClassName = withContainer
+    ? `${baseClasses} ${className}`.trim()
+    : className
+
+  const IconComponent = icon ? iconComponents[icon] : undefined
+
+  return (
+    <div className={containerClassName} aria-hidden="true">
+      {IconComponent && <IconComponent className={iconClassName} />}
+    </div>
+  )
+}
+
+export { DecorativeIcon }

@@ -1,0 +1,106 @@
+import { useEffect } from 'react'
+import { Routes, useLocation } from 'react-router-dom'
+import ErrorBoundary from './components/ErrorBoundary'
+import { Header } from './components/navigation/Header'
+import { Button } from './components/ui/Button'
+import { BottomNavigation } from './features/app-shell/components/BottomNavigation'
+import { useAppShell } from './features/app-shell/hooks/useAppShell'
+import { createAuthRoutes } from './routes/authRoutes'
+import { createPublicRoutes } from './routes/publicRoutes'
+import { getInstallHint } from './utils/pwa'
+
+function ScrollToTop() {
+  const { pathname } = useLocation()
+
+  useEffect(() => {
+    window.scrollTo(0, 0)
+  }, [pathname])
+
+  return null
+}
+
+function App() {
+  // Add PWA class to HTML element if in standalone mode
+  useEffect(() => {
+    const isPwa =
+      window.matchMedia('(display-mode: standalone)').matches ||
+      (window.navigator as unknown as { standalone: boolean }).standalone
+    if (isPwa) {
+      document.documentElement.classList.add('pwa')
+    } else {
+      document.documentElement.classList.remove('pwa')
+    }
+  }, [])
+
+  const {
+    appName,
+    broadcastMessage,
+    currentRouteVisibility,
+    desktopMenuItems,
+    handleAuthClick,
+    isCurrentRouteVisible,
+    mobileMenuItems,
+    mustChangePassword,
+    setMobileMenuOpen,
+    showInstallHint,
+    setShowInstallHint,
+    tabletMenuItems,
+    user,
+    mobileMenuOpen,
+  } = useAppShell()
+
+  return (
+    <div className="min-h-screen bg-slate-50 pb-16 text-slate-900 transition-colors dark:bg-slate-950 dark:text-slate-100 pwa:pb-[calc(4rem+env(safe-area-inset-bottom))]">
+      <ScrollToTop />
+      {broadcastMessage.trim() ? (
+        <div className="border-b border-amber-200 bg-amber-50 px-4 py-2 text-center text-sm font-medium text-amber-900">
+          {broadcastMessage}
+        </div>
+      ) : null}
+      {showInstallHint ? (
+        <div className="border-b border-slate-200 bg-slate-900 px-4 py-3 text-sm text-white">
+          <div className="mx-auto flex max-w-6xl items-center justify-between gap-3">
+            <span>{getInstallHint(true, false)}</span>
+            <Button
+              onClick={() => setShowInstallHint(false)}
+              className="rounded-full bg-white/15 px-3 py-1 text-xs font-semibold text-white transition hover:bg-white/25"
+            >
+              Close
+            </Button>
+          </div>
+        </div>
+      ) : null}
+      <Header
+        appName={appName}
+        desktopMenuItems={desktopMenuItems}
+        tabletMenuItems={tabletMenuItems}
+        mobileMenuItems={mobileMenuItems}
+        mobileMenuOpen={mobileMenuOpen}
+        user={user}
+        mustChangePassword={mustChangePassword}
+        onAuthClick={handleAuthClick} // This prop is still needed for auth actions
+        onToggleMobileMenu={() => setMobileMenuOpen((current) => !current)} // This prop is still needed for mobile menu
+      />
+
+      {currentRouteVisibility && !isCurrentRouteVisible ? (
+        <div className="mx-auto flex max-w-6xl flex-col gap-3 px-4 py-8 sm:px-6 lg:px-8">
+          <h1 className="text-2xl font-semibold">
+            This screen is not available for your current tier or device.
+          </h1>
+        </div>
+      ) : (
+        <ErrorBoundary>
+          <Routes>
+            {createAuthRoutes()}
+            {createPublicRoutes({
+              user,
+            })}
+          </Routes>
+        </ErrorBoundary>
+      )}
+      <BottomNavigation />
+    </div>
+  )
+}
+
+export default App
