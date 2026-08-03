@@ -1,19 +1,19 @@
-import { useMemo, useState } from 'react';
-import Calendar from 'react-calendar';
-import 'react-calendar/dist/Calendar.css';
+import { useMemo, useState } from 'react'
+import Calendar from 'react-calendar'
+import 'react-calendar/dist/Calendar.css'
 import {
-    Bar,
-    BarChart,
-    CartesianGrid,
-    Legend,
-    ResponsiveContainer,
-    Tooltip,
-    XAxis,
-    YAxis,
-} from 'recharts';
-import { PageCard } from '../components/PageCard';
-import { useImportedWorkouts } from '../hooks/useImportedWorkouts';
-import { PageLayout } from '../layouts/PageLayout';
+  Bar,
+  BarChart,
+  CartesianGrid,
+  Legend,
+  ResponsiveContainer,
+  Tooltip,
+  XAxis,
+  YAxis,
+} from 'recharts'
+import { PageCard } from '../components/PageCard'
+import { useImportedWorkouts } from '../hooks/useImportedWorkouts'
+import { PageLayout } from '../layouts/PageLayout'
 
 type FilterType = 'thisWeek' | 'thisMonth' | 'thisYear' | 'all' | 'custom'
 type DateRange = [Date, Date]
