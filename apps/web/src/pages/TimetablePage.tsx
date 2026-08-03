@@ -1,30 +1,30 @@
-import { useEffect, useMemo, useRef, useState } from 'react'
-import { useNavigate } from 'react-router-dom'
-import { saveTimetableAttendance } from '@gym-pilot/shared'
-import { useAuth } from '../auth/AuthContext'
-import { PageLayout } from '../layouts/PageLayout'
-import { PageCardLayout } from '../layouts/PageCardLayout'
-import { Button } from '../components/ui/Button'
-import { GymClubSelector } from '../components/GymClubSelector'
-import { RatingSelector } from '../components/RatingSelector'
-import { DesktopOnly } from '../components/visibility/DeviceVisibility'
-import { reportUiError } from '../utils/uiErrorLogging'
-import { loadVirginActiveClubs } from '../utils/virginActiveClubs'
+import { saveTimetableAttendance } from '@gym-pilot/shared';
+import { useEffect, useMemo, useRef, useState } from 'react';
+import { useNavigate } from 'react-router-dom';
+import { useAuth } from '../auth/AuthContext';
+import { GymClubSelector } from '../components/GymClubSelector';
+import { RatingSelector } from '../components/RatingSelector';
+import { Button } from '../components/ui/Button';
+import { StatusMessageNotification } from '../components/ui/StatusMessageNotification';
+import { DesktopOnly } from '../components/visibility/DeviceVisibility';
+import { timetableCache } from '../features/timetable/domain/timetableCache';
 import {
-  formatTimetableAvailability,
-  formatTimetableDateLabel,
-  formatTimetableTimeLabel,
-  isPastTimetableSession,
-  resolveNextActiveDayKey,
-  resolveTimetableAttendanceAction,
-  resolveTimetableClubSelectionViewModel,
-  resolveTimetableHeaderViewModel,
-  resolveTimetableViewModel,
-  type TimetableSession,
-} from '../features/timetable/domain/timetableView'
-import { StatusMessageNotification } from '../components/ui/StatusMessageNotification'
-import { loadTimetable } from '../features/timetable/services/timetableService'
-import { timetableCache } from '../features/timetable/domain/timetableCache'
+    formatTimetableAvailability,
+    formatTimetableDateLabel,
+    formatTimetableTimeLabel,
+    isPastTimetableSession,
+    resolveNextActiveDayKey,
+    resolveTimetableAttendanceAction,
+    resolveTimetableClubSelectionViewModel,
+    resolveTimetableHeaderViewModel,
+    resolveTimetableViewModel,
+    type TimetableSession,
+} from '../features/timetable/domain/timetableView';
+import { loadTimetable } from '../features/timetable/services/timetableService';
+import { PageCardLayout } from '../layouts/PageCardLayout';
+import { PageLayout } from '../layouts/PageLayout';
+import { reportUiError } from '../utils/uiErrorLogging';
+import { loadVirginActiveClubs } from '../utils/virginActiveClubs';
 
 export function TimetablePage() {
   const { user, updateGymName } = useAuth()
@@ -410,7 +410,7 @@ export function TimetablePage() {
 
   if (!clubId) {
     return (
-      <PageLayout className="max-w-6xl">
+      <PageLayout className="w-full gap-6">
         <PageCardLayout
           title={headerViewModel.title}
           subtitle={headerViewModel.subtitle}

@@ -1,12 +1,12 @@
-import { useEffect, useMemo, useState } from 'react'
-import { useAuth } from '../auth/AuthContext'
-import { PageCard } from '../components/PageCard'
-import SessionActions from '../components/SessionActions'
-import { DecorativeIcon } from '../components/ui/DecorativeIcon'
-import WorkoutCalendar from '../components/WorkoutCalendar'
-import { resolveDashboardViewModel } from '../features/dashboard/domain/dashboardLayout'
-import { useImportedWorkouts } from '../hooks/useImportedWorkouts'
-import { PageLayout } from '../layouts/PageLayout'
+import { useEffect, useMemo, useState } from 'react';
+import { useAuth } from '../auth/AuthContext';
+import { PageCard } from '../components/PageCard';
+import SessionActions from '../components/SessionActions';
+import { DecorativeIcon } from '../components/ui/DecorativeIcon';
+import WorkoutCalendar from '../components/WorkoutCalendar';
+import { resolveDashboardViewModel } from '../features/dashboard/domain/dashboardLayout';
+import { useImportedWorkouts } from '../hooks/useImportedWorkouts';
+import { PageLayout } from '../layouts/PageLayout';
 
 export function DashboardPage() {
   const { user } = useAuth()
@@ -25,23 +25,6 @@ export function DashboardPage() {
   const isTrainer = Boolean(user?.roles?.includes('trainer'))
 
   const { workouts } = useImportedWorkouts()
-
-  // const filteredLayouts = layouts.map((layout) => ({
-  //   ...layout,
-  //   widgets: layout.widgets.filter((widget) => {
-  //     if (canShowTimetable) return true
-  //     const path = widget.to ?? ''
-  //     if (path === '/timetable' || path === '/sessions') {
-  //       return false
-  //     }
-  //     return true
-  //   }),
-  // }))
-
-  // const filteredSelectedLayout =
-  //   filteredLayouts.find((layout) => layout.key === selectedLayoutKey) ??
-  //   filteredLayouts.find((layout) => layout.widgets.length > 0) ??
-  //   filteredLayouts[0]
 
   useEffect(() => {
     if (!layouts.some((layout) => layout.key === selectedRole)) {

@@ -1,5 +1,5 @@
-import RecordButtons from './RecordButtons';
-import ActionButton from './ui/ActionButton';
+import RecordButtons from './RecordButtons'
+import ActionButton from './ui/ActionButton'
 
 type SessionActionsProps = {
   showViewSessionsButton?: boolean

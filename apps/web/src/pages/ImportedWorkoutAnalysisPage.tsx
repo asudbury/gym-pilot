@@ -1,19 +1,19 @@
-import { useMemo, useState } from 'react'
-import Calendar from 'react-calendar'
-import 'react-calendar/dist/Calendar.css'
+import { useMemo, useState } from 'react';
+import Calendar from 'react-calendar';
+import 'react-calendar/dist/Calendar.css';
 import {
-  Bar,
-  BarChart,
-  CartesianGrid,
-  Legend,
-  ResponsiveContainer,
-  Tooltip,
-  XAxis,
-  YAxis,
-} from 'recharts'
-import { PageCard } from '../components/PageCard'
-import { useImportedWorkouts } from '../hooks/useImportedWorkouts'
-import { PageLayout } from '../layouts/PageLayout'
+    Bar,
+    BarChart,
+    CartesianGrid,
+    Legend,
+    ResponsiveContainer,
+    Tooltip,
+    XAxis,
+    YAxis,
+} from 'recharts';
+import { PageCard } from '../components/PageCard';
+import { useImportedWorkouts } from '../hooks/useImportedWorkouts';
+import { PageLayout } from '../layouts/PageLayout';
 
 type FilterType = 'thisWeek' | 'thisMonth' | 'thisYear' | 'all' | 'custom'
 type DateRange = [Date, Date]
@@ -113,7 +113,7 @@ export function ImportedWorkoutAnalysisPage() {
   return (
     <PageLayout className="gap-6">
       <PageCard as="section" className="space-y-6">
-        <h1 className="text-2xl font-bold">Imported Workout Analysis</h1>
+        <h1 className="text-2xl font-bold">Apple Fitness Workout Analysis</h1>
 
         <div className="flex flex-wrap gap-2">
           <button onClick={() => setFilter('all')}>All</button>
@@ -141,12 +141,12 @@ export function ImportedWorkoutAnalysisPage() {
           <div className="p-4 bg-gray-100 rounded-lg dark:bg-gray-800">
             <h2 className="text-lg font-semibold">Total Duration (minutes)</h2>
             <p className="text-3xl font-bold">
-              {(totalDuration / 60).toFixed(2)}
+              {(totalDuration / 60).toFixed(0)}
             </p>
           </div>
           <div className="p-4 bg-gray-100 rounded-lg dark:bg-gray-800">
             <h2 className="text-lg font-semibold">Total Energy (kcal)</h2>
-            <p className="text-3xl font-bold">{totalEnergy.toFixed(2)}</p>
+            <p className="text-3xl font-bold">{totalEnergy.toFixed(0)}</p>
           </div>
         </div>
 
