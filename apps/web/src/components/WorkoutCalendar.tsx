@@ -6,6 +6,7 @@ import {
 } from '@gym-pilot/shared'
 import React, { useEffect, useMemo, useState } from 'react'
 import Calendar from 'react-calendar'
+import { formatDateForDisplay } from '../dateTimeFormatter'
 import { useIsDesktop } from '../utils/useMediaQuery'
 import { AppleFitnessWorkoutCard } from './AppleFitnessWorkoutCard'
 import { Button } from './ui/Button'
@@ -415,7 +416,7 @@ const WorkoutCalendar: React.FC<WorkoutCalendarProps> = ({
           {selectedDate && !Array.isArray(selectedDate) && (
             <div className="mt-5">
               <h3 className="mb-2.5 text-slate-800">
-                <b>Workouts on {selectedDate.toDateString()}</b>
+                <b>Workouts on {formatDateForDisplay(selectedDate)}</b>
               </h3>
               {workoutsForSelectedDate.length > 0 ? (
                 workoutsForSelectedDate.map((workout) => (

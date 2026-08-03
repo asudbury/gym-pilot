@@ -1,6 +1,6 @@
 import type { UserSession } from '@gym-pilot/shared'
 import { useNavigate } from 'react-router-dom'
-import { formatDateTime } from '../../dateTimeFormatter'
+import { formatDateTimeForDisplay } from '../../dateTimeFormatter'
 import {
   getSessionEntryRating,
   getSessionEntryTitle,
@@ -19,7 +19,7 @@ function formatAttendanceDate(value?: string | null) {
     return value
   }
 
-  return formatDateTime(parsed)
+  return formatDateTimeForDisplay(parsed)
 }
 
 type SessionEntryCardProps = {
@@ -31,6 +31,7 @@ type SessionEntryCardProps = {
   selected?: boolean
   onCardClick?: (sessionId: string) => void
   showEditButton?: boolean
+  extendedDetails?: boolean
 }
 
 export function SessionEntryCard({
@@ -43,6 +44,7 @@ export function SessionEntryCard({
   onCardClick,
   children,
   showEditButton = false,
+  extendedDetails = true,
 }: SessionEntryCardProps & { children?: React.ReactNode }) {
   const navigate = useNavigate()
 
@@ -78,43 +80,35 @@ export function SessionEntryCard({
             <p className="text-base font-semibold text-slate-900">
               {getSessionEntryTitle(entry)}
             </p>
-            {(() => {
-              const roleLabel =
-                entry.attendance_type === 'taught'
-                  ? 'Taught'
-                  : entry.attendance_type === 'attended'
-                    ? 'Attended'
-                    : null
 
-              return roleLabel ? (
-                <p className="text-sm text-slate-600">{roleLabel}</p>
-              ) : null
-            })()}
-            {entry.trainer_name ? (
+            <p className="text-sm text-slate-600">
+              {formatAttendanceDate(entry.start_at)}
+            </p>
+            {entry.trainer_name && extendedDetails ? (
               <p className="text-sm text-slate-600">
                 Instructor: {entry.trainer_name}
               </p>
             ) : null}
-            <p className="text-sm text-slate-600">
-              {formatAttendanceDate(entry.start_at)}
-            </p>
-            {entry.notes ? (
+            {entry.notes && extendedDetails ? (
               <p className="text-sm text-slate-600">{entry.notes}</p>
             ) : null}
-            {entry.duration_minutes != null ? (
+            {entry.duration_minutes != null && extendedDetails ? (
               <p className="text-sm text-slate-600">
                 Duration: {entry.duration_minutes} min
               </p>
             ) : null}
+
             {(() => {
               const rating = getSessionEntryRating(entry)
-              return rating != null ? (
+              return rating != null && extendedDetails ? (
                 <p className="text-sm text-slate-600">Rating: {rating} / 5</p>
               ) : null
             })()}
           </div>
         </div>
+
         {showEditButton && <Button>Edit</Button>}
+
         {deleteEntry && (
           <div className="flex flex-wrap gap-2">
             {pendingDeleteEntryId !== entry.id ? (

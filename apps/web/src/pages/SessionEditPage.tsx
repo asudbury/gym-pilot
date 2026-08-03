@@ -132,7 +132,7 @@ export function SessionEditPage() {
           entry.session_type === 'solo'
             ? sessionName.trim() || null
             : (entry.class_name ?? null),
-        updatedAt: new Date().toISOString(),
+        updated_at: new Date().toISOString(),
       }
 
       if (userId && entry.session_id) {

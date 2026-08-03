@@ -84,6 +84,7 @@ export function LinkAppleWorkoutPage() {
         const { sessions, error } = await listSessions({
           userId,
           from: workout?.start_date,
+          to: workout?.start_date,
         })
         if (error) {
           throw error
@@ -104,7 +105,7 @@ export function LinkAppleWorkoutPage() {
     return () => {
       isActive = false
     }
-  }, [userId, workout?.start_date])
+  }, [userId, workout])
 
   const handleLinkWorkout = async () => {
     if (!selectedSession || !workout) {
@@ -163,6 +164,7 @@ export function LinkAppleWorkoutPage() {
                     entry={session}
                     onSelect={handleSessionSelection}
                     selected={selectedSession === session.id}
+                    extendedDetails={false}
                   >
                     {selectedSession === session.id && (
                       <div className="mt-4">

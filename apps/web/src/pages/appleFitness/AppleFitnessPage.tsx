@@ -110,62 +110,87 @@ export const AppleFitnessPage: React.FC = () => {
     setError(null)
     setIsLoading(true)
 
-    const workoutsToImport = workoutsToImportOverride ?? workouts
-
-    const client = getSupabaseClient()
-    if (!client) {
-      setError('Supabase client not available.')
-      setIsLoading(false)
-      return
-    }
-
-    const {
-      data: { session },
-    } = await client.auth.getSession()
-
-    if (!session) {
-      setError('You must be logged in to import workouts.')
-      setIsLoading(false)
-      return
-    }
-
     try {
-      const { data: importResult, error: importError } =
-        await client.functions.invoke<ImportWorkoutsResponse>(
-          'import-workouts',
-          {
-            body: { workouts: workoutsToImport },
-            headers: {
-              Authorization: `Bearer ${session.access_token}`,
-            },
-          },
-        )
+      const workoutsToImport = workoutsToImportOverride ?? workouts
 
-      if (importError) {
-        const details =
-          typeof importError.message === 'string' && importError.message.trim()
-            ? importError.message
-            : 'Unknown error'
-
-        setError(`Import failed: ${details}`)
+      const client = getSupabaseClient()
+      if (!client) {
+        setError('Supabase client not available.')
         return
       }
 
-      const payload = (importResult ?? {}) as ImportWorkoutsResponse
+      const {
+        data: { session },
+      } = await client.auth.getSession()
 
-      if (payload.error) {
-        setError(`Import failed: ${payload.error}`)
+      if (!session) {
+        setError('You must be logged in to import workouts.')
         return
       }
 
-      const importedCount = payload.importedCount ?? 0
-      const changedWorkouts = payload.changedWorkouts ?? []
+      const BATCH_SIZE = 100
+      let totalImportedCount = 0
+      const allChangedWorkouts: Workout[] = []
+      let hasError = false
+
+      for (let i = 0; i < workoutsToImport.length; i += BATCH_SIZE) {
+        const batch = workoutsToImport.slice(i, i + BATCH_SIZE)
+
+        try {
+          const { data: importResult, error: importError } =
+            await client.functions.invoke<ImportWorkoutsResponse>(
+              'import-workouts',
+              {
+                body: { workouts: batch },
+                headers: {
+                  Authorization: `Bearer ${session.access_token}`,
+                },
+              },
+            )
+
+          if (importError) {
+            const details =
+              typeof importError.message === 'string' &&
+              importError.message.trim()
+                ? importError.message
+                : 'Unknown error'
+
+            setError(`Import failed: ${details}`)
+            hasError = true
+            break
+          }
+
+          const payload = (importResult ?? {}) as ImportWorkoutsResponse
+
+          if (payload.error) {
+            setError(`Import failed: ${payload.error}`)
+            hasError = true
+            break
+          }
+
+          totalImportedCount += payload.importedCount ?? 0
+          allChangedWorkouts.push(...(payload.changedWorkouts ?? []))
+        } catch (error) {
+          setError(
+            error instanceof Error
+              ? `An error occurred during import: ${error.message}`
+              : 'An error occurred during import.',
+          )
+          hasError = true
+          break
+        }
+      }
+
+      if (hasError) {
+        return
+      }
+
       const importedMessage =
-        importedCount > 0
-          ? `Imported ${importedCount} new or changed workout${importedCount === 1 ? '' : 's'}.`
+        totalImportedCount > 0
+          ? `Imported ${totalImportedCount} new or changed workout${totalImportedCount === 1 ? '' : 's'}.`
           : 'No new or changed workouts to import.'
 
-      setWorkouts(changedWorkouts)
+      setWorkouts(allChangedWorkouts)
       setMessage(importedMessage)
       setImportCount((c) => c + 1)
     } catch (error) {
@@ -204,7 +229,7 @@ export const AppleFitnessPage: React.FC = () => {
     return () => {
       isActive = false
     }
-  }, [user?.id, importCount])
+  }, [user?.id, importCount, searchParams])
 
   return (
     <PageLayout className="gap-6">

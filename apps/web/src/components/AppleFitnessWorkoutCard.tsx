@@ -1,8 +1,9 @@
-import { useNavigate } from 'react-router-dom'
 import type { ImportedWorkout, UserSession } from '@gym-pilot/shared'
+import { useNavigate } from 'react-router-dom'
+import { formatDateTimeForDisplay } from '../dateTimeFormatter'
+import { SessionEntryCard } from './session-history/SessionEntryCard'
 import { Button } from './ui/Button'
 import { Panel } from './ui/Panel'
-import { SessionEntryCard } from './session-history/SessionEntryCard'
 import { resolveWorkoutLinkState } from './workoutCalendarUtils'
 
 type CalendarValue = Date | null
@@ -49,32 +50,6 @@ export const AppleFitnessWorkoutCard = ({
     onUnlink?.(workout)
   }
 
-  const getDayWithSuffix = (day: number): string => {
-    if (day > 3 && day < 21) return day + 'th'
-    switch (day % 10) {
-      case 1:
-        return day + 'st'
-      case 2:
-        return day + 'nd'
-      case 3:
-        return day + 'rd'
-      default:
-        return day + 'th'
-    }
-  }
-
-  const date = new Date(workout.start_date)
-  const weekday = date.toLocaleString('en-US', { weekday: 'short' })
-  const month = date.toLocaleString('en-US', { month: 'short' })
-  const dayOfMonth = getDayWithSuffix(date.getDate())
-  const hour = date.toLocaleString('en-US', {
-    hour: '2-digit',
-    hourCycle: 'h23',
-  })
-  const minute = date.toLocaleString('en-US', {
-    minute: '2-digit',
-  })
-
   const linkState = resolveWorkoutLinkState(workout.session_id)
   const showActions = showLinkButton
 
@@ -93,7 +68,7 @@ export const AppleFitnessWorkoutCard = ({
       </div>
       <div className="text-m text-slate-600 dark:text-slate-400 mt-2">
         <p>
-          {`${weekday} ${month} ${dayOfMonth} at ${hour}:${minute}`}
+          {formatDateTimeForDisplay(workout.start_date)}
           <span className="ml-2" />({(workout.duration / 60).toFixed(0)}{' '}
           minutes)
         </p>
@@ -109,7 +84,11 @@ export const AppleFitnessWorkoutCard = ({
 
           {linkedSession ? (
             <>
-              <SessionEntryCard entry={linkedSession} showEditButton />
+              <SessionEntryCard
+                entry={linkedSession}
+                showEditButton
+                extendedDetails={true}
+              />
               <Button
                 tone="emerald"
                 className="mt-2 mr-2"
