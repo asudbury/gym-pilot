@@ -1,5 +1,5 @@
-import ActionButton from './ui/ActionButton'
-import RecordButtons from './RecordButtons'
+import RecordButtons from './RecordButtons';
+import ActionButton from './ui/ActionButton';
 
 type SessionActionsProps = {
   showViewSessionsButton?: boolean
@@ -30,14 +30,6 @@ function SessionActions({
         mobileLabel="Apple Fitness"
         tone="default"
         to="/apple-fitness"
-      />
-
-      <ActionButton
-        icon="chart"
-        label="Workout Analysis"
-        mobileLabel="Analysis"
-        tone="default"
-        to="/analysis"
       />
 
       <RecordButtons

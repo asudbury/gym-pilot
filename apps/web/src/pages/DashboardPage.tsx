@@ -1,12 +1,12 @@
-import { useEffect, useMemo, useState } from 'react';
-import { useAuth } from '../auth/AuthContext';
-import { PageCard } from '../components/PageCard';
-import SessionActions from '../components/SessionActions';
-import { DecorativeIcon } from '../components/ui/DecorativeIcon';
-import WorkoutCalendar from '../components/WorkoutCalendar';
-import { resolveDashboardViewModel } from '../features/dashboard/domain/dashboardLayout';
-import { useImportedWorkouts } from '../hooks/useImportedWorkouts';
-import { PageLayout } from '../layouts/PageLayout';
+import { useEffect, useMemo, useState } from 'react'
+import { useAuth } from '../auth/AuthContext'
+import { PageCard } from '../components/PageCard'
+import SessionActions from '../components/SessionActions'
+import { DecorativeIcon } from '../components/ui/DecorativeIcon'
+import WorkoutCalendar from '../components/WorkoutCalendar'
+import { resolveDashboardViewModel } from '../features/dashboard/domain/dashboardLayout'
+import { useImportedWorkouts } from '../hooks/useImportedWorkouts'
+import { PageLayout } from '../layouts/PageLayout'
 
 export function DashboardPage() {
   const { user } = useAuth()
@@ -88,8 +88,7 @@ export function DashboardPage() {
             {workouts.length > 0 && <WorkoutCalendar workouts={workouts} />}
           </PageCard>
         </div>
-
-       </PageCard>
+      </PageCard>
     </PageLayout>
   )
 }
