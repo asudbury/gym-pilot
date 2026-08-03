@@ -138,9 +138,6 @@ button {
 .btn-blue {
   @apply border border-blue-300 bg-blue-50 text-blue-700;
 }
-.btn-destructive {
-  @apply border border-rose-300 bg-rose-50 text-rose-700 px-2 py-1;
-}
 
 html.dark .bg-white {
   background-color: var(--app-surface) !important;
@@ -193,14 +190,17 @@ html.dark .bg-slate-900 {
 
 /* Styling for calendar tiles based on workout link state */
 .has-no-link-workouts {
+  background-color: #dbeafe; /* Light blue for 'no link' */
   border: 1px solid #93c5fd; /* A slightly darker blue border */
 }
 
 .dark .has-no-link-workouts {
+  background-color: #1e3a8a; /* Dark blue for 'no link' */
   border: 1px solid #3b82f6;
 }
 
 .has-unassigned-workouts {
+  background-color: #fef3c7; /* Light yellow for 'unassigned' */
   border: 1px solid #fcd34d; /* A slightly darker yellow border */
 }
 
