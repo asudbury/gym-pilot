@@ -17,6 +17,7 @@ import { PlansPage } from '../pages/plans/PlansPage'
 import { RecordSessionPage } from '../pages/RecordSessionPage'
 import SessionTemplateCreatePage from '../pages/SessionTemplateCreatePage'
 import { SessionTemplatesPage } from '../pages/SessionTemplatesPage'
+import { ImportedWorkoutAnalysisPage } from '../pages/ImportedWorkoutAnalysisPage'
 import { TimetablePage } from '../pages/TimetablePage'
 export function createProtectedRoutes() {
   return (
@@ -29,6 +30,7 @@ export function createProtectedRoutes() {
         <Route path="/sessions" element={<SessionHistoryPage />} />
         <Route path="/sessions/:entryId/edit" element={<SessionEditPage />} />
       </Route>
+      <Route path="/analysis" element={<ImportedWorkoutAnalysisPage />} />
       <Route path="/assignments" element={<AssignmentsPage />} />
       <Route
         path="/users/:userSlug/assignments"

@@ -32,6 +32,14 @@ function SessionActions({
         to="/apple-fitness"
       />
 
+      <ActionButton
+        icon="chart"
+        label="Workout Analysis"
+        mobileLabel="Analysis"
+        tone="default"
+        to="/analysis"
+      />
+
       <RecordButtons
         showClassSessionAction={showClassSessionAction}
         showPTSessionAction={showPTSessionAction}

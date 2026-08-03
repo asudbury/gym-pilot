@@ -1,13 +1,12 @@
-import type { ImportedWorkout } from '@gym-pilot/shared'
-import { getImportedWorkouts } from '@gym-pilot/shared'
-import { useEffect, useMemo, useState } from 'react'
-import { useAuth } from '../auth/AuthContext'
-import { PageCard } from '../components/PageCard'
-import SessionActions from '../components/SessionActions'
-import { DecorativeIcon } from '../components/ui/DecorativeIcon'
-import WorkoutCalendar from '../components/WorkoutCalendar'
-import { resolveDashboardViewModel } from '../features/dashboard/domain/dashboardLayout'
-import { PageLayout } from '../layouts/PageLayout'
+import { useEffect, useMemo, useState } from 'react';
+import { useAuth } from '../auth/AuthContext';
+import { PageCard } from '../components/PageCard';
+import SessionActions from '../components/SessionActions';
+import { DecorativeIcon } from '../components/ui/DecorativeIcon';
+import WorkoutCalendar from '../components/WorkoutCalendar';
+import { resolveDashboardViewModel } from '../features/dashboard/domain/dashboardLayout';
+import { useImportedWorkouts } from '../hooks/useImportedWorkouts';
+import { PageLayout } from '../layouts/PageLayout';
 
 export function DashboardPage() {
   const { user } = useAuth()
@@ -20,40 +19,12 @@ export function DashboardPage() {
   )
 
   const layouts = viewModel.layouts
-  // const shouldShowRoleSelector = viewModel.shouldShowRoleSelector
-  // const selectedLayoutKey =
-  //   selectedRole && layouts.some((layout) => layout.key === selectedRole)
-  //     ? selectedRole
-  //     : viewModel.selectedLayoutKey
 
   const canShowTimetable = Boolean(user?.gymName && user.gymName.trim())
   const hasTrainerConfigured = Boolean(user?.trainerId?.trim())
   const isTrainer = Boolean(user?.roles?.includes('trainer'))
 
-  const [workouts, setWorkouts] = useState<ImportedWorkout[]>([])
-
-  // Fetch workouts for the calendar
-  useEffect(() => {
-    let isActive = true
-
-    const loadWorkouts = async () => {
-      try {
-        if (user?.id == null) {
-          setWorkouts([])
-          return
-        }
-
-        const { data } = await getImportedWorkouts(user.id)
-        if (isActive) {
-          setWorkouts(data ?? [])
-        }
-      } catch (error) {
-        console.error('Failed to load imported workouts:', error)
-      }
-    }
-    void loadWorkouts()
-    return () => {}
-  }, [user?.id])
+  const { workouts } = useImportedWorkouts()
 
   // const filteredLayouts = layouts.map((layout) => ({
   //   ...layout,
@@ -79,8 +50,8 @@ export function DashboardPage() {
   }, [layouts, selectedRole])
 
   return (
-    <PageLayout className="gap-6">
-      <PageCard as="section" className="space-y-6">
+    <PageLayout className="w-full gap-6">
+      <PageCard as="section" className="w-full space-y-6">
         <div className="flex items-start gap-3">
           <div className="flex flex-col items-start gap-2">
             <div className="inline-flex items-center gap-2 pl-2">
@@ -93,7 +64,7 @@ export function DashboardPage() {
         </div>
 
         <div className="mt-4">
-          <PageCard as="section">
+          <PageCard as="section" className="w-full">
             {(() => {
               const sessionActionsProps = {
                 showViewSessionsButton: true,
@@ -114,36 +85,11 @@ export function DashboardPage() {
                 </>
               )
             })()}
+            {workouts.length > 0 && <WorkoutCalendar workouts={workouts} />}
           </PageCard>
         </div>
 
-        {workouts.length > 0 && <WorkoutCalendar workouts={workouts} />}
-
-        {/* {shouldShowRoleSelector ? (
-          <div className="flex flex-wrap gap-2">
-            {filteredLayouts
-              .filter((l) => l.widgets.length > 0)
-              .map((layout) => {
-                const isActive = selectedLayoutKey === layout.key
-                return (
-                  <Button
-                    key={layout.key}
-                    onClick={() => setSelectedRole(layout.key)}
-                    className={`rounded-full border px-3 py-1.5 text-sm font-medium transition ${isActive ? 'border-slate-900 bg-slate-900 text-white dark:border-slate-100 dark:bg-slate-100 dark:text-slate-950' : 'border-slate-300 bg-white text-slate-700 hover:bg-slate-100 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-200'}`}
-                  >
-                    {layout.label}
-                  </Button>
-                )
-              })}
-          </div>
-        ) : null}
-
-        {filteredSelectedLayout ? (
-          <div className="space-y-2">
-            {renderDashboardWidgets(filteredLayouts, selectedLayoutKey)}
-          </div>
-        ) : null} */}
-      </PageCard>
+       </PageCard>
     </PageLayout>
   )
 }
