@@ -1,21 +1,21 @@
-import { useMemo, useState } from 'react';
-import Calendar from 'react-calendar';
-import 'react-calendar/dist/Calendar.css';
+import { useMemo, useState } from 'react'
+import Calendar from 'react-calendar'
+import 'react-calendar/dist/Calendar.css'
 import {
-    Bar,
-    BarChart,
-    CartesianGrid,
-    Legend,
-    Line,
-    LineChart,
-    ResponsiveContainer,
-    Tooltip,
-    XAxis,
-    YAxis
-} from 'recharts';
-import { PageCard } from '../components/PageCard';
-import { useImportedWorkouts } from '../hooks/useImportedWorkouts';
-import { PageLayout } from '../layouts/PageLayout';
+  Bar,
+  BarChart,
+  CartesianGrid,
+  Legend,
+  Line,
+  LineChart,
+  ResponsiveContainer,
+  Tooltip,
+  XAxis,
+  YAxis,
+} from 'recharts'
+import { PageCard } from '../components/PageCard'
+import { useImportedWorkouts } from '../hooks/useImportedWorkouts'
+import { PageLayout } from '../layouts/PageLayout'
 
 type FilterType = 'thisWeek' | 'thisMonth' | 'thisYear' | 'all' | 'custom'
 type DateRange = [Date, Date]
@@ -161,7 +161,12 @@ export function ImportedWorkoutAnalysisPage() {
               <YAxis />
               <Tooltip />
               <Legend />
-              <Line type="monotone" dataKey="count" stroke="#8884d8" name="Workouts" />
+              <Line
+                type="monotone"
+                dataKey="count"
+                stroke="#8884d8"
+                name="Workouts"
+              />
             </LineChart>
           </ResponsiveContainer>
         </div>
