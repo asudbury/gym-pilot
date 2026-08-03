@@ -193,20 +193,17 @@ html.dark .bg-slate-900 {
 
 /* Styling for calendar tiles based on workout link state */
 .has-no-link-workouts {
-  background-color: #e0f2fe; /* Light blue for 'no link' */
   border: 1px solid #93c5fd; /* A slightly darker blue border */
-  border-radius: 0;
+  
 }
 
 .dark .has-no-link-workouts {
-  background-color: #1e3a8a; /* Dark blue for 'no link' */
   border: 1px solid #3b82f6;
 }
 
 .has-unassigned-workouts {
-  background-color: #fffbeb; /* Light yellow for 'unassigned' */
   border: 1px solid #fcd34d; /* A slightly darker yellow border */
-  border-radius: 0;
+  
 }
 
 .dark .has-unassigned-workouts {
@@ -217,7 +214,7 @@ html.dark .bg-slate-900 {
 .has-linked-workouts {
   background-color: #dcfce7; /* Light green for 'linked' */
   border: 1px solid #86efad; /* A slightly darker green border */
-  border-radius: 0;
+  
 }
 
 .dark .has-linked-workouts {
@@ -238,7 +235,7 @@ html.dark .bg-slate-900 {
 .has-no-workouts {
   background-color: #ffffff; /* White background for blank days */
   border: 1px solid #e2e8f0; /* Light gray border */
-  border-radius: 0;
+  
 }
 
 .dark .has-no-workouts {
@@ -271,11 +268,11 @@ html.dark .bg-slate-900 {
 
 /* Styling for the selected day tile */
 .selected-day-border {
-  border: 2px solid black; /* A distinct blue border for selected day */
+  border: 2px solid #3b82f6; /* A distinct blue border for selected day */
 }
 
 .dark .selected-day-border {
-  border: 2px solid white; /* Lighter blue border for dark mode */
+  border: 2px solid #60a5fa; /* Lighter blue border for dark mode */
 }
 
 .react-calendar {
@@ -331,17 +328,5 @@ html.dark .bg-slate-900 {
   }
 }
 
-/* Media query for smaller screens */
-@media (max-width: 768px) {
-  .react-calendar__month-view__weekdays__weekday {
-    font-size: 0.6em; /* Smaller font size on mobile */
-  }
-}
 
-/* Hide the day header for the second month in showDoubleView */
-/* This targets the weekdays row of the second calendar instance */
-.react-calendar__viewContainer
-  .react-calendar__month-view:nth-child(2)
-  .react-calendar__month-view__weekdays {
-  display: none;
-}
+
