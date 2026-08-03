@@ -1,23 +1,23 @@
-import { Navigate, Route } from 'react-router-dom';
-import { RequireAuth } from '../auth/RequireAuth';
-import { AppleFitnessPage } from '../pages/appleFitness/AppleFitnessPage';
-import { LinkAppleWorkoutPage } from '../pages/appleFitness/LinkAppleWorkoutPage';
-import { AssignmentDetailPage } from '../pages/assignments/AssignmentDetailPage';
-import { AssignmentsManagerPage } from '../pages/assignments/AssignmentsManagerPage';
-import { AssignmentsPage } from '../pages/assignments/AssignmentsPage';
-import { CreateAssignmentPage } from '../pages/assignments/CreateAssignmentPage';
-import { HomePage } from '../pages/HomePage';
-import { IconShowcasePage } from '../pages/IconShowcasePage';
-import { ImportedWorkoutAnalysisPage } from '../pages/ImportedWorkoutAnalysisPage';
-import { CreatePlanPage } from '../pages/plans/CreatePlanPage';
-import { PlanDetailPage } from '../pages/plans/PlanDetailPage';
-import { PlansPage } from '../pages/plans/PlansPage';
-import { RecordSessionPage } from '../pages/RecordSessionPage';
-import { SessionEditPage } from '../pages/SessionEditPage';
-import { SessionHistoryPage } from '../pages/SessionHistoryPage';
-import SessionTemplateCreatePage from '../pages/SessionTemplateCreatePage';
-import { SessionTemplatesPage } from '../pages/SessionTemplatesPage';
-import { TimetablePage } from '../pages/TimetablePage';
+import { Navigate, Route } from 'react-router-dom'
+import { RequireAuth } from '../auth/RequireAuth'
+import { AppleFitnessPage } from '../pages/appleFitness/AppleFitnessPage'
+import { LinkAppleWorkoutPage } from '../pages/appleFitness/LinkAppleWorkoutPage'
+import { AssignmentDetailPage } from '../pages/assignments/AssignmentDetailPage'
+import { AssignmentsManagerPage } from '../pages/assignments/AssignmentsManagerPage'
+import { AssignmentsPage } from '../pages/assignments/AssignmentsPage'
+import { CreateAssignmentPage } from '../pages/assignments/CreateAssignmentPage'
+import { HomePage } from '../pages/HomePage'
+import { IconShowcasePage } from '../pages/IconShowcasePage'
+import { ImportedWorkoutAnalysisPage } from '../pages/ImportedWorkoutAnalysisPage'
+import { CreatePlanPage } from '../pages/plans/CreatePlanPage'
+import { PlanDetailPage } from '../pages/plans/PlanDetailPage'
+import { PlansPage } from '../pages/plans/PlansPage'
+import { RecordSessionPage } from '../pages/RecordSessionPage'
+import { SessionEditPage } from '../pages/SessionEditPage'
+import { SessionHistoryPage } from '../pages/SessionHistoryPage'
+import SessionTemplateCreatePage from '../pages/SessionTemplateCreatePage'
+import { SessionTemplatesPage } from '../pages/SessionTemplatesPage'
+import { TimetablePage } from '../pages/TimetablePage'
 export function createProtectedRoutes() {
   return (
     <Route element={<RequireAuth />}>
