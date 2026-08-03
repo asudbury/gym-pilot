@@ -194,7 +194,6 @@ html.dark .bg-slate-900 {
 /* Styling for calendar tiles based on workout link state */
 .has-no-link-workouts {
   border: 1px solid #93c5fd; /* A slightly darker blue border */
-  
 }
 
 .dark .has-no-link-workouts {
@@ -203,7 +202,6 @@ html.dark .bg-slate-900 {
 
 .has-unassigned-workouts {
   border: 1px solid #fcd34d; /* A slightly darker yellow border */
-  
 }
 
 .dark .has-unassigned-workouts {
@@ -214,7 +212,6 @@ html.dark .bg-slate-900 {
 .has-linked-workouts {
   background-color: #dcfce7; /* Light green for 'linked' */
   border: 1px solid #86efad; /* A slightly darker green border */
-  
 }
 
 .dark .has-linked-workouts {
@@ -235,7 +232,6 @@ html.dark .bg-slate-900 {
 .has-no-workouts {
   background-color: #ffffff; /* White background for blank days */
   border: 1px solid #e2e8f0; /* Light gray border */
-  
 }
 
 .dark .has-no-workouts {
@@ -327,6 +323,3 @@ html.dark .bg-slate-900 {
     text-decoration: none; /* Remove underline from weekday abbreviations */
   }
 }
-
-
-
