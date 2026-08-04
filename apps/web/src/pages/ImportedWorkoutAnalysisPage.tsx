@@ -1,106 +1,86 @@
-import { useMemo, useState } from 'react'
-import Calendar from 'react-calendar'
-import 'react-calendar/dist/Calendar.css'
+import { useMemo, useState } from 'react';
+import Calendar from 'react-calendar';
+import 'react-calendar/dist/Calendar.css';
 import {
-  Bar,
-  BarChart,
-  CartesianGrid,
-  Legend,
-  Line,
-  LineChart,
-  ResponsiveContainer,
-  Tooltip,
-  XAxis,
-  YAxis,
-} from 'recharts'
-import { PageCard } from '../components/PageCard'
-import { useImportedWorkouts } from '../hooks/useImportedWorkouts'
-import { PageLayout } from '../layouts/PageLayout'
+    Bar,
+    BarChart,
+    CartesianGrid,
+    Legend,
+    Line,
+    LineChart,
+    ResponsiveContainer,
+    Tooltip,
+    XAxis,
+    YAxis,
+} from 'recharts';
+import { PageCard } from '../components/PageCard';
+import { Button } from '../components/ui/Button';
+import { ResponsiveVisibility } from '../components/visibility/ResponsiveVisibility';
+import {
+    buildImportedWorkoutAnalysisCsv,
+    buildImportedWorkoutAnalysisViewModel,
+} from '../features/importedWorkouts/domain/workoutAnalysis';
+import { useImportedWorkouts } from '../hooks/useImportedWorkouts';
+import { PageLayout } from '../layouts/PageLayout';
 
-type FilterType = 'thisWeek' | 'thisMonth' | 'thisYear' | 'all' | 'custom'
+type FilterType =
+  | 'thisWeek'
+  | 'thisMonth'
+  | 'thisYear'
+  | 'all'
+  | 'custom'
+  | 'last7days'
+  | 'last31days'
+  | 'last3months'
 type DateRange = [Date, Date]
 
 export function ImportedWorkoutAnalysisPage() {
   const { workouts, loading } = useImportedWorkouts()
   const [filter, setFilter] = useState<FilterType>('all')
   const [customRange, setCustomRange] = useState<DateRange | null>(null)
-
-  const filteredWorkouts = useMemo(() => {
-    const now = new Date()
-    const startOfWeek = new Date(
-      now.setDate(now.getDate() - now.getDay() + (now.getDay() === 0 ? -6 : 1)),
-    )
-    const endOfWeek = new Date(now.setDate(startOfWeek.getDate() + 6))
-    const startOfMonth = new Date(now.getFullYear(), now.getMonth(), 1)
-    const endOfMonth = new Date(now.getFullYear(), now.getMonth() + 1, 0)
-    const startOfYear = new Date(now.getFullYear(), 0, 1)
-    const endOfYear = new Date(now.getFullYear(), 11, 31)
-
-    switch (filter) {
-      case 'thisWeek':
-        return workouts.filter((w) => {
-          const date = new Date(w.start_date)
-          return date >= startOfWeek && date <= endOfWeek
-        })
-      case 'thisMonth':
-        return workouts.filter((w) => {
-          const date = new Date(w.start_date)
-          return date >= startOfMonth && date <= endOfMonth
-        })
-      case 'thisYear':
-        return workouts.filter((w) => {
-          const date = new Date(w.start_date)
-          return date >= startOfYear && date <= endOfYear
-        })
-      case 'custom':
-        if (customRange) {
-          const [start, end] = customRange
-          return workouts.filter((w) => {
-            const date = new Date(w.start_date)
-            return date >= start && date <= end
-          })
-        }
-        return workouts
-      case 'all':
-      default:
-        return workouts
-    }
-  }, [workouts, filter, customRange])
-
-  const totalWorkouts = filteredWorkouts.length
-  const totalDuration = filteredWorkouts.reduce((sum, w) => sum + w.duration, 0)
-  const totalEnergy = filteredWorkouts.reduce((sum, w) => sum + w.energy, 0)
-
-  const workoutsByWeek = filteredWorkouts.reduce(
-    (acc, workout) => {
-      const date = new Date(workout.start_date)
-      const year = date.getFullYear()
-      const week = Math.ceil(
-        ((date.getTime() - new Date(year, 0, 1).getTime()) / 86400000 + 1) / 7,
-      )
-      const weekKey = `${year}-W${week.toString().padStart(2, '0')}`
-      acc[weekKey] = (acc[weekKey] || 0) + 1
-      return acc
-    },
-    {} as Record<string, number>,
+  const [chartGranularity, setChartGranularity] = useState<'weekly' | 'daily'>(
+    'weekly',
   )
 
-  const weeklyChartData = Object.entries(workoutsByWeek)
-    .map(([week, count]) => ({ week, count }))
-    .sort((a, b) => a.week.localeCompare(b.week))
-
-  const workoutsByName = filteredWorkouts.reduce(
-    (acc, workout) => {
-      const name = workout.display_name
-      acc[name] = (acc[name] || 0) + 1
-      return acc
-    },
-    {} as Record<string, number>,
+  const analysisViewModel = useMemo(
+    () =>
+      buildImportedWorkoutAnalysisViewModel({
+        workouts,
+        filter,
+        customRange,
+      }),
+    [workouts, filter, customRange],
   )
 
-  const nameChartData = Object.entries(workoutsByName)
-    .map(([name, count]) => ({ name, count }))
-    .sort((a, b) => b.count - a.count)
+  const {
+    filteredWorkouts,
+    currentDateRangeString,
+    totalWorkouts,
+    totalDuration,
+    totalEnergy,
+    avgWorkoutsPerWeek,
+    avgEnergyPerWeek,
+    avgDuration,
+    chartGranularity: viewModelChartGranularity,
+    weeklyChartData,
+    dailyChartData,
+    nameChartData,
+  } = analysisViewModel
+
+  useMemo(() => {
+    setChartGranularity(viewModelChartGranularity)
+  }, [viewModelChartGranularity])
+
+  const handleExport = () => {
+    const csv = buildImportedWorkoutAnalysisCsv(analysisViewModel)
+    const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' })
+    const url = URL.createObjectURL(blob)
+    const link = document.createElement('a')
+    link.href = url
+    link.download = `apple-fitness-analysis-${filter}.csv`
+    link.click()
+    URL.revokeObjectURL(url)
+  }
 
   if (loading) {
     return (
@@ -117,12 +97,75 @@ export function ImportedWorkoutAnalysisPage() {
       <PageCard as="section" className="space-y-6">
         <h1 className="text-2xl font-bold">Apple Fitness Workout Analysis</h1>
 
-        <div className="flex flex-wrap gap-2">
-          <button onClick={() => setFilter('all')}>All</button>
-          <button onClick={() => setFilter('thisWeek')}>This Week</button>
-          <button onClick={() => setFilter('thisMonth')}>This Month</button>
-          <button onClick={() => setFilter('thisYear')}>This Year</button>
-          <button onClick={() => setFilter('custom')}>Custom Range</button>
+        <div>
+          <ResponsiveVisibility hiddenOn="mobile">
+            <div className="flex flex-wrap gap-2">
+              <Button
+                onClick={() => setFilter('all')}
+                tone={filter === 'all' ? 'blue' : 'default'}
+              >
+                All
+              </Button>
+              <Button
+                onClick={() => setFilter('last7days')}
+                tone={filter === 'last7days' ? 'blue' : 'default'}
+              >
+                Last 7 days
+              </Button>
+              <Button
+                onClick={() => setFilter('last31days')}
+                tone={filter === 'last31days' ? 'blue' : 'default'}
+              >
+                Last 31 days
+              </Button>
+              <Button
+                onClick={() => setFilter('last3months')}
+                tone={filter === 'last3months' ? 'blue' : 'default'}
+              >
+                Last 3 months
+              </Button>
+              <Button
+                onClick={() => setFilter('thisWeek')}
+                tone={filter === 'thisWeek' ? 'blue' : 'default'}
+              >
+                This Week
+              </Button>
+              <Button
+                onClick={() => setFilter('thisMonth')}
+                tone={filter === 'thisMonth' ? 'blue' : 'default'}
+              >
+                This Month
+              </Button>
+              <Button
+                onClick={() => setFilter('thisYear')}
+                tone={filter === 'thisYear' ? 'blue' : 'default'}
+              >
+                This Year
+              </Button>
+              <Button
+                onClick={() => setFilter('custom')}
+                tone={filter === 'custom' ? 'blue' : 'default'}
+              >
+                Custom Range
+              </Button>
+            </div>
+          </ResponsiveVisibility>
+          <ResponsiveVisibility visibleOn="mobile">
+            <select
+              className="w-full p-2 border rounded"
+              value={filter}
+              onChange={(e) => setFilter(e.target.value as FilterType)}
+            >
+              <option value="all">All</option>
+              <option value="last7days">Last 7 days</option>
+              <option value="last31days">Last 31 days</option>
+              <option value="last3months">Last 3 months</option>
+              <option value="thisWeek">This Week</option>
+              <option value="thisMonth">This Month</option>
+              <option value="thisYear">This Year</option>
+              <option value="custom">Custom Range</option>
+            </select>
+          </ResponsiveVisibility>
         </div>
 
         {filter === 'custom' && (
@@ -135,55 +178,120 @@ export function ImportedWorkoutAnalysisPage() {
           </div>
         )}
 
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-          <div className="p-4 bg-gray-100 rounded-lg dark:bg-gray-800">
-            <h2 className="text-lg font-semibold">Total Workouts</h2>
-            <p className="text-3xl font-bold">{totalWorkouts}</p>
-          </div>
-          <div className="p-4 bg-gray-100 rounded-lg dark:bg-gray-800">
-            <h2 className="text-lg font-semibold">Total Duration (minutes)</h2>
-            <p className="text-3xl font-bold">
-              {(totalDuration / 60).toFixed(0)}
-            </p>
-          </div>
-          <div className="p-4 bg-gray-100 rounded-lg dark:bg-gray-800">
-            <h2 className="text-lg font-semibold">Total Energy (kcal)</h2>
-            <p className="text-3xl font-bold">{totalEnergy.toFixed(0)}</p>
-          </div>
+        <div className="flex flex-wrap items-center justify-between gap-3">
+          <span className="text-sm pb-2">{currentDateRangeString}</span>
+          <Button onClick={handleExport} tone="default">
+            Export CSV
+          </Button>
         </div>
+        {filteredWorkouts.length === 0 ? (
+          <div className="rounded-lg border border-dashed border-slate-300 p-6 text-sm text-slate-600 dark:border-slate-700 dark:text-slate-300">
+            No imported workouts match this time range yet. Import some Apple
+            Fitness data to start analysing your activity.
+          </div>
+        ) : (
+          <>
+            <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-3 gap-4">
+              <div className="p-4 bg-gray-100 rounded-lg dark:bg-gray-800">
+                <h2 className="text-lg font-semibold">Total Workouts</h2>
+                <p className="text-3xl font-bold">
+                  {totalWorkouts.toLocaleString()}
+                </p>
+              </div>
+              <div className="p-4 bg-gray-100 rounded-lg dark:bg-gray-800">
+                <h2 className="text-lg font-semibold">
+                  Total Duration (minutes)
+                </h2>
+                <p className="text-3xl font-bold">
+                  {Number((totalDuration / 60).toFixed(0)).toLocaleString()}
+                </p>
+              </div>
+              <div className="p-4 bg-gray-100 rounded-lg dark:bg-gray-800">
+                <h2 className="text-lg font-semibold">Total Energy (kcal)</h2>
+                <p className="text-3xl font-bold">
+                  {Number(totalEnergy.toFixed(0)).toLocaleString()}
+                </p>
+              </div>
+              <div className="p-4 bg-gray-100 rounded-lg dark:bg-gray-800">
+                <h2 className="text-lg font-semibold">Avg Workouts / Week</h2>
+                <p className="text-3xl font-bold">
+                  {Number(avgWorkoutsPerWeek).toLocaleString()}
+                </p>
+              </div>
+              <div className="p-4 bg-gray-100 rounded-lg dark:bg-gray-800">
+                <h2 className="text-lg font-semibold">
+                  Avg Energy / Week (kcal)
+                </h2>
+                <p className="text-3xl font-bold">
+                  {Number(avgEnergyPerWeek).toLocaleString()}
+                </p>
+              </div>
+              <div className="p-4 bg-gray-100 rounded-lg dark:bg-gray-800">
+                <h2 className="text-lg font-semibold">
+                  Avg Duration (minutes)
+                </h2>
+                <p className="text-3xl font-bold">
+                  {Number(avgDuration).toLocaleString()}
+                </p>
+              </div>
+            </div>
 
-        <div>
-          <h2 className="text-xl font-bold mb-4">Workouts per Week</h2>
-          <ResponsiveContainer width="100%" height={300}>
-            <LineChart data={weeklyChartData}>
-              <CartesianGrid strokeDasharray="3 3" />
-              <XAxis dataKey="week" />
-              <YAxis />
-              <Tooltip />
-              <Legend />
-              <Line
-                type="monotone"
-                dataKey="count"
-                stroke="#8884d8"
-                name="Workouts"
-              />
-            </LineChart>
-          </ResponsiveContainer>
-        </div>
+            <div>
+              <div className="mb-4 flex flex-wrap items-center justify-between gap-3">
+                <h2 className="text-xl font-bold">Workouts over Time</h2>
+                <div className="flex gap-2">
+                  <Button
+                    onClick={() => setChartGranularity('daily')}
+                    tone={chartGranularity === 'daily' ? 'blue' : 'default'}
+                  >
+                    Daily
+                  </Button>
+                  <Button
+                    onClick={() => setChartGranularity('weekly')}
+                    tone={chartGranularity === 'weekly' ? 'blue' : 'default'}
+                  >
+                    Weekly
+                  </Button>
+                </div>
+              </div>
+              <ResponsiveContainer width="100%" height={300}>
+                <LineChart
+                  data={
+                    chartGranularity === 'daily'
+                      ? dailyChartData
+                      : weeklyChartData
+                  }
+                >
+                  <CartesianGrid strokeDasharray="3 3" />
+                  <XAxis dataKey="label" />
+                  <YAxis />
+                  <Tooltip />
+                  <Legend />
+                  <Line
+                    type="monotone"
+                    dataKey="count"
+                    stroke="#8884d8"
+                    name="Workouts"
+                  />
+                </LineChart>
+              </ResponsiveContainer>
+            </div>
 
-        <div>
-          <h2 className="text-xl font-bold mb-4">Workouts by Name</h2>
-          <ResponsiveContainer width="100%" height={300}>
-            <BarChart data={nameChartData}>
-              <CartesianGrid strokeDasharray="3 3" />
-              <XAxis dataKey="name" />
-              <YAxis />
-              <Tooltip />
-              <Legend />
-              <Bar dataKey="count" fill="#82ca9d" name="Count" />
-            </BarChart>
-          </ResponsiveContainer>
-        </div>
+            <div>
+              <h2 className="text-xl font-bold mb-4">Workouts by Name</h2>
+              <ResponsiveContainer width="100%" height={300}>
+                <BarChart data={nameChartData}>
+                  <CartesianGrid strokeDasharray="3 3" />
+                  <XAxis dataKey="name" />
+                  <YAxis />
+                  <Tooltip />
+                  <Legend />
+                  <Bar dataKey="count" fill="#82ca9d" name="Count" />
+                </BarChart>
+              </ResponsiveContainer>
+            </div>
+          </>
+        )}
       </PageCard>
     </PageLayout>
   )
