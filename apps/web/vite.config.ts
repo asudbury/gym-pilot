@@ -3,12 +3,59 @@ import react from '@vitejs/plugin-react'
 import { defineConfig } from 'vite'
 import { VitePWA } from 'vite-plugin-pwa'
 
+const buildTimestamp = new Date()
+  .toISOString()
+  .replace(/[-:T.]/g, '')
+  .slice(0, 14)
+
+const addBuildTimestampToAssets = () => ({
+  name: 'add-build-timestamp-to-assets',
+  apply: 'build',
+  enforce: 'post',
+  transformIndexHtml(html: string) {
+    return html.replace(/(src|href)="([^"]+)"/g, (match, attribute, value) => {
+      if (!/\.(js|css|webmanifest)(\?.*)?$/.test(value)) {
+        return match
+      }
+
+      if (
+        value.startsWith('http://') ||
+        value.startsWith('https://') ||
+        value.startsWith('//') ||
+        value.startsWith('data:')
+      ) {
+        return match
+      }
+
+      const separator = value.includes('?') ? '&' : '?'
+      return `${attribute}="${value}${separator}x=${buildTimestamp}"`
+    })
+  },
+})
+
 export default defineConfig(({ command }) => ({
   base: command === 'build' ? '/gym-pilot/' : '/',
+
+  build: {
+    rollupOptions: {
+      output: {
+        entryFileNames: `assets/[name]-[hash]-${buildTimestamp}.js`,
+        chunkFileNames: `assets/[name]-[hash]-${buildTimestamp}.js`,
+        assetFileNames: (assetInfo) => {
+          if (assetInfo.name?.endsWith('.css')) {
+            return `assets/[name]-[hash]-${buildTimestamp}.css`
+          }
+
+          return `assets/[name]-[hash]-${buildTimestamp}[extname]`
+        },
+      },
+    },
+  },
 
   plugins: [
     react(),
     tailwindcss(),
+    addBuildTimestampToAssets(),
 
     VitePWA({
       registerType: 'autoUpdate',

@@ -1,19 +1,70 @@
-import { PageLayout } from '../../layouts/PageLayout'
-import { PageCardLayout } from '../../layouts/PageCardLayout'
-import { Panel } from '../../components/ui/Panel'
-import { useAuth } from '../../auth/AuthContext'
-import { helpSections } from '../../utils/helpUtils'
-import { getDisplayRoles } from '../../features/admin/domain/adminUtils'
-import { UserRolesDisplay } from '../../components/UserRolesDisplay'
-import { Link } from 'react-router-dom'
-import { getBuildMetadata } from '../../utils/buildInfo'
+import { getSupabaseClient } from '@gym-pilot/shared';
+import { useEffect, useState } from 'react';
+import { Link } from 'react-router-dom';
+import { useAuth } from '../../auth/AuthContext';
+import { Panel } from '../../components/ui/Panel';
+import { UserRolesDisplay } from '../../components/UserRolesDisplay';
+import { getDisplayRoles } from '../../features/admin/domain/adminUtils';
+import { formatSessionTimeRemaining } from '../../features/auth/domain/authSessionTime';
+import { PageCardLayout } from '../../layouts/PageCardLayout';
+import { PageLayout } from '../../layouts/PageLayout';
+import { getBuildMetadata } from '../../utils/buildInfo';
+import { helpSections } from '../../utils/helpUtils';
 
 export function HelpPage() {
   const { hasAccess, user, isAuthenticated } = useAuth()
   const buildMetadata = getBuildMetadata()
+  const [sessionTimeRemaining, setSessionTimeRemaining] = useState('Checking…')
   const isAdmin = hasAccess('admin')
   const isTrainer = hasAccess('trainer')
   const isClient = hasAccess('client')
+
+  useEffect(() => {
+    if (!isAuthenticated || !user?.id) {
+      setSessionTimeRemaining('Not signed in')
+      return
+    }
+
+    let isActive = true
+
+    const syncSessionTime = async () => {
+      try {
+        const client = getSupabaseClient()
+        const {
+          data: { session },
+          error,
+        } = await client.auth.getSession()
+
+        if (!isActive) {
+          return
+        }
+
+        if (error || !session?.expires_at) {
+          setSessionTimeRemaining('Unavailable')
+          return
+        }
+
+        setSessionTimeRemaining(
+          formatSessionTimeRemaining(session.expires_at),
+        )
+      } catch {
+        if (isActive) {
+          setSessionTimeRemaining('Unavailable')
+        }
+      }
+    }
+
+    void syncSessionTime()
+
+    const intervalId = window.setInterval(() => {
+      void syncSessionTime()
+    }, 60000)
+
+    return () => {
+      isActive = false
+      window.clearInterval(intervalId)
+    }
+  }, [isAuthenticated, user?.id])
 
   const quickStartItems = isAdmin
     ? [
@@ -173,6 +224,11 @@ export function HelpPage() {
             <br />
             <p>App version: {buildMetadata.appVersion}</p>
             <p className="mt-1">Build: {buildMetadata.buildTimestamp}</p>
+            {isAuthenticated ? (
+              <p className="mt-2 text-sm text-slate-600">
+                Session time remaining: {sessionTimeRemaining}
+              </p>
+            ) : null}
           </Panel>
         </div>
       </PageCardLayout>

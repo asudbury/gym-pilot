@@ -65,6 +65,18 @@ export function useAuthModule(users: User[]) {
       userRef.current = null
       setUser(null)
       persistCurrentUserId(null)
+      window.sessionStorage.setItem(
+        'gym-pilot-auth-expired',
+        'Your session has expired. Please sign in again.',
+      )
+      window.dispatchEvent(
+        new CustomEvent('gym-pilot-notification', {
+          detail: {
+            text: 'Your session has expired. Please sign in again.',
+            tone: 'error',
+          },
+        }),
+      )
     }
 
     hasHydratedSessionRef.current = true
@@ -95,6 +107,18 @@ export function useAuthModule(users: User[]) {
       userRef.current = null
       setUser(null)
       persistCurrentUserId(null)
+      window.sessionStorage.setItem(
+        'gym-pilot-auth-expired',
+        'Your session has expired. Please sign in again.',
+      )
+      window.dispatchEvent(
+        new CustomEvent('gym-pilot-notification', {
+          detail: {
+            text: 'Your session has expired. Please sign in again.',
+            tone: 'error',
+          },
+        }),
+      )
     }
   }, [users])
 
@@ -186,6 +210,18 @@ export function useAuthModule(users: User[]) {
         userRef.current = null
         setUser(null)
         persistCurrentUserId(null)
+        window.sessionStorage.setItem(
+          'gym-pilot-auth-expired',
+          'Your session has expired. Please sign in again.',
+        )
+        window.dispatchEvent(
+          new CustomEvent('gym-pilot-notification', {
+            detail: {
+              text: 'Your session has expired. Please sign in again.',
+              tone: 'error',
+            },
+          }),
+        )
       }
     })
 
