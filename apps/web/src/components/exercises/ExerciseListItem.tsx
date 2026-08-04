@@ -1,9 +1,9 @@
-import { Link } from 'react-router-dom';
-import { formatLabel } from '../../utils/formatUtils';
-import { Button } from '../ui/Button';
-import { ResponsiveVisibility } from '../visibility/ResponsiveVisibility';
-import { ExerciseImage } from './ExerciseImage';
-import { ExerciseMetaBadges } from './ExerciseMetaBadges';
+import { Link } from 'react-router-dom'
+import { formatLabel } from '../../utils/formatUtils'
+import { Button } from '../ui/Button'
+import { ResponsiveVisibility } from '../visibility/ResponsiveVisibility'
+import { ExerciseImage } from './ExerciseImage'
+import { ExerciseMetaBadges } from './ExerciseMetaBadges'
 
 type ExerciseActionButtonsProps = {
   exerciseId: string
@@ -102,7 +102,11 @@ export function ExerciseListItem({
               pillClassName="text-[11px]"
             />
           </div>
-          <ExerciseImage mediaGif={exercise.image} exerciseName={exercise.name} className="mt-4" />
+          <ExerciseImage
+            mediaGif={exercise.image}
+            exerciseName={exercise.name}
+            className="mt-4"
+          />
         </Link>
         <ResponsiveVisibility visibleOn="desktop">
           <ExerciseActionButtons

@@ -1,7 +1,7 @@
-import type { exercises } from '@gym-pilot/shared';
-import { useEffect, useMemo, useRef, useState } from 'react';
-import { getExercisePath } from '../../utils/exerciseRouteUtils';
-import { ExerciseListItem } from './ExerciseListItem';
+import type { exercises } from '@gym-pilot/shared'
+import { useEffect, useMemo, useRef, useState } from 'react'
+import { getExercisePath } from '../../utils/exerciseRouteUtils'
+import { ExerciseListItem } from './ExerciseListItem'
 type ExerciseListItemType = (typeof exercises)[number]
 
 type ExerciseListProps = {
@@ -29,7 +29,9 @@ export function ExerciseList({
 
   const exerciseRows = useMemo(() => {
     const columns = isLargeScreen ? 3 : 1
-    const rows: Array<Array<{ exercise: ExerciseListItemType; position: number }>> = []
+    const rows: Array<
+      Array<{ exercise: ExerciseListItemType; position: number }>
+    > = []
 
     for (let index = 0; index < exercises.length; index += columns) {
       const rowItems = exercises.slice(index, index + columns)
@@ -71,7 +73,9 @@ export function ExerciseList({
 
   return (
     <div className="overflow-hidden rounded-2xl">
-      <style>{'.exercise-list-scroll::-webkit-scrollbar { display: none; }'}</style>
+      <style>
+        {'.exercise-list-scroll::-webkit-scrollbar { display: none; }'}
+      </style>
       <div
         ref={scrollContainerRef}
         onScroll={(event) => setScrollTop(event.currentTarget.scrollTop)}
@@ -83,7 +87,10 @@ export function ExerciseList({
         }}
       >
         <div
-          style={{ height: `${exerciseRows.length * rowHeight}px`, position: 'relative' }}
+          style={{
+            height: `${exerciseRows.length * rowHeight}px`,
+            position: 'relative',
+          }}
         >
           <div
             style={{
@@ -121,4 +128,3 @@ export function ExerciseList({
     </div>
   )
 }
-

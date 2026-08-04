@@ -1,6 +1,6 @@
-import { renderToStaticMarkup } from 'react-dom/server';
-import { describe, expect, it } from 'vitest';
-import { ExerciseFilterPanel } from './ExerciseFilterPanel';
+import { renderToStaticMarkup } from 'react-dom/server'
+import { describe, expect, it } from 'vitest'
+import { ExerciseFilterPanel } from './ExerciseFilterPanel'
 
 describe('ExerciseFilterPanel', () => {
   it('renders a plain search input with a clear action when usePlainInput is enabled', () => {

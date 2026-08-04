@@ -1,9 +1,9 @@
-import { useState } from 'react';
-import { formatLabel } from '../../utils/formatUtils';
-import { getToneClass } from '../toneClasses';
-import { Button } from '../ui/Button';
-import { ExercisePicker } from './ExercisePicker';
-import { ExerciseSearchField } from './ExerciseSearchField';
+import { useState } from 'react'
+import { formatLabel } from '../../utils/formatUtils'
+import { getToneClass } from '../toneClasses'
+import { Button } from '../ui/Button'
+import { ExercisePicker } from './ExercisePicker'
+import { ExerciseSearchField } from './ExerciseSearchField'
 
 type ExerciseFilterPanelProps = {
   draftSearchTerm: string

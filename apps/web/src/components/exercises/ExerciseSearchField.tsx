@@ -1,5 +1,5 @@
-import { forwardRef } from 'react';
-import { appTokens } from '../../constants/tokens';
+import { forwardRef } from 'react'
+import { appTokens } from '../../constants/tokens'
 
 type ExerciseSearchFieldProps = {
   id?: string
