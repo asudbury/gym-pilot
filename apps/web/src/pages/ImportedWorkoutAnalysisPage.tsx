@@ -1,27 +1,27 @@
-import { useEffect, useMemo, useState } from 'react';
-import Calendar from 'react-calendar';
-import 'react-calendar/dist/Calendar.css';
+import { useEffect, useMemo, useState } from 'react'
+import Calendar from 'react-calendar'
+import 'react-calendar/dist/Calendar.css'
 import {
-    Bar,
-    BarChart,
-    CartesianGrid,
-    Legend,
-    Line,
-    LineChart,
-    ResponsiveContainer,
-    Tooltip,
-    XAxis,
-    YAxis,
-} from 'recharts';
-import { PageCard } from '../components/PageCard';
-import { Button } from '../components/ui/Button';
-import { ResponsiveVisibility } from '../components/visibility/ResponsiveVisibility';
+  Bar,
+  BarChart,
+  CartesianGrid,
+  Legend,
+  Line,
+  LineChart,
+  ResponsiveContainer,
+  Tooltip,
+  XAxis,
+  YAxis,
+} from 'recharts'
+import { PageCard } from '../components/PageCard'
+import { Button } from '../components/ui/Button'
+import { ResponsiveVisibility } from '../components/visibility/ResponsiveVisibility'
 import {
-    buildImportedWorkoutAnalysisCsv,
-    buildImportedWorkoutAnalysisViewModel,
-} from '../features/importedWorkouts/domain/workoutAnalysis';
-import { useImportedWorkouts } from '../hooks/useImportedWorkouts';
-import { PageLayout } from '../layouts/PageLayout';
+  buildImportedWorkoutAnalysisCsv,
+  buildImportedWorkoutAnalysisViewModel,
+} from '../features/importedWorkouts/domain/workoutAnalysis'
+import { useImportedWorkouts } from '../hooks/useImportedWorkouts'
+import { PageLayout } from '../layouts/PageLayout'
 
 const LOCAL_STORAGE_FILTER_KEY = 'importedWorkoutAnalysisFilter'
 
@@ -342,9 +342,7 @@ export function ImportedWorkoutAnalysisPage() {
                 </p>
               </div>
               <div className="p-4 bg-gray-100 rounded-lg dark:bg-gray-800">
-                <h2 className="text-m font-semibold">
-                  Avg Duration (minutes)
-                </h2>
+                <h2 className="text-m font-semibold">Avg Duration (minutes)</h2>
                 <p className="text-2xl font-bold">
                   {Number(avgDuration).toLocaleString()}
                 </p>
