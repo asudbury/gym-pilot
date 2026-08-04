@@ -52,7 +52,7 @@ jobs:
           EOF
 
       - name: Build web app
-        run: npm run build:web
+        run: npm run build:ci
 
       - name: Upload Pages artifact
         uses: actions/upload-pages-artifact@v3
