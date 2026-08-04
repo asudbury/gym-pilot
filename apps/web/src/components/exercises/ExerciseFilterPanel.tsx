@@ -79,17 +79,12 @@ export function ExerciseFilterPanel({
             return (
               <Button
                 key={category}
-                onClick={() => onCategoryChange(isAll ? 'All' : category)}
+                onClick={() => onCategoryChange(category)}
+                tone={isSelected ? 'blue' : 'default'}
                 className={
                   isSelected
-                    ? getToneClass(
-                        'blue',
-                        'px-4 py-2 text-sm font-medium transition',
-                      )
-                    : getToneClass(
-                        'default',
-                        'px-4 py-2 text-sm font-medium transition hover:bg-slate-200',
-                      )
+                    ? 'px-4 py-2 text-sm font-medium transition'
+                    : 'px-4 py-2 text-sm font-medium transition hover:bg-slate-200'
                 }
               >
                 {category}
