@@ -1,27 +1,27 @@
-import { useEffect, useMemo, useState } from 'react';
-import Calendar from 'react-calendar';
-import 'react-calendar/dist/Calendar.css';
+import { useEffect, useMemo, useState } from 'react'
+import Calendar from 'react-calendar'
+import 'react-calendar/dist/Calendar.css'
 import {
-    Bar,
-    BarChart,
-    CartesianGrid,
-    Legend,
-    Line,
-    LineChart,
-    ResponsiveContainer,
-    Tooltip,
-    XAxis,
-    YAxis,
-} from 'recharts';
-import { PageCard } from '../components/PageCard';
-import { Button } from '../components/ui/Button';
-import { ResponsiveVisibility } from '../components/visibility/ResponsiveVisibility';
+  Bar,
+  BarChart,
+  CartesianGrid,
+  Legend,
+  Line,
+  LineChart,
+  ResponsiveContainer,
+  Tooltip,
+  XAxis,
+  YAxis,
+} from 'recharts'
+import { PageCard } from '../components/PageCard'
+import { Button } from '../components/ui/Button'
+import { ResponsiveVisibility } from '../components/visibility/ResponsiveVisibility'
 import {
-    buildImportedWorkoutAnalysisCsv,
-    buildImportedWorkoutAnalysisViewModel,
-} from '../features/importedWorkouts/domain/workoutAnalysis';
-import { useImportedWorkouts } from '../hooks/useImportedWorkouts';
-import { PageLayout } from '../layouts/PageLayout';
+  buildImportedWorkoutAnalysisCsv,
+  buildImportedWorkoutAnalysisViewModel,
+} from '../features/importedWorkouts/domain/workoutAnalysis'
+import { useImportedWorkouts } from '../hooks/useImportedWorkouts'
+import { PageLayout } from '../layouts/PageLayout'
 
 const LOCAL_STORAGE_FILTER_KEY = 'importedWorkoutAnalysisFilter'
 
@@ -101,43 +101,43 @@ export function ImportedWorkoutAnalysisPage() {
     )
   }
 
-const formatXAxisLabel = (value: string, filter: FilterType) => {
-  if (filter === 'all') {
-    return value
+  const formatXAxisLabel = (value: string, filter: FilterType) => {
+    if (filter === 'all') {
+      return value
+    }
+
+    if (value.includes('-W')) {
+      return value.replace(/^\d{4}-W/, 'W')
+    }
+
+    const date = new Date(`${value}T00:00:00`)
+
+    switch (filter) {
+      case 'last7days':
+      case 'thisWeek':
+        return date.toLocaleDateString('en-GB', {
+          weekday: 'short',
+        })
+
+      case 'last31days':
+      case 'thisMonth':
+        return date.toLocaleDateString('en-GB', {
+          day: 'numeric',
+          month: 'short',
+        })
+
+      case 'thisYear':
+        return date.toLocaleDateString('en-GB', {
+          month: 'short',
+        })
+
+      default:
+        return date.toLocaleDateString('en-GB', {
+          day: 'numeric',
+          month: 'short',
+        })
+    }
   }
-
-  if (value.includes('-W')) {
-    return value.replace(/^\d{4}-W/, 'W')
-  }
-
-  const date = new Date(`${value}T00:00:00`)
-
-  switch (filter) {
-    case 'last7days':
-    case 'thisWeek':
-      return date.toLocaleDateString('en-GB', {
-        weekday: 'short',
-      })
-
-    case 'last31days':
-    case 'thisMonth':
-      return date.toLocaleDateString('en-GB', {
-        day: 'numeric',
-        month: 'short',
-      })
-
-    case 'thisYear':
-      return date.toLocaleDateString('en-GB', {
-        month: 'short',
-      })
-
-    default:
-      return date.toLocaleDateString('en-GB', {
-        day: 'numeric',
-        month: 'short',
-      })
-  }
-}
 
   return (
     <PageLayout className="gap-6">
@@ -378,9 +378,9 @@ const formatXAxisLabel = (value: string, filter: FilterType) => {
                   }
                 >
                   <CartesianGrid strokeDasharray="3 3" />
-                  <XAxis 
-                    dataKey="label"   
-                    tickFormatter={(value) => formatXAxisLabel(value, filter)} 
+                  <XAxis
+                    dataKey="label"
+                    tickFormatter={(value) => formatXAxisLabel(value, filter)}
                     interval="preserveStartEnd"
                   />
                   <YAxis />
