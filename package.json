@@ -8,6 +8,7 @@
   "scripts": {
     "dev:web": "npm --workspace apps/web run dev",
     "build:web": "npm --workspace apps/web run build",
+    "build:ci": "npm --workspace apps/web run build:ci",
     "format:web": "npm --workspace apps/web run format",
     "format:changed": "node scripts/check-prettier-changed.cjs",
     "lint:web": "npm --workspace apps/web run lint",
