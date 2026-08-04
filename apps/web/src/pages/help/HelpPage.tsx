@@ -1,15 +1,15 @@
-import { getSupabaseClient } from '@gym-pilot/shared';
-import { useEffect, useState } from 'react';
-import { Link } from 'react-router-dom';
-import { useAuth } from '../../auth/AuthContext';
-import { Panel } from '../../components/ui/Panel';
-import { UserRolesDisplay } from '../../components/UserRolesDisplay';
-import { getDisplayRoles } from '../../features/admin/domain/adminUtils';
-import { formatSessionTimeRemaining } from '../../features/auth/domain/authSessionTime';
-import { PageCardLayout } from '../../layouts/PageCardLayout';
-import { PageLayout } from '../../layouts/PageLayout';
-import { getBuildMetadata } from '../../utils/buildInfo';
-import { helpSections } from '../../utils/helpUtils';
+import { getSupabaseClient } from '@gym-pilot/shared'
+import { useEffect, useState } from 'react'
+import { Link } from 'react-router-dom'
+import { useAuth } from '../../auth/AuthContext'
+import { Panel } from '../../components/ui/Panel'
+import { UserRolesDisplay } from '../../components/UserRolesDisplay'
+import { getDisplayRoles } from '../../features/admin/domain/adminUtils'
+import { formatSessionTimeRemaining } from '../../features/auth/domain/authSessionTime'
+import { PageCardLayout } from '../../layouts/PageCardLayout'
+import { PageLayout } from '../../layouts/PageLayout'
+import { getBuildMetadata } from '../../utils/buildInfo'
+import { helpSections } from '../../utils/helpUtils'
 
 export function HelpPage() {
   const { hasAccess, user, isAuthenticated } = useAuth()
@@ -44,9 +44,7 @@ export function HelpPage() {
           return
         }
 
-        setSessionTimeRemaining(
-          formatSessionTimeRemaining(session.expires_at),
-        )
+        setSessionTimeRemaining(formatSessionTimeRemaining(session.expires_at))
       } catch {
         if (isActive) {
           setSessionTimeRemaining('Unavailable')
