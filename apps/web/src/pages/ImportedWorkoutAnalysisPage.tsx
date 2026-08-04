@@ -1,27 +1,27 @@
-import { useMemo, useState } from 'react'
-import Calendar from 'react-calendar'
-import 'react-calendar/dist/Calendar.css'
+import { useMemo, useState } from 'react';
+import Calendar from 'react-calendar';
+import 'react-calendar/dist/Calendar.css';
 import {
-  Bar,
-  BarChart,
-  CartesianGrid,
-  Legend,
-  Line,
-  LineChart,
-  ResponsiveContainer,
-  Tooltip,
-  XAxis,
-  YAxis,
-} from 'recharts'
-import { PageCard } from '../components/PageCard'
-import { Button } from '../components/ui/Button'
-import { ResponsiveVisibility } from '../components/visibility/ResponsiveVisibility'
+    Bar,
+    BarChart,
+    CartesianGrid,
+    Legend,
+    Line,
+    LineChart,
+    ResponsiveContainer,
+    Tooltip,
+    XAxis,
+    YAxis,
+} from 'recharts';
+import { PageCard } from '../components/PageCard';
+import { Button } from '../components/ui/Button';
+import { ResponsiveVisibility } from '../components/visibility/ResponsiveVisibility';
 import {
-  buildImportedWorkoutAnalysisCsv,
-  buildImportedWorkoutAnalysisViewModel,
-} from '../features/importedWorkouts/domain/workoutAnalysis'
-import { useImportedWorkouts } from '../hooks/useImportedWorkouts'
-import { PageLayout } from '../layouts/PageLayout'
+    buildImportedWorkoutAnalysisCsv,
+    buildImportedWorkoutAnalysisViewModel,
+} from '../features/importedWorkouts/domain/workoutAnalysis';
+import { useImportedWorkouts } from '../hooks/useImportedWorkouts';
+import { PageLayout } from '../layouts/PageLayout';
 
 type FilterType =
   | 'thisWeek'
@@ -169,14 +169,82 @@ export function ImportedWorkoutAnalysisPage() {
         </div>
 
         {filter === 'custom' && (
-          <div>
-            <Calendar
-              onChange={(value) => setCustomRange(value as DateRange)}
-              value={customRange}
-              selectRange={true}
-            />
+          <div className="space-y-4">
+            <div className="flex flex-col gap-3 md:flex-row md:flex-wrap">
+              <div className="w-full rounded-lg border border-slate-200 p-2 dark:border-slate-700 md:min-w-[280px] md:p-3">
+                <p className="mb-2 text-sm font-semibold">From</p>
+                <Calendar
+                  onChange={(value) => {
+                    const nextValue = value as Date | Date[] | null
+                    if (Array.isArray(nextValue)) {
+                      return
+                    }
+                    setCustomRange((currentRange) => {
+                      if (currentRange == null) {
+                        return nextValue == null ? null : [nextValue, nextValue]
+                      }
+                      return [nextValue ?? currentRange[0], currentRange[1]]
+                    })
+                  }}
+                  value={customRange?.[0] ?? null}
+                  className="react-calendar-mobile"
+                />
+              </div>
+              <div className="w-full rounded-lg border border-slate-200 p-2 dark:border-slate-700 md:min-w-[280px] md:p-3">
+                <p className="mb-2 text-sm font-semibold">To</p>
+                <Calendar
+                  onChange={(value) => {
+                    const nextValue = value as Date | Date[] | null
+                    if (Array.isArray(nextValue)) {
+                      return
+                    }
+                    setCustomRange((currentRange) => {
+                      if (currentRange == null) {
+                        return nextValue == null ? null : [nextValue, nextValue]
+                      }
+                      return [currentRange[0], nextValue ?? currentRange[1]]
+                    })
+                  }}
+                  value={customRange?.[1] ?? null}
+                  minDate={customRange?.[0]}
+                  className="react-calendar-mobile"
+                />
+              </div>
+            </div>
+            <div className="flex flex-wrap gap-2">
+              <Button onClick={() => setCustomRange(null)} tone="default">
+                Clear range
+              </Button>
+              {customRange?.[0] != null && customRange?.[1] != null && (
+                <span className="text-sm text-slate-600 dark:text-slate-300">
+                  {customRange[0].toLocaleDateString('en-US')} -{' '}
+                  {customRange[1].toLocaleDateString('en-US')}
+                </span>
+              )}
+            </div>
           </div>
         )}
+
+        <style>{`
+          .react-calendar-mobile .react-calendar__tile {
+            max-width: 2.2rem;
+            height: 2.2rem;
+            font-size: 0.8rem;
+            padding: 0;
+          }
+
+          .react-calendar-mobile .react-calendar__month-view__weekdays__weekday {
+            font-size: 0.7rem;
+          }
+
+          @media (min-width: 768px) {
+            .react-calendar-mobile .react-calendar__tile {
+              max-width: 2.6rem;
+              height: 2.6rem;
+              font-size: 0.85rem;
+            }
+          }
+        `}</style>
 
         <div className="flex flex-wrap items-center justify-between gap-3">
           <span className="text-sm pb-2">{currentDateRangeString}</span>
