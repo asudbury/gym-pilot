@@ -1,9 +1,9 @@
-import type { ReactNode } from 'react';
-import { PageCard } from '../components/PageCard';
-import { Heading1, UpperCaseParagraph } from '../components/Typography';
-import type { DecorativeIconProps } from '../components/ui/DecorativeIcon';
-import { DecorativeIcon } from '../components/ui/DecorativeIcon';
-import { DesktopOnly } from '../components/visibility/DeviceVisibility';
+import type { ReactNode } from 'react'
+import { PageCard } from '../components/PageCard'
+import { Heading1, UpperCaseParagraph } from '../components/Typography'
+import type { DecorativeIconProps } from '../components/ui/DecorativeIcon'
+import { DecorativeIcon } from '../components/ui/DecorativeIcon'
+import { DesktopOnly } from '../components/visibility/DeviceVisibility'
 
 type PageCardLayoutProps = {
   title?: string
