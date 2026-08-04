@@ -37,8 +37,7 @@ export function resolveHomeViewModel(filters: HomeFilters) {
     normalizedCategory: normalizedCategory ?? null,
     hasExplicitAll,
     hasCategoryFilter,
-    shouldShowResults:
-      hasCategoryFilter || filters.searchTerm.trim().length >= MIN_SEARCH_CHARS,
+    shouldShowResults: parsed.length > 0,
   } satisfies HomeViewModel
 }
 
