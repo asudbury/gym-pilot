@@ -1,5 +1,5 @@
-import { forwardRef } from 'react'
-import { appTokens } from '../../constants/tokens'
+import { forwardRef } from 'react';
+import { appTokens } from '../../constants/tokens';
 
 type ExerciseSearchFieldProps = {
   id?: string
@@ -22,6 +22,7 @@ export const ExerciseSearchField = forwardRef<
       placeholder = 'Search for exercise... (BB, DB, etc.)',
       className,
       onChange,
+      onClear,
     },
     ref,
   ) => {
@@ -42,6 +43,16 @@ export const ExerciseSearchField = forwardRef<
             enterKeyHint="search"
             className={`${appTokens.input} h-10 w-full pr-16 text-sm outline-none ring-0 focus:border-slate-400 sm:pr-24`}
           />
+          {value && onClear ? (
+            <button
+              type="button"
+              onClick={onClear}
+              aria-label="Clear search"
+              className="absolute right-3 top-1/2 -translate-y-1/2 text-sm font-medium text-slate-500 transition hover:text-slate-700"
+            >
+              Clear
+            </button>
+          ) : null}
         </div>
       </div>
     )

@@ -1,64 +1,17 @@
-import type { exercises } from '@gym-pilot/shared'
-import { useMemo } from 'react'
-import { Link } from 'react-router-dom'
-import { getExercisePath } from '../../utils/exerciseRouteUtils'
-import { formatLabel } from '../../utils/formatUtils'
-import { Button } from '../ui/Button'
-import { ResponsiveVisibility } from '../visibility/ResponsiveVisibility'
-import { ExerciseImage } from './ExerciseImage'
-import { ExerciseMetaBadges } from './ExerciseMetaBadges'
-
-type ExerciseListItem = (typeof exercises)[number]
+import type { exercises } from '@gym-pilot/shared';
+import { useEffect, useMemo, useRef, useState } from 'react';
+import { getExercisePath } from '../../utils/exerciseRouteUtils';
+import { ExerciseListItem } from './ExerciseListItem';
+type ExerciseListItemType = (typeof exercises)[number]
 
 type ExerciseListProps = {
-  exercises: ExerciseListItem[]
+  exercises: ExerciseListItemType[]
   isLargeScreen: boolean
   showExerciseImages: boolean
   copiedId: string | null
   isExerciseFavorite?: (exerciseId: string) => boolean
   onToggleFavoriteExercise?: (exerciseId: string) => void
   onCopyUrl: (exerciseId: string) => Promise<void>
-}
-
-type ExerciseActionButtonsProps = {
-  exerciseId: string
-  isFavorite: boolean
-  copiedId: string | null
-  onToggleFavoriteExercise?: (exerciseId: string) => void
-  onCopyUrl: (exerciseId: string) => Promise<void>
-}
-
-function ExerciseActionButtons({
-  exerciseId,
-  isFavorite,
-  copiedId,
-  onToggleFavoriteExercise,
-  onCopyUrl,
-}: ExerciseActionButtonsProps) {
-  return (
-    <div className="flex shrink-0 flex-col gap-2 self-start">
-      <Button
-        onClick={(event) => {
-          event.preventDefault()
-          event.stopPropagation()
-          onToggleFavoriteExercise?.(exerciseId)
-        }}
-        className={`rounded-full border px-3 py-2 text-sm font-medium transition ${isFavorite ? 'border-emerald-200 bg-emerald-50 text-emerald-700' : 'border-slate-200 bg-white text-slate-700'}`}
-      >
-        {isFavorite ? '★ Favourited' : '☆ Favourite'}
-      </Button>
-      <Button
-        onClick={(event) => {
-          event.preventDefault()
-          event.stopPropagation()
-          void onCopyUrl(exerciseId)
-        }}
-        className={`rounded-full border px-3 py-2 text-sm font-medium transition ${copiedId === exerciseId ? 'border-emerald-200 bg-emerald-50 text-emerald-700' : 'border-slate-200 bg-white text-slate-700'}`}
-      >
-        {copiedId === exerciseId ? 'Copied!' : 'Copy URL'}
-      </Button>
-    </div>
-  )
 }
 
 export function ExerciseList({
@@ -70,125 +23,102 @@ export function ExerciseList({
   onToggleFavoriteExercise,
   onCopyUrl,
 }: ExerciseListProps) {
+  const [scrollTop, setScrollTop] = useState(0)
+  const [viewportHeight, setViewportHeight] = useState(720)
+  const scrollContainerRef = useRef<HTMLDivElement | null>(null)
+
   const exerciseRows = useMemo(() => {
-    const columns = isLargeScreen ? 2 : 1
-    const rows: ExerciseListItem[][] = []
+    const columns = isLargeScreen ? 3 : 1
+    const rows: Array<Array<{ exercise: ExerciseListItemType; position: number }>> = []
 
     for (let index = 0; index < exercises.length; index += columns) {
-      rows.push(exercises.slice(index, index + columns))
+      const rowItems = exercises.slice(index, index + columns)
+      rows.push(
+        rowItems.map((exercise, rowIndex) => ({
+          exercise,
+          position: index + rowIndex + 1,
+        })),
+      )
     }
 
     return rows
   }, [exercises, isLargeScreen])
 
+  useEffect(() => {
+    if (typeof window === 'undefined') {
+      return
+    }
+
+    const updateViewportHeight = () => {
+      const nextHeight = Math.min(window.innerHeight - 280, 900)
+      setViewportHeight(Math.max(nextHeight, 420))
+    }
+
+    updateViewportHeight()
+    window.addEventListener('resize', updateViewportHeight)
+
+    return () => window.removeEventListener('resize', updateViewportHeight)
+  }, [])
+
+  const rowHeight = showExerciseImages ? 340 : 170
+  const overscanRows = 2
+  const startRow = Math.max(0, Math.floor(scrollTop / rowHeight) - overscanRows)
+  const endRow = Math.min(
+    exerciseRows.length,
+    startRow + Math.ceil(viewportHeight / rowHeight) + overscanRows * 2,
+  )
+  const visibleRows = exerciseRows.slice(startRow, endRow)
+
   return (
     <div className="overflow-hidden rounded-2xl">
-      <div className="flex flex-col gap-3">
-        {exerciseRows.map((row, rowIndex) => (
+      <style>{'.exercise-list-scroll::-webkit-scrollbar { display: none; }'}</style>
+      <div
+        ref={scrollContainerRef}
+        onScroll={(event) => setScrollTop(event.currentTarget.scrollTop)}
+        className="exercise-list-scroll overflow-y-auto"
+        style={{
+          maxHeight: `${viewportHeight}px`,
+          scrollbarWidth: 'none',
+          msOverflowStyle: 'none',
+        }}
+      >
+        <div
+          style={{ height: `${exerciseRows.length * rowHeight}px`, position: 'relative' }}
+        >
           <div
-            key={`exercise-row-${rowIndex}`}
-            className={
-              showExerciseImages
-                ? `grid items-start gap-4 md:gap-6 ${isLargeScreen ? 'lg:grid-cols-2' : 'grid-cols-1'}`
-                : `grid items-start gap-1 md:gap-1.5 ${isLargeScreen ? 'lg:grid-cols-2' : 'grid-cols-1'}`
-            }
+            style={{
+              transform: `translateY(${startRow * rowHeight}px)`,
+            }}
+            className="flex flex-col gap-3"
           >
-            {row.map((exercise) => {
-              const position =
-                exercises.findIndex((item) => item.id === exercise.id) + 1
-
-              if (showExerciseImages) {
-                return (
-                  <div
+            {visibleRows.map((row, rowIndex) => (
+              <div
+                key={`exercise-row-${startRow + rowIndex}`}
+                className={
+                  showExerciseImages
+                    ? `grid items-start gap-3 md:gap-4 ${isLargeScreen ? 'xl:grid-cols-3 lg:grid-cols-3 md:grid-cols-2' : 'grid-cols-1'}`
+                    : `grid items-start gap-1 md:gap-1.5 ${isLargeScreen ? 'xl:grid-cols-3 lg:grid-cols-3 md:grid-cols-2' : 'grid-cols-1'}`
+                }
+              >
+                {row.map(({ exercise, position }) => (
+                  <ExerciseListItem
                     key={exercise.id}
-                    className="flex h-full min-h-75 gap-3 rounded-2xl border border-slate-200/70 bg-white/80 p-4 shadow-sm transition hover:-translate-y-0.5 hover:border-slate-300 hover:shadow-md dark:border-slate-700 dark:bg-slate-900/90 dark:hover:border-slate-600"
-                  >
-                    <Link
-                      to={getExercisePath(exercise)}
-                      className="flex min-w-0 flex-1 flex-col gap-3"
-                    >
-                      <div className="min-w-0 flex-1">
-                        <div className="flex items-center gap-2">
-                          <span className="inline-flex h-8 min-w-8 items-center justify-center rounded-full bg-slate-100 px-3 py-1.5 text-sm font-semibold leading-none text-slate-700 dark:bg-slate-800 dark:text-slate-100">
-                            {position}
-                          </span>
-                          <h3 className="text-base font-semibold leading-tight text-slate-900 dark:text-slate-100">
-                            {formatLabel(exercise.name)}
-                          </h3>
-                        </div>
-                        <ExerciseMetaBadges
-                          values={[
-                            formatLabel(exercise.category),
-                            formatLabel(exercise.equipment),
-                          ]}
-                          tones={['orange', 'orange']}
-                          className="mt-2"
-                          pillClassName="text-xs"
-                        />
-                      </div>
-                      <ExerciseImage
-                        mediaGif={exercise.image}
-                        exerciseName={exercise.name}
-                        className="mt-6"
-                      />
-                    </Link>
-                    <ResponsiveVisibility visibleOn="desktop">
-                      <ExerciseActionButtons
-                        exerciseId={exercise.id}
-                        isFavorite={Boolean(isExerciseFavorite?.(exercise.id))}
-                        copiedId={copiedId}
-                        onToggleFavoriteExercise={onToggleFavoriteExercise}
-                        onCopyUrl={onCopyUrl}
-                      />
-                    </ResponsiveVisibility>
-                  </div>
-                )
-              }
-
-              return (
-                <div
-                  key={exercise.id}
-                  className="flex h-full min-h-35 gap-2 rounded-2xl border border-slate-200/70 bg-white/80 p-2 shadow-sm transition hover:-translate-y-0.5 hover:border-slate-300 hover:shadow-md dark:border-slate-700 dark:bg-slate-900/90 dark:hover:border-slate-600"
-                >
-                  <Link
-                    to={getExercisePath(exercise)}
-                    className="flex min-w-0 flex-1 flex-col gap-2"
-                  >
-                    <div className="min-w-0 flex-1">
-                      <div className="flex items-center gap-2">
-                        <span className="inline-flex h-8 min-w-8 items-center justify-center rounded-full bg-slate-100 px-3 py-1.5 text-sm font-semibold leading-none text-slate-700 dark:bg-slate-800 dark:text-slate-100">
-                          {position}
-                        </span>
-                        <h3 className="text-base font-semibold leading-tight text-slate-900 dark:text-slate-100">
-                          {formatLabel(exercise.name)}
-                        </h3>
-                      </div>
-                      <ExerciseMetaBadges
-                        values={[
-                          formatLabel(exercise.category),
-                          formatLabel(exercise.equipment),
-                        ]}
-                        tones={['blue', 'orange']}
-                        className="mt-1"
-                        pillClassName="text-xs"
-                      />
-                    </div>
-                  </Link>
-                  <ResponsiveVisibility visibleOn="desktop">
-                    <ExerciseActionButtons
-                      exerciseId={exercise.id}
-                      isFavorite={Boolean(isExerciseFavorite?.(exercise.id))}
-                      copiedId={copiedId}
-                      onToggleFavoriteExercise={onToggleFavoriteExercise}
-                      onCopyUrl={onCopyUrl}
-                    />
-                  </ResponsiveVisibility>
-                </div>
-              )
-            })}
+                    exercise={exercise}
+                    position={position}
+                    showExerciseImages={showExerciseImages}
+                    isExerciseFavorite={isExerciseFavorite}
+                    copiedId={copiedId ?? ''}
+                    onToggleFavoriteExercise={onToggleFavoriteExercise!}
+                    onCopyUrl={onCopyUrl}
+                    getExercisePath={getExercisePath}
+                  />
+                ))}
+              </div>
+            ))}
           </div>
-        ))}
+        </div>
       </div>
     </div>
   )
 }
+

@@ -1,5 +1,5 @@
-import { describe, expect, it } from 'vitest'
 import type { exercises } from '@gym-pilot/shared'
+import { describe, expect, it } from 'vitest'
 import {
   filterExercises,
   normalizeCategory,
@@ -25,8 +25,6 @@ describe('resolveHomeViewModel', () => {
 
     expect(viewModel.categories[0]).toBe('All')
     expect(viewModel.hasExplicitAll).toBe(true)
-    expect(viewModel.hasSearchText).toBe(true)
-    expect(viewModel.hasSearchThreshold).toBe(true)
     expect(viewModel.shouldShowResults).toBe(true)
   })
 })

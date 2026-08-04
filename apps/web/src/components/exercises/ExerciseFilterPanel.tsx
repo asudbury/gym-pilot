@@ -1,8 +1,9 @@
-import { useState } from 'react'
-import { getToneClass } from '../toneClasses'
-import { Button } from '../ui/Button'
-import { formatLabel } from '../../utils/formatUtils'
-import { ExercisePicker } from './ExercisePicker'
+import { useState } from 'react';
+import { formatLabel } from '../../utils/formatUtils';
+import { getToneClass } from '../toneClasses';
+import { Button } from '../ui/Button';
+import { ExercisePicker } from './ExercisePicker';
+import { ExerciseSearchField } from './ExerciseSearchField';
 
 type ExerciseFilterPanelProps = {
   draftSearchTerm: string
@@ -14,32 +15,47 @@ type ExerciseFilterPanelProps = {
   onSelectExercise: (exerciseName: string) => void
   onCategoryChange: (nextCategory: string | null) => void
   onToggleImages: () => void
+  usePlainInput?: boolean
 }
 
 export function ExerciseFilterPanel({
+  draftSearchTerm,
   selectedCategory,
   categories,
   normalizedCategory,
   showExerciseImages,
+  onSearchChange,
   onSelectExercise,
   onCategoryChange,
   onToggleImages,
+  usePlainInput = false,
 }: ExerciseFilterPanelProps) {
   const [showExercisePicker, setShowExercisePicker] = useState(false)
 
   return (
     <div className="space-y-4">
       <div className="mb-5">
-        <Button tone="blue" onClick={() => setShowExercisePicker(true)}>
-          Pick Exercise
-        </Button>
-        <ExercisePicker
-          onSelectExercise={(exercise) => {
-            onSelectExercise(formatLabel(exercise.name))
-            setShowExercisePicker(false)
-          }}
-          isOpen={showExercisePicker}
-        />
+        {usePlainInput ? (
+          <ExerciseSearchField
+            value={draftSearchTerm}
+            onChange={onSearchChange}
+            onClear={() => onSearchChange('')}
+            placeholder="Search for exercise... (BB, DB, etc.)"
+          />
+        ) : (
+          <>
+            <Button tone="blue" onClick={() => setShowExercisePicker(true)}>
+              Pick Exercise
+            </Button>
+            <ExercisePicker
+              onSelectExercise={(exercise) => {
+                onSelectExercise(formatLabel(exercise.name))
+                setShowExercisePicker(false)
+              }}
+              isOpen={showExercisePicker}
+            />
+          </>
+        )}
       </div>
 
       <div className="mt-4 flex flex-col items-start gap-2">

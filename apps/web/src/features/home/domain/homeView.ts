@@ -1,6 +1,6 @@
 import { exercises, exercisesSchema } from '@gym-pilot/shared'
-import { formatLabel } from '../../../utils/formatUtils'
 import { MIN_SEARCH_CHARS } from '../../../constants/home'
+import { formatLabel } from '../../../utils/formatUtils'
 import { type HomeFilters } from '../../favourites/domain/quickLinks'
 
 type HomeExercise = (typeof exercises)[number]
@@ -12,8 +12,6 @@ type HomeViewModel = {
   normalizedCategory: string | null
   hasExplicitAll: boolean
   hasCategoryFilter: boolean
-  hasSearchText: boolean
-  hasSearchThreshold: boolean
   shouldShowResults: boolean
 }
 
@@ -23,12 +21,9 @@ export function normalizeCategory(category: string | null | undefined) {
 
 export function resolveHomeViewModel(filters: HomeFilters) {
   const parsed = exercisesSchema.parse(exercises)
-  const trimmedSearchTerm = filters.searchTerm.trim()
   const normalizedCategory = normalizeCategory(filters.selectedCategory)
   const hasExplicitAll = filters.selectedCategory === 'All'
   const hasCategoryFilter = normalizedCategory !== null || hasExplicitAll
-  const hasSearchText = trimmedSearchTerm.length > 0
-  const hasSearchThreshold = trimmedSearchTerm.length >= MIN_SEARCH_CHARS
 
   return {
     exerciseList: parsed as HomeExercise[],
@@ -42,10 +37,8 @@ export function resolveHomeViewModel(filters: HomeFilters) {
     normalizedCategory: normalizedCategory ?? null,
     hasExplicitAll,
     hasCategoryFilter,
-    hasSearchText,
-    hasSearchThreshold,
     shouldShowResults:
-      hasCategoryFilter || (hasSearchText && hasSearchThreshold),
+      hasCategoryFilter || filters.searchTerm.trim().length >= MIN_SEARCH_CHARS,
   } satisfies HomeViewModel
 }
 

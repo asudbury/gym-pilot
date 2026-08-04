@@ -1,18 +1,18 @@
-import { logger } from '@gym-pilot/shared'
-import { useDeferredValue, useEffect, useMemo, useState } from 'react'
-import { ExerciseFilterPanel } from '../components/exercises/ExerciseFilterPanel'
-import { ExerciseList } from '../components/exercises/ExerciseList'
-import { ExerciseResultsHeader } from '../components/exercises/ExerciseResultsHeader'
-import { PageCard } from '../components/PageCard'
-import { DecorativeIcon } from '../components/ui/DecorativeIcon'
-import { MIN_SEARCH_CHARS } from '../constants/home'
-import { useAppShell } from '../features/app-shell/hooks/useAppShell'
+import { logger } from '@gym-pilot/shared';
+import { useDeferredValue, useEffect, useMemo, useState } from 'react';
+import { ExerciseFilterPanel } from '../components/exercises/ExerciseFilterPanel';
+import { ExerciseList } from '../components/exercises/ExerciseList';
+import { ExerciseResultsHeader } from '../components/exercises/ExerciseResultsHeader';
+import { PageCard } from '../components/PageCard';
+import { DecorativeIcon } from '../components/ui/DecorativeIcon';
+import { MIN_SEARCH_CHARS } from '../constants/home';
+import { useAppShell } from '../features/app-shell/hooks/useAppShell';
 import {
-  filterExercises,
-  resolveHomeViewModel,
-} from '../features/home/domain/homeView'
-import { PageLayout } from '../layouts/PageLayout'
-import { copyExerciseLinkToClipboard } from '../utils/navigationUtils'
+    filterExercises,
+    resolveHomeViewModel,
+} from '../features/home/domain/homeView';
+import { PageLayout } from '../layouts/PageLayout';
+import { copyExerciseLinkToClipboard } from '../utils/navigationUtils';
 
 export function HomePage() {
   const {
@@ -41,8 +41,6 @@ export function HomePage() {
   const viewModel = useMemo(() => resolveHomeViewModel(filters), [filters])
   const normalizedCategory = viewModel.normalizedCategory
   const hasExplicitAll = viewModel.hasExplicitAll
-  const hasSearchText = viewModel.hasSearchText
-  const hasSearchThreshold = viewModel.hasSearchThreshold
   const shouldShowResults = viewModel.shouldShowResults
 
   useEffect(() => {
@@ -140,6 +138,7 @@ export function HomePage() {
           categories={categories}
           normalizedCategory={normalizedCategory ?? null}
           showExerciseImages={showExerciseImages}
+          usePlainInput={true}
           onSearchChange={(nextValue) => setDraftSearchTerm(nextValue)}
           onSelectExercise={(nextSearchTerm) =>
             onFiltersChange({
@@ -175,8 +174,7 @@ export function HomePage() {
           filteredExercisesCount={filteredExercises.length}
           totalExercises={totalExercises}
           shouldShowResults={shouldShowResults}
-          hasSearchText={hasSearchText}
-          hasSearchThreshold={hasSearchThreshold}
+          searchText={trimmedSearchTerm}
           normalizedCategory={normalizedCategory ?? null}
         />
 
