@@ -31,7 +31,6 @@ export type ImportedWorkoutAnalysisViewModel = {
   dailyChartData: TimelineChartPoint[]
   nameChartData: Array<{ name: string; count: number }>
 }
-
 export function buildImportedWorkoutAnalysisCsv(
   workoutAnalysis: ImportedWorkoutAnalysisViewModel,
 ): string {
