@@ -6,7 +6,7 @@ on:
   workflow_dispatch:
 
 permissions:
-  contents: read
+  contents: write
   pages: write
   id-token: write
 
@@ -21,6 +21,9 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v4
+        with:
+          persist-credentials: true
+          fetch-depth: 0
 
       - name: Setup Node
         uses: actions/setup-node@v4
@@ -63,7 +66,7 @@ jobs:
             echo "No version bump to commit"
           else
             git commit -m "chore: bump web app version"
-            git push
+            git push origin HEAD:${GITHUB_REF_NAME}
           fi
 
       - name: Upload Pages artifact
