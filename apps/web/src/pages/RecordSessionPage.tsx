@@ -22,8 +22,11 @@ import {
 } from '../components/ui/StatusMessageNotification'
 import { DesktopOnly } from '../components/visibility/DeviceVisibility'
 import { appTokens } from '../constants/tokens'
+import {
+  formatDateTimeLocalInputValue,
+  toUtcIsoStringFromLocalInputValue,
+} from '../dateTimeFormatter'
 import { PageLayout } from '../layouts/PageLayout'
-
 function buildWorkoutItemsFromPlanSessions(
   planSessions: PlanSession[],
 ): Partial<UserSessionWorkoutItem>[] {
@@ -75,26 +78,6 @@ export function resolvePersistedSessionId(
     : fallbackId
 }
 
-export function detectDateTimeLocalSupport(
-  windowObject: Window | null,
-): boolean {
-  if (!windowObject?.document) {
-    return true
-  }
-
-  try {
-    const input = windowObject.document.createElement('input')
-    input.setAttribute('type', 'datetime-local')
-    return input.type === 'datetime-local'
-  } catch {
-    return false
-  }
-}
-
-const supportsDateTimeLocal = detectDateTimeLocalSupport(
-  typeof window === 'undefined' ? null : window,
-)
-
 export function RecordSessionPage() {
   const { user } = useAuth()
   const { users, visiblePlans, visibleAssignments } = usePlan()
@@ -110,8 +93,6 @@ export function RecordSessionPage() {
 
   const [sessionType] = useState<SessionType>(initialSessionType)
   const [startAt, setStartAt] = useState('')
-  const [datePart, setDatePart] = useState('')
-  const [timePart, setTimePart] = useState('')
   const [rating, setRating] = useState<number | null>(null)
   const [duration, setDuration] = useState<number | undefined>(undefined)
   const [name, setName] = useState('')
@@ -150,14 +131,7 @@ export function RecordSessionPage() {
   }, [availablePlans, selectedPlanId])
 
   useEffect(() => {
-    const now = new Date()
-    const tzOffset = now.getTimezoneOffset() * 60000
-    const localIso = new Date(now.getTime() - tzOffset)
-      .toISOString()
-      .slice(0, 16)
-    setStartAt(localIso)
-    setDatePart(localIso.slice(0, 10))
-    setTimePart(localIso.slice(11, 16))
+    setStartAt(formatDateTimeLocalInputValue(new Date()))
   }, [])
 
   useEffect(() => {
@@ -216,7 +190,7 @@ export function RecordSessionPage() {
             ? userSessionId
             : null,
         session_type: normalizedSessionType,
-        start_at: startAt,
+        start_at: toUtcIsoStringFromLocalInputValue(startAt),
         status: null,
         trainer_id:
           normalizedSessionType === 'personal_training'
@@ -308,39 +282,12 @@ export function RecordSessionPage() {
 
             <label className="mt-4 block text-sm text-slate-700">
               <span className="font-medium pl-1">Start time</span>
-              {!supportsDateTimeLocal ? (
-                <div className="mt-1 flex flex-col gap-2 sm:flex-row">
-                  <input
-                    type="date"
-                    value={datePart}
-                    onChange={(event) => {
-                      setDatePart(event.target.value)
-                      if (event.target.value && timePart) {
-                        setStartAt(`${event.target.value}T${timePart}`)
-                      }
-                    }}
-                    className={`${appTokens.input} w-full sm:w-1/2`}
-                  />
-                  <input
-                    type="time"
-                    value={timePart}
-                    onChange={(event) => {
-                      setTimePart(event.target.value)
-                      if (datePart && event.target.value) {
-                        setStartAt(`${datePart}T${event.target.value}`)
-                      }
-                    }}
-                    className={`${appTokens.input} w-full sm:w-1/2`}
-                  />
-                </div>
-              ) : (
-                <input
-                  type="datetime-local"
-                  value={startAt}
-                  onChange={(event) => setStartAt(event.target.value)}
-                  className={`${appTokens.input} mt-1 w-full`}
-                />
-              )}
+              <input
+                type="datetime-local"
+                value={startAt}
+                onChange={(event) => setStartAt(event.target.value)}
+                className={`${appTokens.input} mt-1 w-full`}
+              />
             </label>
 
             <label className="mt-4 block text-sm text-slate-700">

@@ -1,5 +1,43 @@
 import dayjs from 'dayjs'
 
+export function formatDateTimeLocalInputValue(date: Date): string {
+  const year = date.getFullYear()
+  const month = String(date.getMonth() + 1).padStart(2, '0')
+  const day = String(date.getDate()).padStart(2, '0')
+  const hours = String(date.getHours()).padStart(2, '0')
+  const minutes = String(date.getMinutes()).padStart(2, '0')
+
+  return `${year}-${month}-${day}T${hours}:${minutes}`
+}
+
+export function formatDateTimeLocalInputValueFromValue(
+  value?: string | null,
+): string {
+  if (!value) {
+    return ''
+  }
+
+  const parsed = new Date(value)
+  if (Number.isNaN(parsed.getTime())) {
+    return ''
+  }
+
+  return formatDateTimeLocalInputValue(parsed)
+}
+
+export function toUtcIsoStringFromLocalInputValue(value: string): string {
+  if (!value) {
+    return ''
+  }
+
+  const parsed = new Date(value)
+  if (Number.isNaN(parsed.getTime())) {
+    return ''
+  }
+
+  return parsed.toISOString()
+}
+
 function getOrdinalSuffix(day: number): string {
   if (day > 3 && day < 21) return 'th'
   switch (day % 10) {

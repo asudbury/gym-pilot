@@ -2,6 +2,9 @@ import { describe, expect, it } from 'vitest'
 import {
   formatDateForDisplay,
   formatDateTimeForDisplay,
+  formatDateTimeLocalInputValue,
+  formatDateTimeLocalInputValueFromValue,
+  toUtcIsoStringFromLocalInputValue,
 } from './dateTimeFormatter'
 
 describe('formatDateTimeForDisplay', () => {
@@ -79,6 +82,30 @@ describe('formatDateTimeForDisplay', () => {
     expect(
       formatDateTimeForDisplay('invalid date string', { includeYear: true }),
     ).toBe('Invalid Date')
+  })
+})
+
+describe('datetime input helpers', () => {
+  it('formats a Date as a local datetime-local input value', () => {
+    const date = new Date(2023, 4, 22, 10, 15)
+
+    expect(formatDateTimeLocalInputValue(date)).toBe('2023-05-22T10:15')
+  })
+
+  it('converts a local datetime-local value to a UTC ISO string', () => {
+    const localValue = '2023-05-22T10:15'
+
+    expect(toUtcIsoStringFromLocalInputValue(localValue)).toBe(
+      new Date(localValue).toISOString(),
+    )
+  })
+
+  it('formats a UTC ISO string for display as a local datetime-local value', () => {
+    const utcValue = new Date('2023-05-22T10:15:00.000Z').toISOString()
+
+    expect(formatDateTimeLocalInputValueFromValue(utcValue)).toBe(
+      formatDateTimeLocalInputValue(new Date(utcValue)),
+    )
   })
 })
 

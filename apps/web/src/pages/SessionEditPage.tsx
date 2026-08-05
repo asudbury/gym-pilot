@@ -15,6 +15,10 @@ import { SessionWorkoutEditor } from '../components/SessionWorkoutEditor'
 import { Button } from '../components/ui/Button'
 import { DesktopOnly } from '../components/visibility/DeviceVisibility'
 import {
+  formatDateTimeLocalInputValueFromValue,
+  toUtcIsoStringFromLocalInputValue,
+} from '../dateTimeFormatter'
+import {
   getSessionEntryRating,
   getSessionEntryTitle,
 } from '../features/session-history/domain/sessionHistoryViewModel'
@@ -65,7 +69,9 @@ export function SessionEditPage() {
           setNotes(nextEntry.notes ?? '')
           setRating(getSessionEntryRating(nextEntry))
           setDurationMinutes(nextEntry.duration_minutes ?? null)
-          setStartedAt(nextEntry.start_at ?? '')
+          setStartedAt(
+            formatDateTimeLocalInputValueFromValue(nextEntry.start_at),
+          )
           setSessionName(nextEntry.class_name ?? '')
 
           if (nextEntry.session_id) {
@@ -127,7 +133,8 @@ export function SessionEditPage() {
         notes: notes.trim() ? notes.trim() : null,
         rating: normalizedRating,
         duration_minutes: durationMinutes ?? entry.duration_minutes ?? null,
-        start_at: startedAt || entry.start_at || '',
+        start_at:
+          toUtcIsoStringFromLocalInputValue(startedAt) || entry.start_at || '',
         class_name:
           entry.session_type === 'solo'
             ? sessionName.trim() || null
@@ -198,14 +205,8 @@ export function SessionEditPage() {
               <span className="font-medium">Start time</span>
               <input
                 type="datetime-local"
-                value={startedAt ? startedAt.slice(0, 16) : ''}
-                onChange={(event) =>
-                  setStartedAt(
-                    event.target.value
-                      ? new Date(event.target.value).toISOString()
-                      : '',
-                  )
-                }
+                value={startedAt}
+                onChange={(event) => setStartedAt(event.target.value)}
                 className="rounded-2xl border border-slate-300 bg-white px-3 py-2 text-sm text-slate-700 shadow-sm"
               />
             </label>
