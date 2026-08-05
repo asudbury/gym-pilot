@@ -1,17 +1,19 @@
-import React, { useEffect, useState } from 'react';
-import { NavLink, useNavigate } from 'react-router-dom';
-import { useAuth } from '../../auth/AuthContext';
-import { Button } from '../../components/ui/Button';
-import { StatusMessageNotification } from '../../components/ui/StatusMessageNotification';
-import { PageCardLayout } from '../../layouts/PageCardLayout';
-import { PageLayout } from '../../layouts/PageLayout';
+import React, { useEffect, useState } from 'react'
+import { NavLink, useNavigate } from 'react-router-dom'
+import { useAuth } from '../../auth/AuthContext'
+import { Button } from '../../components/ui/Button'
+import { StatusMessageNotification } from '../../components/ui/StatusMessageNotification'
+import { PageCardLayout } from '../../layouts/PageCardLayout'
+import { PageLayout } from '../../layouts/PageLayout'
 
 export const SpreadsheetImportPage: React.FC = () => {
   const { user } = useAuth()
   const navigate = useNavigate()
   const SPREADSHEET_INPUT_KEY = 'gym-pilot:spreadsheetImportInput'
   const [spreadsheetInput, setSpreadsheetInput] = useState('')
-  const [spreadsheetImportError, setSpreadsheetImportError] = useState<string | null>(null)
+  const [spreadsheetImportError, setSpreadsheetImportError] = useState<
+    string | null
+  >(null)
 
   useEffect(() => {
     try {
@@ -34,12 +36,16 @@ Time + calories\t-\t-\t0:52 318kcal`)
 
   const handlePreviewImport = () => {
     if (!user?.id) {
-      setSpreadsheetImportError('You must be logged in to import spreadsheet sessions.')
+      setSpreadsheetImportError(
+        'You must be logged in to import spreadsheet sessions.',
+      )
       return
     }
 
     if (!spreadsheetInput.trim()) {
-      setSpreadsheetImportError('Please paste some spreadsheet content before importing.')
+      setSpreadsheetImportError(
+        'Please paste some spreadsheet content before importing.',
+      )
       return
     }
 
@@ -65,7 +71,9 @@ Time + calories\t-\t-\t0:52 318kcal`)
         <div className="rounded-lg border border-slate-200 bg-slate-50 p-4 dark:border-slate-700 dark:bg-slate-900/40">
           <div className="flex flex-col gap-3">
             <div className="rounded-md border border-slate-200 bg-white p-3 text-sm text-slate-600 dark:border-slate-700 dark:bg-slate-950 dark:text-slate-400">
-              <p className="font-medium text-slate-900 dark:text-slate-100">Paste one of these formats:</p>
+              <p className="font-medium text-slate-900 dark:text-slate-100">
+                Paste one of these formats:
+              </p>
               <ul className="mt-2 list-disc space-y-1 pl-5">
                 <li>Tab-separated table data</li>
                 <li>Comma-separated CSV data</li>
@@ -98,7 +106,10 @@ Shoulder press machine\t1-4\t3\t30kg(x2) x4"
               </Button>
             </div>
             {spreadsheetImportError && (
-              <StatusMessageNotification tone="error" message={spreadsheetImportError} />
+              <StatusMessageNotification
+                tone="error"
+                message={spreadsheetImportError}
+              />
             )}
           </div>
         </div>
