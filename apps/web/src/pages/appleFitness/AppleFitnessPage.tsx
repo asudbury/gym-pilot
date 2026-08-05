@@ -1,18 +1,18 @@
 import {
-  getImportedWorkouts,
-  type ImportedWorkout as Workout,
-} from '@gym-pilot/shared'
-import { getSupabaseClient } from '@gym-pilot/shared/src/supabase'
-import React, { useEffect, useMemo, useRef, useState } from 'react'
-import { NavLink, useSearchParams } from 'react-router-dom'
-import { useAuth } from '../../auth/AuthContext'
-import { AppleFitnessWorkoutCard } from '../../components/AppleFitnessWorkoutCard'
-import { Button } from '../../components/ui/Button'
-import { DecorativeIcon } from '../../components/ui/DecorativeIcon'
-import { StatusMessageNotification } from '../../components/ui/StatusMessageNotification'
-import WorkoutCalendar from '../../components/WorkoutCalendar'
-import { PageCardLayout } from '../../layouts/PageCardLayout'
-import { PageLayout } from '../../layouts/PageLayout'
+    getImportedWorkouts,
+    type ImportedWorkout as Workout,
+} from '@gym-pilot/shared';
+import { getSupabaseClient } from '@gym-pilot/shared/src/supabase';
+import React, { useEffect, useMemo, useRef, useState } from 'react';
+import { NavLink, useSearchParams } from 'react-router-dom';
+import { useAuth } from '../../auth/AuthContext';
+import { AppleFitnessWorkoutCard } from '../../components/AppleFitnessWorkoutCard';
+import { Button } from '../../components/ui/Button';
+import { DecorativeIcon } from '../../components/ui/DecorativeIcon';
+import { StatusMessageNotification } from '../../components/ui/StatusMessageNotification';
+import WorkoutCalendar from '../../components/WorkoutCalendar';
+import { PageCardLayout } from '../../layouts/PageCardLayout';
+import { PageLayout } from '../../layouts/PageLayout';
 
 type ImportWorkoutsResponse = {
   data?: unknown[]
@@ -253,7 +253,9 @@ export const AppleFitnessPage: React.FC = () => {
             ref={fileInputRef}
             className="hidden"
           />
-          <NavLink to="/analysis">Analysis</NavLink>
+          <Button as={NavLink} to="/analysis" tone="default">
+            Analysis
+          </Button>
         </div>
         {message && <StatusMessageNotification tone="info" message={message} />}
 
