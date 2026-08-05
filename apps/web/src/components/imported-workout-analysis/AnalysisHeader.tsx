@@ -1,5 +1,5 @@
-import { Button } from '../ui/Button';
-import { ResponsiveVisibility } from '../visibility/ResponsiveVisibility';
+import { Button } from '../ui/Button'
+import { ResponsiveVisibility } from '../visibility/ResponsiveVisibility'
 
 type FilterType =
   | 'thisWeek'
