@@ -1,10 +1,10 @@
-import type { ImportedWorkout, UserSession } from '@gym-pilot/shared';
-import { useNavigate } from 'react-router-dom';
-import { formatDateTimeForDisplay } from '../dateTimeFormatter';
-import { SessionEntryCard } from './session-history/SessionEntryCard';
-import { Button } from './ui/Button';
-import { Panel } from './ui/Panel';
-import { resolveWorkoutLinkState } from './workoutCalendarUtils';
+import type { ImportedWorkout, UserSession } from '@gym-pilot/shared'
+import { useNavigate } from 'react-router-dom'
+import { formatDateTimeForDisplay } from '../dateTimeFormatter'
+import { SessionEntryCard } from './session-history/SessionEntryCard'
+import { Button } from './ui/Button'
+import { Panel } from './ui/Panel'
+import { resolveWorkoutLinkState } from './workoutCalendarUtils'
 
 type CalendarValue = Date | null
 
