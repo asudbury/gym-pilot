@@ -458,7 +458,7 @@ begin
 end
 $$;
 
-create table public.gym_pilot_user_activity (
+create table public.user_activity (
   id uuid primary key default gen_random_uuid(),
   user_id uuid references auth.users(id) on delete cascade not null,
   event_type text not null,
@@ -467,18 +467,18 @@ create table public.gym_pilot_user_activity (
   updated_at timestamptz not null default now()
 );
 
-create index if not exists gym_pilot_user_activity_user_id_idx
-on public.gym_pilot_user_activity (user_id);
+create index if not exists user_activity_user_id_idx
+on public.user_activity (user_id);
 
-create index if not exists gym_pilot_user_activity_created_at_idx
-on public.gym_pilot_user_activity (created_at desc);
+create index if not exists user_activity_created_at_idx
+on public.user_activity (created_at desc);
 
-drop trigger if exists set_updated_at on public.gym_pilot_user_activity;
+drop trigger if exists set_updated_at on public.user_activity;
 create trigger set_updated_at
-before update on public.gym_pilot_user_activity
+before update on public.user_activity
 for each row execute function public.set_updated_at();
 
-alter table public.gym_pilot_user_activity enable row level security;
+alter table public.user_activity enable row level security;
 
 do $$
 begin
@@ -486,11 +486,11 @@ begin
     select 1
     from pg_policies
     where schemaname = 'public'
-      and tablename = 'gym_pilot_user_activity'
+      and tablename = 'user_activity'
       and policyname = 'Users can manage their own activity'
   ) then
     create policy "Users can manage their own activity"
-    on public.gym_pilot_user_activity
+    on public.user_activity
     for all
     using (auth.uid() = user_id)
     with check (auth.uid() = user_id);
@@ -500,11 +500,11 @@ begin
     select 1
     from pg_policies
     where schemaname = 'public'
-      and tablename = 'gym_pilot_user_activity'
+      and tablename = 'user_activity'
       and policyname = 'Admins and trainers can read related activity'
   ) then
     create policy "Admins and trainers can read related activity"
-    on public.gym_pilot_user_activity
+    on public.user_activity
     for select
     using (
       auth.uid() = user_id
@@ -523,7 +523,7 @@ begin
       or exists (
         select 1
         from public.gym_pilot_profile as client_profile
-        where client_profile.user_id = gym_pilot_user_activity.user_id
+        where client_profile.user_id = user_activity.user_id
           and client_profile.trainer_id = auth.uid()
       )
     );

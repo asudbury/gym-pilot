@@ -134,7 +134,7 @@ export type Database = {
           },
         ]
       }
-      gym_pilot_audit_log: {
+      audit_log: {
         Row: {
           created_at: string
           details: Json | null
@@ -155,7 +155,7 @@ export type Database = {
         }
         Relationships: []
       }
-      gym_pilot_error_log: {
+      error_log: {
         Row: {
           created_at: string
           details: Json | null
@@ -376,7 +376,7 @@ export type Database = {
         }
         Relationships: []
       }
-      gym_pilot_user_activity: {
+      user_activity: {
         Row: {
           created_at: string
           event_data: Json

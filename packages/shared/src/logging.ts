@@ -1,4 +1,5 @@
-import type { AppSettingValue } from './appSettings'
+import { TableNames } from '@gym-pilot/shared/src/dataServices/tableNames';
+import type { AppSettingValue } from './appSettings';
 
 const loggerAppName = 'gym-pilot'
 
@@ -128,7 +129,7 @@ export async function persistErrorLog(message: string, details?: Record<string, 
   }
 
   try {
-    const { error } = await client.from('gym_pilot_error_log').insert({
+    const { error } = await client.from(TableNames.ErrorLog).insert({
       message,
       details: buildErrorLogDetails(details) ?? null,
       created_at: new Date().toISOString(),
@@ -158,7 +159,7 @@ export async function persistAuditLog(message: string, details?: Record<string, 
   }
 
   try {
-    const { error } = await client.from('gym_pilot_audit_log').insert({
+    const { error } = await client.from(TableNames.AuditLog).insert({
       message,
       details: buildErrorLogDetails(details) ?? null,
       created_at: new Date().toISOString(),

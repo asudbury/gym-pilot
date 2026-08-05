@@ -1,6 +1,7 @@
-import { getSupabaseClient } from "./supabase";
-import { logger } from "./logging";
+import { TableNames } from "@gym-pilot/shared/src/dataServices/tableNames";
 import { loadAppSetting } from "./appSettingsService";
+import { logger } from "./logging";
+import { getSupabaseClient } from "./supabase";
 import { getAuthenticatedUserId } from "./supabaseAuth";
 
 function isLocalhostHost(hostname?: string) {
@@ -159,7 +160,7 @@ export async function recordSupabaseUserActivity(
 
   const payload = buildSupabaseUserActivityEventData(eventData, friendlyName);
 
-  const { error } = await client.from("gym_pilot_user_activity").insert({
+  const { error } = await client.from(TableNames.UserActivity).insert({
     user_id: resolvedUserId,
     event_type: eventType,
     event_data: payload,

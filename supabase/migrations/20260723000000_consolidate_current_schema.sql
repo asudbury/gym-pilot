@@ -114,7 +114,7 @@ create table if not exists public.gym_pilot_assignment (
   updated_at timestamptz not null default now()
 );
 
-create table if not exists public.gym_pilot_user_activity (
+create table if not exists public.user_activity (
   id uuid primary key default gen_random_uuid(),
   user_id uuid references auth.users(id) on delete cascade not null,
   event_type text not null,
@@ -178,14 +178,14 @@ create table if not exists public.gym_pilot_app_setting (
   updated_at timestamptz not null default now()
 );
 
-create table if not exists public.gym_pilot_error_log (
+create table if not exists public.error_log (
   id uuid primary key default gen_random_uuid(),
   message text not null,
   details jsonb,
   created_at timestamptz not null default now()
 );
 
-create table if not exists public.gym_pilot_audit_log (
+create table if not exists public.audit_log (
   id uuid primary key default gen_random_uuid(),
   message text not null,
   details jsonb,
@@ -199,12 +199,12 @@ alter table public.gym_pilot_favourite_folder enable row level security;
 alter table public.gym_pilot_favourite enable row level security;
 alter table public.gym_pilot_plan enable row level security;
 alter table public.gym_pilot_assignment enable row level security;
-alter table public.gym_pilot_user_activity enable row level security;
+alter table public.user_activity enable row level security;
 alter table public.gym_pilot_user_session enable row level security;
 alter table public.gym_pilot_user_session_workout_item enable row level security;
 alter table public.gym_pilot_app_setting enable row level security;
-alter table public.gym_pilot_error_log enable row level security;
-alter table public.gym_pilot_audit_log enable row level security;
+alter table public.error_log enable row level security;
+alter table public.audit_log enable row level security;
 
 create unique index if not exists gym_pilot_app_state_user_id_key_idx
 on public.gym_pilot_app_state (user_id, key);

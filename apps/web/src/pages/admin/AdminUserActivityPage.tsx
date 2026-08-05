@@ -1,20 +1,21 @@
-import { useEffect, useState } from 'react'
-import { useNavigate, useParams } from 'react-router-dom'
-import { Button } from '../../components/ui/Button'
-import { AdminSectionShell } from '../../components/admin/AdminSectionShell'
 import {
-  getSupabaseClient,
-  listSupabaseAuthUsers,
-  loadSupabaseProfileRoles,
-  logger,
-} from '@gym-pilot/shared'
-import { getDisplayEmail } from '../../features/admin/domain/adminUtils'
+    getSupabaseClient,
+    listSupabaseAuthUsers,
+    loadSupabaseProfileRoles,
+    logger,
+} from '@gym-pilot/shared';
+import { TableNames } from '@gym-pilot/shared/src/dataServices/tableNames';
+import { useEffect, useState } from 'react';
+import { useNavigate, useParams } from 'react-router-dom';
+import { AdminSectionShell } from '../../components/admin/AdminSectionShell';
+import { Button } from '../../components/ui/Button';
+import { getDisplayEmail } from '../../features/admin/domain/adminUtils';
 import {
-  resolveUserActivityViewModel,
-  type UserActivityProfileViewModel,
-  type UserActivityRowViewModel,
-} from '../../features/admin/domain/userActivity'
-import { renderDashboardTimestamp } from '../../features/dashboard/domain/dashboardUtils'
+    resolveUserActivityViewModel,
+    type UserActivityProfileViewModel,
+    type UserActivityRowViewModel,
+} from '../../features/admin/domain/userActivity';
+import { renderDashboardTimestamp } from '../../features/dashboard/domain/dashboardUtils';
 
 const formatStoredTimestamp = (value?: string | null) => {
   if (!value) {
@@ -91,7 +92,7 @@ export function AdminUserActivityPage() {
     }
 
     const { data: activityData, error: activityError } = await client
-      .from('gym_pilot_user_activity')
+      .from(TableNames.UserActivity)
       .select('id, event_type, event_data, created_at')
       .eq('user_id', nextProfile.id)
       .order('created_at', { ascending: false })
