@@ -15,7 +15,7 @@ describe('getBuildMetadata', () => {
       appVersion: '1.2.3',
       buildDate: '2026-07-18',
       buildTime: '10:30:00 UTC',
-      buildTimestamp: '18 Jul 2026 at 10:30 UTC',
+      buildTimestamp: 'Sat 18th Jul 2026 at 11:30',
       commitSha: 'abc1234',
       branch: 'main',
     })
@@ -27,7 +27,7 @@ describe('getBuildMetadata', () => {
         VITE_BUILD_DATE: '2026-07-18',
         VITE_BUILD_TIME: '23:45:00 UTC',
       }).buildTimestamp,
-    ).toBe('18 Jul 2026 at 23:45 UTC')
+    ).toBe('Sun 19th Jul 2026 at 00:45')
   })
 
   it('falls back to the package version and unknown values when no metadata is injected', () => {

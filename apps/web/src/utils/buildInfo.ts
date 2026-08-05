@@ -1,4 +1,5 @@
 import webPackageJson from '../../package.json'
+import { formatDateTimeForDisplay } from '../dateTimeFormatter'
 
 export type BuildMetadata = {
   appVersion: string
@@ -21,25 +22,7 @@ function formatFriendlyTimestamp(buildDate: string, buildTime: string): string {
   const trimmedTime = buildTime.replace(/ UTC$/, '')
   const dateValue = new Date(`${buildDate}T${trimmedTime}Z`)
 
-  if (Number.isNaN(dateValue.getTime())) {
-    return `${buildDate} ${buildTime}`
-  }
-
-  const day = dateValue.getUTCDate()
-  const month = dateValue.toLocaleDateString('en-GB', {
-    month: 'short',
-    timeZone: 'UTC',
-  })
-  const year = dateValue.getUTCFullYear()
-  const time = dateValue.toLocaleTimeString('en-GB', {
-    hour: '2-digit',
-    minute: '2-digit',
-    hour12: false,
-    timeZone: 'UTC',
-  })
-  const timezone = buildTime.includes('UTC') ? 'UTC' : ''
-
-  return `${day} ${month} ${year} at ${time}${timezone ? ` ${timezone}` : ''}`
+  return formatDateTimeForDisplay(dateValue, { includeYear: true })
 }
 
 export function getBuildMetadata(
