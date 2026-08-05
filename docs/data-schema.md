@@ -65,7 +65,7 @@
 | created_at        | string           | Creation timestamp              |
 | attribution       | string           | Source attribution              |
 
-### Favourite folder — gym_pilot_favourite_folder
+### Favourite folder — favourite_folder
 
 | Field      | Type   | Notes                 |
 | ---------- | ------ | --------------------- |
@@ -75,7 +75,7 @@
 | created_at | string | Creation timestamp    |
 | updated_at | string | Last update timestamp |
 
-### Favourite link — gym_pilot_favourite
+### Favourite link — favourite
 
 | Field      | Type           | Notes                     |
 | ---------- | -------------- | ------------------------- |
@@ -206,7 +206,7 @@ The shared Supabase helpers in [packages/shared/src/gymPilotSupabase.ts](package
 | Profiles and settings   | `loadSupabaseProfileSnapshot()`, `saveSupabaseProfileName()`, `saveSupabaseApplicationName()`, `saveSupabaseGymBrand()`, `saveSupabaseGymName()`, `saveSupabaseProfileAccessSettings()`, `saveSupabaseProfileFlag()`, `saveSupabaseProfileLastLoggedIn()`, `loadSupabaseProfileTermsAcceptance()`, `saveSupabaseProfileTermsAcceptance()`, `loadSupabaseProfileRoles()`, `saveSupabaseProfileRoles()` | `gym_pilot_profile`, `gym_pilot_user_role`                                                       |
 | Key/value persistence   | `loadSupabaseJsonRecord()`, `saveSupabaseJsonRecord()`, `removeSupabaseJsonRecord()`                                                                                                                                                                                                                                                                                                                  | `gym_pilot_app_state` plus table-specific rows for plans, assignments, favourites, and app state |
 | Plans and assignments   | `select`, `insert`, `upsert`, `delete` against remote rows                                                                                                                                                                                                                                                                                                                                            | `gym_pilot_plan`, `gym_pilot_assignment`                                                         |
-| Favourites and folders  | `select`, `insert`, `upsert`, `delete` against remote rows                                                                                                                                                                                                                                                                                                                                            | `gym_pilot_favourite_folder`, `gym_pilot_favourite`                                              |
+| Favourites and folders  | `select`, `insert`, `upsert`, `delete` against remote rows                                                                                                                                                                                                                                                                                                                                            | `favourite_folder`, `favourite`                                              |
 | Activity logging        | `recordSupabaseUserActivity()` uses `insert` into `user_activity`; it skips inserts when the app is running on localhost-style hosts                                                                                                                                                                                                                                                        | `user_activity`                                                                        |
 | Session recording       | `saveTimetableAttendance()` inserts role-based session records with optional notes and a 1-5 rating for a session/class                                                                                                                                                                                                                                                                               | `gym_pilot_user_session`                                                                         |
 | Workout items           | `loadWorkoutItemsForSession()` and `saveWorkoutItemsForSession()` read/write ordered workout rows for a session                                                                                                                                                                                                                                                                                       | `gym_pilot_user_session_workout_item`                                                            |
@@ -219,8 +219,8 @@ erDiagram
     auth_users ||--o{ gym_pilot_app_state : owns
     auth_users ||--o{ gym_pilot_profile : owns
     auth_users ||--o{ gym_pilot_user_role : has
-    auth_users ||--o{ gym_pilot_favourite_folder : owns
-    auth_users ||--o{ gym_pilot_favourite : owns
+    auth_users ||--o{ favourite_folder : owns
+    auth_users ||--o{ favourite : owns
     auth_users ||--o{ gym_pilot_plan : owns
     auth_users ||--o{ gym_pilot_assignment : creates
     auth_users ||--o{ user_activity : records
@@ -265,7 +265,7 @@ erDiagram
         timestamptz updated_at
     }
 
-    gym_pilot_favourite_folder {
+    favourite_folder {
         uuid id
         uuid user_id
         text name
@@ -273,7 +273,7 @@ erDiagram
         timestamptz updated_at
     }
 
-    gym_pilot_favourite {
+    favourite {
         uuid id
         uuid user_id
         text path

@@ -1,3 +1,4 @@
+import { TableNames } from "@gym-pilot/shared/src/dataServices/tableNames";
 import type { Assignment, Plan } from "@gym-pilot/types";
 import { logger } from "../logging";
 import { getSupabaseClient } from "../supabase";
@@ -20,11 +21,11 @@ export type FavoriteStorageValue = {
   folders: string[];
 };
 
-const DEFAULT_SUPABASE_TABLE = "gym_pilot_app_state";
+const DEFAULT_SUPABASE_TABLE = TableNames.AppState;
 
 const SUPABASE_TABLE_BY_KEY: Record<string, string> = {
-  "gym-pilot-plans": "gym_pilot_plan",
-  "gym-pilot-assignments": "gym_pilot_assignment",
+  "gym-pilot-plans": TableNames.Plan,
+  "gym-pilot-assignments": TableNames.Assignment,
 };
 
 export function normalizeFolderName(value?: string) {
@@ -41,7 +42,7 @@ export function isFavoritesKey(key: string) {
 
 export function getSupabaseTableName(key: string) {
   if (isFavoritesKey(key)) {
-    return "gym_pilot_favourite";
+    return TableNames.Favourite;
   }
 
   return SUPABASE_TABLE_BY_KEY[key] ?? DEFAULT_SUPABASE_TABLE;
@@ -121,7 +122,7 @@ export async function loadSupabaseJsonRecord<T>(
 
   if (key === "gym-pilot-plans") {
     const { data, error } = await client
-      .from("gym_pilot_plan")
+      .from(TableNames.Plan)
       .select("id, plan_name, plan_slug, plan_sessions, created_at, updated_at")
       .eq("user_id", userId);
 
@@ -143,7 +144,7 @@ export async function loadSupabaseJsonRecord<T>(
 
   if (key === "gym-pilot-assignments") {
     const { data, error } = await client
-      .from("gym_pilot_assignment")
+      .from(TableNames.Assignment)
       .select(
         "id, assignment_name, plan_id, plan_items, assigned_user_id, assigned_user_name, completed_exercises",
       )
@@ -171,7 +172,7 @@ export async function loadSupabaseJsonRecord<T>(
 
   if (isFavoritesKey(key)) {
     const { data: folderRows, error: folderError } = await client
-      .from("gym_pilot_favourite_folder")
+      .from(TableNames.FavouriteFolder)
       .select("id,name")
       .eq("user_id", userId);
 
@@ -188,7 +189,7 @@ export async function loadSupabaseJsonRecord<T>(
     );
 
     const { data, error } = await client
-      .from("gym_pilot_favourite")
+      .from("favourite")
       .select("path,label,folder,folder_id")
       .eq("user_id", userId);
 
@@ -264,7 +265,7 @@ export async function saveSupabaseJsonRecord<T>(key: string, value: T) {
     const plans = Array.isArray(value) ? (value as Plan[]) : [];
 
     const { error: deleteError } = await client
-      .from("gym_pilot_plan")
+      .from(TableNames.Plan)
       .delete()
       .eq("user_id", userId);
 
@@ -273,7 +274,7 @@ export async function saveSupabaseJsonRecord<T>(key: string, value: T) {
     }
 
     if (plans.length > 0) {
-      const { error: insertError } = await client.from("gym_pilot_plan").insert(
+      const { error: insertError } = await client.from(TableNames.Plan).insert(
         plans.map((plan) => ({
           id: plan.id,
           user_id: userId,
@@ -295,7 +296,7 @@ export async function saveSupabaseJsonRecord<T>(key: string, value: T) {
     const assignments = Array.isArray(value) ? (value as Assignment[]) : [];
 
     const { error: deleteError } = await client
-      .from("gym_pilot_assignment")
+      .from(TableNames.Assignment)
       .delete()
       .eq("user_id", userId);
 
@@ -305,7 +306,7 @@ export async function saveSupabaseJsonRecord<T>(key: string, value: T) {
 
     if (assignments.length > 0) {
       const { error: insertError } = await client
-        .from("gym_pilot_assignment")
+        .from(TableNames.Assignment)
         .insert(
           assignments.map((assignment) => ({
             id: assignment.id,
@@ -340,7 +341,7 @@ export async function saveSupabaseJsonRecord<T>(key: string, value: T) {
     );
 
     const { error: deleteFavoritesError } = await client
-      .from("gym_pilot_favourite")
+      .from(TableNames.Favourite)
       .delete()
       .eq("user_id", userId);
 
@@ -349,7 +350,7 @@ export async function saveSupabaseJsonRecord<T>(key: string, value: T) {
     }
 
     const { error: deleteFoldersError } = await client
-      .from("gym_pilot_favourite_folder")
+      .from(TableNames.FavouriteFolder)
       .delete()
       .eq("user_id", userId);
 
@@ -360,7 +361,7 @@ export async function saveSupabaseJsonRecord<T>(key: string, value: T) {
     const folderRows =
       folderNames.length > 0
         ? await client
-            .from("gym_pilot_favourite_folder")
+            .from(TableNames.FavouriteFolder)
             .upsert(
               folderNames.map((name) => ({ user_id: userId, name })),
               { onConflict: "user_id,name" },
@@ -378,7 +379,7 @@ export async function saveSupabaseJsonRecord<T>(key: string, value: T) {
 
     if (favorites.length > 0) {
       const { error: insertError } = await client
-        .from("gym_pilot_favourite")
+        .from(TableNames.Favourite)
         .insert(
           favorites.map((favorite) => {
             const normalizedFolder = normalizeFolderName(favorite.folder);
@@ -433,7 +434,7 @@ export async function removeSupabaseJsonRecord(key: string) {
 
   if (isFavoritesKey(key)) {
     const { error: favoritesError } = await client
-      .from("gym_pilot_favourite")
+      .from(TableNames.Favourite)
       .delete()
       .eq("user_id", userId);
 
@@ -442,7 +443,7 @@ export async function removeSupabaseJsonRecord(key: string) {
     }
 
     const { error: foldersError } = await client
-      .from("gym_pilot_favourite_folder")
+      .from(TableNames.FavouriteFolder)
       .delete()
       .eq("user_id", userId);
 

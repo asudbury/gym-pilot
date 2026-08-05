@@ -101,7 +101,7 @@ export default {
 
       const { data: existingWorkouts, error: existingWorkoutsError } =
         await supabaseAdmin
-          .from("gym_pilot_imported_workout")
+          .from("imported_workout")
           .select(
             "original_id, display_name, start_date, duration, energy, energy_unit",
           )
@@ -145,7 +145,7 @@ export default {
       const importedCount = importedWorkouts.length;
 
       const { data: upsertedWorkouts, error } = await supabaseAdmin
-        .from("gym_pilot_imported_workout")
+        .from("imported_workout")
         .upsert(importedWorkouts, {
           onConflict: "user_id,original_id",
         })

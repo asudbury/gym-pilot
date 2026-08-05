@@ -176,7 +176,7 @@ export type Database = {
           },
         ]
       }
-      gym_pilot_favourite: {
+      favourite: {
         Row: {
           created_at: string
           folder: string | null
@@ -209,15 +209,15 @@ export type Database = {
         }
         Relationships: [
           {
-            foreignKeyName: "gym_pilot_favourite_folder_id_fkey"
+            foreignKeyName: "favourite_folder_id_fkey"
             columns: ["folder_id"]
             isOneToOne: false
-            referencedRelation: "gym_pilot_favourite_folder"
+            referencedRelation: "favourite_folder"
             referencedColumns: ["id"]
           },
         ]
       }
-      gym_pilot_favourite_folder: {
+      favourite_folder: {
         Row: {
           created_at: string
           id: string
@@ -241,7 +241,7 @@ export type Database = {
         }
         Relationships: []
       }
-      gym_pilot_imported_workout: {
+      imported_workout: {
         Row: {
           created_at: string
           display_name: string
