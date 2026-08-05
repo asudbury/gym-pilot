@@ -1,18 +1,18 @@
-import { useEffect, useMemo, useState } from 'react';
-import { AnalysisHeader } from '../components/imported-workout-analysis/AnalysisHeader';
-import { CustomDateRangePicker } from '../components/imported-workout-analysis/CustomDateRangePicker';
-import { SummaryStatistics } from '../components/imported-workout-analysis/SummaryStatistics';
-import { WorkoutsByNameChart } from '../components/imported-workout-analysis/WorkoutsByNameChart';
-import { WorkoutsOverTimeChart } from '../components/imported-workout-analysis/WorkoutsOverTimeChart';
-import { PageCard } from '../components/PageCard';
-import { Button } from '../components/ui/Button';
+import { useEffect, useMemo, useState } from 'react'
+import { AnalysisHeader } from '../components/imported-workout-analysis/AnalysisHeader'
+import { CustomDateRangePicker } from '../components/imported-workout-analysis/CustomDateRangePicker'
+import { SummaryStatistics } from '../components/imported-workout-analysis/SummaryStatistics'
+import { WorkoutsByNameChart } from '../components/imported-workout-analysis/WorkoutsByNameChart'
+import { WorkoutsOverTimeChart } from '../components/imported-workout-analysis/WorkoutsOverTimeChart'
+import { PageCard } from '../components/PageCard'
+import { Button } from '../components/ui/Button'
 import {
-    buildImportedWorkoutAnalysisCsv,
-    buildImportedWorkoutAnalysisViewModel,
-} from '../features/importedWorkouts/domain/workoutAnalysis';
-import { useImportedWorkouts } from '../hooks/useImportedWorkouts';
-import { PageLayout } from '../layouts/PageLayout';
-import './imported-workout-analysis.css';
+  buildImportedWorkoutAnalysisCsv,
+  buildImportedWorkoutAnalysisViewModel,
+} from '../features/importedWorkouts/domain/workoutAnalysis'
+import { useImportedWorkouts } from '../hooks/useImportedWorkouts'
+import { PageLayout } from '../layouts/PageLayout'
+import './imported-workout-analysis.css'
 
 const LOCAL_STORAGE_FILTER_KEY = 'importedWorkoutAnalysisFilter'
 
@@ -91,8 +91,6 @@ export function ImportedWorkoutAnalysisPage() {
       </PageLayout>
     )
   }
-
-  
 
   return (
     <PageLayout className="gap-6">

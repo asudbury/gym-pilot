@@ -1,4 +1,3 @@
-
 import {
   CartesianGrid,
   Legend,
@@ -99,9 +98,7 @@ export function WorkoutsOverTimeChart({
       </div>
       <ResponsiveContainer width="100%" height={300}>
         <LineChart
-          data={
-            chartGranularity === 'daily' ? dailyChartData : weeklyChartData
-          }
+          data={chartGranularity === 'daily' ? dailyChartData : weeklyChartData}
         >
           <CartesianGrid strokeDasharray="3 3" />
           <XAxis

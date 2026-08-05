@@ -1,7 +1,7 @@
-import type { ComponentProps } from 'react';
-import Calendar from 'react-calendar';
-import 'react-calendar/dist/Calendar.css';
-import { Button } from '../ui/Button';
+import type { ComponentProps } from 'react'
+import Calendar from 'react-calendar'
+import 'react-calendar/dist/Calendar.css'
+import { Button } from '../ui/Button'
 
 type DateRange = [Date, Date]
 
@@ -23,9 +23,7 @@ export function CustomDateRangePicker({
 
     if (value instanceof Date) {
       onCustomRangeChange(
-        value === null
-          ? null
-          : [value, customRange?.[1] ?? value],
+        value === null ? null : [value, customRange?.[1] ?? value],
       )
     }
   }
@@ -37,9 +35,7 @@ export function CustomDateRangePicker({
 
     if (value instanceof Date) {
       onCustomRangeChange(
-        value === null
-          ? null
-          : [customRange?.[0] ?? value, value],
+        value === null ? null : [customRange?.[0] ?? value, value],
       )
     }
   }

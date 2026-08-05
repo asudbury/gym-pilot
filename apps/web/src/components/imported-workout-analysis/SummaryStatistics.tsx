@@ -1,4 +1,3 @@
-
 interface SummaryStatisticsProps {
   totalWorkouts: number
   totalDuration: number
