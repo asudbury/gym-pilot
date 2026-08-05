@@ -1,5 +1,5 @@
-import { Button } from '../ui/Button'
-import { ResponsiveVisibility } from '../visibility/ResponsiveVisibility'
+import { Button } from '../ui/Button';
+import { ResponsiveVisibility } from '../visibility/ResponsiveVisibility';
 
 type FilterType =
   | 'thisWeek'
@@ -33,7 +33,7 @@ export function AnalysisHeader({
 
   return (
     <>
-      <h1 className="text-2xl font-bold">Apple Fitness Workout Analysis</h1>
+      <h1 className="text-2xl font-bold">Apple Fitness Analysis</h1>
 
       <div>
         <ResponsiveVisibility hiddenOn="mobile">
