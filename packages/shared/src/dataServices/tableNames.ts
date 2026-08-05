@@ -1,7 +1,7 @@
 export const TableNames = {
   AppSetting: "app_setting",
-  AppState: "gym_pilot_app_state",
-  Assignment: "gym_pilot_assignment",
+  AppState: "app_state",
+  Assignment: "assignment",
   AuditLog: "audit_log",
   ErrorLog: "error_log",
   Favourite: "favourite",

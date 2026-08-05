@@ -105,7 +105,7 @@ export type Database = {
         }
         Relationships: []
       }
-      gym_pilot_app_state: {
+      app_state: {
         Row: {
           id: string
           key: string
@@ -129,7 +129,7 @@ export type Database = {
         }
         Relationships: []
       }
-      gym_pilot_assignment: {
+      assignment: {
         Row: {
           assigned_user_id: string | null
           assigned_user_name: string | null

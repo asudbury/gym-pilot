@@ -12,7 +12,7 @@
 | created_at | string | Creation timestamp |
 | updated_at | string | Last update timestamp |
 
-### Assignment — gym_pilot_assignment
+### Assignment — assignment
 
 | Field | Type | Notes |
 | --- | --- | --- |
@@ -204,8 +204,8 @@ The shared Supabase helpers in [packages/shared/src/gymPilotSupabase.ts](package
 | ----------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------ |
 | Auth and session        | `client.auth.getSession()`, `client.auth.signInWithOAuth()`, `client.auth.signInWithPassword()`, `client.auth.signUp()`, `client.auth.resetPasswordForEmail()`, `client.auth.updateUser()`, `client.auth.signOut()`                                                                                                                                                                                   | Supabase Auth users and session state                                                            |
 | Profiles and settings   | `loadSupabaseProfileSnapshot()`, `saveSupabaseProfileName()`, `saveSupabaseApplicationName()`, `saveSupabaseGymBrand()`, `saveSupabaseGymName()`, `saveSupabaseProfileAccessSettings()`, `saveSupabaseProfileFlag()`, `saveSupabaseProfileLastLoggedIn()`, `loadSupabaseProfileTermsAcceptance()`, `saveSupabaseProfileTermsAcceptance()`, `loadSupabaseProfileRoles()`, `saveSupabaseProfileRoles()` | `gym_pilot_profile`, `gym_pilot_user_role`                                                       |
-| Key/value persistence   | `loadSupabaseJsonRecord()`, `saveSupabaseJsonRecord()`, `removeSupabaseJsonRecord()`                                                                                                                                                                                                                                                                                                                  | `gym_pilot_app_state` plus table-specific rows for plans, assignments, favourites, and app state |
-| Plans and assignments   | `select`, `insert`, `upsert`, `delete` against remote rows                                                                                                                                                                                                                                                                                                                                            | `gym_pilot_plan`, `gym_pilot_assignment`                                                         |
+| Key/value persistence   | `loadSupabaseJsonRecord()`, `saveSupabaseJsonRecord()`, `removeSupabaseJsonRecord()`                                                                                                                                                                                                                                                                                                                  | `app_state` plus table-specific rows for plans, assignments, favourites, and app state |
+| Plans and assignments   | `select`, `insert`, `upsert`, `delete` against remote rows                                                                                                                                                                                                                                                                                                                                            | `gym_pilot_plan`, `assignment`                                                         |
 | Favourites and folders  | `select`, `insert`, `upsert`, `delete` against remote rows                                                                                                                                                                                                                                                                                                                                            | `favourite_folder`, `favourite`                                              |
 | Activity logging        | `recordSupabaseUserActivity()` uses `insert` into `user_activity`; it skips inserts when the app is running on localhost-style hosts                                                                                                                                                                                                                                                        | `user_activity`                                                                        |
 | Session recording       | `saveTimetableAttendance()` inserts role-based session records with optional notes and a 1-5 rating for a session/class                                                                                                                                                                                                                                                                               | `gym_pilot_user_session`                                                                         |
@@ -216,19 +216,19 @@ The shared Supabase helpers in [packages/shared/src/gymPilotSupabase.ts](package
 
 ```mermaid
 erDiagram
-    auth_users ||--o{ gym_pilot_app_state : owns
+    auth_users ||--o{ app_state : owns
     auth_users ||--o{ gym_pilot_profile : owns
     auth_users ||--o{ gym_pilot_user_role : has
     auth_users ||--o{ favourite_folder : owns
     auth_users ||--o{ favourite : owns
     auth_users ||--o{ gym_pilot_plan : owns
-    auth_users ||--o{ gym_pilot_assignment : creates
+    auth_users ||--o{ assignment : creates
     auth_users ||--o{ user_activity : records
     auth_users ||--o{ gym_pilot_user_session : records
-    gym_pilot_plan ||--o{ gym_pilot_assignment : uses
+    gym_pilot_plan ||--o{ assignment : uses
     gym_pilot_user_session ||--o{ gym_pilot_user_session_workout_item : contains
 
-    gym_pilot_app_state {
+    app_state {
         uuid id
         uuid user_id
         text key
@@ -294,7 +294,7 @@ erDiagram
         timestamptz updated_at
     }
 
-    gym_pilot_assignment {
+    assignment {
         uuid id
         uuid user_id
         uuid plan_id
