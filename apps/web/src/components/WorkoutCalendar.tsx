@@ -1,20 +1,20 @@
 import {
-  getSupabaseClient,
-  updateImportedWorkout,
-  type ImportedWorkout,
-  type UserSession,
-} from '@gym-pilot/shared'
-import React, { useEffect, useMemo, useState } from 'react'
-import Calendar from 'react-calendar'
-import { formatDateForDisplay } from '../dateTimeFormatter'
-import { useIsDesktop } from '../utils/useMediaQuery'
-import { AppleFitnessWorkoutCard } from './AppleFitnessWorkoutCard'
-import { Button } from './ui/Button'
-import { StatusMessageNotification } from './ui/StatusMessageNotification'
+    getSupabaseClient,
+    updateImportedWorkout,
+    type ImportedWorkout,
+    type UserSession,
+} from '@gym-pilot/shared';
+import React, { useEffect, useMemo, useState } from 'react';
+import Calendar from 'react-calendar';
+import { formatDateForDisplay } from '../dateTimeFormatter';
+import { useIsDesktop } from '../utils/useMediaQuery';
+import { AppleFitnessWorkoutCard } from './AppleFitnessWorkoutCard';
+import { Button } from './ui/Button';
+import { StatusMessageNotification } from './ui/StatusMessageNotification';
 import {
-  NO_LINK_SESSION_ID,
-  resolveWorkoutLinkState,
-} from './workoutCalendarUtils'
+    NO_LINK_SESSION_ID,
+    resolveWorkoutLinkState,
+} from './workoutCalendarUtils';
 
 type Value = Date | null | [Date | null, Date | null]
 
@@ -375,7 +375,7 @@ const WorkoutCalendar: React.FC<WorkoutCalendarProps> = ({
           onDismiss={() => setError(null)}
         />
       )}
-      <div className="text-right mr-3 flex justify-end space-x-2">
+      <div className="mb-3 flex space-x-2">
         {view === 'calendar' && (
           <Button onClick={handleTodayClick}>Today</Button>
         )}

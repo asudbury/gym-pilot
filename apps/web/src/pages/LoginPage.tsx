@@ -1,20 +1,20 @@
-import { logger, resetSupabasePassword } from '@gym-pilot/shared'
-import { useEffect, useMemo, useRef, useState } from 'react'
-import { useLocation, useNavigate, useSearchParams } from 'react-router-dom'
-import { useAuth } from '../auth/AuthContext'
-import { PageCard } from '../components/PageCard'
-import { getToneClass } from '../components/toneClasses'
-import { Heading1 } from '../components/Typography'
-import { Button } from '../components/ui/Button'
-import { DecorativeIcon } from '../components/ui/DecorativeIcon'
-import { appTokens } from '../constants/tokens'
-import { resolvePostLoginRedirectPath } from '../features/auth/domain/authUtils'
+import { logger, resetSupabasePassword } from '@gym-pilot/shared';
+import { useEffect, useMemo, useRef, useState } from 'react';
+import { useLocation, useNavigate, useSearchParams } from 'react-router-dom';
+import { useAuth } from '../auth/AuthContext';
+import { PageCard } from '../components/PageCard';
+import { getToneClass } from '../components/toneClasses';
+import { Heading1 } from '../components/Typography';
+import { Button } from '../components/ui/Button';
+import { DecorativeIcon } from '../components/ui/DecorativeIcon';
+import { appTokens } from '../constants/tokens';
+import { resolvePostLoginRedirectPath } from '../features/auth/domain/authUtils';
 import {
-  persistRememberEmailPreference,
-  persistRememberedEmail,
-  readStoredRememberedEmail,
-} from '../features/auth/domain/loginPreferences' // All functions from here are used
-import { recordWelcomeJourneyActivity } from '../features/auth/domain/welcomeJourneyLogging'
+    persistRememberEmailPreference,
+    persistRememberedEmail,
+    readStoredRememberedEmail,
+} from '../features/auth/domain/loginPreferences'; // All functions from here are used
+import { recordWelcomeJourneyActivity } from '../features/auth/domain/welcomeJourneyLogging';
 
 export function LoginPage() {
   const location = useLocation()
@@ -316,6 +316,18 @@ export function LoginPage() {
               </span>
             ) : null}
           </label>
+        {authMessage ? (
+          <div
+            className={`mt-4 rounded-2xl border px-4 py-3 text-sm ${
+              authMessageTone === 'error' // Removed loginError from this line
+                ? 'border-rose-200 bg-rose-50 text-rose-700'
+                : 'border-slate-200 bg-slate-50 text-slate-600'
+            }`}
+          >
+            {authMessage}
+          </div>
+        ) : null}
+
           <button
             type="submit"
             className={getToneClass(
@@ -346,18 +358,6 @@ export function LoginPage() {
             </Button>
           ) : null}
         </form>
-
-        {authMessage ? (
-          <div
-            className={`mt-4 rounded-2xl border px-4 py-3 text-sm ${
-              authMessageTone === 'error' // Removed loginError from this line
-                ? 'border-rose-200 bg-rose-50 text-rose-700'
-                : 'border-slate-200 bg-slate-50 text-slate-600'
-            }`}
-          >
-            {authMessage}
-          </div>
-        ) : null}
       </PageCard>
     </div>
   )
