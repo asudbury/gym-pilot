@@ -1,5 +1,5 @@
 export const TableNames = {
-  AppSetting: "gym_pilot_app_setting",
+  AppSetting: "app_setting",
   AppState: "gym_pilot_app_state",
   Assignment: "gym_pilot_assignment",
   AuditLog: "audit_log",
@@ -15,5 +15,4 @@ export const TableNames = {
   UserSessionWorkoutItem: "gym_pilot_user_session_workout_item",
 } as const;
 
-export type TableName = typeof TableNames[keyof typeof TableNames];
-
+export type TableName = (typeof TableNames)[keyof typeof TableNames];

@@ -87,7 +87,7 @@ export function buildImportedWorkoutAnalysisViewModel({
     0,
   )
   const totalEnergy = filteredWorkouts.reduce(
-    (sum, workout) => sum + workout.energy,
+    (sum, workout) => sum + (workout.energy ?? 0),
     0,
   )
 
@@ -103,7 +103,7 @@ export function buildImportedWorkoutAnalysisViewModel({
         acc[weekKey] = { count: 0, energy: 0 }
       }
       acc[weekKey].count += 1
-      acc[weekKey].energy += workout.energy
+      acc[weekKey].energy += workout.energy ?? 0
       return acc
     },
     {} as Record<string, { count: number; energy: number }>,

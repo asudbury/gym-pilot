@@ -2,30 +2,30 @@
 
 ## Data types
 
-### App setting — gym_pilot_app_state
+### App setting — app_setting
 
-| Field         | Type                    | Notes                     |
-| ------------- | ----------------------- | ------------------------- |
-| id            | string                  | Primary key               |
-| setting_key   | string                  | Unique setting identifier |
-| setting_value | Record<string, unknown> | Stored JSON payload       |
-| created_at    | string                  | Creation timestamp        |
-| updated_at    | string                  | Last update timestamp     |
+| Field | Type | Notes |
+| --- | --- | --- |
+| id | string | Primary key |
+| setting_key | string | Unique setting identifier |
+| setting_value | Json | Stored JSON payload |
+| created_at | string | Creation timestamp |
+| updated_at | string | Last update timestamp |
 
 ### Assignment — gym_pilot_assignment
 
-| Field               | Type                    | Notes                          |
-| ------------------- | ----------------------- | ------------------------------ |
-| id                  | string                  | Primary key                    |
-| user_id             | string                  | Owner of the assignment        |
-| plan_id             | string                  | Related plan template          |
-| assignment_name     | string                  | Friendly assignment title      |
-| assigned_user_id    | string \| null          | Optional assignee              |
-| assigned_user_name  | string \| null          | Optional assignee display name |
-| completed_exercises | Record<string, unknown> | Completion tracking payload    |
-| plan_items          | PlanItem[]              | Assignment-specific plan rows  |
-| created_at          | string                  | Creation timestamp             |
-| updated_at          | string                  | Last update timestamp          |
+| Field | Type | Notes |
+| --- | --- | --- |
+| id | string | Primary key |
+| user_id | string | Owner of the assignment |
+| plan_id | string | Related plan template |
+| assignment_name | string | Friendly assignment title |
+| assigned_user_id | string \| null | Optional assignee |
+| assigned_user_name | string \| null | Optional assignee display name |
+| completed_exercises | Json | Completion tracking payload |
+| plan_items | Json | Assignment-specific plan rows |
+| created_at | string | Creation timestamp |
+| updated_at | string | Last update timestamp |
 
 ### Audit log — audit_log
 

@@ -39,7 +39,7 @@ export type Database = {
   }
   public: {
     Tables: {
-      gym_pilot_app_setting: {
+      app_setting: {
         Row: {
           created_at: string
           id: string
@@ -60,6 +60,48 @@ export type Database = {
           setting_key?: string
           setting_value?: Json
           updated_at?: string
+        }
+        Relationships: []
+      }
+      audit_log: {
+        Row: {
+          created_at: string
+          details: Json | null
+          id: string
+          message: string
+        }
+        Insert: {
+          created_at?: string
+          details?: Json | null
+          id?: string
+          message: string
+        }
+        Update: {
+          created_at?: string
+          details?: Json | null
+          id?: string
+          message?: string
+        }
+        Relationships: []
+      }
+      error_log: {
+        Row: {
+          created_at: string
+          details: Json | null
+          id: string
+          message: string
+        }
+        Insert: {
+          created_at?: string
+          details?: Json | null
+          id?: string
+          message: string
+        }
+        Update: {
+          created_at?: string
+          details?: Json | null
+          id?: string
+          message?: string
         }
         Relationships: []
       }
@@ -134,48 +176,6 @@ export type Database = {
           },
         ]
       }
-      audit_log: {
-        Row: {
-          created_at: string
-          details: Json | null
-          id: string
-          message: string
-        }
-        Insert: {
-          created_at?: string
-          details?: Json | null
-          id?: string
-          message: string
-        }
-        Update: {
-          created_at?: string
-          details?: Json | null
-          id?: string
-          message?: string
-        }
-        Relationships: []
-      }
-      error_log: {
-        Row: {
-          created_at: string
-          details: Json | null
-          id: string
-          message: string
-        }
-        Insert: {
-          created_at?: string
-          details?: Json | null
-          id?: string
-          message: string
-        }
-        Update: {
-          created_at?: string
-          details?: Json | null
-          id?: string
-          message?: string
-        }
-        Relationships: []
-      }
       gym_pilot_favourite: {
         Row: {
           created_at: string
@@ -246,37 +246,37 @@ export type Database = {
           created_at: string
           display_name: string
           duration: number
-          energy: number
-          energy_unit: string
+          energy: number | null
+          energy_unit: string | null
           id: string
           original_id: string | null
+          session_id: string | null
           start_date: string
           user_id: string
-          session_id: string | null
         }
         Insert: {
           created_at?: string
           display_name: string
           duration: number
-          energy: number
-          energy_unit: string
+          energy?: number | null
+          energy_unit?: string | null
           id?: string
           original_id?: string | null
+          session_id?: string | null
           start_date: string
           user_id: string
-          session_id?: string | null
         }
         Update: {
           created_at?: string
           display_name?: string
           duration?: number
-          energy?: number
-          energy_unit?: string
+          energy?: number | null
+          energy_unit?: string | null
           id?: string
           original_id?: string | null
+          session_id?: string | null
           start_date?: string
           user_id?: string
-          session_id?: string | null
         }
         Relationships: []
       }
@@ -371,33 +371,6 @@ export type Database = {
           terms_accepted?: boolean
           terms_accepted_at?: string | null
           trainer_id?: string | null
-          updated_at?: string
-          user_id?: string
-        }
-        Relationships: []
-      }
-      user_activity: {
-        Row: {
-          created_at: string
-          event_data: Json
-          event_type: string
-          id: string
-          updated_at: string
-          user_id: string
-        }
-        Insert: {
-          created_at?: string
-          event_data?: Json
-          event_type: string
-          id?: string
-          updated_at?: string
-          user_id: string
-        }
-        Update: {
-          created_at?: string
-          event_data?: Json
-          event_type?: string
-          id?: string
           updated_at?: string
           user_id?: string
         }
@@ -575,6 +548,33 @@ export type Database = {
             referencedColumns: ["id"]
           },
         ]
+      }
+      user_activity: {
+        Row: {
+          created_at: string
+          event_data: Json
+          event_type: string
+          id: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          event_data?: Json
+          event_type: string
+          id?: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          event_data?: Json
+          event_type?: string
+          id?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
       }
     }
     Views: {

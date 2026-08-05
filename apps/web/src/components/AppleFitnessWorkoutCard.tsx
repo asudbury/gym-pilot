@@ -1,10 +1,10 @@
-import type { ImportedWorkout, UserSession } from '@gym-pilot/shared'
-import { useNavigate } from 'react-router-dom'
-import { formatDateTimeForDisplay } from '../dateTimeFormatter'
-import { SessionEntryCard } from './session-history/SessionEntryCard'
-import { Button } from './ui/Button'
-import { Panel } from './ui/Panel'
-import { resolveWorkoutLinkState } from './workoutCalendarUtils'
+import type { ImportedWorkout, UserSession } from '@gym-pilot/shared';
+import { useNavigate } from 'react-router-dom';
+import { formatDateTimeForDisplay } from '../dateTimeFormatter';
+import { SessionEntryCard } from './session-history/SessionEntryCard';
+import { Button } from './ui/Button';
+import { Panel } from './ui/Panel';
+import { resolveWorkoutLinkState } from './workoutCalendarUtils';
 
 type CalendarValue = Date | null
 
@@ -64,7 +64,7 @@ export const AppleFitnessWorkoutCard = ({
         {workout.display_name}
       </div>
       <div className="text-m font-semibold text-slate-600 dark:text-slate-100">
-        {workout.energy.toFixed(0)} {workout.energy_unit}
+        {(workout.energy ?? 0).toFixed(0)} {workout.energy_unit ?? ''}
       </div>
       <div className="text-m text-slate-600 dark:text-slate-400 mt-2">
         <p>
