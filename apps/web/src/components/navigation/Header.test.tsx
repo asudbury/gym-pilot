@@ -1,9 +1,9 @@
 /** @vitest-environment jsdom */
-import { act } from 'react'
-import { createRoot, type Root } from 'react-dom/client'
-import { MemoryRouter } from 'react-router-dom'
-import { afterEach, describe, expect, it, vi } from 'vitest'
-import { Header } from './Header'
+import { act } from 'react';
+import { createRoot, type Root } from 'react-dom/client';
+import { MemoryRouter } from 'react-router-dom';
+import { afterEach, describe, expect, it, vi } from 'vitest';
+import { Header } from './Header';
 
 describe('Header', () => {
   let container: HTMLDivElement | null = null
@@ -49,9 +49,7 @@ describe('Header', () => {
     expect(toggleButton).not.toBeNull()
 
     act(() => {
-      toggleButton!.dispatchEvent(
-        new MouseEvent('mousedown', { bubbles: true }),
-      )
+      toggleButton!.dispatchEvent(new MouseEvent('click', { bubbles: true }))
     })
 
     expect(container.querySelector('.fixed')).not.toBeNull()

@@ -1,18 +1,18 @@
-import { useEffect, useRef } from 'react'
-import { NavLink } from 'react-router-dom'
-import type { NavigationMenuListItem } from '../../utils/navigationUtils'
-import { getToneClass } from '../toneClasses'
-import { Button } from '../ui/Button'
-import { DecorativeIcon } from '../ui/DecorativeIcon'
-import { StatusMessageNotification } from '../ui/StatusMessageNotification'
-import { ResponsiveVisibility } from '../visibility/ResponsiveVisibility'
-import { FavouriteLinksMenu } from './FavouriteLinksMenu'
-import { HomeButton } from './HomeButton'
+import { useEffect, useRef } from 'react';
+import { NavLink } from 'react-router-dom';
+import type { NavigationMenuListItem } from '../../utils/navigationUtils';
+import { getToneClass } from '../toneClasses';
+import { Button } from '../ui/Button';
+import { DecorativeIcon } from '../ui/DecorativeIcon';
+import { StatusMessageNotification } from '../ui/StatusMessageNotification';
+import { ResponsiveVisibility } from '../visibility/ResponsiveVisibility';
+import { FavouriteLinksMenu } from './FavouriteLinksMenu';
+import { HomeButton } from './HomeButton';
 import {
-  navigationItemBaseClassName,
-  navigationItemIconClassName,
-} from './navigationItemStyles'
-import { NavigationMenuList } from './NavigationMenuList'
+    navigationItemBaseClassName,
+    navigationItemIconClassName,
+} from './navigationItemStyles';
+import { NavigationMenuList } from './NavigationMenuList';
 
 type HeaderProps = {
   appName: string
@@ -61,7 +61,7 @@ export function Header({
       return
     }
 
-    const handlePointerDown = (event: MouseEvent) => {
+    const handleDocumentClick = (event: MouseEvent) => {
       const target = event.target as Node | null
 
       if (!target || !(target instanceof Node)) {
@@ -73,22 +73,23 @@ export function Header({
         target.closest('[data-mobile-menu-toggle]')
 
       if (isToggleTarget) {
-        event.stopPropagation()
         return
       }
 
       if (
         menuContainerRef.current &&
-        !menuContainerRef.current.contains(target)
+        menuContainerRef.current.contains(target)
       ) {
-        onToggleMobileMenu()
+        return
       }
+
+      onToggleMobileMenu()
     }
 
-    document.addEventListener('mousedown', handlePointerDown)
+    document.addEventListener('click', handleDocumentClick, true)
 
     return () => {
-      document.removeEventListener('mousedown', handlePointerDown) // eslint-disable-line @typescript-eslint/no-unsafe-argument
+      document.removeEventListener('click', handleDocumentClick, true)
     }
   }, [mobileMenuOpen, onToggleMobileMenu])
 
