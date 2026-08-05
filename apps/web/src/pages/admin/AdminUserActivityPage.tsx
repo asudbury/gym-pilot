@@ -1,21 +1,21 @@
 import {
-    getSupabaseClient,
-    listSupabaseAuthUsers,
-    loadSupabaseProfileRoles,
-    logger,
-} from '@gym-pilot/shared';
-import { TableNames } from '@gym-pilot/shared/src/dataServices/tableNames';
-import { useEffect, useState } from 'react';
-import { useNavigate, useParams } from 'react-router-dom';
-import { AdminSectionShell } from '../../components/admin/AdminSectionShell';
-import { Button } from '../../components/ui/Button';
-import { getDisplayEmail } from '../../features/admin/domain/adminUtils';
+  getSupabaseClient,
+  listSupabaseAuthUsers,
+  loadSupabaseProfileRoles,
+  logger,
+} from '@gym-pilot/shared'
+import { TableNames } from '@gym-pilot/shared/src/dataServices/tableNames'
+import { useEffect, useState } from 'react'
+import { useNavigate, useParams } from 'react-router-dom'
+import { AdminSectionShell } from '../../components/admin/AdminSectionShell'
+import { Button } from '../../components/ui/Button'
+import { getDisplayEmail } from '../../features/admin/domain/adminUtils'
 import {
-    resolveUserActivityViewModel,
-    type UserActivityProfileViewModel,
-    type UserActivityRowViewModel,
-} from '../../features/admin/domain/userActivity';
-import { renderDashboardTimestamp } from '../../features/dashboard/domain/dashboardUtils';
+  resolveUserActivityViewModel,
+  type UserActivityProfileViewModel,
+  type UserActivityRowViewModel,
+} from '../../features/admin/domain/userActivity'
+import { renderDashboardTimestamp } from '../../features/dashboard/domain/dashboardUtils'
 
 const formatStoredTimestamp = (value?: string | null) => {
   if (!value) {
