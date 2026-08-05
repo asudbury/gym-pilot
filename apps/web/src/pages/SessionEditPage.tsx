@@ -1,29 +1,29 @@
-import type { UserSession } from '@gym-pilot/shared'
+import type { UserSession } from '@gym-pilot/shared';
 import {
-  getUserSession,
-  getUserSessionWorkoutItemsForSession,
-  saveWorkoutItemsForSession,
-  updateUserSession,
-  type UserSessionWorkoutItem,
-} from '@gym-pilot/shared'
-import { useEffect, useMemo, useState } from 'react'
-import { useNavigate, useParams } from 'react-router-dom'
-import { useAuth } from '../auth/AuthContext'
-import { OptionSelector } from '../components/OptionSelector'
-import { RatingSelector } from '../components/RatingSelector'
-import { SessionWorkoutEditor } from '../components/SessionWorkoutEditor'
-import { Button } from '../components/ui/Button'
-import { DesktopOnly } from '../components/visibility/DeviceVisibility'
+    getUserSession,
+    getUserSessionWorkoutItemsForSession,
+    saveWorkoutItemsForSession,
+    updateUserSession,
+    type UserSessionWorkoutItem,
+} from '@gym-pilot/shared';
+import { useEffect, useMemo, useState } from 'react';
+import { useNavigate, useParams } from 'react-router-dom';
+import { useAuth } from '../auth/AuthContext';
+import { OptionSelector } from '../components/OptionSelector';
+import { RatingSelector } from '../components/RatingSelector';
+import { SessionWorkoutEditor } from '../components/SessionWorkoutEditor';
+import { Button } from '../components/ui/Button';
+import { DesktopOnly } from '../components/visibility/DeviceVisibility';
 import {
-  formatDateTimeLocalInputValueFromValue,
-  toUtcIsoStringFromLocalInputValue,
-} from '../dateTimeFormatter'
+    formatDateTimeLocalInputValueFromValue,
+    toUtcIsoStringFromLocalInputValue,
+} from '../dateTimeFormatter';
 import {
-  getSessionEntryRating,
-  getSessionEntryTitle,
-} from '../features/session-history/domain/sessionHistoryViewModel'
-import { PageCardLayout } from '../layouts/PageCardLayout'
-import { PageLayout } from '../layouts/PageLayout'
+    getSessionEntryRating,
+    getSessionEntryTitle,
+} from '../features/session-history/domain/sessionHistoryViewModel';
+import { PageCardLayout } from '../layouts/PageCardLayout';
+import { PageLayout } from '../layouts/PageLayout';
 
 export function SessionEditPage() {
   const { user } = useAuth()
@@ -264,9 +264,7 @@ export function SessionEditPage() {
                 >
                   Save changes
                 </Button>
-                <Button tone="default" onClick={() => navigate(-1)}>
-                  Cancel
-                </Button>
+                <Button tone="default" onClick={() => navigate(-1)}>Cancel</Button>
               </div>
               {errorMessage ? (
                 <div className="rounded-2xl border border-rose-200 bg-rose-50 px-3 py-2 text-sm font-medium text-rose-700">

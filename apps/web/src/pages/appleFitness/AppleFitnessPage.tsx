@@ -1,18 +1,18 @@
 import {
-  getImportedWorkouts,
-  type ImportedWorkout as Workout,
-} from '@gym-pilot/shared'
-import { getSupabaseClient } from '@gym-pilot/shared/src/supabase'
-import React, { useEffect, useMemo, useRef, useState } from 'react'
-import { NavLink, useSearchParams } from 'react-router-dom'
-import { useAuth } from '../../auth/AuthContext'
-import { AppleFitnessWorkoutCard } from '../../components/AppleFitnessWorkoutCard'
-import { Button } from '../../components/ui/Button'
-import { DecorativeIcon } from '../../components/ui/DecorativeIcon'
-import { StatusMessageNotification } from '../../components/ui/StatusMessageNotification'
-import WorkoutCalendar from '../../components/WorkoutCalendar'
-import { PageCardLayout } from '../../layouts/PageCardLayout'
-import { PageLayout } from '../../layouts/PageLayout'
+    getImportedWorkouts,
+    type ImportedWorkout as Workout,
+} from '@gym-pilot/shared';
+import { getSupabaseClient } from '@gym-pilot/shared/src/supabase';
+import React, { useEffect, useMemo, useRef, useState } from 'react';
+import { NavLink, useSearchParams } from 'react-router-dom';
+import { useAuth } from '../../auth/AuthContext';
+import { AppleFitnessWorkoutCard } from '../../components/AppleFitnessWorkoutCard';
+import { Button } from '../../components/ui/Button';
+import { DecorativeIcon } from '../../components/ui/DecorativeIcon';
+import { StatusMessageNotification } from '../../components/ui/StatusMessageNotification';
+import WorkoutCalendar from '../../components/WorkoutCalendar';
+import { PageCardLayout } from '../../layouts/PageCardLayout';
+import { PageLayout } from '../../layouts/PageLayout';
 
 type ImportWorkoutsResponse = {
   data?: unknown[]
@@ -31,7 +31,6 @@ export const AppleFitnessPage: React.FC = () => {
   const [currentWorkouts, setCurrentWorkouts] = useState<Workout[]>([])
   const [importCount, setImportCount] = useState(0)
   const [searchParams, setSearchParams] = useSearchParams()
-
   const handleDateChange = (date: Date | null) => {
     if (date) {
       const year = date.getFullYear()
@@ -257,6 +256,13 @@ export const AppleFitnessPage: React.FC = () => {
             Analysis
           </Button>
         </div>
+
+        <div className="flex items-center space-x-3">
+          <Button as={NavLink} to="/apple-fitness/import-spreadsheet" tone="default">
+            Import spreadsheet sessions
+          </Button>
+        </div>
+
         {message && <StatusMessageNotification tone="info" message={message} />}
 
         {isLoading && (
