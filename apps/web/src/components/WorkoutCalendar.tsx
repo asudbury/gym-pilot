@@ -1,20 +1,20 @@
 import {
-    getSupabaseClient,
-    updateImportedWorkout,
-    type ImportedWorkout,
-    type UserSession,
-} from '@gym-pilot/shared';
-import React, { useEffect, useMemo, useState } from 'react';
-import Calendar from 'react-calendar';
-import { formatDateForDisplay } from '../dateTimeFormatter';
-import { useIsDesktop } from '../utils/useMediaQuery';
-import { AppleFitnessWorkoutCard } from './AppleFitnessWorkoutCard';
-import { Button } from './ui/Button';
-import { StatusMessageNotification } from './ui/StatusMessageNotification';
+  getSupabaseClient,
+  updateImportedWorkout,
+  type ImportedWorkout,
+  type UserSession,
+} from '@gym-pilot/shared'
+import React, { useEffect, useMemo, useState } from 'react'
+import Calendar from 'react-calendar'
+import { formatDateForDisplay } from '../dateTimeFormatter'
+import { useIsDesktop } from '../utils/useMediaQuery'
+import { AppleFitnessWorkoutCard } from './AppleFitnessWorkoutCard'
+import { Button } from './ui/Button'
+import { StatusMessageNotification } from './ui/StatusMessageNotification'
 import {
-    NO_LINK_SESSION_ID,
-    resolveWorkoutLinkState,
-} from './workoutCalendarUtils';
+  NO_LINK_SESSION_ID,
+  resolveWorkoutLinkState,
+} from './workoutCalendarUtils'
 
 type Value = Date | null | [Date | null, Date | null]
 

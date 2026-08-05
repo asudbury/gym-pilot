@@ -1,6 +1,6 @@
-import type { ComponentPropsWithoutRef, ElementType, ReactNode } from 'react';
-import { getToneClass, type ToneName } from '../toneClasses';
-import { SpinnerIcon } from './icons'; // Import the SpinnerIcon component
+import type { ComponentPropsWithoutRef, ElementType, ReactNode } from 'react'
+import { getToneClass, type ToneName } from '../toneClasses'
+import { SpinnerIcon } from './icons' // Import the SpinnerIcon component
 
 type ButtonProps<T extends ElementType = 'button'> = {
   type?: 'button' | 'submit' | 'reset'
