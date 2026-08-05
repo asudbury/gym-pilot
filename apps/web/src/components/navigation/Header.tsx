@@ -1,18 +1,18 @@
-import { useEffect, useRef } from 'react';
-import { NavLink } from 'react-router-dom';
-import type { NavigationMenuListItem } from '../../utils/navigationUtils';
-import { getToneClass } from '../toneClasses';
-import { Button } from '../ui/Button';
-import { DecorativeIcon } from '../ui/DecorativeIcon';
-import { StatusMessageNotification } from '../ui/StatusMessageNotification';
-import { ResponsiveVisibility } from '../visibility/ResponsiveVisibility';
-import { FavouriteLinksMenu } from './FavouriteLinksMenu';
-import { HomeButton } from './HomeButton';
+import { useEffect, useRef } from 'react'
+import { NavLink } from 'react-router-dom'
+import type { NavigationMenuListItem } from '../../utils/navigationUtils'
+import { getToneClass } from '../toneClasses'
+import { Button } from '../ui/Button'
+import { DecorativeIcon } from '../ui/DecorativeIcon'
+import { StatusMessageNotification } from '../ui/StatusMessageNotification'
+import { ResponsiveVisibility } from '../visibility/ResponsiveVisibility'
+import { FavouriteLinksMenu } from './FavouriteLinksMenu'
+import { HomeButton } from './HomeButton'
 import {
-    navigationItemBaseClassName,
-    navigationItemIconClassName,
-} from './navigationItemStyles';
-import { NavigationMenuList } from './NavigationMenuList';
+  navigationItemBaseClassName,
+  navigationItemIconClassName,
+} from './navigationItemStyles'
+import { NavigationMenuList } from './NavigationMenuList'
 
 type HeaderProps = {
   appName: string
