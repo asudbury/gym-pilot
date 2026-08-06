@@ -112,55 +112,55 @@ export function SessionEntryCard({
         {deleteEntry && (
           <div className="flex flex-wrap gap-2">
             {pendingDeleteEntryId !== entry.id ? (
-              <button
+              <Button
                 type="button"
                 onClick={(e) => {
                   e.stopPropagation()
                   navigate(`/sessions/${entry.id}/edit`)
                 }}
-                className="inline-flex items-center gap-2 rounded-full border border-slate-300 bg-white px-3 py-1.5 text-sm font-medium text-slate-700 transition-all duration-200 hover:border-slate-400 hover:bg-slate-50 hover:font-semibold hover:shadow-sm"
+                tone="chip"
               >
                 <DecorativeIcon icon="edit" className="h-4 w-4" />
                 <span>Edit</span>
-              </button>
+              </Button>
             ) : null}
             {pendingDeleteEntryId === entry.id ? (
               <>
-                <button
+                <Button
                   type="button"
                   onClick={(e) => {
                     e.stopPropagation()
                     setPendingDeleteEntryId?.(null)
                   }}
-                  className="inline-flex items-center gap-2 rounded-full border border-slate-300 bg-white px-3 py-1.5 text-sm font-medium text-slate-700 transition-all duration-200 hover:border-slate-400 hover:bg-slate-50 hover:font-semibold hover:shadow-sm"
+                  tone="chip"
                 >
                   <DecorativeIcon icon="close" className="h-4 w-4" />
                   <span>Cancel</span>
-                </button>
-                <button
+                </Button>
+                <Button
                   type="button"
                   onClick={(e) => {
                     e.stopPropagation()
                     deleteEntry(entry.id)
                   }}
-                  className="inline-flex items-center gap-2 rounded-full border border-rose-600 bg-rose-600 px-3 py-1.5 text-sm font-medium text-white shadow-sm transition-all duration-200 hover:border-rose-700 hover:bg-rose-700 hover:font-semibold"
+                  tone="chip-destructive"
                 >
                   <DecorativeIcon icon="check" className="h-4 w-4" />
                   <span>Confirm</span>
-                </button>
+                </Button>
               </>
             ) : (
-              <button
+              <Button
                 type="button"
                 onClick={(e) => {
                   e.stopPropagation()
                   deleteEntry(entry.id)
                 }}
-                className="inline-flex items-center gap-2 rounded-full border border-rose-300 bg-rose-50 px-3 py-1.5 text-sm font-medium text-rose-700 transition-all duration-200 hover:border-rose-400 hover:bg-rose-100 hover:font-semibold hover:shadow-sm"
+                tone="chip-rose"
               >
                 <DecorativeIcon icon="trash" className="h-4 w-4" />
                 <span>Delete</span>
-              </button>
+              </Button>
             )}
           </div>
         )}

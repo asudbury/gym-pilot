@@ -22,10 +22,12 @@ export function RatingSelector({
           <Button
             key={rating}
             onClick={() => onChange(rating)}
-            tone={isSelected ? 'blue' : 'white'}
+            tone="chip"
             className={[
-              'px-3 py-1.5 text-sm font-semibold shadow-sm',
-              isSelected ? 'ring-2 ring-sky-200' : '',
+              isSelected
+                ? 'border-sky-600 bg-sky-600 text-white shadow-sm'
+                : '',
+              'text-sm font-semibold',
             ]
               .filter(Boolean)
               .join(' ')}

@@ -1,5 +1,4 @@
-import { useMemo, useState, type DragEvent } from 'react'
-import { AgGridReact } from 'ag-grid-react'
+import { exercises } from '@gym-pilot/shared'
 import {
   AllCommunityModule,
   ModuleRegistry,
@@ -8,16 +7,17 @@ import {
 } from 'ag-grid-community'
 import 'ag-grid-community/styles/ag-grid.css'
 import 'ag-grid-community/styles/ag-theme-quartz.css'
-import { exercises } from '@gym-pilot/shared'
-import { Button } from './ui/Button'
-import { ExercisePicker } from './exercises/ExercisePicker'
-import { formatLabel } from '../utils/formatUtils'
+import { AgGridReact } from 'ag-grid-react'
+import { useMemo, useState, type DragEvent } from 'react'
 import { type QuickLink } from '../features/favourites/domain/quickLinks'
+import { resolveFavoriteLinkGroups } from '../features/planBuilder/domain/builderWorkspace'
 import {
   type PlanGridRow,
   type PlanTab,
 } from '../features/planBuilder/domain/planBuilderUtils'
-import { resolveFavoriteLinkGroups } from '../features/planBuilder/domain/builderWorkspace'
+import { formatLabel } from '../utils/formatUtils'
+import { ExercisePicker } from './exercises/ExercisePicker'
+import { Button } from './ui/Button'
 
 ModuleRegistry.registerModules([AllCommunityModule])
 provideGlobalGridOptions({ theme: 'legacy' })
@@ -299,7 +299,7 @@ export function PlanBuilderWorkspace({
                 <Button
                   key={exercise.id}
                   onClick={() => onAddRow(exercise.id)}
-                  className="rounded-full border px-3 py-1.5 text-sm font-medium"
+                  tone="chip"
                 >
                   {formatLabel(exercise.name)}
                 </Button>
@@ -323,7 +323,8 @@ export function PlanBuilderWorkspace({
                       })),
                     )
                   }
-                  className="rounded-full border border-emerald-200 bg-emerald-50 px-3 py-1.5 text-sm font-medium text-emerald-700 transition hover:bg-emerald-100"
+                  tone="chip"
+                  className="border-emerald-200 bg-emerald-50 text-emerald-700 hover:bg-emerald-100"
                 >
                   {group.folderName}
                 </Button>
@@ -359,7 +360,7 @@ export function PlanBuilderWorkspace({
                 ) : null}
               </div>
             ))}
-            <Button tone="default" onClick={onAddTab} className="px-3 py-2">
+            <Button tone="chip" onClick={onAddTab} className="px-3 py-2">
               + Add tab
             </Button>
           </div>

@@ -1,13 +1,12 @@
-import { classNames } from '@gym-pilot/shared'
-import { useMemo } from 'react'
-import { useFavouriteLinksMenu } from '../../features/favourites/hooks/useFavouriteLinksMenu'
-import { getToneClass } from '../toneClasses'
-import { Button } from '../ui/Button'
-import { DecorativeIcon } from '../ui/DecorativeIcon'
+import { classNames } from '@gym-pilot/shared';
+import { useMemo } from 'react';
+import { useFavouriteLinksMenu } from '../../features/favourites/hooks/useFavouriteLinksMenu';
+import { Button } from '../ui/Button';
+import { DecorativeIcon } from '../ui/DecorativeIcon';
 import {
-  navigationItemBaseClassName,
-  navigationItemIconClassName,
-} from './navigationItemStyles'
+    navigationItemBaseClassName,
+    navigationItemIconClassName,
+} from './navigationItemStyles';
 
 type SavedSearch = {
   id: string
@@ -92,10 +91,8 @@ export function FavouriteLinksMenu({
                 </label>
                 <Button
                   onClick={handleToggleCurrentFavorite}
-                  className={getToneClass(
-                    'blue',
-                    'px-3 py-1.5 text-xs font-medium',
-                  )}
+                  tone="chip"
+                  className="text-xs font-medium"
                 >
                   {isCurrentLinkFavorite
                     ? 'Remove from favourites'
@@ -105,10 +102,8 @@ export function FavouriteLinksMenu({
             </div>
             <Button
               onClick={handleOpenFavouritesPage}
-              className={getToneClass(
-                'default',
-                'w-fit px-3 py-2 text-xs font-medium',
-              )}
+              tone="chip"
+              className="w-fit text-xs font-medium px-3 py-2"
             >
               Open favourites page
             </Button>
@@ -158,4 +153,4 @@ export function FavouriteLinksMenu({
   )
 }
 
-export type { SavedSearch }
+export type { SavedSearch };

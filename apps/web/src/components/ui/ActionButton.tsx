@@ -23,7 +23,7 @@ const ActionButton = ({
     to={to}
     className={getToneClass(
       tone,
-      'flex w-full items-center justify-center rounded-lg px-4 py-3 text-base font-medium sm:w-auto sm:py-2 sm:text-sm',
+      'flex w-full items-center justify-center px-4 py-2 text-base font-medium sm:w-auto sm:py-2 sm:text-sm',
     )}
   >
     <DesktopOnly>

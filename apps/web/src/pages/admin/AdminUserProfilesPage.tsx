@@ -1,18 +1,19 @@
-import { useEffect, useMemo, useState } from 'react'
-import { useNavigate, useParams } from 'react-router-dom'
-import { Button } from '../../components/ui/Button'
 import {
   getSupabaseAdminClient,
+  getSupabaseClient,
   listSupabaseAuthUsers,
-  saveSupabaseProfile,
   loadSupabaseProfileRoles,
   logger,
+  saveSupabaseProfile,
   saveSupabaseProfileRoles,
   usePlan,
-  getSupabaseClient,
 } from '@gym-pilot/shared'
 import type { UserRole } from '@gym-pilot/types'
+import { useEffect, useMemo, useState } from 'react'
+import { useNavigate, useParams } from 'react-router-dom'
 import { AdminSectionShell } from '../../components/admin/AdminSectionShell'
+import { Button } from '../../components/ui/Button'
+import { StatusMessageNotification } from '../../components/ui/StatusMessageNotification'
 import {
   getDisplayEmail,
   type AdminProfileRow,
@@ -23,7 +24,6 @@ import {
   type ProfileDraft,
 } from '../../features/admin/domain/userProfiles'
 import { renderDashboardTimestamp } from '../../features/dashboard/domain/dashboardUtils'
-import { StatusMessageNotification } from '../../components/ui/StatusMessageNotification'
 import { UserProfileForm } from './UserProfileForm'
 
 const formatStoredTimestamp = (value?: string | null) => {
@@ -268,7 +268,8 @@ export function AdminUserProfilesPage() {
                         setLocalSelectedId(p.id)
                         navigate(`/admin/users/profiles/${p.id}`)
                       }}
-                      className="ml-1 rounded-full px-1 text-sm leading-none text-slate-500 hover:text-slate-700"
+                      tone="chip"
+                      className="ml-1 px-1 text-sm leading-none text-slate-500 hover:text-slate-700"
                       aria-label={`Edit ${p.name}`}
                     >
                       ✎
@@ -324,7 +325,7 @@ export function AdminUserProfilesPage() {
 
                       <div className="mt-3 flex flex-wrap items-center gap-2">
                         <Button
-                          tone="emerald"
+                          tone="chip"
                           onClick={async () => {
                             const email = selectedProfile.email?.trim()
                             if (!email) {
@@ -364,7 +365,6 @@ export function AdminUserProfilesPage() {
                               setStatusType('error')
                             }
                           }}
-                          className="px-3 py-1.5"
                         >
                           {copiedUserId === selectedProfile.id
                             ? 'Invite link copied'
@@ -372,13 +372,12 @@ export function AdminUserProfilesPage() {
                         </Button>
 
                         <Button
-                          tone="blue"
+                          tone="chip"
                           onClick={() =>
                             navigate(
                               `/admin/users/profiles/${selectedProfile.id}/activity`,
                             )
                           }
-                          className="px-3 py-1.5"
                         >
                           View activity
                         </Button>

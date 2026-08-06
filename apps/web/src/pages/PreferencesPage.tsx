@@ -1,13 +1,13 @@
 import { useEffect, useState } from 'react'
-import { useNavigate, Link } from 'react-router-dom'
-import { PageLayout } from '../layouts/PageLayout'
-import { PageCardLayout } from '../layouts/PageCardLayout'
+import { Link, useNavigate } from 'react-router-dom'
 import { useAuth } from '../auth/AuthContext'
-import { appTokens } from '../constants/tokens'
 import { GymClubSelector } from '../components/GymClubSelector'
 import { Button } from '../components/ui/Button'
-import { getDisplayRoles } from '../features/admin/domain/adminUtils'
 import { UserRolesDisplay } from '../components/UserRolesDisplay'
+import { appTokens } from '../constants/tokens'
+import { getDisplayRoles } from '../features/admin/domain/adminUtils'
+import { PageCardLayout } from '../layouts/PageCardLayout'
+import { PageLayout } from '../layouts/PageLayout'
 
 export function PreferencesPage() {
   const {
@@ -141,8 +141,8 @@ export function PreferencesPage() {
             <Button
               as={Link}
               to="/reset-password"
-              tone="blue"
-              className="w-fit rounded-full px-3 py-1.5 text-sm font-semibold"
+              tone="chip"
+              className="w-fit text-sm font-semibold"
             >
               Change password
             </Button>

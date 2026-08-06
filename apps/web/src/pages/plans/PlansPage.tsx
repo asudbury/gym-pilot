@@ -1,12 +1,12 @@
-import { Link } from 'react-router-dom'
-import { Button } from '../../components/ui/Button'
-import { getToneClass } from '../../components/toneClasses'
 import { usePlan } from '@gym-pilot/shared'
-import { CallToAction } from '../../layouts/CallToAction'
+import { Link } from 'react-router-dom'
 import { PageCard } from '../../components/PageCard'
-import { PageLayout } from '../../layouts/PageLayout'
-import { PageCardLayout } from '../../layouts/PageCardLayout'
+import { getToneClass } from '../../components/toneClasses'
+import { Button } from '../../components/ui/Button'
 import { resolvePlanListViewModels } from '../../features/plans/domain/planList'
+import { CallToAction } from '../../layouts/CallToAction'
+import { PageCardLayout } from '../../layouts/PageCardLayout'
+import { PageLayout } from '../../layouts/PageLayout'
 
 export function PlansPage() {
   const { visiblePlans, deletePlan } = usePlan()
@@ -76,28 +76,15 @@ export function PlansPage() {
                       </p>
                     </div>
                     <div className="flex flex-col gap-2 sm:flex-row sm:items-center">
-                      <Link
-                        to={card.viewPath}
-                        className={getToneClass(
-                          'default',
-                          'px-3 py-1.5 text-sm text-center',
-                        )}
-                      >
+                      <Link to={card.viewPath} className={getToneClass('chip')}>
                         View
                       </Link>
-                      <Link
-                        to={card.editPath}
-                        className={getToneClass(
-                          'default',
-                          'px-3 py-1.5 text-sm text-center',
-                        )}
-                      >
+                      <Link to={card.editPath} className={getToneClass('chip')}>
                         Update
                       </Link>
                       <Button
-                        tone="rose"
+                        tone="chip-rose"
                         onClick={() => deletePlan(plan.id)}
-                        className="px-3 py-1.5"
                       >
                         Remove
                       </Button>

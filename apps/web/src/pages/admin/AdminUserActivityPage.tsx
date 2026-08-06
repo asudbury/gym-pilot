@@ -196,9 +196,8 @@ export function AdminUserActivityPage() {
                 </div>
               </div>
               <Button
-                tone="blue"
+                tone="chip"
                 onClick={() => navigate(`/admin/users/profiles/${profile.id}`)}
-                className="px-3 py-1.5"
               >
                 View profile
               </Button>

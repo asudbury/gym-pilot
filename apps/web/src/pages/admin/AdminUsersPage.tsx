@@ -234,18 +234,16 @@ export function AdminUsersPage() {
                 </div>
                 <div className="flex flex-wrap items-center gap-2">
                   <Button
-                    tone="emerald"
+                    tone="chip"
                     onClick={() => void handleCopyInviteLink(user)}
-                    className="px-3 py-1.5"
                   >
                     {linkCopied && lastCopiedUserId === user.id
                       ? 'Invite link copied'
                       : 'Copy invite link'}
                   </Button>
                   <Button
-                    tone="blue"
+                    tone="chip"
                     onClick={() => navigate(`/admin/users/edit/${user.id}`)}
-                    className="px-3 py-1.5"
                   >
                     Edit user
                   </Button>

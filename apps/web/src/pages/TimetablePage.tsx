@@ -496,14 +496,19 @@ export function TimetablePage() {
                       {attendanceAction.options.map((option) => {
                         const isSelected = attendanceSelection === option.kind
                         return (
-                          <button
+                          <Button
                             key={option.kind}
                             type="button"
                             onClick={() => setAttendanceSelection(option.kind)}
-                            className={`rounded-full border px-3 py-1.5 text-sm font-semibold transition-all duration-200 ${isSelected ? 'border-sky-600 bg-sky-600 text-white shadow-sm' : 'border-slate-300 bg-white text-slate-700 hover:border-slate-400 hover:bg-slate-50 hover:shadow-md'}`}
+                            tone="chip"
+                            className={
+                              isSelected
+                                ? 'border-sky-600 bg-sky-600 text-white shadow-sm'
+                                : ''
+                            }
                           >
                             {option.label}
-                          </button>
+                          </Button>
                         )
                       })}
                     </div>
@@ -610,13 +615,13 @@ export function TimetablePage() {
                 <p>{errorMessage}</p>
               </div>
               <div className="flex flex-wrap gap-2">
-                <button
+                <Button
                   type="button"
+                  tone="chip-rose"
                   onClick={handleRefreshTimetable}
-                  className="inline-flex items-center rounded-full border border-rose-300 bg-white px-3 py-1.5 font-medium text-rose-700 transition-all duration-200 hover:border-rose-400 hover:bg-rose-50 hover:shadow-md"
                 >
                   Try again
-                </button>
+                </Button>
               </div>
             </div>
           ) : null}
@@ -636,32 +641,35 @@ export function TimetablePage() {
                       ? `Last refreshed: ${lastRefreshedAt}`
                       : 'Refresh to update the latest timetable data.'}
                   </div>
-                  <button
+                  <Button
                     type="button"
                     onClick={handleRefreshTimetable}
                     disabled={isLoading}
-                    className="inline-flex items-center rounded-full border border-slate-300 bg-white px-3 py-1.5 text-sm font-medium text-slate-700 transition-all duration-200 hover:border-slate-400 hover:bg-slate-50 hover:shadow-md disabled:cursor-not-allowed disabled:bg-slate-100"
+                    tone="chip"
+                    className="disabled:cursor-not-allowed disabled:bg-slate-100"
                   >
                     {isLoading ? 'Refreshing…' : 'Refresh'}
-                  </button>
+                  </Button>
                 </div>
                 <div className="flex flex-wrap gap-2">
-                  <button
+                  <Button
                     type="button"
                     onClick={() => setActiveDayKey('all')}
-                    className={`rounded-full border px-3 py-1.5 text-sm font-medium transition-all duration-200 shadow-sm ${activeDayKey === 'all' ? 'border-slate-900 bg-slate-900 text-white' : 'border-slate-300 bg-white text-slate-700 hover:border-slate-400 hover:bg-slate-50 hover:shadow-md'}`}
+                    tone={activeDayKey === 'all' ? 'chip-blue' : 'chip'}
                   >
                     All days
-                  </button>
+                  </Button>
                   {groupedSessions.map((dayGroup) => (
-                    <button
+                    <Button
                       key={dayGroup.dateKey}
                       type="button"
                       onClick={() => setActiveDayKey(dayGroup.dateKey)}
-                      className={`rounded-full border px-3 py-1.5 text-sm font-medium transition-all duration-200 shadow-sm ${activeDayKey === dayGroup.dateKey ? 'border-slate-900 bg-slate-900 text-white' : 'border-slate-300 bg-white text-slate-700 hover:border-slate-400 hover:bg-slate-50 hover:shadow-md'}`}
+                      tone={
+                        activeDayKey === dayGroup.dateKey ? 'chip-blue' : 'chip'
+                      }
                     >
                       {dayGroup.label}
-                    </button>
+                    </Button>
                   ))}
                 </div>
 

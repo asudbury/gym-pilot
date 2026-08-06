@@ -76,28 +76,15 @@ export function SessionTemplatesPage() {
                       </p>
                     </div>
                     <div className="flex flex-col gap-2 sm:flex-row sm:items-center">
-                      <Link
-                        to={card.viewPath}
-                        className={getToneClass(
-                          'default',
-                          'px-3 py-1.5 text-sm text-center',
-                        )}
-                      >
+                      <Link to={card.viewPath} className={getToneClass('chip')}>
                         View
                       </Link>
-                      <Link
-                        to={card.editPath}
-                        className={getToneClass(
-                          'default',
-                          'px-3 py-1.5 text-sm text-center',
-                        )}
-                      >
+                      <Link to={card.editPath} className={getToneClass('chip')}>
                         Update
                       </Link>
                       <Button
-                        tone="rose"
+                        tone="chip-rose"
                         onClick={() => deleteAssignment(assignment.id)}
-                        className="px-3 py-1.5"
                       >
                         Remove
                       </Button>

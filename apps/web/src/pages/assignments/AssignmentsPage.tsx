@@ -1,12 +1,12 @@
-import { Link } from 'react-router-dom'
-import { Button } from '../../components/ui/Button'
-import { getToneClass } from '../../components/toneClasses'
 import { usePlan } from '@gym-pilot/shared'
+import { Link } from 'react-router-dom'
 import { PageCard } from '../../components/PageCard'
-import { PageLayout } from '../../layouts/PageLayout'
-import { PageCardLayout } from '../../layouts/PageCardLayout'
-import { CallToAction } from '../../layouts/CallToAction'
+import { getToneClass } from '../../components/toneClasses'
+import { Button } from '../../components/ui/Button'
 import { resolveAssignmentListViewModels } from '../../features/plans/domain/planList'
+import { CallToAction } from '../../layouts/CallToAction'
+import { PageCardLayout } from '../../layouts/PageCardLayout'
+import { PageLayout } from '../../layouts/PageLayout'
 
 export function AssignmentsPage() {
   const { visibleAssignments, deleteAssignment } = usePlan()
@@ -77,28 +77,15 @@ export function AssignmentsPage() {
                       </p>
                     </div>
                     <div className="flex flex-col gap-2 sm:flex-row sm:items-center">
-                      <Link
-                        to={card.viewPath}
-                        className={getToneClass(
-                          'default',
-                          'px-3 py-1.5 text-sm text-center',
-                        )}
-                      >
+                      <Link to={card.viewPath} className={getToneClass('chip')}>
                         View
                       </Link>
-                      <Link
-                        to={card.editPath}
-                        className={getToneClass(
-                          'default',
-                          'px-3 py-1.5 text-sm text-center',
-                        )}
-                      >
+                      <Link to={card.editPath} className={getToneClass('chip')}>
                         Update
                       </Link>
                       <Button
-                        tone="rose"
+                        tone="chip-rose"
                         onClick={() => deleteAssignment(assignment.id)}
-                        className="px-3 py-1.5"
                       >
                         Remove
                       </Button>

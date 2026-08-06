@@ -1,27 +1,27 @@
 import {
-  getSupabaseAdminClient,
-  getSupabaseClient,
-  loadSupabaseProfileRoles,
-  logger,
-  saveSupabaseProfile,
-  saveSupabaseProfileRoles,
-  usePlan,
-} from '@gym-pilot/shared'
-import { useEffect, useState } from 'react'
-import { useNavigate, useParams } from 'react-router-dom'
-import { AdminSectionShell } from '../../components/admin/AdminSectionShell'
-import { Button } from '../../components/ui/Button'
-import type { DisplayableError } from '../../components/ui/StatusMessageNotification'
-import { StatusMessageNotification } from '../../components/ui/StatusMessageNotification'
-import { type AdminProfileRow } from '../../features/admin/domain/adminUtils'
+    getSupabaseAdminClient,
+    getSupabaseClient,
+    loadSupabaseProfileRoles,
+    logger,
+    saveSupabaseProfile,
+    saveSupabaseProfileRoles,
+    usePlan,
+} from '@gym-pilot/shared';
+import { useEffect, useState } from 'react';
+import { useNavigate, useParams } from 'react-router-dom';
+import { AdminSectionShell } from '../../components/admin/AdminSectionShell';
+import { Button } from '../../components/ui/Button';
+import type { DisplayableError } from '../../components/ui/StatusMessageNotification';
+import { StatusMessageNotification } from '../../components/ui/StatusMessageNotification';
+import { type AdminProfileRow } from '../../features/admin/domain/adminUtils';
 import {
-  createInitialProfileDraft,
-  mapProfileRow,
-  type ProfileDraft,
-} from '../../features/admin/domain/userProfiles'
-import { renderDashboardTimestamp } from '../../features/dashboard/domain/dashboardUtils'
-import { UserProfileForm } from './UserProfileForm'
-import { useCopyToClipboard } from './useCopyToClipboard'
+    createInitialProfileDraft,
+    mapProfileRow,
+    type ProfileDraft,
+} from '../../features/admin/domain/userProfiles';
+import { renderDashboardTimestamp } from '../../features/dashboard/domain/dashboardUtils';
+import { UserProfileForm } from './UserProfileForm';
+import { useCopyToClipboard } from './useCopyToClipboard';
 
 const formatStoredTimestamp = (value?: string | null) => {
   if (!value) {
@@ -229,7 +229,6 @@ export function AdminEditUserPage() {
 
             <div className="mt-3 flex flex-wrap items-center gap-2">
               <Button
-                tone="emerald"
                 onClick={() => {
                   const email =
                     draft?.email?.trim() ?? selectedProfile.email?.trim()
@@ -250,19 +249,17 @@ export function AdminEditUserPage() {
                   inviteUrl.hash = `#/login?email=${encodeURIComponent(email)}`
                   void copy(inviteUrl.toString())
                 }}
-                className="px-3 py-1.5"
               >
                 {linkCopied ? 'Invite link copied' : 'Copy invite link'}
               </Button>
 
               <Button
-                tone="blue"
                 onClick={() =>
                   navigate(
                     `/admin/users/profiles/${selectedProfile.id}/activity`,
                   )
                 }
-                className="px-3 py-1.5"
+                tone="chip"
               >
                 View activity
               </Button>
@@ -280,11 +277,7 @@ export function AdminEditUserPage() {
                 >
                   Save profile
                 </Button>
-                <Button
-                  tone="default"
-                  onClick={() => navigate('/admin/users')}
-                  className="px-3 py-1.5"
-                >
+                <Button tone="chip" onClick={() => navigate('/admin/users')}>
                   Cancel
                 </Button>
               </div>

@@ -47,39 +47,42 @@ export function AdminLogsPage({ view = 'error' }: AdminLogsPageProps) {
         <div className="space-y-6">
           <div className="flex flex-wrap items-center justify-between gap-3">
             <div className="flex flex-wrap items-center gap-3">
-              <button
+              <Button
                 type="button"
                 onClick={() => navigate('/admin/logs/error')}
-                className={`rounded-full border px-3 py-1.5 text-sm font-semibold transition ${
+                tone="chip"
+                className={
                   view === 'error'
                     ? 'border-sky-600 bg-sky-600 text-white shadow-sm'
-                    : 'border-slate-300 bg-white text-slate-700 hover:bg-slate-50'
-                }`}
+                    : ''
+                }
               >
                 Error log
-              </button>
-              <button
+              </Button>
+              <Button
                 type="button"
                 onClick={() => navigate('/admin/logs/audit')}
-                className={`rounded-full border px-3 py-1.5 text-sm font-semibold transition ${
+                tone="chip"
+                className={
                   view === 'audit'
                     ? 'border-sky-600 bg-sky-600 text-white shadow-sm'
-                    : 'border-slate-300 bg-white text-slate-700 hover:bg-slate-50'
-                }`}
+                    : ''
+                }
               >
                 Audit log
-              </button>
-              <button
+              </Button>
+              <Button
                 type="button"
                 onClick={() => navigate('/admin/logs/activity')}
-                className={`rounded-full border px-3 py-1.5 text-sm font-semibold transition ${
+                tone="chip"
+                className={
                   view === 'activity'
                     ? 'border-sky-600 bg-sky-600 text-white shadow-sm'
-                    : 'border-slate-300 bg-white text-slate-700 hover:bg-slate-50'
-                }`}
+                    : ''
+                }
               >
                 Activity log
-              </button>
+              </Button>
             </div>
             <div className="flex items-center gap-2">
               <label className="flex items-center gap-2 rounded-full border border-slate-300 bg-white px-3 py-1.5 text-sm text-slate-700 shadow-sm">
