@@ -4,6 +4,7 @@ import { useAuth } from '../../auth/AuthContext'
 import { Button } from '../../components/ui/Button'
 import { StatusMessageNotification } from '../../components/ui/StatusMessageNotification'
 import { PageCardLayout } from '../../layouts/PageCardLayout'
+import { parseSpreadsheet } from '../../features/import/spreadsheet-importer'
 import { PageLayout } from '../../layouts/PageLayout'
 
 export const SpreadsheetImportPage: React.FC = () => {
@@ -27,10 +28,10 @@ export const SpreadsheetImportPage: React.FC = () => {
   }, [])
 
   const handleUseSampleData = () => {
-    setSpreadsheetInput(`Exercise\tReps\tWorking sets\tWeek 1
-DATE\t-\t-\t21st Jun
-Shoulder press machine (seat height 6)\t1-4\t3\t30kg(x2) x4
-Time + calories\t-\t-\t0:52 318kcal`)
+    setSpreadsheetInput(`Exercise	Reps	Working sets	Week 1
+DATE	-	-	21st Jun
+Shoulder press machine (seat height 6)	1-4	3	30kg(x2) x4
+Time + calories	-	-	0:52 318kcal`)
     setSpreadsheetImportError(null)
   }
 
@@ -49,10 +50,26 @@ Time + calories\t-\t-\t0:52 318kcal`)
       return
     }
 
-    setSpreadsheetImportError(null)
-    navigate('/apple-fitness/import-spreadsheet/preview', {
-      state: { spreadsheetInput },
-    })
+    try {
+      const parsedSessions = parseSpreadsheet(spreadsheetInput)
+
+      if (parsedSessions.length === 0) {
+        setSpreadsheetImportError(
+          'Could not find any sessions to import. Check the format of the pasted data.',
+        )
+        return
+      }
+
+      setSpreadsheetImportError(null)
+      navigate('/apple-fitness/import-spreadsheet/preview', {
+        state: { parsedSessions },
+      })
+    } catch (error) {
+      console.error('Parsing error:', error)
+      setSpreadsheetImportError(
+        'An error occurred while parsing the spreadsheet data. Please check the console for details.',
+      )
+    }
   }
 
   return (
