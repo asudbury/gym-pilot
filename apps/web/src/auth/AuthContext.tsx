@@ -8,6 +8,7 @@ import {
   useState,
   type ReactNode,
 } from 'react'
+import { useNavigate } from 'react-router-dom'
 import type { AuthUser } from '../features/auth/domain/authTypes'
 import { isUserAccessBlocked } from '../features/auth/domain/authTypes'
 import { getHashHomeUrl } from '../features/auth/domain/authUtils'
@@ -42,8 +43,10 @@ const persistence = new DexiePersistence()
 
 export function AuthProvider({ children }: AuthProviderProps) {
   const { users } = usePlan()
+  const navigate = useNavigate()
   const {
     user,
+    sessionExpired,
     hydrateSession,
     refreshSupabaseSession,
     persistAuthState,
@@ -58,6 +61,12 @@ export function AuthProvider({ children }: AuthProviderProps) {
   const [themePreference, setThemePreferenceState] = useState<ThemePreference>(
     () => readStoredThemePreference(),
   )
+
+  useEffect(() => {
+    if (sessionExpired) {
+      navigate('/login')
+    }
+  }, [sessionExpired, navigate])
 
   useEffect(() => {
     const handleAuthStateChanged = () => {

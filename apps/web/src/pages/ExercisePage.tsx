@@ -1,20 +1,20 @@
-import { exercises, exercisesSchema } from '@gym-pilot/shared'
-import { useMemo, useState } from 'react'
-import { useParams, useSearchParams } from 'react-router-dom'
-import { PageActionGroup, PageActionRow } from '../components/PageActionRow'
-import { PageCard } from '../components/PageCard'
-import { Heading1, Paragraph } from '../components/Typography'
-import { ExerciseImage } from '../components/exercises/ExerciseImage'
-import { ExerciseMetaBadges } from '../components/exercises/ExerciseMetaBadges'
-import { ExerciseSteps } from '../components/exercises/ExerciseSteps'
-import { YouTubeExerciseSearchButton } from '../components/exercises/YouTubeExerciseSearchButton'
-import BackLink from '../components/ui/BackLink'
-import { Button } from '../components/ui/Button'
-import { useAppShell } from '../features/app-shell/hooks/useAppShell'
-import { resolveExercisePageViewModel } from '../features/exercises/domain/exerciseView'
-import { PageLayout } from '../layouts/PageLayout'
-import { formatLabel } from '../utils/formatUtils'
-import { copyExerciseLinkToClipboard } from '../utils/navigationUtils'
+import { exercises, exercisesSchema } from '@gym-pilot/shared';
+import { useMemo, useState } from 'react';
+import { useParams, useSearchParams } from 'react-router-dom';
+import { PageActionGroup, PageActionRow } from '../components/PageActionRow';
+import { PageCard } from '../components/PageCard';
+import { Heading1, Paragraph } from '../components/Typography';
+import { ExerciseImage } from '../components/exercises/ExerciseImage';
+import { ExerciseMetaBadges } from '../components/exercises/ExerciseMetaBadges';
+import { ExerciseSteps } from '../components/exercises/ExerciseSteps';
+import { YouTubeExerciseSearchButton } from '../components/exercises/YouTubeExerciseSearchButton';
+import BackLink from '../components/ui/BackLink';
+import { Button } from '../components/ui/Button';
+import { useAppShell } from '../features/app-shell/hooks/useAppShell';
+import { resolveExercisePageViewModel } from '../features/exercises/domain/exerciseView';
+import { PageLayout } from '../layouts/PageLayout';
+import { formatLabel } from '../utils/formatUtils';
+import { copyExerciseLinkToClipboard } from '../utils/navigationUtils';
 
 export function ExercisePage() {
   const {
@@ -117,11 +117,7 @@ export function ExercisePage() {
           </Button>
           <Button
             onClick={handleCopyUrl}
-            className={
-              copied
-                ? 'rounded-full bg-emerald-600 px-4 py-2 text-sm font-medium text-white'
-                : 'rounded-full bg-slate-100 px-4 py-2 text-sm font-medium text-slate-700 transition-colors dark:bg-slate-800 dark:text-slate-100'
-            }
+            tone={copied ? 'emerald' : 'default'}
           >
             {copied ? 'Copied!' : 'Copy URL'}
           </Button>

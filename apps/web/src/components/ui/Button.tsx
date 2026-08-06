@@ -1,6 +1,6 @@
-import type { ComponentPropsWithoutRef, ElementType, ReactNode } from 'react'
-import { getToneClass, type ToneName } from '../toneClasses'
-import { SpinnerIcon } from './icons' // Import the SpinnerIcon component
+import type { ComponentPropsWithoutRef, ElementType, ReactNode } from 'react';
+import { getToneClass, type ToneName } from '../toneClasses';
+import { SpinnerIcon } from './icons'; // Import the SpinnerIcon component
 
 type ButtonProps<T extends ElementType = 'button'> = {
   type?: 'button' | 'submit' | 'reset'
@@ -16,10 +16,9 @@ type ButtonProps<T extends ElementType = 'button'> = {
 export function Button<T extends ElementType = 'button'>({
   as,
   type = 'button',
-  tone = 'default', // Removed loginError from this line
+  tone = 'default',
   className = '',
-  // Add a consistent height so buttons render at the same vertical size by default
-  defaultClassName = 'inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-full font-medium shadow-sm transition-all duration-200 h-10 focus:outline-none focus:ring-2 focus:ring-slate-400/20 dark:focus:ring-slate-500/20 disabled:pointer-events-none disabled:opacity-50',
+  defaultClassName = 'inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-full font-medium shadow-sm transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-slate-400/20 dark:focus:ring-slate-500/20 disabled:pointer-events-none disabled:opacity-50',
   children,
   isLoading = false,
   loadingLabel,

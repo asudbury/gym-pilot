@@ -38,6 +38,7 @@ import {
 
 export function useAuthModule(users: User[]) {
   const [user, setUser] = useState<AuthUser | null>(null)
+  const [sessionExpired, setSessionExpired] = useState(false)
   const userRef = useRef<AuthUser | null>(null)
   const hasHydratedSessionRef = useRef(false)
   const hadAuthenticatedUserRef = useRef(false)
@@ -65,18 +66,7 @@ export function useAuthModule(users: User[]) {
       userRef.current = null
       setUser(null)
       persistCurrentUserId(null)
-      window.sessionStorage.setItem(
-        'gym-pilot-auth-expired',
-        'Your session has expired. Please sign in again.',
-      )
-      window.dispatchEvent(
-        new CustomEvent('gym-pilot-notification', {
-          detail: {
-            text: 'Your session has expired. Please sign in again.',
-            tone: 'error',
-          },
-        }),
-      )
+      setSessionExpired(true)
     }
 
     hasHydratedSessionRef.current = true
@@ -107,18 +97,7 @@ export function useAuthModule(users: User[]) {
       userRef.current = null
       setUser(null)
       persistCurrentUserId(null)
-      window.sessionStorage.setItem(
-        'gym-pilot-auth-expired',
-        'Your session has expired. Please sign in again.',
-      )
-      window.dispatchEvent(
-        new CustomEvent('gym-pilot-notification', {
-          detail: {
-            text: 'Your session has expired. Please sign in again.',
-            tone: 'error',
-          },
-        }),
-      )
+      setSessionExpired(true)
     }
   }, [users])
 
@@ -210,18 +189,7 @@ export function useAuthModule(users: User[]) {
         userRef.current = null
         setUser(null)
         persistCurrentUserId(null)
-        window.sessionStorage.setItem(
-          'gym-pilot-auth-expired',
-          'Your session has expired. Please sign in again.',
-        )
-        window.dispatchEvent(
-          new CustomEvent('gym-pilot-notification', {
-            detail: {
-              text: 'Your session has expired. Please sign in again.',
-              tone: 'error',
-            },
-          }),
-        )
+        setSessionExpired(true)
       }
     })
 
@@ -342,6 +310,7 @@ export function useAuthModule(users: User[]) {
     user,
     setUser,
     isAuthenticated,
+    sessionExpired,
     hydrateSession,
     refreshSupabaseSession,
     persistAuthState,
