@@ -1,12 +1,12 @@
-import { classNames } from '@gym-pilot/shared';
-import { useMemo } from 'react';
-import { useFavouriteLinksMenu } from '../../features/favourites/hooks/useFavouriteLinksMenu';
-import { Button } from '../ui/Button';
-import { DecorativeIcon } from '../ui/DecorativeIcon';
+import { classNames } from '@gym-pilot/shared'
+import { useMemo } from 'react'
+import { useFavouriteLinksMenu } from '../../features/favourites/hooks/useFavouriteLinksMenu'
+import { Button } from '../ui/Button'
+import { DecorativeIcon } from '../ui/DecorativeIcon'
 import {
-    navigationItemBaseClassName,
-    navigationItemIconClassName,
-} from './navigationItemStyles';
+  navigationItemBaseClassName,
+  navigationItemIconClassName,
+} from './navigationItemStyles'
 
 type SavedSearch = {
   id: string
@@ -153,4 +153,4 @@ export function FavouriteLinksMenu({
   )
 }
 
-export type { SavedSearch };
+export type { SavedSearch }
