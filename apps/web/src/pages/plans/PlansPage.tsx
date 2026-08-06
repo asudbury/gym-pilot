@@ -1,11 +1,11 @@
-import { usePlan } from '@gym-pilot/shared';
-import { Link } from 'react-router-dom';
-import { PageCard } from '../../components/PageCard';
-import { Button } from '../../components/ui/Button';
-import { resolvePlanListViewModels } from '../../features/plans/domain/planList';
-import { CallToAction } from '../../layouts/CallToAction';
-import { PageCardLayout } from '../../layouts/PageCardLayout';
-import { PageLayout } from '../../layouts/PageLayout';
+import { usePlan } from '@gym-pilot/shared'
+import { Link } from 'react-router-dom'
+import { PageCard } from '../../components/PageCard'
+import { Button } from '../../components/ui/Button'
+import { resolvePlanListViewModels } from '../../features/plans/domain/planList'
+import { CallToAction } from '../../layouts/CallToAction'
+import { PageCardLayout } from '../../layouts/PageCardLayout'
+import { PageLayout } from '../../layouts/PageLayout'
 
 export function PlansPage() {
   const { visiblePlans, deletePlan } = usePlan()
@@ -25,7 +25,11 @@ export function PlansPage() {
         >
           <CallToAction
             title="Manage plans"
-            action={<Button as={Link} to="/plans/new" tone="blue">Create a new plan</Button>}
+            action={
+              <Button as={Link} to="/plans/new" tone="blue">
+                Create a new plan
+              </Button>
+            }
           />
         </PageCardLayout>
       ) : (

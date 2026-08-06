@@ -1,13 +1,13 @@
-import { changeSupabasePassword, logger } from '@gym-pilot/shared';
-import { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
-import { PageCard } from '../../components/PageCard';
-import { Heading1, Paragraph } from '../../components/Typography';
-import { BackLink } from '../../components/ui/BackLink';
-import { Button } from '../../components/ui/Button';
-import { DecorativeIcon } from '../../components/ui/DecorativeIcon';
-import { appTokens } from '../../constants/tokens';
-import { PageLayout } from '../../layouts/PageLayout';
+import { changeSupabasePassword, logger } from '@gym-pilot/shared'
+import { useState } from 'react'
+import { useNavigate } from 'react-router-dom'
+import { PageCard } from '../../components/PageCard'
+import { Heading1, Paragraph } from '../../components/Typography'
+import { BackLink } from '../../components/ui/BackLink'
+import { Button } from '../../components/ui/Button'
+import { DecorativeIcon } from '../../components/ui/DecorativeIcon'
+import { appTokens } from '../../constants/tokens'
+import { PageLayout } from '../../layouts/PageLayout'
 
 export function AdminChangePasswordPage() {
   const navigate = useNavigate()
@@ -105,7 +105,11 @@ export function AdminChangePasswordPage() {
             />
           </label>
 
-          <Button disabled={isSaving} tone="blue" className="w-fit rounded-full px-4 py-2.5 text-sm font-semibold text-white transition disabled:cursor-not-allowed disabled:bg-slate-400">
+          <Button
+            disabled={isSaving}
+            tone="blue"
+            className="w-fit rounded-full px-4 py-2.5 text-sm font-semibold text-white transition disabled:cursor-not-allowed disabled:bg-slate-400"
+          >
             {isSaving ? 'Updating…' : 'Update password'}
           </Button>
         </form>

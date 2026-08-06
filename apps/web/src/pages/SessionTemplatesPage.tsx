@@ -1,11 +1,11 @@
-import { usePlan } from '@gym-pilot/shared';
-import { Link } from 'react-router-dom';
-import { PageCard } from '../components/PageCard';
-import { Button } from '../components/ui/Button';
-import { resolveAssignmentListViewModels } from '../features/plans/domain/planList';
-import { CallToAction } from '../layouts/CallToAction';
-import { PageCardLayout } from '../layouts/PageCardLayout';
-import { PageLayout } from '../layouts/PageLayout';
+import { usePlan } from '@gym-pilot/shared'
+import { Link } from 'react-router-dom'
+import { PageCard } from '../components/PageCard'
+import { Button } from '../components/ui/Button'
+import { resolveAssignmentListViewModels } from '../features/plans/domain/planList'
+import { CallToAction } from '../layouts/CallToAction'
+import { PageCardLayout } from '../layouts/PageCardLayout'
+import { PageLayout } from '../layouts/PageLayout'
 
 export function SessionTemplatesPage() {
   const { visibleAssignments, deleteAssignment } = usePlan()
@@ -69,7 +69,10 @@ export function SessionTemplatesPage() {
                       <Button as={Link} to={card.editPath} tone="chip">
                         Update
                       </Button>
-                      <Button tone="chip-rose" onClick={() => deleteAssignment(assignment.id)}>
+                      <Button
+                        tone="chip-rose"
+                        onClick={() => deleteAssignment(assignment.id)}
+                      >
                         Remove
                       </Button>
                     </div>

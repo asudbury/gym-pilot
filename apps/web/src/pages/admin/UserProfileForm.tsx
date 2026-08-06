@@ -1,15 +1,15 @@
-import type { User, UserRole } from '@gym-pilot/types';
-import { GymClubSelector } from '../../components/GymClubSelector';
-import { appTokens } from '../../constants/tokens';
+import type { User, UserRole } from '@gym-pilot/types'
+import { GymClubSelector } from '../../components/GymClubSelector'
+import { appTokens } from '../../constants/tokens'
 import {
-    availableAdminRoles,
-    type AdminProfileRow,
-} from '../../features/admin/domain/adminUtils';
+  availableAdminRoles,
+  type AdminProfileRow,
+} from '../../features/admin/domain/adminUtils'
 import {
-    resolveTrainerOptions,
-    toggleRoleSelection,
-    type ProfileDraft,
-} from '../../features/admin/domain/userProfiles';
+  resolveTrainerOptions,
+  toggleRoleSelection,
+  type ProfileDraft,
+} from '../../features/admin/domain/userProfiles'
 
 type UserProfileFormProps = {
   profile: AdminProfileRow
@@ -38,7 +38,7 @@ export function UserProfileForm({
             return (
               <label
                 key={role}
-                className={`flex items-center gap-2 ${appTokens.pill.replace('bg-white','bg-slate-50')} text-base font-medium text-slate-700`}
+                className={`flex items-center gap-2 ${appTokens.pill.replace('bg-white', 'bg-slate-50')} text-base font-medium text-slate-700`}
               >
                 <input
                   type="checkbox"

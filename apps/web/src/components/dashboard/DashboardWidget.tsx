@@ -1,8 +1,8 @@
-import type { ReactNode } from 'react';
-import { NavLink } from 'react-router-dom';
-import { CallToAction } from '../../layouts/CallToAction';
-import { Button } from '../ui/Button';
-import { DecorativeIcon, type DecorativeIconProps } from '../ui/DecorativeIcon';
+import type { ReactNode } from 'react'
+import { NavLink } from 'react-router-dom'
+import { CallToAction } from '../../layouts/CallToAction'
+import { Button } from '../ui/Button'
+import { DecorativeIcon, type DecorativeIconProps } from '../ui/DecorativeIcon'
 
 type DashboardWidgetProps = {
   title: string

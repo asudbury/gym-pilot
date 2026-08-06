@@ -1,6 +1,6 @@
-import { Link } from 'react-router-dom';
-import { Button } from '../../components/ui/Button';
-import { PageLayout } from '../../layouts/PageLayout';
+import { Link } from 'react-router-dom'
+import { Button } from '../../components/ui/Button'
+import { PageLayout } from '../../layouts/PageLayout'
 
 export function InternalServerErrorPage() {
   return (

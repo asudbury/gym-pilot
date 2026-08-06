@@ -1,11 +1,11 @@
-import { useState } from 'react';
-import { useLocation, useNavigate } from 'react-router-dom';
-import { ActivityLogView, AuditLogView, ErrorLogView } from './logs';
+import { useState } from 'react'
+import { useLocation, useNavigate } from 'react-router-dom'
+import { ActivityLogView, AuditLogView, ErrorLogView } from './logs'
 ///import { StatusMessageNotification } from '../../components/ui/StatusMessageNotification';
-import { Button } from '../../components/ui/Button';
-import { appTokens } from '../../constants/tokens';
-import { PageCardLayout } from '../../layouts/PageCardLayout';
-import { PageLayout } from '../../layouts/PageLayout';
+import { Button } from '../../components/ui/Button'
+import { appTokens } from '../../constants/tokens'
+import { PageCardLayout } from '../../layouts/PageCardLayout'
+import { PageLayout } from '../../layouts/PageLayout'
 
 type LogViewMode = 'error' | 'audit' | 'activity' | 'combined'
 

@@ -1,7 +1,7 @@
-import { Link } from 'react-router-dom';
-import { type AdminActionCard } from '../../features/admin/domain/adminUtils';
-import { CallToAction } from '../../layouts/CallToAction';
-import { Button } from '../ui/Button';
+import { Link } from 'react-router-dom'
+import { type AdminActionCard } from '../../features/admin/domain/adminUtils'
+import { CallToAction } from '../../layouts/CallToAction'
+import { Button } from '../ui/Button'
 
 type AdminPageCardsProps = {
   cards: AdminActionCard[]
@@ -15,7 +15,11 @@ export function AdminPageCards({ cards }: AdminPageCardsProps) {
           key={card.href}
           title={card.title}
           description={card.description}
-          action={<Button as={Link} to={card.href} tone="blue">{card.label}</Button>}
+          action={
+            <Button as={Link} to={card.href} tone="blue">
+              {card.label}
+            </Button>
+          }
         />
       ))}
     </div>

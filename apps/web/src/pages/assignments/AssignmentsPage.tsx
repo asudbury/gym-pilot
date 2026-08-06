@@ -1,11 +1,11 @@
-import { usePlan } from '@gym-pilot/shared';
-import { Link } from 'react-router-dom';
-import { PageCard } from '../../components/PageCard';
-import { Button } from '../../components/ui/Button';
-import { resolveAssignmentListViewModels } from '../../features/plans/domain/planList';
-import { CallToAction } from '../../layouts/CallToAction';
-import { PageCardLayout } from '../../layouts/PageCardLayout';
-import { PageLayout } from '../../layouts/PageLayout';
+import { usePlan } from '@gym-pilot/shared'
+import { Link } from 'react-router-dom'
+import { PageCard } from '../../components/PageCard'
+import { Button } from '../../components/ui/Button'
+import { resolveAssignmentListViewModels } from '../../features/plans/domain/planList'
+import { CallToAction } from '../../layouts/CallToAction'
+import { PageCardLayout } from '../../layouts/PageCardLayout'
+import { PageLayout } from '../../layouts/PageLayout'
 
 export function AssignmentsPage() {
   const { visibleAssignments, deleteAssignment } = usePlan()

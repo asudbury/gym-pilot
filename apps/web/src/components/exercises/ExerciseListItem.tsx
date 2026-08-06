@@ -1,10 +1,10 @@
-import { Link } from 'react-router-dom';
-import { appTokens } from '../../constants/tokens';
-import { formatLabel } from '../../utils/formatUtils';
-import { Button } from '../ui/Button';
-import { ResponsiveVisibility } from '../visibility/ResponsiveVisibility';
-import { ExerciseImage } from './ExerciseImage';
-import { ExerciseMetaBadges } from './ExerciseMetaBadges';
+import { Link } from 'react-router-dom'
+import { appTokens } from '../../constants/tokens'
+import { formatLabel } from '../../utils/formatUtils'
+import { Button } from '../ui/Button'
+import { ResponsiveVisibility } from '../visibility/ResponsiveVisibility'
+import { ExerciseImage } from './ExerciseImage'
+import { ExerciseMetaBadges } from './ExerciseMetaBadges'
 
 type ExerciseActionButtonsProps = {
   exerciseId: string
@@ -135,7 +135,9 @@ export function ExerciseListItem({
       >
         <div className="min-w-0 flex-1">
           <div className="flex items-center gap-2">
-              <span className={`inline-flex h-8 min-w-8 items-center justify-center ${appTokens.pill} font-semibold leading-none text-slate-700 dark:bg-slate-800 dark:text-slate-100`}> 
+            <span
+              className={`inline-flex h-8 min-w-8 items-center justify-center ${appTokens.pill} font-semibold leading-none text-slate-700 dark:bg-slate-800 dark:text-slate-100`}
+            >
               {position}
             </span>
             <h3 className="text-base font-semibold leading-tight text-slate-900 dark:text-slate-100">
