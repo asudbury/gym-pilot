@@ -1,21 +1,21 @@
 import {
-    loadSupabaseProfileFlag,
-    loadSupabaseProfileTermsAcceptance,
-    logger,
-    recordSupabaseUserActivity,
-    saveSupabaseProfileTermsAcceptance,
-    signOutFromSupabase,
-} from '@gym-pilot/shared';
-import { useEffect, useMemo, useState } from 'react';
-import { Link, useNavigate, useSearchParams } from 'react-router-dom';
-import { useAuth } from '../../auth/AuthContext';
-import { PageCard } from '../../components/PageCard';
-import { Heading1 } from '../../components/Typography';
-import { Button } from '../../components/ui/Button';
-import { DecorativeIcon } from '../../components/ui/DecorativeIcon';
-import { StatusMessageNotification } from '../../components/ui/StatusMessageNotification';
-import { appTokens } from '../../constants/tokens';
-import { recordWelcomeJourneyActivity } from '../../features/auth/domain/welcomeJourneyLogging';
+  loadSupabaseProfileFlag,
+  loadSupabaseProfileTermsAcceptance,
+  logger,
+  recordSupabaseUserActivity,
+  saveSupabaseProfileTermsAcceptance,
+  signOutFromSupabase,
+} from '@gym-pilot/shared'
+import { useEffect, useMemo, useState } from 'react'
+import { Link, useNavigate, useSearchParams } from 'react-router-dom'
+import { useAuth } from '../../auth/AuthContext'
+import { PageCard } from '../../components/PageCard'
+import { Heading1 } from '../../components/Typography'
+import { Button } from '../../components/ui/Button'
+import { DecorativeIcon } from '../../components/ui/DecorativeIcon'
+import { StatusMessageNotification } from '../../components/ui/StatusMessageNotification'
+import { appTokens } from '../../constants/tokens'
+import { recordWelcomeJourneyActivity } from '../../features/auth/domain/welcomeJourneyLogging'
 
 export function WelcomePage() {
   const navigate = useNavigate()
@@ -225,17 +225,15 @@ export function WelcomePage() {
             tone="emerald"
             onClick={handleAccept}
             disabled={isAccepting || hasAccepted}
-            >
+          >
             {isAccepting
               ? 'Saving…'
               : hasAccepted
                 ? 'Accepted'
                 : 'Accept and continue'}
           </Button>
-          <Button
-            tone="default"
-            onClick={handleDecline}>
-            Decline and log out    
+          <Button tone="default" onClick={handleDecline}>
+            Decline and log out
           </Button>
         </div>
 
