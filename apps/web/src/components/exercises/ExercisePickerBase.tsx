@@ -1,12 +1,12 @@
-import type { Exercise } from '@gym-pilot/shared';
-import { useEffect, useRef, useState, type ReactNode } from 'react';
-import { MIN_SEARCH_CHARS } from '../../constants/home';
-import { useExerciseSearch } from '../../hooks/useExerciseSearch';
-import { Button } from '../ui/Button';
-import { DecorativeIcon } from '../ui/DecorativeIcon';
-import { Modal } from '../ui/Modal';
-import { ExercisePreview } from './ExercisePreview';
-import { ExerciseSearchField } from './ExerciseSearchField';
+import type { Exercise } from '@gym-pilot/shared'
+import { useEffect, useRef, useState, type ReactNode } from 'react'
+import { MIN_SEARCH_CHARS } from '../../constants/home'
+import { useExerciseSearch } from '../../hooks/useExerciseSearch'
+import { Button } from '../ui/Button'
+import { DecorativeIcon } from '../ui/DecorativeIcon'
+import { Modal } from '../ui/Modal'
+import { ExercisePreview } from './ExercisePreview'
+import { ExerciseSearchField } from './ExerciseSearchField'
 
 type ExercisePickerBaseProps = {
   isOpen: boolean

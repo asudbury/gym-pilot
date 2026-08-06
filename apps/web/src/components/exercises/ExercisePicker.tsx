@@ -1,7 +1,7 @@
-import type { Exercise } from '@gym-pilot/shared';
-import { formatLabel } from '../../utils/formatUtils';
-import { DecorativeIcon } from '../ui/DecorativeIcon';
-import { ExercisePickerBase } from './ExercisePickerBase';
+import type { Exercise } from '@gym-pilot/shared'
+import { formatLabel } from '../../utils/formatUtils'
+import { DecorativeIcon } from '../ui/DecorativeIcon'
+import { ExercisePickerBase } from './ExercisePickerBase'
 
 export interface ExercisePickerProps {
   isOpen: boolean
