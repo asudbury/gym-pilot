@@ -200,6 +200,8 @@ export function RecordSessionPage() {
           normalizedSessionType === 'personal_training'
             ? (trainer?.name ?? null)
             : null,
+        energy: activeKwh ? Number(activeKwh) : null,
+        energy_unit: activeKwh ? 'kWh' : null,
       }
 
       const { data: savedSession, error } = await updateUserSession(userSession)
