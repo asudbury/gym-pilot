@@ -11,7 +11,7 @@ export const TableNames = {
   Profile: "gym_pilot_profile",
   UserActivity: "user_activity",
   UserRole: "gym_pilot_user_role",
-  UserSession: "gym_pilot_user_session",
+  UserSession: "user_workout",
   UserSessionWorkoutItem: "gym_pilot_user_session_workout_item",
 } as const;
 

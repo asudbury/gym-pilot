@@ -63,48 +63,6 @@ export type Database = {
         }
         Relationships: []
       }
-      audit_log: {
-        Row: {
-          created_at: string
-          details: Json | null
-          id: string
-          message: string
-        }
-        Insert: {
-          created_at?: string
-          details?: Json | null
-          id?: string
-          message: string
-        }
-        Update: {
-          created_at?: string
-          details?: Json | null
-          id?: string
-          message?: string
-        }
-        Relationships: []
-      }
-      error_log: {
-        Row: {
-          created_at: string
-          details: Json | null
-          id: string
-          message: string
-        }
-        Insert: {
-          created_at?: string
-          details?: Json | null
-          id?: string
-          message: string
-        }
-        Update: {
-          created_at?: string
-          details?: Json | null
-          id?: string
-          message?: string
-        }
-        Relationships: []
-      }
       app_state: {
         Row: {
           id: string
@@ -176,6 +134,48 @@ export type Database = {
           },
         ]
       }
+      audit_log: {
+        Row: {
+          created_at: string
+          details: Json | null
+          id: string
+          message: string
+        }
+        Insert: {
+          created_at?: string
+          details?: Json | null
+          id?: string
+          message: string
+        }
+        Update: {
+          created_at?: string
+          details?: Json | null
+          id?: string
+          message?: string
+        }
+        Relationships: []
+      }
+      error_log: {
+        Row: {
+          created_at: string
+          details: Json | null
+          id: string
+          message: string
+        }
+        Insert: {
+          created_at?: string
+          details?: Json | null
+          id?: string
+          message: string
+        }
+        Update: {
+          created_at?: string
+          details?: Json | null
+          id?: string
+          message?: string
+        }
+        Relationships: []
+      }
       favourite: {
         Row: {
           created_at: string
@@ -209,7 +209,7 @@ export type Database = {
         }
         Relationships: [
           {
-            foreignKeyName: "favourite_folder_id_fkey"
+            foreignKeyName: "gym_pilot_favourite_folder_id_fkey"
             columns: ["folder_id"]
             isOneToOne: false
             referencedRelation: "favourite_folder"
@@ -237,45 +237,6 @@ export type Database = {
           id?: string
           name?: string
           updated_at?: string
-          user_id?: string
-        }
-        Relationships: []
-      }
-      imported_workout: {
-        Row: {
-          created_at: string
-          display_name: string
-          duration: number
-          energy: number | null
-          energy_unit: string | null
-          id: string
-          original_id: string | null
-          session_id: string | null
-          start_date: string
-          user_id: string
-        }
-        Insert: {
-          created_at?: string
-          display_name: string
-          duration: number
-          energy?: number | null
-          energy_unit?: string | null
-          id?: string
-          original_id?: string | null
-          session_id?: string | null
-          start_date: string
-          user_id: string
-        }
-        Update: {
-          created_at?: string
-          display_name?: string
-          duration?: number
-          energy?: number | null
-          energy_unit?: string | null
-          id?: string
-          original_id?: string | null
-          session_id?: string | null
-          start_date?: string
           user_id?: string
         }
         Relationships: []
@@ -400,81 +361,6 @@ export type Database = {
         }
         Relationships: []
       }
-      gym_pilot_user_session: {
-        Row: {
-          attendance_type: string | null
-          capacity: number | null
-          class_id: string | null
-          class_name: string | null
-          created_at: string | null
-          duration_minutes: number | null
-          gym_club_id: number | null
-          id: string
-          location: string | null
-          metadata: Json | null
-          notes: string | null
-          price: number | null
-          rating: number | null
-          role: string | null
-          session_id: string | null
-          session_type: string
-          start_at: string
-          status: string | null
-          trainer_id: string | null
-          trainer_name: string | null
-          updated_at: string | null
-          user_id: string | null
-        }
-        Insert: {
-          attendance_type?: string | null
-          capacity?: number | null
-          class_id?: string | null
-          class_name?: string | null
-          created_at?: string | null
-          duration_minutes?: number | null
-          gym_club_id?: number | null
-          id?: string
-          location?: string | null
-          metadata?: Json | null
-          notes?: string | null
-          price?: number | null
-          rating?: number | null
-          role?: string | null
-          session_id?: string | null
-          session_type: string
-          start_at: string
-          status?: string | null
-          trainer_id?: string | null
-          trainer_name?: string | null
-          updated_at?: string | null
-          user_id?: string | null
-        }
-        Update: {
-          attendance_type?: string | null
-          capacity?: number | null
-          class_id?: string | null
-          class_name?: string | null
-          created_at?: string | null
-          duration_minutes?: number | null
-          gym_club_id?: number | null
-          id?: string
-          location?: string | null
-          metadata?: Json | null
-          notes?: string | null
-          price?: number | null
-          rating?: number | null
-          role?: string | null
-          session_id?: string | null
-          session_type?: string
-          start_at?: string
-          status?: string | null
-          trainer_id?: string | null
-          trainer_name?: string | null
-          updated_at?: string | null
-          user_id?: string | null
-        }
-        Relationships: []
-      }
       gym_pilot_user_session_workout_item: {
         Row: {
           category: string
@@ -544,10 +430,49 @@ export type Database = {
             foreignKeyName: "gym_pilot_user_session_workout_item_session_row_id_fkey"
             columns: ["session_row_id"]
             isOneToOne: false
-            referencedRelation: "gym_pilot_user_session"
+            referencedRelation: "user_workout"
             referencedColumns: ["id"]
           },
         ]
+      }
+      imported_workout: {
+        Row: {
+          created_at: string
+          display_name: string
+          duration: number
+          energy: number | null
+          energy_unit: string | null
+          id: string
+          original_id: string | null
+          session_id: string | null
+          start_date: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          display_name: string
+          duration: number
+          energy?: number | null
+          energy_unit?: string | null
+          id?: string
+          original_id?: string | null
+          session_id?: string | null
+          start_date: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          display_name?: string
+          duration?: number
+          energy?: number | null
+          energy_unit?: string | null
+          id?: string
+          original_id?: string | null
+          session_id?: string | null
+          start_date?: string
+          user_id?: string
+        }
+        Relationships: []
       }
       user_activity: {
         Row: {
@@ -573,6 +498,87 @@ export type Database = {
           id?: string
           updated_at?: string
           user_id?: string
+        }
+        Relationships: []
+      }
+      user_workout: {
+        Row: {
+          attendance_type: string | null
+          capacity: number | null
+          class_id: string | null
+          class_name: string | null
+          created_at: string | null
+          duration_minutes: number | null
+          energy: number | null
+          energy_unit: string | null
+          gym_club_id: number | null
+          id: string
+          location: string | null
+          metadata: Json | null
+          notes: string | null
+          price: number | null
+          rating: number | null
+          role: string | null
+          session_id: string | null
+          session_type: string
+          start_at: string
+          status: string | null
+          trainer_id: string | null
+          trainer_name: string | null
+          updated_at: string | null
+          user_id: string | null
+        }
+        Insert: {
+          attendance_type?: string | null
+          capacity?: number | null
+          class_id?: string | null
+          class_name?: string | null
+          created_at?: string | null
+          duration_minutes?: number | null
+          energy?: number | null
+          energy_unit?: string | null
+          gym_club_id?: number | null
+          id?: string
+          location?: string | null
+          metadata?: Json | null
+          notes?: string | null
+          price?: number | null
+          rating?: number | null
+          role?: string | null
+          session_id?: string | null
+          session_type: string
+          start_at: string
+          status?: string | null
+          trainer_id?: string | null
+          trainer_name?: string | null
+          updated_at?: string | null
+          user_id?: string | null
+        }
+        Update: {
+          attendance_type?: string | null
+          capacity?: number | null
+          class_id?: string | null
+          class_name?: string | null
+          created_at?: string | null
+          duration_minutes?: number | null
+          energy?: number | null
+          energy_unit?: string | null
+          gym_club_id?: number | null
+          id?: string
+          location?: string | null
+          metadata?: Json | null
+          notes?: string | null
+          price?: number | null
+          rating?: number | null
+          role?: string | null
+          session_id?: string | null
+          session_type?: string
+          start_at?: string
+          status?: string | null
+          trainer_id?: string | null
+          trainer_name?: string | null
+          updated_at?: string | null
+          user_id?: string | null
         }
         Relationships: []
       }

@@ -4,6 +4,7 @@ import {
   type ImportedWorkout,
   type UserSession,
 } from '@gym-pilot/shared'
+import { TableNames } from '@gym-pilot/shared/src/dataServices/tableNames'
 import React, { useEffect, useMemo, useState } from 'react'
 import Calendar from 'react-calendar'
 import { formatDateForDisplay } from '../dateTimeFormatter'
@@ -128,7 +129,7 @@ const WorkoutCalendar: React.FC<WorkoutCalendarProps> = ({
         const client = getSupabaseClient()
         if (client) {
           const { data, error } = await client
-            .from('gym_pilot_user_session')
+            .from(TableNames.UserSession)
             .select('*')
             .in('id', sessionIds)
 

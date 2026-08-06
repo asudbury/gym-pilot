@@ -123,7 +123,7 @@ create table if not exists public.user_activity (
 );
 
 
-create table if not exists public.gym_pilot_user_session (
+create table if not exists public.user_workout (
   id uuid primary key default gen_random_uuid(),
   gym_club_id bigint,
   session_type text not null check (session_type in ('class', 'personal_training', 'solo')),
@@ -144,6 +144,8 @@ create table if not exists public.gym_pilot_user_session (
   notes text,
   rating smallint check (rating is null or (rating >= 1 and rating <= 5)),
   attendance_type text check (attendance_type is null or attendance_type in ('attended', 'taught')),
+  energy double precision,
+  energy_unit text,
   created_at timestamptz default now(),
   updated_at timestamptz default now()
 );
@@ -200,7 +202,7 @@ alter table public.gym_pilot_favourite enable row level security;
 alter table public.gym_pilot_plan enable row level security;
 alter table public.gym_pilot_assignment enable row level security;
 alter table public.user_activity enable row level security;
-alter table public.gym_pilot_user_session enable row level security;
+alter table public.user_workout enable row level security;
 alter table public.gym_pilot_user_session_workout_item enable row level security;
 alter table public.gym_pilot_app_setting enable row level security;
 alter table public.error_log enable row level security;
@@ -221,12 +223,12 @@ create index if not exists gym_pilot_profile_last_logged_in_at_idx
 on public.gym_pilot_profile (last_logged_in_at desc);
 create index if not exists gym_pilot_favourite_folder_user_id_idx
 on public.gym_pilot_favourite_folder (user_id);
-create index if not exists gym_pilot_user_session_trainer_id_idx
-on public.gym_pilot_user_session (trainer_id);
-create index if not exists gym_pilot_user_session_start_at_idx
-on public.gym_pilot_user_session (start_at);
-create index if not exists gym_pilot_user_session_user_id_idx
-on public.gym_pilot_user_session (user_id);
+create index if not exists user_workout_trainer_id_idx
+on public.user_workout (trainer_id);
+create index if not exists user_workout_start_at_idx
+on public.user_workout (start_at);
+create index if not exists user_workout_user_id_idx
+on public.user_workout (user_id);
 alter table public.gym_pilot_user_session_workout_item
 add column if not exists session_row_id uuid;
 
@@ -250,7 +252,7 @@ begin
   ) then
     alter table public.gym_pilot_user_session_workout_item
     add constraint gym_pilot_user_session_workout_item_session_row_id_fkey
-    foreign key (session_row_id) references public.gym_pilot_user_session(id)
+    foreign key (session_row_id) references public.user_workout(id)
     on delete cascade;
   end if;
 end $$;
@@ -317,7 +319,7 @@ begin
     select 1 from pg_trigger where tgname = 'gym_pilot_user_session_set_updated_at'
   ) then
     create trigger gym_pilot_user_session_set_updated_at
-    before update on public.gym_pilot_user_session
+    before update on public.user_workout
     for each row execute function public.set_updated_at();
   end if;
 

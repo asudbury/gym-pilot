@@ -160,7 +160,7 @@
 | created_at | string                              | Creation timestamp     |
 | updated_at | string                              | Last update timestamp  |
 
-### User session — gym_pilot_user_session
+### User session — user_workout
 
 | Field            | Type                                                           | Notes                      |
 | ---------------- | -------------------------------------------------------------- | -------------------------- |
@@ -208,7 +208,7 @@ The shared Supabase helpers in [packages/shared/src/gymPilotSupabase.ts](package
 | Plans and assignments   | `select`, `insert`, `upsert`, `delete` against remote rows                                                                                                                                                                                                                                                                                                                                            | `gym_pilot_plan`, `assignment`                                                         |
 | Favourites and folders  | `select`, `insert`, `upsert`, `delete` against remote rows                                                                                                                                                                                                                                                                                                                                            | `favourite_folder`, `favourite`                                              |
 | Activity logging        | `recordSupabaseUserActivity()` uses `insert` into `user_activity`; it skips inserts when the app is running on localhost-style hosts                                                                                                                                                                                                                                                        | `user_activity`                                                                        |
-| Session recording       | `saveTimetableAttendance()` inserts role-based session records with optional notes and a 1-5 rating for a session/class                                                                                                                                                                                                                                                                               | `gym_pilot_user_session`                                                                         |
+| Session recording       | `saveTimetableAttendance()` inserts role-based session records with optional notes and a 1-5 rating for a session/class                                                                                                                                                                                                                                                                               | `user_workout`                                                                         |
 | Workout items           | `loadWorkoutItemsForSession()` and `saveWorkoutItemsForSession()` read/write ordered workout rows for a session                                                                                                                                                                                                                                                                                       | `gym_pilot_user_session_workout_item`                                                            |
 | Error and audit logging | `persistErrorLog()` and `persistAuditLog()` write to `error_log` and `audit_log` only when the matching app settings are enabled                                                                                                                                                                                                                                                  | `error_log`, `audit_log`                                                     |
 
@@ -224,9 +224,9 @@ erDiagram
     auth_users ||--o{ gym_pilot_plan : owns
     auth_users ||--o{ assignment : creates
     auth_users ||--o{ user_activity : records
-    auth_users ||--o{ gym_pilot_user_session : records
+    auth_users ||--o{ user_workout : records
     gym_pilot_plan ||--o{ assignment : uses
-    gym_pilot_user_session ||--o{ gym_pilot_user_session_workout_item : contains
+    user_workout ||--o{ gym_pilot_user_session_workout_item : contains
 
     app_state {
         uuid id
@@ -315,7 +315,7 @@ erDiagram
         timestamptz created_at
     }
 
-    gym_pilot_user_session {
+    user_workout {
         uuid id
         uuid user_id
         text session_type

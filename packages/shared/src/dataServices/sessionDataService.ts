@@ -1,3 +1,4 @@
+import { TableNames } from "@gym-pilot/shared/src/dataServices/tableNames";
 import { logger } from "../logging";
 import { loadSupabaseProfileSnapshot } from "../profilePersistence";
 import { saveWorkoutItemsForSession } from "../sessionWorkoutPersistence";
@@ -137,7 +138,7 @@ export function getSessionHistorySelectColumns() {
 }
 
 export function getSessionTableName() {
-  return "gym_pilot_user_session";
+  return TableNames.UserSession;
 }
 
 export function getSessionBookingTableName() {
