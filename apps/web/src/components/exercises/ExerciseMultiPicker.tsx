@@ -1,10 +1,10 @@
-import { useState } from 'react'
-import { formatLabel } from '../../utils/formatUtils'
-import { Button } from '../ui/Button'
-import { DecorativeIcon } from '../ui/DecorativeIcon'
-import { ExercisePickerBase } from './ExercisePickerBase'
-import quickPickExercises from '../../constants/quickPickExercises.json' // This is fine, it's data
-import type { Exercise } from '@gym-pilot/shared'
+import type { Exercise } from '@gym-pilot/shared';
+import { useState } from 'react';
+import quickPickExercises from '../../constants/quickPickExercises.json'; // This is fine, it's data
+import { formatLabel } from '../../utils/formatUtils';
+import { Button } from '../ui/Button';
+import { DecorativeIcon } from '../ui/DecorativeIcon';
+import { ExercisePickerBase } from './ExercisePickerBase';
 
 type ExerciseSearchMultiPickerProps = {
   isOpen: boolean
@@ -30,7 +30,7 @@ export function ExerciseMultiPicker({
   const handleSelectExercises = () => {
     onSelectExercises(selectedExercises)
     setSelectedExercises([])
-    onCancel() // Call the parent's onCancel to close the picker after selection.
+    onCancel()
   }
 
   const handleCancel = () => {
@@ -44,26 +44,34 @@ export function ExerciseMultiPicker({
       onCancel={handleCancel}
       onSelect={handleToggleExercise}
       header={
-        // The header content is now only the selected exercises and quick pick buttons.
-        // The "Add exercises" button is moved to the footer for better mobile accessibility.
-        <div className="flex flex-col">
-          {selectedExercises.length > 0 && (
-            <div className="flex flex-wrap gap-2 border-b border-slate-200 p-4">
-              {selectedExercises.map((exercise) => (
-                <span
-                  key={exercise.id}
-                  className="flex items-center gap-1 rounded-full bg-blue-100 px-3 py-1 text-sm font-medium text-blue-800"
-                >
-                  {formatLabel(exercise.name)}
-                  <button
-                    type="button" // Added type for accessibility
-                    className="flex h-5 w-5 items-center justify-center rounded-full text-blue-500 hover:bg-blue-200 hover:text-blue-700" // Increased tap target area
-                    onClick={() => handleToggleExercise(exercise)}
+          <div className="flex flex-col">
+            {selectedExercises.length > 0 && (
+              <div className="flex flex-wrap gap-2 border-b border-slate-200 p-4">
+                {selectedExercises.map((exercise) => (
+                  <span
+                    key={exercise.id}
+                    className="flex items-center gap-1 rounded-full bg-blue-100 px-3 py-1 text-sm font-medium text-blue-800"
                   >
-                    x
-                  </button>
-                </span>
-              ))}
+                    {formatLabel(exercise.name)}
+                    <button
+                      type="button" 
+                      className="flex h-5 w-5 items-center justify-center rounded-full text-blue-500 hover:bg-blue-200 hover:text-blue-700" // Increased tap target area
+                      onClick={() => handleToggleExercise(exercise)}
+                    >
+                      x
+                    </button>
+                  </span>
+                ))}
+
+          <Button
+            tone="emerald"
+            onClick={handleSelectExercises}
+            disabled={selectedExercises.length === 0}
+            className="w-full" // Make button full width for better mobile usability
+          >
+            Add {selectedExercises.length} exercise
+            {selectedExercises.length === 1 ? '' : 's'}
+          </Button>
             </div>
           )}
           <div className="flex flex-wrap gap-2 border-b border-slate-200 p-4">

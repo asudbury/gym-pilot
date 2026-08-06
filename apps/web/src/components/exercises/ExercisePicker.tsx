@@ -1,7 +1,7 @@
-import type { Exercise } from '@gym-pilot/shared'
-import { formatLabel } from '../../utils/formatUtils'
-import { DecorativeIcon } from '../ui/DecorativeIcon'
-import { ExercisePickerBase } from './ExercisePickerBase'
+import type { Exercise } from '@gym-pilot/shared';
+import { formatLabel } from '../../utils/formatUtils';
+import { DecorativeIcon } from '../ui/DecorativeIcon';
+import { ExercisePickerBase } from './ExercisePickerBase';
 
 export interface ExercisePickerProps {
   isOpen: boolean
@@ -23,14 +23,9 @@ export function ExercisePicker({
       {...rest}
     >
       {(suggestions, renderSuggestion, _triggerPreview) => (
-        // Destructure _triggerPreview to match signature
         <>
-          {' '}
-          {/* Wrap the mapped elements in a React.Fragment */}
           {suggestions.map((exercise: Exercise) =>
-            // Explicitly type exercise
             renderSuggestion(exercise, (exercise: Exercise) => (
-              // Explicitly type exercise
               <button
                 type="button"
                 onClick={() => handleSelect(exercise)}
