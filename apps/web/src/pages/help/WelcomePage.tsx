@@ -1,21 +1,21 @@
-import { useEffect, useMemo, useState } from 'react'
-import { useNavigate, useSearchParams, Link } from 'react-router-dom'
 import {
-  loadSupabaseProfileTermsAcceptance,
-  logger,
-  recordSupabaseUserActivity,
-  saveSupabaseProfileTermsAcceptance,
-  signOutFromSupabase,
-} from '@gym-pilot/shared'
-import { loadSupabaseProfileFlag } from '@gym-pilot/shared'
-import { PageCard } from '../../components/PageCard'
-import { Heading1 } from '../../components/Typography'
-import { appTokens } from '../../constants/tokens'
-import { useAuth } from '../../auth/AuthContext'
-import { DecorativeIcon } from '../../components/ui/DecorativeIcon'
-import { Button } from '../../components/ui/Button'
-import { recordWelcomeJourneyActivity } from '../../features/auth/domain/welcomeJourneyLogging'
-import { StatusMessageNotification } from '../../components/ui/StatusMessageNotification'
+    loadSupabaseProfileFlag,
+    loadSupabaseProfileTermsAcceptance,
+    logger,
+    recordSupabaseUserActivity,
+    saveSupabaseProfileTermsAcceptance,
+    signOutFromSupabase,
+} from '@gym-pilot/shared';
+import { useEffect, useMemo, useState } from 'react';
+import { Link, useNavigate, useSearchParams } from 'react-router-dom';
+import { useAuth } from '../../auth/AuthContext';
+import { PageCard } from '../../components/PageCard';
+import { Heading1 } from '../../components/Typography';
+import { Button } from '../../components/ui/Button';
+import { DecorativeIcon } from '../../components/ui/DecorativeIcon';
+import { StatusMessageNotification } from '../../components/ui/StatusMessageNotification';
+import { appTokens } from '../../constants/tokens';
+import { recordWelcomeJourneyActivity } from '../../features/auth/domain/welcomeJourneyLogging';
 
 export function WelcomePage() {
   const navigate = useNavigate()
@@ -225,21 +225,18 @@ export function WelcomePage() {
             tone="emerald"
             onClick={handleAccept}
             disabled={isAccepting || hasAccepted}
-            className="shadow-sm transition hover:shadow-md disabled:cursor-not-allowed disabled:border-emerald-300 disabled:bg-emerald-300 disabled:text-emerald-950"
-          >
+            >
             {isAccepting
               ? 'Saving…'
               : hasAccepted
                 ? 'Accepted'
                 : 'Accept and continue'}
           </Button>
-          <button
-            type="button"
-            onClick={handleDecline}
-            className="rounded-full border border-slate-300 bg-white px-4 py-2.5 text-sm font-medium text-slate-700 transition hover:bg-slate-50"
-          >
-            Decline and log out
-          </button>
+          <Button
+            tone="default"
+            onClick={handleDecline}>
+            Decline and log out    
+          </Button>
         </div>
 
         <div className="mt-4 text-sm">

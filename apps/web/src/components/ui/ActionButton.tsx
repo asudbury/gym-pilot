@@ -1,7 +1,7 @@
-import { NavLink } from 'react-router-dom'
-import { getToneClass, type ToneName } from '../toneClasses'
-import { DecorativeIcon, type DecorativeIconProps } from './DecorativeIcon'
-import { DesktopOnly, NotOnDesktop } from '../visibility/DeviceVisibility'
+import { NavLink } from 'react-router-dom';
+import { getToneClass, type ToneName } from '../toneClasses';
+import { DesktopOnly, NotOnDesktop } from '../visibility/DeviceVisibility';
+import { DecorativeIcon, type DecorativeIconProps } from './DecorativeIcon';
 
 const iconClass = 'w-5 h-5 shrink-0 mr-2 sm:mr-1'
 
