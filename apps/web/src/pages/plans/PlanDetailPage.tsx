@@ -1,17 +1,17 @@
-import { useMemo, useState } from 'react'
-import { Link, useParams } from 'react-router-dom'
-import { BackLink } from '../../components/ui/BackLink'
-import { getToneClass } from '../../components/toneClasses'
-import { usePlan } from '@gym-pilot/shared'
-import { PageCard } from '../../components/PageCard'
-import { PageLayout } from '../../layouts/PageLayout'
-import { Heading1, Paragraph } from '../../components/Typography'
-import { ExerciseDetailsCard } from '../../components/exercises/ExerciseDetailsCard'
+import { usePlan } from '@gym-pilot/shared';
+import { useMemo, useState } from 'react';
+import { Link, useParams } from 'react-router-dom';
+import { PageCard } from '../../components/PageCard';
+import { Heading1, Paragraph } from '../../components/Typography';
+import { ExerciseDetailsCard } from '../../components/exercises/ExerciseDetailsCard';
+import { BackLink } from '../../components/ui/BackLink';
+import { Button } from '../../components/ui/Button';
 import {
-  resolveExerciseForPlanItem,
-  resolvePlanDetailViewModel,
-} from '../../features/plans/domain/planDetail'
-import { resolvePlanRouteSelection } from '../../features/plans/domain/planRoute'
+    resolveExerciseForPlanItem,
+    resolvePlanDetailViewModel,
+} from '../../features/plans/domain/planDetail';
+import { resolvePlanRouteSelection } from '../../features/plans/domain/planRoute';
+import { PageLayout } from '../../layouts/PageLayout';
 
 export function PlanDetailPage() {
   const { planSlug } = useParams()
@@ -59,12 +59,9 @@ export function PlanDetailPage() {
             </Heading1>
           </div>
           <div className="flex flex-wrap gap-2">
-            <Link
-              to={viewModel.editPath}
-              className={getToneClass('blue', 'px-4 py-2 text-sm font-medium')}
-            >
+            <Button as={Link} to={viewModel.editPath} tone="blue" className="px-4 py-2 text-sm font-medium">
               {viewModel.editLabel}
-            </Link>
+            </Button>
             <BackLink to={viewModel.backPath} label={viewModel.backLabel} />
           </div>
         </div>

@@ -1,6 +1,6 @@
-import { Link } from 'react-router-dom'
-import { getToneClass } from '../../components/toneClasses'
-import { PageLayout } from '../../layouts/PageLayout'
+import { Link } from 'react-router-dom';
+import { Button } from '../../components/ui/Button';
+import { PageLayout } from '../../layouts/PageLayout';
 
 export function InternalServerErrorPage() {
   return (
@@ -11,9 +11,9 @@ export function InternalServerErrorPage() {
         <p className="mt-4 mb-4">
           Something went wrong on our end. Please try again later.
         </p>
-        <Link to="/" className={getToneClass('blue')}>
+        <Button as={Link} to="/" tone="blue">
           Go Home
-        </Link>
+        </Button>
       </div>
     </PageLayout>
   )

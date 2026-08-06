@@ -1,12 +1,11 @@
-import { Link } from 'react-router-dom'
-import { Button } from '../components/ui/Button'
-import { getToneClass } from '../components/toneClasses'
-import { usePlan } from '@gym-pilot/shared'
-import { PageCard } from '../components/PageCard'
-import { PageLayout } from '../layouts/PageLayout'
-import { PageCardLayout } from '../layouts/PageCardLayout'
-import { CallToAction } from '../layouts/CallToAction'
-import { resolveAssignmentListViewModels } from '../features/plans/domain/planList'
+import { usePlan } from '@gym-pilot/shared';
+import { Link } from 'react-router-dom';
+import { PageCard } from '../components/PageCard';
+import { Button } from '../components/ui/Button';
+import { resolveAssignmentListViewModels } from '../features/plans/domain/planList';
+import { CallToAction } from '../layouts/CallToAction';
+import { PageCardLayout } from '../layouts/PageCardLayout';
+import { PageLayout } from '../layouts/PageLayout';
 
 export function SessionTemplatesPage() {
   const { visibleAssignments, deleteAssignment } = usePlan()
@@ -25,15 +24,9 @@ export function SessionTemplatesPage() {
           <CallToAction
             title="Manage templates"
             action={
-              <Link
-                to="/session-templates/create"
-                className={getToneClass(
-                  'blue',
-                  'inline-flex items-center rounded-lg px-4 py-2 text-sm font-medium',
-                )}
-              >
+              <Button as={Link} to="/session-templates/create" tone="blue">
                 Create a new template
-              </Link>
+              </Button>
             }
           />
         </PageCardLayout>
@@ -44,15 +37,9 @@ export function SessionTemplatesPage() {
           description={description}
         >
           <div className="flex justify-end">
-            <Link
-              to="/session-templates/create"
-              className={getToneClass(
-                'blue',
-                'inline-flex items-center rounded-lg px-4 py-2 text-sm font-medium',
-              )}
-            >
+            <Button as={Link} to="/session-templates/create" tone="blue">
               Create a new template
-            </Link>
+            </Button>
           </div>
           <div className="grid gap-4 md:grid-cols-2">
             {cards.map((card) => {
@@ -76,16 +63,13 @@ export function SessionTemplatesPage() {
                       </p>
                     </div>
                     <div className="flex flex-col gap-2 sm:flex-row sm:items-center">
-                      <Link to={card.viewPath} className={getToneClass('chip')}>
+                      <Button as={Link} to={card.viewPath} tone="chip">
                         View
-                      </Link>
-                      <Link to={card.editPath} className={getToneClass('chip')}>
+                      </Button>
+                      <Button as={Link} to={card.editPath} tone="chip">
                         Update
-                      </Link>
-                      <Button
-                        tone="chip-rose"
-                        onClick={() => deleteAssignment(assignment.id)}
-                      >
+                      </Button>
+                      <Button tone="chip-rose" onClick={() => deleteAssignment(assignment.id)}>
                         Remove
                       </Button>
                     </div>

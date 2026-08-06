@@ -1,10 +1,11 @@
-import { useState } from 'react'
-import { useLocation, useNavigate } from 'react-router-dom'
-import { ActivityLogView, AuditLogView, ErrorLogView } from './logs'
+import { useState } from 'react';
+import { useLocation, useNavigate } from 'react-router-dom';
+import { ActivityLogView, AuditLogView, ErrorLogView } from './logs';
 ///import { StatusMessageNotification } from '../../components/ui/StatusMessageNotification';
-import { Button } from '../../components/ui/Button'
-import { PageCardLayout } from '../../layouts/PageCardLayout'
-import { PageLayout } from '../../layouts/PageLayout'
+import { Button } from '../../components/ui/Button';
+import { appTokens } from '../../constants/tokens';
+import { PageCardLayout } from '../../layouts/PageCardLayout';
+import { PageLayout } from '../../layouts/PageLayout';
 
 type LogViewMode = 'error' | 'audit' | 'activity' | 'combined'
 
@@ -85,7 +86,7 @@ export function AdminLogsPage({ view = 'error' }: AdminLogsPageProps) {
               </Button>
             </div>
             <div className="flex items-center gap-2">
-              <label className="flex items-center gap-2 rounded-full border border-slate-300 bg-white px-3 py-1.5 text-sm text-slate-700 shadow-sm">
+              <label className={`flex items-center gap-2 ${appTokens.pill}`}>
                 <span className="font-medium">Filter</span>
                 <input
                   type="text"

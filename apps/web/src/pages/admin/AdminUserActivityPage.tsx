@@ -1,21 +1,22 @@
 import {
-  getSupabaseClient,
-  listSupabaseAuthUsers,
-  loadSupabaseProfileRoles,
-  logger,
-} from '@gym-pilot/shared'
-import { TableNames } from '@gym-pilot/shared/src/dataServices/tableNames'
-import { useEffect, useState } from 'react'
-import { useNavigate, useParams } from 'react-router-dom'
-import { AdminSectionShell } from '../../components/admin/AdminSectionShell'
-import { Button } from '../../components/ui/Button'
-import { getDisplayEmail } from '../../features/admin/domain/adminUtils'
+    getSupabaseClient,
+    listSupabaseAuthUsers,
+    loadSupabaseProfileRoles,
+    logger,
+} from '@gym-pilot/shared';
+import { TableNames } from '@gym-pilot/shared/src/dataServices/tableNames';
+import { useEffect, useState } from 'react';
+import { useNavigate, useParams } from 'react-router-dom';
+import { AdminSectionShell } from '../../components/admin/AdminSectionShell';
+import { Button } from '../../components/ui/Button';
+import { appTokens } from '../../constants/tokens';
+import { getDisplayEmail } from '../../features/admin/domain/adminUtils';
 import {
-  resolveUserActivityViewModel,
-  type UserActivityProfileViewModel,
-  type UserActivityRowViewModel,
-} from '../../features/admin/domain/userActivity'
-import { renderDashboardTimestamp } from '../../features/dashboard/domain/dashboardUtils'
+    resolveUserActivityViewModel,
+    type UserActivityProfileViewModel,
+    type UserActivityRowViewModel,
+} from '../../features/admin/domain/userActivity';
+import { renderDashboardTimestamp } from '../../features/dashboard/domain/dashboardUtils';
 
 const formatStoredTimestamp = (value?: string | null) => {
   if (!value) {
@@ -230,15 +231,13 @@ export function AdminUserActivityPage() {
                 </p>
                 <label className="flex items-center gap-2 text-sm text-slate-600">
                   <span className="font-medium">Friendly name</span>
-                  <input
-                    type="text"
-                    value={friendlyNameFilter}
-                    onChange={(event) =>
-                      setFriendlyNameFilter(event.target.value)
-                    }
-                    placeholder="Filter activities"
-                    className="rounded-full border border-slate-300 bg-white px-3 py-1.5 text-sm text-slate-700 shadow-sm"
-                  />
+                   <input
+                     type="text"
+                     value={friendlyNameFilter}
+                     onChange={(event) => setFriendlyNameFilter(event.target.value)}
+                     placeholder="Filter activities"
+                     className={`w-full ${appTokens.pill} text-sm text-slate-700`}
+                   />
                 </label>
               </div>
 

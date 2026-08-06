@@ -1,12 +1,11 @@
-import { usePlan } from '@gym-pilot/shared'
-import { Link } from 'react-router-dom'
-import { PageCard } from '../../components/PageCard'
-import { getToneClass } from '../../components/toneClasses'
-import { Button } from '../../components/ui/Button'
-import { resolvePlanListViewModels } from '../../features/plans/domain/planList'
-import { CallToAction } from '../../layouts/CallToAction'
-import { PageCardLayout } from '../../layouts/PageCardLayout'
-import { PageLayout } from '../../layouts/PageLayout'
+import { usePlan } from '@gym-pilot/shared';
+import { Link } from 'react-router-dom';
+import { PageCard } from '../../components/PageCard';
+import { Button } from '../../components/ui/Button';
+import { resolvePlanListViewModels } from '../../features/plans/domain/planList';
+import { CallToAction } from '../../layouts/CallToAction';
+import { PageCardLayout } from '../../layouts/PageCardLayout';
+import { PageLayout } from '../../layouts/PageLayout';
 
 export function PlansPage() {
   const { visiblePlans, deletePlan } = usePlan()
@@ -26,17 +25,7 @@ export function PlansPage() {
         >
           <CallToAction
             title="Manage plans"
-            action={
-              <Link
-                to="/plans/new"
-                className={getToneClass(
-                  'blue',
-                  'inline-flex items-center rounded-lg px-4 py-2 text-sm font-medium',
-                )}
-              >
-                Create a new plan
-              </Link>
-            }
+            action={<Button as={Link} to="/plans/new" tone="blue">Create a new plan</Button>}
           />
         </PageCardLayout>
       ) : (
@@ -46,15 +35,9 @@ export function PlansPage() {
           description={description}
         >
           <div className="flex justify-end">
-            <Link
-              to="/plans/new"
-              className={getToneClass(
-                'blue',
-                'inline-flex items-center rounded-lg px-4 py-2 text-sm font-medium',
-              )}
-            >
+            <Button as={Link} to="/plans/new" tone="blue">
               Create a new plan
-            </Link>
+            </Button>
           </div>
           <div className="grid gap-4 md:grid-cols-2">
             {cards.map((card) => {
@@ -76,12 +59,12 @@ export function PlansPage() {
                       </p>
                     </div>
                     <div className="flex flex-col gap-2 sm:flex-row sm:items-center">
-                      <Link to={card.viewPath} className={getToneClass('chip')}>
+                      <Button as={Link} to={card.viewPath} tone="chip">
                         View
-                      </Link>
-                      <Link to={card.editPath} className={getToneClass('chip')}>
+                      </Button>
+                      <Button as={Link} to={card.editPath} tone="chip">
                         Update
-                      </Link>
+                      </Button>
                       <Button
                         tone="chip-rose"
                         onClick={() => deletePlan(plan.id)}

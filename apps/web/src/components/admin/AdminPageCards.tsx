@@ -1,7 +1,7 @@
-import { Link } from 'react-router-dom'
-import { CallToAction } from '../../layouts/CallToAction'
-import { getToneClass } from '../toneClasses'
-import { type AdminActionCard } from '../../features/admin/domain/adminUtils'
+import { Link } from 'react-router-dom';
+import { type AdminActionCard } from '../../features/admin/domain/adminUtils';
+import { CallToAction } from '../../layouts/CallToAction';
+import { Button } from '../ui/Button';
 
 type AdminPageCardsProps = {
   cards: AdminActionCard[]
@@ -15,17 +15,7 @@ export function AdminPageCards({ cards }: AdminPageCardsProps) {
           key={card.href}
           title={card.title}
           description={card.description}
-          action={
-            <Link
-              to={card.href}
-              className={getToneClass(
-                'blue',
-                'inline-flex items-center rounded-lg px-4 py-2 text-sm font-medium',
-              )}
-            >
-              {card.label}
-            </Link>
-          }
+          action={<Button as={Link} to={card.href} tone="blue">{card.label}</Button>}
         />
       ))}
     </div>

@@ -1,8 +1,8 @@
-import type { ReactNode } from 'react'
-import { NavLink } from 'react-router-dom'
-import { CallToAction } from '../../layouts/CallToAction'
-import { DecorativeIcon, type DecorativeIconProps } from '../ui/DecorativeIcon'
-import { getToneClass } from '../toneClasses'
+import type { ReactNode } from 'react';
+import { NavLink } from 'react-router-dom';
+import { CallToAction } from '../../layouts/CallToAction';
+import { Button } from '../ui/Button';
+import { DecorativeIcon, type DecorativeIconProps } from '../ui/DecorativeIcon';
 
 type DashboardWidgetProps = {
   title: string
@@ -22,15 +22,14 @@ export function DashboardWidget({
   children,
 }: DashboardWidgetProps) {
   const action = to ? (
-    <NavLink
+    <Button
+      as={NavLink}
       to={to}
-      className={getToneClass(
-        tone === 'default' ? 'blue' : tone,
-        'flex w-full items-center justify-center rounded-lg px-4 py-3 text-base font-medium sm:w-auto sm:py-2 sm:text-sm',
-      )}
+      tone={tone === 'default' ? 'blue' : (tone as any)}
+      className="flex w-full items-center justify-center rounded-lg px-4 py-3 text-base font-medium sm:w-auto sm:py-2 sm:text-sm"
     >
       Open
-    </NavLink>
+    </Button>
   ) : null
 
   const cardContent = (

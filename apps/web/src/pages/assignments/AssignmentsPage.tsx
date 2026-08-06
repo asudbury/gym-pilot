@@ -1,12 +1,11 @@
-import { usePlan } from '@gym-pilot/shared'
-import { Link } from 'react-router-dom'
-import { PageCard } from '../../components/PageCard'
-import { getToneClass } from '../../components/toneClasses'
-import { Button } from '../../components/ui/Button'
-import { resolveAssignmentListViewModels } from '../../features/plans/domain/planList'
-import { CallToAction } from '../../layouts/CallToAction'
-import { PageCardLayout } from '../../layouts/PageCardLayout'
-import { PageLayout } from '../../layouts/PageLayout'
+import { usePlan } from '@gym-pilot/shared';
+import { Link } from 'react-router-dom';
+import { PageCard } from '../../components/PageCard';
+import { Button } from '../../components/ui/Button';
+import { resolveAssignmentListViewModels } from '../../features/plans/domain/planList';
+import { CallToAction } from '../../layouts/CallToAction';
+import { PageCardLayout } from '../../layouts/PageCardLayout';
+import { PageLayout } from '../../layouts/PageLayout';
 
 export function AssignmentsPage() {
   const { visibleAssignments, deleteAssignment } = usePlan()
@@ -26,15 +25,9 @@ export function AssignmentsPage() {
           <CallToAction
             title="Manage assignments"
             action={
-              <Link
-                to="/assignments/new"
-                className={getToneClass(
-                  'blue',
-                  'inline-flex items-center rounded-lg px-4 py-2 text-sm font-medium',
-                )}
-              >
+              <Button as={Link} to="/assignments/new" tone="blue">
                 Create a new assignment
-              </Link>
+              </Button>
             }
           />
         </PageCardLayout>
@@ -45,15 +38,9 @@ export function AssignmentsPage() {
           description={description}
         >
           <div className="flex justify-end">
-            <Link
-              to="/assignments/new"
-              className={getToneClass(
-                'blue',
-                'inline-flex items-center rounded-lg px-4 py-2 text-sm font-medium',
-              )}
-            >
+            <Button as={Link} to="/assignments/new" tone="blue">
               Create a new assignment
-            </Link>
+            </Button>
           </div>
           <div className="grid gap-4 md:grid-cols-2">
             {cards.map((card) => {
@@ -77,12 +64,12 @@ export function AssignmentsPage() {
                       </p>
                     </div>
                     <div className="flex flex-col gap-2 sm:flex-row sm:items-center">
-                      <Link to={card.viewPath} className={getToneClass('chip')}>
+                      <Button as={Link} to={card.viewPath} tone="chip">
                         View
-                      </Link>
-                      <Link to={card.editPath} className={getToneClass('chip')}>
+                      </Button>
+                      <Button as={Link} to={card.editPath} tone="chip">
                         Update
-                      </Link>
+                      </Button>
                       <Button
                         tone="chip-rose"
                         onClick={() => deleteAssignment(assignment.id)}

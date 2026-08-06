@@ -1,6 +1,6 @@
-import { Link } from 'react-router-dom'
-import { getToneClass } from '../../components/toneClasses'
-import { PageLayout } from '../../layouts/PageLayout'
+import { Link } from 'react-router-dom';
+import { Button } from '../../components/ui/Button';
+import { PageLayout } from '../../layouts/PageLayout';
 
 export function NotFoundPage() {
   return (
@@ -11,9 +11,9 @@ export function NotFoundPage() {
         <p className="mt-4 mb-4">
           The page you are looking for does not exist.
         </p>
-        <Link to="/" className={getToneClass('blue')}>
+        <Button as={Link} to="/" tone="blue">
           Go Home
-        </Link>
+        </Button>
       </div>
     </PageLayout>
   )
