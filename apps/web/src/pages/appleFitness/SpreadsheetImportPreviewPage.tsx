@@ -332,14 +332,30 @@ export const SpreadsheetImportPreviewPage: React.FC = () => {
                               <p className="text-xs font-medium">
                                 Exercises ({payload.workout_items.length})
                               </p>
-                              <ul className="mt-1 list-disc pl-5 text-xs text-slate-600 dark:text-slate-400">
-                                {payload.workout_items.map((item) => (
-                                  <li
-                                    key={`${item.exercise_name}-${item.item_index}`}
-                                  >
-                                    {item.exercise_name}
-                                  </li>
-                                ))}
+                              <ul className="mt-1 list-disc space-y-1 pl-5 text-xs text-slate-600 dark:text-slate-400">
+                                {payload.workout_items.map((item) => {
+                                  const dataItems = [
+                                    item.sets ? `${item.sets} sets` : null,
+                                    item.reps ? `${item.reps} reps` : null,
+                                    item.weight,
+                                    item.notes,
+                                  ]
+                                    .filter(Boolean)
+                                    .join(' - ')
+
+                                  return (
+                                    <li
+                                      key={`${item.exercise_name}-${item.item_index}`}
+                                    >
+                                      <span>{item.exercise_name}</span>
+                                      {dataItems && (
+                                        <span className="ml-2 text-slate-500">
+                                          ({dataItems})
+                                        </span>
+                                      )}
+                                    </li>
+                                  )
+                                })}
                               </ul>
                             </div>
 

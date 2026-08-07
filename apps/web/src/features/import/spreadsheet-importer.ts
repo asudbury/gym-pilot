@@ -10,8 +10,25 @@ export interface ParsedSession {
   exercises: ParsedExercise[]
   time?: string
   calories?: string
+  energy?: number
+  unit?: string
   warmUp?: string
   stretch?: string
+}
+
+function parseEnergy(value: string): { energy?: number; unit?: string } {
+  if (!value) {
+    return {}
+  }
+  const kcalMatch = value.match(/(\d+)\s*(kcal|kal)/i)
+  if (kcalMatch) {
+    return { energy: parseInt(kcalMatch[1], 10), unit: 'kcal' }
+  }
+  const kjMatch = value.match(/(\d+)\s*kj/i)
+  if (kjMatch) {
+    return { energy: parseInt(kjMatch[1], 10), unit: 'kj' }
+  }
+  return {}
 }
 
 function parseTable(table: string): ParsedSession[] {
@@ -57,7 +74,15 @@ function parseTable(table: string): ParsedSession[] {
           const parts = value.trim().split(/\s+/)
           sessions[index].time = parts[0]
           if (parts.length > 1) {
-            sessions[index].calories = parts.slice(1).join(' ')
+            const calorieString = parts.slice(1).join(' ')
+            sessions[index].calories = calorieString
+            const { energy, unit } = parseEnergy(calorieString)
+            if (energy) {
+              sessions[index].energy = energy
+            }
+            if (unit) {
+              sessions[index].unit = unit
+            }
           }
         }
       })

@@ -304,16 +304,6 @@ export function RecordSessionPage() {
               />
             </label>
 
-            {/* <label className="mt-4 block text-sm text-slate-700">
-              <span className="font-medium">End time</span>
-              <input
-                type="datetime-local"
-                value={endAt}
-                onChange={(event) => setEndAt(event.target.value)}
-                className={`${appTokens.input} mt-1 w-full`}
-              />
-            </label> */}
-
             <label className="mt-4 block text-sm text-slate-700">
               <span className="font-medium pl-1">Active kWh</span>
               <input

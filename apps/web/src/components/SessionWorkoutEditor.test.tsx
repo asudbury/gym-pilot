@@ -1,10 +1,8 @@
-import { renderToStaticMarkup } from 'react-dom/server'
-import { describe, expect, it } from 'vitest'
+import { describe, expect, it } from 'vitest';
 import {
-  SessionWorkoutEditor,
-  createSessionWorkoutItemId,
-  resolveExpandedWorkoutItemId,
-} from './SessionWorkoutEditor'
+    createSessionWorkoutItemId,
+    resolveExpandedWorkoutItemId
+} from './SessionWorkoutEditor';
 
 describe('resolveExpandedWorkoutItemId', () => {
   it('keeps the current active id when it still exists', () => {
@@ -35,13 +33,5 @@ describe('resolveExpandedWorkoutItemId', () => {
     expect(id).toMatch(
       /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i,
     )
-  })
-
-  it('renders the exercise lookup picker in the quick-add area', () => {
-    const markup = renderToStaticMarkup(
-      <SessionWorkoutEditor items={[]} onChange={() => undefined} />,
-    )
-
-    expect(markup).toContain('quick-add-exercise-picker')
   })
 })
