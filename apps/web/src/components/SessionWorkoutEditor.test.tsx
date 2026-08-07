@@ -1,8 +1,8 @@
-import { describe, expect, it } from 'vitest';
+import { describe, expect, it } from 'vitest'
 import {
-    createSessionWorkoutItemId,
-    resolveExpandedWorkoutItemId
-} from './SessionWorkoutEditor';
+  createSessionWorkoutItemId,
+  resolveExpandedWorkoutItemId,
+} from './SessionWorkoutEditor'
 
 describe('resolveExpandedWorkoutItemId', () => {
   it('keeps the current active id when it still exists', () => {
