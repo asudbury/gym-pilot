@@ -1,4 +1,4 @@
-import type { Tables } from "./databaseTypes";
+import type { Tables, TablesInsert } from "./databaseTypes";
 import type { TableNames } from "./tableNames";
 
 export type AppSetting = Tables<typeof TableNames.AppSetting>;
@@ -9,9 +9,21 @@ export type ErrorLog = Tables<typeof TableNames.ErrorLog>;
 export type Favourite = Tables<typeof TableNames.Favourite>;
 export type FavouriteFolder = Tables<typeof TableNames.FavouriteFolder>;
 export type ImportedWorkout = Tables<typeof TableNames.ImportedWorkout>;
+export type WorkoutTemplate = Tables<typeof TableNames.WorkoutTemplate>;
+export type WorkoutTemplateExercise = Tables<
+  typeof TableNames.WorkoutTemplateExercise
+>;
+export type WorkoutTemplateInsert = TablesInsert<
+  typeof TableNames.WorkoutTemplate
+>;
+export type WorkoutTemplateExerciseInsert = TablesInsert<
+  typeof TableNames.WorkoutTemplateExercise
+>;
 export type Plan = Tables<typeof TableNames.Plan>;
 export type Profile = Tables<typeof TableNames.Profile>;
 export type UserActivity = Tables<typeof TableNames.UserActivity>;
 export type UserRole = Tables<typeof TableNames.UserRole>;
 export type UserSession = Tables<typeof TableNames.UserSession>;
-export type UserSessionWorkoutItem = Tables<typeof TableNames.UserSessionWorkoutItem>;
+export type UserSessionWorkoutItem = Tables<
+  typeof TableNames.UserSessionWorkoutItem
+>;

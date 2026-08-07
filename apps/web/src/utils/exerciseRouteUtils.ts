@@ -10,11 +10,18 @@ function slugify(value: string) {
     .replace(/(^-|-$)/g, '')
 }
 
-export function getExerciseSlug(exercise: { id: string; name: string }) {
-  const slug = slugify(formatLabel(exercise.name))
+export function getExerciseSlug(exercise: {
+  id: string
+  name?: string | null
+}) {
+  const label = exercise.name ?? exercise.id
+  const slug = slugify(formatLabel(label))
   return slug || exercise.id
 }
 
-export function getExercisePath(exercise: { id: string; name: string }) {
+export function getExercisePath(exercise: {
+  id: string
+  name?: string | null
+}) {
   return `/exercise/${getExerciseSlug(exercise)}`
 }

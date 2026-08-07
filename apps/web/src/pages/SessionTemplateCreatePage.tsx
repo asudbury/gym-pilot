@@ -1,4 +1,5 @@
-import type { Exercise } from '@gym-pilot/shared'
+import type { Exercise, WorkoutTemplateInsert } from '@gym-pilot/shared'
+import { getSupabaseClient } from '@gym-pilot/shared'
 import clsx from 'clsx'
 import { useEffect, useState } from 'react'
 import { NavLink, useNavigate } from 'react-router-dom'
@@ -9,6 +10,7 @@ import { Heading1, Paragraph } from '../components/Typography'
 import { BackLink } from '../components/ui/BackLink'
 import { Button } from '../components/ui/Button'
 import { DecorativeIcon } from '../components/ui/DecorativeIcon'
+import { StatusMessageNotification } from '../components/ui/StatusMessageNotification'
 import { PageLayout } from '../layouts/PageLayout'
 import { getExercisePath } from '../utils/exerciseRouteUtils'
 import { formatLabel } from '../utils/formatUtils'
@@ -35,6 +37,79 @@ function SessionTemplateCreatePage() {
 
   const navigate = useNavigate()
   const isDesktop = useIsDesktop()
+  const [templateName, setTemplateName] = useState('')
+  const [templateDescription, setTemplateDescription] = useState('')
+  const [isSaving, setIsSaving] = useState(false)
+  const [error, setError] = useState<string | null>(null)
+
+  async function handleSaveTemplate() {
+    if (!templateName || selectedExercises.length === 0) {
+      return
+    }
+
+    setIsSaving(true)
+    try {
+      const client = getSupabaseClient()
+
+      // Ensure we set the current auth user id on the payload so the DB NOT NULL constraint is satisfied
+      const { data: authData, error: authErr } = await client.auth.getUser()
+
+      if (authErr || !authData?.user) {
+        console.error(
+          'Unable to determine current user for template save',
+          authErr,
+        )
+        setIsSaving(false)
+        return
+      }
+
+      const payload: WorkoutTemplateInsert = {
+        name: templateName,
+        description: templateDescription || null,
+        metadata: {},
+        user_id: authData.user.id,
+      }
+
+      const { data: insertedTemplates, error: insertError } = await client
+        .from('workout_template')
+        .insert(payload)
+        .select('*')
+        .single()
+
+      if (insertError || !insertedTemplates) {
+        setError(insertError?.message ?? 'Error inserting template')
+        setIsSaving(false)
+        return
+      }
+
+      const templateId = insertedTemplates.id
+
+      const exerciseRows = selectedExercises.map((ex, idx) => ({
+        template_id: templateId,
+        exercise_id: ex.id,
+        position: idx,
+        exercise_name: formatLabel(ex.name) || null,
+      }))
+
+      const { error: exInsertErr } = await client
+        .from('workout_template_exercise')
+        .insert(exerciseRows)
+
+      if (exInsertErr) {
+        setError(exInsertErr.message)
+        setIsSaving(false)
+        return
+      }
+
+      // Clear local cached selections and navigate back
+      localStorage.removeItem(LOCAL_STORAGE_KEY)
+      navigate('/session-templates')
+    } catch (err) {
+      setError('Unexpected error saving template')
+    } finally {
+      setIsSaving(false)
+    }
+  }
 
   useEffect(() => {
     if (moved) {
@@ -111,6 +186,26 @@ function SessionTemplateCreatePage() {
 
         <div className="mt-6 grid grid-cols-1 gap-6">
           <div>
+            <label className="block text-sm font-medium text-slate-700">
+              Template name
+            </label>
+            <input
+              value={templateName}
+              onChange={(e) => setTemplateName(e.target.value)}
+              className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm"
+              placeholder="e.g. Full body - Monday"
+            />
+            <label className="block text-sm font-medium text-slate-700 mt-3">
+              Description (optional)
+            </label>
+            <input
+              value={templateDescription}
+              onChange={(e) => setTemplateDescription(e.target.value)}
+              className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm"
+              placeholder="Notes about this template"
+            />
+          </div>
+          <div>
             <Button
               tone="blue"
               className="mr-2"
@@ -175,16 +270,26 @@ function SessionTemplateCreatePage() {
               )}
             </div>
           </div>
-        </div>
 
+          {error ? (
+            <StatusMessageNotification
+              message={error}
+              tone="error"
+              className="mt-2"
+            />
+          ) : null}
+        </div>
         <div className="mt-6">
           <div className="flex flex-wrap gap-2">
             <Button
               tone="emerald"
               className="w-fit rounded-full px-4 py-2.5 text-sm font-semibold transition disabled:cursor-not-allowed disabled:bg-slate-400"
-              onClick={() => navigate('/session-templates')}
+              onClick={handleSaveTemplate}
+              disabled={
+                isSaving || !templateName || selectedExercises.length === 0
+              }
             >
-              Save template
+              {isSaving ? 'Saving...' : 'Save template'}
             </Button>
             <Button
               tone="default"

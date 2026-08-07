@@ -59,6 +59,7 @@
 - Use explicit types for shared data structures and helper return values.
 - Prefer reusable domain types over ad-hoc inline object shapes.
 - Keep imports aligned with the new architecture: feature modules for domain logic, shared packages for shared contracts.
+ - Prefer DB-generated types from `packages/shared/src/dataServices` (use `Tables`, `TablesInsert`) for table shapes and inserts; avoid creating duplicate manual alias types.
 - Add JSDoc comments for exported functions, shared helpers, and service modules, especially in packages/shared, describing purpose, inputs, outputs, side effects, and important assumptions.
 - Prefer concise JSDoc blocks like `/** ... */` above exported symbols rather than leaving complex logic undocumented.
 

@@ -10,6 +10,7 @@ import { AssignmentDetailPage } from '../pages/assignments/AssignmentDetailPage'
 import { AssignmentsManagerPage } from '../pages/assignments/AssignmentsManagerPage'
 import { AssignmentsPage } from '../pages/assignments/AssignmentsPage'
 import { CreateAssignmentPage } from '../pages/assignments/CreateAssignmentPage'
+import HelpPage from '../pages/HelpPage'
 import { HomePage } from '../pages/HomePage'
 import { IconShowcasePage } from '../pages/IconShowcasePage'
 import { ImportedWorkoutAnalysisPage } from '../pages/ImportedWorkoutAnalysisPage'
@@ -20,6 +21,7 @@ import { RecordSessionPage } from '../pages/RecordSessionPage'
 import { SessionEditPage } from '../pages/SessionEditPage'
 import { SessionHistoryPage } from '../pages/SessionHistoryPage'
 import SessionTemplateCreatePage from '../pages/SessionTemplateCreatePage'
+import SessionTemplateEditPage from '../pages/SessionTemplateEditPage'
 import { SessionTemplatesPage } from '../pages/SessionTemplatesPage'
 import { TimetablePage } from '../pages/TimetablePage'
 export function createProtectedRoutes() {
@@ -72,6 +74,11 @@ export function createProtectedRoutes() {
         path="/session-templates/create"
         element={<SessionTemplateCreatePage />}
       />
+      <Route
+        path="/session-templates/:id/edit"
+        element={<SessionTemplateEditPage />}
+      />
+      <Route path="/help" element={<HelpPage />} />
       <Route path="/apple-fitness" element={<AppleFitnessPage />} />
       <Route
         path="/apple-fitness/import-spreadsheet"

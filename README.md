@@ -109,3 +109,40 @@ npm run sonar:analyze # run SonarQube analysis against the local instance
 - Dexie
 - TanStack Query
 - Vitest
+
+## Help — For Business Users
+
+This section is a short, non-technical guide describing what the product does and how to use it for planning, templates, and member assignments.
+
+- **Purpose:** Gym Pilot helps trainers and managers build repeatable workout plans from reusable workout templates, assign plans to members, and record session activity. It is designed to speed up programme creation and keep consistent workouts across staff.
+
+- **Core concepts:**
+	- **Workout Template:** a saved list of exercises (the building block). Templates snapshot exercise names and positions so they are stable.
+	- **Plan:** a collection of workout templates arranged into days/tabs and enriched with scheduling/assignment details.
+	- **Assignment:** a plan given to a user or cohort for a period of time.
+	- **Session:** a recorded training instance (actual performed workout) linked back to plan/template information for reporting.
+
+- **Common workflows (quick):**
+	1. Create a **Workout Template**: go to Templates → Create, add exercises, save. Templates are reusable across plans.
+ 2. Build a **Plan**: create a new plan, add templates (or individual exercises) into tabs/days, adjust ordering, then save.
+ 3. **Assign** a plan: from Plans, choose the plan and assign it to a member or group with start/end dates.
+ 4. **Record Sessions**: members and trainers record sessions; data is stored locally and optionally synced to Supabase.
+
+- **Admin tasks & roles:**
+	- Admins can manage user profiles, roles, and view/override templates or assignments.
+	- Be mindful of access: templates and plans are owned by the creator unless transferred.
+
+- **Data & migrations:**
+	- The app persists data locally and can sync to a Supabase backend. Database migrations live in `supabase/migrations` and are applied with `supabase db push`.
+	- Template rows include a snapshot of exercise names to keep historical accuracy when exercise catalog entries change.
+
+- **Tips for non-technical staff:**
+	- Use Templates for commonly repeated sessions (e.g., "Full Body — Monday").
+	- Encourage naming consistency so exported plans are readable.
+	- Use Favourites to store quick links to frequently used plans or templates.
+
+- **Support & contacts:**
+	- For product questions, contact the product owner or the operations lead (add your team's contact info here).
+	- For technical deployments or DB migrations, contact the engineering lead and reference the `supabase/migrations` folder.
+
+If you'd like, I can turn this into a dedicated `docs/help.md` page, or expand any workflow into step-by-step screenshots or a short video script.

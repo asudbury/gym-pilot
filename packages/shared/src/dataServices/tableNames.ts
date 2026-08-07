@@ -7,6 +7,8 @@ export const TableNames = {
   Favourite: "favourite",
   FavouriteFolder: "favourite_folder",
   ImportedWorkout: "imported_workout",
+  WorkoutTemplate: "workout_template",
+  WorkoutTemplateExercise: "workout_template_exercise",
   Plan: "gym_pilot_plan",
   Profile: "gym_pilot_profile",
   UserActivity: "user_activity",

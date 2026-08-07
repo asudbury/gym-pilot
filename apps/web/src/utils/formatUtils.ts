@@ -1,5 +1,6 @@
-export const formatLabel = (value: string) =>
-  value
+export const formatLabel = (value?: string | null) => {
+  const input = value ?? ''
+  return input
     .replace(/_/g, ' ')
     .split(/\s+/)
     .filter(Boolean)
@@ -14,3 +15,4 @@ export const formatLabel = (value: string) =>
       return word.charAt(0).toUpperCase() + word.slice(1).toLowerCase()
     })
     .join(' ')
+}
