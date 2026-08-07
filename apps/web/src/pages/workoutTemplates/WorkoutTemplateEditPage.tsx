@@ -1,16 +1,16 @@
-import { getSupabaseClient } from '@gym-pilot/shared'
-import { useEffect, useState } from 'react'
-import { Link, useNavigate, useParams } from 'react-router-dom'
-import { ExerciseMultiPicker } from '../../components/exercises/ExerciseMultiPicker'
-import { ItemControls } from '../../components/ItemControls'
-import { PageCard } from '../../components/PageCard'
-import { Heading1, Paragraph } from '../../components/Typography'
-import { BackLink } from '../../components/ui/BackLink'
-import { Button } from '../../components/ui/Button'
-import { PageLayout } from '../../layouts/PageLayout'
-import { getExercisePath } from '../../utils/exerciseRouteUtils'
-import { formatLabel } from '../../utils/formatUtils'
-import { useIsDesktop } from '../../utils/useMediaQuery'
+import { getSupabaseClient } from '@gym-pilot/shared';
+import { useEffect, useState } from 'react';
+import { Link, useNavigate, useParams } from 'react-router-dom';
+import { ExerciseMultiPicker } from '../../components/exercises/ExerciseMultiPicker';
+import { ItemControls } from '../../components/ItemControls';
+import { PageCard } from '../../components/PageCard';
+import { Heading1, Paragraph } from '../../components/Typography';
+import { BackLink } from '../../components/ui/BackLink';
+import { Button } from '../../components/ui/Button';
+import { PageLayout } from '../../layouts/PageLayout';
+import { getExercisePath } from '../../utils/exerciseRouteUtils';
+import { formatLabel } from '../../utils/formatUtils';
+import { useIsDesktop } from '../../utils/useMediaQuery';
 
 export default function WorkoutTemplateEditPage() {
   const { id } = useParams<{ id: string }>()
@@ -124,6 +124,70 @@ export default function WorkoutTemplateEditPage() {
     navigate('/workout-templates')
   }
 
+  async function handleCopy() {
+    if (!id) return
+    const client = getSupabaseClient()
+    if (!client) return
+
+    setStatusMessage(null)
+    const { data, error } = await client
+      .from('workout_template')
+      .select('*, workout_template_exercise(*)')
+      .eq('id', id)
+      .single()
+
+    if (error || !data) {
+      setStatusTone('error')
+      setStatusMessage(error?.message ?? 'Could not copy template')
+      return
+    }
+
+    // create new template with same name + "Copy" and set current user
+    const { data: authData, error: authErr } = await client.auth.getUser()
+
+    if (authErr || !authData?.user) {
+      setStatusTone('error')
+      setStatusMessage('Unable to determine current user for template copy')
+      return
+    }
+
+    const { data: newTemplate, error: insertError } = await client
+      .from('workout_template')
+      .insert({
+        name: `${data.name} Copy`,
+        description: data.description,
+        user_id: authData.user.id,
+      })
+      .select()
+      .single()
+
+    if (insertError || !newTemplate) {
+      setStatusTone('error')
+      setStatusMessage(insertError?.message ?? 'Could not copy template')
+      return
+    }
+
+    // copy exercises
+    if (data.workout_template_exercise?.length) {
+      const exerciseRows = data.workout_template_exercise.map((ex: any, idx: number) => ({
+        template_id: newTemplate.id,
+        exercise_id: ex.exercise_id,
+        exercise_name: ex.exercise_name,
+        position: idx,
+      }))
+      const { error: exerciseError } = await client
+        .from('workout_template_exercise')
+        .insert(exerciseRows)
+      if (exerciseError) {
+        setStatusTone('error')
+        setStatusMessage(exerciseError.message)
+        return
+      }
+    }
+
+    navigate(`/workout-templates/${newTemplate.id}/edit`)
+  }
+  
   async function removeExerciseRow(rowId: string) {
     const client = getSupabaseClient()
     if (!client) return
@@ -336,6 +400,11 @@ export default function WorkoutTemplateEditPage() {
               >
                 Cancel
               </Button>
+              <div className="ml-auto">
+                <Button onClick={handleCopy} tone="blue">
+                  Copy
+                </Button>
+              </div>
             </div>
           </div>
         )}

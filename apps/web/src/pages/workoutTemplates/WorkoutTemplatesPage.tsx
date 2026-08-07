@@ -1,16 +1,16 @@
 import { getSupabaseClient } from '@gym-pilot/shared';
-import { useEffect, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { PageCard } from '../../components/PageCard';
 import { Button } from '../../components/ui/Button';
-import { StatusMessageNotification } from '../../components/ui/StatusMessageNotification';
+import { formatDateTimeForDisplay } from '../../dateTimeFormatter';
 import { PageCardLayout } from '../../layouts/PageCardLayout';
 import { PageLayout } from '../../layouts/PageLayout';
 
 export function WorkoutTemplatesPage() {
   const [templates, setTemplates] = useState<any[]>([])
   const [loading, setLoading] = useState(false)
-  const [pendingDeleteId, setPendingDeleteId] = useState<string | null>(null)
+  const [filterText, setFilterText] = useState('')
 
   const description = 'Create a workout template to define exercises.'
 
@@ -43,36 +43,14 @@ export function WorkoutTemplatesPage() {
     void loadTemplates()
   }, [])
 
-  const [statusMessage, setStatusMessage] = useState<string | null>(null)
-  const [statusTone, setStatusTone] = useState<'info' | 'error' | 'success'>(
-    'info',
+
+  const filteredTemplates = useMemo(
+    () =>
+      templates.filter((t) =>
+        t.name.toLowerCase().includes(filterText.toLowerCase()),
+      ),
+    [templates, filterText],
   )
-
-  async function deleteTemplate(id: string) {
-    const client = getSupabaseClient()
-    if (!client) return
-
-    setStatusMessage(null)
-    try {
-      const { error } = await client
-        .from('workout_template')
-        .delete()
-        .eq('id', id)
-      if (error) {
-        setStatusTone('error')
-        setStatusMessage(error.message)
-        return
-      }
-
-      setStatusTone('success')
-      setStatusMessage('Template removed')
-      setPendingDeleteId(null)
-      void loadTemplates()
-    } catch (err) {
-      setStatusTone('error')
-      setStatusMessage('Unexpected error deleting template')
-    }
-  }
 
   return (
     <PageLayout>
@@ -81,21 +59,34 @@ export function WorkoutTemplatesPage() {
         subtitle="Dashboard"
         description={description}
       >
-        <div className="flex justify-end">
+        <div className="flex flex-col sm:flex-row justify-between items-center gap-4">
+          <div className="w-full max-w-sm">
+            <input
+              type="text"
+              placeholder="Search templates..."
+              value={filterText}
+              onChange={(e) => setFilterText(e.target.value)}
+              className="w-full px-3 py-2 text-sm border border-slate-300 rounded-md shadow-sm focus:outline-none focus:ring-slate-500 focus:border-slate-500"
+            />
+          </div>
           <Button as={Link} to="/workout-templates/create" tone="blue">
-            Create a new template
+            Create template
           </Button>
         </div>
 
         {loading ? (
           <p className="mt-4 text-sm text-slate-600">Loading templates…</p>
         ) : templates.length === 0 ? (
-          <div className="rounded-2xl border border-dashed border-slate-200 bg-slate-50 px-4 py-6 text-sm text-slate-500">
+          <div className="mt-4 rounded-2xl border border-dashed border-slate-200 bg-slate-50 px-4 py-6 text-sm text-slate-500">
             No templates yet. Create one using the button above.
+          </div>
+        ) : filteredTemplates.length === 0 ? (
+          <div className="mt-4 rounded-2xl border border-dashed border-slate-200 bg-slate-50 px-4 py-6 text-sm text-slate-500">
+            No templates match your search.
           </div>
         ) : (
           <div className="grid gap-4 md:grid-cols-2 mt-4">
-            {templates.map((t) => (
+            {filteredTemplates.map((t) => (
               <PageCard key={t.id} padding="compact">
                 <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
                   <div>
@@ -111,6 +102,12 @@ export function WorkoutTemplatesPage() {
                         ? t.workout_template_exercise.length
                         : 0}
                     </p>
+                    <p className="mt-1 text-xs text-slate-500">
+                      Last updated:{' '}
+                      {formatDateTimeForDisplay(t.created_at, {
+                        includeYear: false,
+                      })}
+                    </p>
                   </div>
                   <div className="flex flex-col gap-2 sm:flex-row sm:items-center">
                     <Button
@@ -120,44 +117,12 @@ export function WorkoutTemplatesPage() {
                     >
                       Update
                     </Button>
-                    {pendingDeleteId === t.id ? (
-                      <>
-                        <Button
-                          tone="chip"
-                          onClick={() => setPendingDeleteId(null)}
-                        >
-                          Cancel
-                        </Button>
-                        <Button
-                          tone="chip-destructive"
-                          onClick={() => deleteTemplate(t.id)}
-                        >
-                          Confirm
-                        </Button>
-                      </>
-                    ) : (
-                      <Button
-                        tone="chip-rose"
-                        onClick={() => setPendingDeleteId(t.id)}
-                      >
-                        Remove
-                      </Button>
-                    )}
                   </div>
                 </div>
               </PageCard>
             ))}
           </div>
         )}
-        {statusMessage ? (
-          <div className="mt-4">
-            <StatusMessageNotification
-              message={statusMessage}
-              tone={statusTone}
-            />
-          </div>
-        ) : null}
-        {null}
       </PageCardLayout>
     </PageLayout>
   )
