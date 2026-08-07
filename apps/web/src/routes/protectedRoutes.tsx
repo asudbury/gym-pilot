@@ -1,29 +1,23 @@
-import { Navigate, Route } from 'react-router-dom'
-import { RequireAuth } from '../auth/RequireAuth'
-import { AppleFitnessPage } from '../pages/appleFitness/AppleFitnessPage'
-import { LinkAppleWorkoutPage } from '../pages/appleFitness/LinkAppleWorkoutPage'
-import SpreadsheetImportConfirmPage from '../pages/appleFitness/SpreadsheetImportConfirmPage'
-import { SpreadsheetImportPage } from '../pages/appleFitness/SpreadsheetImportPage'
-import SpreadsheetImportPreviewDetailPage from '../pages/appleFitness/SpreadsheetImportPreviewDetailPage'
-import { SpreadsheetImportPreviewPage } from '../pages/appleFitness/SpreadsheetImportPreviewPage'
-import { AssignmentDetailPage } from '../pages/assignments/AssignmentDetailPage'
-import { AssignmentsManagerPage } from '../pages/assignments/AssignmentsManagerPage'
-import { AssignmentsPage } from '../pages/assignments/AssignmentsPage'
-import { CreateAssignmentPage } from '../pages/assignments/CreateAssignmentPage'
-import HelpPage from '../pages/HelpPage'
-import { HomePage } from '../pages/HomePage'
-import { IconShowcasePage } from '../pages/IconShowcasePage'
-import { ImportedWorkoutAnalysisPage } from '../pages/ImportedWorkoutAnalysisPage'
-import { CreatePlanPage } from '../pages/plans/CreatePlanPage'
-import { PlanDetailPage } from '../pages/plans/PlanDetailPage'
-import { PlansPage } from '../pages/plans/PlansPage'
-import { RecordSessionPage } from '../pages/RecordSessionPage'
-import { SessionEditPage } from '../pages/SessionEditPage'
-import { SessionHistoryPage } from '../pages/SessionHistoryPage'
-import { TimetablePage } from '../pages/TimetablePage'
-import WorkoutTemplateCreatePage from '../pages/workoutTemplates/WorkoutTemplateCreatePage'
-import WorkoutTemplateEditPage from '../pages/workoutTemplates/WorkoutTemplateEditPage'
-import { WorkoutTemplatesPage } from '../pages/workoutTemplates/WorkoutTemplatesPage'
+import { Navigate, Route } from 'react-router-dom';
+import { RequireAuth } from '../auth/RequireAuth';
+import { AppleFitnessPage } from '../pages/appleFitness/AppleFitnessPage';
+import { LinkAppleWorkoutPage } from '../pages/appleFitness/LinkAppleWorkoutPage';
+import SpreadsheetImportConfirmPage from '../pages/appleFitness/SpreadsheetImportConfirmPage';
+import { SpreadsheetImportPage } from '../pages/appleFitness/SpreadsheetImportPage';
+import SpreadsheetImportPreviewDetailPage from '../pages/appleFitness/SpreadsheetImportPreviewDetailPage';
+import { SpreadsheetImportPreviewPage } from '../pages/appleFitness/SpreadsheetImportPreviewPage';
+import HelpPage from '../pages/HelpPage';
+import { HomePage } from '../pages/HomePage';
+import { IconShowcasePage } from '../pages/IconShowcasePage';
+import { ImportedWorkoutAnalysisPage } from '../pages/ImportedWorkoutAnalysisPage';
+import { PlansPage } from '../pages/plans/PlansPage';
+import { RecordSessionPage } from '../pages/RecordSessionPage';
+import { SessionEditPage } from '../pages/SessionEditPage';
+import { SessionHistoryPage } from '../pages/SessionHistoryPage';
+import { TimetablePage } from '../pages/TimetablePage';
+import WorkoutTemplateCreatePage from '../pages/workoutTemplates/WorkoutTemplateCreatePage';
+import WorkoutTemplateEditPage from '../pages/workoutTemplates/WorkoutTemplateEditPage';
+import { WorkoutTemplatesPage } from '../pages/workoutTemplates/WorkoutTemplatesPage';
 
 export function createProtectedRoutes() {
   return (
@@ -37,38 +31,13 @@ export function createProtectedRoutes() {
         <Route path="/sessions/:entryId/edit" element={<SessionEditPage />} />
       </Route>
       <Route path="/analysis" element={<ImportedWorkoutAnalysisPage />} />
-      <Route path="/assignments" element={<AssignmentsPage />} />
-      <Route
-        path="/users/:userSlug/assignments"
-        element={<AssignmentsPage />}
-      />
-      <Route
-        path="/users/:userSlug/assignments/create"
-        element={<AssignmentsManagerPage />}
-      />
-      <Route path="/plans/new" element={<CreatePlanPage />} />
-      <Route path="/plans/:planSlug/edit" element={<CreatePlanPage />} />
-      <Route path="/plans/:planSlug" element={<PlanDetailPage />} />
-      <Route path="/assignments/new" element={<AssignmentsManagerPage />} />
       <Route
         path="/assignments/create"
         element={<Navigate to="/assignments/new" replace />}
       />
       <Route
-        path="/users/:userSlug/assignments/new"
-        element={<AssignmentsManagerPage />}
-      />
-      <Route
         path="/users/:userSlug/assignments/create"
         element={<Navigate to="../new" replace />}
-      />
-      <Route
-        path="/users/:userSlug/assignments/:planSlug"
-        element={<AssignmentDetailPage />}
-      />
-      <Route
-        path="/users/:userSlug/assignments/:planSlug/edit"
-        element={<CreateAssignmentPage />}
       />
       <Route path="/workout-templates" element={<WorkoutTemplatesPage />} />
       <Route

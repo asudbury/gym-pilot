@@ -1,3 +1,6 @@
+import { exercises } from '@gym-pilot/shared'
+import type { PlanSession } from '@gym-pilot/types'
+import ExcelJS from 'exceljs'
 import {
   useCallback,
   useEffect,
@@ -6,10 +9,7 @@ import {
   type Dispatch,
   type SetStateAction,
 } from 'react'
-import ExcelJS from 'exceljs'
-import { exercises } from '@gym-pilot/shared'
 import { buildFavoritePlanBuilderState } from '../domain/planBuilderFavorites'
-import { loadPlanBuilderFavoriteStorage } from '../services/planBuilderStorage'
 import {
   resolvePlanBuilderHydrationState,
   resolvePlanBuilderLinkRows,
@@ -24,7 +24,7 @@ import {
   sanitizeSheetName,
   type PlanTab,
 } from '../domain/planBuilderUtils'
-import type { PlanSession } from '@gym-pilot/types'
+import { loadPlanBuilderFavoriteStorage } from '../services/planBuilderStorage'
 
 export type PlanBuilderFeatureState = {
   tabs: PlanTab[]
@@ -53,6 +53,13 @@ export type PlanBuilderFeatureActions = {
   handleAddRow: (exerciseId?: string) => void
   handleExerciseSelection: (exerciseId: string, exerciseName: string) => void
   handleAddLinkRows: (links: Array<{ label: string; path: string }>) => void
+  handleAddTemplate: (
+    exercises: Array<{
+      exercise_id?: string
+      exercise_name?: string
+      details?: any
+    }>,
+  ) => void
   handleRemoveRow: (rowId: string) => void
   handleMoveRow: (rowId: string, direction: -1 | 1) => void
   handleCellChange: (rowId: string, field: string, value: string) => void
