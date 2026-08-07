@@ -1,25 +1,25 @@
-import type { Exercise, WorkoutTemplateInsert } from '@gym-pilot/shared'
-import { getSupabaseClient } from '@gym-pilot/shared'
-import clsx from 'clsx'
-import { useEffect, useState } from 'react'
-import { NavLink, useNavigate } from 'react-router-dom'
-import { ExerciseMultiPicker } from '../components/exercises/ExerciseMultiPicker'
-import { ItemControls } from '../components/ItemControls'
-import { PageCard } from '../components/PageCard'
-import { Heading1, Paragraph } from '../components/Typography'
-import { BackLink } from '../components/ui/BackLink'
-import { Button } from '../components/ui/Button'
-import { DecorativeIcon } from '../components/ui/DecorativeIcon'
-import { StatusMessageNotification } from '../components/ui/StatusMessageNotification'
-import { PageLayout } from '../layouts/PageLayout'
-import { getExercisePath } from '../utils/exerciseRouteUtils'
-import { formatLabel } from '../utils/formatUtils'
-import { useIsDesktop } from '../utils/useMediaQuery'
+import type { Exercise, WorkoutTemplateInsert } from '@gym-pilot/shared';
+import { getSupabaseClient } from '@gym-pilot/shared';
+import clsx from 'clsx';
+import { useEffect, useState } from 'react';
+import { NavLink, useNavigate } from 'react-router-dom';
+import { ExerciseMultiPicker } from '../../components/exercises/ExerciseMultiPicker';
+import { ItemControls } from '../../components/ItemControls';
+import { PageCard } from '../../components/PageCard';
+import { Heading1, Paragraph } from '../../components/Typography';
+import { BackLink } from '../../components/ui/BackLink';
+import { Button } from '../../components/ui/Button';
+import { DecorativeIcon } from '../../components/ui/DecorativeIcon';
+import { StatusMessageNotification } from '../../components/ui/StatusMessageNotification';
+import { PageLayout } from '../../layouts/PageLayout';
+import { getExercisePath } from '../../utils/exerciseRouteUtils';
+import { formatLabel } from '../../utils/formatUtils';
+import { useIsDesktop } from '../../utils/useMediaQuery';
 
 // Define a key for local storage
 const LOCAL_STORAGE_KEY = 'gym-pilot-selected-template-exercises'
 
-function SessionTemplateCreatePage() {
+function WorkoutTemplateCreatePage() {
   const [selectedExercises, setSelectedExercises] = useState<
     { id: string; name: string }[]
   >(() => {
@@ -103,7 +103,7 @@ function SessionTemplateCreatePage() {
 
       // Clear local cached selections and navigate back
       localStorage.removeItem(LOCAL_STORAGE_KEY)
-      navigate('/session-templates')
+      navigate('/workout-templates')
     } catch (err) {
       setError('Unexpected error saving template')
     } finally {
@@ -247,7 +247,7 @@ function SessionTemplateCreatePage() {
                     )}
                   >
                     <NavLink
-                      to={`${getExercisePath(exercise)}?backTo=${encodeURIComponent('/session-templates/create')}&backLabel=${encodeURIComponent('Back to Create Template')}`}
+                      to={`${getExercisePath(exercise)}?backTo=${encodeURIComponent('/workout-templates/create')}&backLabel=${encodeURIComponent('Back to Create Template')}`}
                       className="text-sm font-medium text-blue-700 underline decoration-blue-600/50 underline-offset-2 hover:text-blue-800"
                     >
                       {formatLabel(exercise.name)}
@@ -293,7 +293,7 @@ function SessionTemplateCreatePage() {
             </Button>
             <Button
               tone="default"
-              onClick={() => navigate('/session-templates')}
+              onClick={() => navigate('/workout-templates')}
             >
               Cancel
             </Button>
@@ -304,4 +304,4 @@ function SessionTemplateCreatePage() {
   )
 }
 
-export default SessionTemplateCreatePage
+export default WorkoutTemplateCreatePage

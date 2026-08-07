@@ -1,5 +1,5 @@
-import RecordButtons from './RecordButtons'
-import ActionButton from './ui/ActionButton'
+import RecordButtons from './RecordButtons';
+import ActionButton from './ui/ActionButton';
 
 type SessionActionsProps = {
   showViewSessionsButton?: boolean
@@ -54,7 +54,7 @@ function SessionActions({
           label="Workout templates"
           mobileLabel="Workout templates"
           tone="default"
-          to="/session-templates"
+          to="/workout-templates"
         />
       ) : null}
     </div>

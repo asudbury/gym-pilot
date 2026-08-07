@@ -1,18 +1,18 @@
-import { getSupabaseClient } from '@gym-pilot/shared'
-import { useEffect, useState } from 'react'
-import { Link, useNavigate, useParams } from 'react-router-dom'
-import { ExerciseMultiPicker } from '../components/exercises/ExerciseMultiPicker'
-import { ItemControls } from '../components/ItemControls'
-import { PageCard } from '../components/PageCard'
-import { Heading1, Paragraph } from '../components/Typography'
-import { BackLink } from '../components/ui/BackLink'
-import { Button } from '../components/ui/Button'
-import { PageLayout } from '../layouts/PageLayout'
-import { getExercisePath } from '../utils/exerciseRouteUtils'
-import { formatLabel } from '../utils/formatUtils'
-import { useIsDesktop } from '../utils/useMediaQuery'
+import { getSupabaseClient } from '@gym-pilot/shared';
+import { useEffect, useState } from 'react';
+import { Link, useNavigate, useParams } from 'react-router-dom';
+import { ExerciseMultiPicker } from '../../components/exercises/ExerciseMultiPicker';
+import { ItemControls } from '../../components/ItemControls';
+import { PageCard } from '../../components/PageCard';
+import { Heading1, Paragraph } from '../../components/Typography';
+import { BackLink } from '../../components/ui/BackLink';
+import { Button } from '../../components/ui/Button';
+import { PageLayout } from '../../layouts/PageLayout';
+import { getExercisePath } from '../../utils/exerciseRouteUtils';
+import { formatLabel } from '../../utils/formatUtils';
+import { useIsDesktop } from '../../utils/useMediaQuery';
 
-export default function SessionTemplateEditPage() {
+export default function WorkoutTemplateEditPage() {
   const { id } = useParams<{ id: string }>()
   const navigate = useNavigate()
   const [template, setTemplate] = useState<any | null>(null)
@@ -103,7 +103,7 @@ export default function SessionTemplateEditPage() {
       console.warn('Could not persist exercise positions', posErr)
     }
 
-    navigate('/session-templates')
+    navigate('/workout-templates')
   }
 
   async function handleDelete() {
@@ -121,7 +121,7 @@ export default function SessionTemplateEditPage() {
       return
     }
 
-    navigate('/session-templates')
+    navigate('/workout-templates')
   }
 
   async function removeExerciseRow(rowId: string) {
@@ -332,7 +332,7 @@ export default function SessionTemplateEditPage() {
               )}
               <Button
                 tone="default"
-                onClick={() => navigate('/session-templates')}
+                onClick={() => navigate('/workout-templates')}
               >
                 Cancel
               </Button>

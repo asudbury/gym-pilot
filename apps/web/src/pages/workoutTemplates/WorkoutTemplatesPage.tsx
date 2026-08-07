@@ -1,13 +1,13 @@
-import { getSupabaseClient } from '@gym-pilot/shared'
-import { useEffect, useState } from 'react'
-import { Link } from 'react-router-dom'
-import { PageCard } from '../components/PageCard'
-import { Button } from '../components/ui/Button'
-import { StatusMessageNotification } from '../components/ui/StatusMessageNotification'
-import { PageCardLayout } from '../layouts/PageCardLayout'
-import { PageLayout } from '../layouts/PageLayout'
+import { getSupabaseClient } from '@gym-pilot/shared';
+import { useEffect, useState } from 'react';
+import { Link } from 'react-router-dom';
+import { PageCard } from '../../components/PageCard';
+import { Button } from '../../components/ui/Button';
+import { StatusMessageNotification } from '../../components/ui/StatusMessageNotification';
+import { PageCardLayout } from '../../layouts/PageCardLayout';
+import { PageLayout } from '../../layouts/PageLayout';
 
-export function SessionTemplatesPage() {
+export function WorkoutTemplatesPage() {
   const [templates, setTemplates] = useState<any[]>([])
   const [loading, setLoading] = useState(false)
   const [pendingDeleteId, setPendingDeleteId] = useState<string | null>(null)
@@ -82,7 +82,7 @@ export function SessionTemplatesPage() {
         description={description}
       >
         <div className="flex justify-end">
-          <Button as={Link} to="/session-templates/create" tone="blue">
+          <Button as={Link} to="/workout-templates/create" tone="blue">
             Create a new template
           </Button>
         </div>
@@ -115,7 +115,7 @@ export function SessionTemplatesPage() {
                   <div className="flex flex-col gap-2 sm:flex-row sm:items-center">
                     <Button
                       as={Link}
-                      to={`/session-templates/${t.id}/edit`}
+                      to={`/workout-templates/${t.id}/edit`}
                       tone="chip"
                     >
                       Update
