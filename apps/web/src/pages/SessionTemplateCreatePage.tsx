@@ -1,18 +1,18 @@
-import { useState, useEffect } from 'react'
-import { PageLayout } from '../layouts/PageLayout'
-import { PageCard } from '../components/PageCard'
-import { Heading1, Paragraph } from '../components/Typography'
-import { DecorativeIcon } from '../components/ui/DecorativeIcon'
-import { BackLink } from '../components/ui/BackLink'
-import { Button } from '../components/ui/Button'
-import type { Exercise } from '@gym-pilot/shared'
-import { useNavigate, NavLink } from 'react-router-dom'
-import { ExerciseMultiPicker } from '../components/exercises/ExerciseMultiPicker'
-import { ItemControls } from '../components/ItemControls'
-import { useIsDesktop } from '../utils/useMediaQuery'
-import { getExercisePath } from '../utils/exerciseRouteUtils'
-import { formatLabel } from '../utils/formatUtils'
-import clsx from 'clsx'
+import type { Exercise } from '@gym-pilot/shared';
+import clsx from 'clsx';
+import { useEffect, useState } from 'react';
+import { NavLink, useNavigate } from 'react-router-dom';
+import { ExerciseMultiPicker } from '../components/exercises/ExerciseMultiPicker';
+import { ItemControls } from '../components/ItemControls';
+import { PageCard } from '../components/PageCard';
+import { Heading1, Paragraph } from '../components/Typography';
+import { BackLink } from '../components/ui/BackLink';
+import { Button } from '../components/ui/Button';
+import { DecorativeIcon } from '../components/ui/DecorativeIcon';
+import { PageLayout } from '../layouts/PageLayout';
+import { getExercisePath } from '../utils/exerciseRouteUtils';
+import { formatLabel } from '../utils/formatUtils';
+import { useIsDesktop } from '../utils/useMediaQuery';
 
 // Define a key for local storage
 const LOCAL_STORAGE_KEY = 'gym-pilot-selected-template-exercises'
@@ -145,7 +145,7 @@ function SessionTemplateCreatePage() {
                   <div
                     key={exercise.id}
                     className={clsx(
-                      'flex items-center justify-between rounded-md border p-2 transition-colors',
+                      'flex flex-col gap-2 rounded-md border p-2 transition-colors sm:flex-row sm:items-center sm:justify-between',
                       {
                         'bg-blue-100': moved === exercise.id,
                       },
@@ -157,21 +157,19 @@ function SessionTemplateCreatePage() {
                     >
                       {formatLabel(exercise.name)}
                     </NavLink>
-
-                    <div className="flex items-center gap-2">
-                      <ItemControls
-                        itemName={exercise.name || 'item'}
-                        onRemove={() =>
-                          setSelectedExercises((prev) =>
-                            prev.filter((_, idx) => idx !== i),
-                          )
-                        }
-                        onReorder={(direction) => handleReorder(i, direction)}
-                        isFirst={i === 0}
-                        isLast={i === selectedExercises.length - 1}
-                        removeText={isDesktop}
-                      />
-                    </div>
+                    <ItemControls
+                      itemName={exercise.name || 'item'}
+                      onRemove={() =>
+                        setSelectedExercises((prev) =>
+                          prev.filter((_, idx) => idx !== i),
+                        )
+                      }
+                      onReorder={(direction) => handleReorder(i, direction)}
+                      isFirst={i === 0}
+                      isLast={i === selectedExercises.length - 1}
+                      removeText={isDesktop}
+                      className="flex flex-wrap items-center justify-end gap-2"
+                    />
                   </div>
                 ))
               )}
