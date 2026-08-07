@@ -1,16 +1,17 @@
-import { getSupabaseClient } from '@gym-pilot/shared'
-import { useEffect, useState } from 'react'
-import { Link, useNavigate, useParams } from 'react-router-dom'
-import { ExerciseMultiPicker } from '../../components/exercises/ExerciseMultiPicker'
-import { ItemControls } from '../../components/ItemControls'
-import { PageCard } from '../../components/PageCard'
-import { Heading1, Paragraph } from '../../components/Typography'
-import { BackLink } from '../../components/ui/BackLink'
-import { Button } from '../../components/ui/Button'
-import { PageLayout } from '../../layouts/PageLayout'
-import { getExercisePath } from '../../utils/exerciseRouteUtils'
-import { formatLabel } from '../../utils/formatUtils'
-import { useIsDesktop } from '../../utils/useMediaQuery'
+import { getSupabaseClient } from '@gym-pilot/shared';
+import { clsx } from 'clsx';
+import { useEffect, useState } from 'react';
+import { Link, useNavigate, useParams } from 'react-router-dom';
+import { ExerciseMultiPicker } from '../../components/exercises/ExerciseMultiPicker';
+import { ItemControls } from '../../components/ItemControls';
+import { PageCard } from '../../components/PageCard';
+import { Heading1, Paragraph } from '../../components/Typography';
+import { BackLink } from '../../components/ui/BackLink';
+import { Button } from '../../components/ui/Button';
+import { PageLayout } from '../../layouts/PageLayout';
+import { getExercisePath } from '../../utils/exerciseRouteUtils';
+import { formatLabel } from '../../utils/formatUtils';
+import { useIsDesktop } from '../../utils/useMediaQuery';
 
 export default function WorkoutTemplateEditPage() {
   const { id } = useParams<{ id: string }>()
@@ -328,17 +329,19 @@ export default function WorkoutTemplateEditPage() {
                   {localExercises.map((ex: any, idx: number) => (
                     <li
                       key={ex.id ?? `new-${idx}`}
-                      className={
-                        'flex items-center justify-between text-sm ' +
-                        (moved === ex.id ? 'bg-blue-100' : '')
-                      }
+                      className={clsx(
+                        'flex flex-col gap-2 rounded-md border p-2 transition-colors sm:flex-row sm:items-center sm:justify-between',
+                        {
+                          'bg-blue-100': moved === ex.id,
+                        },
+                      )}
                     >
                       <Link
                         to={getExercisePath({
                           id: ex.exercise_id,
                           name: ex.exercise_name,
                         } as any)}
-                        className="text-blue-600 underline"
+                        className="text-sm font-medium text-blue-700 underline decoration-blue-600/50 underline-offset-2 hover:text-blue-800"
                       >
                         {formatLabel(ex.exercise_name ?? ex.exercise_id)}
                       </Link>
