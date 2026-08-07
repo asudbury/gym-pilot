@@ -1,11 +1,11 @@
-import { getSupabaseClient } from '@gym-pilot/shared';
-import { useEffect, useMemo, useState } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
-import { PageCard } from '../../components/PageCard';
-import { Button } from '../../components/ui/Button';
-import { formatDateTimeForDisplay } from '../../dateTimeFormatter';
-import { PageCardLayout } from '../../layouts/PageCardLayout';
-import { PageLayout } from '../../layouts/PageLayout';
+import { getSupabaseClient } from '@gym-pilot/shared'
+import { useEffect, useMemo, useState } from 'react'
+import { Link, useNavigate } from 'react-router-dom'
+import { PageCard } from '../../components/PageCard'
+import { Button } from '../../components/ui/Button'
+import { formatDateTimeForDisplay } from '../../dateTimeFormatter'
+import { PageCardLayout } from '../../layouts/PageCardLayout'
+import { PageLayout } from '../../layouts/PageLayout'
 
 export function WorkoutTemplatesPage() {
   const navigate = useNavigate()
@@ -70,14 +70,13 @@ export function WorkoutTemplatesPage() {
             />
           </div>
           <div>
-          <Button as={Link} to="/plans" tone="default" className="mr-2">
-            Plans
-          </Button>
-          <Button as={Link} to="/workout-templates/create" tone="blue">
-            Create template
-          </Button>
+            <Button as={Link} to="/plans" tone="default" className="mr-2">
+              Plans
+            </Button>
+            <Button as={Link} to="/workout-templates/create" tone="blue">
+              Create template
+            </Button>
           </div>
-
         </div>
 
         {loading ? (

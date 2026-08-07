@@ -1,23 +1,23 @@
-import { exercises } from '@gym-pilot/shared';
+import { exercises } from '@gym-pilot/shared'
 import {
-    AllCommunityModule,
-    ModuleRegistry,
-    provideGlobalGridOptions,
-    type ColDef,
-} from 'ag-grid-community';
-import 'ag-grid-community/styles/ag-grid.css';
-import 'ag-grid-community/styles/ag-theme-quartz.css';
-import { AgGridReact } from 'ag-grid-react';
-import { useMemo, useState, type DragEvent } from 'react';
-import { type QuickLink } from '../features/favourites/domain/quickLinks';
-import { resolveFavoriteLinkGroups } from '../features/planBuilder/domain/builderWorkspace';
+  AllCommunityModule,
+  ModuleRegistry,
+  provideGlobalGridOptions,
+  type ColDef,
+} from 'ag-grid-community'
+import 'ag-grid-community/styles/ag-grid.css'
+import 'ag-grid-community/styles/ag-theme-quartz.css'
+import { AgGridReact } from 'ag-grid-react'
+import { useMemo, useState, type DragEvent } from 'react'
+import { type QuickLink } from '../features/favourites/domain/quickLinks'
+import { resolveFavoriteLinkGroups } from '../features/planBuilder/domain/builderWorkspace'
 import {
-    type PlanGridRow,
-    type PlanTab,
-} from '../features/planBuilder/domain/planBuilderUtils';
-import { formatLabel } from '../utils/formatUtils';
-import { ExercisePicker } from './exercises/ExercisePicker';
-import { Button } from './ui/Button';
+  type PlanGridRow,
+  type PlanTab,
+} from '../features/planBuilder/domain/planBuilderUtils'
+import { formatLabel } from '../utils/formatUtils'
+import { ExercisePicker } from './exercises/ExercisePicker'
+import { Button } from './ui/Button'
 
 ModuleRegistry.registerModules([AllCommunityModule])
 provideGlobalGridOptions({ theme: 'legacy' })
@@ -215,8 +215,7 @@ export function PlanBuilderWorkspace({
   return (
     <div className="rounded-2xl border border-slate-200 bg-white p-3 sm:p-4">
       <div className="space-y-3">
-        <div className="flex flex-col gap-2 rounded-2xl border border-slate-200 bg-slate-50 p-3 sm:flex-row sm:items-center sm:justify-between">
-        </div>
+        <div className="flex flex-col gap-2 rounded-2xl border border-slate-200 bg-slate-50 p-3 sm:flex-row sm:items-center sm:justify-between"></div>
 
         <div className="flex flex-col gap-3 rounded-2xl border border-slate-200 bg-slate-50 p-3 sm:flex-row sm:items-end sm:justify-between">
           <div className="flex flex-col gap-3 sm:flex-row sm:items-end sm:gap-3">
