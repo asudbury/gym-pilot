@@ -1,11 +1,11 @@
-import { usePlan } from '@gym-pilot/shared';
-import { useMemo, useState } from 'react';
-import { useNavigate } from 'react-router-dom';
-import { PageCard } from '../../components/PageCard';
-import { Heading1, Paragraph } from '../../components/Typography';
-import { BackLink } from '../../components/ui/BackLink';
-import { Button } from '../../components/ui/Button';
-import { PageLayout } from '../../layouts/PageLayout';
+import { usePlan } from '@gym-pilot/shared'
+import { useMemo, useState } from 'react'
+import { useNavigate } from 'react-router-dom'
+import { PageCard } from '../../components/PageCard'
+import { Heading1, Paragraph } from '../../components/Typography'
+import { BackLink } from '../../components/ui/BackLink'
+import { Button } from '../../components/ui/Button'
+import { PageLayout } from '../../layouts/PageLayout'
 
 export function AssignmentsManagerPage() {
   const { visibleUsers, visiblePlans, assignUsersToPlan } = usePlan()

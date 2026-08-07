@@ -1,16 +1,16 @@
-import { usePlan } from '@gym-pilot/shared';
-import { useEffect, useMemo } from 'react';
-import { useLocation, useNavigate, useParams } from 'react-router-dom';
-import { PageCard } from '../../components/PageCard';
-import { PlanBuilderWorkspace } from '../../components/PlanBuilderWorkspace';
-import { Heading1, Paragraph } from '../../components/Typography';
-import { BackLink } from '../../components/ui/BackLink';
+import { usePlan } from '@gym-pilot/shared'
+import { useEffect, useMemo } from 'react'
+import { useLocation, useNavigate, useParams } from 'react-router-dom'
+import { PageCard } from '../../components/PageCard'
+import { PlanBuilderWorkspace } from '../../components/PlanBuilderWorkspace'
+import { Heading1, Paragraph } from '../../components/Typography'
+import { BackLink } from '../../components/ui/BackLink'
 import {
-    hasBuilderContent,
-    resolveCreateFlowViewModel,
-} from '../../features/planBuilder/domain/createFlow';
-import { usePlanBuilderFeature } from '../../features/planBuilder/hooks/usePlanBuilderFeature';
-import { PageLayout } from '../../layouts/PageLayout';
+  hasBuilderContent,
+  resolveCreateFlowViewModel,
+} from '../../features/planBuilder/domain/createFlow'
+import { usePlanBuilderFeature } from '../../features/planBuilder/hooks/usePlanBuilderFeature'
+import { PageLayout } from '../../layouts/PageLayout'
 
 export function CreatePlanPage() {
   const { createPlan, plans, updatePlan } = usePlan()

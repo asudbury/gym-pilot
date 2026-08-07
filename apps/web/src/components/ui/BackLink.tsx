@@ -1,6 +1,6 @@
-import { Link, useNavigate } from 'react-router-dom';
-import { getToneClass } from '../../components/toneClasses';
-import { DecorativeIcon } from './DecorativeIcon';
+import { Link, useNavigate } from 'react-router-dom'
+import { getToneClass } from '../../components/toneClasses'
+import { DecorativeIcon } from './DecorativeIcon'
 type BackLinkProps = {
   to?: string
   label?: string

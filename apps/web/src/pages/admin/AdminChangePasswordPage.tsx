@@ -1,13 +1,13 @@
-import { changeSupabasePassword, logger } from '@gym-pilot/shared';
-import { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
-import { PageCard } from '../../components/PageCard';
-import { Heading1, Paragraph } from '../../components/Typography';
-import { BackLink } from '../../components/ui/BackLink';
-import { Button } from '../../components/ui/Button';
-import { DecorativeIcon } from '../../components/ui/DecorativeIcon';
-import { appTokens } from '../../constants/tokens';
-import { PageLayout } from '../../layouts/PageLayout';
+import { changeSupabasePassword, logger } from '@gym-pilot/shared'
+import { useState } from 'react'
+import { useNavigate } from 'react-router-dom'
+import { PageCard } from '../../components/PageCard'
+import { Heading1, Paragraph } from '../../components/Typography'
+import { BackLink } from '../../components/ui/BackLink'
+import { Button } from '../../components/ui/Button'
+import { DecorativeIcon } from '../../components/ui/DecorativeIcon'
+import { appTokens } from '../../constants/tokens'
+import { PageLayout } from '../../layouts/PageLayout'
 
 export function AdminChangePasswordPage() {
   const navigate = useNavigate()
