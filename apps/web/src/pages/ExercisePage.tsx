@@ -1,20 +1,20 @@
-import { exercises, exercisesSchema } from '@gym-pilot/shared'
-import { useMemo, useState } from 'react'
-import { useParams, useSearchParams } from 'react-router-dom'
-import { PageActionGroup, PageActionRow } from '../components/PageActionRow'
-import { PageCard } from '../components/PageCard'
-import { Heading1, Paragraph } from '../components/Typography'
-import { ExerciseImage } from '../components/exercises/ExerciseImage'
-import { ExerciseMetaBadges } from '../components/exercises/ExerciseMetaBadges'
-import { ExerciseSteps } from '../components/exercises/ExerciseSteps'
-import { YouTubeExerciseSearchButton } from '../components/exercises/YouTubeExerciseSearchButton'
-import BackLink from '../components/ui/BackLink'
-import { Button } from '../components/ui/Button'
-import { useAppShell } from '../features/app-shell/hooks/useAppShell'
-import { resolveExercisePageViewModel } from '../features/exercises/domain/exerciseView'
-import { PageLayout } from '../layouts/PageLayout'
-import { formatLabel } from '../utils/formatUtils'
-import { copyExerciseLinkToClipboard } from '../utils/navigationUtils'
+import { exercises, exercisesSchema } from '@gym-pilot/shared';
+import { useMemo, useState } from 'react';
+import { useParams, useSearchParams } from 'react-router-dom';
+import { PageActionGroup, PageActionRow } from '../components/PageActionRow';
+import { PageCard } from '../components/PageCard';
+import { Heading1, Paragraph } from '../components/Typography';
+import { ExerciseImage } from '../components/exercises/ExerciseImage';
+import { ExerciseMetaBadges } from '../components/exercises/ExerciseMetaBadges';
+import { ExerciseSteps } from '../components/exercises/ExerciseSteps';
+import { YouTubeExerciseSearchButton } from '../components/exercises/YouTubeExerciseSearchButton';
+import BackLink from '../components/ui/BackLink';
+import { Button } from '../components/ui/Button';
+import { useAppShell } from '../features/app-shell/hooks/useAppShell';
+import { resolveExercisePageViewModel } from '../features/exercises/domain/exerciseView';
+import { PageLayout } from '../layouts/PageLayout';
+import { formatLabel } from '../utils/formatUtils';
+import { copyExerciseLinkToClipboard } from '../utils/navigationUtils';
 
 export function ExercisePage() {
   const {
@@ -88,11 +88,7 @@ export function ExercisePage() {
           {backTo && backLabel ? (
             <BackLink to={backTo} label={backLabel} className="ml-auto" />
           ) : (
-            <BackLink
-              to="/exercises"
-              label="Back to exercises"
-              className="ml-auto"
-            />
+            <BackLink />
           )}
         </PageActionRow>
         <ExerciseImage

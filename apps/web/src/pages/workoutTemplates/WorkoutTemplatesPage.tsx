@@ -1,13 +1,14 @@
-import { getSupabaseClient } from '@gym-pilot/shared'
-import { useEffect, useMemo, useState } from 'react'
-import { Link } from 'react-router-dom'
-import { PageCard } from '../../components/PageCard'
-import { Button } from '../../components/ui/Button'
-import { formatDateTimeForDisplay } from '../../dateTimeFormatter'
-import { PageCardLayout } from '../../layouts/PageCardLayout'
-import { PageLayout } from '../../layouts/PageLayout'
+import { getSupabaseClient } from '@gym-pilot/shared';
+import { useEffect, useMemo, useState } from 'react';
+import { Link, useNavigate } from 'react-router-dom';
+import { PageCard } from '../../components/PageCard';
+import { Button } from '../../components/ui/Button';
+import { formatDateTimeForDisplay } from '../../dateTimeFormatter';
+import { PageCardLayout } from '../../layouts/PageCardLayout';
+import { PageLayout } from '../../layouts/PageLayout';
 
 export function WorkoutTemplatesPage() {
+  const navigate = useNavigate();
   const [templates, setTemplates] = useState<any[]>([])
   const [loading, setLoading] = useState(false)
   const [filterText, setFilterText] = useState('')
@@ -86,7 +87,7 @@ export function WorkoutTemplatesPage() {
         ) : (
           <div className="grid gap-4 md:grid-cols-2 mt-4">
             {filteredTemplates.map((t) => (
-              <PageCard key={t.id} padding="compact">
+              <PageCard key={t.id} padding="compact" onClick={() => navigate(`/workout-templates/${t.id}/edit`)} className="cursor-pointer">
                 <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
                   <div>
                     <h2 className="text-xl font-semibold text-slate-900">
