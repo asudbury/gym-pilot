@@ -1,11 +1,11 @@
-import { getSupabaseClient } from '@gym-pilot/shared'
-import { useEffect, useMemo, useState } from 'react'
-import { Link, useNavigate } from 'react-router-dom'
-import { PageCard } from '../../components/PageCard'
-import { Button } from '../../components/ui/Button'
-import { formatDateTimeForDisplay } from '../../dateTimeFormatter'
-import { PageCardLayout } from '../../layouts/PageCardLayout'
-import { PageLayout } from '../../layouts/PageLayout'
+import { getSupabaseClient } from '@gym-pilot/shared';
+import { useEffect, useMemo, useState } from 'react';
+import { Link, useNavigate } from 'react-router-dom';
+import { PageCard } from '../../components/PageCard';
+import { Button } from '../../components/ui/Button';
+import { formatDateTimeForDisplay } from '../../dateTimeFormatter';
+import { PageCardLayout } from '../../layouts/PageCardLayout';
+import { PageLayout } from '../../layouts/PageLayout';
 
 export function WorkoutTemplatesPage() {
   const navigate = useNavigate()
@@ -63,15 +63,21 @@ export function WorkoutTemplatesPage() {
           <div className="w-full max-w-sm">
             <input
               type="text"
-              placeholder="Search templates..."
+              placeholder="Search..."
               value={filterText}
               onChange={(e) => setFilterText(e.target.value)}
               className="w-full px-3 py-2 text-sm border border-slate-300 rounded-md shadow-sm focus:outline-none focus:ring-slate-500 focus:border-slate-500"
             />
           </div>
+          <div>
+          <Button as={Link} to="/plans" tone="default" className="mr-2">
+            Plans
+          </Button>
           <Button as={Link} to="/workout-templates/create" tone="blue">
             Create template
           </Button>
+          </div>
+
         </div>
 
         {loading ? (

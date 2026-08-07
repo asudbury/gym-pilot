@@ -28,7 +28,7 @@ export function resolveCreateFlowViewModel({
   }
 
   return {
-    title: isEditMode ? 'Edit plan' : 'Create a new plan',
+    title: isEditMode ? 'Edit plan' : 'Create plan',
     backLabel: 'Back to plans',
     saveLabel: isEditMode ? 'Save changes' : 'Create plan',
     planNamePlaceholder: 'Plan name',
