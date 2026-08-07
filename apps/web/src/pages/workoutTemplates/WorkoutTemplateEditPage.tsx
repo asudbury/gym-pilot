@@ -1,16 +1,16 @@
-import { getSupabaseClient } from '@gym-pilot/shared';
-import { useEffect, useState } from 'react';
-import { Link, useNavigate, useParams } from 'react-router-dom';
-import { ExerciseMultiPicker } from '../../components/exercises/ExerciseMultiPicker';
-import { ItemControls } from '../../components/ItemControls';
-import { PageCard } from '../../components/PageCard';
-import { Heading1, Paragraph } from '../../components/Typography';
-import { BackLink } from '../../components/ui/BackLink';
-import { Button } from '../../components/ui/Button';
-import { PageLayout } from '../../layouts/PageLayout';
-import { getExercisePath } from '../../utils/exerciseRouteUtils';
-import { formatLabel } from '../../utils/formatUtils';
-import { useIsDesktop } from '../../utils/useMediaQuery';
+import { getSupabaseClient } from '@gym-pilot/shared'
+import { useEffect, useState } from 'react'
+import { Link, useNavigate, useParams } from 'react-router-dom'
+import { ExerciseMultiPicker } from '../../components/exercises/ExerciseMultiPicker'
+import { ItemControls } from '../../components/ItemControls'
+import { PageCard } from '../../components/PageCard'
+import { Heading1, Paragraph } from '../../components/Typography'
+import { BackLink } from '../../components/ui/BackLink'
+import { Button } from '../../components/ui/Button'
+import { PageLayout } from '../../layouts/PageLayout'
+import { getExercisePath } from '../../utils/exerciseRouteUtils'
+import { formatLabel } from '../../utils/formatUtils'
+import { useIsDesktop } from '../../utils/useMediaQuery'
 
 export default function WorkoutTemplateEditPage() {
   const { id } = useParams<{ id: string }>()
@@ -169,12 +169,14 @@ export default function WorkoutTemplateEditPage() {
 
     // copy exercises
     if (data.workout_template_exercise?.length) {
-      const exerciseRows = data.workout_template_exercise.map((ex: any, idx: number) => ({
-        template_id: newTemplate.id,
-        exercise_id: ex.exercise_id,
-        exercise_name: ex.exercise_name,
-        position: idx,
-      }))
+      const exerciseRows = data.workout_template_exercise.map(
+        (ex: any, idx: number) => ({
+          template_id: newTemplate.id,
+          exercise_id: ex.exercise_id,
+          exercise_name: ex.exercise_name,
+          position: idx,
+        }),
+      )
       const { error: exerciseError } = await client
         .from('workout_template_exercise')
         .insert(exerciseRows)
@@ -187,7 +189,7 @@ export default function WorkoutTemplateEditPage() {
 
     navigate(`/workout-templates/${newTemplate.id}/edit`)
   }
-  
+
   async function removeExerciseRow(rowId: string) {
     const client = getSupabaseClient()
     if (!client) return
