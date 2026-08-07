@@ -1,23 +1,23 @@
-import { exercises } from '@gym-pilot/shared';
+import { exercises } from '@gym-pilot/shared'
 import {
-    AllCommunityModule,
-    ModuleRegistry,
-    provideGlobalGridOptions,
-    type ColDef,
-} from 'ag-grid-community';
-import 'ag-grid-community/styles/ag-grid.css';
-import 'ag-grid-community/styles/ag-theme-quartz.css';
-import { AgGridReact } from 'ag-grid-react';
-import { useMemo, useState, type DragEvent } from 'react';
-import { type QuickLink } from '../features/favourites/domain/quickLinks';
-import { resolveFavoriteLinkGroups } from '../features/planBuilder/domain/builderWorkspace';
+  AllCommunityModule,
+  ModuleRegistry,
+  provideGlobalGridOptions,
+  type ColDef,
+} from 'ag-grid-community'
+import 'ag-grid-community/styles/ag-grid.css'
+import 'ag-grid-community/styles/ag-theme-quartz.css'
+import { AgGridReact } from 'ag-grid-react'
+import { useMemo, useState, type DragEvent } from 'react'
+import { type QuickLink } from '../features/favourites/domain/quickLinks'
+import { resolveFavoriteLinkGroups } from '../features/planBuilder/domain/builderWorkspace'
 import {
-    type PlanGridRow,
-    type PlanTab,
-} from '../features/planBuilder/domain/planBuilderUtils';
-import { formatLabel } from '../utils/formatUtils';
-import { ExercisePicker } from './exercises/ExercisePicker';
-import { Button } from './ui/Button';
+  type PlanGridRow,
+  type PlanTab,
+} from '../features/planBuilder/domain/planBuilderUtils'
+import { formatLabel } from '../utils/formatUtils'
+import { ExercisePicker } from './exercises/ExercisePicker'
+import { Button } from './ui/Button'
 
 ModuleRegistry.registerModules([AllCommunityModule])
 provideGlobalGridOptions({ theme: 'legacy' })
