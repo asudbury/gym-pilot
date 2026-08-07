@@ -1,11 +1,11 @@
-import { useMemo, useState } from 'react'
-import { useNavigate } from 'react-router-dom'
-import { BackLink } from '../../components/ui/BackLink'
-import { Button } from '../../components/ui/Button'
-import { usePlan } from '@gym-pilot/shared'
-import { PageCard } from '../../components/PageCard'
-import { PageLayout } from '../../layouts/PageLayout'
-import { Heading1, Paragraph } from '../../components/Typography'
+import { usePlan } from '@gym-pilot/shared';
+import { useMemo, useState } from 'react';
+import { useNavigate } from 'react-router-dom';
+import { PageCard } from '../../components/PageCard';
+import { Heading1, Paragraph } from '../../components/Typography';
+import { BackLink } from '../../components/ui/BackLink';
+import { Button } from '../../components/ui/Button';
+import { PageLayout } from '../../layouts/PageLayout';
 
 export function AssignmentsManagerPage() {
   const { visibleUsers, visiblePlans, assignUsersToPlan } = usePlan()
@@ -34,7 +34,7 @@ export function AssignmentsManagerPage() {
             <Paragraph>Assignments</Paragraph>
             <Heading1 className="mt-2">Create assignment</Heading1>
           </div>
-          <BackLink to="/assignments" label="Back to assignments" />
+          <BackLink />
         </div>
 
         <div className="mt-6 m-0 bg-white p-0 sm:m-4 sm:rounded-2xl sm:border sm:border-slate-200 sm:p-4">

@@ -1,17 +1,17 @@
-import { usePlan } from '@gym-pilot/shared'
-import { useMemo, useState } from 'react'
-import { Link, useParams } from 'react-router-dom'
-import { PageCard } from '../../components/PageCard'
-import { Heading1, Paragraph } from '../../components/Typography'
-import { ExerciseDetailsCard } from '../../components/exercises/ExerciseDetailsCard'
-import { BackLink } from '../../components/ui/BackLink'
-import { Button } from '../../components/ui/Button'
+import { usePlan } from '@gym-pilot/shared';
+import { useMemo, useState } from 'react';
+import { Link, useParams } from 'react-router-dom';
+import { PageCard } from '../../components/PageCard';
+import { Heading1, Paragraph } from '../../components/Typography';
+import { ExerciseDetailsCard } from '../../components/exercises/ExerciseDetailsCard';
+import { BackLink } from '../../components/ui/BackLink';
+import { Button } from '../../components/ui/Button';
 import {
-  resolveExerciseForPlanItem,
-  resolvePlanDetailViewModel,
-} from '../../features/plans/domain/planDetail'
-import { resolvePlanRouteSelection } from '../../features/plans/domain/planRoute'
-import { PageLayout } from '../../layouts/PageLayout'
+    resolveExerciseForPlanItem,
+    resolvePlanDetailViewModel,
+} from '../../features/plans/domain/planDetail';
+import { resolvePlanRouteSelection } from '../../features/plans/domain/planRoute';
+import { PageLayout } from '../../layouts/PageLayout';
 
 export function PlanDetailPage() {
   const { planSlug } = useParams()
@@ -67,7 +67,7 @@ export function PlanDetailPage() {
             >
               {viewModel.editLabel}
             </Button>
-            <BackLink to={viewModel.backPath} label={viewModel.backLabel} />
+            <BackLink />
           </div>
         </div>
         <div className="space-y-4 mt-6">

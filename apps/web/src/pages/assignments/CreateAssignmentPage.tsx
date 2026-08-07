@@ -1,16 +1,16 @@
-import { useEffect, useMemo, useState } from 'react'
-import { useNavigate, useParams } from 'react-router-dom'
-import { BackLink } from '../../components/ui/BackLink'
-import { usePlan } from '@gym-pilot/shared'
-import { PageCard } from '../../components/PageCard'
-import { PageLayout } from '../../layouts/PageLayout'
-import { Heading1, Paragraph } from '../../components/Typography'
-import { PlanBuilderWorkspace } from '../../components/PlanBuilderWorkspace'
-import { usePlanBuilderFeature } from '../../features/planBuilder/hooks/usePlanBuilderFeature'
+import { usePlan } from '@gym-pilot/shared';
+import { useEffect, useMemo, useState } from 'react';
+import { useNavigate, useParams } from 'react-router-dom';
+import { PageCard } from '../../components/PageCard';
+import { PlanBuilderWorkspace } from '../../components/PlanBuilderWorkspace';
+import { Heading1, Paragraph } from '../../components/Typography';
+import { BackLink } from '../../components/ui/BackLink';
 import {
-  hasBuilderContent,
-  resolveCreateFlowViewModel,
-} from '../../features/planBuilder/domain/createFlow'
+    hasBuilderContent,
+    resolveCreateFlowViewModel,
+} from '../../features/planBuilder/domain/createFlow';
+import { usePlanBuilderFeature } from '../../features/planBuilder/hooks/usePlanBuilderFeature';
+import { PageLayout } from '../../layouts/PageLayout';
 
 export function CreateAssignmentPage() {
   const {
@@ -101,7 +101,7 @@ export function CreateAssignmentPage() {
             <Paragraph>Assignments</Paragraph>
             <Heading1 className="mt-2">{createFlowViewModel.title}</Heading1>
           </div>
-          <BackLink to="/assignments" label="Back to assignments" />
+          <BackLink />
         </div>
 
         <div className="mt-2 space-y-2 p-0 md:mt-4 md:space-y-4 md:rounded-2xl md:border md:border-slate-200 md:bg-slate-50 md:p-3 lg:mt-6 lg:space-y-6 lg:p-4">

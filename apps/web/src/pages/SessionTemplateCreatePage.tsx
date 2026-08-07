@@ -1,18 +1,18 @@
-import type { Exercise } from '@gym-pilot/shared'
-import clsx from 'clsx'
-import { useEffect, useState } from 'react'
-import { NavLink, useNavigate } from 'react-router-dom'
-import { ExerciseMultiPicker } from '../components/exercises/ExerciseMultiPicker'
-import { ItemControls } from '../components/ItemControls'
-import { PageCard } from '../components/PageCard'
-import { Heading1, Paragraph } from '../components/Typography'
-import { BackLink } from '../components/ui/BackLink'
-import { Button } from '../components/ui/Button'
-import { DecorativeIcon } from '../components/ui/DecorativeIcon'
-import { PageLayout } from '../layouts/PageLayout'
-import { getExercisePath } from '../utils/exerciseRouteUtils'
-import { formatLabel } from '../utils/formatUtils'
-import { useIsDesktop } from '../utils/useMediaQuery'
+import type { Exercise } from '@gym-pilot/shared';
+import clsx from 'clsx';
+import { useEffect, useState } from 'react';
+import { NavLink, useNavigate } from 'react-router-dom';
+import { ExerciseMultiPicker } from '../components/exercises/ExerciseMultiPicker';
+import { ItemControls } from '../components/ItemControls';
+import { PageCard } from '../components/PageCard';
+import { Heading1, Paragraph } from '../components/Typography';
+import { BackLink } from '../components/ui/BackLink';
+import { Button } from '../components/ui/Button';
+import { DecorativeIcon } from '../components/ui/DecorativeIcon';
+import { PageLayout } from '../layouts/PageLayout';
+import { getExercisePath } from '../utils/exerciseRouteUtils';
+import { formatLabel } from '../utils/formatUtils';
+import { useIsDesktop } from '../utils/useMediaQuery';
 
 // Define a key for local storage
 const LOCAL_STORAGE_KEY = 'gym-pilot-selected-template-exercises'
@@ -106,7 +106,7 @@ function SessionTemplateCreatePage() {
               <Heading1 className="mt-2">Create Template</Heading1>
             </div>
           </div>
-          <BackLink to="/session-templates" label="Back to Templates" />
+          <BackLink />
         </div>
 
         <div className="mt-6 grid grid-cols-1 gap-6">
