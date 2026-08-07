@@ -1,5 +1,5 @@
-import { Component, type ErrorInfo, type ReactNode } from 'react'
-import { InternalServerErrorPage } from '../pages/errors/InternalServerErrorPage'
+import { Component, type ErrorInfo, type ReactNode } from 'react';
+import { InternalServerErrorPage } from '../pages/errors/InternalServerErrorPage';
 
 interface Props {
   children: ReactNode
@@ -15,7 +15,9 @@ class ErrorBoundary extends Component<Props, State> {
   }
 
   public static getDerivedStateFromError(_: Error): State {
-    return { hasError: true }
+    return {
+      hasError: true,
+    }
   }
 
   public componentDidCatch(error: Error, errorInfo: ErrorInfo) {

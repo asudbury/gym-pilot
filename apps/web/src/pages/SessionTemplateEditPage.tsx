@@ -7,7 +7,6 @@ import { PageCard } from '../components/PageCard'
 import { Heading1, Paragraph } from '../components/Typography'
 import { BackLink } from '../components/ui/BackLink'
 import { Button } from '../components/ui/Button'
-import { ConfirmModal } from '../components/ui/ConfirmModal'
 import { PageLayout } from '../layouts/PageLayout'
 import { getExercisePath } from '../utils/exerciseRouteUtils'
 import { formatLabel } from '../utils/formatUtils'
@@ -28,7 +27,7 @@ export default function SessionTemplateEditPage() {
   const [statusTone, setStatusTone] = useState<'info' | 'error' | 'success'>(
     'info',
   )
-  const [showDeleteModal, setShowDeleteModal] = useState(false)
+  const [pendingDelete, setPendingDelete] = useState(false)
 
   async function loadTemplate() {
     if (!id) return
@@ -312,9 +311,25 @@ export default function SessionTemplateEditPage() {
               <Button tone="emerald" onClick={handleSave}>
                 Save
               </Button>
-              <Button tone="chip-rose" onClick={() => setShowDeleteModal(true)}>
-                Delete
-              </Button>
+              {pendingDelete ? (
+                <>
+                  <Button tone="chip" onClick={() => setPendingDelete(false)}>
+                    Cancel
+                  </Button>
+                  <Button
+                    tone="chip-destructive"
+                    onClick={async () => {
+                      await handleDelete()
+                    }}
+                  >
+                    Confirm
+                  </Button>
+                </>
+              ) : (
+                <Button tone="chip-rose" onClick={() => setPendingDelete(true)}>
+                  Delete
+                </Button>
+              )}
               <Button
                 tone="default"
                 onClick={() => navigate('/session-templates')}
@@ -324,17 +339,7 @@ export default function SessionTemplateEditPage() {
             </div>
           </div>
         )}
-        <ConfirmModal
-          isOpen={showDeleteModal}
-          title="Delete workout template"
-          description="Delete this template? This cannot be undone."
-          confirmLabel="Delete"
-          cancelLabel="Cancel"
-          onCancel={() => setShowDeleteModal(false)}
-          onConfirm={async () => {
-            await handleDelete()
-          }}
-        />
+        {null}
       </PageCard>
     </PageLayout>
   )

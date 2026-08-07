@@ -1,21 +1,16 @@
-import { getSupabaseClient } from '@gym-pilot/shared'
-import { useEffect, useState } from 'react'
-import { Link } from 'react-router-dom'
-import { PageCard } from '../components/PageCard'
-import { Button } from '../components/ui/Button'
-import { ConfirmModal } from '../components/ui/ConfirmModal'
-import { StatusMessageNotification } from '../components/ui/StatusMessageNotification'
-import { PageCardLayout } from '../layouts/PageCardLayout'
-import { PageLayout } from '../layouts/PageLayout'
+import { getSupabaseClient } from '@gym-pilot/shared';
+import { useEffect, useState } from 'react';
+import { Link } from 'react-router-dom';
+import { PageCard } from '../components/PageCard';
+import { Button } from '../components/ui/Button';
+import { StatusMessageNotification } from '../components/ui/StatusMessageNotification';
+import { PageCardLayout } from '../layouts/PageCardLayout';
+import { PageLayout } from '../layouts/PageLayout';
 
 export function SessionTemplatesPage() {
   const [templates, setTemplates] = useState<any[]>([])
   const [loading, setLoading] = useState(false)
-  const [showDeleteModal, setShowDeleteModal] = useState(false)
-  const [deleteTarget, setDeleteTarget] = useState<{
-    id: string
-    name?: string
-  } | null>(null)
+  const [pendingDeleteId, setPendingDeleteId] = useState<string | null>(null)
 
   const description = 'Create a workout template to define exercises.'
 
@@ -71,8 +66,7 @@ export function SessionTemplatesPage() {
 
       setStatusTone('success')
       setStatusMessage('Template deleted')
-      setShowDeleteModal(false)
-      setDeleteTarget(null)
+      setPendingDeleteId(null)
       void loadTemplates()
     } catch (err) {
       setStatusTone('error')
@@ -126,16 +120,29 @@ export function SessionTemplatesPage() {
                     >
                       Update
                     </Button>
-                    {/* Use modal-based confirmation for delete */}
-                    <Button
-                      tone="chip-rose"
-                      onClick={() => {
-                        setDeleteTarget({ id: t.id, name: t.name })
-                        setShowDeleteModal(true)
-                      }}
-                    >
-                      Remove
-                    </Button>
+                    {pendingDeleteId === t.id ? (
+                      <>
+                        <Button
+                          tone="chip"
+                          onClick={() => setPendingDeleteId(null)}
+                        >
+                          Cancel
+                        </Button>
+                        <Button
+                          tone="chip-destructive"
+                          onClick={() => deleteTemplate(t.id)}
+                        >
+                          Confirm
+                        </Button>
+                      </>
+                    ) : (
+                      <Button
+                        tone="chip-rose"
+                        onClick={() => setPendingDeleteId(t.id)}
+                      >
+                        Remove
+                      </Button>
+                    )}
                   </div>
                 </div>
               </PageCard>
@@ -150,19 +157,7 @@ export function SessionTemplatesPage() {
             />
           </div>
         ) : null}
-        <ConfirmModal
-          isOpen={showDeleteModal}
-          title="Delete workout template"
-          description={
-            deleteTarget
-              ? `Delete “${deleteTarget.name ?? ''}”? This cannot be undone.`
-              : 'Delete this template? This cannot be undone.'
-          }
-          confirmLabel="Delete"
-          cancelLabel="Cancel"
-          onCancel={() => setShowDeleteModal(false)}
-          onConfirm={() => deleteTemplate(deleteTarget?.id ?? '')}
-        />
+        {null}
       </PageCardLayout>
     </PageLayout>
   )
