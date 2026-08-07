@@ -1,12 +1,12 @@
-import { getSupabaseClient } from '@gym-pilot/shared';
-import { useEffect, useState } from 'react';
-import { Link } from 'react-router-dom';
-import { PageCard } from '../components/PageCard';
-import { Button } from '../components/ui/Button';
-import { ConfirmModal } from '../components/ui/ConfirmModal';
-import { StatusMessageNotification } from '../components/ui/StatusMessageNotification';
-import { PageCardLayout } from '../layouts/PageCardLayout';
-import { PageLayout } from '../layouts/PageLayout';
+import { getSupabaseClient } from '@gym-pilot/shared'
+import { useEffect, useState } from 'react'
+import { Link } from 'react-router-dom'
+import { PageCard } from '../components/PageCard'
+import { Button } from '../components/ui/Button'
+import { ConfirmModal } from '../components/ui/ConfirmModal'
+import { StatusMessageNotification } from '../components/ui/StatusMessageNotification'
+import { PageCardLayout } from '../layouts/PageCardLayout'
+import { PageLayout } from '../layouts/PageLayout'
 
 export function SessionTemplatesPage() {
   const [templates, setTemplates] = useState<any[]>([])
