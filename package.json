@@ -23,11 +23,9 @@
   },
   "dependencies": {
     "clsx": "^2.1.1",
-    "dexie": "^4.4.4",
-    "react-window": "^2.2.7"
+    "dexie": "^4.4.4"
   },
   "devDependencies": {
-    "@vitest/coverage-v8": "^4.1.10",
     "knip": "^6.27.0"
   }
 }
