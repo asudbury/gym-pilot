@@ -1,8 +1,11 @@
 import { TableNames } from "@gym-pilot/shared/src/dataServices/tableNames";
 import type { Assignment, Plan } from "@gym-pilot/types";
-import { logger } from "../logging";
+import { logger } from "../logging"; // Assuming logger is defined elsewhere
 import { getSupabaseClient } from "../supabase";
 import { getAuthenticatedUserId } from "../supabaseAuth";
+import type { WorkoutPlanExercise } from "./types";
+
+type PlanWithExercises = Plan & { planExercises?: WorkoutPlanExercise[] };
 
 export type SupabaseRecordResponse<T> = {
   found: boolean;
@@ -24,7 +27,7 @@ export type FavoriteStorageValue = {
 const DEFAULT_SUPABASE_TABLE = TableNames.AppState;
 
 const SUPABASE_TABLE_BY_KEY: Record<string, string> = {
-  "gym-pilot-plans": TableNames.Plan,
+  "gym-pilot-plans": TableNames.WorkoutPlan, // This now correctly points to "workout_plan"
   "gym-pilot-assignments": TableNames.Assignment,
 };
 
@@ -121,22 +124,50 @@ export async function loadSupabaseJsonRecord<T>(
   }
 
   if (key === "gym-pilot-plans") {
-    const { data, error } = await client
-      .from(TableNames.Plan)
-      .select("id, plan_name, plan_slug, plan_sessions, created_at, updated_at")
+    const { data: planData, error: planError } = await client
+      .from(TableNames.WorkoutPlan)
+      .select("id, plan_name, plan_slug, created_at, updated_at")
       .eq("user_id", userId);
 
-    if (error) {
-      logger.error("[Supabase] Remote plans load failed", { key, error });
-      throw error;
+    if (planError) {
+      logger.error("[Supabase] Remote plans load failed", {
+        key,
+        error: planError,
+      });
+      throw planError;
     }
 
-    const plans = (data ?? []).map((row) => ({
-      id: row.id,
-      planName: row.plan_name,
-      planSlug: row.plan_slug,
-      planSessions: Array.isArray(row.plan_sessions) ? row.plan_sessions : [],
-      createdByUserId: userId,
+    const planIds = (planData ?? []).map((plan) => plan.id);
+
+    const { data: exercisesData, error: exercisesError } = await client
+      .from(TableNames.WorkoutPlanExercise)
+      .select(
+        "id, plan_id, exercise_id, exercise_name, position, details, created_at, updated_at",
+      )
+      .in("plan_id", planIds)
+      .order("position", { ascending: true });
+
+    if (exercisesError) {
+      logger.error("[Supabase] Remote plan exercises load failed", {
+        key,
+        error: exercisesError,
+      });
+      throw exercisesError;
+    }
+
+    const exercisesByPlanId = new Map<string, WorkoutPlanExercise[]>();
+    (exercisesData ?? []).forEach((exercise) => {
+      const planExercises = exercisesByPlanId.get(exercise.plan_id) || [];
+      planExercises.push(exercise);
+      exercisesByPlanId.set(exercise.plan_id, planExercises);
+    });
+
+    const plans = (planData ?? []).map((planRow) => ({
+      id: planRow.id,
+      planName: planRow.plan_name,
+      planSlug: planRow.plan_slug,
+      planExercises: exercisesByPlanId.get(planRow.id) || [], // Assuming Plan type now has planExercises
+      createdByUserId: userId, // Assuming this is part of your Plan type
     }));
 
     return { found: true, value: plans as T };
@@ -262,30 +293,58 @@ export async function saveSupabaseJsonRecord<T>(key: string, value: T) {
   }
 
   if (key === "gym-pilot-plans") {
-    const plans = Array.isArray(value) ? (value as Plan[]) : [];
+    const plansToSave = Array.isArray(value)
+      ? (value as PlanWithExercises[])
+      : [];
 
-    const { error: deleteError } = await client
-      .from(TableNames.Plan)
+    // Delete existing plans and their exercises for the user
+    const { error: deletePlansError } = await client
+      .from(TableNames.WorkoutPlan)
       .delete()
       .eq("user_id", userId);
 
-    if (deleteError) {
-      throw deleteError;
+    if (deletePlansError) {
+      throw deletePlansError;
     }
 
-    if (plans.length > 0) {
-      const { error: insertError } = await client.from(TableNames.Plan).insert(
-        plans.map((plan) => ({
-          id: plan.id,
-          user_id: userId,
-          plan_name: plan.planName,
-          plan_slug: plan.planSlug,
-          plan_sessions: plan.planSessions ?? [],
+    // Insert new plans
+    if (plansToSave.length > 0) {
+      const { error: insertPlansError } = await client
+        .from(TableNames.WorkoutPlan)
+        .insert(
+          plansToSave.map((plan) => ({
+            id: plan.id,
+            user_id: userId,
+            plan_name: plan.planName,
+            plan_slug: plan.planSlug,
+          })),
+        );
+
+      if (insertPlansError) {
+        throw insertPlansError;
+      }
+
+      // Insert associated exercises
+      const allExercises: WorkoutPlanExercise[] = plansToSave.flatMap((plan) =>
+        (plan.planExercises || []).map((exercise: WorkoutPlanExercise) => ({
+          ...exercise,
+          plan_id: plan.id,
         })),
       );
 
-      if (insertError) {
-        throw insertError;
+      if (allExercises.length > 0) {
+        const { error: insertExercisesError } = await client
+          .from(TableNames.WorkoutPlanExercise)
+          .insert(
+            allExercises.map((exercise) => ({
+              ...exercise, // Assuming exercise object directly maps to table columns
+              plan_id: exercise.plan_id,
+            })),
+          );
+
+        if (insertExercisesError) {
+          throw insertExercisesError;
+        }
       }
     }
 

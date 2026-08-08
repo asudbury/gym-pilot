@@ -65,7 +65,7 @@
 | created_at        | string           | Creation timestamp              |
 | attribution       | string           | Source attribution              |
 
-### Favourite folder — favourite_folder
+### Favourite folder — gym_pilot_favourite_folder
 
 | Field      | Type   | Notes                 |
 | ---------- | ------ | --------------------- |
@@ -75,7 +75,7 @@
 | created_at | string | Creation timestamp    |
 | updated_at | string | Last update timestamp |
 
-### Favourite link — favourite
+### Favourite link — gym_pilot_favourite
 
 | Field      | Type           | Notes                     |
 | ---------- | -------------- | ------------------------- |
@@ -89,35 +89,56 @@
 | updated_at | string         | Last update timestamp     |
 
 ### Plan — gym_pilot_plan
+| Field      | Type   | Notes                       |
+| ---------- | ------ | --------------------------- |
+| id         | string | Primary key                 |
+| user_id    | string | Plan owner                  |
+| plan_name  | string | Plan title                  |
+| plan_slug  | string | URL-friendly slug           |
+| created_at | string | Creation timestamp          |
+| updated_at | string | Last update timestamp       |
 
-| Field         | Type          | Notes                       |
-| ------------- | ------------- | --------------------------- |
-| id            | string        | Primary key                 |
-| user_id       | string        | Plan owner                  |
-| plan_name     | string        | Plan title                  |
-| plan_slug     | string        | URL-friendly slug           |
-| plan_sessions | PlanSession[] | Nested plan session payload |
-| created_at    | string        | Creation timestamp          |
-| updated_at    | string        | Last update timestamp       |
-
-### PlanItem — embedded in gym_pilot_plan
+### Workout plan exercise — workout_plan_exercise
 
 | Field      | Type   | Notes               |
 | ---------- | ------ | ------------------- |
 | exerciseId | string | Referenced exercise |
 | note       | string | Optional note       |
 
+| Field         | Type   | Notes                               |
+| ------------- | ------ | ----------------------------------- |
+| id            | string | Primary key                         |
+| plan_id       | string | Foreign key to `workout_plan`       |
+| exercise_id   | string | Catalog exercise id (stored as text)|
+| exercise_name | string | Denormalised exercise name for display |
+| position      | number | Ordering within the plan            |
+| details       | Json   | JSON details / overrides            |
+| created_at    | string | Creation timestamp                  |
+| updated_at    | string | Last update timestamp               |
+
 ### Profile — gym_pilot_profile
 
-| Field             | Type           | Notes                 |
-| ----------------- | -------------- | --------------------- |
-| id                | string         | Primary key           |
-| user_id           | string         | Supabase auth user    |
-| friendly_name     | string \| null | Display name          |
-| terms_accepted    | boolean        | Acceptance flag       |
-| terms_accepted_at | string \| null | Acceptance timestamp  |
-| created_at        | string         | Creation timestamp    |
-| updated_at        | string         | Last update timestamp |
+| Field                     | Type               | Notes                                            |
+| ------------------------- | ------------------ | ------------------------------------------------ |
+| id                        | string             | Primary key                                      |
+| user_id                   | string             | Supabase auth user (unique)                      |
+| friendly_name             | string \| null     | Display name                                     |
+| must_change_password      | boolean            | Flag to require password change on next sign-in  |
+| terms_accepted            | boolean            | Acceptance flag                                  |
+| terms_accepted_at         | string \| null     | Acceptance timestamp                             |
+| trainer_id                | string \| null     | Optional trainer reference                       |
+| application_name          | string \| null     | App identifier for the profile                   |
+| gym_brand                 | string \| null     | Gym brand name                                   |
+| gym_name                  | string \| null     | Gym or club display name                         |
+| gym_club_id               | number \| null     | External gym/club id                             |
+| account_tier              | 'free'|'bronze'|'silver'|'gold' | Account tier (enum)                              |
+| access_ends_at            | string \| null     | Subscription / access expiry timestamp           |
+| is_frozen                 | boolean            | Whether the profile is frozen                    |
+| last_logged_in_at         | string \| null     | Last login timestamp                             |
+| previous_last_logged_in_at| string \| null     | Previous login timestamp                         |
+| email                     | string \| null     | Optional email (kept in profile snapshot)        |
+| created_at                | string             | Creation timestamp                               |
+| updated_at                | string             | Last update timestamp                            |
 
 ### Session workout item — gym_pilot_user_session_workout_item
 
@@ -130,6 +151,7 @@
 | item_index       | number                                                     | Position within the session    |
 | category         | exercise \| warm_up \| stretch \| cool_down \| run \| spin | Workout item category          |
 | exercise_name    | string \| null                                             | Exercise label                 |
+| exercise_id      | string \| null                                             | Optional canonical exercise id |
 | reps             | string \| null                                             | Repetition value               |
 | sets             | string \| null                                             | Set count                      |
 | weight           | string \| null                                             | Weight value                   |
@@ -138,8 +160,48 @@
 | speed_kph        | string \| null                                             | Speed value                    |
 | notes            | string \| null                                             | Optional notes                 |
 | plan_item_id     | string \| null                                             | Optional related plan item     |
+| sort_order       | number \| null                                             | Optional ordering field        |
 | created_at       | string                                                     | Creation timestamp             |
 | updated_at       | string                                                     | Last update timestamp          |
+
+### Imported workout — gym_pilot_imported_workout
+
+| Field        | Type           | Notes |
+| ------------ | -------------- | ------------------------------------------------------------- |
+| id           | string         | Primary key                                                   |
+| user_id      | string         | Owner of the imported workout                                  |
+| display_name | string         | Human-friendly workout name                                    |
+| start_date   | string         | Start timestamp                                                |
+| duration     | number         | Duration in seconds                                            |
+| energy       | number \| null | Optional energy reading                                         |
+| energy_unit  | string \| null | Optional energy unit                                            |
+| original_id  | string \| null | Optional original provider id (for de-duplication)             |
+| session_id   | string \| null | Optional linked `user_workout` session identifier              |
+| created_at   | string         | Creation timestamp                                              |
+
+### Workout template — workout_template
+
+| Field      | Type           | Notes |
+| ---------- | -------------- | ------------------------------------------------------------- |
+| id         | string         | Primary key                                                   |
+| user_id    | string         | Owner of the template                                         |
+| name       | string         | Template name                                                 |
+| description| string \| null | Optional long description                                      |
+| metadata   | Record<string, unknown> | Arbitrary JSON metadata                               |
+| created_at | string         | Creation timestamp                                            |
+| updated_at | string \| null | Last update timestamp                                         |
+
+### Workout template exercise — workout_template_exercise
+
+| Field       | Type           | Notes |
+| ----------- | -------------- | ------------------------------------------------------------- |
+| id          | string         | Primary key                                                   |
+| template_id | string         | Foreign key to `workout_template`                             |
+| exercise_id | string         | Catalog exercise id (stored as text)                          |
+| exercise_name | string \| null | Denormalised exercise name for display                     |
+| position    | number         | Ordering within the template                                  |
+| details     | Record<string, unknown> | JSON details / overrides for the exercise             |
+| created_at  | string         | Creation timestamp                                            |
 
 ### User — auth.users
 
@@ -203,32 +265,34 @@ The shared Supabase helpers in [packages/shared/src/gymPilotSupabase.ts](package
 | Area                    | Current call patterns                                                                                                                                                                                                                                                                                                                                                                                 | Tables / resources                                                                               |
 | ----------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------ |
 | Auth and session        | `client.auth.getSession()`, `client.auth.signInWithOAuth()`, `client.auth.signInWithPassword()`, `client.auth.signUp()`, `client.auth.resetPasswordForEmail()`, `client.auth.updateUser()`, `client.auth.signOut()`                                                                                                                                                                                   | Supabase Auth users and session state                                                            |
-| Profiles and settings   | `loadSupabaseProfileSnapshot()`, `saveSupabaseProfileName()`, `saveSupabaseApplicationName()`, `saveSupabaseGymBrand()`, `saveSupabaseGymName()`, `saveSupabaseProfileAccessSettings()`, `saveSupabaseProfileFlag()`, `saveSupabaseProfileLastLoggedIn()`, `loadSupabaseProfileTermsAcceptance()`, `saveSupabaseProfileTermsAcceptance()`, `loadSupabaseProfileRoles()`, `saveSupabaseProfileRoles()` | `gym_pilot_profile`, `gym_pilot_user_role`                                                       |
-| Key/value persistence   | `loadSupabaseJsonRecord()`, `saveSupabaseJsonRecord()`, `removeSupabaseJsonRecord()`                                                                                                                                                                                                                                                                                                                  | `app_state` plus table-specific rows for plans, assignments, favourites, and app state |
-| Plans and assignments   | `select`, `insert`, `upsert`, `delete` against remote rows                                                                                                                                                                                                                                                                                                                                            | `gym_pilot_plan`, `assignment`                                                         |
-| Favourites and folders  | `select`, `insert`, `upsert`, `delete` against remote rows                                                                                                                                                                                                                                                                                                                                            | `favourite_folder`, `favourite`                                              |
+| Profiles and settings   | `loadSupabaseProfileSnapshot()`, `saveSupabaseProfileName()`, `saveSupabaseApplicationName()`, `saveSupabaseGymBrand()`, `saveSupabaseGymName()`, `saveSupabaseProfileAccessSettings()`, `saveSupabaseProfileFlag()`, `saveSupabaseProfileLastLoggedIn()`, `loadSupabaseProfileTermsAcceptance()`, `saveSupabaseProfileTermsAcceptance()`, `loadSupabaseProfileRoles()`, `saveSupabaseProfileRoles()` | `gym_pilot_profile`, `gym_pilot_user_role` |
+| Key/value persistence   | `loadSupabaseJsonRecord()`, `saveSupabaseJsonRecord()`, `removeSupabaseJsonRecord()`                                                                                                                                                                                                                                                                                                                  | `gym_pilot_app_state` plus table-specific rows for plans, assignments, favourites, and app state |
+| Plans and assignments   | `select`, `insert`, `upsert`, `delete` against remote rows                                                                                                                                                                                                                                                                                                                                            | `gym_pilot_plan`, `assignment` |
+| Favourites and folders  | `select`, `insert`, `upsert`, `delete` against remote rows                                                                                                                                                                                                                                                                                                                                            | `gym_pilot_favourite_folder`, `gym_pilot_favourite`                                              |
 | Activity logging        | `recordSupabaseUserActivity()` uses `insert` into `user_activity`; it skips inserts when the app is running on localhost-style hosts                                                                                                                                                                                                                                                        | `user_activity`                                                                        |
 | Session recording       | `saveTimetableAttendance()` inserts role-based session records with optional notes and a 1-5 rating for a session/class                                                                                                                                                                                                                                                                               | `user_workout`                                                                         |
 | Workout items           | `loadWorkoutItemsForSession()` and `saveWorkoutItemsForSession()` read/write ordered workout rows for a session                                                                                                                                                                                                                                                                                       | `gym_pilot_user_session_workout_item`                                                            |
+| Imported workouts       | Import pipeline and CSV/GPX/connected-service imports — `importWorkout()` and related helpers read/write imported workout rows                                                                                                                                                                                                                                                                        | `gym_pilot_imported_workout`                                                            |
+| Templates               | Create and reuse workout templates via `createWorkoutTemplate()`, `loadWorkoutTemplates()` and related helpers                                                                                                                                                                                                                                                                                         | `workout_template`, `workout_template_exercise`                                          |
 | Error and audit logging | `persistErrorLog()` and `persistAuditLog()` write to `error_log` and `audit_log` only when the matching app settings are enabled                                                                                                                                                                                                                                                  | `error_log`, `audit_log`                                                     |
 
 ### Entity relationship overview
 
 ```mermaid
 erDiagram
-    auth_users ||--o{ app_state : owns
+    auth_users ||--o{ gym_pilot_app_state : owns
     auth_users ||--o{ gym_pilot_profile : owns
     auth_users ||--o{ gym_pilot_user_role : has
-    auth_users ||--o{ favourite_folder : owns
-    auth_users ||--o{ favourite : owns
+    auth_users ||--o{ gym_pilot_favourite_folder : owns
+    auth_users ||--o{ gym_pilot_favourite : owns
     auth_users ||--o{ gym_pilot_plan : owns
-    auth_users ||--o{ assignment : creates
+    auth_users ||--o{ assignment : owns
     auth_users ||--o{ user_activity : records
     auth_users ||--o{ user_workout : records
     gym_pilot_plan ||--o{ assignment : uses
     user_workout ||--o{ gym_pilot_user_session_workout_item : contains
 
-    app_state {
+    gym_pilot_app_state {
         uuid id
         uuid user_id
         text key
@@ -265,7 +329,7 @@ erDiagram
         timestamptz updated_at
     }
 
-    favourite_folder {
+    gym_pilot_favourite_folder {
         uuid id
         uuid user_id
         text name
@@ -273,13 +337,33 @@ erDiagram
         timestamptz updated_at
     }
 
-    favourite {
+    gym_pilot_favourite {
         uuid id
         uuid user_id
         text path
         text label
         text folder
         uuid folder_id
+        timestamptz created_at
+        timestamptz updated_at
+    }
+
+    workout_plan {
+        uuid id
+        uuid user_id
+        text plan_name
+        text plan_slug
+        timestamptz created_at
+        timestamptz updated_at
+    }
+
+    workout_plan_exercise {
+        uuid id
+        uuid plan_id
+        text exercise_id
+        text exercise_name
+        integer position
+        jsonb details
         timestamptz created_at
         timestamptz updated_at
     }
@@ -317,19 +401,27 @@ erDiagram
 
     user_workout {
         uuid id
-        uuid user_id
+        bigint gym_club_id
         text session_type
-        timestamptz start_at
         text class_id
         text class_name
         uuid trainer_id
         text trainer_name
+        timestamptz start_at
+        int duration_minutes
+        text location
+        int capacity
+        int price
+        jsonb metadata
+        uuid user_id
+        text session_id
         text role
         text status
         text notes
         smallint rating
         text attendance_type
-        jsonb metadata
+        double precision energy
+        text energy_unit
         timestamptz created_at
         timestamptz updated_at
     }
@@ -342,6 +434,7 @@ erDiagram
         int item_index
         text category
         text exercise_name
+        text exercise_id
         text reps
         text sets
         text weight
@@ -350,6 +443,7 @@ erDiagram
         text speed_kph
         text notes
         text plan_item_id
+        int sort_order
         timestamptz created_at
         timestamptz updated_at
     }

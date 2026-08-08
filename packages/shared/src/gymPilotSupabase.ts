@@ -517,21 +517,6 @@ export {
   saveSupabaseJsonRecord,
 } from "./dataServices/jsonRecordDataService";
 
-export function isLocalhostHost(hostname?: string) {
-  if (!hostname) {
-    return false;
-  }
-
-  return (
-    hostname === "localhost" ||
-    hostname === "127.0.0.1" ||
-    hostname === "::1" ||
-    hostname === "[::1]" ||
-    hostname === "0.0.0.0" ||
-    hostname.endsWith(".localhost")
-  );
-}
-
 export {
   buildSupabaseUserActivityEventData,
   recordSupabaseUserActivity,

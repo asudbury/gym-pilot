@@ -1,3 +1,4 @@
+/// <reference types="vite/client" />
 import { createClient, type SupabaseClient } from "@supabase/supabase-js";
 import { logger } from "./logging";
 
@@ -63,8 +64,9 @@ export function getSupabaseClient(options?: SupabaseClientOptions) {
     const anonKey = getSupabaseAnonKey();
 
     if (!url || !anonKey) {
-      throw new Error("Supabase URL or anon key is not configured. Please set VITE_SUPABASE_URL and VITE_SUPABASE_ANON_KEY in your environment."
-      );  
+      throw new Error(
+        "Supabase URL or anon key is not configured. Please set VITE_SUPABASE_URL and VITE_SUPABASE_ANON_KEY in your environment.",
+      );
     }
 
     logger.info("[Supabase] Creating client", {

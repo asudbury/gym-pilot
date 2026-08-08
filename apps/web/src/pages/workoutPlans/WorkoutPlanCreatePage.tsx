@@ -1,18 +1,19 @@
-import { getSupabaseClient } from '@gym-pilot/shared'
-import clsx from 'clsx'
-import { useEffect, useState } from 'react'
-import { useNavigate } from 'react-router-dom'
-import { ItemControls } from '../../components/ItemControls'
-import { PageCard } from '../../components/PageCard'
-import { Heading1, Paragraph } from '../../components/Typography'
-import BackLink from '../../components/ui/BackLink'
-import { Button } from '../../components/ui/Button'
-import { DecorativeIcon } from '../../components/ui/DecorativeIcon'
-import { StatusMessageNotification } from '../../components/ui/StatusMessageNotification'
-import { WorkoutTemplatePickerModal } from '../../components/WorkoutTemplatePickerModal'
-import { PageLayout } from '../../layouts/PageLayout'
-import { formatLabel } from '../../utils/formatUtils'
-import { useIsDesktop } from '../../utils/useMediaQuery'
+import { getSupabaseClient } from '@gym-pilot/shared';
+import { TableNames } from '@gym-pilot/shared/src/dataServices/tableNames';
+import clsx from 'clsx';
+import { useEffect, useState } from 'react';
+import { useNavigate } from 'react-router-dom';
+import { ItemControls } from '../../components/ItemControls';
+import { PageCard } from '../../components/PageCard';
+import { Heading1, Paragraph } from '../../components/Typography';
+import BackLink from '../../components/ui/BackLink';
+import { Button } from '../../components/ui/Button';
+import { DecorativeIcon } from '../../components/ui/DecorativeIcon';
+import { StatusMessageNotification } from '../../components/ui/StatusMessageNotification';
+import { WorkoutTemplatePickerModal } from '../../components/WorkoutTemplatePickerModal';
+import { PageLayout } from '../../layouts/PageLayout';
+import { formatLabel } from '../../utils/formatUtils';
+import { useIsDesktop } from '../../utils/useMediaQuery';
 
 // --- Types (These types are defined locally for this new feature. In a larger project,
 // they would typically be moved to a shared types package like `@gym-pilot/types`.) ---
@@ -249,32 +250,51 @@ export default function WorkoutPlanCreatePage() {
         .replace(/[^a-z0-9]+/g, '-')
         .replace(/^-*|-*$/g, '')
 
-      const payload = {
-        user_id: authData.user.id,
-        plan_name: planName.trim(),
-        plan_slug: planSlug,
-        plan_sessions: planSessions.map((session, sIdx) => ({
-          ...session,
-          planItems: session.planItems.map((item, iIdx) => ({
-            ...item,
-            position: iIdx, // Ensure positions are updated before saving
-          })),
-          // Assuming 'position' for sessions themselves is part of the JSON structure
-          position: sIdx,
-        })),
-        // The 'gym_pilot_plan' schema in docs/data-schema.md does not explicitly list 'description'.
-        // If needed, the database schema would require an update.
-        // description: planDescription || null,
+      // Create the plan row (no plan_sessions JSON). We'll insert exercises separately.
+      const { data: createdPlan, error: createPlanError } = await client
+        .from(TableNames.WorkoutPlan)
+        .insert({
+          user_id: authData.user.id,
+          plan_name: planName.trim(),
+          plan_slug: planSlug,
+        })
+        .select('id')
+        .maybeSingle();
+
+      if (createPlanError || !createdPlan?.id) {
+        setError(createPlanError?.message || 'Failed to create plan');
+        setIsSaving(false);
+        return;
       }
 
-      const { error: insertError } = await client
-        .from('gym_pilot_plan')
-        .insert(payload)
+      const planId = createdPlan.id;
 
-      if (insertError) {
-        setError(insertError.message)
-        setIsSaving(false)
-        return
+      // Flatten sessions -> exercises and insert into workout_plan_exercise
+      const exercisesToInsert: Array<any> = [];
+      let positionCounter = 0;
+      planSessions.forEach((session) => {
+        session.planItems.forEach((item) => {
+          exercisesToInsert.push({
+            id: generateUUID(),
+            plan_id: planId,
+            exercise_id: item.exercise_id,
+            exercise_name: item.exercise_name,
+            position: positionCounter++,
+            details: {},
+          });
+        });
+      });
+
+      if (exercisesToInsert.length > 0) {
+        const { error: insertExercisesError } = await client
+          .from(TableNames.WorkoutPlanExercise)
+          .insert(exercisesToInsert);
+
+        if (insertExercisesError) {
+          setError(insertExercisesError.message);
+          setIsSaving(false);
+          return;
+        }
       }
 
       navigate('/workout-plans') // Navigate to the plans list page after successful save
