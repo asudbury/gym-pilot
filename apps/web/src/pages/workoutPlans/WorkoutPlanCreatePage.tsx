@@ -1,19 +1,19 @@
-import { getSupabaseClient } from '@gym-pilot/shared';
-import { TableNames } from '@gym-pilot/shared/src/dataServices/tableNames';
-import clsx from 'clsx';
-import { useEffect, useState } from 'react';
-import { useNavigate } from 'react-router-dom';
-import { ItemControls } from '../../components/ItemControls';
-import { PageCard } from '../../components/PageCard';
-import { Heading1, Paragraph } from '../../components/Typography';
-import BackLink from '../../components/ui/BackLink';
-import { Button } from '../../components/ui/Button';
-import { DecorativeIcon } from '../../components/ui/DecorativeIcon';
-import { StatusMessageNotification } from '../../components/ui/StatusMessageNotification';
-import { WorkoutTemplatePickerModal } from '../../components/WorkoutTemplatePickerModal';
-import { PageLayout } from '../../layouts/PageLayout';
-import { formatLabel } from '../../utils/formatUtils';
-import { useIsDesktop } from '../../utils/useMediaQuery';
+import { getSupabaseClient } from '@gym-pilot/shared'
+import { TableNames } from '@gym-pilot/shared/src/dataServices/tableNames'
+import clsx from 'clsx'
+import { useEffect, useState } from 'react'
+import { useNavigate } from 'react-router-dom'
+import { ItemControls } from '../../components/ItemControls'
+import { PageCard } from '../../components/PageCard'
+import { Heading1, Paragraph } from '../../components/Typography'
+import BackLink from '../../components/ui/BackLink'
+import { Button } from '../../components/ui/Button'
+import { DecorativeIcon } from '../../components/ui/DecorativeIcon'
+import { StatusMessageNotification } from '../../components/ui/StatusMessageNotification'
+import { WorkoutTemplatePickerModal } from '../../components/WorkoutTemplatePickerModal'
+import { PageLayout } from '../../layouts/PageLayout'
+import { formatLabel } from '../../utils/formatUtils'
+import { useIsDesktop } from '../../utils/useMediaQuery'
 
 // --- Types (These types are defined locally for this new feature. In a larger project,
 // they would typically be moved to a shared types package like `@gym-pilot/types`.) ---
@@ -259,19 +259,19 @@ export default function WorkoutPlanCreatePage() {
           plan_slug: planSlug,
         })
         .select('id')
-        .maybeSingle();
+        .maybeSingle()
 
       if (createPlanError || !createdPlan?.id) {
-        setError(createPlanError?.message || 'Failed to create plan');
-        setIsSaving(false);
-        return;
+        setError(createPlanError?.message || 'Failed to create plan')
+        setIsSaving(false)
+        return
       }
 
-      const planId = createdPlan.id;
+      const planId = createdPlan.id
 
       // Flatten sessions -> exercises and insert into workout_plan_exercise
-      const exercisesToInsert: Array<any> = [];
-      let positionCounter = 0;
+      const exercisesToInsert: Array<any> = []
+      let positionCounter = 0
       planSessions.forEach((session) => {
         session.planItems.forEach((item) => {
           exercisesToInsert.push({
@@ -281,19 +281,19 @@ export default function WorkoutPlanCreatePage() {
             exercise_name: item.exercise_name,
             position: positionCounter++,
             details: {},
-          });
-        });
-      });
+          })
+        })
+      })
 
       if (exercisesToInsert.length > 0) {
         const { error: insertExercisesError } = await client
           .from(TableNames.WorkoutPlanExercise)
-          .insert(exercisesToInsert);
+          .insert(exercisesToInsert)
 
         if (insertExercisesError) {
-          setError(insertExercisesError.message);
-          setIsSaving(false);
-          return;
+          setError(insertExercisesError.message)
+          setIsSaving(false)
+          return
         }
       }
 
