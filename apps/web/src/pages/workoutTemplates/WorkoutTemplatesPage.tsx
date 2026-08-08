@@ -70,7 +70,12 @@ export function WorkoutTemplatesPage() {
             />
           </div>
           <div>
-            <Button as={Link} to="/plans" tone="default" className="mr-2">
+            <Button
+              as={Link}
+              to="/workout-plans"
+              tone="default"
+              className="mr-2"
+            >
               Plans
             </Button>
             <Button as={Link} to="/workout-templates/create" tone="blue">

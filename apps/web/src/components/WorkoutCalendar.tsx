@@ -343,9 +343,10 @@ const WorkoutCalendar: React.FC<WorkoutCalendarProps> = ({
     }
   }
 
-  const formatMonth = (locale: string | undefined, date: Date) => {
+  const formatMonthYear = (locale: string | undefined, date: Date) => {
     return date.toLocaleString(locale || 'en-US', {
       month: isDesktop ? 'long' : 'short',
+      year: isDesktop ? 'numeric' : undefined,
     })
   }
 
@@ -412,7 +413,7 @@ const WorkoutCalendar: React.FC<WorkoutCalendarProps> = ({
                 setSelectedDate(null)
               }
             }}
-            formatMonth={formatMonth} // Correct placement: inside Calendar props
+            formatMonthYear={formatMonthYear}
           />
           {selectedDate && !Array.isArray(selectedDate) && (
             <div className="mt-5">

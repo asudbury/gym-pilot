@@ -7,7 +7,7 @@ import { CallToAction } from '../../layouts/CallToAction'
 import { PageCardLayout } from '../../layouts/PageCardLayout'
 import { PageLayout } from '../../layouts/PageLayout'
 
-export function PlansPage() {
+export function WorkoutPlansPage() {
   const { visiblePlans, deletePlan } = usePlan()
   const basePlans = visiblePlans
   const cards = resolvePlanListViewModels(basePlans)
@@ -26,7 +26,7 @@ export function PlansPage() {
           <CallToAction
             title="Manage plans"
             action={
-              <Button as={Link} to="/plans/new" tone="blue">
+              <Button as={Link} to="/workout-plans/create" tone="blue">
                 Create plan
               </Button>
             }
@@ -39,7 +39,7 @@ export function PlansPage() {
           description={description}
         >
           <div className="flex justify-end">
-            <Button as={Link} to="/plans/new" tone="blue">
+            <Button as={Link} to="/workout-plans/create" tone="blue">
               Create plan
             </Button>
           </div>

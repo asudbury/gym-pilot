@@ -1,29 +1,29 @@
-import { Navigate, Route } from 'react-router-dom'
-import { RequireAuth } from '../auth/RequireAuth'
-import { AppleFitnessPage } from '../pages/appleFitness/AppleFitnessPage'
-import { LinkAppleWorkoutPage } from '../pages/appleFitness/LinkAppleWorkoutPage'
-import SpreadsheetImportConfirmPage from '../pages/appleFitness/SpreadsheetImportConfirmPage'
-import { SpreadsheetImportPage } from '../pages/appleFitness/SpreadsheetImportPage'
-import SpreadsheetImportPreviewDetailPage from '../pages/appleFitness/SpreadsheetImportPreviewDetailPage'
-import { SpreadsheetImportPreviewPage } from '../pages/appleFitness/SpreadsheetImportPreviewPage'
-import HelpPage from '../pages/HelpPage'
-import { HomePage } from '../pages/HomePage'
-import { IconShowcasePage } from '../pages/IconShowcasePage'
-import { ImportedWorkoutAnalysisPage } from '../pages/ImportedWorkoutAnalysisPage'
-import { PlansPage } from '../pages/plans/PlansPage'
-import { RecordSessionPage } from '../pages/RecordSessionPage'
-import { SessionEditPage } from '../pages/SessionEditPage'
-import { SessionHistoryPage } from '../pages/SessionHistoryPage'
-import { TimetablePage } from '../pages/TimetablePage'
-import WorkoutTemplateCreatePage from '../pages/workoutTemplates/WorkoutTemplateCreatePage'
-import WorkoutTemplateEditPage from '../pages/workoutTemplates/WorkoutTemplateEditPage'
-import { WorkoutTemplatesPage } from '../pages/workoutTemplates/WorkoutTemplatesPage'
+import { Navigate, Route } from 'react-router-dom';
+import { RequireAuth } from '../auth/RequireAuth';
+import { AppleFitnessPage } from '../pages/appleFitness/AppleFitnessPage';
+import { LinkAppleWorkoutPage } from '../pages/appleFitness/LinkAppleWorkoutPage';
+import SpreadsheetImportConfirmPage from '../pages/appleFitness/SpreadsheetImportConfirmPage';
+import { SpreadsheetImportPage } from '../pages/appleFitness/SpreadsheetImportPage';
+import SpreadsheetImportPreviewDetailPage from '../pages/appleFitness/SpreadsheetImportPreviewDetailPage';
+import { SpreadsheetImportPreviewPage } from '../pages/appleFitness/SpreadsheetImportPreviewPage';
+import HelpPage from '../pages/HelpPage';
+import { HomePage } from '../pages/HomePage';
+import { IconShowcasePage } from '../pages/IconShowcasePage';
+import { ImportedWorkoutAnalysisPage } from '../pages/ImportedWorkoutAnalysisPage';
+import { RecordSessionPage } from '../pages/RecordSessionPage';
+import { SessionEditPage } from '../pages/SessionEditPage';
+import { SessionHistoryPage } from '../pages/SessionHistoryPage';
+import { TimetablePage } from '../pages/TimetablePage';
+import WorkoutPlanCreatePage from '../pages/workoutPlans/WorkoutPlanCreatePage';
+import { WorkoutPlansPage } from '../pages/workoutPlans/WorkoutPlansPage';
+import WorkoutTemplateCreatePage from '../pages/workoutTemplates/WorkoutTemplateCreatePage';
+import WorkoutTemplateEditPage from '../pages/workoutTemplates/WorkoutTemplateEditPage';
+import { WorkoutTemplatesPage } from '../pages/workoutTemplates/WorkoutTemplatesPage';
 
 export function createProtectedRoutes() {
   return (
     <Route element={<RequireAuth />}>
       <Route path="/exercises" element={<HomePage />} />
-      <Route path="/plans" element={<PlansPage />} />
       <Route element={<RequireAuth requireClubId />}>
         <Route path="/timetable" element={<TimetablePage />} />
         <Route path="/record-session" element={<RecordSessionPage />} />
@@ -48,6 +48,8 @@ export function createProtectedRoutes() {
         path="/workout-templates/:id/edit"
         element={<WorkoutTemplateEditPage />}
       />
+      <Route path="/workout-plans" element={<WorkoutPlansPage />} />
+      <Route path="/workout-plans/create" element={<WorkoutPlanCreatePage />} />
       <Route path="/help" element={<HelpPage />} />
       <Route path="/apple-fitness" element={<AppleFitnessPage />} />
       <Route
