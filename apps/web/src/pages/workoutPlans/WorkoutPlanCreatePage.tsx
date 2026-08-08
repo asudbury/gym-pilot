@@ -1,19 +1,19 @@
-import { getSupabaseClient } from '@gym-pilot/shared';
-import { TableNames } from '@gym-pilot/shared/src/dataServices/tableNames';
-import clsx from 'clsx';
-import { useEffect, useState } from 'react';
-import { useNavigate } from 'react-router-dom';
-import { ItemControls } from '../../components/ItemControls';
-import { PageCard } from '../../components/PageCard';
-import { Heading1, Paragraph } from '../../components/Typography';
-import BackLink from '../../components/ui/BackLink';
-import { Button } from '../../components/ui/Button';
-import { DecorativeIcon } from '../../components/ui/DecorativeIcon';
-import { StatusMessageNotification } from '../../components/ui/StatusMessageNotification';
-import { WorkoutTemplatePickerModal } from '../../components/WorkoutTemplatePickerModal';
-import { PageLayout } from '../../layouts/PageLayout';
-import { formatLabel } from '../../utils/formatUtils';
-import { useIsDesktop } from '../../utils/useMediaQuery';
+import { getSupabaseClient } from '@gym-pilot/shared'
+import { TableNames } from '@gym-pilot/shared/src/dataServices/tableNames'
+import clsx from 'clsx'
+import { useEffect, useState } from 'react'
+import { useNavigate } from 'react-router-dom'
+import { ItemControls } from '../../components/ItemControls'
+import { PageCard } from '../../components/PageCard'
+import { Heading1, Paragraph } from '../../components/Typography'
+import BackLink from '../../components/ui/BackLink'
+import { Button } from '../../components/ui/Button'
+import { DecorativeIcon } from '../../components/ui/DecorativeIcon'
+import { StatusMessageNotification } from '../../components/ui/StatusMessageNotification'
+import { WorkoutTemplatePickerModal } from '../../components/WorkoutTemplatePickerModal'
+import { PageLayout } from '../../layouts/PageLayout'
+import { formatLabel } from '../../utils/formatUtils'
+import { useIsDesktop } from '../../utils/useMediaQuery'
 
 // --- Types (These types are defined locally for this new feature. In a larger project,
 // they would typically be moved to a shared types package like `@gym-pilot/types`.) ---
