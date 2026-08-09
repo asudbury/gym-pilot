@@ -1,24 +1,27 @@
-import { getSupabaseClient } from '@gym-pilot/shared';
+import { getSupabaseClient } from '@gym-pilot/shared'
 import type {
-    Tables,
-    TablesInsert,
-} from '@gym-pilot/shared/src/dataServices/databaseTypes';
-import { TableNames } from '@gym-pilot/shared/src/dataServices/tableNames';
-import clsx from 'clsx';
-import { useEffect, useState } from 'react';
-import { useNavigate, useParams } from 'react-router-dom';
-import { ItemControls } from '../../components/ItemControls';
-import { PageCard } from '../../components/PageCard';
-import { Heading1, Paragraph } from '../../components/Typography';
-import { BackLink } from '../../components/ui/BackLink';
-import { Button } from '../../components/ui/Button';
-import { DecorativeIcon } from '../../components/ui/DecorativeIcon';
-import { StatusMessageNotification } from '../../components/ui/StatusMessageNotification';
-import { WorkoutTemplatePickerModal } from '../../components/WorkoutTemplatePickerModal';
-import { PageLayout } from '../../layouts/PageLayout';
-import { formatLabel } from '../../utils/formatUtils';
-import { useIsDesktop } from '../../utils/useMediaQuery';
-import { buildPersistedPlanRows, buildPlanSessionsFromRows } from './workoutPlanState';
+  Tables,
+  TablesInsert,
+} from '@gym-pilot/shared/src/dataServices/databaseTypes'
+import { TableNames } from '@gym-pilot/shared/src/dataServices/tableNames'
+import clsx from 'clsx'
+import { useEffect, useState } from 'react'
+import { useNavigate, useParams } from 'react-router-dom'
+import { ItemControls } from '../../components/ItemControls'
+import { PageCard } from '../../components/PageCard'
+import { Heading1, Paragraph } from '../../components/Typography'
+import { BackLink } from '../../components/ui/BackLink'
+import { Button } from '../../components/ui/Button'
+import { DecorativeIcon } from '../../components/ui/DecorativeIcon'
+import { StatusMessageNotification } from '../../components/ui/StatusMessageNotification'
+import { WorkoutTemplatePickerModal } from '../../components/WorkoutTemplatePickerModal'
+import { PageLayout } from '../../layouts/PageLayout'
+import { formatLabel } from '../../utils/formatUtils'
+import { useIsDesktop } from '../../utils/useMediaQuery'
+import {
+  buildPersistedPlanRows,
+  buildPlanSessionsFromRows,
+} from './workoutPlanState'
 
 type PlanItem = Tables<typeof TableNames.WorkoutPlanExercise> & {
   exercise_name?: string | null
@@ -381,8 +384,9 @@ export default function WorkoutPlanEditPage() {
       resolvedPlanId,
     )
 
-    const sessionsToInsert: TablesInsert<typeof TableNames.WorkoutPlanSession>[] =
-      persistedSessions
+    const sessionsToInsert: TablesInsert<
+      typeof TableNames.WorkoutPlanSession
+    >[] = persistedSessions
 
     if (sessionsToInsert.length > 0) {
       const { error: insertSessionsError } = await client
@@ -433,7 +437,9 @@ export default function WorkoutPlanEditPage() {
       await persistPlanState(nextSessions)
     } catch (err: any) {
       console.error('Error clearing session exercises:', err)
-      setError(err.message || 'An unexpected error occurred while clearing exercises.')
+      setError(
+        err.message || 'An unexpected error occurred while clearing exercises.',
+      )
     }
   }
 
