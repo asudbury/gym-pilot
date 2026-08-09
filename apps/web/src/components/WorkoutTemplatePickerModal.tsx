@@ -1,9 +1,9 @@
-import { getSupabaseClient } from '@gym-pilot/shared';
-import type { Tables } from '@gym-pilot/shared/src/dataServices/databaseTypes';
-import { TableNames } from '@gym-pilot/shared/src/dataServices/tableNames';
-import { useEffect, useState } from 'react';
-import { Button } from './ui/Button';
-import { StatusMessageNotification } from './ui/StatusMessageNotification';
+import { getSupabaseClient } from '@gym-pilot/shared'
+import type { Tables } from '@gym-pilot/shared/src/dataServices/databaseTypes'
+import { TableNames } from '@gym-pilot/shared/src/dataServices/tableNames'
+import { useEffect, useState } from 'react'
+import { Button } from './ui/Button'
+import { StatusMessageNotification } from './ui/StatusMessageNotification'
 
 type WorkoutTemplate = Tables<typeof TableNames.WorkoutTemplate> & {
   workout_template_exercise: Array<

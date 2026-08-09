@@ -1,20 +1,23 @@
-import { getSupabaseClient } from '@gym-pilot/shared';
-import type { Tables, TablesInsert } from '@gym-pilot/shared/src/dataServices/databaseTypes';
-import { TableNames } from '@gym-pilot/shared/src/dataServices/tableNames';
-import clsx from 'clsx';
-import { useEffect, useState } from 'react';
-import { useNavigate } from 'react-router-dom';
-import { ItemControls } from '../../components/ItemControls';
-import { PageCard } from '../../components/PageCard';
-import { Heading1, Paragraph } from '../../components/Typography';
-import { BackLink } from '../../components/ui/BackLink';
-import { Button } from '../../components/ui/Button';
-import { DecorativeIcon } from '../../components/ui/DecorativeIcon';
-import { StatusMessageNotification } from '../../components/ui/StatusMessageNotification';
-import { WorkoutTemplatePickerModal } from '../../components/WorkoutTemplatePickerModal';
-import { PageLayout } from '../../layouts/PageLayout';
-import { formatLabel } from '../../utils/formatUtils';
-import { useIsDesktop } from '../../utils/useMediaQuery';
+import { getSupabaseClient } from '@gym-pilot/shared'
+import type {
+  Tables,
+  TablesInsert,
+} from '@gym-pilot/shared/src/dataServices/databaseTypes'
+import { TableNames } from '@gym-pilot/shared/src/dataServices/tableNames'
+import clsx from 'clsx'
+import { useEffect, useState } from 'react'
+import { useNavigate } from 'react-router-dom'
+import { ItemControls } from '../../components/ItemControls'
+import { PageCard } from '../../components/PageCard'
+import { Heading1, Paragraph } from '../../components/Typography'
+import { BackLink } from '../../components/ui/BackLink'
+import { Button } from '../../components/ui/Button'
+import { DecorativeIcon } from '../../components/ui/DecorativeIcon'
+import { StatusMessageNotification } from '../../components/ui/StatusMessageNotification'
+import { WorkoutTemplatePickerModal } from '../../components/WorkoutTemplatePickerModal'
+import { PageLayout } from '../../layouts/PageLayout'
+import { formatLabel } from '../../utils/formatUtils'
+import { useIsDesktop } from '../../utils/useMediaQuery'
 
 type PlanItem = Tables<typeof TableNames.WorkoutPlanExercise> & {
   exercise_name: string
@@ -259,7 +262,10 @@ export default function WorkoutPlanCreatePage() {
         return
       }
 
-      const planSlug = planName.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-*|-*$/g, '')
+      const planSlug = planName
+        .toLowerCase()
+        .replace(/[^a-z0-9]+/g, '-')
+        .replace(/^-*|-*$/g, '')
 
       // Create the plan row first to get the plan_id
       const { data: createdPlan, error: createPlanError } = await client
@@ -281,29 +287,32 @@ export default function WorkoutPlanCreatePage() {
       const planId = createdPlan.id
 
       // Insert sessions into the new workout_plan_session table
-      const sessionsToInsert: TablesInsert<typeof TableNames.WorkoutPlanSession>[] =
-        planSessions.map((session, index) => ({
-          id: session.id,
-          plan_id: planId,
-          name: session.name,
-          position: index,
-        }))
+      const sessionsToInsert: TablesInsert<
+        typeof TableNames.WorkoutPlanSession
+      >[] = planSessions.map((session, index) => ({
+        id: session.id,
+        plan_id: planId,
+        name: session.name,
+        position: index,
+      }))
 
       if (sessionsToInsert.length > 0) {
         const { error: insertSessionsError } = await client
           .from(TableNames.WorkoutPlanSession)
-          .insert(sessionsToInsert);
+          .insert(sessionsToInsert)
 
         if (insertSessionsError) {
-          setError(insertSessionsError.message);
-          setIsSaving(false);
-          return;
+          setError(insertSessionsError.message)
+          setIsSaving(false)
+          return
         }
       }
 
       // Flatten sessions -> exercises and insert into workout_plan_exercise
       // Each exercise now needs to be associated with its session
-      const exercisesToInsert: TablesInsert<typeof TableNames.WorkoutPlanExercise>[] = []
+      const exercisesToInsert: TablesInsert<
+        typeof TableNames.WorkoutPlanExercise
+      >[] = []
       planSessions.forEach((session) => {
         session.planItems.forEach((item, itemIndex) => {
           exercisesToInsert.push({
@@ -389,27 +398,27 @@ export default function WorkoutPlanCreatePage() {
                       'border-blue-500 bg-blue-50': sIdx === activeSessionIndex,
                     },
                   )}
-              >
-                {sIdx === activeSessionIndex ? ( // Active session is always editable
-                  <input
-                    type="text"
-                    value={session.name} // Directly bind to session.name
-                    onChange={(e) => handleSessionNameChange(e.target.value)} // Update state directly
-                    className="rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm p-1"
-                    autoFocus
-                  />
-                ) : (
-                  <Button
-                    tone="chip"
-                    onClick={() => setActiveSessionIndex(sIdx)}
-                    className={clsx({
-                      'bg-blue-500 text-white hover:bg-blue-600':
-                        sIdx === activeSessionIndex,
-                    })}
-                  >
-                    {session.name}
-                  </Button>
-                )}
+                >
+                  {sIdx === activeSessionIndex ? ( // Active session is always editable
+                    <input
+                      type="text"
+                      value={session.name} // Directly bind to session.name
+                      onChange={(e) => handleSessionNameChange(e.target.value)} // Update state directly
+                      className="rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm p-1"
+                      autoFocus
+                    />
+                  ) : (
+                    <Button
+                      tone="chip"
+                      onClick={() => setActiveSessionIndex(sIdx)}
+                      className={clsx({
+                        'bg-blue-500 text-white hover:bg-blue-600':
+                          sIdx === activeSessionIndex,
+                      })}
+                    >
+                      {session.name}
+                    </Button>
+                  )}
                   <ItemControls
                     itemName={session.name}
                     onRemove={() => handleRemoveSession(sIdx)}

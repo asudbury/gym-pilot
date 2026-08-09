@@ -1,12 +1,12 @@
-import { getSupabaseClient } from '@gym-pilot/shared';
-import { TableNames } from '@gym-pilot/shared/src/dataServices/tableNames';
-import { useEffect, useMemo, useState } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
-import { PageCard } from '../../components/PageCard';
-import { Button } from '../../components/ui/Button';
-import { formatDateTimeForDisplay } from '../../dateTimeFormatter';
-import { PageCardLayout } from '../../layouts/PageCardLayout';
-import { PageLayout } from '../../layouts/PageLayout';
+import { getSupabaseClient } from '@gym-pilot/shared'
+import { TableNames } from '@gym-pilot/shared/src/dataServices/tableNames'
+import { useEffect, useMemo, useState } from 'react'
+import { Link, useNavigate } from 'react-router-dom'
+import { PageCard } from '../../components/PageCard'
+import { Button } from '../../components/ui/Button'
+import { formatDateTimeForDisplay } from '../../dateTimeFormatter'
+import { PageCardLayout } from '../../layouts/PageCardLayout'
+import { PageLayout } from '../../layouts/PageLayout'
 
 export function WorkoutPlansPage() {
   const navigate = useNavigate()
@@ -107,7 +107,8 @@ export function WorkoutPlansPage() {
                 <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
                   <div>
                     <h2 className="text-xl font-semibold text-slate-900">
-                      {t.plan_name} <span className="text-xs text-slate-500">(plan)</span>
+                      {t.plan_name}{' '}
+                      <span className="text-xs text-slate-500">(plan)</span>
                     </h2>
                     <p className="mt-1 text-sm text-slate-600">
                       {t.description}
