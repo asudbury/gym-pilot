@@ -1,24 +1,24 @@
-import { getSupabaseClient } from '@gym-pilot/shared';
+import { getSupabaseClient } from '@gym-pilot/shared'
 import type {
-    Tables,
-    TablesInsert,
-} from '@gym-pilot/shared/src/dataServices/databaseTypes';
-import { TableNames } from '@gym-pilot/shared/src/dataServices/tableNames';
-import clsx from 'clsx';
-import { useEffect, useState } from 'react';
-import { useNavigate, useParams } from 'react-router-dom';
-import { ItemControls } from '../../components/ItemControls';
-import { PageCard } from '../../components/PageCard';
-import { Heading1, Paragraph } from '../../components/Typography';
-import { BackLink } from '../../components/ui/BackLink';
-import { Button } from '../../components/ui/Button';
-import { DecorativeIcon } from '../../components/ui/DecorativeIcon';
-import { StatusMessageNotification } from '../../components/ui/StatusMessageNotification';
-import { WorkoutTemplatePickerModal } from '../../components/WorkoutTemplatePickerModal';
-import { PageLayout } from '../../layouts/PageLayout';
-import { formatLabel } from '../../utils/formatUtils';
-import { useIsDesktop } from '../../utils/useMediaQuery';
-import { buildPlanSessionsFromRows } from './workoutPlanState';
+  Tables,
+  TablesInsert,
+} from '@gym-pilot/shared/src/dataServices/databaseTypes'
+import { TableNames } from '@gym-pilot/shared/src/dataServices/tableNames'
+import clsx from 'clsx'
+import { useEffect, useState } from 'react'
+import { useNavigate, useParams } from 'react-router-dom'
+import { ItemControls } from '../../components/ItemControls'
+import { PageCard } from '../../components/PageCard'
+import { Heading1, Paragraph } from '../../components/Typography'
+import { BackLink } from '../../components/ui/BackLink'
+import { Button } from '../../components/ui/Button'
+import { DecorativeIcon } from '../../components/ui/DecorativeIcon'
+import { StatusMessageNotification } from '../../components/ui/StatusMessageNotification'
+import { WorkoutTemplatePickerModal } from '../../components/WorkoutTemplatePickerModal'
+import { PageLayout } from '../../layouts/PageLayout'
+import { formatLabel } from '../../utils/formatUtils'
+import { useIsDesktop } from '../../utils/useMediaQuery'
+import { buildPlanSessionsFromRows } from './workoutPlanState'
 
 type PlanItem = Tables<typeof TableNames.WorkoutPlanExercise> & {
   exercise_name?: string | null
@@ -143,7 +143,9 @@ export default function WorkoutPlanEditPage() {
 
         const { data: exercisesData, error: exercisesError } = await client
           .from(TableNames.WorkoutPlanExercise)
-          .select('id, plan_id, exercise_id, exercise_name, position, created_at, updated_at')
+          .select(
+            'id, plan_id, exercise_id, exercise_name, position, created_at, updated_at',
+          )
           .eq('plan_id', id)
           .order('position', { ascending: true })
 
@@ -152,7 +154,9 @@ export default function WorkoutPlanEditPage() {
         }
 
         setPlanName(planData.plan_name ?? '')
-        setPlanSessions(buildPlanSessionsFromRows(sessionsData ?? [], exercisesData ?? []))
+        setPlanSessions(
+          buildPlanSessionsFromRows(sessionsData ?? [], exercisesData ?? []),
+        )
         setActiveSessionIndex(0)
       } catch (err: any) {
         console.error('Error loading plan:', err)
@@ -378,10 +382,11 @@ export default function WorkoutPlanEditPage() {
       }
 
       if (isEditMode) {
-        const { data: existingSessionsData, error: fetchSessionsError } = await client
-          .from(TableNames.WorkoutPlanSession)
-          .select('id')
-          .eq('plan_id', planId)
+        const { data: existingSessionsData, error: fetchSessionsError } =
+          await client
+            .from(TableNames.WorkoutPlanSession)
+            .select('id')
+            .eq('plan_id', planId)
 
         if (fetchSessionsError) {
           setError(fetchSessionsError.message)
@@ -389,7 +394,9 @@ export default function WorkoutPlanEditPage() {
           return
         }
 
-        const existingSessionIds = (existingSessionsData ?? []).map((session) => session.id)
+        const existingSessionIds = (existingSessionsData ?? []).map(
+          (session) => session.id,
+        )
         if (existingSessionIds.length > 0) {
           const { error: deleteSessionsError } = await client
             .from(TableNames.WorkoutPlanSession)
@@ -403,10 +410,11 @@ export default function WorkoutPlanEditPage() {
           }
         }
 
-        const { data: existingExercisesData, error: fetchExercisesError } = await client
-          .from(TableNames.WorkoutPlanExercise)
-          .select('id')
-          .eq('plan_id', planId)
+        const { data: existingExercisesData, error: fetchExercisesError } =
+          await client
+            .from(TableNames.WorkoutPlanExercise)
+            .select('id')
+            .eq('plan_id', planId)
 
         if (fetchExercisesError) {
           setError(fetchExercisesError.message)
@@ -414,7 +422,9 @@ export default function WorkoutPlanEditPage() {
           return
         }
 
-        const existingExerciseIds = (existingExercisesData ?? []).map((exercise) => exercise.id)
+        const existingExerciseIds = (existingExercisesData ?? []).map(
+          (exercise) => exercise.id,
+        )
         if (existingExerciseIds.length > 0) {
           const { error: deleteExercisesError } = await client
             .from(TableNames.WorkoutPlanExercise)
@@ -531,7 +541,9 @@ export default function WorkoutPlanEditPage() {
       navigate('/workout-plans')
     } catch (err: any) {
       console.error('Error deleting plan:', err)
-      setError(err.message || 'An unexpected error occurred while deleting the plan.')
+      setError(
+        err.message || 'An unexpected error occurred while deleting the plan.',
+      )
     }
   }
 
@@ -569,7 +581,9 @@ export default function WorkoutPlanEditPage() {
 
       const { data: exercisesData, error: exercisesError } = await client
         .from(TableNames.WorkoutPlanExercise)
-        .select('id, plan_id, exercise_id, exercise_name, position, created_at, updated_at')
+        .select(
+          'id, plan_id, exercise_id, exercise_name, position, created_at, updated_at',
+        )
         .eq('plan_id', id)
         .order('position', { ascending: true })
 
@@ -603,13 +617,14 @@ export default function WorkoutPlanEditPage() {
         return
       }
 
-      const copiedSessions: TablesInsert<typeof TableNames.WorkoutPlanSession>[] =
-        (sessionsData ?? []).map((session) => ({
-          id: generateUUID(),
-          plan_id: newPlan.id,
-          name: session.name,
-          position: session.position,
-        }))
+      const copiedSessions: TablesInsert<
+        typeof TableNames.WorkoutPlanSession
+      >[] = (sessionsData ?? []).map((session) => ({
+        id: generateUUID(),
+        plan_id: newPlan.id,
+        name: session.name,
+        position: session.position,
+      }))
 
       if (copiedSessions.length > 0) {
         const { error: insertSessionsError } = await client
@@ -622,14 +637,15 @@ export default function WorkoutPlanEditPage() {
         }
       }
 
-      const copiedExercises: TablesInsert<typeof TableNames.WorkoutPlanExercise>[] =
-        (exercisesData ?? []).map((exercise) => ({
-          id: generateUUID(),
-          plan_id: newPlan.id,
-          exercise_id: exercise.exercise_id,
-          exercise_name: exercise.exercise_name ?? null,
-          position: exercise.position,
-        }))
+      const copiedExercises: TablesInsert<
+        typeof TableNames.WorkoutPlanExercise
+      >[] = (exercisesData ?? []).map((exercise) => ({
+        id: generateUUID(),
+        plan_id: newPlan.id,
+        exercise_id: exercise.exercise_id,
+        exercise_name: exercise.exercise_name ?? null,
+        position: exercise.position,
+      }))
 
       if (copiedExercises.length > 0) {
         const { error: insertExercisesError } = await client
@@ -645,7 +661,9 @@ export default function WorkoutPlanEditPage() {
       navigate(`/workout-plans/${newPlan.id}/edit`)
     } catch (err: any) {
       console.error('Error copying plan:', err)
-      setError(err.message || 'An unexpected error occurred while copying the plan.')
+      setError(
+        err.message || 'An unexpected error occurred while copying the plan.',
+      )
     }
   }
 
@@ -657,7 +675,9 @@ export default function WorkoutPlanEditPage() {
             <DecorativeIcon icon="clipboard" />
             <div>
               <Paragraph>Workout Plans</Paragraph>
-              <Heading1 className="mt-2">{isEditMode ? 'Edit Plan' : 'Create Plan'}</Heading1>
+              <Heading1 className="mt-2">
+                {isEditMode ? 'Edit Plan' : 'Create Plan'}
+              </Heading1>
             </div>
           </div>
           <BackLink />
@@ -830,7 +850,11 @@ export default function WorkoutPlanEditPage() {
               onClick={handleSavePlan}
               disabled={isSaving || isLoadingPlan}
             >
-              {isSaving ? 'Saving...' : isEditMode ? 'Save Changes' : 'Create Plan'}
+              {isSaving
+                ? 'Saving...'
+                : isEditMode
+                  ? 'Save Changes'
+                  : 'Create Plan'}
             </Button>
             <Button tone="default" onClick={() => navigate('/workout-plans')}>
               Cancel
@@ -847,7 +871,10 @@ export default function WorkoutPlanEditPage() {
                     </Button>
                   </>
                 ) : (
-                  <Button tone="chip-rose" onClick={() => setPendingDelete(true)}>
+                  <Button
+                    tone="chip-rose"
+                    onClick={() => setPendingDelete(true)}
+                  >
                     Delete
                   </Button>
                 )}
