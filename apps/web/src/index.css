@@ -5,6 +5,7 @@
 
 :root {
   color-scheme: light;
+
   --app-bg: #f8fafc;
   --app-surface: #ffffff;
   --app-surface-soft: #f8fafc;
@@ -13,6 +14,7 @@
   --app-text: #0f172a;
   --app-text-muted: #475569;
   --app-text-subtle: #64748b;
+
   font-family:
     'Plus Jakarta Sans',
     Inter,
@@ -21,6 +23,7 @@
     BlinkMacSystemFont,
     'Segoe UI',
     sans-serif;
+
   line-height: 1.5;
   font-weight: 400;
   font-synthesis: none;
@@ -29,22 +32,29 @@
   -moz-osx-font-smoothing: grayscale;
 }
 
-html.dark {
-  color-scheme: dark;
-  --app-bg: #020617;
-  --app-surface: #0f172a;
-  --app-surface-soft: #111827;
-  --app-surface-muted: #1f2937;
-  --app-border: #334155;
-  --app-text: #f8fafc;
-  --app-text-muted: #cbd5e1;
-  --app-text-subtle: #94a3b8;
+/* Prevent padding and borders from increasing element width */
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+/* Prevent accidental horizontal overflow */
+html {
+  width: 100%;
+  max-width: 100%;
+  min-width: 0;
+  scroll-behavior: smooth;
+  overflow-x: clip;
 }
 
 body {
-  margin: 0;
-  min-width: 320px;
+  width: 100%;
+  max-width: 100%;
+  min-width: 0;
   min-height: 100vh;
+  margin: 0;
+
   background:
     radial-gradient(
       circle at top left,
@@ -57,11 +67,45 @@ body {
       transparent 28%
     ),
     linear-gradient(135deg, #f8fafc 0%, #eff6ff 100%);
+
   background-attachment: fixed;
   color: var(--app-text);
+  overflow-x: clip;
+
   transition:
     background-color 200ms ease,
     color 200ms ease;
+}
+
+/* React root */
+#root {
+  width: 100%;
+  max-width: 100%;
+  min-width: 0;
+  min-height: 100vh;
+}
+
+/* Prevent media/content from exceeding its container */
+img,
+svg,
+video,
+canvas,
+iframe {
+  max-width: 100%;
+}
+
+/* Dark mode */
+html.dark {
+  color-scheme: dark;
+
+  --app-bg: #020617;
+  --app-surface: #0f172a;
+  --app-surface-soft: #111827;
+  --app-surface-muted: #1f2937;
+  --app-border: #334155;
+  --app-text: #f8fafc;
+  --app-text-muted: #cbd5e1;
+  --app-text-subtle: #94a3b8;
 }
 
 html.dark body {
@@ -79,21 +123,7 @@ html.dark body {
     linear-gradient(135deg, #020617 0%, #0f172a 100%);
 }
 
-html {
-  scroll-behavior: smooth;
-}
-
-#root {
-  min-height: 100vh;
-}
-
-@keyframes spin {
-  to {
-    transform: rotate(360deg);
-  }
-}
-
-/* Ensure buttons show a pointer cursor by default and a not-allowed cursor when disabled. */
+/* Buttons */
 button {
   cursor: pointer;
 }
@@ -103,42 +133,46 @@ button[disabled] {
   cursor: not-allowed;
 }
 
-/* Base appearance for native button elements to match component buttons */
 button {
-  @apply text-sm font-medium px-2 py-1 transition-colors;
+  @apply px-2 py-1 text-sm font-medium transition-colors;
 }
 
-/* Helper for destructive/outline rose buttons (Delete style) */
+/* Destructive button */
 .btn-destructive {
-  /* This class is intended for direct use on buttons or via @apply */
   @apply border border-rose-300 bg-rose-50 text-rose-700 transition-all duration-200 hover:border-rose-400 hover:bg-rose-100 hover:font-semibold hover:shadow-sm dark:border-rose-700 dark:bg-slate-900 dark:text-rose-500 dark:hover:border-rose-600 dark:hover:bg-slate-800 dark:hover:text-rose-300;
 }
 
-/* Generic helper so anchors can match Button look: use like <a class="btn">Open</a> */
+/* Generic button */
 .btn {
-  @apply cursor-pointer inline-flex items-center rounded-full px-2 py-1 text-sm font-medium;
+  @apply inline-flex cursor-pointer items-center rounded-full px-2 py-1 text-sm font-medium;
 }
 
-/* Tone helpers to match Button tones */
+/* Button tones */
 .btn-default {
   @apply border border-slate-200 bg-slate-50 text-slate-700 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-100;
 }
+
 .btn-white {
   @apply border border-slate-200 bg-white text-slate-700 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-100;
 }
+
 .btn-emerald {
-  @apply border border-emerald-300 bg-emerald-50 text-emerald-700 px-2 py-1;
+  @apply border border-emerald-300 bg-emerald-50 px-2 py-1 text-emerald-700;
 }
+
 .btn-orange {
   @apply border border-orange-300 bg-orange-50 text-orange-700;
 }
+
 .btn-rose {
   @apply border border-rose-300 bg-rose-50 text-rose-700;
 }
+
 .btn-blue {
   @apply border border-blue-300 bg-blue-50 text-blue-700;
 }
 
+/* Dark mode surface overrides */
 html.dark .bg-white {
   background-color: var(--app-surface) !important;
 }
@@ -188,91 +222,95 @@ html.dark .bg-slate-900 {
   color: var(--app-text) !important;
 }
 
-/* Styling for calendar tiles based on workout link state */
+/* Calendar workout states */
 .has-no-link-workouts {
-  background-color: #dbeafe; /* Light blue for 'no link' */
-  border: 1px solid #93c5fd; /* A slightly darker blue border */
+  background-color: #dbeafe;
+  border: 1px solid #93c5fd;
 }
 
 .dark .has-no-link-workouts {
-  background-color: #1e3a8a; /* Dark blue for 'no link' */
+  background-color: #1e3a8a;
   border: 1px solid #3b82f6;
 }
 
 .has-unassigned-workouts {
-  background-color: #fef3c7; /* Light yellow for 'unassigned' */
-  border: 1px solid #fcd34d; /* A slightly darker yellow border */
+  background-color: #fef3c7;
+  border: 1px solid #fcd34d;
 }
 
 .dark .has-unassigned-workouts {
-  background-color: #78350f; /* Dark yellow for 'unassigned' */
+  background-color: #78350f;
   border: 1px solid #f59e0b;
 }
 
 .has-linked-workouts {
-  background-color: #dcfce7; /* Light green for 'linked' */
-  border: 1px solid #86efad; /* A slightly darker green border */
+  background-color: #dcfce7;
+  border: 1px solid #86efad;
 }
 
 .dark .has-linked-workouts {
-  background-color: #166534; /* Dark green for 'linked' */
+  background-color: #166534;
   border: 1px solid #4ade80;
 }
 
-/* Add a border to the current day for better visibility */
+/* Current day */
 .react-calendar__tile--now {
-  border: 1px solid #3b82f6; /* Blue border for today */
-  /* Removed border-radius to make it squared */
+  border: 1px solid #3b82f6;
 }
 
 .dark .react-calendar__tile--now {
-  border: 1px solid #60a5fa; /* Lighter blue for today in dark mode */
+  border: 1px solid #60a5fa;
 }
 
+/* Empty calendar days */
 .has-no-workouts {
-  background-color: #ffffff; /* White background for blank days */
-  border: 1px solid #e2e8f0; /* Light gray border */
+  background-color: #ffffff;
+  border: 1px solid #e2e8f0;
 }
 
 .dark .has-no-workouts {
-  background-color: var(
-    --app-surface-muted
-  ); /* Dark background for blank days */
+  background-color: var(--app-surface-muted);
   border: 1px solid var(--app-border);
 }
 
+/* Calendar dots */
 .dot-no-link {
-  background-color: #3b82f6; /* Blue for 'no link' */
+  background-color: #3b82f6;
 }
+
 .dark .dot-no-link {
   background-color: #60a5fa;
 }
 
 .dot-unassigned {
-  background-color: #f59e0b; /* Amber for 'unassigned' */
+  background-color: #f59e0b;
 }
+
 .dark .dot-unassigned {
   background-color: #fbbf24;
 }
 
 .dot-linked {
-  background-color: #22c55e; /* Green for 'linked' */
+  background-color: #22c55e;
 }
+
 .dark .dot-linked {
   background-color: #4ade80;
 }
 
-/* Styling for the selected day tile */
+/* Selected calendar day */
 .selected-day-border {
-  border: 2px solid #3b82f6; /* A distinct blue border for selected day */
+  border: 2px solid #3b82f6;
 }
 
 .dark .selected-day-border {
-  border: 2px solid #60a5fa; /* Lighter blue border for dark mode */
+  border: 2px solid #60a5fa;
 }
 
+/* Calendar */
 .react-calendar {
-  @apply bg-transparent;
+  @apply w-full max-w-full bg-transparent;
+  box-sizing: border-box;
 }
 
 .react-calendar__navigation button {
@@ -295,31 +333,35 @@ html.dark .bg-slate-900 {
   @apply text-slate-700 dark:text-slate-300;
 }
 
-/* Custom styles for react-calendar to improve responsiveness */
 .react-calendar__navigation__label {
-  font-size: 1.2em; /* Adjust as needed for better mobile readability */
+  font-size: 1.2em;
 }
 
 .react-calendar__navigation__arrow {
-  font-size: 1.2em; /* Adjust as needed for better mobile readability */
-}
-
-@media (max-width: 768px) {
-  .react-calendar__navigation__label {
-    font-size: 1.2em; /* Larger on smaller screens */
-  }
-  .react-calendar__navigation__arrow {
-    font-size: 1.5em; /* Also make arrows larger on smaller screens */
-  }
+  font-size: 1.2em;
 }
 
 .react-calendar__month-view__weekdays__weekday {
   text-align: center;
-  font-size: 0.75em; /* Default font size for day headers */
-  color: var(
-    --app-text-subtle
-  ); /* Use CSS variable for dark mode compatibility */
-  abbr {
-    text-decoration: none; /* Remove underline from weekday abbreviations */
+  font-size: 0.75em;
+  color: var(--app-text-subtle);
+}
+
+.react-calendar__month-view__weekdays__weekday abbr {
+  text-decoration: none;
+}
+
+@media (max-width: 768px) {
+  .react-calendar {
+    width: 100%;
+    max-width: 100%;
+  }
+
+  .react-calendar__navigation__label {
+    font-size: 1.2em;
+  }
+
+  .react-calendar__navigation__arrow {
+    font-size: 1.5em;
   }
 }
