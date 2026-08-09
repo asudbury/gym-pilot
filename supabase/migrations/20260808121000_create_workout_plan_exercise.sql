@@ -12,7 +12,6 @@ BEGIN
       exercise_id text NOT NULL,
       exercise_name text,
       position integer NOT NULL DEFAULT 0,
-      details jsonb DEFAULT '{}'::jsonb,
       created_at timestamptz NOT NULL DEFAULT now(),
       updated_at timestamptz NOT NULL DEFAULT now()
     );

@@ -1,20 +1,14 @@
-import { getSupabaseClient } from '@gym-pilot/shared'
-import { useEffect, useState } from 'react'
-import { Button } from './ui/Button'
-import { StatusMessageNotification } from './ui/StatusMessageNotification'
+import { getSupabaseClient } from '@gym-pilot/shared';
+import type { Tables } from '@gym-pilot/shared/src/dataServices/databaseTypes';
+import { TableNames } from '@gym-pilot/shared/src/dataServices/tableNames';
+import { useEffect, useState } from 'react';
+import { Button } from './ui/Button';
+import { StatusMessageNotification } from './ui/StatusMessageNotification';
 
-// Type for a workout template fetched from DB
-interface WorkoutTemplate {
-  id: string
-  name: string
-  description: string | null
-  workout_template_exercise: {
-    id: string // ID of the workout_template_exercise row
-    template_id: string
-    exercise_id: string
-    exercise_name: string
-    position: number
-  }[]
+type WorkoutTemplate = Tables<typeof TableNames.WorkoutTemplate> & {
+  workout_template_exercise: Array<
+    Tables<typeof TableNames.WorkoutTemplateExercise>
+  >
 }
 
 interface WorkoutTemplatePickerModalProps {
@@ -47,7 +41,7 @@ export function WorkoutTemplatePickerModal({
       }
 
       const { data, error } = await client
-        .from('workout_template')
+        .from(TableNames.WorkoutTemplate)
         .select('*, workout_template_exercise(*)')
         .order('name', { ascending: true })
 

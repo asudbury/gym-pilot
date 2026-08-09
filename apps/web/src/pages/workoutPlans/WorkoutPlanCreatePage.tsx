@@ -1,51 +1,48 @@
-import { getSupabaseClient } from '@gym-pilot/shared'
-import { TableNames } from '@gym-pilot/shared/src/dataServices/tableNames'
-import clsx from 'clsx'
-import { useEffect, useState } from 'react'
-import { useNavigate } from 'react-router-dom'
-import { ItemControls } from '../../components/ItemControls'
-import { PageCard } from '../../components/PageCard'
-import { Heading1, Paragraph } from '../../components/Typography'
-import BackLink from '../../components/ui/BackLink'
-import { Button } from '../../components/ui/Button'
-import { DecorativeIcon } from '../../components/ui/DecorativeIcon'
-import { StatusMessageNotification } from '../../components/ui/StatusMessageNotification'
-import { WorkoutTemplatePickerModal } from '../../components/WorkoutTemplatePickerModal'
-import { PageLayout } from '../../layouts/PageLayout'
-import { formatLabel } from '../../utils/formatUtils'
-import { useIsDesktop } from '../../utils/useMediaQuery'
+import { getSupabaseClient } from '@gym-pilot/shared';
+import type { Tables, TablesInsert } from '@gym-pilot/shared/src/dataServices/databaseTypes';
+import { TableNames } from '@gym-pilot/shared/src/dataServices/tableNames';
+import clsx from 'clsx';
+import { useEffect, useState } from 'react';
+import { useNavigate } from 'react-router-dom';
+import { ItemControls } from '../../components/ItemControls';
+import { PageCard } from '../../components/PageCard';
+import { Heading1, Paragraph } from '../../components/Typography';
+import { BackLink } from '../../components/ui/BackLink';
+import { Button } from '../../components/ui/Button';
+import { DecorativeIcon } from '../../components/ui/DecorativeIcon';
+import { StatusMessageNotification } from '../../components/ui/StatusMessageNotification';
+import { WorkoutTemplatePickerModal } from '../../components/WorkoutTemplatePickerModal';
+import { PageLayout } from '../../layouts/PageLayout';
+import { formatLabel } from '../../utils/formatUtils';
+import { useIsDesktop } from '../../utils/useMediaQuery';
 
-// --- Types (These types are defined locally for this new feature. In a larger project,
-// they would typically be moved to a shared types package like `@gym-pilot/types`.) ---
-interface PlanItem {
-  id: string // UUID for this specific plan item instance
-  exercise_id: string
+type PlanItem = Tables<typeof TableNames.WorkoutPlanExercise> & {
   exercise_name: string
-  position: number
-  reps?: string
-  sets?: string
-  notes?: string
 }
 
-interface PlanSession {
-  id: string // UUID for this specific plan session instance (e.g., a day/tab)
-  name: string // e.g., "Day 1", "Monday"
+type PlanSession = Tables<typeof TableNames.WorkoutPlanSession> & {
   planItems: PlanItem[]
 }
 
-interface WorkoutTemplate {
-  id: string
-  name: string
-  description: string | null
-  workout_template_exercise: {
-    id: string // ID of the workout_template_exercise row
-    template_id: string
-    exercise_id: string
-    exercise_name: string
-    position: number
-  }[]
+function createPlanSession(id: string, name: string): PlanSession {
+  const now = new Date().toISOString()
+
+  return {
+    id,
+    name,
+    created_at: now,
+    plan_id: '',
+    position: 0,
+    updated_at: now,
+    planItems: [],
+  }
 }
-// --- End Types ---
+
+type WorkoutTemplate = Tables<typeof TableNames.WorkoutTemplate> & {
+  workout_template_exercise: Array<
+    Tables<typeof TableNames.WorkoutTemplateExercise>
+  >
+}
 
 // Helper to generate UUIDs
 function generateUUID(): string {
@@ -83,7 +80,7 @@ export default function WorkoutPlanCreatePage() {
   const [planName, setPlanName] = useState('')
   const [planDescription, setPlanDescription] = useState('')
   const [planSessions, setPlanSessions] = useState<PlanSession[]>([
-    { id: generateUUID(), name: 'Day 1', planItems: [] },
+    createPlanSession(generateUUID(), 'Day 1'),
   ])
   const [activeSessionIndex, setActiveSessionIndex] = useState(0)
   const [isSaving, setIsSaving] = useState(false)
@@ -113,7 +110,7 @@ export default function WorkoutPlanCreatePage() {
   const handleAddSession = () => {
     setPlanSessions((prev) => [
       ...prev,
-      { id: generateUUID(), name: `Day ${prev.length + 1}`, planItems: [] },
+      createPlanSession(generateUUID(), `Day ${prev.length + 1}`),
     ])
     setActiveSessionIndex(planSessions.length) // Activate the new session
   }
@@ -151,16 +148,28 @@ export default function WorkoutPlanCreatePage() {
     })
   }
 
+  const handleSessionNameChange = (newName: string) => {
+    setPlanSessions((prev) =>
+      prev.map((session, idx) =>
+        idx === activeSessionIndex
+          ? { ...session, name: newName.trim() } // Trim name as it's updated
+          : session,
+      ),
+    )
+  }
+
   const handleSelectTemplate = (template: WorkoutTemplate) => {
     if (!activeSession) return
 
     const newPlanItems: PlanItem[] = template.workout_template_exercise.map(
       (ex, idx) => ({
         id: generateUUID(),
+        created_at: new Date().toISOString(),
+        updated_at: new Date().toISOString(),
+        plan_id: '',
         exercise_id: ex.exercise_id,
-        exercise_name: ex.exercise_name,
-        position: activeSession.planItems.length + idx, // Append to current items and set position
-        // Add other fields from workout_template_exercise if they exist and are relevant for PlanItem
+        exercise_name: ex.exercise_name ?? '',
+        position: activeSession.planItems.length + idx,
       }),
     )
 
@@ -222,6 +231,11 @@ export default function WorkoutPlanCreatePage() {
       setError('Plan name is required.')
       return
     }
+    // Validate that all session names are not blank
+    if (planSessions.some((session) => !session.name.trim())) {
+      setError('All session names must be provided.')
+      return
+    }
     if (planSessions.every((session) => session.planItems.length === 0)) {
       setError('Plan must contain at least one exercise across all sessions.')
       return
@@ -245,12 +259,9 @@ export default function WorkoutPlanCreatePage() {
         return
       }
 
-      const planSlug = planName
-        .toLowerCase()
-        .replace(/[^a-z0-9]+/g, '-')
-        .replace(/^-*|-*$/g, '')
+      const planSlug = planName.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-*|-*$/g, '')
 
-      // Create the plan row (no plan_sessions JSON). We'll insert exercises separately.
+      // Create the plan row first to get the plan_id
       const { data: createdPlan, error: createPlanError } = await client
         .from(TableNames.WorkoutPlan)
         .insert({
@@ -269,18 +280,38 @@ export default function WorkoutPlanCreatePage() {
 
       const planId = createdPlan.id
 
+      // Insert sessions into the new workout_plan_session table
+      const sessionsToInsert: TablesInsert<typeof TableNames.WorkoutPlanSession>[] =
+        planSessions.map((session, index) => ({
+          id: session.id,
+          plan_id: planId,
+          name: session.name,
+          position: index,
+        }))
+
+      if (sessionsToInsert.length > 0) {
+        const { error: insertSessionsError } = await client
+          .from(TableNames.WorkoutPlanSession)
+          .insert(sessionsToInsert);
+
+        if (insertSessionsError) {
+          setError(insertSessionsError.message);
+          setIsSaving(false);
+          return;
+        }
+      }
+
       // Flatten sessions -> exercises and insert into workout_plan_exercise
-      const exercisesToInsert: Array<any> = []
-      let positionCounter = 0
+      // Each exercise now needs to be associated with its session
+      const exercisesToInsert: TablesInsert<typeof TableNames.WorkoutPlanExercise>[] = []
       planSessions.forEach((session) => {
-        session.planItems.forEach((item) => {
+        session.planItems.forEach((item, itemIndex) => {
           exercisesToInsert.push({
             id: generateUUID(),
             plan_id: planId,
             exercise_id: item.exercise_id,
             exercise_name: item.exercise_name,
-            position: positionCounter++,
-            details: {},
+            position: itemIndex,
           })
         })
       })
@@ -358,7 +389,16 @@ export default function WorkoutPlanCreatePage() {
                       'border-blue-500 bg-blue-50': sIdx === activeSessionIndex,
                     },
                   )}
-                >
+              >
+                {sIdx === activeSessionIndex ? ( // Active session is always editable
+                  <input
+                    type="text"
+                    value={session.name} // Directly bind to session.name
+                    onChange={(e) => handleSessionNameChange(e.target.value)} // Update state directly
+                    className="rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm p-1"
+                    autoFocus
+                  />
+                ) : (
                   <Button
                     tone="chip"
                     onClick={() => setActiveSessionIndex(sIdx)}
@@ -369,6 +409,7 @@ export default function WorkoutPlanCreatePage() {
                   >
                     {session.name}
                   </Button>
+                )}
                   <ItemControls
                     itemName={session.name}
                     onRemove={() => handleRemoveSession(sIdx)}
@@ -435,7 +476,7 @@ export default function WorkoutPlanCreatePage() {
                           {formatLabel(item.exercise_name)}
                         </span>
                         <ItemControls
-                          itemName={item.exercise_name}
+                          itemName={item.exercise_name ?? ''}
                           onRemove={() =>
                             handleRemovePlanItem(activeSessionIndex, iIdx)
                           }

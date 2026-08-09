@@ -13,19 +13,28 @@ export type WorkoutTemplate = Tables<typeof TableNames.WorkoutTemplate>;
 export type WorkoutTemplateExercise = Tables<
   typeof TableNames.WorkoutTemplateExercise
 >;
+export type WorkoutPlanExercise = Tables<typeof TableNames.WorkoutPlanExercise>;
+
 export type WorkoutTemplateInsert = TablesInsert<
   typeof TableNames.WorkoutTemplate
 >;
-export type WorkoutPlanExercise = Tables<typeof TableNames.WorkoutPlanExercise>;
 export type WorkoutTemplateExerciseInsert = TablesInsert<
   typeof TableNames.WorkoutTemplateExercise
 >;
+
+export type WorkoutPlanSession = Tables<
+  typeof TableNames.WorkoutPlanSession
+> & {
+  planItems: WorkoutPlanExercise[]; // Add this to hold exercises within a session
+};
 
 // Assuming 'Plan' is the application-level type that maps to WorkoutPlan
 export type Plan = Tables<typeof TableNames.WorkoutPlan> & {
   planExercises: WorkoutPlanExercise[]; // Add this to reflect the new structure
   planName: string; // Ensure these are present if they are part of the application-level Plan type
   planSlug: string;
+  planSessions: WorkoutPlanSession[]; // Add this to reflect the new structure
+  createdByUserId: string; // Add this as it's used in loadSupabaseJsonRecord
 };
 export type WorkoutPlan = Tables<typeof TableNames.WorkoutPlan>;
 export type Profile = Tables<typeof TableNames.Profile>;

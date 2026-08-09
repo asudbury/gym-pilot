@@ -112,7 +112,6 @@
 | exercise_id   | string | Catalog exercise id (stored as text)|
 | exercise_name | string | Denormalised exercise name for display |
 | position      | number | Ordering within the plan            |
-| details       | Json   | JSON details / overrides            |
 | created_at    | string | Creation timestamp                  |
 | updated_at    | string | Last update timestamp               |
 

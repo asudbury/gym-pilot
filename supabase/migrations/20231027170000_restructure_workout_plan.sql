@@ -1,159 +1,154 @@
 -- Up Migration
--- Create the new workout_plan_exercise table
--- Ensure workout_plan exists: rename existing gym_pilot_plan or create an empty workout_plan
+-- Create the workout plan session and exercise tables in an idempotent way.
+-- This avoids failures when the table already exists or when the updated_at trigger
+-- function has not been created yet by an earlier migration.
+
 DO $$
 BEGIN
   IF EXISTS (
-    SELECT 1 FROM pg_tables WHERE schemaname = 'public' AND tablename = 'gym_pilot_plan'
+    SELECT 1
+    FROM information_schema.tables
+    WHERE table_schema = 'public' AND table_name = 'workout_plan'
   ) THEN
-    -- Create workout_plan with the same structure but no data, then drop the old table
-    IF NOT EXISTS (
-      SELECT 1 FROM pg_tables WHERE schemaname = 'public' AND tablename = 'workout_plan'
-    ) THEN
-      CREATE TABLE public.workout_plan (LIKE public.gym_pilot_plan INCLUDING ALL);
-    END IF;
-    DROP TABLE IF EXISTS public.gym_pilot_plan CASCADE;
-  ELSIF NOT EXISTS (
-    SELECT 1 FROM pg_tables WHERE schemaname = 'public' AND tablename = 'workout_plan'
+    ALTER TABLE public.workout_plan DROP COLUMN IF EXISTS plan_sessions;
+  END IF;
+END
+$$;
+
+DO $$
+BEGIN
+  IF NOT EXISTS (
+    SELECT 1
+    FROM pg_tables
+    WHERE schemaname = 'public' AND tablename = 'workout_plan_session'
   ) THEN
-    -- Create a minimal workout_plan if neither table exists
-    CREATE TABLE public.workout_plan (
-      id uuid PRIMARY KEY DEFAULT gen_random_uuid()
+    CREATE TABLE public.workout_plan_session (
+      id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
+      plan_id uuid NOT NULL,
+      name text NOT NULL,
+      position integer NOT NULL DEFAULT 0,
+      created_at timestamptz NOT NULL DEFAULT now(),
+      updated_at timestamptz NOT NULL DEFAULT now(),
+      CONSTRAINT workout_plan_session_plan_id_fkey
+        FOREIGN KEY (plan_id) REFERENCES public.workout_plan(id) ON DELETE CASCADE
     );
   END IF;
 END
 $$;
 
--- Ensure workout_plan has expected columns and indexes (compatible with gym_pilot_plan)
+ALTER TABLE public.workout_plan_session
+  ADD COLUMN IF NOT EXISTS plan_id uuid;
+ALTER TABLE public.workout_plan_session
+  ADD COLUMN IF NOT EXISTS name text;
+ALTER TABLE public.workout_plan_session
+  ADD COLUMN IF NOT EXISTS position integer;
+ALTER TABLE public.workout_plan_session
+  ADD COLUMN IF NOT EXISTS created_at timestamptz;
+ALTER TABLE public.workout_plan_session
+  ADD COLUMN IF NOT EXISTS updated_at timestamptz;
+
+CREATE INDEX IF NOT EXISTS workout_plan_session_plan_id_idx
+ON public.workout_plan_session (plan_id);
+
 DO $$
 BEGIN
-  -- Add columns if they don't exist
-  IF NOT EXISTS (
-    SELECT 1 FROM information_schema.columns
-    WHERE table_schema = 'public' AND table_name = 'workout_plan' AND column_name = 'user_id'
-  ) THEN
-    ALTER TABLE public.workout_plan
-    ADD COLUMN user_id uuid REFERENCES auth.users(id) ON DELETE CASCADE NOT NULL;
+  IF EXISTS (SELECT 1 FROM pg_proc WHERE proname = 'set_updated_at') THEN
+    DROP TRIGGER IF EXISTS set_updated_at ON public.workout_plan_session;
+    CREATE TRIGGER set_updated_at
+    BEFORE UPDATE ON public.workout_plan_session
+    FOR EACH ROW EXECUTE FUNCTION public.set_updated_at();
+  ELSE
+    RAISE NOTICE 'set_updated_at function not found; skipping trigger creation for workout_plan_session';
   END IF;
-
-  IF NOT EXISTS (
-    SELECT 1 FROM information_schema.columns
-    WHERE table_schema = 'public' AND table_name = 'workout_plan' AND column_name = 'plan_name'
-  ) THEN
-    ALTER TABLE public.workout_plan
-    ADD COLUMN plan_name text NOT NULL;
-  END IF;
-
-  IF NOT EXISTS (
-    SELECT 1 FROM information_schema.columns
-    WHERE table_schema = 'public' AND table_name = 'workout_plan' AND column_name = 'plan_slug'
-  ) THEN
-    ALTER TABLE public.workout_plan
-    ADD COLUMN plan_slug text NOT NULL;
-  END IF;
-
-  IF NOT EXISTS (
-    SELECT 1 FROM information_schema.columns
-    WHERE table_schema = 'public' AND table_name = 'workout_plan' AND column_name = 'plan_sessions'
-  ) THEN
-    ALTER TABLE public.workout_plan
-    ADD COLUMN plan_sessions jsonb NOT NULL DEFAULT '[]'::jsonb;
-  END IF;
-
-  IF NOT EXISTS (
-    SELECT 1 FROM information_schema.columns
-    WHERE table_schema = 'public' AND table_name = 'workout_plan' AND column_name = 'created_at'
-  ) THEN
-    ALTER TABLE public.workout_plan
-    ADD COLUMN created_at timestamptz NOT NULL DEFAULT now();
-  END IF;
-
-  IF NOT EXISTS (
-    SELECT 1 FROM information_schema.columns
-    WHERE table_schema = 'public' AND table_name = 'workout_plan' AND column_name = 'updated_at'
-  ) THEN
-    ALTER TABLE public.workout_plan
-    ADD COLUMN updated_at timestamptz NOT NULL DEFAULT now();
-  END IF;
-
-  -- Ensure unique index on (user_id, plan_slug)
-  IF NOT EXISTS (
-    SELECT 1 FROM pg_indexes WHERE schemaname = 'public' AND tablename = 'workout_plan' AND indexname = 'workout_plan_user_id_plan_slug_key'
-  ) THEN
-    CREATE UNIQUE INDEX workout_plan_user_id_plan_slug_key ON public.workout_plan (user_id, plan_slug);
-  END IF;
-
-  -- Ensure user_id index
-  IF NOT EXISTS (
-    SELECT 1 FROM pg_indexes WHERE schemaname = 'public' AND tablename = 'workout_plan' AND indexname = 'workout_plan_user_id_idx'
-  ) THEN
-    CREATE INDEX workout_plan_user_id_idx ON public.workout_plan (user_id);
-  END IF;
-
-  -- Trigger for updated_at
-  PERFORM 1; -- no-op to allow DDL above
 END
 $$;
 
--- Create/refresh trigger for set_updated_at
-DROP TRIGGER IF EXISTS set_updated_at ON public.workout_plan;
-CREATE TRIGGER set_updated_at
-BEFORE UPDATE ON public.workout_plan
-FOR EACH ROW EXECUTE FUNCTION public.set_updated_at();
+ALTER TABLE public.workout_plan_session ENABLE ROW LEVEL SECURITY;
 
--- Enable Row Level Security for workout_plan
-ALTER TABLE public.workout_plan ENABLE ROW LEVEL SECURITY;
-
--- RLS Policy: Users can manage their own plans
 DO $$
 BEGIN
   IF NOT EXISTS (
     SELECT 1
     FROM pg_policies
     WHERE schemaname = 'public'
-      AND tablename = 'workout_plan'
-      AND policyname = 'Users can manage their own plans'
+      AND tablename = 'workout_plan_session'
+      AND policyname = 'Users can manage their own plan sessions'
   ) THEN
-    CREATE POLICY "Users can manage their own plans"
-      ON public.workout_plan
+    CREATE POLICY "Users can manage their own plan sessions"
+      ON public.workout_plan_session
       FOR ALL
-      USING (auth.uid() = user_id)
-      WITH CHECK (auth.uid() = user_id);
+      USING (EXISTS (SELECT 1 FROM public.workout_plan wp WHERE wp.id = plan_id AND auth.uid() = wp.user_id))
+      WITH CHECK (EXISTS (SELECT 1 FROM public.workout_plan wp WHERE wp.id = plan_id AND auth.uid() = wp.user_id));
   END IF;
 END
 $$;
 
-
-CREATE TABLE public.workout_plan_exercise ( 
-  id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
-  plan_id uuid REFERENCES public.workout_plan(id) ON DELETE CASCADE NOT NULL,
-  exercise_id text NOT NULL, -- Changed to text as per workout_template_exercise
-  exercise_name text, -- Added as per workout_template_exercise
-  position integer NOT NULL DEFAULT 0,
-  details jsonb DEFAULT '{}'::jsonb,
-  created_at timestamptz NOT NULL DEFAULT now(),
-  updated_at timestamptz NOT NULL DEFAULT now() -- Added updated_at for consistency
-);
-
--- Add indexes for performance 
-CREATE INDEX IF NOT EXISTS workout_plan_exercise_plan_id_idx
-ON public.workout_plan_exercise (plan_id);
-
--- Add trigger for updated_at
--- Ensure the set_updated_at function exists (it should from consolidated_current_schema.sql)
-DROP TRIGGER IF EXISTS set_updated_at ON public.workout_plan_exercise;
-CREATE TRIGGER set_updated_at
-BEFORE UPDATE ON public.workout_plan_exercise
-FOR EACH ROW EXECUTE FUNCTION public.set_updated_at(); 
-
--- Enable Row Level Security for workout_plan_exercise
-ALTER TABLE public.workout_plan_exercise ENABLE ROW LEVEL SECURITY;
-
--- RLS Policy: Users can see exercises for their plans
 DO $$
 BEGIN
   IF NOT EXISTS (
-    SELECT 1 
+    SELECT 1
+    FROM pg_tables
+    WHERE schemaname = 'public' AND tablename = 'workout_plan_exercise'
+  ) THEN
+    CREATE TABLE public.workout_plan_exercise (
+      id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
+      plan_id uuid NOT NULL,
+      session_id uuid NOT NULL,
+      exercise_id text NOT NULL,
+      exercise_name text,
+      position integer NOT NULL DEFAULT 0,
+      details jsonb DEFAULT '{}'::jsonb,
+      created_at timestamptz NOT NULL DEFAULT now(),
+      updated_at timestamptz NOT NULL DEFAULT now(),
+      CONSTRAINT workout_plan_exercise_plan_id_fkey
+        FOREIGN KEY (plan_id) REFERENCES public.workout_plan(id) ON DELETE CASCADE,
+      CONSTRAINT workout_plan_exercise_session_id_fkey
+        FOREIGN KEY (session_id) REFERENCES public.workout_plan_session(id) ON DELETE CASCADE
+    );
+  END IF;
+END
+$$;
+
+ALTER TABLE public.workout_plan_exercise
+  ADD COLUMN IF NOT EXISTS plan_id uuid;
+ALTER TABLE public.workout_plan_exercise
+  ADD COLUMN IF NOT EXISTS session_id uuid;
+ALTER TABLE public.workout_plan_exercise
+  ADD COLUMN IF NOT EXISTS exercise_id text;
+ALTER TABLE public.workout_plan_exercise
+  ADD COLUMN IF NOT EXISTS exercise_name text;
+ALTER TABLE public.workout_plan_exercise
+  ADD COLUMN IF NOT EXISTS position integer;
+ALTER TABLE public.workout_plan_exercise
+  ADD COLUMN IF NOT EXISTS created_at timestamptz;
+ALTER TABLE public.workout_plan_exercise
+  ADD COLUMN IF NOT EXISTS updated_at timestamptz;
+
+CREATE INDEX IF NOT EXISTS workout_plan_exercise_plan_id_idx
+ON public.workout_plan_exercise (plan_id);
+
+CREATE INDEX IF NOT EXISTS workout_plan_exercise_session_id_idx
+ON public.workout_plan_exercise (session_id);
+
+DO $$
+BEGIN
+  IF EXISTS (SELECT 1 FROM pg_proc WHERE proname = 'set_updated_at') THEN
+    DROP TRIGGER IF EXISTS set_updated_at ON public.workout_plan_exercise;
+    CREATE TRIGGER set_updated_at
+    BEFORE UPDATE ON public.workout_plan_exercise
+    FOR EACH ROW EXECUTE FUNCTION public.set_updated_at();
+  ELSE
+    RAISE NOTICE 'set_updated_at function not found; skipping trigger creation for workout_plan_exercise';
+  END IF;
+END
+$$;
+
+ALTER TABLE public.workout_plan_exercise ENABLE ROW LEVEL SECURITY;
+
+DO $$
+BEGIN
+  IF NOT EXISTS (
+    SELECT 1
     FROM pg_policies
     WHERE schemaname = 'public'
       AND tablename = 'workout_plan_exercise'
@@ -165,18 +160,17 @@ BEGIN
       USING (
         EXISTS (
           SELECT 1 FROM public.workout_plan wp
-          WHERE wp.id = plan_id AND (auth.uid() = wp.user_id OR public.user_has_role(auth.uid(), 'admin'))
+          WHERE wp.id = plan_id AND auth.uid() = wp.user_id
         )
       );
   END IF;
 END
 $$;
 
--- RLS Policy: Users can insert exercises for their plans
 DO $$
 BEGIN
   IF NOT EXISTS (
-    SELECT 1 
+    SELECT 1
     FROM pg_policies
     WHERE schemaname = 'public'
       AND tablename = 'workout_plan_exercise'
@@ -188,18 +182,17 @@ BEGIN
       WITH CHECK (
         EXISTS (
           SELECT 1 FROM public.workout_plan wp
-          WHERE wp.id = plan_id AND (auth.uid() = wp.user_id OR public.user_has_role(auth.uid(), 'admin'))
+          WHERE wp.id = plan_id AND auth.uid() = wp.user_id
         )
       );
   END IF;
 END
 $$;
 
--- RLS Policy: Users can update exercises for their plans
 DO $$
 BEGIN
   IF NOT EXISTS (
-    SELECT 1 
+    SELECT 1
     FROM pg_policies
     WHERE schemaname = 'public'
       AND tablename = 'workout_plan_exercise'
@@ -211,28 +204,21 @@ BEGIN
       USING (
         EXISTS (
           SELECT 1 FROM public.workout_plan wp
-          WHERE wp.id = plan_id AND (auth.uid() = wp.user_id OR public.user_has_role(auth.uid(), 'admin'))
+          WHERE wp.id = plan_id AND auth.uid() = wp.user_id
         )
       )
       WITH CHECK (
         EXISTS (
           SELECT 1 FROM public.workout_plan wp
-          WHERE wp.id = plan_id AND (auth.uid() = wp.user_id OR public.user_has_role(auth.uid(), 'admin'))
+          WHERE wp.id = plan_id AND auth.uid() = wp.user_id
         )
       );
   END IF;
 END
 $$;
 
--- Remove the plan_sessions column from workout_plan 
-ALTER TABLE public.workout_plan
-DROP COLUMN plan_sessions;
-
-
 -- Down Migration
--- Re-add the plan_sessions column to workout_plan 
 ALTER TABLE public.workout_plan
-ADD COLUMN plan_sessions jsonb NOT NULL DEFAULT '[]'::jsonb;
-
--- Drop the workout_plan_exercise table
+ADD COLUMN IF NOT EXISTS plan_sessions jsonb NOT NULL DEFAULT '[]'::jsonb;
+DROP TABLE IF EXISTS public.workout_plan_session CASCADE;
 DROP TABLE IF EXISTS public.workout_plan_exercise CASCADE;

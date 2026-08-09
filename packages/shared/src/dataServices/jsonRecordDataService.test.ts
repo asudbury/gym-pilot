@@ -1,6 +1,9 @@
 import { describe, expect, it, vi } from "vitest";
 import { getSupabaseClient } from "../supabase";
-import { normalizeFavoriteStorageValue } from "./jsonRecordDataService";
+import {
+  buildPlanSessionsWithExercises,
+  normalizeFavoriteStorageValue,
+} from "./jsonRecordDataService";
 import {
   buildSessionBookingSessionPayload,
   listSessions,
@@ -22,6 +25,39 @@ describe("json record data helpers", () => {
       { path: "/foo", label: "Foo", folder: "Strength" },
     ]);
     expect(normalized.folders).toEqual(["A", "B"]);
+  });
+
+  it("attaches plan exercises to the first session when the schema no longer exposes session ids", () => {
+    const sessions = [
+      {
+        id: "session-1",
+        name: "Day 1",
+        plan_id: "plan-1",
+        position: 0,
+        created_at: "2026-01-01T00:00:00.000Z",
+        updated_at: "2026-01-01T00:00:00.000Z",
+        planItems: [],
+      },
+    ];
+
+    const exercises = [
+      {
+        id: "exercise-1",
+        plan_id: "plan-1",
+        exercise_id: "bench-press",
+        exercise_name: "Bench Press",
+        position: 0,
+        created_at: "2026-01-01T00:00:00.000Z",
+        updated_at: "2026-01-01T00:00:00.000Z",
+      },
+    ];
+
+    const result = buildPlanSessionsWithExercises(
+      sessions as any,
+      exercises as any,
+    );
+
+    expect(result[0].planItems).toEqual(exercises);
   });
 });
 

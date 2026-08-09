@@ -1,20 +1,21 @@
-import type { Exercise, WorkoutTemplateInsert } from '@gym-pilot/shared'
-import { getSupabaseClient } from '@gym-pilot/shared'
-import clsx from 'clsx'
-import { useEffect, useState } from 'react'
-import { NavLink, useNavigate } from 'react-router-dom'
-import { ExerciseMultiPicker } from '../../components/exercises/ExerciseMultiPicker'
-import { ItemControls } from '../../components/ItemControls'
-import { PageCard } from '../../components/PageCard'
-import { Heading1, Paragraph } from '../../components/Typography'
-import { BackLink } from '../../components/ui/BackLink'
-import { Button } from '../../components/ui/Button'
-import { DecorativeIcon } from '../../components/ui/DecorativeIcon'
-import { StatusMessageNotification } from '../../components/ui/StatusMessageNotification'
-import { PageLayout } from '../../layouts/PageLayout'
-import { getExercisePath } from '../../utils/exerciseRouteUtils'
-import { formatLabel } from '../../utils/formatUtils'
-import { useIsDesktop } from '../../utils/useMediaQuery'
+import type { Exercise, WorkoutTemplateInsert } from '@gym-pilot/shared';
+import { getSupabaseClient } from '@gym-pilot/shared';
+import { TableNames } from '@gym-pilot/shared/src/dataServices/tableNames';
+import clsx from 'clsx';
+import { useEffect, useState } from 'react';
+import { NavLink, useNavigate } from 'react-router-dom';
+import { ExerciseMultiPicker } from '../../components/exercises/ExerciseMultiPicker';
+import { ItemControls } from '../../components/ItemControls';
+import { PageCard } from '../../components/PageCard';
+import { Heading1, Paragraph } from '../../components/Typography';
+import { BackLink } from '../../components/ui/BackLink';
+import { Button } from '../../components/ui/Button';
+import { DecorativeIcon } from '../../components/ui/DecorativeIcon';
+import { StatusMessageNotification } from '../../components/ui/StatusMessageNotification';
+import { PageLayout } from '../../layouts/PageLayout';
+import { getExercisePath } from '../../utils/exerciseRouteUtils';
+import { formatLabel } from '../../utils/formatUtils';
+import { useIsDesktop } from '../../utils/useMediaQuery';
 
 // Define a key for local storage
 const LOCAL_STORAGE_KEY = 'gym-pilot-selected-template-exercises'
@@ -71,7 +72,7 @@ function WorkoutTemplateCreatePage() {
       }
 
       const { data: insertedTemplates, error: insertError } = await client
-        .from('workout_template')
+        .from(TableNames.WorkoutTemplate)
         .insert(payload)
         .select('*')
         .single()

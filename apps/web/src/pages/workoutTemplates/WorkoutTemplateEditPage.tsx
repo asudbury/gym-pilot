@@ -1,17 +1,18 @@
-import { getSupabaseClient } from '@gym-pilot/shared'
-import { clsx } from 'clsx'
-import { useEffect, useState } from 'react'
-import { Link, useNavigate, useParams } from 'react-router-dom'
-import { ExerciseMultiPicker } from '../../components/exercises/ExerciseMultiPicker'
-import { ItemControls } from '../../components/ItemControls'
-import { PageCard } from '../../components/PageCard'
-import { Heading1, Paragraph } from '../../components/Typography'
-import { BackLink } from '../../components/ui/BackLink'
-import { Button } from '../../components/ui/Button'
-import { PageLayout } from '../../layouts/PageLayout'
-import { getExercisePath } from '../../utils/exerciseRouteUtils'
-import { formatLabel } from '../../utils/formatUtils'
-import { useIsDesktop } from '../../utils/useMediaQuery'
+import { getSupabaseClient } from '@gym-pilot/shared';
+import { TableNames } from '@gym-pilot/shared/src/dataServices/tableNames';
+import { clsx } from 'clsx';
+import { useEffect, useState } from 'react';
+import { Link, useNavigate, useParams } from 'react-router-dom';
+import { ExerciseMultiPicker } from '../../components/exercises/ExerciseMultiPicker';
+import { ItemControls } from '../../components/ItemControls';
+import { PageCard } from '../../components/PageCard';
+import { Heading1, Paragraph } from '../../components/Typography';
+import { BackLink } from '../../components/ui/BackLink';
+import { Button } from '../../components/ui/Button';
+import { PageLayout } from '../../layouts/PageLayout';
+import { getExercisePath } from '../../utils/exerciseRouteUtils';
+import { formatLabel } from '../../utils/formatUtils';
+import { useIsDesktop } from '../../utils/useMediaQuery';
 
 export default function WorkoutTemplateEditPage() {
   const { id } = useParams<{ id: string }>()
@@ -41,7 +42,7 @@ export default function WorkoutTemplateEditPage() {
     }
 
     const { data, error } = await client
-      .from('workout_template')
+      .from(TableNames.WorkoutTemplate)
       .select('*, workout_template_exercise(*)')
       .eq('id', id)
       .single()
@@ -77,7 +78,7 @@ export default function WorkoutTemplateEditPage() {
 
     setStatusMessage(null)
     const { error } = await client
-      .from('workout_template')
+      .from(TableNames.WorkoutTemplate)
       .update({ name, description: description || null })
       .eq('id', id)
 
@@ -94,7 +95,7 @@ export default function WorkoutTemplateEditPage() {
           const position = idx
           if (!row.id) return Promise.resolve(null)
           return client
-            .from('workout_template_exercise')
+            .from(TableNames.WorkoutTemplateExercise)
             .update({ position })
             .eq('id', row.id)
         }),
@@ -113,7 +114,7 @@ export default function WorkoutTemplateEditPage() {
     if (!client) return
 
     const { error } = await client
-      .from('workout_template')
+      .from(TableNames.WorkoutTemplate)
       .delete()
       .eq('id', id)
     if (error) {
@@ -132,7 +133,7 @@ export default function WorkoutTemplateEditPage() {
 
     setStatusMessage(null)
     const { data, error } = await client
-      .from('workout_template')
+      .from(TableNames.WorkoutTemplate)
       .select('*, workout_template_exercise(*)')
       .eq('id', id)
       .single()
@@ -153,7 +154,7 @@ export default function WorkoutTemplateEditPage() {
     }
 
     const { data: newTemplate, error: insertError } = await client
-      .from('workout_template')
+      .from(TableNames.WorkoutTemplate)
       .insert({
         name: `${data.name} Copy`,
         description: data.description,
@@ -179,7 +180,7 @@ export default function WorkoutTemplateEditPage() {
         }),
       )
       const { error: exerciseError } = await client
-        .from('workout_template_exercise')
+        .from(TableNames.WorkoutTemplateExercise)
         .insert(exerciseRows)
       if (exerciseError) {
         setStatusTone('error')
@@ -195,7 +196,7 @@ export default function WorkoutTemplateEditPage() {
     const client = getSupabaseClient()
     if (!client) return
     const { error } = await client
-      .from('workout_template_exercise')
+      .from(TableNames.WorkoutTemplateExercise)
       .delete()
       .eq('id', rowId)
     if (error) {
@@ -258,7 +259,7 @@ export default function WorkoutTemplateEditPage() {
     }))
 
     const { error } = await client
-      .from('workout_template_exercise')
+      .from(TableNames.WorkoutTemplateExercise)
       .insert(rows)
     if (error) {
       setStatusTone('error')
