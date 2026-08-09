@@ -1,18 +1,18 @@
-import { useEffect, useRef } from 'react';
-import { NavLink } from 'react-router-dom';
-import type { NavigationMenuListItem } from '../../utils/navigationUtils';
-import { getToneClass } from '../toneClasses';
-import { Button } from '../ui/Button';
-import { DecorativeIcon } from '../ui/DecorativeIcon';
-import { StatusMessageNotification } from '../ui/StatusMessageNotification';
-import { ResponsiveVisibility } from '../visibility/ResponsiveVisibility';
-import { FavouriteLinksMenu } from './FavouriteLinksMenu';
-import { HomeButton } from './HomeButton';
+import { useEffect, useRef } from 'react'
+import { NavLink } from 'react-router-dom'
+import type { NavigationMenuListItem } from '../../utils/navigationUtils'
+import { getToneClass } from '../toneClasses'
+import { Button } from '../ui/Button'
+import { DecorativeIcon } from '../ui/DecorativeIcon'
+import { StatusMessageNotification } from '../ui/StatusMessageNotification'
+import { ResponsiveVisibility } from '../visibility/ResponsiveVisibility'
+import { FavouriteLinksMenu } from './FavouriteLinksMenu'
+import { HomeButton } from './HomeButton'
 import {
-    navigationItemBaseClassName,
-    navigationItemIconClassName,
-} from './navigationItemStyles';
-import { NavigationMenuList } from './NavigationMenuList';
+  navigationItemBaseClassName,
+  navigationItemIconClassName,
+} from './navigationItemStyles'
+import { NavigationMenuList } from './NavigationMenuList'
 
 type HeaderProps = {
   appName: string
@@ -135,9 +135,7 @@ export function Header({
                 {!showRestrictedBadge ? (
                   <NavigationMenuList
                     className="flex min-w-0 flex-wrap items-center justify-end gap-2"
-                    items={desktopMenuItems.filter(
-                      (item) => item.to !== '/',
-                    )}
+                    items={desktopMenuItems.filter((item) => item.to !== '/')}
                   />
                 ) : null}
 
@@ -195,9 +193,7 @@ export function Header({
 
                     <NavigationMenuList
                       className="flex min-w-0 flex-col gap-2"
-                      items={tabletMenuItems.filter(
-                        (item) => item.to !== '/',
-                      )}
+                      items={tabletMenuItems.filter((item) => item.to !== '/')}
                     />
 
                     <div className="mt-2 flex min-w-0 flex-col gap-2 border-t border-slate-200 pt-3">
@@ -251,9 +247,7 @@ export function Header({
 
                     <NavigationMenuList
                       className="flex min-w-0 flex-col gap-2"
-                      items={mobileMenuItems.filter(
-                        (item) => item.to !== '/',
-                      )}
+                      items={mobileMenuItems.filter((item) => item.to !== '/')}
                     />
 
                     <div className="mt-2 flex min-w-0 flex-col gap-2 border-t border-slate-200 pt-3">
