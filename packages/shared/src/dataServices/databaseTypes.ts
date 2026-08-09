@@ -549,7 +549,6 @@ export type Database = {
           created_at: string;
           id: string;
           plan_name: string;
-          plan_slug: string;
           updated_at: string;
           user_id: string;
         };
@@ -557,7 +556,6 @@ export type Database = {
           created_at?: string;
           id?: string;
           plan_name: string;
-          plan_slug: string;
           updated_at?: string;
           user_id: string;
         };
@@ -565,7 +563,6 @@ export type Database = {
           created_at?: string;
           id?: string;
           plan_name?: string;
-          plan_slug?: string;
           updated_at?: string;
           user_id?: string;
         };
@@ -579,6 +576,7 @@ export type Database = {
           id: string;
           plan_id: string;
           position: number;
+          session_id: string | null;
           updated_at: string;
         };
         Insert: {
@@ -588,6 +586,7 @@ export type Database = {
           id?: string;
           plan_id: string;
           position?: number;
+          session_id?: string | null;
           updated_at?: string;
         };
         Update: {
@@ -597,6 +596,7 @@ export type Database = {
           id?: string;
           plan_id?: string;
           position?: number;
+          session_id?: string | null;
           updated_at?: string;
         };
         Relationships: [
@@ -605,6 +605,13 @@ export type Database = {
             columns: ["plan_id"];
             isOneToOne: false;
             referencedRelation: "workout_plan";
+            referencedColumns: ["id"];
+          },
+          {
+            foreignKeyName: "workout_plan_exercise_session_id_fkey";
+            columns: ["session_id"];
+            isOneToOne: false;
+            referencedRelation: "workout_plan_session";
             referencedColumns: ["id"];
           },
         ];

@@ -94,7 +94,6 @@
 | id         | string | Primary key                 |
 | user_id    | string | Plan owner                  |
 | plan_name  | string | Plan title                  |
-| plan_slug  | string | URL-friendly slug           |
 | created_at | string | Creation timestamp          |
 | updated_at | string | Last update timestamp       |
 
@@ -109,9 +108,10 @@
 | ------------- | ------ | ----------------------------------- |
 | id            | string | Primary key                         |
 | plan_id       | string | Foreign key to `workout_plan`       |
+| session_id    | string | Foreign key to `workout_plan_session` |
 | exercise_id   | string | Catalog exercise id (stored as text)|
 | exercise_name | string | Denormalised exercise name for display |
-| position      | number | Ordering within the plan            |
+| position      | number | Ordering within the session        |
 | created_at    | string | Creation timestamp                  |
 | updated_at    | string | Last update timestamp               |
 
@@ -351,7 +351,6 @@ erDiagram
         uuid id
         uuid user_id
         text plan_name
-        text plan_slug
         timestamptz created_at
         timestamptz updated_at
     }
@@ -371,7 +370,6 @@ erDiagram
         uuid id
         uuid user_id
         text plan_name
-        text plan_slug
         jsonb plan_sessions
         timestamptz created_at
         timestamptz updated_at

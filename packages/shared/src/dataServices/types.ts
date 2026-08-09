@@ -32,7 +32,6 @@ export type WorkoutPlanSession = Tables<
 export type Plan = Tables<typeof TableNames.WorkoutPlan> & {
   planExercises: WorkoutPlanExercise[]; // Add this to reflect the new structure
   planName: string; // Ensure these are present if they are part of the application-level Plan type
-  planSlug: string;
   planSessions: WorkoutPlanSession[]; // Add this to reflect the new structure
   createdByUserId: string; // Add this as it's used in loadSupabaseJsonRecord
 };

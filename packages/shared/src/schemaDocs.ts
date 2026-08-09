@@ -26,7 +26,6 @@ export const dataSchemaDocs = {
     fields: [
       { name: "id", type: "string", required: true },
       { name: "planName", type: "string", required: true },
-      { name: "planSlug", type: "string", required: true },
       { name: "exercises", type: "PlanItem[]", required: true },
     ],
   },
@@ -38,7 +37,6 @@ export const dataSchemaDocs = {
       { name: "id", type: "string", required: true },
       { name: "planId", type: "string", required: true },
       { name: "planName", type: "string", required: true },
-      { name: "planSlug", type: "string", required: true },
       { name: "assignedUserId", type: "string | undefined", required: false },
       { name: "assignedUserName", type: "string | undefined", required: false },
       {

@@ -6,7 +6,6 @@ BEGIN
   -- Add columns if they don't exist
   ALTER TABLE public.workout_plan ADD COLUMN IF NOT EXISTS user_id uuid REFERENCES auth.users(id) ON DELETE CASCADE NOT NULL;
   ALTER TABLE public.workout_plan ADD COLUMN IF NOT EXISTS plan_name text NOT NULL DEFAULT '';
-  ALTER TABLE public.workout_plan ADD COLUMN IF NOT EXISTS plan_slug text NOT NULL DEFAULT '';
   ALTER TABLE public.workout_plan ADD COLUMN IF NOT EXISTS plan_sessions jsonb NOT NULL DEFAULT '[]'::jsonb;
   ALTER TABLE public.workout_plan ADD COLUMN IF NOT EXISTS created_at timestamptz NOT NULL DEFAULT now();
   ALTER TABLE public.workout_plan ADD COLUMN IF NOT EXISTS updated_at timestamptz NOT NULL DEFAULT now();
@@ -16,7 +15,6 @@ END
 $$;
 
 -- Ensure indexes
-CREATE UNIQUE INDEX IF NOT EXISTS workout_plan_user_id_plan_slug_key ON public.workout_plan (user_id, plan_slug);
 CREATE INDEX IF NOT EXISTS workout_plan_user_id_idx ON public.workout_plan (user_id);
 
 -- Ensure updated_at trigger exists

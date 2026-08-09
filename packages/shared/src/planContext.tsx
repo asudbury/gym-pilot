@@ -1,11 +1,10 @@
-import { createContext, useContext, useEffect, useMemo, useState, type ReactNode } from 'react'
-import { createUUID } from './utils'
-import type { Assignment, Plan, PlanItem, PlanSession, User, UserRole } from '@gym-pilot/types'
-import { DexiePersistence, listJsonRecords } from './storage'
-import { logger } from './logging'
-import { ASSIGNMENTS_KEY, PLANS_KEY } from '../../../apps/web/src/constants/storageKeys'
-import { listSupabaseProfiles } from './gymPilotSupabase'
-import { normalizeUserRoles } from './utils'
+import type { Assignment, Plan, PlanItem, PlanSession, User, UserRole } from '@gym-pilot/types';
+import { createContext, useContext, useEffect, useMemo, useState, type ReactNode } from 'react';
+import { ASSIGNMENTS_KEY, PLANS_KEY } from '../../../apps/web/src/constants/storageKeys';
+import { listSupabaseProfiles } from './gymPilotSupabase';
+import { logger } from './logging';
+import { DexiePersistence, listJsonRecords } from './storage';
+import { createUUID, normalizeUserRoles } from './utils';
 
 type PlanContextValue = {
   plans: Plan[]
@@ -34,25 +33,6 @@ const PlanContext = createContext<PlanContextValue | undefined>(undefined)
 const persistence = new DexiePersistence()
 const CURRENT_USER_ID_STORAGE_KEY = 'gym-pilot-current-user-id'
 
-function buildPlanSlug(name: string, plans: Plan[]) {
-  const slugParts = [name]
-    .map((value) =>
-      value
-        .toLowerCase()
-        .trim()
-        .replace(/[^a-z0-9]+/g, '-')
-        .replace(/(^-|-$)/g, ''),
-    )
-    .filter(Boolean)
-
-  const baseSlug = slugParts.join('-') || 'plan'
-  const duplicateCount = plans.filter(
-    (plan) => (plan.planSlug ?? '').toLowerCase() === baseSlug || (plan.planSlug ?? '').startsWith(`${baseSlug}-`),
-  ).length
-
-  return duplicateCount > 0 ? `${baseSlug}-${duplicateCount + 1}` : baseSlug
-}
-
 function normalizePlan(plan: Plan): Plan {
   const fallbackName = plan.planName || 'Untitled plan'
   const normalizedSessions = Array.isArray(plan.planSessions) && plan.planSessions.length > 0
@@ -67,7 +47,6 @@ function normalizePlan(plan: Plan): Plan {
   return {
     ...plan,
     planName: fallbackName,
-    planSlug: plan.planSlug || buildPlanSlug(fallbackName, []),
     planSessions: normalizedSessions,
   }
 }
@@ -85,7 +64,6 @@ function normalizeAssignment(assignment: Assignment): Assignment {
   return {
     ...assignment,
     planName: assignment.planName || 'Untitled plan',
-    planSlug: assignment.planSlug || buildPlanSlug(assignment.planName || 'Untitled plan', []),
     planSessions: normalizedSessions,
     completedExercises: assignment.completedExercises ?? {},
   }
@@ -308,7 +286,6 @@ function createAssignmentCopy(basePlan: Plan, user: User): Assignment {
     assignmentName: basePlan.planName + ' - ' + user.name,
     planId: basePlan.id,
     planName: basePlan.planName,
-    planSlug: basePlan.planSlug,
     planSessions: (basePlan.planSessions ?? []).map((session) => ({
       ...session,
       id: session.id || createUUID(),
@@ -465,7 +442,6 @@ export function PlanProvider({ children, storageKey = PLANS_KEY }: PlanProviderP
     const newPlan: Plan = {
       id: createUUID(),
       planName: trimmedName,
-      planSlug: buildPlanSlug(trimmedName, plans),
       planSessions: normalizedSessions,
       createdByUserId: currentUserId,
     }
@@ -493,7 +469,6 @@ export function PlanProvider({ children, storageKey = PLANS_KEY }: PlanProviderP
     const newPlanItem: Plan = {
       id: createUUID(),
       planName: fallbackName,
-      planSlug: buildPlanSlug(fallbackName, plans),
       planSessions: normalizedSessions,
       createdByUserId: currentUserId,
     }
@@ -523,12 +498,9 @@ export function PlanProvider({ children, storageKey = PLANS_KEY }: PlanProviderP
           planItems: (session.planItems ?? []).map((item) => normalizePlanItem(item)),
         }))
 
-        const nextSlug = buildPlanSlug(trimmedName, current.filter((item) => item.id !== planId))
-
         return {
           ...plan,
           planName: trimmedName,
-          planSlug: nextSlug,
           planSessions: normalizedSessions,
         }
       }),
@@ -599,7 +571,6 @@ export function PlanProvider({ children, storageKey = PLANS_KEY }: PlanProviderP
           ...assignment,
           assignmentName: assignment.assignmentName || trimmedName,
           planName: trimmedName,
-          planSlug: buildPlanSlug(trimmedName, plans),
           planSessions: normalizedSessions,
         }
       }),

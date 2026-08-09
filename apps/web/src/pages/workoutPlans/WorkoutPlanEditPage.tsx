@@ -1,27 +1,28 @@
-import { getSupabaseClient } from '@gym-pilot/shared'
+import { getSupabaseClient } from '@gym-pilot/shared';
 import type {
-  Tables,
-  TablesInsert,
-} from '@gym-pilot/shared/src/dataServices/databaseTypes'
-import { TableNames } from '@gym-pilot/shared/src/dataServices/tableNames'
-import clsx from 'clsx'
-import { useEffect, useState } from 'react'
-import { useNavigate, useParams } from 'react-router-dom'
-import { ItemControls } from '../../components/ItemControls'
-import { PageCard } from '../../components/PageCard'
-import { Heading1, Paragraph } from '../../components/Typography'
-import { BackLink } from '../../components/ui/BackLink'
-import { Button } from '../../components/ui/Button'
-import { DecorativeIcon } from '../../components/ui/DecorativeIcon'
-import { StatusMessageNotification } from '../../components/ui/StatusMessageNotification'
-import { WorkoutTemplatePickerModal } from '../../components/WorkoutTemplatePickerModal'
-import { PageLayout } from '../../layouts/PageLayout'
-import { formatLabel } from '../../utils/formatUtils'
-import { useIsDesktop } from '../../utils/useMediaQuery'
-import { buildPlanSessionsFromRows } from './workoutPlanState'
+    Tables,
+    TablesInsert,
+} from '@gym-pilot/shared/src/dataServices/databaseTypes';
+import { TableNames } from '@gym-pilot/shared/src/dataServices/tableNames';
+import clsx from 'clsx';
+import { useEffect, useState } from 'react';
+import { useNavigate, useParams } from 'react-router-dom';
+import { ItemControls } from '../../components/ItemControls';
+import { PageCard } from '../../components/PageCard';
+import { Heading1, Paragraph } from '../../components/Typography';
+import { BackLink } from '../../components/ui/BackLink';
+import { Button } from '../../components/ui/Button';
+import { DecorativeIcon } from '../../components/ui/DecorativeIcon';
+import { StatusMessageNotification } from '../../components/ui/StatusMessageNotification';
+import { WorkoutTemplatePickerModal } from '../../components/WorkoutTemplatePickerModal';
+import { PageLayout } from '../../layouts/PageLayout';
+import { formatLabel } from '../../utils/formatUtils';
+import { useIsDesktop } from '../../utils/useMediaQuery';
+import { buildPersistedPlanRows, buildPlanSessionsFromRows } from './workoutPlanState';
 
 type PlanItem = Tables<typeof TableNames.WorkoutPlanExercise> & {
   exercise_name?: string | null
+  session_id?: string | null
 }
 
 type PlanSession = Tables<typeof TableNames.WorkoutPlanSession> & {
@@ -57,13 +58,6 @@ function generateUUID(): string {
   })
 }
 
-function createPlanSlug(value: string): string {
-  return value
-    .toLowerCase()
-    .replace(/[^a-z0-9]+/g, '-')
-    .replace(/^-*|-*$/g, '')
-}
-
 // Reorder utility (copied from WorkoutTemplateCreatePage for consistency)
 function reorder<T>(items: T[], index: number, direction: 'up' | 'down'): T[] {
   const currentIndex = index
@@ -93,7 +87,7 @@ export default function WorkoutPlanEditPage() {
   const [planName, setPlanName] = useState('')
   const [planDescription, setPlanDescription] = useState('')
   const [planSessions, setPlanSessions] = useState<PlanSession[]>([
-    createPlanSession(generateUUID(), 'Day 1'),
+    createPlanSession(generateUUID(), 'Session 1'),
   ])
   const [activeSessionIndex, setActiveSessionIndex] = useState(0)
   const [isSaving, setIsSaving] = useState(false)
@@ -123,7 +117,7 @@ export default function WorkoutPlanEditPage() {
       try {
         const { data: planData, error: planError } = await client
           .from(TableNames.WorkoutPlan)
-          .select('id, plan_name, plan_slug')
+          .select('id, plan_name')
           .eq('id', id)
           .maybeSingle()
 
@@ -144,7 +138,7 @@ export default function WorkoutPlanEditPage() {
         const { data: exercisesData, error: exercisesError } = await client
           .from(TableNames.WorkoutPlanExercise)
           .select(
-            'id, plan_id, exercise_id, exercise_name, position, created_at, updated_at',
+            'id, plan_id, session_id, exercise_id, exercise_name, position, created_at, updated_at',
           )
           .eq('plan_id', id)
           .order('position', { ascending: true })
@@ -188,7 +182,7 @@ export default function WorkoutPlanEditPage() {
   const handleAddSession = () => {
     setPlanSessions((prev) => [
       ...prev,
-      createPlanSession(generateUUID(), `Day ${prev.length + 1}`),
+      createPlanSession(generateUUID(), `Session ${prev.length + 1}`),
     ])
     setActiveSessionIndex(planSessions.length) // Activate the new session
   }
@@ -248,6 +242,7 @@ export default function WorkoutPlanEditPage() {
         exercise_id: ex.exercise_id,
         exercise_name: ex.exercise_name ?? '',
         position: activeSession.planItems.length + idx,
+        session_id: activeSession.id,
       }),
     )
 
@@ -304,6 +299,144 @@ export default function WorkoutPlanEditPage() {
     )
   }
 
+  const persistPlanState = async (
+    sessionsToPersist: PlanSession[],
+    options?: { shouldNavigate?: boolean },
+  ) => {
+    const client = getSupabaseClient()
+    if (!client) {
+      setError('Supabase client not available.')
+      return null
+    }
+
+    const { data: authData, error: authErr } = await client.auth.getUser()
+    if (authErr || !authData?.user) {
+      setError('Unable to determine current user for plan save.')
+      return null
+    }
+
+    const planNameValue = planName.trim()
+
+    let resolvedPlanId = id
+
+    if (!isEditMode) {
+      const { data: createdPlan, error: createPlanError } = await client
+        .from(TableNames.WorkoutPlan)
+        .insert({
+          user_id: authData.user.id,
+          plan_name: planNameValue,
+        })
+        .select('id')
+        .maybeSingle()
+
+      if (createPlanError || !createdPlan?.id) {
+        setError(createPlanError?.message || 'Failed to create plan')
+        return null
+      }
+
+      resolvedPlanId = createdPlan.id
+    } else if (resolvedPlanId) {
+      const { error: updatePlanError } = await client
+        .from(TableNames.WorkoutPlan)
+        .update({
+          plan_name: planNameValue,
+        })
+        .eq('id', resolvedPlanId)
+
+      if (updatePlanError) {
+        setError(updatePlanError.message)
+        return null
+      }
+    }
+
+    if (!resolvedPlanId) {
+      setError('Unable to determine plan id for save.')
+      return null
+    }
+
+    if (isEditMode) {
+      const { error: deleteSessionsError } = await client
+        .from(TableNames.WorkoutPlanSession)
+        .delete()
+        .eq('plan_id', resolvedPlanId)
+
+      if (deleteSessionsError) {
+        setError(deleteSessionsError.message)
+        return null
+      }
+
+      const { error: deleteExercisesError } = await client
+        .from(TableNames.WorkoutPlanExercise)
+        .delete()
+        .eq('plan_id', resolvedPlanId)
+
+      if (deleteExercisesError) {
+        setError(deleteExercisesError.message)
+        return null
+      }
+    }
+
+    const { persistedSessions, persistedExercises } = buildPersistedPlanRows(
+      sessionsToPersist,
+      resolvedPlanId,
+    )
+
+    const sessionsToInsert: TablesInsert<typeof TableNames.WorkoutPlanSession>[] =
+      persistedSessions
+
+    if (sessionsToInsert.length > 0) {
+      const { error: insertSessionsError } = await client
+        .from(TableNames.WorkoutPlanSession)
+        .insert(sessionsToInsert)
+
+      if (insertSessionsError) {
+        setError(insertSessionsError.message)
+        return null
+      }
+    }
+
+    const exercisesToInsert: Array<
+      TablesInsert<typeof TableNames.WorkoutPlanExercise> & {
+        session_id?: string | null
+      }
+    > = persistedExercises
+
+    if (exercisesToInsert.length > 0) {
+      const { error: insertExercisesError } = await client
+        .from(TableNames.WorkoutPlanExercise)
+        .insert(exercisesToInsert)
+
+      if (insertExercisesError) {
+        setError(insertExercisesError.message)
+        return null
+      }
+    }
+
+    if (options?.shouldNavigate) {
+      navigate('/workout-plans')
+    }
+
+    return resolvedPlanId
+  }
+
+  const handleClearActiveSessionExercises = async () => {
+    const nextSessions = planSessions.map((session, idx) =>
+      idx === activeSessionIndex ? { ...session, planItems: [] } : session,
+    )
+    setPlanSessions(nextSessions)
+
+    if (!isEditMode || !id) {
+      return
+    }
+
+    try {
+      await persistPlanState(nextSessions)
+    } catch (err: any) {
+      console.error('Error clearing session exercises:', err)
+      setError(err.message || 'An unexpected error occurred while clearing exercises.')
+    }
+  }
+
   const handleSavePlan = async () => {
     if (!planName.trim()) {
       setError('Plan name is required.')
@@ -319,175 +452,22 @@ export default function WorkoutPlanEditPage() {
       return
     }
 
+    if (isSaving) {
+      return
+    }
+
     setIsSaving(true)
     setError(null)
 
     try {
-      const client = getSupabaseClient()
-      if (!client) {
-        setError('Supabase client not available.')
-        setIsSaving(false)
-        return
-      }
-
-      const { data: authData, error: authErr } = await client.auth.getUser()
-      if (authErr || !authData?.user) {
-        setError('Unable to determine current user for plan save.')
-        setIsSaving(false)
-        return
-      }
-
-      const planSlug = createPlanSlug(planName.trim())
-
-      let planId = id
-
-      if (!isEditMode) {
-        const { data: createdPlan, error: createPlanError } = await client
-          .from(TableNames.WorkoutPlan)
-          .insert({
-            user_id: authData.user.id,
-            plan_name: planName.trim(),
-            plan_slug: planSlug,
-          })
-          .select('id')
-          .maybeSingle()
-
-        if (createPlanError || !createdPlan?.id) {
-          setError(createPlanError?.message || 'Failed to create plan')
-          setIsSaving(false)
-          return
-        }
-
-        planId = createdPlan.id
-      } else if (planId) {
-        const { error: updatePlanError } = await client
-          .from(TableNames.WorkoutPlan)
-          .update({
-            plan_name: planName.trim(),
-            plan_slug: planSlug,
-          })
-          .eq('id', planId)
-
-        if (updatePlanError) {
-          setError(updatePlanError.message)
-          setIsSaving(false)
-          return
-        }
-      }
-
-      if (!planId) {
-        setError('Unable to determine plan id for save.')
-        setIsSaving(false)
-        return
-      }
-
-      if (isEditMode) {
-        const { data: existingSessionsData, error: fetchSessionsError } =
-          await client
-            .from(TableNames.WorkoutPlanSession)
-            .select('id')
-            .eq('plan_id', planId)
-
-        if (fetchSessionsError) {
-          setError(fetchSessionsError.message)
-          setIsSaving(false)
-          return
-        }
-
-        const existingSessionIds = (existingSessionsData ?? []).map(
-          (session) => session.id,
-        )
-        if (existingSessionIds.length > 0) {
-          const { error: deleteSessionsError } = await client
-            .from(TableNames.WorkoutPlanSession)
-            .delete()
-            .in('id', existingSessionIds)
-
-          if (deleteSessionsError) {
-            setError(deleteSessionsError.message)
-            setIsSaving(false)
-            return
-          }
-        }
-
-        const { data: existingExercisesData, error: fetchExercisesError } =
-          await client
-            .from(TableNames.WorkoutPlanExercise)
-            .select('id')
-            .eq('plan_id', planId)
-
-        if (fetchExercisesError) {
-          setError(fetchExercisesError.message)
-          setIsSaving(false)
-          return
-        }
-
-        const existingExerciseIds = (existingExercisesData ?? []).map(
-          (exercise) => exercise.id,
-        )
-        if (existingExerciseIds.length > 0) {
-          const { error: deleteExercisesError } = await client
-            .from(TableNames.WorkoutPlanExercise)
-            .delete()
-            .in('id', existingExerciseIds)
-
-          if (deleteExercisesError) {
-            setError(deleteExercisesError.message)
-            setIsSaving(false)
-            return
-          }
-        }
-      }
-
-      const sessionsToInsert: TablesInsert<
-        typeof TableNames.WorkoutPlanSession
-      >[] = planSessions.map((session, index) => ({
-        id: generateUUID(),
-        plan_id: planId,
-        name: session.name,
-        position: index,
-      }))
-
-      if (sessionsToInsert.length > 0) {
-        const { error: insertSessionsError } = await client
-          .from(TableNames.WorkoutPlanSession)
-          .insert(sessionsToInsert)
-
-        if (insertSessionsError) {
-          setError(insertSessionsError.message)
-          setIsSaving(false)
-          return
-        }
-      }
-
-      const exercisesToInsert: TablesInsert<
-        typeof TableNames.WorkoutPlanExercise
-      >[] = []
-      planSessions.forEach((session, sessionIndex) => {
-        session.planItems.forEach((item, itemIndex) => {
-          exercisesToInsert.push({
-            id: generateUUID(),
-            plan_id: planId,
-            exercise_id: item.exercise_id,
-            exercise_name: item.exercise_name ?? null,
-            position: sessionIndex * 1000 + itemIndex,
-          })
-        })
+      const persistedPlanId = await persistPlanState(planSessions, {
+        shouldNavigate: true,
       })
 
-      if (exercisesToInsert.length > 0) {
-        const { error: insertExercisesError } = await client
-          .from(TableNames.WorkoutPlanExercise)
-          .insert(exercisesToInsert)
-
-        if (insertExercisesError) {
-          setError(insertExercisesError.message)
-          setIsSaving(false)
-          return
-        }
+      if (!persistedPlanId) {
+        setIsSaving(false)
+        return
       }
-
-      navigate('/workout-plans') // Navigate to the plans list page after successful save
     } catch (err: any) {
       console.error('Error saving plan:', err)
       setError(
@@ -559,7 +539,7 @@ export default function WorkoutPlanEditPage() {
     try {
       const { data: planData, error: planError } = await client
         .from(TableNames.WorkoutPlan)
-        .select('id, plan_name, plan_slug')
+        .select('id, plan_name')
         .eq('id', id)
         .maybeSingle()
 
@@ -582,7 +562,7 @@ export default function WorkoutPlanEditPage() {
       const { data: exercisesData, error: exercisesError } = await client
         .from(TableNames.WorkoutPlanExercise)
         .select(
-          'id, plan_id, exercise_id, exercise_name, position, created_at, updated_at',
+          'id, plan_id, session_id, exercise_id, exercise_name, position, created_at, updated_at',
         )
         .eq('plan_id', id)
         .order('position', { ascending: true })
@@ -600,14 +580,12 @@ export default function WorkoutPlanEditPage() {
 
       const sourceName = planName.trim() || planData.plan_name || 'Workout Plan'
       const newPlanName = `${sourceName} Copy`
-      const newPlanSlug = createPlanSlug(newPlanName)
 
       const { data: newPlan, error: insertPlanError } = await client
         .from(TableNames.WorkoutPlan)
         .insert({
           user_id: authData.user.id,
           plan_name: newPlanName,
-          plan_slug: newPlanSlug,
         })
         .select('id')
         .maybeSingle()
@@ -707,7 +685,7 @@ export default function WorkoutPlanEditPage() {
 
           {/* Plan Sessions (Days/Tabs) */}
           <div className="mt-4">
-            <h3 className="text-sm font-medium">Plan Sessions (Days)</h3>
+            <h3 className="text-sm font-medium">Sessions</h3>
             <div className="flex flex-wrap gap-2 mt-2">
               {planSessions.map((session, sIdx) => (
                 <div
@@ -754,7 +732,7 @@ export default function WorkoutPlanEditPage() {
                 </div>
               ))}
               <Button tone="default" onClick={handleAddSession}>
-                Add Day
+                Add Session
               </Button>
             </div>
 
@@ -768,21 +746,15 @@ export default function WorkoutPlanEditPage() {
                     tone="blue"
                     onClick={() => setShowTemplatePicker(true)}
                   >
-                    Add Exercises from Template
+                    Add from Template
                   </Button>
                   <Button
                     tone="default"
                     onClick={() => {
-                      setPlanSessions((prev) =>
-                        prev.map((s, idx) =>
-                          idx === activeSessionIndex
-                            ? { ...s, planItems: [] }
-                            : s,
-                        ),
-                      )
+                      void handleClearActiveSessionExercises()
                     }}
                   >
-                    Clear Exercises
+                    Clear
                   </Button>
                 </div>
 

@@ -1,32 +1,32 @@
 import {
-  logger,
-  saveWorkoutItemsForSession,
-  updateUserSession,
-  usePlan,
-  type UserSession,
-  type UserSessionWorkoutItem,
-} from '@gym-pilot/shared'
-import { type PlanSession } from '@gym-pilot/types'
-import { useEffect, useMemo, useState } from 'react'
-import { useNavigate, useSearchParams } from 'react-router-dom'
-import { useAuth } from '../auth/AuthContext'
-import { PageCard } from '../components/PageCard'
-import { RatingSelector } from '../components/RatingSelector'
-import { SessionWorkoutEditor } from '../components/SessionWorkoutEditor'
-import { Heading1, UpperCaseParagraph } from '../components/Typography'
-import { Button } from '../components/ui/Button'
-import { DecorativeIcon } from '../components/ui/DecorativeIcon'
+    logger,
+    saveWorkoutItemsForSession,
+    updateUserSession,
+    usePlan,
+    type UserSession,
+    type UserSessionWorkoutItem,
+} from '@gym-pilot/shared';
+import { type PlanSession } from '@gym-pilot/types';
+import { useEffect, useMemo, useState } from 'react';
+import { useNavigate, useSearchParams } from 'react-router-dom';
+import { useAuth } from '../auth/AuthContext';
+import { PageCard } from '../components/PageCard';
+import { RatingSelector } from '../components/RatingSelector';
+import { SessionWorkoutEditor } from '../components/SessionWorkoutEditor';
+import { Heading1, UpperCaseParagraph } from '../components/Typography';
+import { Button } from '../components/ui/Button';
+import { DecorativeIcon } from '../components/ui/DecorativeIcon';
 import {
-  StatusMessageNotification,
-  type DisplayableError,
-} from '../components/ui/StatusMessageNotification'
-import { DesktopOnly } from '../components/visibility/DeviceVisibility'
-import { appTokens } from '../constants/tokens'
+    StatusMessageNotification,
+    type DisplayableError,
+} from '../components/ui/StatusMessageNotification';
+import { DesktopOnly } from '../components/visibility/DeviceVisibility';
+import { appTokens } from '../constants/tokens';
 import {
-  formatDateTimeLocalInputValue,
-  toUtcIsoStringFromLocalInputValue,
-} from '../dateTimeFormatter'
-import { PageLayout } from '../layouts/PageLayout'
+    formatDateTimeLocalInputValue,
+    toUtcIsoStringFromLocalInputValue,
+} from '../dateTimeFormatter';
+import { PageLayout } from '../layouts/PageLayout';
 function buildWorkoutItemsFromPlanSessions(
   planSessions: PlanSession[],
 ): Partial<UserSessionWorkoutItem>[] {
@@ -114,7 +114,6 @@ export function RecordSessionPage() {
       ...visibleAssignments.map((assignment) => ({
         id: assignment.id,
         planName: assignment.assignmentName,
-        planSlug: assignment.planSlug ?? assignment.id,
         planSessions: assignment.planSessions ?? [],
         createdByUserId: assignment.assignedUserId,
       })),

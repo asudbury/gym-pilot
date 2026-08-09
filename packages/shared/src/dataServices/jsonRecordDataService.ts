@@ -150,7 +150,7 @@ export async function loadSupabaseJsonRecord<T>(
   if (key === "gym-pilot-plans") {
     const { data: planData, error: planError } = await client
       .from(TableNames.WorkoutPlan)
-      .select("id, plan_name, plan_slug, created_at, updated_at")
+      .select("id, plan_name, created_at, updated_at")
       .eq("user_id", userId); // Assuming user_id is part of the select for Plan type
 
     if (planError) {
@@ -210,7 +210,6 @@ export async function loadSupabaseJsonRecord<T>(
       return {
         id: planRow.id,
         planName: planRow.plan_name,
-        planSlug: planRow.plan_slug,
         planSessions: sessionsWithExercises,
         createdByUserId: userId, // Assuming this is part of your Plan type
       };
@@ -237,7 +236,6 @@ export async function loadSupabaseJsonRecord<T>(
       assignmentName: row.assignment_name,
       planId: row.plan_id,
       planName: undefined,
-      planSlug: undefined,
       planSessions: Array.isArray(row.plan_items) ? row.plan_items : [],
       assignedUserId: row.assigned_user_id ?? undefined,
       assignedUserName: row.assigned_user_name ?? undefined,
@@ -362,7 +360,6 @@ export async function saveSupabaseJsonRecord<T>(key: string, value: T) {
             id: plan.id,
             user_id: userId,
             plan_name: plan.planName,
-            plan_slug: plan.planSlug,
           })),
         );
 
