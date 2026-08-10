@@ -93,7 +93,9 @@ export function buildAssignmentCreatePayload(
       id: assignmentId,
       user_id: input.creatorUserId,
       assignment_name:
-        input.assignmentName.trim() || input.plan.planName || 'Untitled assignment',
+        input.assignmentName.trim() ||
+        input.plan.planName ||
+        'Untitled assignment',
       assigned_to_user_id: input.assigneeUserId ?? null,
       allocated_by_user_id: input.allocatedByUserId ?? null,
       description: input.description ?? null,

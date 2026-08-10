@@ -101,7 +101,9 @@ export function AssignmentCreatePage() {
       const createdAssignment = await createAssignmentFromPlan(
         {
           plan: selectedPlan,
-          assignmentName: assignmentName.trim() || `${selectedPlan.planName} - ${selectedUserId}`,
+          assignmentName:
+            assignmentName.trim() ||
+            `${selectedPlan.planName} - ${selectedUserId}`,
           creatorUserId: authData.user.id,
           assigneeUserId: selectedUserId,
           allocatedByUserId: authData.user.id,
@@ -149,7 +151,9 @@ export function AssignmentCreatePage() {
                 </option>
               ))}
             </select>
-            {loading ? <p className="mt-2 text-sm text-slate-500">Loading plans…</p> : null}
+            {loading ? (
+              <p className="mt-2 text-sm text-slate-500">Loading plans…</p>
+            ) : null}
           </div>
 
           <div>

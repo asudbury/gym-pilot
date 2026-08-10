@@ -1,13 +1,13 @@
-import { getSupabaseClient } from '@gym-pilot/shared';
-import { TableNames } from '@gym-pilot/shared/src/dataServices/tableNames';
-import { useEffect, useMemo, useState } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
-import { PageCard } from '../../components/PageCard';
-import { Button } from '../../components/ui/Button';
-import { formatDateTimeForDisplay } from '../../dateTimeFormatter';
-import { mapWorkoutAssignmentRows } from '../../features/assignments/domain/assignmentView';
-import { PageCardLayout } from '../../layouts/PageCardLayout';
-import { PageLayout } from '../../layouts/PageLayout';
+import { getSupabaseClient } from '@gym-pilot/shared'
+import { TableNames } from '@gym-pilot/shared/src/dataServices/tableNames'
+import { useEffect, useMemo, useState } from 'react'
+import { Link, useNavigate } from 'react-router-dom'
+import { PageCard } from '../../components/PageCard'
+import { Button } from '../../components/ui/Button'
+import { formatDateTimeForDisplay } from '../../dateTimeFormatter'
+import { mapWorkoutAssignmentRows } from '../../features/assignments/domain/assignmentView'
+import { PageCardLayout } from '../../layouts/PageCardLayout'
+import { PageLayout } from '../../layouts/PageLayout'
 
 export function WorkoutAssignmentsPage() {
   const navigate = useNavigate()
@@ -28,7 +28,9 @@ export function WorkoutAssignmentsPage() {
 
     const { data, error } = await client
       .from(TableNames.WorkoutAssignment)
-      .select('id, assignment_name, assigned_to_user_id, description, goal, created_at, updated_at')
+      .select(
+        'id, assignment_name, assigned_to_user_id, description, goal, created_at, updated_at',
+      )
       .order('created_at', { ascending: false })
 
     if (error) {
@@ -49,7 +51,9 @@ export function WorkoutAssignmentsPage() {
   const filteredAssignments = useMemo(
     () =>
       assignments.filter((assignment) =>
-        assignment.assignmentName.toLowerCase().includes(filterText.toLowerCase()),
+        assignment.assignmentName
+          .toLowerCase()
+          .includes(filterText.toLowerCase()),
       ),
     [assignments, filterText],
   )
@@ -95,7 +99,9 @@ export function WorkoutAssignmentsPage() {
                 key={assignment.id}
                 padding="compact"
                 className="cursor-pointer"
-                onClick={() => navigate(`/workout-assignments/${assignment.id}/edit`)}
+                onClick={() =>
+                  navigate(`/workout-assignments/${assignment.id}/edit`)
+                }
               >
                 <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
                   <div>
@@ -106,8 +112,7 @@ export function WorkoutAssignmentsPage() {
                       {assignment.description || 'No description provided.'}
                     </p>
                     <p className="mt-2 text-sm text-slate-700">
-                      Assigned to:{' '}
-                      {assignment.assigneeUserId || 'Unassigned'}
+                      Assigned to: {assignment.assigneeUserId || 'Unassigned'}
                     </p>
                     <p className="mt-1 text-xs text-slate-500">
                       Last updated:{' '}
