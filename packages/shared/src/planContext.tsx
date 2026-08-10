@@ -277,10 +277,12 @@ function normalizePlanItem(item: Partial<PlanItem> = {}): PlanItem {
     reps: item.reps ?? '',
     workingSets: item.workingSets ?? '',
     notes: item.notes ?? '',
+    weight: item.weight ?? '',
+    goal: item.goal ?? '',
   }
 }
 
-function createAssignmentCopy(basePlan: Plan, user: User): Assignment {
+function createAssignmentCopy(basePlan: Plan, user: User, allocatorUserId?: string): Assignment {
   return {
     id: createUUID(),
     assignmentName: basePlan.planName + ' - ' + user.name,
@@ -293,6 +295,7 @@ function createAssignmentCopy(basePlan: Plan, user: User): Assignment {
       planItems: (session.planItems ?? []).map((item) => normalizePlanItem(item)),
     })),
     assignedUserId: user.id,
+    allocatedByUserId: allocatorUserId?.trim() || undefined,
     assignedUserName: user.name,
     completedExercises: {},
   }
@@ -536,7 +539,7 @@ export function PlanProvider({ children, storageKey = PLANS_KEY }: PlanProviderP
           return
         }
 
-        nextAssignments.push(createAssignmentCopy(basePlan, user))
+        nextAssignments.push(createAssignmentCopy(basePlan, user, currentUserId))
       })
 
       return [...current.filter((assignment) => assignment.planId !== planId), ...nextAssignments]

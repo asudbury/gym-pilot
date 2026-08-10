@@ -51,8 +51,8 @@ export function buildPlanSessionsWithExercises<
 const DEFAULT_SUPABASE_TABLE = TableNames.AppState;
 
 const SUPABASE_TABLE_BY_KEY: Record<string, string> = {
-  "gym-pilot-plans": TableNames.WorkoutPlan, // This now correctly points to "workout_plan"
-  "gym-pilot-assignments": TableNames.Assignment,
+  "gym-pilot-plans": TableNames.WorkoutPlan,
+  "gym-pilot-assignments": TableNames.WorkoutAssignment,
 };
 
 export function normalizeFolderName(value?: string) {
@@ -219,27 +219,112 @@ export async function loadSupabaseJsonRecord<T>(
   }
 
   if (key === "gym-pilot-assignments") {
-    const { data, error } = await client
-      .from(TableNames.Assignment)
+    const { data: assignmentRows, error: assignmentError } = await client
+      .from(TableNames.WorkoutAssignment)
       .select(
-        "id, assignment_name, plan_id, plan_items, assigned_user_id, assigned_user_name, completed_exercises",
+        "id, assignment_name, assigned_to_user_id, allocated_by_user_id, description, goal, notes, source_plan_id, created_at, updated_at",
       )
       .eq("user_id", userId);
 
-    if (error) {
-      logger.error("[Supabase] Remote assignments load failed", { key, error });
-      throw error;
+    if (assignmentError) {
+      logger.error("[Supabase] Remote assignments load failed", {
+        key,
+        error: assignmentError,
+      });
+      throw assignmentError;
     }
 
-    const assignments = (data ?? []).map((row) => ({
+    const assignmentIds = (assignmentRows ?? []).map((row) => row.id);
+
+    const { data: sessionRows, error: sessionError } = await client
+      .from(TableNames.WorkoutAssignmentSession)
+      .select(
+        "id, assignment_id, name, position, goal, notes, created_at, updated_at",
+      )
+      .in("assignment_id", assignmentIds)
+      .order("position", { ascending: true });
+
+    if (sessionError) {
+      logger.error("[Supabase] Remote assignment sessions load failed", {
+        key,
+        error: sessionError,
+      });
+      throw sessionError;
+    }
+
+    const { data: exerciseRows, error: exerciseError } = await client
+      .from(TableNames.WorkoutAssignmentExercise)
+      .select(
+        "id, assignment_id, assignment_session_id, exercise_id, exercise_name, position, reps, weight, notes, goal, created_at, updated_at",
+      )
+      .in("assignment_id", assignmentIds)
+      .order("position", { ascending: true });
+
+    if (exerciseError) {
+      logger.error("[Supabase] Remote assignment exercises load failed", {
+        key,
+        error: exerciseError,
+      });
+      throw exerciseError;
+    }
+
+    const sessionsByAssignmentId = new Map<
+      string,
+      Array<Record<string, unknown>>
+    >();
+    (sessionRows ?? []).forEach((row) => {
+      const assignmentId = String(row.assignment_id);
+      const sessions = sessionsByAssignmentId.get(assignmentId) ?? [];
+      sessions.push(row);
+      sessionsByAssignmentId.set(assignmentId, sessions);
+    });
+
+    const exercisesByAssignmentSessionId = new Map<
+      string,
+      Array<Record<string, unknown>>
+    >();
+    (exerciseRows ?? []).forEach((row) => {
+      const sessionId = String(row.assignment_session_id);
+      const exercises = exercisesByAssignmentSessionId.get(sessionId) ?? [];
+      exercises.push(row);
+      exercisesByAssignmentSessionId.set(sessionId, exercises);
+    });
+
+    const assignments = (assignmentRows ?? []).map((row) => ({
       id: row.id,
       assignmentName: row.assignment_name,
-      planId: row.plan_id,
-      planName: undefined,
-      planSessions: Array.isArray(row.plan_items) ? row.plan_items : [],
-      assignedUserId: row.assigned_user_id ?? undefined,
-      assignedUserName: row.assigned_user_name ?? undefined,
-      completedExercises: row.completed_exercises ?? {},
+      planId: row.source_plan_id ?? "",
+      planName: row.assignment_name,
+      planSessions: (sessionsByAssignmentId.get(String(row.id)) ?? []).map(
+        (session) => ({
+          id: String(session.id),
+          title: String(session.name),
+          name: String(session.name),
+          position: Number(session.position),
+          goal: session.goal != null ? String(session.goal) : undefined,
+          notes: session.notes != null ? String(session.notes) : undefined,
+          planItems: (
+            exercisesByAssignmentSessionId.get(String(session.id)) ?? []
+          ).map((exercise) => ({
+            id: String(exercise.id),
+            exercise_id: String(exercise.exercise_id),
+            exercise_name:
+              exercise.exercise_name != null
+                ? String(exercise.exercise_name)
+                : undefined,
+            position: Number(exercise.position),
+            reps: exercise.reps != null ? String(exercise.reps) : undefined,
+            weight:
+              exercise.weight != null ? String(exercise.weight) : undefined,
+            notes: exercise.notes != null ? String(exercise.notes) : undefined,
+            goal: exercise.goal != null ? String(exercise.goal) : undefined,
+          })),
+        }),
+      ),
+      assignedUserId: row.assigned_to_user_id ?? undefined,
+      allocatedByUserId: row.allocated_by_user_id ?? undefined,
+      assignedUserName: undefined,
+      completedExercises: {},
     }));
 
     return { found: true, value: assignments as T };
@@ -419,41 +504,101 @@ export async function saveSupabaseJsonRecord<T>(key: string, value: T) {
     return;
   }
 
-  // if (key === "gym-pilot-assignments") {
-  //   const assignments = Array.isArray(value) ? (value as Assignment[]) : [];
+  if (key === "gym-pilot-assignments") {
+    const assignments = Array.isArray(value)
+      ? (value as Array<Record<string, unknown>>)
+      : [];
 
-  //   const { error: deleteError } = await client
-  //     .from(TableNames.Assignment)
-  //     .delete()
-  //     .eq("user_id", userId);
+    const { error: deleteAssignmentsError } = await client
+      .from(TableNames.WorkoutAssignment)
+      .delete()
+      .eq("user_id", userId);
 
-  //   if (deleteError) {
-  //     throw deleteError;
-  //   }
+    if (deleteAssignmentsError) {
+      throw deleteAssignmentsError;
+    }
 
-  //   if (assignments.length > 0) {
-  //     const { error: insertError } = await client
-  //       .from(TableNames.Assignment)
-  //       .insert(
-  //         assignments.map((assignment) => ({
-  //           id: assignment.id,
-  //           user_id: userId,
-  //           plan_id: assignment.planId,
-  //           assignment_name: assignment.assignmentName,
-  //           assigned_user_id: assignment.assignedUserId ?? null,
-  //           assigned_user_name: assignment.assignedUserName ?? null,
-  //           completed_exercises: assignment.completedExercises ?? {},
-  //           plan_items: assignment.planSessions ?? [],
-  //         })),
-  //       );
+    const assignmentPayload = assignments.map((assignment) => ({
+      id: assignment.id,
+      user_id: userId,
+      assignment_name:
+        assignment.assignmentName ??
+        assignment.assignment_name ??
+        "Untitled assignment",
+      assigned_to_user_id: assignment.assignedUserId ?? null,
+      allocated_by_user_id: assignment.allocatedByUserId ?? null,
+      description: assignment.description ?? null,
+      goal: assignment.goal ?? null,
+      notes: assignment.notes ?? null,
+      source_plan_id: assignment.planId ?? null,
+    }));
 
-  //     if (insertError) {
-  //       throw insertError;
-  //     }
-  //   }
+    if (assignmentPayload.length > 0) {
+      const { error: insertAssignmentsError } = await client
+        .from(TableNames.WorkoutAssignment)
+        .insert(assignmentPayload);
 
-  //   return;
-  // }
+      if (insertAssignmentsError) {
+        throw insertAssignmentsError;
+      }
+
+      const sessionPayload = assignments.flatMap((assignment) =>
+        Array.isArray(assignment.planSessions)
+          ? assignment.planSessions.map((session: any, index: number) => ({
+              id: session.id,
+              assignment_id: assignment.id,
+              name: session.name ?? session.title ?? `Day ${index + 1}`,
+              position: session.position ?? index + 1,
+              goal: session.goal ?? null,
+              notes: session.notes ?? null,
+            }))
+          : [],
+      );
+
+      if (sessionPayload.length > 0) {
+        const { error: insertSessionError } = await client
+          .from(TableNames.WorkoutAssignmentSession)
+          .insert(sessionPayload);
+
+        if (insertSessionError) {
+          throw insertSessionError;
+        }
+      }
+
+      const exercisePayload = assignments.flatMap((assignment) =>
+        Array.isArray(assignment.planSessions)
+          ? assignment.planSessions.flatMap((session: any) =>
+              Array.isArray(session.planItems)
+                ? session.planItems.map((item: any, index: number) => ({
+                    id: item.id,
+                    assignment_id: assignment.id,
+                    assignment_session_id: session.id,
+                    exercise_id: item.exercise_id ?? item.id ?? "",
+                    exercise_name: item.exercise_name ?? null,
+                    position: item.position ?? index + 1,
+                    reps: item.reps ?? null,
+                    weight: item.weight ?? null,
+                    notes: item.notes ?? null,
+                    goal: item.goal ?? null,
+                  }))
+                : [],
+            )
+          : [],
+      );
+
+      if (exercisePayload.length > 0) {
+        const { error: insertExerciseError } = await client
+          .from(TableNames.WorkoutAssignmentExercise)
+          .insert(exercisePayload);
+
+        if (insertExerciseError) {
+          throw insertExerciseError;
+        }
+      }
+    }
+
+    return;
+  }
 
   if (isFavoritesKey(key)) {
     const normalizedValue = normalizeFavoriteStorageValue(value);

@@ -5,58 +5,59 @@ import { Link, useNavigate } from 'react-router-dom';
 import { PageCard } from '../../components/PageCard';
 import { Button } from '../../components/ui/Button';
 import { formatDateTimeForDisplay } from '../../dateTimeFormatter';
+import { mapWorkoutAssignmentRows } from '../../features/assignments/domain/assignmentView';
 import { PageCardLayout } from '../../layouts/PageCardLayout';
 import { PageLayout } from '../../layouts/PageLayout';
 
-export function WorkoutPlansPage() {
+export function WorkoutAssignmentsPage() {
   const navigate = useNavigate()
-  const [plans, setPlans] = useState<any[]>([])
+  const [assignments, setAssignments] = useState<any[]>([])
   const [loading, setLoading] = useState(false)
   const [filterText, setFilterText] = useState('')
 
-  const description = 'Create a workout plan to define exercises.'
+  const description = 'Review and manage workout assignments.'
 
-  async function loadPlans() {
+  async function loadAssignments() {
     setLoading(true)
     const client = getSupabaseClient()
     if (!client) {
-      setPlans([])
+      setAssignments([])
       setLoading(false)
       return
     }
 
     const { data, error } = await client
-      .from(TableNames.WorkoutPlan)
-      .select('*, workout_plan_exercise(*)')
+      .from(TableNames.WorkoutAssignment)
+      .select('id, assignment_name, assigned_to_user_id, description, goal, created_at, updated_at')
       .order('created_at', { ascending: false })
 
     if (error) {
-      console.error('Could not load workout plans', error)
-      setPlans([])
+      console.error('Could not load workout assignments', error)
+      setAssignments([])
       setLoading(false)
       return
     }
 
-    setPlans(Array.isArray(data) ? data : [])
+    setAssignments(mapWorkoutAssignmentRows(Array.isArray(data) ? data : []))
     setLoading(false)
   }
 
   useEffect(() => {
-    void loadPlans()
+    void loadAssignments()
   }, [])
 
-  const filteredPlans = useMemo(
+  const filteredAssignments = useMemo(
     () =>
-      plans.filter((t) =>
-        t.plan_name.toLowerCase().includes(filterText.toLowerCase()),
+      assignments.filter((assignment) =>
+        assignment.assignmentName.toLowerCase().includes(filterText.toLowerCase()),
       ),
-    [plans, filterText],
+    [assignments, filterText],
   )
 
   return (
     <PageLayout>
       <PageCardLayout
-        title="Workout Plans"
+        title="Workout Assignments"
         subtitle="Dashboard"
         description={description}
       >
@@ -66,62 +67,51 @@ export function WorkoutPlansPage() {
               type="text"
               placeholder="Search..."
               value={filterText}
-              onChange={(e) => setFilterText(e.target.value)}
+              onChange={(event) => setFilterText(event.target.value)}
               className="w-full px-3 py-2 text-sm border border-slate-300 rounded-md shadow-sm focus:outline-none focus:ring-slate-500 focus:border-slate-500"
             />
           </div>
           <div>
-            <Button
-              as={Link}
-              to="/workout-assignments"
-              tone="default"
-              className="mr-2"
-            >
-              Assignments
-            </Button>
-            <Button as={Link} to="/workout-plans/create" tone="blue">
-              Create plan
+            <Button as={Link} to="/workout-assignments/create" tone="blue">
+              Create assignment
             </Button>
           </div>
         </div>
 
         {loading ? (
-          <p className="mt-4 text-sm text-slate-600">Loading plans…</p>
-        ) : plans.length === 0 ? (
+          <p className="mt-4 text-sm text-slate-600">Loading assignments…</p>
+        ) : assignments.length === 0 ? (
           <div className="mt-4 rounded-2xl border border-dashed border-slate-200 bg-slate-50 px-4 py-6 text-sm text-slate-500">
-            No plans yet. Create one using the button above.
+            No assignments yet. Create one using the button above.
           </div>
-        ) : filteredPlans.length === 0 ? (
+        ) : filteredAssignments.length === 0 ? (
           <div className="mt-4 rounded-2xl border border-dashed border-slate-200 bg-slate-50 px-4 py-6 text-sm text-slate-500">
-            No plans match your search.
+            No assignments match your search.
           </div>
         ) : (
           <div className="grid gap-4 md:grid-cols-2 mt-4">
-            {filteredPlans.map((t) => (
+            {filteredAssignments.map((assignment) => (
               <PageCard
-                key={t.id}
+                key={assignment.id}
                 padding="compact"
-                onClick={() => navigate(`/workout-plans/${t.id}/edit`)}
                 className="cursor-pointer"
+                onClick={() => navigate(`/workout-assignments/${assignment.id}/edit`)}
               >
                 <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
                   <div>
                     <h2 className="text-xl font-semibold text-slate-900">
-                      {t.plan_name}{' '}
-                      <span className="text-xs text-slate-500">(plan)</span>
+                      {assignment.assignmentName}
                     </h2>
                     <p className="mt-1 text-sm text-slate-600">
-                      {t.description}
+                      {assignment.description || 'No description provided.'}
                     </p>
                     <p className="mt-2 text-sm text-slate-700">
-                      Exercises:{' '}
-                      {Array.isArray(t.workout_plan_exercise)
-                        ? t.workout_plan_exercise.length
-                        : 0}
+                      Assigned to:{' '}
+                      {assignment.assigneeUserId || 'Unassigned'}
                     </p>
                     <p className="mt-1 text-xs text-slate-500">
                       Last updated:{' '}
-                      {formatDateTimeForDisplay(t.updated_at, {
+                      {formatDateTimeForDisplay(assignment.updatedAt, {
                         includeYear: false,
                       })}
                     </p>
@@ -129,10 +119,10 @@ export function WorkoutPlansPage() {
                   <div className="flex flex-col gap-2 sm:flex-row sm:items-center">
                     <Button
                       as={Link}
-                      to={`/workout-plans/${t.id}/edit`}
+                      to={`/workout-assignments/${assignment.id}/edit`}
                       tone="chip"
                     >
-                      Update
+                      View
                     </Button>
                   </div>
                 </div>

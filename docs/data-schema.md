@@ -12,18 +12,48 @@
 | created_at | string | Creation timestamp |
 | updated_at | string | Last update timestamp |
 
-### Assignment — assignment
+### Workout assignment — workout_assignment
 
 | Field | Type | Notes |
 | --- | --- | --- |
 | id | string | Primary key |
-| user_id | string | Owner of the assignment |
-| plan_id | string | Related plan template |
+| user_id | string | Creator / owner of the assignment |
 | assignment_name | string | Friendly assignment title |
-| assigned_user_id | string \| null | Optional assignee |
-| assigned_user_name | string \| null | Optional assignee display name |
-| completed_exercises | Json | Completion tracking payload |
-| plan_items | Json | Assignment-specific plan rows |
+| assigned_to_user_id | string \| null | Optional assignee |
+| description | string \| null | Optional assignment summary |
+| goal | string \| null | Assignment-level goal |
+| notes | string \| null | Assignment-level notes |
+| source_plan_id | string \| null | Reference to the source workout plan |
+| created_at | string | Creation timestamp |
+| updated_at | string | Last update timestamp |
+
+### Workout assignment session — workout_assignment_session
+
+| Field | Type | Notes |
+| --- | --- | --- |
+| id | string | Primary key |
+| assignment_id | string | Foreign key to `workout_assignment` |
+| name | string | Session label |
+| position | number | Ordering within the assignment |
+| goal | string \| null | Session-level goal |
+| notes | string \| null | Session-level notes |
+| created_at | string | Creation timestamp |
+| updated_at | string | Last update timestamp |
+
+### Workout assignment exercise — workout_assignment_exercise
+
+| Field | Type | Notes |
+| --- | --- | --- |
+| id | string | Primary key |
+| assignment_id | string | Foreign key to `workout_assignment` |
+| assignment_session_id | string | Foreign key to `workout_assignment_session` |
+| exercise_id | string | Catalog exercise id |
+| exercise_name | string \| null | Display name for the exercise |
+| position | number | Ordering within the session |
+| reps | string \| null | Repetition target |
+| weight | string \| null | Weight target |
+| notes | string \| null | Exercise notes |
+| goal | string \| null | Exercise goal |
 | created_at | string | Creation timestamp |
 | updated_at | string | Last update timestamp |
 

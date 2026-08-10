@@ -3,7 +3,17 @@ import type { TableNames } from "./tableNames";
 
 export type AppSetting = Tables<typeof TableNames.AppSetting>;
 export type AppState = Tables<typeof TableNames.AppState>;
-export type Assignment = Tables<typeof TableNames.Assignment>;
+
+export type WorkoutAssignment = Tables<typeof TableNames.WorkoutAssignment> & {
+  allocatedByUserId?: string | null;
+  assignedToUserId?: string | null;
+};
+export type WorkoutAssignmentSession = Tables<
+  typeof TableNames.WorkoutAssignmentSession
+>;
+export type WorkoutAssignmentExercise = Tables<
+  typeof TableNames.WorkoutAssignmentExercise
+>;
 export type AuditLog = Tables<typeof TableNames.AuditLog>;
 export type ErrorLog = Tables<typeof TableNames.ErrorLog>;
 export type Favourite = Tables<typeof TableNames.Favourite>;

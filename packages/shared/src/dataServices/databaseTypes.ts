@@ -87,44 +87,148 @@ export type Database = {
         };
         Relationships: [];
       };
-      assignment: {
+      workout_assignment: {
         Row: {
-          assigned_user_id: string | null;
-          assigned_user_name: string | null;
+          allocated_by_user_id: string | null;
+          assigned_to_user_id: string | null;
           assignment_name: string;
-          completed_exercises: Json;
           created_at: string;
+          description: string | null;
+          goal: string | null;
           id: string;
-          plan_id: string;
-          plan_items: Json;
+          notes: string | null;
+          source_plan_id: string | null;
           updated_at: string;
           user_id: string;
         };
         Insert: {
-          assigned_user_id?: string | null;
-          assigned_user_name?: string | null;
+          allocated_by_user_id?: string | null;
+          assigned_to_user_id?: string | null;
           assignment_name: string;
-          completed_exercises?: Json;
           created_at?: string;
+          description?: string | null;
+          goal?: string | null;
           id?: string;
-          plan_id: string;
-          plan_items?: Json;
+          notes?: string | null;
+          source_plan_id?: string | null;
           updated_at?: string;
           user_id: string;
         };
         Update: {
-          assigned_user_id?: string | null;
-          assigned_user_name?: string | null;
+          allocated_by_user_id?: string | null;
+          assigned_to_user_id?: string | null;
           assignment_name?: string;
-          completed_exercises?: Json;
           created_at?: string;
+          description?: string | null;
+          goal?: string | null;
           id?: string;
-          plan_id?: string;
-          plan_items?: Json;
+          notes?: string | null;
+          source_plan_id?: string | null;
           updated_at?: string;
           user_id?: string;
         };
         Relationships: [];
+      };
+      workout_assignment_session: {
+        Row: {
+          assignment_id: string;
+          created_at: string;
+          goal: string | null;
+          id: string;
+          name: string;
+          notes: string | null;
+          position: number;
+          updated_at: string;
+        };
+        Insert: {
+          assignment_id: string;
+          created_at?: string;
+          goal?: string | null;
+          id?: string;
+          name: string;
+          notes?: string | null;
+          position?: number;
+          updated_at?: string;
+        };
+        Update: {
+          assignment_id?: string;
+          created_at?: string;
+          goal?: string | null;
+          id?: string;
+          name?: string;
+          notes?: string | null;
+          position?: number;
+          updated_at?: string;
+        };
+        Relationships: [
+          {
+            foreignKeyName: "workout_assignment_session_assignment_id_fkey";
+            columns: ["assignment_id"];
+            isOneToOne: false;
+            referencedRelation: "workout_assignment";
+            referencedColumns: ["id"];
+          },
+        ];
+      };
+      workout_assignment_exercise: {
+        Row: {
+          assignment_id: string;
+          assignment_session_id: string;
+          created_at: string;
+          exercise_id: string;
+          exercise_name: string | null;
+          goal: string | null;
+          id: string;
+          notes: string | null;
+          position: number;
+          reps: string | null;
+          updated_at: string;
+          weight: string | null;
+        };
+        Insert: {
+          assignment_id: string;
+          assignment_session_id: string;
+          created_at?: string;
+          exercise_id: string;
+          exercise_name?: string | null;
+          goal?: string | null;
+          id?: string;
+          notes?: string | null;
+          position?: number;
+          reps?: string | null;
+          updated_at?: string;
+          weight?: string | null;
+        };
+        Update: {
+          assignment_id?: string;
+          assignment_session_id?: string;
+          created_at?: string;
+          exercise_id?: string;
+          exercise_name?: string | null;
+          goal?: string | null;
+          id?: string;
+          notes?: string | null;
+          position?: number;
+          reps?: string | null;
+          updated_at?: string;
+          weight?: string | null;
+        };
+        Relationships: [
+          {
+            foreignKeyName: "workout_assignment_exercise_assignment_id_fkey";
+            columns: ["assignment_id"];
+            isOneToOne: false;
+            referencedRelation: "workout_assignment";
+            referencedColumns: ["id"];
+          },
+          {
+            foreignKeyName: "workout_assignment_exercise_assignment_session_id_fkey";
+            columns: ["assignment_session_id"];
+            isOneToOne: false;
+            referencedRelation: "workout_assignment_session";
+            referencedColumns: ["id"];
+          },
+        ];
       };
       audit_log: {
         Row: {
