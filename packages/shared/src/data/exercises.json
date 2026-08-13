@@ -136,7 +136,7 @@
   },
   {
     "id": "0007",
-    "name": "alternate lateral pulldown",
+    "name": "alternate lat pulldown",
     "category": "back",
     "body_part": "back",
     "equipment": "cable",
@@ -512,7 +512,7 @@
   },
   {
     "id": "0012",
-    "name": "assisted lying leg raise with lateral throw down",
+    "name": "assisted lying leg raise with lat throw down",
     "category": "waist",
     "body_part": "waist",
     "equipment": "assisted",
@@ -1488,7 +1488,7 @@
   },
   {
     "id": "0977",
-    "name": "band front lateral raise",
+    "name": "band front lat raise",
     "category": "shoulders",
     "body_part": "shoulders",
     "equipment": "band",
@@ -3833,7 +3833,7 @@
   },
   {
     "id": "1410",
-    "name": "BB lateral lunge",
+    "name": "BB lat lunge",
     "category": "upper legs",
     "body_part": "upper legs",
     "equipment": "barbell",
@@ -7546,7 +7546,7 @@
   },
   {
     "id": "0150",
-    "name": "cable bar lateral pulldown",
+    "name": "cable bar lat pulldown",
     "category": "back",
     "body_part": "back",
     "equipment": "cable",
@@ -7689,7 +7689,7 @@
   },
   {
     "id": "0153",
-    "name": "cable cross-over lateral pulldown",
+    "name": "cable cross-over lat pulldown",
     "category": "back",
     "body_part": "back",
     "equipment": "cable",
@@ -8545,7 +8545,7 @@
   },
   {
     "id": "0177",
-    "name": "cable lateral pulldown (with rope attachment)",
+    "name": "cable lat pulldown (with rope attachment)",
     "category": "back",
     "body_part": "back",
     "equipment": "cable",
@@ -8575,7 +8575,7 @@
   },
   {
     "id": "2616",
-    "name": "cable lateral pulldown with v-bar",
+    "name": "cable lat pulldown with v-bar",
     "category": "back",
     "body_part": "back",
     "equipment": "cable",
@@ -8603,7 +8603,7 @@
   },
   {
     "id": "0178",
-    "name": "cable lateral raise",
+    "name": "cable lat raise",
     "category": "shoulders",
     "body_part": "shoulders",
     "equipment": "cable",
@@ -9053,7 +9053,7 @@
   },
   {
     "id": "0191",
-    "name": "cable one arm lateral bent-over",
+    "name": "cable one arm lat bent-over",
     "category": "chest",
     "body_part": "chest",
     "equipment": "cable",
@@ -9081,7 +9081,7 @@
   },
   {
     "id": "0192",
-    "name": "cable one arm lateral raise",
+    "name": "cable one arm lat raise",
     "category": "shoulders",
     "body_part": "shoulders",
     "equipment": "cable",
@@ -10486,7 +10486,7 @@
   },
   {
     "id": "0215",
-    "name": "cable seated rear lateral raise",
+    "name": "cable seated rear lat raise",
     "category": "shoulders",
     "body_part": "shoulders",
     "equipment": "cable",
@@ -14287,7 +14287,7 @@
   },
   {
     "id": "0311",
-    "name": "DB full can lateral raise",
+    "name": "DB full can lat raise",
     "category": "shoulders",
     "body_part": "shoulders",
     "equipment": "dumbbell",
@@ -14940,7 +14940,7 @@
   },
   {
     "id": "0323",
-    "name": "DB incline one arm lateral raise",
+    "name": "DB incline one arm lat raise",
     "category": "shoulders",
     "body_part": "shoulders",
     "equipment": "dumbbell",
@@ -15107,7 +15107,7 @@
   },
   {
     "id": "0326",
-    "name": "DB incline rear lateral raise",
+    "name": "DB incline rear lat raise",
     "category": "shoulders",
     "body_part": "shoulders",
     "equipment": "dumbbell",
@@ -15464,7 +15464,7 @@
   },
   {
     "id": "0334",
-    "name": "DB lateral raise",
+    "name": "DB lat raise",
     "category": "shoulders",
     "body_part": "shoulders",
     "equipment": "dumbbell",
@@ -15491,7 +15491,7 @@
   },
   {
     "id": "0335",
-    "name": "DB lateral to front raise",
+    "name": "DB lat to front raise",
     "category": "shoulders",
     "body_part": "shoulders",
     "equipment": "dumbbell",
@@ -15871,7 +15871,7 @@
   },
   {
     "id": "0345",
-    "name": "DB lying one arm rear lateral raise",
+    "name": "DB lying one arm rear lat raise",
     "category": "shoulders",
     "body_part": "shoulders",
     "equipment": "dumbbell",
@@ -16033,7 +16033,7 @@
   },
   {
     "id": "0348",
-    "name": "DB lying rear lateral raise",
+    "name": "DB lying rear lat raise",
     "category": "shoulders",
     "body_part": "shoulders",
     "equipment": "dumbbell",
@@ -16587,7 +16587,7 @@
   },
   {
     "id": "0355",
-    "name": "DB one arm lateral raise",
+    "name": "DB one arm lat raise",
     "category": "shoulders",
     "body_part": "shoulders",
     "equipment": "dumbbell",
@@ -16615,7 +16615,7 @@
   },
   {
     "id": "0356",
-    "name": "DB one arm lateral raise with support",
+    "name": "DB one arm lat raise with support",
     "category": "shoulders",
     "body_part": "shoulders",
     "equipment": "dumbbell",
@@ -17917,7 +17917,7 @@
   },
   {
     "id": "0380",
-    "name": "DB rear lateral raise",
+    "name": "DB rear lat raise",
     "category": "shoulders",
     "body_part": "shoulders",
     "equipment": "dumbbell",
@@ -17944,7 +17944,7 @@
   },
   {
     "id": "0379",
-    "name": "DB rear lateral raise (support head)",
+    "name": "DB rear lat raise (support head)",
     "category": "shoulders",
     "body_part": "shoulders",
     "equipment": "dumbbell",
@@ -18479,7 +18479,7 @@
   },
   {
     "id": "2317",
-    "name": "DB seated bent arm lateral raise",
+    "name": "DB seated bent arm lat raise",
     "category": "shoulders",
     "body_part": "shoulders",
     "equipment": "dumbbell",
@@ -18811,7 +18811,7 @@
   },
   {
     "id": "0396",
-    "name": "DB seated lateral raise",
+    "name": "DB seated lat raise",
     "category": "shoulders",
     "body_part": "shoulders",
     "equipment": "dumbbell",
@@ -18838,7 +18838,7 @@
   },
   {
     "id": "0395",
-    "name": "DB seated lateral raise v. 2",
+    "name": "DB seated lat raise v. 2",
     "category": "shoulders",
     "body_part": "shoulders",
     "equipment": "dumbbell",
@@ -25702,7 +25702,7 @@
   },
   {
     "id": "3237",
-    "name": "landmine lateral raise",
+    "name": "landmine lat raise",
     "category": "shoulders",
     "body_part": "shoulders",
     "equipment": "barbell",
@@ -26542,7 +26542,7 @@
   },
   {
     "id": "0584",
-    "name": "lever lateral raise",
+    "name": "lever lat raise",
     "category": "shoulders",
     "body_part": "shoulders",
     "equipment": "leverage machine",
@@ -26740,7 +26740,7 @@
   },
   {
     "id": "1356",
-    "name": "lever one arm lateral high row",
+    "name": "lever one arm lat high row",
     "category": "back",
     "body_part": "back",
     "equipment": "leverage machine",
@@ -26768,7 +26768,7 @@
   },
   {
     "id": "1347",
-    "name": "lever one arm lateral wide pulldown",
+    "name": "lever one arm lat wide pulldown",
     "category": "back",
     "body_part": "back",
     "equipment": "leverage machine",
@@ -26935,7 +26935,7 @@
   },
   {
     "id": "2736",
-    "name": "lever reverse grip lateral pulldown",
+    "name": "lever reverse grip lat pulldown",
     "category": "back",
     "body_part": "back",
     "equipment": "leverage machine",
@@ -34467,7 +34467,7 @@
   },
   {
     "id": "0794",
-    "name": "standing lateral stretch",
+    "name": "standing lat stretch",
     "category": "back",
     "body_part": "back",
     "equipment": "body weight",
