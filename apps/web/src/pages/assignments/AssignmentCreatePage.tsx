@@ -1,31 +1,38 @@
 import { getSupabaseClient } from '@gym-pilot/shared'
 import { TableNames } from '@gym-pilot/shared/src/dataServices/tableNames'
+import type { Plan } from '@gym-pilot/types'
 import { useEffect, useMemo, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { Button } from '../../components/ui/Button'
 import { PageCard } from '../../components/PageCard'
 import { Heading1, Paragraph } from '../../components/Typography'
 import { BackLink } from '../../components/ui/BackLink'
-import { PageLayout } from '../../layouts/PageLayout'
+import { Button } from '../../components/ui/Button'
 import { StatusMessageNotification } from '../../components/ui/StatusMessageNotification'
 import { createAssignmentFromPlan } from '../../features/assignments/domain/assignmentCreation'
-import type { Plan } from '@gym-pilot/types'
+import {
+  buildAssignmentUserOptions,
+  type AssignmentUserOption,
+} from '../../features/assignments/domain/assignmentUserOptions'
+import { PageLayout } from '../../layouts/PageLayout'
 
 export function AssignmentCreatePage() {
   const navigate = useNavigate()
   const [plans, setPlans] = useState<Plan[]>([])
+  const [userOptions, setUserOptions] = useState<AssignmentUserOption[]>([])
   const [selectedPlanId, setSelectedPlanId] = useState('')
   const [selectedUserId, setSelectedUserId] = useState('')
   const [assignmentName, setAssignmentName] = useState('')
   const [description, setDescription] = useState('')
   const [goal, setGoal] = useState('')
   const [notes, setNotes] = useState('')
+  const [additionalItemsText, setAdditionalItemsText] = useState('')
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
   const [submitting, setSubmitting] = useState(false)
 
   useEffect(() => {
     void loadPlans()
+    void loadUserOptions()
   }, [])
 
   async function loadPlans() {
@@ -63,6 +70,36 @@ export function AssignmentCreatePage() {
       setSelectedPlanId(planList[0].id)
     }
     setLoading(false)
+  }
+
+  async function loadUserOptions() {
+    const client = getSupabaseClient()
+    if (!client) {
+      setError('Supabase client is not available.')
+      return
+    }
+
+    const { data: profileRows, error: profileError } = await client
+      .from(TableNames.Profile)
+      .select('user_id, friendly_name')
+
+    if (profileError) {
+      setError(profileError.message || 'Could not load assignable users.')
+      return
+    }
+
+    const { data: authData, error: authError } = await client.auth.getUser()
+    const fallbackUserId =
+      authError || !authData?.user ? null : authData.user.id
+    const nextUserOptions = buildAssignmentUserOptions(
+      profileRows ?? [],
+      fallbackUserId,
+    )
+
+    setUserOptions(nextUserOptions)
+    if (!selectedUserId && nextUserOptions.length > 0) {
+      setSelectedUserId(nextUserOptions[0].id)
+    }
   }
 
   const selectedPlan = useMemo(
@@ -110,6 +147,7 @@ export function AssignmentCreatePage() {
           description: description.trim() || null,
           goal: goal.trim() || null,
           notes: notes.trim() || null,
+          additionalItemsText: additionalItemsText.trim() || null,
         },
         client,
       )
@@ -117,8 +155,15 @@ export function AssignmentCreatePage() {
       if (createdAssignment.id) {
         navigate('/workout-plans')
       }
-    } catch (err: any) {
-      setError(err.message || 'Failed to create assignment.')
+    } catch (err: unknown) {
+      const message =
+        err instanceof Error
+          ? err.message
+          : typeof err === 'string'
+            ? err
+            : 'Failed to create assignment.'
+
+      setError(message || 'Failed to create assignment.')
     } finally {
       setSubmitting(false)
     }
@@ -160,14 +205,20 @@ export function AssignmentCreatePage() {
             <label className="block text-sm font-medium text-slate-700">
               User
             </label>
-            <input
+            <select
               value={selectedUserId}
               onChange={(event) => setSelectedUserId(event.target.value)}
               className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm"
-              placeholder="User ID"
-            />
+            >
+              <option value="">Select a user</option>
+              {userOptions.map((option) => (
+                <option key={option.id} value={option.id}>
+                  {option.label}
+                </option>
+              ))}
+            </select>
             <p className="mt-2 text-xs text-slate-500">
-              Enter the target user id for this assignment.
+              Choose the target user from the available profile records.
             </p>
           </div>
 
@@ -205,6 +256,22 @@ export function AssignmentCreatePage() {
               className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm"
               placeholder="Assignment goal"
             />
+          </div>
+
+          <div>
+            <label className="block text-sm font-medium text-slate-700">
+              Additional items
+            </label>
+            <textarea
+              value={additionalItemsText}
+              onChange={(event) => setAdditionalItemsText(event.target.value)}
+              className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm"
+              rows={4}
+              placeholder="Add extra exercises or items, one per line"
+            />
+            <p className="mt-2 text-xs text-slate-500">
+              Enter one item per line to create extra assignment exercises.
+            </p>
           </div>
 
           <div>

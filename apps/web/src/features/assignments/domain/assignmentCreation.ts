@@ -1,5 +1,6 @@
-import type { Assignment, Plan } from '@gym-pilot/types'
+import { TableNames } from '@gym-pilot/shared/src/dataServices/tableNames'
 import { createUUID } from '@gym-pilot/shared/src/utils'
+import type { Assignment, Plan } from '@gym-pilot/types'
 
 export type AssignmentCreatePayload = {
   assignment: {
@@ -50,6 +51,23 @@ export type AssignmentCreateInput = {
   description?: string | null
   goal?: string | null
   notes?: string | null
+  additionalItemsText?: string | null
+}
+
+function parseAdditionalItems(input?: string | null): string[] {
+  return (input ?? '')
+    .split(/\r?\n/)
+    .map((item) => item.trim())
+    .filter(Boolean)
+}
+
+function slugifyAdditionalItem(item: string, index: number): string {
+  const normalized = item
+    .toLowerCase()
+    .replace(/[^a-z0-9]+/g, '-')
+    .replace(/^-+|-+$/g, '')
+
+  return normalized || `additional-item-${index + 1}`
 }
 
 export function buildAssignmentCreatePayload(
@@ -58,18 +76,36 @@ export function buildAssignmentCreatePayload(
   const now = new Date().toISOString()
   const assignmentId = createUUID()
 
-  const sessions = (input.plan.planSessions ?? []).map((session, index) => ({
-    id: createUUID(),
-    assignment_id: assignmentId,
-    name: session.name?.trim() || session.title?.trim() || `Day ${index + 1}`,
-    position: session.position ?? index + 1,
-    goal: input.goal ?? null,
-    notes: input.notes ?? null,
-    created_at: now,
-    updated_at: now,
-  }))
+  const planSessions = (input.plan.planSessions ?? []).map(
+    (session, index) => ({
+      id: createUUID(),
+      assignment_id: assignmentId,
+      name: session.name?.trim() || session.title?.trim() || `Day ${index + 1}`,
+      position: session.position ?? index + 1,
+      goal: input.goal ?? null,
+      notes: input.notes ?? null,
+      created_at: now,
+      updated_at: now,
+    }),
+  )
 
-  const exercises = sessions.flatMap((session, sessionIndex) => {
+  const additionalItems = parseAdditionalItems(input.additionalItemsText)
+  const sessions = [...planSessions]
+
+  if (additionalItems.length > 0) {
+    sessions.push({
+      id: createUUID(),
+      assignment_id: assignmentId,
+      name: 'Additional items',
+      position: sessions.length + 1,
+      goal: input.goal ?? null,
+      notes: input.notes ?? null,
+      created_at: now,
+      updated_at: now,
+    })
+  }
+
+  const exercises = planSessions.flatMap((session, sessionIndex) => {
     const sourceSession = (input.plan.planSessions ?? [])[sessionIndex]
 
     return (sourceSession?.planItems ?? []).map((exercise, exerciseIndex) => ({
@@ -87,6 +123,29 @@ export function buildAssignmentCreatePayload(
       updated_at: now,
     }))
   })
+
+  if (additionalItems.length > 0) {
+    const additionalSession = sessions[sessions.length - 1]
+
+    if (additionalSession) {
+      exercises.push(
+        ...additionalItems.map((item, index) => ({
+          id: createUUID(),
+          assignment_id: assignmentId,
+          assignment_session_id: additionalSession.id,
+          exercise_id: slugifyAdditionalItem(item, index),
+          exercise_name: item,
+          position: index + 1,
+          reps: null,
+          weight: null,
+          notes: null,
+          goal: input.goal ?? null,
+          created_at: now,
+          updated_at: now,
+        })),
+      )
+    }
+  }
 
   return {
     assignment: {
@@ -117,13 +176,18 @@ export async function createAssignmentFromPlan(
   const payload = buildAssignmentCreatePayload(input)
 
   const { data: assignmentData, error: assignmentError } = await client
-    .from('workout_assignment')
+    .from(TableNames.WorkoutAssignment)
     .insert(payload.assignment)
     .select('id')
     .maybeSingle()
 
   if (assignmentError || !assignmentData?.id) {
-    throw assignmentError ?? new Error('Failed to create assignment')
+    const message =
+      assignmentError?.message ||
+      (assignmentError ? String(assignmentError) : null) ||
+      'Failed to create assignment'
+
+    throw new Error(message)
   }
 
   const sessionRows = payload.sessions.map((session) => ({
@@ -133,11 +197,16 @@ export async function createAssignmentFromPlan(
 
   if (sessionRows.length > 0) {
     const { error: sessionError } = await client
-      .from('workout_assignment_session')
+      .from(TableNames.WorkoutAssignmentSession)
       .insert(sessionRows)
 
     if (sessionError) {
-      throw sessionError
+      const message =
+        sessionError?.message ||
+        (sessionError ? String(sessionError) : null) ||
+        'Failed to create assignment sessions'
+
+      throw new Error(message)
     }
   }
 
@@ -148,11 +217,16 @@ export async function createAssignmentFromPlan(
 
   if (exerciseRows.length > 0) {
     const { error: exerciseError } = await client
-      .from('workout_assignment_exercise')
+      .from(TableNames.WorkoutAssignmentExercise)
       .insert(exerciseRows)
 
     if (exerciseError) {
-      throw exerciseError
+      const message =
+        exerciseError?.message ||
+        (exerciseError ? String(exerciseError) : null) ||
+        'Failed to create assignment exercises'
+
+      throw new Error(message)
     }
   }
 

@@ -42,4 +42,25 @@ describe('buildAssignmentCreatePayload', () => {
     expect(payload.exercises).toHaveLength(1)
     expect(payload.exercises[0]?.exercise_id).toBe('bench-press')
   })
+
+  it('adds user-entered additional items as extra assignment exercises', () => {
+    const payload = buildAssignmentCreatePayload({
+      plan: {
+        id: 'plan-1',
+        planName: 'Strength plan',
+        planSessions: [],
+      },
+      assignmentName: 'Strength plan - Alex',
+      creatorUserId: 'trainer-1',
+      assigneeUserId: 'client-1',
+      additionalItemsText: 'Pull-ups\nDips',
+    })
+
+    expect(payload.sessions).toHaveLength(1)
+    expect(payload.sessions[0]?.name).toBe('Additional items')
+    expect(payload.exercises).toHaveLength(2)
+    expect(payload.exercises.map((exercise) => exercise.exercise_name)).toEqual(
+      ['Pull-ups', 'Dips'],
+    )
+  })
 })
