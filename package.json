@@ -26,6 +26,6 @@
     "dexie": "^4.4.4"
   },
   "devDependencies": {
-    "knip": "^6.27.0"
+    "knip": "^6.31.0"
   }
 }
