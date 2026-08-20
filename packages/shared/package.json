@@ -6,7 +6,7 @@
   "type": "module",
   "dependencies": {
     "@gym-pilot/types": "1.0.0",
-    "@supabase/supabase-js": "^2.49.1",
+    "@supabase/supabase-js": "^2.111.0",
     "zod": "^4.4.3"
   }
 }
