@@ -1,6 +1,14 @@
 import type { Exercise } from '@gym-pilot/shared'
-import { useState } from 'react'
-import quickPickExercises from '../../constants/quickPickExercises.json' // This is fine, it's data
+import { exercises, exercisesSchema } from '@gym-pilot/shared'
+import { useEffect, useMemo, useState } from 'react'
+import quickPickExercises from '../../constants/quickPickExercises.json'
+import {
+  appendRecentExerciseIds,
+  readRecentExerciseIds,
+  resolveFavoriteExerciseIds,
+  saveRecentExerciseIds,
+} from '../../features/exercises/domain/exercisePickerStorage'
+import { useFavouritesFeature } from '../../features/favourites/hooks/useFavouritesFeature'
 import { formatLabel } from '../../utils/formatUtils'
 import { Button } from '../ui/Button'
 import { DecorativeIcon } from '../ui/DecorativeIcon'
@@ -12,23 +20,90 @@ type ExerciseSearchMultiPickerProps = {
   onCancel: () => void
 }
 
+function getExerciseLookup(exerciseList: Exercise[]) {
+  return new Map(exerciseList.map((exercise) => [exercise.id, exercise]))
+}
+
 export function ExerciseMultiPicker({
   isOpen,
   onSelectExercises,
   onCancel,
 }: ExerciseSearchMultiPickerProps) {
   const [selectedExercises, setSelectedExercises] = useState<Exercise[]>([])
+  const [activeTab, setActiveTab] = useState<
+    'recent' | 'favourites' | 'quick-picks'
+  >('recent')
+  const [expandedSections, setExpandedSections] = useState<{
+    recent: boolean
+    favourites: boolean
+  }>({
+    recent: true,
+    favourites: true,
+  })
+  const [recentExerciseIds, setRecentExerciseIds] = useState<string[]>(() =>
+    typeof window === 'undefined'
+      ? []
+      : readRecentExerciseIds(window.localStorage),
+  )
+  const { favorites } = useFavouritesFeature()
+
+  const exerciseList = useMemo(() => exercisesSchema.parse(exercises), [])
+  const exerciseLookup = useMemo(
+    () => getExerciseLookup(exerciseList),
+    [exerciseList],
+  )
+
+  const favoriteExerciseIds = useMemo(
+    () => resolveFavoriteExerciseIds(exerciseList, favorites),
+    [exerciseList, favorites],
+  )
+
+  const recentExercises = useMemo(
+    () =>
+      recentExerciseIds
+        .map((exerciseId) => exerciseLookup.get(exerciseId))
+        .filter((exercise): exercise is Exercise => Boolean(exercise)),
+    [exerciseLookup, recentExerciseIds],
+  )
+
+  const favoriteExercises = useMemo(
+    () =>
+      favoriteExerciseIds
+        .map((exerciseId) => exerciseLookup.get(exerciseId))
+        .filter((exercise): exercise is Exercise => Boolean(exercise)),
+    [exerciseLookup, favoriteExerciseIds],
+  )
+
+  useEffect(() => {
+    if (typeof window !== 'undefined') {
+      saveRecentExerciseIds(recentExerciseIds, window.localStorage)
+    }
+  }, [recentExerciseIds])
 
   const handleToggleExercise = (exercise: Exercise) => {
+    const alreadySelected = selectedExercises.some((e) => e.id === exercise.id)
+
     setSelectedExercises((prev) =>
-      prev.some((e) => e.id === exercise.id)
+      alreadySelected
         ? prev.filter((e) => e.id !== exercise.id)
         : [...prev, exercise],
     )
+
+    if (!alreadySelected) {
+      setRecentExerciseIds((current) =>
+        appendRecentExerciseIds(current, [exercise.id]),
+      )
+    }
   }
 
   const handleSelectExercises = () => {
     onSelectExercises(selectedExercises)
+    setRecentExerciseIds((current) =>
+      appendRecentExerciseIds(
+        current,
+        selectedExercises.map((exercise) => exercise.id),
+      ),
+    )
     setSelectedExercises([])
     onCancel()
   }
@@ -36,6 +111,65 @@ export function ExerciseMultiPicker({
   const handleCancel = () => {
     setSelectedExercises([])
     onCancel()
+  }
+
+  const toggleSection = (key: keyof typeof expandedSections) => {
+    setExpandedSections((current) => ({
+      ...current,
+      [key]: !current[key],
+    }))
+  }
+
+  const renderQuickPickGroup = (
+    label: string,
+    groupExercises: Exercise[],
+    key: keyof typeof expandedSections,
+    maxItems = 6,
+  ) => {
+    if (groupExercises.length === 0) {
+      return null
+    }
+
+    const isExpanded = expandedSections[key]
+    const visibleExercises = isExpanded
+      ? groupExercises
+      : groupExercises.slice(0, maxItems)
+    const canExpand = groupExercises.length > maxItems
+
+    return (
+      <div className="border-b border-slate-200 p-4 last:border-b-0">
+        <div className="mb-2 flex items-center justify-between gap-3">
+          <div className="text-xs font-semibold uppercase tracking-wide text-slate-500">
+            {label}
+          </div>
+          {canExpand && (
+            <button
+              type="button"
+              className="text-xs font-medium text-blue-600 hover:text-blue-700"
+              onClick={() => toggleSection(key)}
+            >
+              {isExpanded ? 'Show less' : 'Show more'}
+            </button>
+          )}
+        </div>
+        <div className="flex flex-wrap gap-2">
+          {visibleExercises.map((exercise) => (
+            <Button
+              key={exercise.id}
+              tone={
+                selectedExercises.some((e) => e.id === exercise.id)
+                  ? 'blue'
+                  : 'default'
+              }
+              className="px-4 py-2 text-sm"
+              onClick={() => handleToggleExercise(exercise)}
+            >
+              {formatLabel(exercise.name)}
+            </Button>
+          ))}
+        </div>
+      </div>
+    )
   }
 
   return (
@@ -55,7 +189,7 @@ export function ExerciseMultiPicker({
                   {formatLabel(exercise.name)}
                   <button
                     type="button"
-                    className="flex h-5 w-5 items-center justify-center rounded-full text-blue-500 hover:bg-blue-200 hover:text-blue-700" // Increased tap target area
+                    className="flex h-5 w-5 items-center justify-center rounded-full text-blue-500 hover:bg-blue-200 hover:text-blue-700"
                     onClick={() => handleToggleExercise(exercise)}
                   >
                     x
@@ -67,28 +201,64 @@ export function ExerciseMultiPicker({
                 tone="emerald"
                 onClick={handleSelectExercises}
                 disabled={selectedExercises.length === 0}
-                className="w-full" // Make button full width for better mobile usability
+                className="w-full"
               >
                 Add {selectedExercises.length} exercise
                 {selectedExercises.length === 1 ? '' : 's'}
               </Button>
             </div>
           )}
-          <div className="flex flex-wrap gap-2 border-b border-slate-200 p-4">
-            {(quickPickExercises as Exercise[]).map((category) => (
-              <Button
-                key={category.id}
-                tone={
-                  selectedExercises.some((e) => e.id === category.id)
-                    ? 'blue'
-                    : 'default'
-                }
-                className="px-4 py-2 text-sm" // Increased padding for better tapability on mobile
-                onClick={() => handleToggleExercise(category)}
-              >
-                {category.name}
-              </Button>
-            ))}
+
+          <div className="border-b border-slate-200">
+            <div className="flex gap-1 border-b border-slate-200 bg-slate-50 px-2 pt-2">
+              {[
+                { id: 'recent', label: 'Recent' },
+                { id: 'favourites', label: 'Favourites' },
+                { id: 'quick-picks', label: 'Quick picks' },
+              ].map((tab) => (
+                <button
+                  key={tab.id}
+                  type="button"
+                  className={`flex-none whitespace-nowrap rounded-t-md px-2 py-2 text-xs font-medium transition sm:text-sm ${
+                    activeTab === tab.id
+                      ? 'bg-white text-blue-700 shadow-sm ring-1 ring-slate-200'
+                      : 'text-slate-600 hover:text-slate-800'
+                  }`}
+                  onClick={() => setActiveTab(tab.id as typeof activeTab)}
+                >
+                  {tab.label}
+                </button>
+              ))}
+            </div>
+
+            {activeTab === 'recent' &&
+              renderQuickPickGroup('Recent', recentExercises, 'recent')}
+            {activeTab === 'favourites' &&
+              renderQuickPickGroup(
+                'Favourites',
+                favoriteExercises,
+                'favourites',
+              )}
+            {activeTab === 'quick-picks' && (
+              <div className="p-4">
+                <div className="flex flex-wrap gap-2">
+                  {(quickPickExercises as Exercise[]).map((category) => (
+                    <Button
+                      key={category.id}
+                      tone={
+                        selectedExercises.some((e) => e.id === category.id)
+                          ? 'blue'
+                          : 'default'
+                      }
+                      className="px-4 py-2 text-sm"
+                      onClick={() => handleToggleExercise(category)}
+                    >
+                      {category.name}
+                    </Button>
+                  ))}
+                </div>
+              </div>
+            )}
           </div>
         </div>
       }
@@ -98,7 +268,7 @@ export function ExerciseMultiPicker({
             tone="emerald"
             onClick={handleSelectExercises}
             disabled={selectedExercises.length === 0}
-            className="w-full" // Make button full width for better mobile usability
+            className="w-full"
           >
             Add {selectedExercises.length} exercise
             {selectedExercises.length === 1 ? '' : 's'}
@@ -107,39 +277,29 @@ export function ExerciseMultiPicker({
       }
     >
       {(suggestions, renderSuggestion, triggerPreview) => (
-        // Destructure triggerPreview from ExercisePickerBase's children prop
         <>
           {suggestions.map((exercise: Exercise) =>
-            // Explicitly type exercise
             renderSuggestion(exercise, (exercise: Exercise) => (
-              // customRender now expects 1 arg
-              // customRender now expects 1 arg
               <div
-                className="flex items-center w-full cursor-pointer" // Entire row is clickable for checkbox
-                onClick={() => handleToggleExercise(exercise)} // Toggle checkbox on row click
+                className="flex w-full cursor-pointer items-center"
+                onClick={() => handleToggleExercise(exercise)}
               >
-                {/* Checkbox itself: flex-shrink-0 so it doesn't take extra space */}
-                <label
-                  className="flex items-center flex-shrink-0 py-1 pr-2" // flex-shrink-0 to keep it compact
-                >
+                <label className="flex shrink-0 items-center py-1 pr-2">
                   <input
                     type="checkbox"
                     checked={selectedExercises.some(
                       (e) => e.id === exercise.id,
                     )}
                     onChange={(e) => {
-                      e.stopPropagation() // Prevent event from bubbling to the parent div (which also toggles)
-                      // The parent div's onClick already handles handleToggleExercise(exercise);
+                      e.stopPropagation()
                     }}
-                    className="h-5 w-5 cursor-pointer" // Increased size and added cursor
+                    className="h-5 w-5 cursor-pointer"
                   />
                 </label>
 
-                {/* Exercise name area: This span will contain the icon and name, and trigger preview.
-                    It takes flex-1 to occupy the remaining space and is underlined. */}
                 <span
-                  className="flex-1 cursor-pointer font-medium text-slate-800 hover:text-blue-500 flex items-center py-1 pl-2 ml-2 underline" // Added underline, flex-1
-                  onClick={() => triggerPreview(exercise)} // Use triggerPreview here
+                  className="ml-2 flex flex-1 items-center py-1 pl-2 font-medium text-slate-800 underline hover:text-blue-500"
+                  onClick={() => triggerPreview(exercise)}
                 >
                   <DecorativeIcon
                     icon="dumbbell"
