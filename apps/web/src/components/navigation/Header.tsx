@@ -1,4 +1,4 @@
-import { useEffect, useRef } from 'react'
+import { useCallback, useEffect, useRef } from 'react'
 import { NavLink } from 'react-router-dom'
 import type { NavigationMenuListItem } from '../../utils/navigationUtils'
 import { getToneClass } from '../toneClasses'
@@ -57,19 +57,22 @@ export function Header({
     onAuthClick()
   }
 
-  const closeMobileMenu = (restoreFocus = false) => {
-    if (!mobileMenuOpen) {
-      return
-    }
+  const closeMobileMenu = useCallback(
+    (restoreFocus = false) => {
+      if (!mobileMenuOpen) {
+        return
+      }
 
-    onToggleMobileMenu()
+      onToggleMobileMenu()
 
-    if (restoreFocus) {
-      document
-        .querySelector<HTMLButtonElement>('button[data-mobile-menu-toggle]')
-        ?.focus()
-    }
-  }
+      if (restoreFocus) {
+        document
+          .querySelector<HTMLButtonElement>('button[data-mobile-menu-toggle]')
+          ?.focus()
+      }
+    },
+    [mobileMenuOpen, onToggleMobileMenu],
+  )
 
   const menuLinkClassName = navigationItemBaseClassName
 
@@ -108,7 +111,7 @@ export function Header({
     return () => {
       document.removeEventListener('click', handleDocumentClick, true)
     }
-  }, [mobileMenuOpen, onToggleMobileMenu])
+  }, [closeMobileMenu, mobileMenuOpen, onToggleMobileMenu])
 
   useEffect(() => {
     if (!mobileMenuOpen) {
@@ -123,7 +126,7 @@ export function Header({
 
     document.addEventListener('keydown', handleEscape)
     return () => document.removeEventListener('keydown', handleEscape)
-  }, [mobileMenuOpen, onToggleMobileMenu])
+  }, [closeMobileMenu, mobileMenuOpen])
 
   return (
     <nav className="sticky top-0 z-30 h-16 w-full max-w-full border-b border-slate-200 bg-white text-slate-900 shadow-sm transition-colors dark:border-slate-700 dark:bg-slate-950 dark:text-slate-100">

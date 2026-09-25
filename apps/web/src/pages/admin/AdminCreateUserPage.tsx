@@ -37,7 +37,7 @@ function normalizeAdminEmail(email: string) {
   const trimmedEmail = email.trim().toLowerCase()
 
   if (!trimmedEmail) {
-    return 'user@gym-pilot.local'
+    return `user-${globalThis.crypto?.randomUUID?.() ?? Date.now()}@gym-pilot.local`
   }
 
   if (trimmedEmail.includes('@')) {

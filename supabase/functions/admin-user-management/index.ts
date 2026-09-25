@@ -141,6 +141,7 @@ async function handleCreateAuthUser(
   const { data, error } = await adminClient.auth.admin.createUser({
     email: payload.email,
     password: payload.password,
+    email_confirm: true,
     user_metadata: {
       password_change_required: Boolean(payload.passwordChangeRequired),
     },
