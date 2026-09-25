@@ -95,7 +95,7 @@
 | created_at        | string           | Creation timestamp              |
 | attribution       | string           | Source attribution              |
 
-### Favourite folder — gym_pilot_favourite_folder
+### Favourite folder — favourite_folder
 
 | Field      | Type   | Notes                 |
 | ---------- | ------ | --------------------- |
@@ -105,7 +105,7 @@
 | created_at | string | Creation timestamp    |
 | updated_at | string | Last update timestamp |
 
-### Favourite link — gym_pilot_favourite
+### Favourite link — favourite
 
 | Field      | Type           | Notes                     |
 | ---------- | -------------- | ------------------------- |
@@ -118,7 +118,7 @@
 | created_at | string         | Creation timestamp        |
 | updated_at | string         | Last update timestamp     |
 
-### Plan — gym_pilot_plan
+### Plan — workout_plan
 | Field      | Type   | Notes                       |
 | ---------- | ------ | --------------------------- |
 | id         | string | Primary key                 |
@@ -193,7 +193,7 @@
 | created_at       | string                                                     | Creation timestamp             |
 | updated_at       | string                                                     | Last update timestamp          |
 
-### Imported workout — gym_pilot_imported_workout
+### Imported workout — imported_workout
 
 | Field        | Type           | Notes |
 | ------------ | -------------- | ------------------------------------------------------------- |
@@ -291,10 +291,10 @@
 
 ## Storage model
 
-The app now has a local-first data layer based on Dexie and a query layer based on TanStack Query.
+The app uses a local-first data layer based on Dexie plus shared repository-style persistence helpers in `packages/shared`.
 
 - Dexie stores key/value records in IndexedDB.
-- TanStack Query is used for API-backed state and caching.
+- Shared persistence helpers coordinate local and Supabase-backed reads and writes for plans, assignments, favourites, and profile data.
 
 ## Supabase schema
 
@@ -307,14 +307,15 @@ The shared Supabase helpers in [packages/shared/src/gymPilotSupabase.ts](package
 | Area                    | Current call patterns                                                                                                                                                                                                                                                                                                                                                                                 | Tables / resources                                                                               |
 | ----------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------ |
 | Auth and session        | `client.auth.getSession()`, `client.auth.signInWithOAuth()`, `client.auth.signInWithPassword()`, `client.auth.signUp()`, `client.auth.resetPasswordForEmail()`, `client.auth.updateUser()`, `client.auth.signOut()`                                                                                                                                                                                   | Supabase Auth users and session state                                                            |
+| Admin auth management   | `client.functions.invoke('admin-user-management', ...)` for privileged create/list/get auth-user operations. This function validates the caller's admin role and uses the service-role key only on the server-side Edge Function.                                                                                                                                                                      | `auth.users`, `gym_pilot_user_role`, `gym_pilot_profile`                                         |
 | Profiles and settings   | `loadSupabaseProfileSnapshot()`, `saveSupabaseProfileName()`, `saveSupabaseApplicationName()`, `saveSupabaseGymBrand()`, `saveSupabaseGymName()`, `saveSupabaseProfileAccessSettings()`, `saveSupabaseProfileFlag()`, `saveSupabaseProfileLastLoggedIn()`, `loadSupabaseProfileTermsAcceptance()`, `saveSupabaseProfileTermsAcceptance()`, `loadSupabaseProfileRoles()`, `saveSupabaseProfileRoles()` | `gym_pilot_profile`, `gym_pilot_user_role` |
 | Key/value persistence   | `loadSupabaseJsonRecord()`, `saveSupabaseJsonRecord()`, `removeSupabaseJsonRecord()`                                                                                                                                                                                                                                                                                                                  | `gym_pilot_app_state` plus table-specific rows for plans, assignments, favourites, and app state |
-| Plans and assignments   | `select`, `insert`, `upsert`, `delete` against remote rows                                                                                                                                                                                                                                                                                                                                            | `gym_pilot_plan`, `assignment` |
-| Favourites and folders  | `select`, `insert`, `upsert`, `delete` against remote rows                                                                                                                                                                                                                                                                                                                                            | `gym_pilot_favourite_folder`, `gym_pilot_favourite`                                              |
+| Plans and assignments   | `select`, `insert`, `upsert`, `delete` against remote rows                                                                                                                                                                                                                                                                                                                                            | `workout_plan`, `workout_assignment`, `workout_assignment_session`, `workout_assignment_exercise` |
+| Favourites and folders  | `select`, `insert`, `upsert`, `delete` against remote rows                                                                                                                                                                                                                                                                                                                                            | `favourite_folder`, `favourite`                                                                  |
 | Activity logging        | `recordSupabaseUserActivity()` uses `insert` into `user_activity`; it skips inserts when the app is running on localhost-style hosts                                                                                                                                                                                                                                                        | `user_activity`                                                                        |
 | Session recording       | `saveTimetableAttendance()` inserts role-based session records with optional notes and a 1-5 rating for a session/class                                                                                                                                                                                                                                                                               | `user_workout`                                                                         |
 | Workout items           | `loadWorkoutItemsForSession()` and `saveWorkoutItemsForSession()` read/write ordered workout rows for a session                                                                                                                                                                                                                                                                                       | `gym_pilot_user_session_workout_item`                                                            |
-| Imported workouts       | Import pipeline and CSV/GPX/connected-service imports — `importWorkout()` and related helpers read/write imported workout rows                                                                                                                                                                                                                                                                        | `gym_pilot_imported_workout`                                                            |
+| Imported workouts       | Import pipeline and CSV/GPX/connected-service imports — `importWorkout()` and related helpers read/write imported workout rows                                                                                                                                                                                                                                                                        | `imported_workout`                                                                            |
 | Templates               | Create and reuse workout templates via `createWorkoutTemplate()`, `loadWorkoutTemplates()` and related helpers                                                                                                                                                                                                                                                                                         | `workout_template`, `workout_template_exercise`                                          |
 | Error and audit logging | `persistErrorLog()` and `persistAuditLog()` write to `error_log` and `audit_log` only when the matching app settings are enabled                                                                                                                                                                                                                                                  | `error_log`, `audit_log`                                                     |
 
@@ -325,13 +326,15 @@ erDiagram
     auth_users ||--o{ gym_pilot_app_state : owns
     auth_users ||--o{ gym_pilot_profile : owns
     auth_users ||--o{ gym_pilot_user_role : has
-    auth_users ||--o{ gym_pilot_favourite_folder : owns
-    auth_users ||--o{ gym_pilot_favourite : owns
-    auth_users ||--o{ gym_pilot_plan : owns
-    auth_users ||--o{ assignment : owns
+    auth_users ||--o{ favourite_folder : owns
+    auth_users ||--o{ favourite : owns
+    auth_users ||--o{ workout_plan : owns
+    auth_users ||--o{ workout_assignment : owns
     auth_users ||--o{ user_activity : records
     auth_users ||--o{ user_workout : records
-    gym_pilot_plan ||--o{ assignment : uses
+    workout_plan ||--o{ workout_assignment : uses
+    workout_assignment ||--o{ workout_assignment_session : contains
+    workout_assignment_session ||--o{ workout_assignment_exercise : contains
     user_workout ||--o{ gym_pilot_user_session_workout_item : contains
 
     gym_pilot_app_state {
@@ -371,7 +374,7 @@ erDiagram
         timestamptz updated_at
     }
 
-    gym_pilot_favourite_folder {
+    favourite_folder {
         uuid id
         uuid user_id
         text name
@@ -379,7 +382,7 @@ erDiagram
         timestamptz updated_at
     }
 
-    gym_pilot_favourite {
+    favourite {
         uuid id
         uuid user_id
         text path
@@ -409,24 +412,41 @@ erDiagram
         timestamptz updated_at
     }
 
-    gym_pilot_plan {
-        uuid id
-        uuid user_id
-        text plan_name
-        jsonb plan_sessions
-        timestamptz created_at
-        timestamptz updated_at
-    }
-
-    assignment {
+    workout_assignment {
         uuid id
         uuid user_id
         uuid plan_id
         text assignment_name
-        uuid assigned_user_id
-        text assigned_user_name
-        jsonb completed_exercises
-        jsonb plan_items
+        uuid assigned_to_user_id
+        text description
+        text goal
+        text notes
+        timestamptz created_at
+        timestamptz updated_at
+    }
+
+    workout_assignment_session {
+        uuid id
+        uuid assignment_id
+        text name
+        int position
+        text goal
+        text notes
+        timestamptz created_at
+        timestamptz updated_at
+    }
+
+    workout_assignment_exercise {
+        uuid id
+        uuid assignment_id
+        uuid assignment_session_id
+        text exercise_id
+        text exercise_name
+        int position
+        text reps
+        text weight
+        text notes
+        text goal
         timestamptz created_at
         timestamptz updated_at
     }
@@ -494,11 +514,11 @@ erDiagram
 - a shared app state table for user-scoped key/value persistence
 - a profile table for friendly names, gym brand/club metadata, optional user settings, and the terms-and-conditions acceptance state used by the welcome flow
 - a favourites table plus folders for saved exercise and link shortcuts
-- a plans table for plan templates
-- an assignments table for user-specific plan assignments
+- a plan table for workout plans plus normalized assignment/session/exercise tables for user-specific assignments
 - a dedicated workout-item table for session workout rows so workout data can be queried independently from the session metadata payload
 - row-level security policies for authenticated users
 - auth metadata can mark a user as requiring a password change on next sign-in
+- privileged admin auth-user operations are routed through a server-side Edge Function so the web build never needs a service-role key
 
 ### Client-side preference storage
 

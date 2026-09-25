@@ -1,14 +1,38 @@
+import { lazy } from 'react'
 import { Route, Navigate } from 'react-router-dom'
 import { RequireAuth } from '../auth/RequireAuth'
-import { AdminPage } from '../pages/admin/AdminPage'
-import { AdminUsersPage } from '../pages/admin/AdminUsersPage'
-import { AdminCreateUserPage } from '../pages/admin/AdminCreateUserPage'
-import { AdminUserProfilesPage } from '../pages/admin/AdminUserProfilesPage'
-import { AdminEditUserPage } from '../pages/admin/AdminEditUserPage'
-import { AdminUserActivityPage } from '../pages/admin/AdminUserActivityPage'
-import { AdminDatabasePage } from '../pages/admin/AdminDatabasePage'
-import { AdminAppSettingsPage } from '../pages/admin/AdminAppSettingsPage'
-import { AdminLogsPage } from '../pages/admin/AdminLogsPage'
+
+const AdminPage = lazy(async () => ({
+  default: (await import('../pages/admin/AdminPage')).AdminPage,
+}))
+const AdminUsersPage = lazy(async () => ({
+  default: (await import('../pages/admin/AdminUsersPage')).AdminUsersPage,
+}))
+const AdminCreateUserPage = lazy(async () => ({
+  default: (await import('../pages/admin/AdminCreateUserPage'))
+    .AdminCreateUserPage,
+}))
+const AdminUserProfilesPage = lazy(async () => ({
+  default: (await import('../pages/admin/AdminUserProfilesPage'))
+    .AdminUserProfilesPage,
+}))
+const AdminEditUserPage = lazy(async () => ({
+  default: (await import('../pages/admin/AdminEditUserPage')).AdminEditUserPage,
+}))
+const AdminUserActivityPage = lazy(async () => ({
+  default: (await import('../pages/admin/AdminUserActivityPage'))
+    .AdminUserActivityPage,
+}))
+const AdminDatabasePage = lazy(async () => ({
+  default: (await import('../pages/admin/AdminDatabasePage')).AdminDatabasePage,
+}))
+const AdminAppSettingsPage = lazy(async () => ({
+  default: (await import('../pages/admin/AdminAppSettingsPage'))
+    .AdminAppSettingsPage,
+}))
+const AdminLogsPage = lazy(async () => ({
+  default: (await import('../pages/admin/AdminLogsPage')).AdminLogsPage,
+}))
 
 export function createAdminRoutes() {
   return (

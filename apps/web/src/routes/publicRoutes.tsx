@@ -1,16 +1,31 @@
+import { lazy } from 'react'
 import { Route } from 'react-router-dom'
-import { DashboardPage } from '../pages/DashboardPage'
-import { ExercisePage } from '../pages/ExercisePage'
-import { FavouritesPage } from '../pages/FavouritesPage'
-import { HomePage } from '../pages/HomePage'
-import { NotFoundPage } from '../pages/errors/NotFoundPage'
-import { HelpPage } from '../pages/help/HelpPage'
-import InstallOnIOSPage from '../pages/help/InstallOnIOSPage'
+import type { AuthUser } from '../features/auth/domain/authTypes'
 import { createAdminRoutes } from './adminRoutes'
 import { createProtectedRoutes } from './protectedRoutes'
 
+const DashboardPage = lazy(async () => ({
+  default: (await import('../pages/DashboardPage')).DashboardPage,
+}))
+const ExercisePage = lazy(async () => ({
+  default: (await import('../pages/ExercisePage')).ExercisePage,
+}))
+const FavouritesPage = lazy(async () => ({
+  default: (await import('../pages/FavouritesPage')).FavouritesPage,
+}))
+const HomePage = lazy(async () => ({
+  default: (await import('../pages/HomePage')).HomePage,
+}))
+const NotFoundPage = lazy(async () => ({
+  default: (await import('../pages/errors/NotFoundPage')).NotFoundPage,
+}))
+const HelpPage = lazy(async () => ({
+  default: (await import('../pages/help/HelpPage')).HelpPage,
+}))
+const InstallOnIOSPage = lazy(() => import('../pages/help/InstallOnIOSPage'))
+
 interface PublicRoutesProps {
-  user: any
+  user: AuthUser | null
 }
 
 export function createPublicRoutes({ user }: PublicRoutesProps) {

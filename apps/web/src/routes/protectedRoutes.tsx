@@ -1,26 +1,77 @@
+import { lazy } from 'react'
 import { Route } from 'react-router-dom'
 import { RequireAuth } from '../auth/RequireAuth'
-import { AppleFitnessPage } from '../pages/appleFitness/AppleFitnessPage'
-import { LinkAppleWorkoutPage } from '../pages/appleFitness/LinkAppleWorkoutPage'
-import SpreadsheetImportConfirmPage from '../pages/appleFitness/SpreadsheetImportConfirmPage'
-import { SpreadsheetImportPage } from '../pages/appleFitness/SpreadsheetImportPage'
-import SpreadsheetImportPreviewDetailPage from '../pages/appleFitness/SpreadsheetImportPreviewDetailPage'
-import { SpreadsheetImportPreviewPage } from '../pages/appleFitness/SpreadsheetImportPreviewPage'
-import { AssignmentCreatePage } from '../pages/assignments/AssignmentCreatePage'
-import { WorkoutAssignmentsPage } from '../pages/assignments/WorkoutAssignmentsPage'
-import HelpPage from '../pages/HelpPage'
-import { HomePage } from '../pages/HomePage'
-import { IconShowcasePage } from '../pages/IconShowcasePage'
-import { ImportedWorkoutAnalysisPage } from '../pages/ImportedWorkoutAnalysisPage'
-import { RecordSessionPage } from '../pages/RecordSessionPage'
-import { SessionEditPage } from '../pages/SessionEditPage'
-import { SessionHistoryPage } from '../pages/SessionHistoryPage'
-import { TimetablePage } from '../pages/TimetablePage'
-import WorkoutPlanEditPage from '../pages/workoutPlans/WorkoutPlanEditPage'
-import { WorkoutPlansPage } from '../pages/workoutPlans/WorkoutPlansPage'
-import WorkoutTemplateCreatePage from '../pages/workoutTemplates/WorkoutTemplateCreatePage'
-import WorkoutTemplateEditPage from '../pages/workoutTemplates/WorkoutTemplateEditPage'
-import { WorkoutTemplatesPage } from '../pages/workoutTemplates/WorkoutTemplatesPage'
+
+const AppleFitnessPage = lazy(async () => ({
+  default: (await import('../pages/appleFitness/AppleFitnessPage'))
+    .AppleFitnessPage,
+}))
+const LinkAppleWorkoutPage = lazy(async () => ({
+  default: (await import('../pages/appleFitness/LinkAppleWorkoutPage'))
+    .LinkAppleWorkoutPage,
+}))
+const SpreadsheetImportConfirmPage = lazy(
+  () => import('../pages/appleFitness/SpreadsheetImportConfirmPage'),
+)
+const SpreadsheetImportPage = lazy(async () => ({
+  default: (await import('../pages/appleFitness/SpreadsheetImportPage'))
+    .SpreadsheetImportPage,
+}))
+const SpreadsheetImportPreviewDetailPage = lazy(
+  () => import('../pages/appleFitness/SpreadsheetImportPreviewDetailPage'),
+)
+const SpreadsheetImportPreviewPage = lazy(async () => ({
+  default: (await import('../pages/appleFitness/SpreadsheetImportPreviewPage'))
+    .SpreadsheetImportPreviewPage,
+}))
+const AssignmentCreatePage = lazy(async () => ({
+  default: (await import('../pages/assignments/AssignmentCreatePage'))
+    .AssignmentCreatePage,
+}))
+const WorkoutAssignmentsPage = lazy(async () => ({
+  default: (await import('../pages/assignments/WorkoutAssignmentsPage'))
+    .WorkoutAssignmentsPage,
+}))
+const HelpPage = lazy(() => import('../pages/HelpPage'))
+const HomePage = lazy(async () => ({
+  default: (await import('../pages/HomePage')).HomePage,
+}))
+const IconShowcasePage = lazy(async () => ({
+  default: (await import('../pages/IconShowcasePage')).IconShowcasePage,
+}))
+const ImportedWorkoutAnalysisPage = lazy(async () => ({
+  default: (await import('../pages/ImportedWorkoutAnalysisPage'))
+    .ImportedWorkoutAnalysisPage,
+}))
+const RecordSessionPage = lazy(async () => ({
+  default: (await import('../pages/RecordSessionPage')).RecordSessionPage,
+}))
+const SessionEditPage = lazy(async () => ({
+  default: (await import('../pages/SessionEditPage')).SessionEditPage,
+}))
+const SessionHistoryPage = lazy(async () => ({
+  default: (await import('../pages/SessionHistoryPage')).SessionHistoryPage,
+}))
+const TimetablePage = lazy(async () => ({
+  default: (await import('../pages/TimetablePage')).TimetablePage,
+}))
+const WorkoutPlanEditPage = lazy(
+  () => import('../pages/workoutPlans/WorkoutPlanEditPage'),
+)
+const WorkoutPlansPage = lazy(async () => ({
+  default: (await import('../pages/workoutPlans/WorkoutPlansPage'))
+    .WorkoutPlansPage,
+}))
+const WorkoutTemplateCreatePage = lazy(
+  () => import('../pages/workoutTemplates/WorkoutTemplateCreatePage'),
+)
+const WorkoutTemplateEditPage = lazy(
+  () => import('../pages/workoutTemplates/WorkoutTemplateEditPage'),
+)
+const WorkoutTemplatesPage = lazy(async () => ({
+  default: (await import('../pages/workoutTemplates/WorkoutTemplatesPage'))
+    .WorkoutTemplatesPage,
+}))
 
 export function createProtectedRoutes() {
   return (

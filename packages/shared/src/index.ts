@@ -1,11 +1,13 @@
 export * from "./appSettings";
 export * from "./appSettingsService";
+export * from "./adminAuth";
 export * from "./data";
 export * from "./dataServices/importedWorkoutsDataService";
 export * from "./dataServices/types";
 export * from "./dataServices/userSessionDataService";
 export * from "./dataServices/userSessionWorkItemDataService";
 export * from "./dataServices/workoutAssignmentDataService";
+export * from "./exerciseData";
 export * from "./exerciseSchema";
 export {
   bookSession,
@@ -64,9 +66,7 @@ export * from "./storage";
 export {
   changeSupabasePassword,
   ensureAuthenticatedSupabaseSession,
-  getSupabaseAdminClient,
   getSupabaseClient,
-  listSupabaseAuthUsers,
   resetSupabasePassword,
   signInWithPassword,
   signOutFromSupabase,

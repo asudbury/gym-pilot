@@ -57,6 +57,20 @@ export function Header({
     onAuthClick()
   }
 
+  const closeMobileMenu = (restoreFocus = false) => {
+    if (!mobileMenuOpen) {
+      return
+    }
+
+    onToggleMobileMenu()
+
+    if (restoreFocus) {
+      document
+        .querySelector<HTMLButtonElement>('button[data-mobile-menu-toggle]')
+        ?.focus()
+    }
+  }
+
   const menuLinkClassName = navigationItemBaseClassName
 
   useEffect(() => {
@@ -86,7 +100,7 @@ export function Header({
         return
       }
 
-      onToggleMobileMenu()
+      closeMobileMenu(true)
     }
 
     document.addEventListener('click', handleDocumentClick, true)
@@ -95,6 +109,21 @@ export function Header({
       document.removeEventListener('click', handleDocumentClick, true)
     }
   }, [mobileMenuOpen, onToggleMobileMenu])
+
+  useEffect(() => {
+    if (!mobileMenuOpen) {
+      return
+    }
+
+    const handleEscape = (event: KeyboardEvent) => {
+      if (event.key === 'Escape') {
+        closeMobileMenu(true)
+      }
+    }
+
+    document.addEventListener('keydown', handleEscape)
+    return () => document.removeEventListener('keydown', handleEscape)
+  }, [mobileMenuOpen])
 
   return (
     <nav className="sticky top-0 z-30 h-16 w-full max-w-full border-b border-slate-200 bg-white text-slate-900 shadow-sm transition-colors dark:border-slate-700 dark:bg-slate-950 dark:text-slate-100">
@@ -174,6 +203,9 @@ export function Header({
               <Button
                 data-mobile-menu-toggle
                 onClick={onToggleMobileMenu}
+                aria-expanded={mobileMenuOpen}
+                aria-controls="tablet-navigation-menu"
+                aria-haspopup="dialog"
                 className={getToneClass(
                   'default',
                   'inline-flex max-w-full items-center gap-2 px-4 py-2 text-sm font-medium',
@@ -185,7 +217,9 @@ export function Header({
 
               {mobileMenuOpen ? (
                 <div
+                  id="tablet-navigation-menu"
                   ref={menuContainerRef}
+                  aria-label="Navigation menu"
                   className="fixed inset-x-3 top-16 z-40 box-border max-h-[min(75vh,32rem)] max-w-[calc(100vw-1.5rem)] overflow-x-hidden overflow-y-auto rounded-2xl border border-white/70 bg-white/75 p-3 shadow-xl backdrop-blur-xl sm:absolute sm:right-0 sm:left-auto sm:top-full sm:mt-2 sm:w-80 sm:max-w-[calc(100vw-2rem)] dark:border-slate-700 dark:bg-slate-900"
                 >
                   <div className="flex min-w-0 flex-col gap-2">
@@ -228,6 +262,9 @@ export function Header({
               <Button
                 data-mobile-menu-toggle
                 onClick={onToggleMobileMenu}
+                aria-expanded={mobileMenuOpen}
+                aria-controls="mobile-navigation-menu"
+                aria-haspopup="dialog"
                 className={getToneClass(
                   'default',
                   'inline-flex max-w-full items-center gap-2 px-4 py-2 text-sm font-medium',
@@ -239,7 +276,9 @@ export function Header({
 
               {mobileMenuOpen ? (
                 <div
+                  id="mobile-navigation-menu"
                   ref={menuContainerRef}
+                  aria-label="Navigation menu"
                   className="fixed inset-x-3 top-16 z-40 box-border max-h-[min(75vh,32rem)] max-w-[calc(100vw-1.5rem)] overflow-x-hidden overflow-y-auto rounded-2xl border border-slate-200 bg-white p-3 shadow-lg sm:absolute sm:right-0 sm:left-auto sm:top-full sm:mt-2 sm:w-80 sm:max-w-[calc(100vw-2rem)] dark:border-slate-700 dark:bg-slate-900"
                 >
                   <div className="flex min-w-0 flex-col gap-2">
