@@ -1,4 +1,3 @@
-import { exercises, exercisesSchema } from '@gym-pilot/shared'
 import { useMemo, useState } from 'react'
 import { useParams, useSearchParams } from 'react-router-dom'
 import { PageActionGroup, PageActionRow } from '../components/PageActionRow'
@@ -28,10 +27,7 @@ export function ExercisePage() {
   const backTo = searchParams.get('backTo')
   const backLabel = searchParams.get('backLabel')
 
-  const viewModel = useMemo(() => {
-    const parsed = exercisesSchema.parse(exercises)
-    return resolveExercisePageViewModel(slug, parsed)
-  }, [slug])
+  const viewModel = useMemo(() => resolveExercisePageViewModel(slug), [slug])
 
   const exercise = viewModel.exercise
   const mediaGif = viewModel.mediaGif

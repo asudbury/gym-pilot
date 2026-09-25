@@ -1,8 +1,7 @@
 import { useEffect, useState } from 'react'
 import { useLocation, useNavigate } from 'react-router-dom'
 import {
-  exercises,
-  exercisesSchema,
+  findExerciseById,
   getSupabaseClient,
   logger,
   usePlan,
@@ -103,8 +102,7 @@ export function useAppShell() {
   const handleToggleFavoriteExercise = (exerciseId: string) => {
     logger.debug(`Toggling favorite exercise: ${exerciseId}`)
 
-    const parsed = exercisesSchema.parse(exercises)
-    const exercise = parsed.find((item) => item.id === exerciseId)
+    const exercise = findExerciseById(exerciseId)
 
     if (!exercise) {
       return
@@ -135,8 +133,7 @@ export function useAppShell() {
   }
 
   const isExerciseFavorite = (exerciseId: string) => {
-    const parsed = exercisesSchema.parse(exercises)
-    const exercise = parsed.find((item) => item.id === exerciseId)
+    const exercise = findExerciseById(exerciseId)
 
     return Boolean(
       exercise &&

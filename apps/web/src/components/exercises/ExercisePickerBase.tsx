@@ -70,7 +70,7 @@ export function ExercisePickerBase({
   )
 
   return (
-    <Modal isOpen={isOpen} onClose={handleCancel}>
+    <Modal isOpen={isOpen} onClose={handleCancel} ariaLabel="Exercise picker">
       {previewExercise ? (
         <ExercisePreview
           exercise={previewExercise}

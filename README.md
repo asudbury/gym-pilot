@@ -21,10 +21,8 @@ Gym Pilot is a monorepo for a fitness planning workspace with a React web app, s
 ## Project structure
 
 - apps/web - main web application
-- apps/mobile - mobile app shell
+- apps/mobile-expo - mobile app shell
 - packages/shared - shared storage, Supabase helpers, and data utilities
-- packages/hooks - reusable hooks
-- packages/api - API layer scaffolding
 - packages/types - shared TypeScript types
 
 ## Documentation
@@ -51,6 +49,9 @@ Set at least:
 
 - VITE_SUPABASE_URL
 - VITE_SUPABASE_ANON_KEY
+- VITE_ENABLE_ANALYTICS=false
+
+Do not expose `VITE_SUPABASE_SERVICE_ROLE_KEY` to the web app. Privileged admin user-management now runs through the server-side Supabase Edge Function in `supabase/functions/admin-user-management`.
 
 
 Run the web app locally:
@@ -72,7 +73,7 @@ The web app is configured for GitHub Pages under the repository subpath `/gym-pi
 Run the test suite:
 
 ```bash
-npm test
+npm run test:all
 ```
 
 ## Local tooling commands
@@ -81,8 +82,10 @@ Useful commands for local development and quality checks:
 
 ```bash
 npm run format:web   # format the web app files
-npm run lint:web     # run ESLint
-npm run test:web     # run Vitest
+npm run lint:web     # run ESLint for JS/JSX plus TS/TSX format and type checks
+npm run test:web     # run app Vitest suites
+npm run test:shared  # run shared package Vitest suites
+npm run test:coverage # run all tests with coverage output
 npm run knip         # check for unused files, exports, and dependencies
 npm run sonar:up     # start a local SonarQube instance with Docker
 npm run sonar:analyze # run SonarQube analysis against the local instance
@@ -102,12 +105,10 @@ npm run sonar:analyze # run SonarQube analysis against the local instance
 - TypeScript
 - Vite
 - Tailwind CSS
-- AG Grid
 - ExcelJS
 - React Router
 - Supabase
 - Dexie
-- TanStack Query
 - Vitest
 
 ## Help — For Business Users
@@ -135,6 +136,10 @@ This section is a short, non-technical guide describing what the product does an
 - **Data & migrations:**
 	- The app persists data locally and can sync to a Supabase backend. Database migrations live in `supabase/migrations` and are applied with `supabase db push`.
 	- Template rows include a snapshot of exercise names to keep historical accuracy when exercise catalog entries change.
+	- Admin-only auth user management is handled by a Supabase Edge Function so service-role credentials stay server-side.
+
+- **Analytics & privacy:**
+	- Google Analytics loads only when `VITE_ENABLE_ANALYTICS=true` and should remain disabled for local development by default.
 
 - **Tips for non-technical staff:**
 	- Use Templates for commonly repeated sessions (e.g., "Full Body — Monday").
