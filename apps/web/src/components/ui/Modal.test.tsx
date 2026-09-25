@@ -40,7 +40,7 @@ describe('Modal', () => {
       await Promise.resolve()
     })
 
-    const dialog = document.getElementById('modal-dialog')
+    const dialog = document.querySelector('[role="dialog"]')
     expect(dialog?.getAttribute('role')).toBe('dialog')
     expect(dialog?.getAttribute('aria-modal')).toBe('true')
     expect(dialog?.getAttribute('aria-label')).toBe('Example dialog')

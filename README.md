@@ -51,7 +51,7 @@ Set at least:
 - VITE_SUPABASE_ANON_KEY
 - VITE_ENABLE_ANALYTICS=false
 
-Do not expose `VITE_SUPABASE_SERVICE_ROLE_KEY` to the web app. Privileged admin user-management now runs through the server-side Supabase Edge Function in `/home/runner/work/gym-pilot/gym-pilot/supabase/functions/admin-user-management`.
+Do not expose `VITE_SUPABASE_SERVICE_ROLE_KEY` to the web app. Privileged admin user-management now runs through the server-side Supabase Edge Function in `supabase/functions/admin-user-management`.
 
 
 Run the web app locally:

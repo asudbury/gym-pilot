@@ -120,7 +120,7 @@ async function requireAdminUser(req: Request) {
 
   if (rolesError) {
     return {
-      error: jsonResponse({ error: rolesError.message }, 403),
+      error: jsonResponse({ error: 'Forbidden' }, 403),
       userId: null,
     }
   }
@@ -147,7 +147,7 @@ async function handleCreateAuthUser(
   })
 
   if (error || !data.user) {
-    return jsonResponse({ error: error?.message ?? 'Could not create user' }, 400)
+    return jsonResponse({ error: 'Could not create auth user.' }, 400)
   }
 
   return jsonResponse({
@@ -162,7 +162,7 @@ async function handleGetAuthUser(
   const { data, error } = await adminClient.auth.admin.getUserById(payload.userId)
 
   if (error) {
-    return jsonResponse({ error: error.message }, 400)
+    return jsonResponse({ error: 'Could not load auth user.' }, 400)
   }
 
   return jsonResponse({
@@ -176,7 +176,7 @@ async function handleListAuthUsers(
   const { data, error } = await adminClient.auth.admin.listUsers()
 
   if (error) {
-    return jsonResponse({ error: error.message }, 400)
+    return jsonResponse({ error: 'Could not list auth users.' }, 400)
   }
 
   return jsonResponse({
@@ -212,7 +212,7 @@ export default {
       }
     } catch (error) {
       return jsonResponse(
-        { error: error instanceof Error ? error.message : String(error) },
+        { error: 'Internal server error' },
         500,
       )
     }

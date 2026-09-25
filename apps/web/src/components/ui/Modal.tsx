@@ -1,4 +1,4 @@
-import { type ReactNode, useEffect } from 'react'
+import { type ReactNode, useEffect, useRef } from 'react'
 import { createPortal } from 'react-dom'
 
 type ModalProps = {
@@ -23,6 +23,8 @@ export function Modal({
   children,
   ariaLabel = 'Dialog',
 }: ModalProps) {
+  const dialogRef = useRef<HTMLDivElement | null>(null)
+
   useEffect(() => {
     if (!isOpen) {
       return
@@ -32,7 +34,7 @@ export function Modal({
       document.activeElement instanceof HTMLElement
         ? document.activeElement
         : null
-    const dialogElement = document.getElementById('modal-dialog')
+    const dialogElement = dialogRef.current
 
     const handleEscape = (event: KeyboardEvent) => {
       if (event.key === 'Escape') {
@@ -95,7 +97,7 @@ export function Modal({
       onClick={onClose}
     >
       <div
-        id="modal-dialog"
+        ref={dialogRef}
         role="dialog"
         aria-modal="true"
         aria-label={ariaLabel}

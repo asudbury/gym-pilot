@@ -123,7 +123,7 @@ export function Header({
 
     document.addEventListener('keydown', handleEscape)
     return () => document.removeEventListener('keydown', handleEscape)
-  }, [mobileMenuOpen])
+  }, [mobileMenuOpen, onToggleMobileMenu])
 
   return (
     <nav className="sticky top-0 z-30 h-16 w-full max-w-full border-b border-slate-200 bg-white text-slate-900 shadow-sm transition-colors dark:border-slate-700 dark:bg-slate-950 dark:text-slate-100">
