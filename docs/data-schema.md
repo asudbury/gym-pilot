@@ -208,6 +208,19 @@
 | session_id   | string \| null | Optional linked `user_workout` session identifier              |
 | created_at   | string         | Creation timestamp                                              |
 
+### HealthKit data — healthkit_data
+
+| Field         | Type           | Notes |
+| ------------- | -------------- | ------------------------------------------------------------- |
+| id            | string         | Primary key                                                   |
+| user_id       | string \| null | Optional owner of the record                                   |
+| device        | string \| null | Device name from the mobile app                                |
+| recorded_at   | string         | Timestamp of the HealthKit sample                              |
+| steps         | string \| null | Latest step count value                                        |
+| heart_rate    | string \| null | Latest heart-rate value                                        |
+| active_energy | string \| null | Latest active energy value                                     |
+| created_at    | string         | Creation timestamp                                              |
+
 ### Workout template — workout_template
 
 | Field      | Type           | Notes |

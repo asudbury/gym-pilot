@@ -1,0 +1,8 @@
+--swiftversion 5.9
+--indent 4
+--linebreaks lf
+--maxwidth 120
+--stripunusedargs closure-only
+--self insert
+--ifdef no-indent
+--exclude GymPilot.xcodeproj

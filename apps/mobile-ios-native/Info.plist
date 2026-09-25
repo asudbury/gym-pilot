@@ -1,0 +1,43 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+    <key>CFBundleDisplayName</key>
+    <string>Gym Pilot</string>
+    <key>CFBundleIdentifier</key>
+    <string>$(PRODUCT_BUNDLE_IDENTIFIER)</string>
+    <key>CFBundleName</key>
+    <string>Gym Pilot</string>
+    <key>CFBundleShortVersionString</key>
+    <string>$(MARKETING_VERSION)</string>
+    <key>CFBundleVersion</key>
+    <string>$(CURRENT_PROJECT_VERSION)</string>
+    <key>ITSAppUsesNonExemptEncryption</key>
+    <false/>
+    <key>LSRequiresIPhoneOS</key>
+    <true/>
+    <key>GPBackendUploadURL</key>
+    <string></string>
+    <key>GPBackendUploadAnonKey</key>
+    <string></string>
+    <key>GPSupabaseURL</key>
+    <string></string>
+    <key>GPSupabaseAnonKey</key>
+    <string></string>
+    <key>GPWebViewURL</key>
+    <string></string>
+    <key>NSHealthShareUsageDescription</key>
+    <string>This app reads your step count, heart rate, and active energy data from HealthKit so you can review your latest health metrics and choose to send them to your connected backend.</string>
+    <key>UIApplicationSceneManifest</key>
+    <dict>
+        <key>UIApplicationSupportsMultipleScenes</key>
+        <false/>
+    </dict>
+    <key>UILaunchScreen</key>
+    <dict/>
+    <key>UISupportedInterfaceOrientations</key>
+    <array>
+        <string>UIInterfaceOrientationPortrait</string>
+    </array>
+</dict>
+</plist>
