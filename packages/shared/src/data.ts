@@ -1,1 +1,1 @@
-export { exercises, exerciseData } from './exerciseData'
+export * from './exerciseData'

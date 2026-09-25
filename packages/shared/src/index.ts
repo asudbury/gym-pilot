@@ -7,7 +7,6 @@ export * from "./dataServices/types";
 export * from "./dataServices/userSessionDataService";
 export * from "./dataServices/userSessionWorkItemDataService";
 export * from "./dataServices/workoutAssignmentDataService";
-export * from "./exerciseData";
 export * from "./exerciseSchema";
 export {
   bookSession,

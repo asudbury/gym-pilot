@@ -76,7 +76,12 @@ export function Modal({
     window.setTimeout(() => {
       const firstFocusable =
         dialogElement?.querySelector<HTMLElement>(focusableSelector)
-      firstFocusable?.focus() ?? dialogElement?.focus()
+      if (firstFocusable) {
+        firstFocusable.focus()
+        return
+      }
+
+      dialogElement?.focus()
     }, 0)
 
     return () => {
