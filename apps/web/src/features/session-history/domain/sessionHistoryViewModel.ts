@@ -1,5 +1,18 @@
 import type { UserSession } from '@gym-pilot/shared'
 
+/**
+ * Returns a copy of the session entries sorted by `created_at` descending
+ * (most recent first). Entries without a `created_at` are sorted last.
+ *
+ * @param entries - The session entries to sort.
+ * @returns A new sorted array; the input is not mutated.
+ */
+export function sortSessionEntries(entries: UserSession[]): UserSession[] {
+  return [...entries].sort((left, right) =>
+    (right.created_at ?? '').localeCompare(left.created_at ?? ''),
+  )
+}
+
 export function getSessionEntryRating(entry: UserSession): number | null {
   if (
     typeof entry.rating === 'number' &&

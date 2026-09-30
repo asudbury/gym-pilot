@@ -1,5 +1,5 @@
 import type { Exercise, WorkoutTemplateInsert } from '@gym-pilot/shared'
-import { getSupabaseClient } from '@gym-pilot/shared'
+import { getSupabaseClient, logger } from '@gym-pilot/shared'
 import { TableNames } from '@gym-pilot/shared/src/dataServices/tableNames'
 import clsx from 'clsx'
 import { useEffect, useState } from 'react'
@@ -56,8 +56,8 @@ function WorkoutTemplateCreatePage() {
       const { data: authData, error: authErr } = await client.auth.getUser()
 
       if (authErr || !authData?.user) {
-        console.error(
-          'Unable to determine current user for template save',
+        logger.error(
+          '[WorkoutTemplateCreatePage] Unable to determine current user for template save',
           authErr,
         )
         setIsSaving(false)

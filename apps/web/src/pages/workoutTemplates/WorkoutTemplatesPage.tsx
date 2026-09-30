@@ -1,4 +1,4 @@
-import { getSupabaseClient } from '@gym-pilot/shared'
+import { getSupabaseClient, logger } from '@gym-pilot/shared'
 import { TableNames } from '@gym-pilot/shared/src/dataServices/tableNames'
 import { useEffect, useMemo, useState } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
@@ -31,7 +31,7 @@ export function WorkoutTemplatesPage() {
       .order('created_at', { ascending: false })
 
     if (error) {
-      console.error('Could not load workout templates', error)
+      logger.error('[WorkoutTemplatesPage] Could not load workout templates', error)
       setTemplates([])
       setLoading(false)
       return

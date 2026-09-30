@@ -1,4 +1,4 @@
-import { getSupabaseClient } from '@gym-pilot/shared'
+import { getSupabaseClient, logger } from '@gym-pilot/shared'
 import { TableNames } from '@gym-pilot/shared/src/dataServices/tableNames'
 import { clsx } from 'clsx'
 import { useEffect, useState } from 'react'
@@ -48,7 +48,7 @@ export default function WorkoutTemplateEditPage() {
       .single()
 
     if (error) {
-      console.error('Could not load template', error)
+      logger.error('[WorkoutTemplateEditPage] Could not load template', error)
       setTemplate(null)
       setLoading(false)
       return
@@ -102,7 +102,7 @@ export default function WorkoutTemplateEditPage() {
       )
     } catch (posErr) {
       // ignore position errors but surface message
-      console.warn('Could not persist exercise positions', posErr)
+      logger.warn('[WorkoutTemplateEditPage] Could not persist exercise positions', posErr)
     }
 
     navigate('/workout-templates')

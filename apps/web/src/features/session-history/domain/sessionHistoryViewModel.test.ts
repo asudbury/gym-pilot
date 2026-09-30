@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest'
 import type { UserSession } from '@gym-pilot/shared'
-import { getSessionEntryRating, getSessionEntryTitle } from './sessionHistoryViewModel'
+import { getSessionEntryRating, getSessionEntryTitle, sortSessionEntries } from './sessionHistoryViewModel'
 
 function makeSession(overrides: Partial<UserSession> = {}): UserSession {
   return {
@@ -107,5 +107,36 @@ describe('getSessionEntryTitle', () => {
     expect(
       getSessionEntryTitle(makeSession({ session_type: null as never })),
     ).toBe('Solo Session')
+  })
+})
+
+describe('sortSessionEntries', () => {
+  it('sorts entries by created_at descending', () => {
+    const entries = [
+      makeSession({ id: 'a', created_at: '2024-01-01' }),
+      makeSession({ id: 'b', created_at: '2024-03-01' }),
+      makeSession({ id: 'c', created_at: '2024-02-01' }),
+    ]
+    const sorted = sortSessionEntries(entries)
+    expect(sorted.map((e) => e.id)).toEqual(['b', 'c', 'a'])
+  })
+
+  it('does not mutate the input array', () => {
+    const entries = [
+      makeSession({ id: 'a', created_at: '2024-01-01' }),
+      makeSession({ id: 'b', created_at: '2024-03-01' }),
+    ]
+    const original = [...entries]
+    sortSessionEntries(entries)
+    expect(entries.map((e) => e.id)).toEqual(original.map((e) => e.id))
+  })
+
+  it('sorts entries with null created_at last', () => {
+    const entries = [
+      makeSession({ id: 'a', created_at: null }),
+      makeSession({ id: 'b', created_at: '2024-01-01' }),
+    ]
+    const sorted = sortSessionEntries(entries)
+    expect(sorted.map((e) => e.id)).toEqual(['b', 'a'])
   })
 })

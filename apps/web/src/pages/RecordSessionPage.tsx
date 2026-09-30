@@ -24,7 +24,6 @@ import { formatDateTimeLocalInputValue } from '../dateTimeFormatter'
 import { PageLayout } from '../layouts/PageLayout'
 import {
   buildUserSession,
-  buildWorkoutItemsFromPlanSessions,
   resolveInitialSessionType,
   type SessionType,
 } from '../features/session-record/domain/sessionConstruction'
@@ -40,7 +39,7 @@ export function resolvePersistedSessionId(
 
 export function RecordSessionPage() {
   const { user } = useAuth()
-  const { users, visiblePlans, visibleAssignments } = usePlan()
+  const { users } = usePlan()
   const navigate = useNavigate()
   const [searchParams] = useSearchParams()
   const trainers = users.filter((candidate) =>
@@ -56,10 +55,8 @@ export function RecordSessionPage() {
   const [rating, setRating] = useState<number | null>(null)
   const [duration, setDuration] = useState<number | undefined>(undefined)
   const [name, setName] = useState('')
-  // const [endAt] = useState<string | null>(null)
   const [activeKwh, setActiveKwh] = useState('')
   const [notes, setNotes] = useState('')
-  const [selectedPlanId] = useState('')
   const [workoutItems, setWorkoutItems] = useState<
     Partial<UserSessionWorkoutItem>[]
   >([])
@@ -68,41 +65,9 @@ export function RecordSessionPage() {
 
   const userSessionId = useMemo(() => crypto.randomUUID(), [])
 
-  const availablePlans = useMemo(() => {
-    const candidates = [
-      ...visiblePlans,
-      ...visibleAssignments.map((assignment) => ({
-        id: assignment.id,
-        planName: assignment.assignmentName,
-        planSessions: assignment.planSessions ?? [],
-        createdByUserId: assignment.assignedUserId,
-      })),
-    ]
-
-    return candidates.filter(
-      (candidate, index, list) =>
-        list.findIndex((entry) => entry.id === candidate.id) === index,
-    )
-  }, [visiblePlans, visibleAssignments])
-
-  const selectedPlan = useMemo(() => {
-    return availablePlans.find((plan) => plan.id === selectedPlanId)
-  }, [availablePlans, selectedPlanId])
-
   useEffect(() => {
     setStartAt(formatDateTimeLocalInputValue(new Date()))
   }, [])
-
-  useEffect(() => {
-    if (!selectedPlan) {
-      setWorkoutItems([])
-      return
-    }
-
-    setWorkoutItems(
-      buildWorkoutItemsFromPlanSessions(selectedPlan.planSessions),
-    )
-  }, [selectedPlan])
 
   const handleSubmit = async () => {
     if (!startAt || !user) {

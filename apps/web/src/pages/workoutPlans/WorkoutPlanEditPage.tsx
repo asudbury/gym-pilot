@@ -1,4 +1,4 @@
-import { getSupabaseClient } from '@gym-pilot/shared'
+import { getSupabaseClient, logger } from '@gym-pilot/shared'
 import type {
   Tables,
   TablesInsert,
@@ -52,15 +52,6 @@ type WorkoutTemplate = Tables<typeof TableNames.WorkoutTemplate> & {
   >
 }
 
-// Helper to generate UUIDs
-function generateUUID(): string {
-  return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function (c) {
-    const r = (Math.random() * 16) | 0,
-      v = c === 'x' ? r : (r & 0x3) | 0x8
-    return v.toString(16)
-  })
-}
-
 // Reorder utility (copied from WorkoutTemplateCreatePage for consistency)
 function reorder<T>(items: T[], index: number, direction: 'up' | 'down'): T[] {
   const currentIndex = index
@@ -90,7 +81,7 @@ export default function WorkoutPlanEditPage() {
   const [planName, setPlanName] = useState('')
   const [planDescription, setPlanDescription] = useState('')
   const [planSessions, setPlanSessions] = useState<PlanSession[]>([
-    createPlanSession(generateUUID(), 'Session 1'),
+    createPlanSession(crypto.randomUUID(), 'Session 1'),
   ])
   const [activeSessionIndex, setActiveSessionIndex] = useState(0)
   const [isSaving, setIsSaving] = useState(false)
@@ -156,7 +147,7 @@ export default function WorkoutPlanEditPage() {
         )
         setActiveSessionIndex(0)
       } catch (err: any) {
-        console.error('Error loading plan:', err)
+        logger.error('[WorkoutPlanEditPage] Error loading plan:', err)
         setError(err.message || 'Failed to load plan for editing.')
       } finally {
         setIsLoadingPlan(false)
@@ -185,7 +176,7 @@ export default function WorkoutPlanEditPage() {
   const handleAddSession = () => {
     setPlanSessions((prev) => [
       ...prev,
-      createPlanSession(generateUUID(), `Session ${prev.length + 1}`),
+      createPlanSession(crypto.randomUUID(), `Session ${prev.length + 1}`),
     ])
     setActiveSessionIndex(planSessions.length) // Activate the new session
   }
@@ -238,7 +229,7 @@ export default function WorkoutPlanEditPage() {
 
     const newPlanItems: PlanItem[] = template.workout_template_exercise.map(
       (ex, idx) => ({
-        id: generateUUID(),
+        id: crypto.randomUUID(),
         created_at: new Date().toISOString(),
         updated_at: new Date().toISOString(),
         plan_id: '',
@@ -436,7 +427,7 @@ export default function WorkoutPlanEditPage() {
     try {
       await persistPlanState(nextSessions)
     } catch (err: any) {
-      console.error('Error clearing session exercises:', err)
+      logger.error('[WorkoutPlanEditPage] Error clearing session exercises:', err)
       setError(
         err.message || 'An unexpected error occurred while clearing exercises.',
       )
@@ -475,7 +466,7 @@ export default function WorkoutPlanEditPage() {
         return
       }
     } catch (err: any) {
-      console.error('Error saving plan:', err)
+      logger.error('[WorkoutPlanEditPage] Error saving plan:', err)
       setError(
         err.message || 'An unexpected error occurred while saving the plan.',
       )
@@ -526,7 +517,7 @@ export default function WorkoutPlanEditPage() {
 
       navigate('/workout-plans')
     } catch (err: any) {
-      console.error('Error deleting plan:', err)
+      logger.error('[WorkoutPlanEditPage] Error deleting plan:', err)
       setError(
         err.message || 'An unexpected error occurred while deleting the plan.',
       )
@@ -604,7 +595,7 @@ export default function WorkoutPlanEditPage() {
       const copiedSessions: TablesInsert<
         typeof TableNames.WorkoutPlanSession
       >[] = (sessionsData ?? []).map((session) => ({
-        id: generateUUID(),
+        id: crypto.randomUUID(),
         plan_id: newPlan.id,
         name: session.name,
         position: session.position,
@@ -624,7 +615,7 @@ export default function WorkoutPlanEditPage() {
       const copiedExercises: TablesInsert<
         typeof TableNames.WorkoutPlanExercise
       >[] = (exercisesData ?? []).map((exercise) => ({
-        id: generateUUID(),
+        id: crypto.randomUUID(),
         plan_id: newPlan.id,
         exercise_id: exercise.exercise_id,
         exercise_name: exercise.exercise_name ?? null,
@@ -644,7 +635,7 @@ export default function WorkoutPlanEditPage() {
 
       navigate(`/workout-plans/${newPlan.id}/edit`)
     } catch (err: any) {
-      console.error('Error copying plan:', err)
+      logger.error('[WorkoutPlanEditPage] Error copying plan:', err)
       setError(
         err.message || 'An unexpected error occurred while copying the plan.',
       )
