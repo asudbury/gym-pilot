@@ -16,6 +16,22 @@ export interface ParsedSession {
   stretch?: string
 }
 
+/** Splits a multi-exercise line like "(1) lat raises (2) bicep curls" into
+ * individual exercise names. Returns a single-element array for plain names.
+ */
+export function parseMultiExerciseNames(name: string): string[] {
+  const trimmed = name.trim()
+  const matches = [...trimmed.matchAll(/\(\d+\)\s*([^()]+)/g)]
+
+  if (matches.length === 0) {
+    return [trimmed]
+  }
+
+  return matches
+    .map((match) => match[1].trim())
+    .filter((n) => n.length > 0)
+}
+
 function parseEnergy(value: string): { energy?: number; unit?: string } {
   if (!value) {
     return {}
@@ -99,8 +115,9 @@ function parseTable(table: string): ParsedSession[] {
         }
       })
     } else {
-      // Exercise row
-      // TODO: handle multi-exercise lines like "(1) lat raises (2) bicep curls"
+      // Exercise row — handles both single names and multi-exercise lines like
+      // "(1) lat raises (2) bicep curls"
+      const exerciseNames = parseMultiExerciseNames(itemName)
       const reps = columns.length > 1 ? columns[1].trim() : ''
       const sets = columns.length > 2 ? columns[2].trim() : ''
 
@@ -111,12 +128,9 @@ function parseTable(table: string): ParsedSession[] {
           p &&
           !['missed', 'x', ''].includes(p.toLowerCase())
         ) {
-          sessions[index].exercises.push({
-            name: itemName,
-            reps,
-            sets,
-            performance: p,
-          })
+          for (const name of exerciseNames) {
+            sessions[index].exercises.push({ name, reps, sets, performance: p })
+          }
         }
       })
     }

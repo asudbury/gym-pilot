@@ -1,12 +1,14 @@
+import { type PostgrestError } from "@supabase/supabase-js";
 import { getItems, getSupabaseClient } from "./supabaseCore";
 import { TableNames } from "./tableNames";
 import type { UserActivity } from "./types";
 
 const tableName = TableNames.UserActivity;
 
+/** Retrieves all activity records, optionally scoped to `userId`, ordered by most recent first. */
 export async function getUserActivity(
   userId?: string
-): Promise<{ data: UserActivity[] | null; error: any | null }> {
+): Promise<{ data: UserActivity[] | null; error: PostgrestError | null }> {
   return getItems<UserActivity>(tableName, { 
     userId,
     orderBy: { 
@@ -16,10 +18,11 @@ export async function getUserActivity(
   });
 }
 
+/** Inserts a new activity record for `userId` into the user activity table. */
 export async function logUserActivity(
     activity: Omit<UserActivity, "id" | "created_at" | "user_id">,
     userId: string
-): Promise<{ data: any[] | null; error: any | null }> {
+): Promise<{ data: unknown[] | null; error: PostgrestError | null }> {
    
     const client = getSupabaseClient();
     const fullActivity = {
@@ -30,7 +33,8 @@ export async function logUserActivity(
     return await client.from(tableName).insert(fullActivity).select();
 }
 
-export async function deleteAllActivity(): Promise<{ data: any | null; error: any | null }> {
+/** Deletes every row in the user activity table. Use with caution – intended for admin/dev use only. */
+export async function deleteAllActivity(): Promise<{ data: unknown | null; error: PostgrestError | null }> {
   
     const client = getSupabaseClient();
     return await client

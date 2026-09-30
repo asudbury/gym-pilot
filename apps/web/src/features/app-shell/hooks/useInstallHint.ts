@@ -1,7 +1,6 @@
 import { useEffect, useState } from 'react'
 import { isAppleDevice, isInstalledAsApp } from '../../../utils/pwa'
-
-const INSTALL_HINT_STORAGE_KEY = 'gym-pilot:install-hint-dismissed'
+import { INSTALL_HINT_KEY } from '../../../constants/storageKeys'
 
 export function useInstallHint() {
   const [showInstallHint, setShowInstallHint] = useState(false)
@@ -15,7 +14,7 @@ export function useInstallHint() {
     }
 
     const dismissed =
-      window.localStorage.getItem(INSTALL_HINT_STORAGE_KEY) === 'true'
+      window.localStorage.getItem(INSTALL_HINT_KEY) === 'true'
 
     if (isInstalled || !isApple || dismissed) {
       setShowInstallHint(false)
@@ -29,7 +28,7 @@ export function useInstallHint() {
     setShowInstallHint(value)
 
     if (typeof window !== 'undefined' && !value) {
-      window.localStorage.setItem(INSTALL_HINT_STORAGE_KEY, 'true')
+      window.localStorage.setItem(INSTALL_HINT_KEY, 'true')
     }
   }
 

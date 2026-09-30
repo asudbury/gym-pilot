@@ -10,6 +10,7 @@ import {
 } from '../../features/importedWorkouts/domain/spreadsheetWorkoutImport'
 import { PageCardLayout } from '../../layouts/PageCardLayout'
 import { PageLayout } from '../../layouts/PageLayout'
+import { SPREADSHEET_PREVIEW_KEY } from '../../constants/storageKeys'
 
 export const SpreadsheetImportPreviewDetailPage: React.FC = () => {
   const { user } = useAuth()
@@ -23,7 +24,7 @@ export const SpreadsheetImportPreviewDetailPage: React.FC = () => {
 
   useEffect(() => {
     try {
-      const raw = localStorage.getItem('gym-pilot:spreadsheetImportPreview')
+      const raw = localStorage.getItem(SPREADSHEET_PREVIEW_KEY)
       if (!raw) {
         setPreviewItems(null)
         return
@@ -85,7 +86,7 @@ export const SpreadsheetImportPreviewDetailPage: React.FC = () => {
   const saveAndBack = () => {
     try {
       localStorage.setItem(
-        'gym-pilot:spreadsheetImportPreview',
+        SPREADSHEET_PREVIEW_KEY,
         JSON.stringify(previewItems),
       )
     } catch {

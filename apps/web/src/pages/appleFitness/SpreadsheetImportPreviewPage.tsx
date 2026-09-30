@@ -13,6 +13,10 @@ import {
 } from '../../features/importedWorkouts/domain/spreadsheetWorkoutImport'
 import { PageCardLayout } from '../../layouts/PageCardLayout'
 import { PageLayout } from '../../layouts/PageLayout'
+import {
+  SPREADSHEET_INPUT_KEY,
+  SPREADSHEET_PREVIEW_KEY,
+} from '../../constants/storageKeys'
 
 type SpreadsheetImportContent = Parameters<
   typeof buildSpreadsheetWorkoutImportPayloads
@@ -43,7 +47,7 @@ export const SpreadsheetImportPreviewPage: React.FC = () => {
   useEffect(() => {
     try {
       localStorage.setItem(
-        'gym-pilot:spreadsheetImportPreview',
+        SPREADSHEET_PREVIEW_KEY,
         JSON.stringify(previewPayloads),
       )
     } catch {
@@ -78,7 +82,7 @@ export const SpreadsheetImportPreviewPage: React.FC = () => {
     const state = location.state as SpreadsheetImportPreviewLocationState | null
     const fallback = (() => {
       try {
-        return localStorage.getItem('gym-pilot:spreadsheetImportInput') ?? ''
+        return localStorage.getItem(SPREADSHEET_INPUT_KEY) ?? ''
       } catch {
         return ''
       }
@@ -108,7 +112,7 @@ export const SpreadsheetImportPreviewPage: React.FC = () => {
       // if there's an already-persisted preview (from prior edits), prefer that
       const persisted = (() => {
         try {
-          const raw = localStorage.getItem('gym-pilot:spreadsheetImportPreview')
+          const raw = localStorage.getItem(SPREADSHEET_PREVIEW_KEY)
           return raw
             ? (JSON.parse(raw) as SpreadsheetWorkoutImportPreviewItem[])
             : null

@@ -544,7 +544,7 @@ export async function saveSupabaseJsonRecord<T>(key: string, value: T) {
 
       const sessionPayload = assignments.flatMap((assignment) =>
         Array.isArray(assignment.planSessions)
-          ? assignment.planSessions.map((session: any, index: number) => ({
+          ? assignment.planSessions.map((session: WorkoutPlanSession, index: number) => ({
               id: session.id,
               assignment_id: assignment.id,
               name: session.name ?? session.title ?? `Day ${index + 1}`,
@@ -567,9 +567,9 @@ export async function saveSupabaseJsonRecord<T>(key: string, value: T) {
 
       const exercisePayload = assignments.flatMap((assignment) =>
         Array.isArray(assignment.planSessions)
-          ? assignment.planSessions.flatMap((session: any) =>
+          ? assignment.planSessions.flatMap((session: WorkoutPlanSession) =>
               Array.isArray(session.planItems)
-                ? session.planItems.map((item: any, index: number) => ({
+                ? session.planItems.map((item: WorkoutPlanExercise, index: number) => ({
                     id: item.id,
                     assignment_id: assignment.id,
                     assignment_session_id: session.id,

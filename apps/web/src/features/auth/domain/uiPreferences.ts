@@ -2,19 +2,42 @@ export type ThemePreference = 'light' | 'dark'
 
 const THEME_STORAGE_KEY = 'gym-pilot-theme-preference'
 
-export function readStoredThemePreference(): ThemePreference {
+type StorageLike = Pick<Storage, 'getItem' | 'setItem'>
+
+function getStorage(storage?: StorageLike | null): StorageLike | null {
+  if (storage) {
+    return storage
+  }
+
   if (typeof window === 'undefined') {
+    return null
+  }
+
+  return window.localStorage
+}
+
+export function readStoredThemePreference(
+  storage?: StorageLike | null,
+): ThemePreference {
+  const activeStorage = getStorage(storage)
+
+  if (!activeStorage) {
     return 'light'
   }
 
-  const storedTheme = window.localStorage.getItem(THEME_STORAGE_KEY)
+  const storedTheme = activeStorage.getItem(THEME_STORAGE_KEY)
   return storedTheme === 'dark' ? 'dark' : 'light'
 }
 
-export function persistThemePreference(themePreference: ThemePreference) {
-  if (typeof window === 'undefined') {
+export function persistThemePreference(
+  themePreference: ThemePreference,
+  storage?: StorageLike | null,
+) {
+  const activeStorage = getStorage(storage)
+
+  if (!activeStorage) {
     return
   }
 
-  window.localStorage.setItem(THEME_STORAGE_KEY, themePreference)
+  activeStorage.setItem(THEME_STORAGE_KEY, themePreference)
 }
