@@ -1,7 +1,6 @@
-import { getSupabaseClient, logger } from '@gym-pilot/shared'
+import { logger } from '@gym-pilot/shared'
 import type {
   Tables,
-  TablesInsert,
 } from '@gym-pilot/shared/src/dataServices/databaseTypes'
 import { TableNames } from '@gym-pilot/shared/src/dataServices/tableNames'
 import clsx from 'clsx'
@@ -18,10 +17,13 @@ import { WorkoutTemplatePickerModal } from '../../components/WorkoutTemplatePick
 import { PageLayout } from '../../layouts/PageLayout'
 import { formatLabel } from '../../utils/formatUtils'
 import { useIsDesktop } from '../../utils/useMediaQuery'
+import { reorder } from '../../utils/arrayUtils'
 import {
-  buildPersistedPlanRows,
-  buildPlanSessionsFromRows,
-} from './workoutPlanState'
+  copyWorkoutPlan,
+  deleteWorkoutPlan,
+  loadWorkoutPlan,
+  persistWorkoutPlan,
+} from '../../features/workoutPlans/services/workoutPlansService'
 
 type PlanItem = Tables<typeof TableNames.WorkoutPlanExercise> & {
   exercise_name?: string | null
@@ -52,26 +54,6 @@ type WorkoutTemplate = Tables<typeof TableNames.WorkoutTemplate> & {
   >
 }
 
-// Reorder utility (copied from WorkoutTemplateCreatePage for consistency)
-function reorder<T>(items: T[], index: number, direction: 'up' | 'down'): T[] {
-  const currentIndex = index
-
-  if (currentIndex < 0) {
-    return items
-  }
-
-  const targetIndex = direction === 'up' ? currentIndex - 1 : currentIndex + 1
-  if (targetIndex < 0 || targetIndex >= items.length) {
-    return items
-  }
-
-  const nextItems = [...items]
-  const [currentItem] = nextItems.splice(currentIndex, 1)
-  nextItems.splice(targetIndex, 0, currentItem)
-
-  return nextItems
-}
-
 export default function WorkoutPlanEditPage() {
   const navigate = useNavigate()
   const { id } = useParams<{ id: string }>()
@@ -100,61 +82,16 @@ export default function WorkoutPlanEditPage() {
       return
     }
 
-    const loadPlan = async () => {
-      const client = getSupabaseClient()
-      if (!client) {
-        setError('Supabase client not available.')
-        setIsLoadingPlan(false)
-        return
-      }
-
-      try {
-        const { data: planData, error: planError } = await client
-          .from(TableNames.WorkoutPlan)
-          .select('id, plan_name')
-          .eq('id', id)
-          .maybeSingle()
-
-        if (planError || !planData) {
-          throw planError ?? new Error('Plan not found')
-        }
-
-        const { data: sessionsData, error: sessionsError } = await client
-          .from(TableNames.WorkoutPlanSession)
-          .select('id, plan_id, name, position, created_at, updated_at')
-          .eq('plan_id', id)
-          .order('position', { ascending: true })
-
-        if (sessionsError) {
-          throw sessionsError
-        }
-
-        const { data: exercisesData, error: exercisesError } = await client
-          .from(TableNames.WorkoutPlanExercise)
-          .select(
-            'id, plan_id, session_id, exercise_id, exercise_name, position, created_at, updated_at',
-          )
-          .eq('plan_id', id)
-          .order('position', { ascending: true })
-
-        if (exercisesError) {
-          throw exercisesError
-        }
-
-        setPlanName(planData.plan_name ?? '')
-        setPlanSessions(
-          buildPlanSessionsFromRows(sessionsData ?? [], exercisesData ?? []),
-        )
+    void loadWorkoutPlan(id).then(({ data, error }) => {
+      if (error || !data) {
+        setError(error ?? 'Failed to load plan for editing.')
+      } else {
+        setPlanName(data.planName)
+        setPlanSessions(data.sessions)
         setActiveSessionIndex(0)
-      } catch (err: any) {
-        logger.error('[WorkoutPlanEditPage] Error loading plan:', err)
-        setError(err.message || 'Failed to load plan for editing.')
-      } finally {
-        setIsLoadingPlan(false)
       }
-    }
-
-    void loadPlan()
+      setIsLoadingPlan(false)
+    })
   }, [id, isEditMode])
 
   // Effect for exercise reorder animation cleanup
@@ -293,124 +230,19 @@ export default function WorkoutPlanEditPage() {
     )
   }
 
-  const persistPlanState = async (
+  const callPersistService = async (
     sessionsToPersist: PlanSession[],
-    options?: { shouldNavigate?: boolean },
-  ) => {
-    const client = getSupabaseClient()
-    if (!client) {
-      setError('Supabase client not available.')
+  ): Promise<string | null> => {
+    const { planId: resolvedPlanId, error: persistError } = await persistWorkoutPlan({
+      planId: id,
+      planName,
+      isEditMode,
+      sessions: sessionsToPersist,
+    })
+    if (persistError) {
+      setError(persistError)
       return null
     }
-
-    const { data: authData, error: authErr } = await client.auth.getUser()
-    if (authErr || !authData?.user) {
-      setError('Unable to determine current user for plan save.')
-      return null
-    }
-
-    const planNameValue = planName.trim()
-
-    let resolvedPlanId = id
-
-    if (!isEditMode) {
-      const { data: createdPlan, error: createPlanError } = await client
-        .from(TableNames.WorkoutPlan)
-        .insert({
-          user_id: authData.user.id,
-          plan_name: planNameValue,
-        })
-        .select('id')
-        .maybeSingle()
-
-      if (createPlanError || !createdPlan?.id) {
-        setError(createPlanError?.message || 'Failed to create plan')
-        return null
-      }
-
-      resolvedPlanId = createdPlan.id
-    } else if (resolvedPlanId) {
-      const { error: updatePlanError } = await client
-        .from(TableNames.WorkoutPlan)
-        .update({
-          plan_name: planNameValue,
-        })
-        .eq('id', resolvedPlanId)
-
-      if (updatePlanError) {
-        setError(updatePlanError.message)
-        return null
-      }
-    }
-
-    if (!resolvedPlanId) {
-      setError('Unable to determine plan id for save.')
-      return null
-    }
-
-    if (isEditMode) {
-      const { error: deleteSessionsError } = await client
-        .from(TableNames.WorkoutPlanSession)
-        .delete()
-        .eq('plan_id', resolvedPlanId)
-
-      if (deleteSessionsError) {
-        setError(deleteSessionsError.message)
-        return null
-      }
-
-      const { error: deleteExercisesError } = await client
-        .from(TableNames.WorkoutPlanExercise)
-        .delete()
-        .eq('plan_id', resolvedPlanId)
-
-      if (deleteExercisesError) {
-        setError(deleteExercisesError.message)
-        return null
-      }
-    }
-
-    const { persistedSessions, persistedExercises } = buildPersistedPlanRows(
-      sessionsToPersist,
-      resolvedPlanId,
-    )
-
-    const sessionsToInsert: TablesInsert<
-      typeof TableNames.WorkoutPlanSession
-    >[] = persistedSessions
-
-    if (sessionsToInsert.length > 0) {
-      const { error: insertSessionsError } = await client
-        .from(TableNames.WorkoutPlanSession)
-        .insert(sessionsToInsert)
-
-      if (insertSessionsError) {
-        setError(insertSessionsError.message)
-        return null
-      }
-    }
-
-    const exercisesToInsert: Array<
-      TablesInsert<typeof TableNames.WorkoutPlanExercise> & {
-        session_id?: string | null
-      }
-    > = persistedExercises
-
-    if (exercisesToInsert.length > 0) {
-      const { error: insertExercisesError } = await client
-        .from(TableNames.WorkoutPlanExercise)
-        .insert(exercisesToInsert)
-
-      if (insertExercisesError) {
-        setError(insertExercisesError.message)
-        return null
-      }
-    }
-
-    if (options?.shouldNavigate) {
-      navigate('/workout-plans')
-    }
-
     return resolvedPlanId
   }
 
@@ -424,13 +256,15 @@ export default function WorkoutPlanEditPage() {
       return
     }
 
-    try {
-      await persistPlanState(nextSessions)
-    } catch (err: any) {
-      logger.error('[WorkoutPlanEditPage] Error clearing session exercises:', err)
-      setError(
-        err.message || 'An unexpected error occurred while clearing exercises.',
-      )
+    const { error: persistError } = await persistWorkoutPlan({
+      planId: id,
+      planName,
+      isEditMode,
+      sessions: nextSessions,
+    })
+    if (persistError) {
+      logger.error('[WorkoutPlanEditPage] Error clearing session exercises:', persistError)
+      setError(persistError)
     }
   }
 
@@ -457,19 +291,18 @@ export default function WorkoutPlanEditPage() {
     setError(null)
 
     try {
-      const persistedPlanId = await persistPlanState(planSessions, {
-        shouldNavigate: true,
-      })
+      const persistedPlanId = await callPersistService(planSessions)
 
       if (!persistedPlanId) {
         setIsSaving(false)
         return
       }
-    } catch (err: any) {
+
+      navigate('/workout-plans')
+    } catch (err: unknown) {
+      const message = err instanceof Error ? err.message : 'An unexpected error occurred while saving the plan.'
       logger.error('[WorkoutPlanEditPage] Error saving plan:', err)
-      setError(
-        err.message || 'An unexpected error occurred while saving the plan.',
-      )
+      setError(message)
     } finally {
       setIsSaving(false)
     }
@@ -478,168 +311,23 @@ export default function WorkoutPlanEditPage() {
   const handleDelete = async () => {
     if (!id) return
 
-    const client = getSupabaseClient()
-    if (!client) {
-      setError('Supabase client not available.')
+    const { error: deleteError } = await deleteWorkoutPlan(id)
+    if (deleteError) {
+      setError(deleteError)
       return
     }
-
-    try {
-      const { error: deleteExercisesError } = await client
-        .from(TableNames.WorkoutPlanExercise)
-        .delete()
-        .eq('plan_id', id)
-
-      if (deleteExercisesError) {
-        setError(deleteExercisesError.message)
-        return
-      }
-
-      const { error: deleteSessionsError } = await client
-        .from(TableNames.WorkoutPlanSession)
-        .delete()
-        .eq('plan_id', id)
-
-      if (deleteSessionsError) {
-        setError(deleteSessionsError.message)
-        return
-      }
-
-      const { error: deletePlanError } = await client
-        .from(TableNames.WorkoutPlan)
-        .delete()
-        .eq('id', id)
-
-      if (deletePlanError) {
-        setError(deletePlanError.message)
-        return
-      }
-
-      navigate('/workout-plans')
-    } catch (err: any) {
-      logger.error('[WorkoutPlanEditPage] Error deleting plan:', err)
-      setError(
-        err.message || 'An unexpected error occurred while deleting the plan.',
-      )
-    }
+    navigate('/workout-plans')
   }
 
   const handleCopy = async () => {
     if (!id) return
 
-    const client = getSupabaseClient()
-    if (!client) {
-      setError('Supabase client not available.')
+    const { newPlanId, error: copyError } = await copyWorkoutPlan(id, planName)
+    if (copyError || !newPlanId) {
+      setError(copyError ?? 'Could not copy plan.')
       return
     }
-
-    try {
-      const { data: planData, error: planError } = await client
-        .from(TableNames.WorkoutPlan)
-        .select('id, plan_name')
-        .eq('id', id)
-        .maybeSingle()
-
-      if (planError || !planData) {
-        setError(planError?.message || 'Could not load plan to copy.')
-        return
-      }
-
-      const { data: sessionsData, error: sessionsError } = await client
-        .from(TableNames.WorkoutPlanSession)
-        .select('id, plan_id, name, position, created_at, updated_at')
-        .eq('plan_id', id)
-        .order('position', { ascending: true })
-
-      if (sessionsError) {
-        setError(sessionsError.message)
-        return
-      }
-
-      const { data: exercisesData, error: exercisesError } = await client
-        .from(TableNames.WorkoutPlanExercise)
-        .select(
-          'id, plan_id, session_id, exercise_id, exercise_name, position, created_at, updated_at',
-        )
-        .eq('plan_id', id)
-        .order('position', { ascending: true })
-
-      if (exercisesError) {
-        setError(exercisesError.message)
-        return
-      }
-
-      const { data: authData, error: authErr } = await client.auth.getUser()
-      if (authErr || !authData?.user) {
-        setError('Unable to determine current user for plan copy.')
-        return
-      }
-
-      const sourceName = planName.trim() || planData.plan_name || 'Workout Plan'
-      const newPlanName = `${sourceName} Copy`
-
-      const { data: newPlan, error: insertPlanError } = await client
-        .from(TableNames.WorkoutPlan)
-        .insert({
-          user_id: authData.user.id,
-          plan_name: newPlanName,
-        })
-        .select('id')
-        .maybeSingle()
-
-      if (insertPlanError || !newPlan?.id) {
-        setError(insertPlanError?.message || 'Could not create copied plan.')
-        return
-      }
-
-      const copiedSessions: TablesInsert<
-        typeof TableNames.WorkoutPlanSession
-      >[] = (sessionsData ?? []).map((session) => ({
-        id: crypto.randomUUID(),
-        plan_id: newPlan.id,
-        name: session.name,
-        position: session.position,
-      }))
-
-      if (copiedSessions.length > 0) {
-        const { error: insertSessionsError } = await client
-          .from(TableNames.WorkoutPlanSession)
-          .insert(copiedSessions)
-
-        if (insertSessionsError) {
-          setError(insertSessionsError.message)
-          return
-        }
-      }
-
-      const copiedExercises: TablesInsert<
-        typeof TableNames.WorkoutPlanExercise
-      >[] = (exercisesData ?? []).map((exercise) => ({
-        id: crypto.randomUUID(),
-        plan_id: newPlan.id,
-        exercise_id: exercise.exercise_id,
-        exercise_name: exercise.exercise_name ?? null,
-        position: exercise.position,
-      }))
-
-      if (copiedExercises.length > 0) {
-        const { error: insertExercisesError } = await client
-          .from(TableNames.WorkoutPlanExercise)
-          .insert(copiedExercises)
-
-        if (insertExercisesError) {
-          setError(insertExercisesError.message)
-          return
-        }
-      }
-
-      navigate(`/workout-plans/${newPlan.id}/edit`)
-    } catch (err: any) {
-      logger.error('[WorkoutPlanEditPage] Error copying plan:', err)
-      setError(
-        err.message || 'An unexpected error occurred while copying the plan.',
-      )
-    }
+    navigate(`/workout-plans/${newPlanId}/edit`)
   }
 
   return (

@@ -1,6 +1,4 @@
-import type { Exercise, WorkoutTemplateInsert } from '@gym-pilot/shared'
-import { getSupabaseClient, logger } from '@gym-pilot/shared'
-import { TableNames } from '@gym-pilot/shared/src/dataServices/tableNames'
+import type { Exercise } from '@gym-pilot/shared'
 import clsx from 'clsx'
 import { useEffect, useState } from 'react'
 import { NavLink, useNavigate } from 'react-router-dom'
@@ -15,10 +13,10 @@ import { StatusMessageNotification } from '../../components/ui/StatusMessageNoti
 import { PageLayout } from '../../layouts/PageLayout'
 import { getExercisePath } from '../../utils/exerciseRouteUtils'
 import { formatLabel } from '../../utils/formatUtils'
+import { reorder } from '../../utils/arrayUtils'
 import { useIsDesktop } from '../../utils/useMediaQuery'
 import { TEMPLATE_EXERCISES_KEY } from '../../constants/storageKeys'
-
-// Define a key for local storage
+import { createWorkoutTemplate } from '../../features/workoutTemplates/services/workoutTemplatesService'
 
 
 function WorkoutTemplateCreatePage() {
@@ -51,62 +49,21 @@ function WorkoutTemplateCreatePage() {
 
     setIsSaving(true)
     try {
-      const client = getSupabaseClient()
+      const { templateId, error: saveError } = await createWorkoutTemplate(
+        templateName,
+        templateDescription || null,
+        selectedExercises,
+      )
 
-      // Ensure we set the current auth user id on the payload so the DB NOT NULL constraint is satisfied
-      const { data: authData, error: authErr } = await client.auth.getUser()
-
-      if (authErr || !authData?.user) {
-        logger.error(
-          '[WorkoutTemplateCreatePage] Unable to determine current user for template save',
-          authErr,
-        )
-        setIsSaving(false)
-        return
-      }
-
-      const payload: WorkoutTemplateInsert = {
-        name: templateName,
-        description: templateDescription || null,
-        metadata: {},
-        user_id: authData.user.id,
-      }
-
-      const { data: insertedTemplates, error: insertError } = await client
-        .from(TableNames.WorkoutTemplate)
-        .insert(payload)
-        .select('*')
-        .single()
-
-      if (insertError || !insertedTemplates) {
-        setError(insertError?.message ?? 'Error inserting template')
-        setIsSaving(false)
-        return
-      }
-
-      const templateId = insertedTemplates.id
-
-      const exerciseRows = selectedExercises.map((ex, idx) => ({
-        template_id: templateId,
-        exercise_id: ex.id,
-        position: idx,
-        exercise_name: formatLabel(ex.name) || null,
-      }))
-
-      const { error: exInsertErr } = await client
-        .from('workout_template_exercise')
-        .insert(exerciseRows)
-
-      if (exInsertErr) {
-        setError(exInsertErr.message)
-        setIsSaving(false)
+      if (saveError || !templateId) {
+        setError(saveError ?? 'Unexpected error saving template')
         return
       }
 
       // Clear local cached selections and navigate back
       localStorage.removeItem(TEMPLATE_EXERCISES_KEY)
       navigate('/workout-templates')
-    } catch (err) {
+    } catch {
       setError('Unexpected error saving template')
     } finally {
       setIsSaving(false)
@@ -128,29 +85,6 @@ function WorkoutTemplateCreatePage() {
       localStorage.setItem(TEMPLATE_EXERCISES_KEY, JSON.stringify(selectedExercises))
     }
   }, [selectedExercises]) // Dependency array includes selectedExercises
-
-  function reorder<T>(
-    items: T[],
-    index: number,
-    direction: 'up' | 'down',
-  ): T[] {
-    const currentIndex = index
-
-    if (currentIndex < 0) {
-      return items
-    }
-
-    const targetIndex = direction === 'up' ? currentIndex - 1 : currentIndex + 1
-    if (targetIndex < 0 || targetIndex >= items.length) {
-      return items
-    }
-
-    const nextItems = [...items]
-    const [currentItem] = nextItems.splice(currentIndex, 1)
-    nextItems.splice(targetIndex, 0, currentItem)
-
-    return nextItems
-  }
 
   const addExercises = (exercises: Exercise[]) => {
     // Filter out exercises that are already selected to avoid duplicates

@@ -1,5 +1,4 @@
-import { getSupabaseClient, logger } from '@gym-pilot/shared'
-import { TableNames } from '@gym-pilot/shared/src/dataServices/tableNames'
+import type { Exercise, WorkoutTemplate, WorkoutTemplateExercise } from '@gym-pilot/shared'
 import { clsx } from 'clsx'
 import { useEffect, useState } from 'react'
 import { Link, useNavigate, useParams } from 'react-router-dom'
@@ -13,15 +12,24 @@ import { PageLayout } from '../../layouts/PageLayout'
 import { getExercisePath } from '../../utils/exerciseRouteUtils'
 import { formatLabel } from '../../utils/formatUtils'
 import { useIsDesktop } from '../../utils/useMediaQuery'
+import { reorder } from '../../utils/arrayUtils'
+import {
+  addExercisesToTemplate,
+  copyWorkoutTemplate,
+  deleteWorkoutTemplate,
+  loadWorkoutTemplate,
+  removeTemplateExercise,
+  saveWorkoutTemplate,
+} from '../../features/workoutTemplates/services/workoutTemplatesService'
 
 export default function WorkoutTemplateEditPage() {
   const { id } = useParams<{ id: string }>()
   const navigate = useNavigate()
-  const [template, setTemplate] = useState<any | null>(null)
+  const [template, setTemplate] = useState<WorkoutTemplate | null>(null)
   const [loading, setLoading] = useState(false)
   const [name, setName] = useState('')
   const [description, setDescription] = useState('')
-  const [localExercises, setLocalExercises] = useState<any[]>([])
+  const [localExercises, setLocalExercises] = useState<WorkoutTemplateExercise[]>([])
   const [showExercisePicker, setShowExercisePicker] = useState(false)
   const [moved, setMoved] = useState<string | null>(null)
   const isDesktop = useIsDesktop()
@@ -31,206 +39,71 @@ export default function WorkoutTemplateEditPage() {
   )
   const [pendingDelete, setPendingDelete] = useState(false)
 
-  async function loadTemplate() {
+  async function refreshTemplate() {
     if (!id) return
     setLoading(true)
-    const client = getSupabaseClient()
-    if (!client) {
+    const { data, error } = await loadWorkoutTemplate(id)
+    if (error || !data) {
       setTemplate(null)
       setLoading(false)
       return
     }
-
-    const { data, error } = await client
-      .from(TableNames.WorkoutTemplate)
-      .select('*, workout_template_exercise(*)')
-      .eq('id', id)
-      .single()
-
-    if (error) {
-      logger.error('[WorkoutTemplateEditPage] Could not load template', error)
-      setTemplate(null)
-      setLoading(false)
-      return
-    }
-
     setTemplate(data)
     setName(data.name ?? '')
     setDescription(data.description ?? '')
-    setLocalExercises(
-      Array.isArray(data.workout_template_exercise)
-        ? [...data.workout_template_exercise].sort(
-            (a, b) => (a.position ?? 0) - (b.position ?? 0),
-          )
-        : [],
-    )
+    setLocalExercises(data.workout_template_exercise)
     setLoading(false)
   }
 
   useEffect(() => {
-    void loadTemplate()
+    void refreshTemplate()
   }, [id])
 
   async function handleSave() {
     if (!id) return
-    const client = getSupabaseClient()
-    if (!client) return
-
     setStatusMessage(null)
-    const { error } = await client
-      .from(TableNames.WorkoutTemplate)
-      .update({ name, description: description || null })
-      .eq('id', id)
-
+    const { error } = await saveWorkoutTemplate(id, name, description, localExercises)
     if (error) {
       setStatusTone('error')
-      setStatusMessage(error.message)
+      setStatusMessage(error)
       return
     }
-
-    // persist positions for reordered exercises
-    try {
-      await Promise.all(
-        localExercises.map((row, idx) => {
-          const position = idx
-          if (!row.id) return Promise.resolve(null)
-          return client
-            .from(TableNames.WorkoutTemplateExercise)
-            .update({ position })
-            .eq('id', row.id)
-        }),
-      )
-    } catch (posErr) {
-      // ignore position errors but surface message
-      logger.warn('[WorkoutTemplateEditPage] Could not persist exercise positions', posErr)
-    }
-
     navigate('/workout-templates')
   }
 
   async function handleDelete() {
     if (!id) return
-    const client = getSupabaseClient()
-    if (!client) return
-
-    const { error } = await client
-      .from(TableNames.WorkoutTemplate)
-      .delete()
-      .eq('id', id)
+    const { error } = await deleteWorkoutTemplate(id)
     if (error) {
       setStatusTone('error')
-      setStatusMessage(error.message)
+      setStatusMessage(error)
       return
     }
-
     navigate('/workout-templates')
   }
 
   async function handleCopy() {
     if (!id) return
-    const client = getSupabaseClient()
-    if (!client) return
-
     setStatusMessage(null)
-    const { data, error } = await client
-      .from(TableNames.WorkoutTemplate)
-      .select('*, workout_template_exercise(*)')
-      .eq('id', id)
-      .single()
-
-    if (error || !data) {
+    const { newTemplateId, error } = await copyWorkoutTemplate(id)
+    if (error || !newTemplateId) {
       setStatusTone('error')
-      setStatusMessage(error?.message ?? 'Could not copy template')
+      setStatusMessage(error ?? 'Could not copy template')
       return
     }
-
-    // create new template with same name + "Copy" and set current user
-    const { data: authData, error: authErr } = await client.auth.getUser()
-
-    if (authErr || !authData?.user) {
-      setStatusTone('error')
-      setStatusMessage('Unable to determine current user for template copy')
-      return
-    }
-
-    const { data: newTemplate, error: insertError } = await client
-      .from(TableNames.WorkoutTemplate)
-      .insert({
-        name: `${data.name} Copy`,
-        description: data.description,
-        user_id: authData.user.id,
-      })
-      .select()
-      .single()
-
-    if (insertError || !newTemplate) {
-      setStatusTone('error')
-      setStatusMessage(insertError?.message ?? 'Could not copy template')
-      return
-    }
-
-    // copy exercises
-    if (data.workout_template_exercise?.length) {
-      const exerciseRows = data.workout_template_exercise.map(
-        (ex: any, idx: number) => ({
-          template_id: newTemplate.id,
-          exercise_id: ex.exercise_id,
-          exercise_name: ex.exercise_name,
-          position: idx,
-        }),
-      )
-      const { error: exerciseError } = await client
-        .from(TableNames.WorkoutTemplateExercise)
-        .insert(exerciseRows)
-      if (exerciseError) {
-        setStatusTone('error')
-        setStatusMessage(exerciseError.message)
-        return
-      }
-    }
-
-    navigate(`/workout-templates/${newTemplate.id}/edit`)
+    navigate(`/workout-templates/${newTemplateId}/edit`)
   }
 
-  async function removeExerciseRow(rowId: string) {
-    const client = getSupabaseClient()
-    if (!client) return
-    const { error } = await client
-      .from(TableNames.WorkoutTemplateExercise)
-      .delete()
-      .eq('id', rowId)
+  async function handleRemoveExercise(rowId: string) {
+    const { error } = await removeTemplateExercise(rowId)
     if (error) {
       setStatusTone('error')
-      setStatusMessage(error.message)
+      setStatusMessage(error)
       return
     }
-
     setStatusTone('success')
     setStatusMessage('Exercise removed')
-    void loadTemplate()
-  }
-
-  function reorder<T>(
-    items: T[],
-    index: number,
-    direction: 'up' | 'down',
-  ): T[] {
-    const currentIndex = index
-
-    if (currentIndex < 0) {
-      return items
-    }
-
-    const targetIndex = direction === 'up' ? currentIndex - 1 : currentIndex + 1
-    if (targetIndex < 0 || targetIndex >= items.length) {
-      return items
-    }
-
-    const nextItems = [...items]
-    const [currentItem] = nextItems.splice(currentIndex, 1)
-    nextItems.splice(targetIndex, 0, currentItem)
-
-    return nextItems
+    void refreshTemplate()
   }
 
   const handleReorder = (index: number, direction: 'up' | 'down') => {
@@ -245,30 +118,16 @@ export default function WorkoutTemplateEditPage() {
     })
   }
 
-  const addExercises = async (exercises: any[]) => {
+  const addExercises = async (exercises: Exercise[]) => {
     if (!id) return
-    const client = getSupabaseClient()
-    if (!client) return
-
-    const startIndex = localExercises.length
-    const rows = exercises.map((ex, idx) => ({
-      template_id: id,
-      exercise_id: ex.id,
-      exercise_name: formatLabel(ex.name) || null,
-      position: startIndex + idx,
-    }))
-
-    const { error } = await client
-      .from(TableNames.WorkoutTemplateExercise)
-      .insert(rows)
+    const { error } = await addExercisesToTemplate(id, exercises, localExercises.length)
     if (error) {
       setStatusTone('error')
-      setStatusMessage(error.message)
+      setStatusMessage(error)
       return
     }
-
     setShowExercisePicker(false)
-    void loadTemplate()
+    void refreshTemplate()
   }
 
   return (
@@ -327,7 +186,7 @@ export default function WorkoutTemplateEditPage() {
                 </p>
               ) : (
                 <ul className="mt-2 space-y-2">
-                  {localExercises.map((ex: any, idx: number) => (
+                  {localExercises.map((ex, idx) => (
                     <li
                       key={ex.id ?? `new-${idx}`}
                       className={clsx(
@@ -341,7 +200,7 @@ export default function WorkoutTemplateEditPage() {
                         to={getExercisePath({
                           id: ex.exercise_id,
                           name: ex.exercise_name,
-                        } as any)}
+                        })}
                         className="text-sm font-medium text-blue-700 underline decoration-blue-600/50 underline-offset-2 hover:text-blue-800"
                       >
                         {formatLabel(ex.exercise_name ?? ex.exercise_id)}
@@ -350,7 +209,7 @@ export default function WorkoutTemplateEditPage() {
                         itemName={ex.exercise_name ?? ex.exercise_id}
                         onRemove={async () => {
                           if (ex.id) {
-                            await removeExerciseRow(ex.id)
+                            await handleRemoveExercise(ex.id)
                           } else {
                             setLocalExercises((cur) =>
                               cur.filter((r) => r !== ex),
