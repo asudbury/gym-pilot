@@ -1,10 +1,23 @@
+import { lazy } from 'react'
 import { Route } from 'react-router-dom'
-import { LoginPage } from '../pages/LoginPage'
-import { ResetPasswordPage } from '../pages/ResetPasswordPage'
-import { WelcomePage } from '../pages/help/WelcomePage'
-import { PreferencesPage } from '../pages/PreferencesPage'
 import { RequireAuth } from '../auth/RequireAuth'
-import { AdminChangePasswordPage } from '../pages/admin/AdminChangePasswordPage'
+
+const LoginPage = lazy(async () => ({
+  default: (await import('../pages/LoginPage')).LoginPage,
+}))
+const ResetPasswordPage = lazy(async () => ({
+  default: (await import('../pages/ResetPasswordPage')).ResetPasswordPage,
+}))
+const WelcomePage = lazy(async () => ({
+  default: (await import('../pages/help/WelcomePage')).WelcomePage,
+}))
+const PreferencesPage = lazy(async () => ({
+  default: (await import('../pages/PreferencesPage')).PreferencesPage,
+}))
+const AdminChangePasswordPage = lazy(async () => ({
+  default: (await import('../pages/admin/AdminChangePasswordPage'))
+    .AdminChangePasswordPage,
+}))
 
 export function createAuthRoutes() {
   return (

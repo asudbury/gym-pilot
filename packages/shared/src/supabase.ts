@@ -5,14 +5,6 @@ import { logger } from "./logging";
 let supabaseClient: SupabaseClient | null = null;
 let supabaseClientNoPersist: SupabaseClient | null = null;
 
-export type SupabaseAuthUser = {
-  id: string;
-  email: string | null;
-  created_at?: string;
-  last_sign_in_at?: string | null;
-  user_metadata?: Record<string, unknown>;
-};
-
 function getSupabaseUrl() {
   return (
     (import.meta.env?.VITE_SUPABASE_URL as string | undefined)?.trim() ||
@@ -25,26 +17,6 @@ function getSupabaseAnonKey() {
     (import.meta.env?.VITE_SUPABASE_ANON_KEY as string | undefined)?.trim() ||
     "anon-key"
   );
-}
-
-function getSupabaseServiceRoleKey() {
-  return import.meta.env?.VITE_SUPABASE_SERVICE_ROLE_KEY as string | undefined;
-}
-
-export function getSupabaseAdminClient() {
-  const url = getSupabaseUrl();
-  const serviceRoleKey = getSupabaseServiceRoleKey();
-
-  if (!url || !serviceRoleKey) {
-    return null;
-  }
-
-  return createClient(url, serviceRoleKey, {
-    auth: {
-      persistSession: false,
-      autoRefreshToken: false,
-    },
-  });
 }
 
 type SupabaseClientOptions = {
@@ -194,82 +166,6 @@ export async function ensureAuthenticatedSupabaseSession(
   });
 
   return signInResult;
-}
-
-async function getCurrentSessionSupabaseUser(): Promise<SupabaseAuthUser | null> {
-  const client = getSupabaseClient();
-
-  if (!client) {
-    return null;
-  }
-
-  try {
-    const {
-      data: { session },
-      error,
-    } = await client.auth.getSession();
-
-    if (error) {
-      logger.warn(
-        "[Supabase] Could not read current session for auth user lookup",
-        error,
-      );
-      return null;
-    }
-
-    const sessionUser = session?.user;
-
-    if (!sessionUser) {
-      return null;
-    }
-
-    return {
-      id: sessionUser.id,
-      email: sessionUser.email ?? null,
-      created_at: sessionUser.created_at,
-      last_sign_in_at: sessionUser.last_sign_in_at ?? null,
-      user_metadata: sessionUser.user_metadata ?? undefined,
-    };
-  } catch (error) {
-    logger.warn("[Supabase] Session-based auth user lookup failed", error);
-    return null;
-  }
-}
-
-export async function listSupabaseAuthUsers(): Promise<SupabaseAuthUser[]> {
-  logger.info("[Supabase] Listing auth users");
-  const adminClient = getSupabaseAdminClient();
-
-  if (!adminClient) {
-    logger.warn(
-      "[Supabase] Admin client unavailable; using current session user as fallback for auth user lookup",
-    );
-    const currentUser = await getCurrentSessionSupabaseUser();
-    return currentUser ? [currentUser] : [];
-  }
-
-  const { data, error } = await adminClient.auth.admin.listUsers();
-
-  if (error) {
-    logger.error("[Supabase] Could not list auth users", error);
-    const currentUser = await getCurrentSessionSupabaseUser();
-    return currentUser ? [currentUser] : [];
-  }
-
-  const authUsers = (data.users ?? []).map((user) => ({
-    id: user.id,
-    email: user.email ?? null,
-    created_at: user.created_at,
-    last_sign_in_at: user.last_sign_in_at ?? null,
-    user_metadata: user.user_metadata ?? undefined,
-  }));
-
-  if (authUsers.length > 0) {
-    return authUsers;
-  }
-
-  const currentUser = await getCurrentSessionSupabaseUser();
-  return currentUser ? [currentUser] : [];
 }
 
 export async function resetSupabasePassword(email: string) {

@@ -1,4 +1,4 @@
-import { exercises, exercisesSchema } from '@gym-pilot/shared'
+import { exercises } from '@gym-pilot/shared'
 import { getExerciseSlug } from '../../../utils/exerciseRouteUtils'
 
 export type ExercisePageViewModel = {
@@ -8,9 +8,7 @@ export type ExercisePageViewModel = {
 
 export function resolveExercisePageViewModel(
   slug: string | undefined,
-  exerciseList: Array<(typeof exercises)[number]> = exercisesSchema.parse(
-    exercises,
-  ),
+  exerciseList: Array<(typeof exercises)[number]> = exercises,
 ) {
   const exercise = slug
     ? exerciseList.find(

@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useState } from 'react'
 import { useLocation, useNavigate } from 'react-router-dom'
-import { exercises, exercisesSchema } from '@gym-pilot/shared'
+import { exerciseLookupById } from '@gym-pilot/shared'
 import { HOME_FILTER_KEY } from '../../../constants/storageKeys'
 import {
   getQuickLinkForPath,
@@ -117,12 +117,7 @@ export function useFavouriteLinksMenu({
   }, [menuOpen])
 
   const exerciseLookup = useMemo(() => {
-    try {
-      const parsedExercises = exercisesSchema.parse(exercises)
-      return new Map(parsedExercises.map((exercise) => [exercise.id, exercise]))
-    } catch {
-      return new Map<string, { id: string; name: string }>()
-    }
+    return exerciseLookupById
   }, [])
 
   const currentQuickLink = useMemo(() => {

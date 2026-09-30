@@ -1,4 +1,4 @@
-import { exercises, exercisesSchema } from '@gym-pilot/shared'
+import { exercises } from '@gym-pilot/shared'
 import { MIN_SEARCH_CHARS } from '../../../constants/home'
 import { formatLabel } from '../../../utils/formatUtils'
 import { type HomeFilters } from '../../favourites/domain/quickLinks'
@@ -20,24 +20,23 @@ export function normalizeCategory(category: string | null | undefined) {
 }
 
 export function resolveHomeViewModel(filters: HomeFilters) {
-  const parsed = exercisesSchema.parse(exercises)
   const normalizedCategory = normalizeCategory(filters.selectedCategory)
   const hasExplicitAll = filters.selectedCategory === 'All'
   const hasCategoryFilter = normalizedCategory !== null || hasExplicitAll
 
   return {
-    exerciseList: parsed as HomeExercise[],
+    exerciseList: exercises as HomeExercise[],
     categories: [
       'All',
       ...Array.from(
-        new Set(parsed.map((exercise) => formatLabel(exercise.category))),
+        new Set(exercises.map((exercise) => formatLabel(exercise.category))),
       ),
     ],
-    totalExercises: parsed.length,
+    totalExercises: exercises.length,
     normalizedCategory: normalizedCategory ?? null,
     hasExplicitAll,
     hasCategoryFilter,
-    shouldShowResults: parsed.length > 0,
+    shouldShowResults: exercises.length > 0,
   } satisfies HomeViewModel
 }
 

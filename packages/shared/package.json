@@ -4,9 +4,14 @@
   "private": true,
   "main": "./src/index.ts",
   "type": "module",
+  "scripts": {
+    "test": "vitest run src/**/*.test.ts",
+    "test:coverage": "vitest run src/**/*.test.ts --coverage --coverage.reportsDirectory ../../coverage/shared"
+  },
   "dependencies": {
     "@gym-pilot/types": "1.0.0",
     "@supabase/supabase-js": "^2.49.1",
+    "dexie": "^4.4.4",
     "zod": "^4.4.3"
   }
 }

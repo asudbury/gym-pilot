@@ -1,6 +1,6 @@
 import {
-  getSupabaseAdminClient,
   getSupabaseClient,
+  getSupabaseAuthUserById,
   loadSupabaseProfileRoles,
   logger,
   saveSupabaseProfile,
@@ -75,14 +75,9 @@ export function AdminEditUserPage() {
       }
 
       const emailLookup = new Map<string, string | null>()
-      const adminClient = getSupabaseAdminClient()
-      if (adminClient) {
-        // This check is valid and necessary
-        const { data: authData } =
-          await adminClient.auth.admin.getUserById(userId)
-        if (authData.user) {
-          emailLookup.set(authData.user.id, authData.user.email ?? null)
-        }
+      const authUser = await getSupabaseAuthUserById(userId)
+      if (authUser) {
+        emailLookup.set(authUser.id, authUser.email ?? null)
       }
 
       const roles = await loadSupabaseProfileRoles(userId)

@@ -2,7 +2,7 @@ import type { ReactNode } from 'react'
 import type { UserRole } from '@gym-pilot/types'
 import type { DecorativeIconProps } from '../components/ui/DecorativeIcon'
 import { getExercisePath, getExerciseSlug } from './exerciseRouteUtils'
-import { exercises, exercisesSchema } from '@gym-pilot/shared'
+import { findExerciseById } from '@gym-pilot/shared'
 import { isVisibleForTierAndDevice } from '../features/visibility/domain/tierDeviceVisibility'
 import type { DeviceType } from '../features/visibility/domain/tierDeviceVisibility'
 import { navigationMeta } from './navigationMeta'
@@ -83,8 +83,7 @@ export function buildNavigationMenuItems({
 export async function copyExerciseLinkToClipboard(
   exerciseId: string,
 ): Promise<void> {
-  const parsedExercises = exercisesSchema.parse(exercises)
-  const exercise = parsedExercises.find((item) => item.id === exerciseId)
+  const exercise = findExerciseById(exerciseId)
   const slug = exercise ? getExerciseSlug(exercise) : exerciseId
   const path = exercise ? getExercisePath(exercise) : `/exercise/${slug}`
   const baseUrl = new URL(

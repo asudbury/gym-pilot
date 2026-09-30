@@ -1,5 +1,6 @@
 export * from "./appSettings";
 export * from "./appSettingsService";
+export * from "./adminAuth";
 export * from "./data";
 export * from "./dataServices/importedWorkoutsDataService";
 export * from "./dataServices/types";
@@ -64,9 +65,7 @@ export * from "./storage";
 export {
   changeSupabasePassword,
   ensureAuthenticatedSupabaseSession,
-  getSupabaseAdminClient,
   getSupabaseClient,
-  listSupabaseAuthUsers,
   resetSupabasePassword,
   signInWithPassword,
   signOutFromSupabase,

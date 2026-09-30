@@ -1,5 +1,5 @@
 import type { Exercise } from '@gym-pilot/shared'
-import { exercises, exercisesSchema } from '@gym-pilot/shared'
+import { exercises } from '@gym-pilot/shared'
 import { useEffect, useMemo, useState } from 'react'
 import quickPickExercises from '../../constants/quickPickExercises.json'
 import {
@@ -47,7 +47,7 @@ export function ExerciseMultiPicker({
   )
   const { favorites } = useFavouritesFeature()
 
-  const exerciseList = useMemo(() => exercisesSchema.parse(exercises), [])
+  const exerciseList = useMemo(() => exercises, [])
   const exerciseLookup = useMemo(
     () => getExerciseLookup(exerciseList),
     [exerciseList],

@@ -1,6 +1,6 @@
 import {
-  getSupabaseAdminClient,
   getSupabaseClient,
+  getSupabaseAuthUserById,
   listSupabaseAuthUsers,
   loadSupabaseProfileRoles,
   logger,
@@ -173,15 +173,8 @@ export function AdminUserProfilesPage() {
 
       await saveSupabaseProfile(profilePayload, profile.id)
 
-      // Ensure the corresponding auth user exists before saving roles.
-      const adminClient = getSupabaseAdminClient()
-      let authUserExists = false
-      if (adminClient) {
-        const { data } = await adminClient.auth.admin.getUserById(profile.id)
-        if (data?.user) {
-          authUserExists = true
-        }
-      }
+      const authUser = await getSupabaseAuthUserById(profile.id)
+      const authUserExists = Boolean(authUser)
 
       if (!authUserExists) {
         // Avoid attempting the insert which would violate FK constraints.

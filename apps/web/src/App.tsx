@@ -1,4 +1,4 @@
-import { useEffect } from 'react'
+import { Suspense, useEffect } from 'react'
 import { Routes, useLocation } from 'react-router-dom'
 import ErrorBoundary from './components/ErrorBoundary'
 import { Header } from './components/navigation/Header'
@@ -90,12 +90,20 @@ function App() {
         </div>
       ) : (
         <ErrorBoundary>
-          <Routes>
-            {createAuthRoutes()}
-            {createPublicRoutes({
-              user,
-            })}
-          </Routes>
+          <Suspense
+            fallback={
+              <div className="mx-auto flex max-w-6xl px-4 py-8 text-sm text-slate-600 sm:px-6 lg:px-8">
+                Loading…
+              </div>
+            }
+          >
+            <Routes>
+              {createAuthRoutes()}
+              {createPublicRoutes({
+                user,
+              })}
+            </Routes>
+          </Suspense>
         </ErrorBoundary>
       )}
       <BottomNavigation />

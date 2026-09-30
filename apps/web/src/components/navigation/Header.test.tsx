@@ -53,5 +53,6 @@ describe('Header', () => {
     })
 
     expect(container.querySelector('.fixed')).not.toBeNull()
+    expect(toggleButton?.getAttribute('aria-expanded')).toBe('true')
   })
 })

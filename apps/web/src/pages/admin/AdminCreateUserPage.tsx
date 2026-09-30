@@ -2,12 +2,11 @@ import { useMemo, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { Button } from '../../components/ui/Button'
 import {
+  createSupabaseAdminAuthUser,
   getSupabaseClient,
-  getSupabaseAdminClient,
   logger,
   saveSupabaseProfile,
   saveSupabaseProfileRoles,
-  signUpWithPassword,
   usePlan,
 } from '@gym-pilot/shared'
 import type { UserRole } from '@gym-pilot/types'
@@ -32,6 +31,22 @@ function isSupabaseAuthCredentialError(message?: string) {
   }
 
   return /invalid login credentials|jwt|token|session/i.test(message)
+}
+
+function normalizeAdminEmail(email: string) {
+  const trimmedEmail = email.trim().toLowerCase()
+
+  if (!trimmedEmail) {
+    return `user-${globalThis.crypto?.randomUUID?.() ?? Date.now()}@gym-pilot.local`
+  }
+
+  if (trimmedEmail.includes('@')) {
+    return trimmedEmail
+  }
+
+  return `${
+    trimmedEmail.replace(/\s+/g, '.').replace(/[^a-z0-9._-]/g, '') || 'user'
+  }@gym-pilot.local`
 }
 
 export function AdminCreateUserPage() {
@@ -88,87 +103,38 @@ export function AdminCreateUserPage() {
     }
 
     if (hasTemporaryPassword) {
-      // Try to create the auth user via the service-role admin client so
-      // the new user exists in `auth.users` before we insert the profile
-      // row (avoids foreign-key race errors). Fall back to a normal
-      // client-side signup when the service role key is not available.
-      const serviceAdminClient = getSupabaseAdminClient()
-      let response: Awaited<ReturnType<typeof signUpWithPassword>> | null = null
       let createdUserId: string | undefined
 
-      if (serviceAdminClient) {
-        const emailCandidate = newUserEmail.trim() || resolvedDisplayName
-        const normalizedEmail = emailCandidate.includes('@')
-          ? emailCandidate.toLowerCase()
-          : `${
-              emailCandidate
-                .replace(/\s+/g, '.')
-                .replace(/[^a-z0-9._-]/gi, '')
-                .toLowerCase() || 'user'
-            }@gym-pilot.local`
-
-        try {
-          const { data, error } =
-            await serviceAdminClient.auth.admin.createUser({
-              email: normalizedEmail,
-              password: tempPassword,
-              user_metadata: { password_change_required: true },
-            })
-
-          logger.info('[AdminCreateUser] service createUser result', {
-            data,
-            error,
-          })
-
-          if (error) {
-            logger.error(
-              '[AdminCreateUser] Service-role createUser failed',
-              error,
-            )
-          } else if (data?.user?.id) {
-            createdUserId = data.user.id
-          }
-        } catch (err) {
-          logger.warn('[AdminCreateUser] Service-role create user threw', err)
-        }
-      }
-
-      // If we didn't create via the service role, fall back to the public
-      // signup flow which returns a session/user id or an error.
-      if (!createdUserId) {
-        response = await signUpWithPassword(
-          newUserEmail.trim() || resolvedDisplayName,
-          tempPassword,
-          { passwordChangeRequired: true, persistSession: false },
+      try {
+        const authUser = await createSupabaseAdminAuthUser({
+          email: normalizeAdminEmail(
+            newUserEmail.trim() || resolvedDisplayName,
+          ),
+          password: tempPassword,
+          passwordChangeRequired: mustChangePasswordFlag,
+        })
+        createdUserId = authUser.id
+      } catch (error) {
+        logger.error(
+          '[AdminCreateUser] Could not create Supabase auth user',
+          error,
         )
-
-        if (response.error) {
-          logger.error(
-            '[AdminCreateUser] Could not create Supabase auth user',
-            response.error,
-          )
-          setTempPassword('')
-
-          const errorMessage = response.error.message?.includes('rate limit')
-            ? 'We could not create the account right now because Supabase is temporarily rate-limiting email sign-ups. Please try again in a few minutes.'
-            : `Could not create user: ${response.error.message}`
-
-          setStatusMessage({ text: errorMessage, tone: 'error' })
-          return
-        }
+        setTempPassword('')
+        setStatusMessage({
+          text:
+            error instanceof Error
+              ? `Could not create user: ${error.message}`
+              : 'Could not create user.',
+          tone: 'error',
+        })
+        return
       }
 
       const noPersistClient = getSupabaseClient({
         persistSession: false,
         autoRefreshToken: false,
       })
-      const adminClient = getSupabaseClient()
-
-      // Prefer the service-role client when available so we can both create
-      // the auth user and upsert the profile using the same privileged
-      // connection (avoids FK races). Otherwise prefer the admin client
-      // (current logged-in admin session) then the no-persist client.
-      const client = serviceAdminClient ?? adminClient ?? noPersistClient
+      const client = noPersistClient
 
       if (!client) {
         setStatusMessage({
@@ -178,44 +144,12 @@ export function AdminCreateUserPage() {
         return
       }
 
-      const resolvedNewUserId = createdUserId ?? response?.data?.user?.id
+      const resolvedNewUserId = createdUserId
 
       logger.info('[AdminCreateUser] resolvedNewUserId', {
         resolvedNewUserId,
         createdUserId,
-        responseData: response?.data,
       })
-
-      // If we created the user via the service-role client, poll auth.users
-      // until the new user record is visible to avoid FK races caused by
-      // eventual consistency in the auth system.
-      if (serviceAdminClient && createdUserId) {
-        let seen = false
-        let attempts = 0
-        while (!seen && attempts < 10) {
-          try {
-            const { data: lookupData } =
-              await serviceAdminClient.auth.admin.getUserById(createdUserId)
-            if (lookupData?.user) {
-              seen = true
-              break
-            }
-          } catch (err) {
-            // ignore and retry
-          }
-
-          attempts += 1
-          // eslint-disable-next-line no-await-in-loop
-          await new Promise((res) => setTimeout(res, 200 * attempts))
-        }
-
-        if (!seen) {
-          logger.warn(
-            '[AdminCreateUser] service admin could not verify new user presence after retries',
-            { createdUserId },
-          )
-        }
-      }
 
       if (resolvedNewUserId) {
         // Validate access end date
