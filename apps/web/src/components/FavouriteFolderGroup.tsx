@@ -46,21 +46,21 @@ export function FavouriteFolderGroup({
         )
       }}
     >
-      <div className="mb-3 flex items-center justify-between">
+      <div className="mb-3 flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
         <Button
           onClick={() => onToggle(folderName)}
-          className="flex items-center gap-2 text-left text-sm font-semibold tracking-wide text-slate-600"
+          className="flex w-full items-center gap-2 text-left text-sm font-semibold tracking-wide text-slate-600 sm:w-auto"
         >
           <span className="text-base text-slate-400">
             {isCollapsed ? '▶' : '▼'}
           </span>
           <span>{folderName}</span>
         </Button>
-        <div className="flex items-center gap-2">
+        <div className="flex flex-col gap-2 sm:flex-row sm:items-center">
           {folderName !== 'No folder' && (
             <Button
               onClick={() => onDeleteFolder(folderName)}
-              className="rounded-lg border border-rose-200 bg-rose-50 px-2 py-1 text-xs font-medium text-rose-700 transition hover:bg-rose-100"
+              className="w-full rounded-lg border border-rose-200 bg-rose-50 px-3 py-2 text-xs font-medium text-rose-700 transition hover:bg-rose-100 sm:w-auto"
             >
               Delete folder
             </Button>
@@ -79,7 +79,7 @@ export function FavouriteFolderGroup({
             >
               <Button
                 onClick={() => onOpenLink(link)}
-                className="flex-1 text-left"
+                className="w-full flex-1 text-left"
                 draggable
                 onDragStart={(event) => {
                   event.stopPropagation()
@@ -99,7 +99,7 @@ export function FavouriteFolderGroup({
                 </div>
                 <div className="mt-1 text-xs text-slate-500">{link.path}</div>
               </Button>
-              <div className="flex flex-col gap-2 sm:flex-row sm:items-center">
+              <div className="flex w-full flex-col gap-2 sm:w-auto sm:flex-row sm:items-center">
                 <label className="text-xs font-semibold uppercase tracking-wide text-slate-500">
                   <span className="sr-only">Folder</span>
                   <select
@@ -107,7 +107,7 @@ export function FavouriteFolderGroup({
                       normalizeFolderName(link.folder ?? '') || 'No folder'
                     }
                     onChange={(event) => onMoveLink(link, event.target.value)}
-                    className="mt-1 rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm text-slate-700"
+                    className="mt-1 w-full rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm text-slate-700 sm:w-auto"
                   >
                     <option value="">No folder</option>
                     {folderOptions.map((folderOption) => (
@@ -121,14 +121,14 @@ export function FavouriteFolderGroup({
                   onClick={() => onOpenLink(link)}
                   className={getToneClass(
                     'default',
-                    'rounded-lg px-3 py-2 text-sm font-medium',
+                    'w-full rounded-lg px-3 py-2 text-sm font-medium sm:w-auto',
                   )}
                 >
                   Open
                 </Button>
                 <Button
                   onClick={() => onRemoveLink(link)}
-                  className="rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm font-medium text-slate-700 transition hover:bg-slate-100"
+                  className="w-full rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm font-medium text-slate-700 transition hover:bg-slate-100 sm:w-auto"
                 >
                   Remove
                 </Button>
