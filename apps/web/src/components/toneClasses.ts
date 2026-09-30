@@ -11,11 +11,42 @@ export type ToneName =
   | 'chip-blue'
   | 'chip-destructive'
 
-/** Base classes shared across all tone variants */
+/**
+ * Base classes shared across all button variants.
+ * Extracted to reduce CSS class string duplication.
+ */
 const baseClasses = {
   button: 'cursor-pointer rounded-lg border font-medium transition-all duration-200 hover:font-semibold',
   buttonLarge: 'px-4 py-2 text-base hover:shadow-md',
   buttonChip: 'px-3 py-1.5 text-sm hover:shadow-sm',
+}
+
+/**
+ * Helper to build button tone classes with consistent structure.
+ * Reduces duplication of hover states and dark mode variants.
+ * @param colors - light/dark mode colors for border, bg, text, and hover states
+ * @param isChip - whether this is a chip (smaller) variant
+ * @param darkHoverText - optional additional hover text color for dark mode
+ */
+function buildToneClass(
+  colors: {
+    borderLight: string
+    bgLight: string
+    textLight: string
+    borderHoverLight: string
+    bgHoverLight: string
+    borderDark: string
+    bgDark: string
+    textDark: string
+    borderHoverDark: string
+    bgHoverDark: string
+    textHoverDark?: string
+  },
+  isChip = false,
+): string {
+  const size = isChip ? baseClasses.buttonChip : baseClasses.buttonLarge
+  const hoverText = colors.textHoverDark ? ` ${colors.textHoverDark}` : ''
+  return `${baseClasses.button} border-${colors.borderLight} bg-${colors.bgLight} text-${colors.textLight} hover:border-${colors.borderHoverLight} hover:bg-${colors.bgHoverLight} dark:border-${colors.borderDark} dark:bg-${colors.bgDark} dark:text-${colors.textDark} dark:hover:border-${colors.borderHoverDark} dark:hover:bg-${colors.bgHoverDark}${hoverText} ${size}`
 }
 
 const toneClasses: Record<ToneName, string> = {
