@@ -51,7 +51,10 @@ export const ItemControls = ({
       ) : (
         <>
           {isFirst ? (
-            <span />
+            <span
+              aria-hidden="true"
+              className="inline-flex min-h-10 min-w-10 items-center justify-center px-3 py-2"
+            />
           ) : (
             <Button
               tone="default"
