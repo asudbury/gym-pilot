@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useState } from 'react'
+import { useCallback, useEffect, useRef, useState } from 'react'
 import { useAuth } from '../auth/AuthContext'
 import { PageCardLayout } from '../layouts/PageCardLayout'
 import { PageLayout } from '../layouts/PageLayout'
@@ -27,11 +27,16 @@ export function SessionHistoryPage() {
     string | null
   >(null)
   const [errorMessage, setErrorMessage] = useState<string | null>(null)
+  const isActiveRef = useRef(true)
 
   const userId = user?.id ?? null
 
   const loadEntries = useCallback(async () => {
     try {
+      if (!isActiveRef.current) {
+        return
+      }
+
       if (userId == null) {
         setEntries([])
         setErrorMessage(null)
@@ -39,21 +44,24 @@ export function SessionHistoryPage() {
       }
 
       const { data } = await getUserSessions(userId)
+      if (!isActiveRef.current) {
+        return
+      }
+
       setEntries(sortSessionEntries(data ?? []))
       setErrorMessage(null)
     } catch (error) {
+      if (!isActiveRef.current) {
+        return
+      }
+
       setErrorMessage(String(error))
     }
   }, [userId])
 
   useEffect(() => {
-    let isActive = true
-
-    void loadEntries().then(() => {
-      if (!isActive) {
-        setEntries([])
-      }
-    })
+    isActiveRef.current = true
+    void loadEntries()
 
     const handleHistoryUpdated = () => {
       void loadEntries()
@@ -65,7 +73,7 @@ export function SessionHistoryPage() {
     )
 
     return () => {
-      isActive = false
+      isActiveRef.current = false
       window.removeEventListener(
         'gym-pilot-session-history-updated',
         handleHistoryUpdated,
