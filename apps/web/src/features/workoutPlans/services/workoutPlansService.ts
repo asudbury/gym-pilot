@@ -316,6 +316,7 @@ export async function copyWorkoutPlan(
         .insert(copiedSessions)
 
       if (insertSessionsError) {
+        await client.from(TableNames.WorkoutPlan).delete().eq('id', newPlan.id)
         return { newPlanId: null, error: insertSessionsError.message }
       }
     }
@@ -337,6 +338,7 @@ export async function copyWorkoutPlan(
         .insert(copiedExercises)
 
       if (insertExercisesError) {
+        await client.from(TableNames.WorkoutPlan).delete().eq('id', newPlan.id)
         return { newPlanId: null, error: insertExercisesError.message }
       }
     }
