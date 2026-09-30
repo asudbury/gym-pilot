@@ -26,6 +26,14 @@ type HeaderProps = {
   onToggleMobileMenu: () => void
 }
 
+// 5rem leaves room for the 4rem header plus a small buffer below it.
+const mobileMenuPanelBaseClassName =
+  'fixed inset-x-3 top-16 z-40 box-border max-h-[min(75vh,calc(100dvh-5rem))] w-[calc(100vw-1.5rem)] max-w-[22rem] overflow-x-hidden overflow-y-auto rounded-2xl p-3 sm:absolute sm:right-0 sm:left-auto sm:top-full sm:mt-2 sm:w-80 sm:max-w-[calc(100vw-2rem)]'
+const mobileMenuPanelGlassClassName =
+  `${mobileMenuPanelBaseClassName} border border-white/70 bg-white/75 shadow-xl backdrop-blur-xl dark:border-slate-700 dark:bg-slate-900`
+const mobileMenuPanelSolidClassName =
+  `${mobileMenuPanelBaseClassName} border border-slate-200 bg-white shadow-lg dark:border-slate-700 dark:bg-slate-900`
+
 export function Header({
   appName,
   desktopMenuItems,
@@ -75,6 +83,7 @@ export function Header({
   )
 
   const menuLinkClassName = navigationItemBaseClassName
+
 
   useEffect(() => {
     if (!mobileMenuOpen) {
@@ -223,7 +232,7 @@ export function Header({
                   id="tablet-navigation-menu"
                   ref={menuContainerRef}
                   aria-label="Navigation menu"
-                  className="fixed inset-x-3 top-16 z-40 box-border max-h-[min(75vh,32rem)] max-w-[calc(100vw-1.5rem)] overflow-x-hidden overflow-y-auto rounded-2xl border border-white/70 bg-white/75 p-3 shadow-xl backdrop-blur-xl sm:absolute sm:right-0 sm:left-auto sm:top-full sm:mt-2 sm:w-80 sm:max-w-[calc(100vw-2rem)] dark:border-slate-700 dark:bg-slate-900"
+                  className={mobileMenuPanelGlassClassName}
                 >
                   <div className="flex min-w-0 flex-col gap-2">
                     <FavouriteLinksMenu />
@@ -282,7 +291,7 @@ export function Header({
                   id="mobile-navigation-menu"
                   ref={menuContainerRef}
                   aria-label="Navigation menu"
-                  className="fixed inset-x-3 top-16 z-40 box-border max-h-[min(75vh,32rem)] max-w-[calc(100vw-1.5rem)] overflow-x-hidden overflow-y-auto rounded-2xl border border-slate-200 bg-white p-3 shadow-lg sm:absolute sm:right-0 sm:left-auto sm:top-full sm:mt-2 sm:w-80 sm:max-w-[calc(100vw-2rem)] dark:border-slate-700 dark:bg-slate-900"
+                  className={mobileMenuPanelSolidClassName}
                 >
                   <div className="flex min-w-0 flex-col gap-2">
                     <FavouriteLinksMenu />

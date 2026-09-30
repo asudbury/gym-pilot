@@ -1,6 +1,10 @@
 import { useState } from 'react'
+import clsx from 'clsx'
 import { Button } from './ui/Button'
 import { DecorativeIcon } from './ui/DecorativeIcon'
+
+const spacerClassName =
+  'inline-flex min-h-10 min-w-10 items-center justify-center px-3 py-2'
 
 interface ItemControlsProps {
   itemName: string
@@ -24,13 +28,13 @@ export const ItemControls = ({
   const [isConfirmingDelete, setIsConfirmingDelete] = useState(false)
 
   return (
-    <div className={className ?? ''}>
+    <div className={clsx('flex flex-wrap gap-2', className)}>
       {isConfirmingDelete ? (
         <>
           <Button
             onClick={() => setIsConfirmingDelete(false)}
             tone="default"
-            className="mr-2"
+            className="min-h-10 px-3 py-2"
           >
             <DecorativeIcon icon="close" className="h-4 w-4" />
             <span>Cancel</span>
@@ -41,6 +45,7 @@ export const ItemControls = ({
               setIsConfirmingDelete(false)
             }}
             tone="destructive"
+            className="min-h-10 px-3 py-2"
           >
             <DecorativeIcon icon="check" className="h-4 w-4" />
             <span>Confirm</span>
@@ -49,30 +54,34 @@ export const ItemControls = ({
       ) : (
         <>
           {isFirst ? (
-            <span />
+            <span
+              aria-hidden="true"
+              className={spacerClassName}
+            />
           ) : (
             <Button
               tone="default"
               onClick={() => onReorder('up')}
               disabled={isFirst}
               aria-label={`Move ${itemName} up`}
-              className="mr-2"
+              className="min-h-10 px-3 py-2"
             >
               <DecorativeIcon icon="arrowUp" className="h-4 w-4" />
             </Button>
           )}
 
           {isLast ? (
-            <Button tone="default" disabled={isLast} className="mr-2">
-              <DecorativeIcon className="h-4 w-4" />
-            </Button>
+            <span
+              aria-hidden="true"
+              className={spacerClassName}
+            />
           ) : (
             <Button
               tone="default"
               onClick={() => onReorder('down')}
               disabled={isLast}
               aria-label={`Move ${itemName} down`}
-              className="mr-2"
+              className="min-h-10 px-3 py-2"
             >
               <DecorativeIcon icon="arrowDown" className="h-4 w-4" />
             </Button>
@@ -80,6 +89,7 @@ export const ItemControls = ({
           <Button
             tone="destructive"
             onClick={() => setIsConfirmingDelete(true)}
+            className="min-h-10 px-3 py-2"
           >
             <DecorativeIcon icon="trash" className="h-4 w-4" />
             {removeText && 'Remove'}

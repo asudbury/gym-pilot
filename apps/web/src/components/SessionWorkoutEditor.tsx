@@ -113,8 +113,12 @@ export function SessionWorkoutEditor({
 
   return (
     <div className={`${className}`}>
-      <div className="flex-1 mb-2">
-        <Button tone="blue" onClick={() => setShowExercisePicker(true)}>
+      <div className="mb-2 flex flex-col gap-2 sm:flex-row sm:items-center">
+        <Button
+          tone="blue"
+          onClick={() => setShowExercisePicker(true)}
+          className="w-full min-h-10 px-3 py-2 sm:w-auto"
+        >
           Add Exercises
         </Button>
         <ExerciseMultiPicker
@@ -142,17 +146,17 @@ export function SessionWorkoutEditor({
           <div
             key={item.id}
             className={clsx(
-              'rounded-2xl border border-slate-200 bg-white p-3 transition-colors',
+              'rounded-2xl border border-slate-200 bg-white p-3 transition-colors sm:p-4',
               {
                 'bg-yellow-100': moved === item.id,
               },
             )}
           >
-            <div className="flex flex-col gap-2 md:flex-row md:items-center">
+            <div className="flex flex-col gap-3 md:flex-row md:items-center">
               <div className="flex flex-1 items-center gap-2">
                 <Button
                   tone="default"
-                  className="px-2 py-1 text-xs"
+                  className="min-h-10 px-3 py-2 text-xs"
                   onClick={() => handleExpandItem(item.id!)}
                   aria-label={isExpanded ? 'Collapse item' : 'Expand item'}
                 >
@@ -185,6 +189,7 @@ export function SessionWorkoutEditor({
                 isFirst={index === 0}
                 isLast={index === items.length - 1}
                 removeText={isDesktop}
+                className="w-full justify-end md:w-auto"
               />
             </div>
 

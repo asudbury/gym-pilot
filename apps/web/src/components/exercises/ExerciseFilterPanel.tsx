@@ -114,11 +114,11 @@ export function ExerciseFilterPanel({
             showExerciseImages
               ? getToneClass(
                   'default',
-                  'w-fit px-4 py-2 text-sm font-medium transition hover:bg-slate-200',
+                  'w-full sm:w-auto px-4 py-2 text-sm font-medium transition hover:bg-slate-200',
                 )
               : getToneClass(
                   'blue',
-                  'w-fit px-4 py-2 text-sm font-medium transition',
+                  'w-full sm:w-auto px-4 py-2 text-sm font-medium transition',
                 )
           }
         >

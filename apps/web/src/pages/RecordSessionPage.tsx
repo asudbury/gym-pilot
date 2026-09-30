@@ -18,7 +18,10 @@ import {
   StatusMessageNotification,
   type DisplayableError,
 } from '../components/ui/StatusMessageNotification'
-import { DesktopOnly } from '../components/visibility/DeviceVisibility'
+import {
+  DesktopOnly,
+  MobileOnly,
+} from '../components/visibility/DeviceVisibility'
 import { appTokens } from '../constants/tokens'
 import { formatDateTimeLocalInputValue } from '../dateTimeFormatter'
 import { PageLayout } from '../layouts/PageLayout'
@@ -208,6 +211,36 @@ export function RecordSessionPage() {
                 pattern="[0-9]*"
               />
             </label>
+
+            <MobileOnly>
+              <details className="mt-4 rounded-2xl border border-slate-200 bg-slate-50 p-4">
+                <summary className="flex cursor-pointer list-none items-center justify-between gap-2 text-sm font-semibold text-slate-700">
+                  <span>Session notes and rating</span>
+                  <span className="text-xs font-medium uppercase tracking-wide text-slate-500">
+                    Tap to edit
+                  </span>
+                </summary>
+                <div className="mt-4 space-y-4">
+                  <div className="text-sm text-slate-700">
+                    <span className="font-medium">Rating</span>
+                    <div className="mt-2 overflow-x-auto">
+                      <RatingSelector value={rating} onChange={setRating} />
+                    </div>
+                  </div>
+
+                  <label className="block text-sm text-slate-700">
+                    <span className="font-medium">Notes</span>
+                    <textarea
+                      value={notes}
+                      onChange={(event) => setNotes(event.target.value)}
+                      rows={4}
+                      className={`${appTokens.input} mt-1 w-full`}
+                      placeholder="Add any notes for this session"
+                    />
+                  </label>
+                </div>
+              </details>
+            </MobileOnly>
 
             <DesktopOnly>
               <div className="mt-4 block text-sm text-slate-700">

@@ -3,7 +3,6 @@ import { PageCard } from '../components/PageCard'
 import { Heading1, UpperCaseParagraph } from '../components/Typography'
 import type { DecorativeIconProps } from '../components/ui/DecorativeIcon'
 import { DecorativeIcon } from '../components/ui/DecorativeIcon'
-import { DesktopOnly } from '../components/visibility/DeviceVisibility'
 
 type PageCardLayoutProps = {
   title?: string
@@ -69,28 +68,26 @@ export function PageCardLayout({
 
   return (
     <PageCard className={`${className} px-0 py-4 sm:p-0`}>
-      <div className="space-y-1 sm:space-y-4">
-        <div className="flex flex-col items-start gap-1 px-4 sm:px-0 sm:gap-2">
+      <div className="space-y-2 sm:space-y-4">
+        <div className="flex flex-col items-start gap-2 px-4 sm:px-0">
           <div className="flex flex-wrap items-center gap-1 sm:gap-2 sm:pl-2">
             <div className="shrink-0">
               <DecorativeIcon icon={resolvedIcon} className="h-5 w-5" />
             </div>
             <UpperCaseParagraph>{title}</UpperCaseParagraph>
           </div>
-          <DesktopOnly>
-            <div className="flex flex-col items-start">
-              {subtitle ? (
-                <Heading1 className="text-xl font-semibold tracking-tight text-slate-900 sm:text-2xl md:text-3xl dark:text-slate-100">
-                  {subtitle}
-                </Heading1>
-              ) : null}
-              {description ? (
-                <p className="max-w-2xl text-sm leading-6 text-slate-600 dark:text-slate-300">
-                  {description}
-                </p>
-              ) : null}
-            </div>
-          </DesktopOnly>
+          <div className="flex flex-col items-start">
+            {subtitle ? (
+              <Heading1 className="text-lg font-semibold tracking-tight text-slate-900 sm:text-2xl md:text-3xl dark:text-slate-100">
+                {subtitle}
+              </Heading1>
+            ) : null}
+            {description ? (
+              <p className="max-w-2xl text-sm leading-6 text-slate-600 dark:text-slate-300">
+                {description}
+              </p>
+            ) : null}
+          </div>
         </div>
         {children ? (
           <div className="flex flex-col gap-4 px-4 sm:px-0">{children}</div>
