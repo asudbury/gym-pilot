@@ -1,4 +1,5 @@
 import { useState } from 'react'
+import clsx from 'clsx'
 import { Button } from './ui/Button'
 import { DecorativeIcon } from './ui/DecorativeIcon'
 
@@ -24,7 +25,7 @@ export const ItemControls = ({
   const [isConfirmingDelete, setIsConfirmingDelete] = useState(false)
 
   return (
-    <div className={`flex flex-wrap gap-2 ${className ?? ''}`.trim()}>
+    <div className={clsx('flex flex-wrap gap-2', className)}>
       {isConfirmingDelete ? (
         <>
           <Button
