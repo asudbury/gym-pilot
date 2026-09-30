@@ -18,7 +18,7 @@ export async function loadWorkoutTemplates(): Promise<{
 }> {
   const client = getSupabaseClient()
   if (!client) {
-    return { data: [], error: null }
+    return { data: [], error: 'Supabase client not available.' }
   }
 
   const { data, error } = await client
@@ -43,7 +43,7 @@ export async function loadWorkoutTemplate(id: string): Promise<{
 }> {
   const client = getSupabaseClient()
   if (!client) {
-    return { data: null, error: null }
+    return { data: null, error: 'Supabase client not available.' }
   }
 
   const { data, error } = await client
@@ -81,7 +81,7 @@ export async function saveWorkoutTemplate(
 ): Promise<{ error: string | null }> {
   const client = getSupabaseClient()
   if (!client) {
-    return { error: null }
+    return { error: 'Supabase client not available.' }
   }
 
   const { error: updateError } = await client
@@ -116,7 +116,7 @@ export async function saveWorkoutTemplate(
 export async function deleteWorkoutTemplate(id: string): Promise<{ error: string | null }> {
   const client = getSupabaseClient()
   if (!client) {
-    return { error: null }
+    return { error: 'Supabase client not available.' }
   }
 
   const { error } = await client
@@ -137,7 +137,7 @@ export async function copyWorkoutTemplate(id: string): Promise<{
 }> {
   const client = getSupabaseClient()
   if (!client) {
-    return { newTemplateId: null, error: null }
+    return { newTemplateId: null, error: 'Supabase client not available.' }
   }
 
   const { data, error } = await client
@@ -195,7 +195,7 @@ export async function copyWorkoutTemplate(id: string): Promise<{
 export async function removeTemplateExercise(rowId: string): Promise<{ error: string | null }> {
   const client = getSupabaseClient()
   if (!client) {
-    return { error: null }
+    return { error: 'Supabase client not available.' }
   }
 
   const { error } = await client
@@ -216,7 +216,7 @@ export async function addExercisesToTemplate(
 ): Promise<{ error: string | null }> {
   const client = getSupabaseClient()
   if (!client) {
-    return { error: null }
+    return { error: 'Supabase client not available.' }
   }
 
   const rows: TablesInsert<typeof TableNames.WorkoutTemplateExercise>[] = exercises.map(
@@ -244,7 +244,7 @@ export async function createWorkoutTemplate(
 ): Promise<{ templateId: string | null; error: string | null }> {
   const client = getSupabaseClient()
   if (!client) {
-    return { templateId: null, error: null }
+    return { templateId: null, error: 'Supabase client not available.' }
   }
 
   const { data: authData, error: authErr } = await client.auth.getUser()
@@ -282,6 +282,8 @@ export async function createWorkoutTemplate(
     .insert(exerciseRows)
 
   if (exInsertErr) {
+    // Clean up the orphaned template record before returning the error
+    await client.from(TableNames.WorkoutTemplate).delete().eq('id', insertedTemplate.id)
     return { templateId: null, error: exInsertErr.message }
   }
 

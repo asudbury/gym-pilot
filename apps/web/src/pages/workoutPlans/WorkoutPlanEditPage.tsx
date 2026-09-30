@@ -230,7 +230,7 @@ export default function WorkoutPlanEditPage() {
     )
   }
 
-  const callPersistService = async (
+  const persistPlanSessions = async (
     sessionsToPersist: PlanSession[],
   ): Promise<string | null> => {
     const { planId: resolvedPlanId, error: persistError } = await persistWorkoutPlan({
@@ -291,7 +291,7 @@ export default function WorkoutPlanEditPage() {
     setError(null)
 
     try {
-      const persistedPlanId = await callPersistService(planSessions)
+      const persistedPlanId = await persistPlanSessions(planSessions)
 
       if (!persistedPlanId) {
         setIsSaving(false)

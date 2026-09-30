@@ -18,10 +18,16 @@ export function WorkoutTemplatesPage() {
 
   useEffect(() => {
     setLoading(true)
-    void loadWorkoutTemplates().then(({ data }) => {
-      setTemplates(data)
-      setLoading(false)
-    })
+    void loadWorkoutTemplates()
+      .then(({ data }) => {
+        setTemplates(data)
+      })
+      .catch(() => {
+        setTemplates([])
+      })
+      .finally(() => {
+        setLoading(false)
+      })
   }, [])
 
   const filteredTemplates = useMemo(
