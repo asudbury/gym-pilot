@@ -11,6 +11,13 @@ export type ToneName =
   | 'chip-blue'
   | 'chip-destructive'
 
+/** Base classes shared across all tone variants */
+const baseClasses = {
+  button: 'cursor-pointer rounded-lg border font-medium transition-all duration-200 hover:font-semibold',
+  buttonLarge: 'px-4 py-2 text-base hover:shadow-md',
+  buttonChip: 'px-3 py-1.5 text-sm hover:shadow-sm',
+}
+
 const toneClasses: Record<ToneName, string> = {
   default:
     'cursor-pointer rounded-lg border border-slate-200 bg-slate-50 px-4 py-2 text-base font-medium text-slate-700 transition-all duration-200 hover:border-slate-400 hover:bg-white hover:font-semibold hover:shadow-md dark:border-slate-700 dark:bg-slate-800 dark:text-slate-100 dark:hover:border-slate-600 dark:hover:bg-slate-700',

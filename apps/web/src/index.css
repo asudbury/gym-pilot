@@ -172,54 +172,58 @@ button {
   @apply border border-blue-300 bg-blue-50 text-blue-700;
 }
 
-/* Dark mode surface overrides */
+/* Dark mode surface overrides
+ * Using CSS custom properties with high specificity (html.dark selector)
+ * eliminates the need for !important flags. The selector specificity ensures
+ * these overrides apply correctly over Tailwind utility classes.
+ */
 html.dark .bg-white {
-  background-color: var(--app-surface) !important;
+  background-color: var(--app-surface);
 }
 
 html.dark .bg-slate-50 {
-  background-color: var(--app-surface-soft) !important;
+  background-color: var(--app-surface-soft);
 }
 
 html.dark .bg-slate-100 {
-  background-color: var(--app-surface-muted) !important;
+  background-color: var(--app-surface-muted);
 }
 
 html.dark .border-slate-200 {
-  border-color: var(--app-border) !important;
+  border-color: var(--app-border);
 }
 
 html.dark .border-slate-300 {
-  border-color: var(--app-border) !important;
+  border-color: var(--app-border);
 }
 
 html.dark .text-slate-900 {
-  color: var(--app-text) !important;
+  color: var(--app-text);
 }
 
 html.dark .text-slate-800 {
-  color: var(--app-text-muted) !important;
+  color: var(--app-text-muted);
 }
 
 html.dark .text-slate-700 {
-  color: var(--app-text-muted) !important;
+  color: var(--app-text-muted);
 }
 
 html.dark .text-slate-600 {
-  color: var(--app-text-subtle) !important;
+  color: var(--app-text-subtle);
 }
 
 html.dark .text-slate-500 {
-  color: var(--app-text-subtle) !important;
+  color: var(--app-text-subtle);
 }
 
 html.dark .text-slate-400 {
-  color: #64748b !important;
+  color: #64748b;
 }
 
 html.dark .bg-slate-900 {
-  background-color: var(--app-surface-muted) !important;
-  color: var(--app-text) !important;
+  background-color: var(--app-surface-muted);
+  color: var(--app-text);
 }
 
 /* Calendar workout states */
