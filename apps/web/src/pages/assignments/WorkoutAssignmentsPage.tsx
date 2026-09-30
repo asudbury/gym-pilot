@@ -1,4 +1,4 @@
-import { getSupabaseClient } from '@gym-pilot/shared'
+import { getSupabaseClient, logger } from '@gym-pilot/shared'
 import { TableNames } from '@gym-pilot/shared/src/dataServices/tableNames'
 import { useEffect, useMemo, useState } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
@@ -34,7 +34,7 @@ export function WorkoutAssignmentsPage() {
       .order('created_at', { ascending: false })
 
     if (error) {
-      console.error('Could not load workout assignments', error)
+      logger.error('[WorkoutAssignmentsPage] Could not load workout assignments', error)
       setAssignments([])
       setLoading(false)
       return

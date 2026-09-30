@@ -1,5 +1,6 @@
 import {
   getImportedWorkouts,
+  logger,
   type ImportedWorkout as Workout,
 } from '@gym-pilot/shared'
 import { getSupabaseClient } from '@gym-pilot/shared/src/supabase'
@@ -93,7 +94,7 @@ export const AppleFitnessPage: React.FC = () => {
           }
         } catch (err) {
           setError('Error parsing JSON file.')
-          console.error(err)
+          logger.error('[AppleFitnessPage]', err)
         }
       }
       reader.readAsText(file)

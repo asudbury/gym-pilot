@@ -1,4 +1,4 @@
-import { getSupabaseClient } from '@gym-pilot/shared'
+import { getSupabaseClient, logger } from '@gym-pilot/shared'
 import type { Tables } from '@gym-pilot/shared/src/dataServices/databaseTypes'
 import { TableNames } from '@gym-pilot/shared/src/dataServices/tableNames'
 import { useEffect, useState } from 'react'
@@ -46,7 +46,7 @@ export function WorkoutTemplatePickerModal({
         .order('name', { ascending: true })
 
       if (error) {
-        console.error('Could not load workout templates', error)
+        logger.error('[WorkoutTemplatePickerModal] Could not load workout templates', error)
         setError(error.message)
         setTemplates([])
       } else {

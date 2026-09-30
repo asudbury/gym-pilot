@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from 'react'
 import { NavLink, useNavigate } from 'react-router-dom'
 import { useAuth } from '../../auth/AuthContext'
+import { logger } from '@gym-pilot/shared'
 import { Button } from '../../components/ui/Button'
 import { StatusMessageNotification } from '../../components/ui/StatusMessageNotification'
 import { PageCardLayout } from '../../layouts/PageCardLayout'
@@ -65,9 +66,9 @@ Time + calories	-	-	0:52 318kcal`)
         state: { parsedSessions },
       })
     } catch (error) {
-      console.error('Parsing error:', error)
+      logger.error('[SpreadsheetImportPage] Parsing error:', error)
       setSpreadsheetImportError(
-        'An error occurred while parsing the spreadsheet data. Please check the console for details.',
+        'An error occurred while parsing the spreadsheet data.',
       )
     }
   }

@@ -1,4 +1,4 @@
-import { getSupabaseClient } from '@gym-pilot/shared'
+import { getSupabaseClient, logger } from '@gym-pilot/shared'
 import type {
   Tables,
   TablesInsert,
@@ -147,7 +147,7 @@ export default function WorkoutPlanEditPage() {
         )
         setActiveSessionIndex(0)
       } catch (err: any) {
-        console.error('Error loading plan:', err)
+        logger.error('[WorkoutPlanEditPage] Error loading plan:', err)
         setError(err.message || 'Failed to load plan for editing.')
       } finally {
         setIsLoadingPlan(false)
@@ -427,7 +427,7 @@ export default function WorkoutPlanEditPage() {
     try {
       await persistPlanState(nextSessions)
     } catch (err: any) {
-      console.error('Error clearing session exercises:', err)
+      logger.error('[WorkoutPlanEditPage] Error clearing session exercises:', err)
       setError(
         err.message || 'An unexpected error occurred while clearing exercises.',
       )
@@ -466,7 +466,7 @@ export default function WorkoutPlanEditPage() {
         return
       }
     } catch (err: any) {
-      console.error('Error saving plan:', err)
+      logger.error('[WorkoutPlanEditPage] Error saving plan:', err)
       setError(
         err.message || 'An unexpected error occurred while saving the plan.',
       )
@@ -517,7 +517,7 @@ export default function WorkoutPlanEditPage() {
 
       navigate('/workout-plans')
     } catch (err: any) {
-      console.error('Error deleting plan:', err)
+      logger.error('[WorkoutPlanEditPage] Error deleting plan:', err)
       setError(
         err.message || 'An unexpected error occurred while deleting the plan.',
       )
@@ -635,7 +635,7 @@ export default function WorkoutPlanEditPage() {
 
       navigate(`/workout-plans/${newPlan.id}/edit`)
     } catch (err: any) {
-      console.error('Error copying plan:', err)
+      logger.error('[WorkoutPlanEditPage] Error copying plan:', err)
       setError(
         err.message || 'An unexpected error occurred while copying the plan.',
       )
