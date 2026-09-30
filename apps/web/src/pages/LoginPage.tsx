@@ -14,6 +14,7 @@ import {
   persistRememberedEmail,
   readStoredRememberedEmail,
 } from '../features/auth/domain/loginPreferences' // All functions from here are used
+import { parseEmailFromSearchParams } from '../features/auth/domain/loginParamsUtils'
 import { recordWelcomeJourneyActivity } from '../features/auth/domain/welcomeJourneyLogging'
 
 export function LoginPage() {
@@ -37,10 +38,7 @@ export function LoginPage() {
   const [capsLockOn, setCapsLockOn] = useState(false)
 
   const emailParam = useMemo(() => {
-    const rawValue =
-      searchParams.get('email') || searchParams.get('emailAddress') || ''
-
-    return rawValue.trim()
+    return parseEmailFromSearchParams(searchParams)
   }, [searchParams])
 
   useEffect(() => {

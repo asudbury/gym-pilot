@@ -11,6 +11,16 @@ export type FavoritePlanBuilderState = {
   favoriteLinks: QuickLink[]
 }
 
+/**
+ * Derives the plan builder's favorite exercises and links from stored favorites data.
+ * Exercises already present in the active tab rows are excluded from the result
+ * to avoid suggesting duplicates.
+ *
+ * @param storedValue - The raw stored favorites object (favorites array + folders).
+ * @param activeRows - The rows currently visible in the active plan tab.
+ * @param exercises - The full exercise library to resolve paths against.
+ * @returns FavoritePlanBuilderState with resolved exercise IDs and link objects.
+ */
 export function buildFavoritePlanBuilderState(
   storedValue: {
     favorites?: Array<Partial<QuickLink> | null> | undefined

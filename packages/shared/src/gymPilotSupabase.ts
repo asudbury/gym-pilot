@@ -48,6 +48,12 @@ function normalizeProfileRoles(roles: unknown): UserRole[] {
   return normalizeUserRoles(Array.isArray(roles) ? roles : undefined);
 }
 
+/**
+ * Normalises raw user role rows from `gym_pilot_user_role` into a typed UserRole[].
+ * Filters out non-string or unrecognised role values.
+ *
+ * @param rows - Raw rows from a Supabase role query.
+ */
 export function normalizeSupabaseUserRoleRows(
   rows: Array<{ user_id?: unknown; role?: unknown }> | null | undefined,
 ): UserRole[] {
@@ -65,6 +71,13 @@ export function normalizeSupabaseUserRoleRows(
   return normalizeUserRoles(normalizedRoles);
 }
 
+/**
+ * Builds the insert rows for the `gym_pilot_user_role` table from a roles value.
+ * Normalises the roles value to a typed UserRole[] before mapping.
+ *
+ * @param userId - The user to assign roles to.
+ * @param roles - The roles to assign. Accepts a single role, array, or null/undefined.
+ */
 export function buildSupabaseUserRoleRows(
   userId: string,
   roles: Array<UserRole | string> | UserRole | null | undefined,
@@ -228,6 +241,11 @@ export async function loadSupabaseProfileLoginHistory(): Promise<{
   return loadSupabaseProfileLoginHistoryFromProfilePersistence();
 }
 
+/**
+ * Loads all gym_pilot_profile rows and their associated roles.
+ * If the current authenticated user has no profile row, one is created automatically.
+ * Returns an empty array when the client is unavailable or the user is not authenticated.
+ */
 export async function listSupabaseProfiles(): Promise<SupabaseProfile[]> {
   const client = getSupabaseClient();
 

@@ -18,12 +18,17 @@ export interface PlanTab {
   rows: PlanGridRow[]
 }
 
+/** Returns a unique ID for a new plan row or tab. */
 export function createId() {
   return typeof crypto !== 'undefined' && 'randomUUID' in crypto
     ? crypto.randomUUID()
     : `${Date.now()}-${Math.random()}`
 }
 
+/**
+ * Creates a blank plan grid row with an optional pre-selected exercise.
+ * @param exerciseId - Optional exercise ID to pre-populate.
+ */
 export function createBlankRow(exerciseId = ''): PlanGridRow {
   return {
     id: createId(),
@@ -34,6 +39,11 @@ export function createBlankRow(exerciseId = ''): PlanGridRow {
   }
 }
 
+/**
+ * Creates a link row for use in plan sessions (e.g. a YouTube or reference link).
+ * @param linkLabel - Display label for the link.
+ * @param linkUrl - URL the link points to.
+ */
 export function createLinkRow(linkLabel = '', linkUrl = ''): PlanGridRow {
   return {
     id: createId(),
@@ -46,6 +56,10 @@ export function createLinkRow(linkLabel = '', linkUrl = ''): PlanGridRow {
   }
 }
 
+/**
+ * Creates a blank plan tab with the given title and no rows.
+ * @param title - The display title for the tab.
+ */
 export function createBlankTab(title: string): PlanTab {
   return {
     id: createId(),
@@ -54,6 +68,14 @@ export function createBlankTab(title: string): PlanTab {
   }
 }
 
+/**
+ * Converts plan builder tabs into a PlanSession[] ready for persistence.
+ * Filters out empty rows, resolves exercise names, and preserves link rows.
+ * Fallback title is `Day N` when the tab title is blank.
+ *
+ * @param tabs - The current plan builder tab state.
+ * @returns Array of PlanSession ready for saving.
+ */
 export function buildPlanSessionsFromTabs(tabs: PlanTab[]): PlanSession[] {
   return tabs.map((tab, index) => ({
     id: tab.id,
@@ -81,6 +103,14 @@ export function buildPlanSessionsFromTabs(tabs: PlanTab[]): PlanSession[] {
   }))
 }
 
+/**
+ * Converts saved PlanSession[] back into plan builder tabs for editing.
+ * Preserves exercise IDs, link rows, notes, reps, and sets.
+ * Falls back to a single blank "Day 1" tab when sessions are empty.
+ *
+ * @param sessions - Persisted plan sessions to hydrate into tabs.
+ * @returns Array of PlanTab representing the editable builder state.
+ */
 export function buildTabsFromSessions(
   sessions: PlanSession[] | undefined,
 ): PlanTab[] {
@@ -112,6 +142,14 @@ export function buildTabsFromSessions(
   })
 }
 
+/**
+ * Sanitises a string for use as an Excel sheet name.
+ * Removes characters forbidden by Excel (`/ * ? : [ ]`) and truncates to 31 characters.
+ * Falls back to `'Sheet'` when the result would be empty.
+ *
+ * @param value - The raw sheet name candidate.
+ * @returns A valid Excel sheet name.
+ */
 export function sanitizeSheetName(value: string) {
   const cleaned = value
     .replace(/[\/*?:\[\]]/g, '')

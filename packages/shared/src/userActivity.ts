@@ -71,6 +71,15 @@ function sanitizeActivityValue(key: string, value: unknown) {
   return value;
 }
 
+/**
+ * Builds a sanitised event data payload for a user activity record.
+ * Removes sensitive fields (passwords, tokens, notes, etc.) and any email addresses.
+ * Appends device context (type, mobile flag) and localhost indicator.
+ *
+ * @param eventData - Raw event data to sanitise and enrich.
+ * @param friendlyName - Optional user display name to include in the payload.
+ * @returns A sanitised payload ready for insertion into the user activity table.
+ */
 export function buildSupabaseUserActivityEventData(
   eventData: Record<string, unknown> = {},
   friendlyName?: string | null,
@@ -112,6 +121,10 @@ export function buildSupabaseUserActivityEventData(
   };
 }
 
+/**
+ * Returns true when user activity recording is enabled in app settings.
+ * Reads the `user_activity_logging_enabled` setting; defaults to true.
+ */
 export async function shouldRecordSupabaseUserActivity() {
   const enabledValue = await loadAppSetting(
     "user_activity_logging_enabled",
@@ -120,6 +133,14 @@ export async function shouldRecordSupabaseUserActivity() {
   return enabledValue === true || enabledValue === "true";
 }
 
+/**
+ * Returns true when a new login activity event should be recorded.
+ * A new login is detected by comparing the previous and next last-login timestamps.
+ * Returns false when the next timestamp is absent.
+ *
+ * @param previousLastLoggedInAt - The previous session's last-login timestamp.
+ * @param nextLastLoggedInAt - The current session's last-login timestamp.
+ */
 export function shouldRecordLoginActivity(
   previousLastLoggedInAt: string | null | undefined,
   nextLastLoggedInAt: string | null | undefined,
@@ -135,6 +156,16 @@ export function shouldRecordLoginActivity(
   return previousLastLoggedInAt !== nextLastLoggedInAt;
 }
 
+/**
+ * Records a user activity event in the `gym_pilot_user_activity` table.
+ * No-ops when activity logging is disabled or the Supabase client is unavailable.
+ * The event data is sanitised via `buildSupabaseUserActivityEventData` before insertion.
+ *
+ * @param eventType - The activity event type string (e.g. `'login'`, `'view_timetable'`).
+ * @param eventData - Additional context data for the event.
+ * @param userId - Optional user ID. Resolves from the session when omitted.
+ * @param friendlyName - Optional user display name to include in the event data.
+ */
 export async function recordSupabaseUserActivity(
   eventType: string,
   eventData: Record<string, unknown> = {},

@@ -10,6 +10,11 @@ import {
 } from '@gym-pilot/shared'
 import SessionActions from '../components/SessionActions'
 import { SessionEntryCard } from '../components/session-history/SessionEntryCard'
+import {
+  isReadyToDelete,
+  resetDeletionState,
+} from '../features/session-history/domain/sessionDeletion'
+import { canAccessTimetable, canAccessPTSessions } from '../features/dashboard/domain/capabilityResolution'
 
 function sortSessionEntries(entries: UserSession[]) {
   return [...entries].sort((left, right) =>
@@ -91,11 +96,11 @@ export function SessionHistoryPage() {
   }
 
   const deleteEntry = async (entryId: string) => {
-    if (pendingDeleteEntryId === entryId) {
+    if (isReadyToDelete(pendingDeleteEntryId, entryId)) {
       try {
         await deleteUserSession(entryId, userId || '')
         await refreshEntries()
-        setPendingDeleteEntryId(null)
+        setPendingDeleteEntryId(resetDeletionState())
       } catch (error) {
         setErrorMessage(String(error))
       }
@@ -115,11 +120,8 @@ export function SessionHistoryPage() {
       >
         <SessionActions
           showViewSessionsButton={false}
-          showClassSessionAction={Boolean(user?.gymName && user.gymName.trim())}
-          showPTSessionAction={
-            Boolean(user?.trainerId?.trim()) ||
-            Boolean(user?.roles?.includes('trainer'))
-          }
+          showClassSessionAction={canAccessTimetable(user)}
+          showPTSessionAction={canAccessPTSessions(user)}
           showViewWorkoutsTemplateButton={true}
         />
         {errorMessage ? (

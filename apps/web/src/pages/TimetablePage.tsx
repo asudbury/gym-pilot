@@ -8,6 +8,11 @@ import { Button } from '../components/ui/Button'
 import { StatusMessageNotification } from '../components/ui/StatusMessageNotification'
 import { DesktopOnly } from '../components/visibility/DeviceVisibility'
 import { appTokens } from '../constants/tokens'
+import {
+  createAttendanceFormState,
+  openAttendanceForm,
+  type AttendanceFormState,
+} from '../features/timetable/domain/attendanceState'
 import { timetableCache } from '../features/timetable/domain/timetableCache'
 import {
   formatTimetableAvailability,
@@ -41,17 +46,9 @@ export function TimetablePage() {
   const [attendanceState, setAttendanceState] = useState<
     Record<string, 'attended' | 'taught'>
   >({})
-  const [attendancePendingSession, setAttendancePendingSession] =
-    useState<TimetableSession | null>(null)
-  const [attendanceNotes, setAttendanceNotes] = useState('')
-  const [attendanceRating, setAttendanceRating] = useState<number | null>(null)
-  const [attendanceSaving, setAttendanceSaving] = useState(false)
-  const [attendanceMessage, setAttendanceMessage] = useState<string | null>(
-    null,
+  const [attendanceForm, setAttendanceForm] = useState<AttendanceFormState>(
+    () => createAttendanceFormState(),
   )
-  const [attendanceSelection, setAttendanceSelection] = useState<
-    'attended' | 'taught' | null
-  >('attended') // Default to 'attended' for better UX)
   const [selectedClubId, setSelectedClubId] = useState(
     () => user?.gymName?.trim() ?? '',
   )
@@ -63,6 +60,27 @@ export function TimetablePage() {
   const [lastRefreshedAt, setLastRefreshedAt] = useState<string | null>(null)
   const classSelectRef = useRef<HTMLSelectElement | null>(null)
   const [highlightClassFilter, setHighlightClassFilter] = useState(false)
+
+  // Convenience accessors from the consolidated form state
+  const attendancePendingSession = attendanceForm.pendingSession
+  const attendanceNotes = attendanceForm.notes
+  const attendanceRating = attendanceForm.rating
+  const attendanceSaving = attendanceForm.saving
+  const attendanceMessage = attendanceForm.message
+  const attendanceSelection = attendanceForm.selection
+
+  const setAttendancePendingSession = (session: TimetableSession | null) =>
+    setAttendanceForm((current) => ({ ...current, pendingSession: session }))
+  const setAttendanceNotes = (notes: string) =>
+    setAttendanceForm((current) => ({ ...current, notes }))
+  const setAttendanceRating = (rating: number | null) =>
+    setAttendanceForm((current) => ({ ...current, rating }))
+  const setAttendanceSaving = (saving: boolean) =>
+    setAttendanceForm((current) => ({ ...current, saving }))
+  const setAttendanceMessage = (message: string | null) =>
+    setAttendanceForm((current) => ({ ...current, message }))
+  const setAttendanceSelection = (selection: 'attended' | 'taught' | null) =>
+    setAttendanceForm((current) => ({ ...current, selection }))
 
   const rawGymBrand = user?.gymBrand?.trim() ?? ''
   const rawGymName = user?.gymName?.trim() ?? ''
@@ -246,13 +264,7 @@ export function TimetablePage() {
       return
     }
 
-    setAttendancePendingSession(session)
-    setAttendanceNotes('')
-    setAttendanceRating(null)
-    setAttendanceMessage(null)
-    setAttendanceSelection(
-      attendanceAction.options.length > 1 ? 'attended' : attendanceAction.kind,
-    )
+    setAttendanceForm(openAttendanceForm(session, attendanceAction))
   }
 
   const handleRefreshTimetable = () => {
