@@ -222,14 +222,14 @@ export function RecordSessionPage() {
                 </summary>
                 <div className="mt-4 space-y-4">
                   <div className="text-sm text-slate-700">
-                    <span className="font-medium pl-1">Rating</span>
+                    <span className="font-medium">Rating</span>
                     <div className="mt-2 overflow-x-auto">
                       <RatingSelector value={rating} onChange={setRating} />
                     </div>
                   </div>
 
                   <label className="block text-sm text-slate-700">
-                    <span className="font-medium pl-1">Notes</span>
+                    <span className="font-medium">Notes</span>
                     <textarea
                       value={notes}
                       onChange={(event) => setNotes(event.target.value)}

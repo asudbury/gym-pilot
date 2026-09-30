@@ -65,9 +65,10 @@ export const ItemControls = ({
           )}
 
           {isLast ? (
-            <Button tone="default" disabled={isLast} className="min-h-10 px-3 py-2">
-              <DecorativeIcon className="h-4 w-4" />
-            </Button>
+            <span
+              aria-hidden="true"
+              className="inline-flex min-h-10 w-10 items-center justify-center"
+            />
           ) : (
             <Button
               tone="default"
