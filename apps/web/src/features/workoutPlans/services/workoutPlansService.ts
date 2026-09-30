@@ -296,14 +296,19 @@ export async function copyWorkoutPlan(
       return { newPlanId: null, error: insertPlanError?.message ?? 'Could not create copied plan.' }
     }
 
+    const sessionIdMap = new Map<string, string>()
     const copiedSessions: TablesInsert<typeof TableNames.WorkoutPlanSession>[] = (
       sessionsData ?? []
-    ).map((session) => ({
-      id: crypto.randomUUID(),
-      plan_id: newPlan.id,
-      name: session.name,
-      position: session.position,
-    }))
+    ).map((session) => {
+      const newId = crypto.randomUUID()
+      sessionIdMap.set(session.id, newId)
+      return {
+        id: newId,
+        plan_id: newPlan.id,
+        name: session.name,
+        position: session.position,
+      }
+    })
 
     if (copiedSessions.length > 0) {
       const { error: insertSessionsError } = await client
@@ -320,6 +325,7 @@ export async function copyWorkoutPlan(
     ).map((exercise) => ({
       id: crypto.randomUUID(),
       plan_id: newPlan.id,
+      session_id: exercise.session_id ? (sessionIdMap.get(exercise.session_id) ?? null) : null,
       exercise_id: exercise.exercise_id,
       exercise_name: exercise.exercise_name ?? null,
       position: exercise.position,

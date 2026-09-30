@@ -182,6 +182,8 @@ export async function copyWorkoutTemplate(id: string): Promise<{
       .from(TableNames.WorkoutTemplateExercise)
       .insert(exerciseRows)
     if (exerciseError) {
+      // Clean up the orphaned template record before returning the error
+      await client.from(TableNames.WorkoutTemplate).delete().eq('id', newTemplate.id)
       return { newTemplateId: null, error: exerciseError.message }
     }
   }
