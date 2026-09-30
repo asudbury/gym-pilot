@@ -3,6 +3,9 @@ import clsx from 'clsx'
 import { Button } from './ui/Button'
 import { DecorativeIcon } from './ui/DecorativeIcon'
 
+const spacerClassName =
+  'inline-flex min-h-10 min-w-10 items-center justify-center px-3 py-2'
+
 interface ItemControlsProps {
   itemName: string
   onReorder: (direction: 'up' | 'down') => void
@@ -53,7 +56,7 @@ export const ItemControls = ({
           {isFirst ? (
             <span
               aria-hidden="true"
-              className="inline-flex min-h-10 min-w-10 items-center justify-center px-3 py-2"
+              className={spacerClassName}
             />
           ) : (
             <Button
@@ -70,7 +73,7 @@ export const ItemControls = ({
           {isLast ? (
             <span
               aria-hidden="true"
-              className="inline-flex min-h-10 min-w-10 items-center justify-center px-3 py-2"
+              className={spacerClassName}
             />
           ) : (
             <Button
