@@ -117,7 +117,7 @@ export function SessionWorkoutEditor({
         <Button
           tone="blue"
           onClick={() => setShowExercisePicker(true)}
-          className="w-full min-h-11 px-4 py-3 sm:w-auto"
+          className="w-full min-h-10 px-3 py-2 sm:w-auto"
         >
           Add Exercises
         </Button>
