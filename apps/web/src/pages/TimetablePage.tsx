@@ -31,6 +31,7 @@ import { PageCardLayout } from '../layouts/PageCardLayout'
 import { PageLayout } from '../layouts/PageLayout'
 import { reportUiError } from '../utils/uiErrorLogging'
 import { loadVirginActiveClubs } from '../utils/virginActiveClubs'
+import { TIMETABLE_ATTENDANCE_KEY } from '../constants/storageKeys'
 
 export function TimetablePage() {
   const { user, updateGymName } = useAuth()
@@ -139,7 +140,7 @@ export function TimetablePage() {
 
     try {
       const storedAttendance = window.localStorage.getItem(
-        'gym-pilot.timetable-attendance',
+        TIMETABLE_ATTENDANCE_KEY,
       )
 
       if (!storedAttendance) {
@@ -165,7 +166,7 @@ export function TimetablePage() {
     }
 
     window.localStorage.setItem(
-      'gym-pilot.timetable-attendance',
+      TIMETABLE_ATTENDANCE_KEY,
       JSON.stringify(attendanceState),
     )
   }, [attendanceState])

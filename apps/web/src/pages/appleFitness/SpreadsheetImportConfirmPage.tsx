@@ -15,6 +15,10 @@ import {
 } from '../../features/importedWorkouts/domain/spreadsheetWorkoutImport'
 import { PageCardLayout } from '../../layouts/PageCardLayout'
 import { PageLayout } from '../../layouts/PageLayout'
+import {
+  SPREADSHEET_INPUT_KEY,
+  SPREADSHEET_PREVIEW_KEY,
+} from '../../constants/storageKeys'
 
 export const SpreadsheetImportConfirmPage: React.FC = () => {
   const { user } = useAuth()
@@ -31,7 +35,7 @@ export const SpreadsheetImportConfirmPage: React.FC = () => {
 
   useEffect(() => {
     try {
-      const raw = localStorage.getItem('gym-pilot:spreadsheetImportPreview')
+      const raw = localStorage.getItem(SPREADSHEET_PREVIEW_KEY)
       const parsed = raw
         ? (JSON.parse(raw) as SpreadsheetWorkoutImportPreviewItem[])
         : []
@@ -126,8 +130,8 @@ export const SpreadsheetImportConfirmPage: React.FC = () => {
 
       setImportedSessionIds(createdIds)
       try {
-        localStorage.removeItem('gym-pilot:spreadsheetImportPreview')
-        localStorage.removeItem('gym-pilot:spreadsheetImportInput')
+        localStorage.removeItem(SPREADSHEET_PREVIEW_KEY)
+        localStorage.removeItem(SPREADSHEET_INPUT_KEY)
       } catch {
         // ignore
       }

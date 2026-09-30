@@ -1,12 +1,14 @@
+import { type PostgrestError } from "@supabase/supabase-js";
 import { getItems, getSupabaseClient } from "./supabaseCore";
 import { TableNames } from "./tableNames";
 import type { ErrorLog } from "./types";
 
 const tableName = TableNames.ErrorLog;
 
+/** Retrieves all error log entries, optionally scoped to `userId`, ordered by most recent first. */
 export async function getErrorLogs(
   userId?: string,
-): Promise<{ data: ErrorLog[] | null; error: any | null }> {
+): Promise<{ data: ErrorLog[] | null; error: PostgrestError | null }> {
   return getItems<ErrorLog>(tableName, {
     userId,
     orderBy: {
@@ -16,10 +18,11 @@ export async function getErrorLogs(
   });
 }
 
+/** Inserts a new error log entry for `userId`. */
 export async function logError(
     errorLog: Omit<ErrorLog, "id" | "created_at" | "user_id">,
     userId: string
-): Promise<{ data: any[] | null; error: any | null }> {
+): Promise<{ data: unknown[] | null; error: PostgrestError | null }> {
 
     const client = getSupabaseClient();
     const fullErrorLog = {
@@ -33,7 +36,8 @@ export async function logError(
       .select();
 }
 
-export async function deleteAllErrorLogs(): Promise<{ data: any | null; error: any | null }> {
+/** Deletes every row in the error log table. Use with caution – intended for admin/dev use only. */
+export async function deleteAllErrorLogs(): Promise<{ data: unknown | null; error: PostgrestError | null }> {
   
     const client = getSupabaseClient();
     return await client

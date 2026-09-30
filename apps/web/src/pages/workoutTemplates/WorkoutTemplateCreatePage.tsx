@@ -16,9 +16,10 @@ import { PageLayout } from '../../layouts/PageLayout'
 import { getExercisePath } from '../../utils/exerciseRouteUtils'
 import { formatLabel } from '../../utils/formatUtils'
 import { useIsDesktop } from '../../utils/useMediaQuery'
+import { TEMPLATE_EXERCISES_KEY } from '../../constants/storageKeys'
 
 // Define a key for local storage
-const LOCAL_STORAGE_KEY = 'gym-pilot-selected-template-exercises'
+
 
 function WorkoutTemplateCreatePage() {
   const [selectedExercises, setSelectedExercises] = useState<
@@ -26,7 +27,7 @@ function WorkoutTemplateCreatePage() {
   >(() => {
     // Initialize state from local storage
     if (typeof window !== 'undefined') {
-      const savedExercises = localStorage.getItem(LOCAL_STORAGE_KEY)
+      const savedExercises = localStorage.getItem(TEMPLATE_EXERCISES_KEY)
       if (savedExercises) {
         return JSON.parse(savedExercises)
       }
@@ -103,7 +104,7 @@ function WorkoutTemplateCreatePage() {
       }
 
       // Clear local cached selections and navigate back
-      localStorage.removeItem(LOCAL_STORAGE_KEY)
+      localStorage.removeItem(TEMPLATE_EXERCISES_KEY)
       navigate('/workout-templates')
     } catch (err) {
       setError('Unexpected error saving template')
@@ -124,7 +125,7 @@ function WorkoutTemplateCreatePage() {
   // Effect to save selectedExercises to local storage whenever it changes
   useEffect(() => {
     if (typeof window !== 'undefined') {
-      localStorage.setItem(LOCAL_STORAGE_KEY, JSON.stringify(selectedExercises))
+      localStorage.setItem(TEMPLATE_EXERCISES_KEY, JSON.stringify(selectedExercises))
     }
   }, [selectedExercises]) // Dependency array includes selectedExercises
 

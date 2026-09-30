@@ -1,4 +1,4 @@
-import { createClient, type SupabaseClient } from "@supabase/supabase-js";
+import { createClient, type SupabaseClient, type PostgrestError } from "@supabase/supabase-js";
 
 let supabaseClient: SupabaseClient | null = null;
 let supabaseClientNoPersist: SupabaseClient | null = null;
@@ -22,6 +22,11 @@ type SupabaseClientOptions = {
   autoRefreshToken?: boolean;
 };
 
+/** Returns a cached singleton Supabase client, creating one on first call.
+ * Throws if `VITE_SUPABASE_URL` or `VITE_SUPABASE_ANON_KEY` are not set.
+ * Pass `{ persistSession: false }` to obtain a separate non-persisting client
+ * (e.g. for server-side or admin operations).
+ */
 export function getSupabaseClient(options?: SupabaseClientOptions) {
   const shouldPersistSession = options?.persistSession ?? true;
   const shouldAutoRefreshToken = options?.autoRefreshToken ?? true;
@@ -74,6 +79,9 @@ export type OrderByOptions = {
   nullsFirst?: boolean;
 };
 
+/** Fetches all rows from `tableName`, optionally filtered by `userId`,
+ * a date-only window on a column, and/or sorted by a column.
+ */
 export async function getItems<T>(
   tableName: string,
   options?: {
@@ -87,7 +95,7 @@ export async function getItems<T>(
       value: string;
     };
   },
-): Promise<{ data: T[] | null; error: any | null }> {
+): Promise<{ data: T[] | null; error: PostgrestError | null }> {
   const client = getSupabaseClient();
   let query = client.from(tableName).select("*");
 
@@ -108,16 +116,19 @@ export async function getItems<T>(
     query = query.order(options.orderBy.column, options.orderBy.options);
   }
 
-  return query as unknown as Promise<{ data: T[] | null; error: any | null }>;
+  return query as unknown as Promise<{ data: T[] | null; error: PostgrestError | null }>;
 }
 
+/** Fetches a single row from `tableName` by optional `userId` and/or `id`.
+ * Returns `null` data when no matching row is found.
+ */
 export async function getItem<T>(
   tableName: string,
   options?: {
     userId?: string;
     id?: string;
   },
-): Promise<{ data: T | null; error: any | null }> {
+): Promise<{ data: T | null; error: PostgrestError | null }> {
   const client = getSupabaseClient();
   let query = client.from(tableName).select("*");
 
@@ -137,11 +148,12 @@ export async function getItem<T>(
   };
 }
 
+/** Deletes the row with the given `id` from `tableName`, scoped to `userId` when provided. */
 export async function deleteItem(
   tableName: string,
   id: string,
   userId?: string,
-): Promise<{ data: any[] | null; error: any | null }> {
+): Promise<{ data: unknown[] | null; error: PostgrestError | null }> {
   const client = getSupabaseClient();
 
   return client.from(tableName).delete().eq("id", id).eq("user_id", userId);

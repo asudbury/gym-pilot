@@ -6,12 +6,13 @@ import {
   loadSupabaseProfileTermsAcceptance,
   signOutFromSupabase,
 } from '@gym-pilot/shared'
+import { type User } from '@supabase/supabase-js'
 import { type NavigateFunction } from 'react-router-dom'
 import { persistRememberedEmail } from './loginPreferences'
 import { recordWelcomeJourneyActivity } from './welcomeJourneyLogging'
 
 export interface PostSignInOptions {
-  user: any // Supabase User object
+  user: User | null
   email: string
   from: string
   navigate: NavigateFunction

@@ -7,11 +7,11 @@ import { StatusMessageNotification } from '../../components/ui/StatusMessageNoti
 import { PageCardLayout } from '../../layouts/PageCardLayout'
 import { parseSpreadsheet } from '../../features/import/spreadsheet-importer'
 import { PageLayout } from '../../layouts/PageLayout'
+import { SPREADSHEET_INPUT_KEY } from '../../constants/storageKeys'
 
 export const SpreadsheetImportPage: React.FC = () => {
   const { user } = useAuth()
   const navigate = useNavigate()
-  const SPREADSHEET_INPUT_KEY = 'gym-pilot:spreadsheetImportInput'
   const [spreadsheetInput, setSpreadsheetInput] = useState('')
   const [spreadsheetImportError, setSpreadsheetImportError] = useState<
     string | null
