@@ -1,3 +1,4 @@
+import { logger } from '@gym-pilot/shared'
 import { Component, type ErrorInfo, type ReactNode } from 'react'
 import { InternalServerErrorPage } from '../pages/errors/InternalServerErrorPage'
 
@@ -21,7 +22,7 @@ class ErrorBoundary extends Component<Props, State> {
   }
 
   public componentDidCatch(error: Error, errorInfo: ErrorInfo) {
-    console.error('Uncaught error:', error, errorInfo)
+    logger.error('Uncaught error:', error, errorInfo)
   }
 
   public render() {

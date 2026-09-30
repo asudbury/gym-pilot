@@ -1,5 +1,3 @@
-import { getSupabaseClient, logger } from '@gym-pilot/shared'
-import { TableNames } from '@gym-pilot/shared/src/dataServices/tableNames'
 import { useEffect, useMemo, useState } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
 import { PageCard } from '../../components/PageCard'
@@ -7,42 +5,29 @@ import { Button } from '../../components/ui/Button'
 import { formatDateTimeForDisplay } from '../../dateTimeFormatter'
 import { PageCardLayout } from '../../layouts/PageCardLayout'
 import { PageLayout } from '../../layouts/PageLayout'
+import type { WorkoutTemplateWithExercises } from '../../features/workoutTemplates/services/workoutTemplatesService'
+import { loadWorkoutTemplates } from '../../features/workoutTemplates/services/workoutTemplatesService'
 
 export function WorkoutTemplatesPage() {
   const navigate = useNavigate()
-  const [templates, setTemplates] = useState<any[]>([])
+  const [templates, setTemplates] = useState<WorkoutTemplateWithExercises[]>([])
   const [loading, setLoading] = useState(false)
   const [filterText, setFilterText] = useState('')
 
   const description = 'Create a workout template to define exercises.'
 
-  async function loadTemplates() {
-    setLoading(true)
-    const client = getSupabaseClient()
-    if (!client) {
-      setTemplates([])
-      setLoading(false)
-      return
-    }
-
-    const { data, error } = await client
-      .from(TableNames.WorkoutTemplate)
-      .select('*, workout_template_exercise(*)')
-      .order('created_at', { ascending: false })
-
-    if (error) {
-      logger.error('[WorkoutTemplatesPage] Could not load workout templates', error)
-      setTemplates([])
-      setLoading(false)
-      return
-    }
-
-    setTemplates(Array.isArray(data) ? data : [])
-    setLoading(false)
-  }
-
   useEffect(() => {
-    void loadTemplates()
+    setLoading(true)
+    void loadWorkoutTemplates()
+      .then(({ data }) => {
+        setTemplates(data)
+      })
+      .catch(() => {
+        setTemplates([])
+      })
+      .finally(() => {
+        setLoading(false)
+      })
   }, [])
 
   const filteredTemplates = useMemo(
