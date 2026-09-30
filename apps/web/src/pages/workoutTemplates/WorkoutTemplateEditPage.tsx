@@ -102,7 +102,10 @@ export default function WorkoutTemplateEditPage() {
       )
     } catch (posErr) {
       // ignore position errors but surface message
-      logger.warn('[WorkoutTemplateEditPage] Could not persist exercise positions', posErr)
+      logger.warn(
+        '[WorkoutTemplateEditPage] Could not persist exercise positions',
+        posErr,
+      )
     }
 
     navigate('/workout-templates')

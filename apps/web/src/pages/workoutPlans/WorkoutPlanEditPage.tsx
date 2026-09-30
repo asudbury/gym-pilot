@@ -427,7 +427,10 @@ export default function WorkoutPlanEditPage() {
     try {
       await persistPlanState(nextSessions)
     } catch (err: any) {
-      logger.error('[WorkoutPlanEditPage] Error clearing session exercises:', err)
+      logger.error(
+        '[WorkoutPlanEditPage] Error clearing session exercises:',
+        err,
+      )
       setError(
         err.message || 'An unexpected error occurred while clearing exercises.',
       )

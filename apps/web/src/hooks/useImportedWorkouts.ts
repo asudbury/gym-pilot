@@ -24,7 +24,10 @@ export function useImportedWorkouts() {
           setWorkouts(data ?? [])
         }
       } catch (error) {
-        logger.error('[useImportedWorkouts] Failed to load imported workouts:', error)
+        logger.error(
+          '[useImportedWorkouts] Failed to load imported workouts:',
+          error,
+        )
       } finally {
         if (isActive) {
           setLoading(false)

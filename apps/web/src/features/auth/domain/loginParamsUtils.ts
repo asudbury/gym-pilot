@@ -6,7 +6,9 @@
  * @param searchParams - The URLSearchParams from the login page URL.
  * @returns A trimmed email string, or an empty string if none is present.
  */
-export function parseEmailFromSearchParams(searchParams: URLSearchParams): string {
+export function parseEmailFromSearchParams(
+  searchParams: URLSearchParams,
+): string {
   const rawValue =
     searchParams.get('email') || searchParams.get('emailAddress') || ''
 

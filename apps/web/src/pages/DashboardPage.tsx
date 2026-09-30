@@ -5,7 +5,10 @@ import SessionActions from '../components/SessionActions'
 import { DecorativeIcon } from '../components/ui/DecorativeIcon'
 import WorkoutCalendar from '../components/WorkoutCalendar'
 import { resolveDashboardViewModel } from '../features/dashboard/domain/dashboardLayout'
-import { canAccessTimetable, canAccessPTSessions } from '../features/dashboard/domain/capabilityResolution'
+import {
+  canAccessTimetable,
+  canAccessPTSessions,
+} from '../features/dashboard/domain/capabilityResolution'
 import { useImportedWorkouts } from '../hooks/useImportedWorkouts'
 import { PageLayout } from '../layouts/PageLayout'
 

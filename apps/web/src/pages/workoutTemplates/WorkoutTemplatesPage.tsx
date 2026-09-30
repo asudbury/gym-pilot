@@ -31,7 +31,10 @@ export function WorkoutTemplatesPage() {
       .order('created_at', { ascending: false })
 
     if (error) {
-      logger.error('[WorkoutTemplatesPage] Could not load workout templates', error)
+      logger.error(
+        '[WorkoutTemplatesPage] Could not load workout templates',
+        error,
+      )
       setTemplates([])
       setLoading(false)
       return

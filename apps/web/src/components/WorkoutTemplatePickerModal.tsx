@@ -46,7 +46,10 @@ export function WorkoutTemplatePickerModal({
         .order('name', { ascending: true })
 
       if (error) {
-        logger.error('[WorkoutTemplatePickerModal] Could not load workout templates', error)
+        logger.error(
+          '[WorkoutTemplatePickerModal] Could not load workout templates',
+          error,
+        )
         setError(error.message)
         setTemplates([])
       } else {

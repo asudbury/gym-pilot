@@ -16,12 +16,18 @@ import {
 
 describe('resolveTimetableClubSelectionViewModel', () => {
   it('hides picker for non-virgin brands', () => {
-    const result = resolveTimetableClubSelectionViewModel({ gymBrand: 'Other', gymName: '123' })
+    const result = resolveTimetableClubSelectionViewModel({
+      gymBrand: 'Other',
+      gymName: '123',
+    })
     expect(result.showPicker).toBe(false)
   })
 
   it('shows picker for virgin brand', () => {
-    const result = resolveTimetableClubSelectionViewModel({ gymBrand: 'Virgin', gymName: '123' })
+    const result = resolveTimetableClubSelectionViewModel({
+      gymBrand: 'Virgin',
+      gymName: '123',
+    })
     expect(result.showPicker).toBe(true)
   })
 
@@ -31,7 +37,9 @@ describe('resolveTimetableClubSelectionViewModel', () => {
   })
 
   it('is case-insensitive for virgin brand check', () => {
-    const result = resolveTimetableClubSelectionViewModel({ gymBrand: 'VIRGIN' })
+    const result = resolveTimetableClubSelectionViewModel({
+      gymBrand: 'VIRGIN',
+    })
     expect(result.showPicker).toBe(true)
   })
 })
@@ -59,7 +67,10 @@ describe('resolveTimetableErrorMessage', () => {
   })
 
   it('includes HTTP status and statusText', () => {
-    const result = resolveTimetableErrorMessage({ status: 503, statusText: 'Service Unavailable' })
+    const result = resolveTimetableErrorMessage({
+      status: 503,
+      statusText: 'Service Unavailable',
+    })
     expect(result).toContain('HTTP 503 Service Unavailable')
   })
 
@@ -121,7 +132,10 @@ describe('resolveTimetableHeaderViewModel', () => {
   })
 
   it('builds subtitle from brand and name', () => {
-    const result = resolveTimetableHeaderViewModel({ gymBrand: 'Virgin', gymName: 'MyGym' })
+    const result = resolveTimetableHeaderViewModel({
+      gymBrand: 'Virgin',
+      gymName: 'MyGym',
+    })
     expect(result.subtitle).toContain('Virgin')
     expect(result.subtitle).toContain('MyGym')
     expect(result.showIcon).toBe(true)
@@ -147,10 +161,7 @@ describe('resolveTimetableHeaderViewModel', () => {
 })
 
 describe('resolveNextActiveDayKey', () => {
-  const groups = [
-    { dateKey: '2024-01-15' },
-    { dateKey: '2024-01-16' },
-  ]
+  const groups = [{ dateKey: '2024-01-15' }, { dateKey: '2024-01-16' }]
 
   it('preserves "all" day key unchanged', () => {
     expect(resolveNextActiveDayKey('all', groups)).toBe('all')
@@ -174,7 +185,11 @@ describe('resolveNextActiveDayKey', () => {
 })
 
 describe('resolveTimetableViewModel', () => {
-  const makeSession = (startTime: string, className = 'Yoga', instructorName = 'Alice'): TimetableSession => ({
+  const makeSession = (
+    startTime: string,
+    className = 'Yoga',
+    instructorName = 'Alice',
+  ): TimetableSession => ({
     id: startTime,
     startTime,
     className,
@@ -361,8 +376,12 @@ describe('formatTimetableAvailability', () => {
   })
 
   it('returns unavailable message when either is missing', () => {
-    expect(formatTimetableAvailability({ booked: 5 })).toBe('Availability unavailable')
-    expect(formatTimetableAvailability({ capacity: 20 })).toBe('Availability unavailable')
+    expect(formatTimetableAvailability({ booked: 5 })).toBe(
+      'Availability unavailable',
+    )
+    expect(formatTimetableAvailability({ capacity: 20 })).toBe(
+      'Availability unavailable',
+    )
     expect(formatTimetableAvailability({})).toBe('Availability unavailable')
   })
 })
@@ -378,10 +397,14 @@ describe('isPastTimetableSession', () => {
   })
 
   it('returns true for a past date', () => {
-    expect(isPastTimetableSession({ startTime: '2000-01-01T00:00:00Z' })).toBe(true)
+    expect(isPastTimetableSession({ startTime: '2000-01-01T00:00:00Z' })).toBe(
+      true,
+    )
   })
 
   it('returns false for a future date', () => {
-    expect(isPastTimetableSession({ startTime: '2099-01-01T00:00:00Z' })).toBe(false)
+    expect(isPastTimetableSession({ startTime: '2099-01-01T00:00:00Z' })).toBe(
+      false,
+    )
   })
 })
