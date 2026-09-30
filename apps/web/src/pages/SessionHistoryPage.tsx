@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from 'react'
+import { useCallback, useEffect, useState } from 'react'
 import { useAuth } from '../auth/AuthContext'
 import { PageCardLayout } from '../layouts/PageCardLayout'
 import { PageLayout } from '../layouts/PageLayout'
@@ -14,13 +14,10 @@ import {
   isReadyToDelete,
   resetDeletionState,
 } from '../features/session-history/domain/sessionDeletion'
+import {
+  sortSessionEntries,
+} from '../features/session-history/domain/sessionHistoryViewModel'
 import { canAccessTimetable, canAccessPTSessions } from '../features/dashboard/domain/capabilityResolution'
-
-function sortSessionEntries(entries: UserSession[]) {
-  return [...entries].sort((left, right) =>
-    (right.created_at ?? '').localeCompare(left.created_at ?? ''),
-  )
-}
 
 export function SessionHistoryPage() {
   const { user } = useAuth()
@@ -32,36 +29,30 @@ export function SessionHistoryPage() {
 
   const userId = user?.id ?? null
 
+  const loadEntries = useCallback(async () => {
+    try {
+      if (userId == null) {
+        setEntries([])
+        setErrorMessage(null)
+        return
+      }
+
+      const { data } = await getUserSessions(userId)
+      setEntries(sortSessionEntries(data ?? []))
+      setErrorMessage(null)
+    } catch (error) {
+      setErrorMessage(String(error))
+    }
+  }, [userId])
+
   useEffect(() => {
     let isActive = true
 
-    const loadEntries = async () => {
-      try {
-        if (userId == null) {
-          setEntries([])
-          setErrorMessage(null)
-          return
-        }
-
-        const { data } = await getUserSessions(userId)
-
-        if (!isActive) {
-          return
-        }
-
-        const sortedLoadedEntries = sortSessionEntries(data ?? [])
-        setEntries(sortedLoadedEntries)
-        setErrorMessage(null)
-      } catch (error) {
-        if (!isActive) {
-          return
-        }
-
-        setErrorMessage(String(error))
+    void loadEntries().then(() => {
+      if (!isActive) {
+        setEntries([])
       }
-    }
-
-    void loadEntries()
+    })
 
     const handleHistoryUpdated = () => {
       void loadEntries()
@@ -79,27 +70,13 @@ export function SessionHistoryPage() {
         handleHistoryUpdated,
       )
     }
-  }, [userId])
-
-  const sortedEntries = useMemo(() => {
-    return sortSessionEntries(entries)
-  }, [entries])
-
-  const refreshEntries = async () => {
-    try {
-      const { data: loadedEntries } = await getUserSessions(userId || '')
-      setEntries(sortSessionEntries(loadedEntries ?? []))
-      setErrorMessage(null)
-    } catch (error) {
-      setErrorMessage(String(error))
-    }
-  }
+  }, [loadEntries])
 
   const deleteEntry = async (entryId: string) => {
     if (isReadyToDelete(pendingDeleteEntryId, entryId)) {
       try {
         await deleteUserSession(entryId, userId || '')
-        await refreshEntries()
+        await loadEntries()
         setPendingDeleteEntryId(resetDeletionState())
       } catch (error) {
         setErrorMessage(String(error))
@@ -131,7 +108,7 @@ export function SessionHistoryPage() {
             className="mb-3"
           />
         ) : null}
-        {sortedEntries.length === 0 ? (
+        {entries.length === 0 ? (
           <StatusMessageNotification
             message="No session entries yet."
             tone="info"
@@ -139,7 +116,7 @@ export function SessionHistoryPage() {
           />
         ) : (
           <div className="space-y-3">
-            {sortedEntries.map((entry) => (
+            {entries.map((entry) => (
               <SessionEntryCard
                 key={entry.id}
                 entry={entry}

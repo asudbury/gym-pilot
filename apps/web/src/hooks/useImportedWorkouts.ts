@@ -1,5 +1,5 @@
 import type { ImportedWorkout } from '@gym-pilot/shared'
-import { getImportedWorkouts } from '@gym-pilot/shared'
+import { getImportedWorkouts, logger } from '@gym-pilot/shared'
 import { useEffect, useState } from 'react'
 import { useAuth } from '../auth/AuthContext'
 
@@ -24,7 +24,7 @@ export function useImportedWorkouts() {
           setWorkouts(data ?? [])
         }
       } catch (error) {
-        console.error('Failed to load imported workouts:', error)
+        logger.error('[useImportedWorkouts] Failed to load imported workouts:', error)
       } finally {
         if (isActive) {
           setLoading(false)
