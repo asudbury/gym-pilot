@@ -3,10 +3,8 @@ import {
   saveWorkoutItemsForSession,
   updateUserSession,
   usePlan,
-  type UserSession,
   type UserSessionWorkoutItem,
 } from '@gym-pilot/shared'
-import { type PlanSession } from '@gym-pilot/types'
 import { useEffect, useMemo, useState } from 'react'
 import { useNavigate, useSearchParams } from 'react-router-dom'
 import { useAuth } from '../auth/AuthContext'
@@ -22,52 +20,14 @@ import {
 } from '../components/ui/StatusMessageNotification'
 import { DesktopOnly } from '../components/visibility/DeviceVisibility'
 import { appTokens } from '../constants/tokens'
-import {
-  formatDateTimeLocalInputValue,
-  toUtcIsoStringFromLocalInputValue,
-} from '../dateTimeFormatter'
+import { formatDateTimeLocalInputValue } from '../dateTimeFormatter'
 import { PageLayout } from '../layouts/PageLayout'
-function buildWorkoutItemsFromPlanSessions(
-  planSessions: PlanSession[],
-): Partial<UserSessionWorkoutItem>[] {
-  if (!planSessions) {
-    return []
-  }
-  const items: Partial<UserSessionWorkoutItem>[] = []
-  let order = 0
-  for (const session of planSessions) {
-    for (const planItem of session.planItems) {
-      items.push({
-        id: crypto.randomUUID(),
-        item_index: order,
-        category: 'exercise',
-        exercise_name: planItem.exercise_name,
-        exercise_id: planItem.exercise_id,
-        reps: planItem.reps,
-        sets: planItem.workingSets,
-        notes: planItem.notes,
-        plan_item_id: planItem.id,
-        sort_order: order,
-      })
-      order++
-    }
-  }
-  return items
-}
-
-type SessionType = 'class' | 'solo' | 'personal_training'
-
-function resolveInitialSessionType(value: string | null): SessionType {
-  if (value === 'solo') {
-    return 'solo'
-  }
-
-  if (value === 'class') {
-    return 'class'
-  }
-
-  return 'personal_training'
-}
+import {
+  buildUserSession,
+  buildWorkoutItemsFromPlanSessions,
+  resolveInitialSessionType,
+  type SessionType,
+} from '../features/session-record/domain/sessionConstruction'
 
 export function resolvePersistedSessionId(
   savedSession: { id?: string | null } | null | undefined,
@@ -154,54 +114,23 @@ export function RecordSessionPage() {
     setError(null)
 
     try {
-      const normalizedSessionType =
-        sessionType === 'solo'
-          ? 'solo'
-          : sessionType === 'personal_training'
-            ? 'personal_training'
-            : 'class'
-
-      if (normalizedSessionType === 'personal_training' && !trainer) {
+      if (sessionType === 'personal_training' && !trainer) {
         setError('Select a trainer before recording a PT session.')
         return
       }
 
-      const userSession: UserSession = {
-        id: userSessionId,
-        user_id: user!.id,
-        created_at: new Date().toISOString(),
-        updated_at: new Date().toISOString(),
-        attendance_type: null,
-        capacity: null,
-        class_id: null,
-        class_name: null,
-        duration_minutes: duration ?? null,
-        gym_club_id: null,
-        location: null,
-        metadata: null,
-        notes: notes || null,
-        price: null,
-        rating: rating ?? null,
-        role: 'client',
-        session_id:
-          normalizedSessionType === 'solo' ||
-          normalizedSessionType === 'personal_training'
-            ? userSessionId
-            : null,
-        session_type: normalizedSessionType,
-        start_at: toUtcIsoStringFromLocalInputValue(startAt),
-        status: null,
-        trainer_id:
-          normalizedSessionType === 'personal_training'
-            ? (trainer?.id ?? null)
-            : null,
-        trainer_name:
-          normalizedSessionType === 'personal_training'
-            ? (trainer?.name ?? null)
-            : null,
-        energy: activeKwh ? Number(activeKwh) : null,
-        energy_unit: activeKwh ? 'kWh' : null,
-      }
+      const userSession = buildUserSession({
+        sessionId: userSessionId,
+        userId: user.id,
+        sessionType,
+        startAt,
+        duration,
+        notes,
+        rating,
+        activeKwh,
+        trainerId: trainer?.id ?? null,
+        trainerName: trainer?.name ?? null,
+      })
 
       const { data: savedSession, error } = await updateUserSession(userSession)
       if (error) {

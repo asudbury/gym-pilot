@@ -89,10 +89,12 @@ function createEmptyProfileSnapshot(): SupabaseProfileSnapshot {
   };
 }
 
+/** Returns the localStorage key used to cache a profile snapshot for a given user. */
 export function getSupabaseProfileLocalStorageKey(userId: string) {
   return `profile:${userId}`;
 }
 
+/** Builds a local-cache entry object wrapping a profile snapshot with metadata. */
 export function buildSupabaseProfileLocalCacheEntry(
   userId: string,
   snapshot: SupabaseProfileSnapshot,
@@ -152,6 +154,12 @@ function normalizeProfileAccessTier(value: unknown): SupabaseAccessTier {
   return "free";
 }
 
+/**
+ * Normalises a raw roles value from Supabase into a typed UserRole[].
+ * Non-string values and empty strings are filtered out.
+ *
+ * @param roles - Raw roles value from the DB row (may be any type).
+ */
 export function normalizeProfileRoles(roles: unknown): UserRole[] {
   if (Array.isArray(roles)) {
     return roles.filter(
@@ -204,6 +212,12 @@ function normalizeProfileSnapshotRow(
   };
 }
 
+/**
+ * Clears the in-memory profile snapshot cache for one or all users.
+ * Also removes the persisted local Dexie entry so the next load fetches fresh data.
+ *
+ * @param userId - The user whose cache entry to invalidate. Clears all entries when omitted.
+ */
 export async function invalidateSupabaseProfileCache(userId?: string) {
   if (!userId) {
     profileSnapshotCache.clear();
@@ -222,6 +236,13 @@ export async function invalidateSupabaseProfileCache(userId?: string) {
   }
 }
 
+/**
+ * Loads the full profile snapshot for a user, with local-cache fallback.
+ * Checks Dexie first; falls back to Supabase and caches the result.
+ * Returns an empty snapshot when the client is unavailable or the user is not authenticated.
+ *
+ * @param userId - Optional user ID. Resolves from the authenticated session when omitted.
+ */
 export async function loadSupabaseProfileSnapshot(
   userId?: string,
 ): Promise<SupabaseProfileSnapshot> {
@@ -273,11 +294,13 @@ export async function loadSupabaseProfileSnapshot(
   return snapshotPromise;
 }
 
+/** Returns the friendly name from the current user's profile snapshot. */
 export async function loadSupabaseProfileName(): Promise<string | null> {
   const snapshot = await loadSupabaseProfileSnapshot();
   return snapshot.friendlyName;
 }
 
+/** Returns the last and previous login timestamps from the current user's profile snapshot. */
 export async function loadSupabaseProfileLoginHistory(): Promise<{
   lastLoggedInAt: string | null;
   previousLastLoggedInAt: string | null;
@@ -289,6 +312,12 @@ export async function loadSupabaseProfileLoginHistory(): Promise<{
   };
 }
 
+/**
+ * Returns the account access state for a user, including tier, expiry, and block status.
+ * Derives `isBlocked` and `blockReason` from the stored access settings.
+ *
+ * @param userId - Optional user ID. Resolves from the authenticated session when omitted.
+ */
 export async function loadSupabaseProfileAccessState(userId?: string): Promise<{
   accountTier: SupabaseAccessTier;
   accessEndsAt: string | null;
@@ -359,6 +388,12 @@ export async function loadSupabaseProfileTermsAcceptance(
   return snapshot.termsAccepted;
 }
 
+/**
+ * Loads the user's roles from the `gym_pilot_user_role` table.
+ * Returns an empty array when the client is unavailable or a database error occurs.
+ *
+ * @param userId - The user whose roles to load.
+ */
 export async function loadSupabaseProfileRoles(
   userId: string,
 ): Promise<UserRole[]> {
@@ -640,6 +675,15 @@ function haveRolesChanged(
   return !nextRoles.every((role) => currentSet.has(role));
 }
 
+/**
+ * Saves the user's roles to `gym_pilot_user_role`.
+ * Deletes all existing role rows first, then inserts the new set.
+ * Skips the update when the roles have not changed.
+ *
+ * @param roles - The new role set. Accepts a single role or an array.
+ * @param userId - Optional user ID. Resolves from the session when omitted.
+ * @param clientOverride - Optional Supabase client (used in admin contexts).
+ */
 export async function saveSupabaseProfileRoles(
   roles: Array<UserRole | string> | UserRole | null | undefined,
   userId?: string,

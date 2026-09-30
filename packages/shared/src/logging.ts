@@ -103,16 +103,26 @@ export interface ILoggingService {
   log: (...args: unknown[]) => void
 }
 
+/** Returns true when error log persistence is enabled in app settings. Defaults to true. */
 export function shouldPersistErrorLogs(settings?: Record<string, AppSettingValue> | null): boolean {
   const value = settings?.error_logging_enabled
   return typeof value === 'boolean' ? value : true
 }
 
+/** Returns true when audit log persistence is enabled in app settings. Defaults to true. */
 export function shouldPersistAuditLogs(settings?: Record<string, AppSettingValue> | null): boolean {
   const value = settings?.audit_logging_enabled
   return typeof value === 'boolean' ? value : true
 }
 
+/**
+ * Persists an error log entry to the `gym_pilot_error_log` Supabase table.
+ * Enriches the payload with the current user context when available.
+ * No-ops when error logging is disabled in app settings or the client is unavailable.
+ *
+ * @param message - Human-readable error message.
+ * @param details - Optional structured details (object or primitive) to store alongside the message.
+ */
 export async function persistErrorLog(message: string, details?: Record<string, unknown> | unknown): Promise<void> {
   const { getSupabaseClient } = await import('./supabase')
   const { loadAppSettings } = await import('./appSettingsService')
@@ -143,6 +153,14 @@ export async function persistErrorLog(message: string, details?: Record<string, 
   }
 }
 
+/**
+ * Persists an audit log entry to the `gym_pilot_audit_log` Supabase table.
+ * Enriches the payload with the current user context when available.
+ * No-ops when audit logging is disabled in app settings or the client is unavailable.
+ *
+ * @param message - Human-readable audit message.
+ * @param details - Optional structured details to store alongside the message.
+ */
 export async function persistAuditLog(message: string, details?: Record<string, unknown> | unknown): Promise<void> {
   const { getSupabaseClient } = await import('./supabase')
   const { loadAppSettings } = await import('./appSettingsService')

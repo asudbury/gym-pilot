@@ -5,6 +5,7 @@ import SessionActions from '../components/SessionActions'
 import { DecorativeIcon } from '../components/ui/DecorativeIcon'
 import WorkoutCalendar from '../components/WorkoutCalendar'
 import { resolveDashboardViewModel } from '../features/dashboard/domain/dashboardLayout'
+import { canAccessTimetable, canAccessPTSessions } from '../features/dashboard/domain/capabilityResolution'
 import { useImportedWorkouts } from '../hooks/useImportedWorkouts'
 import { PageLayout } from '../layouts/PageLayout'
 
@@ -20,9 +21,8 @@ export function DashboardPage() {
 
   const layouts = viewModel.layouts
 
-  const canShowTimetable = Boolean(user?.gymName && user.gymName.trim())
-  const hasTrainerConfigured = Boolean(user?.trainerId?.trim())
-  const isTrainer = Boolean(user?.roles?.includes('trainer'))
+  const canShowTimetable = canAccessTimetable(user)
+  const canShowPTSession = canAccessPTSessions(user)
 
   const { workouts } = useImportedWorkouts()
 
@@ -51,8 +51,8 @@ export function DashboardPage() {
             {(() => {
               const sessionActionsProps = {
                 showViewSessionsButton: true,
-                showClassSessionAction: canShowTimetable, // This will now navigate to /sessions/new?type=class
-                showPTSessionAction: hasTrainerConfigured || isTrainer,
+                showClassSessionAction: canShowTimetable,
+                showPTSessionAction: canShowPTSession,
                 showViewWorkoutsTemplateButton: true,
               }
               return (
