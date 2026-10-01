@@ -57,7 +57,7 @@ export type PlanBuilderFeatureActions = {
     exercises: Array<{
       exercise_id?: string
       exercise_name?: string
-      details?: any
+      details?: unknown
     }>,
   ) => void
   handleRemoveRow: (rowId: string) => void
