@@ -208,7 +208,7 @@ export async function saveTimetableAttendance(input: {
     }
   }
 
-  let dbResult: { data: any[] | null; error: any } = {
+  let dbResult: { data: Record<string, unknown>[] | null; error: unknown } = {
     data: null,
     error: null,
   };
@@ -307,7 +307,7 @@ export async function createSession(input: {
   location?: string | null;
   capacity?: number | null;
   price?: number | null;
-  metadata?: any | null;
+  metadata?: unknown | null;
 }) {
   const client = getSupabaseClient();
   if (!client) {
@@ -611,19 +611,19 @@ export async function listSessions(filters?: {
 
   let results = Array.isArray(data) ? data : [];
 
-  results = results.map((row: any) => ({
+  results = results.map((row: Record<string, unknown>) => ({
     ...row,
     session: {
-      class_name: row.class_name ?? null,
-      session_type: row.session_type ?? null,
-      start_at: row.start_at ?? null,
-      trainer_name: row.trainer_name ?? null,
+      class_name: (row.class_name as string | null) ?? null,
+      session_type: (row.session_type as string | null) ?? null,
+      start_at: (row.start_at as string | null) ?? null,
+      trainer_name: (row.trainer_name as string | null) ?? null,
     },
   }));
 
   if (normalizedFrom || normalizedTo) {
-    results = results.filter((r: any) => {
-      const start = r.start_at ? new Date(r.start_at) : null;
+    results = results.filter((r: Record<string, unknown>) => {
+      const start = r.start_at ? new Date(r.start_at as string) : null;
       if (!start) return false;
       if (normalizedFrom && start < new Date(`${normalizedFrom}T00:00:00`)) {
         return false;
@@ -661,7 +661,7 @@ export function buildSessionRecordPayload(input: {
   location?: string | null;
   capacity?: number | null;
   price?: number | null;
-  metadata?: any | null;
+  metadata?: unknown | null;
   createdAt?: string | null;
   updatedAt?: string | null;
 }) {
