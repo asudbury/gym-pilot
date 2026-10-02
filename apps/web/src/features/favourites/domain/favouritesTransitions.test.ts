@@ -26,7 +26,9 @@ describe('resolveFavouritesHydrationState', () => {
 
   it('preserves optional folder property', () => {
     const input = {
-      favorites: [{ id: '1', label: 'Squat', path: '/exercise/squat', folder: 'Legs' }],
+      favorites: [
+        { id: '1', label: 'Squat', path: '/exercise/squat', folder: 'Legs' },
+      ],
       folders: ['Legs'],
     }
     const result = resolveFavouritesHydrationState(input)

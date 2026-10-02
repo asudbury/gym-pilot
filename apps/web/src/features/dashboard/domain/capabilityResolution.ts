@@ -14,7 +14,9 @@ export type UserCapabilityLike = {
  *
  * @param user - The user object to check.
  */
-export function canAccessTimetable(user: UserCapabilityLike | null | undefined): boolean {
+export function canAccessTimetable(
+  user: UserCapabilityLike | null | undefined,
+): boolean {
   return Boolean(user?.gymName && user.gymName.trim())
 }
 
@@ -25,7 +27,9 @@ export function canAccessTimetable(user: UserCapabilityLike | null | undefined):
  *
  * @param user - The user object to check.
  */
-export function canAccessPTSessions(user: UserCapabilityLike | null | undefined): boolean {
+export function canAccessPTSessions(
+  user: UserCapabilityLike | null | undefined,
+): boolean {
   return (
     Boolean(user?.trainerId?.trim()) ||
     Boolean(user?.roles?.includes('trainer'))

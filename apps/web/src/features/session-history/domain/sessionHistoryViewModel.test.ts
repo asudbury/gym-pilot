@@ -1,6 +1,10 @@
-import { describe, expect, it } from 'vitest'
 import type { UserSession } from '@gym-pilot/shared'
-import { getSessionEntryRating, getSessionEntryTitle, sortSessionEntries } from './sessionHistoryViewModel'
+import { describe, expect, it } from 'vitest'
+import {
+  getSessionEntryRating,
+  getSessionEntryTitle,
+  sortSessionEntries,
+} from './sessionHistoryViewModel'
 
 function makeSession(overrides: Partial<UserSession> = {}): UserSession {
   return {
@@ -22,7 +26,7 @@ function makeSession(overrides: Partial<UserSession> = {}): UserSession {
     rating: null,
     role: null,
     session_id: null,
-    start_at: null,
+    start_at: '2024-01-01T00:00:00.000Z',
     status: null,
     trainer_id: null,
     trainer_name: null,
@@ -74,32 +78,38 @@ describe('getSessionEntryTitle', () => {
   })
 
   it('returns "Class" for class session without class_name', () => {
-    expect(
-      getSessionEntryTitle(makeSession({ session_type: 'class' })),
-    ).toBe('Class')
+    expect(getSessionEntryTitle(makeSession({ session_type: 'class' }))).toBe(
+      'Class',
+    )
   })
 
   it('returns class session title with class_name', () => {
     expect(
-      getSessionEntryTitle(makeSession({ session_type: 'class', class_name: 'Yoga' })),
+      getSessionEntryTitle(
+        makeSession({ session_type: 'class', class_name: 'Yoga' }),
+      ),
     ).toBe('Class Session: Yoga')
   })
 
   it('returns "Solo Session" for solo session without class_name', () => {
-    expect(
-      getSessionEntryTitle(makeSession({ session_type: 'solo' })),
-    ).toBe('Solo Session')
+    expect(getSessionEntryTitle(makeSession({ session_type: 'solo' }))).toBe(
+      'Solo Session',
+    )
   })
 
   it('returns solo title with class_name', () => {
     expect(
-      getSessionEntryTitle(makeSession({ session_type: 'solo', class_name: 'Morning run' })),
+      getSessionEntryTitle(
+        makeSession({ session_type: 'solo', class_name: 'Morning run' }),
+      ),
     ).toBe('Solo Session: Morning run')
   })
 
   it('returns "PT Session" for unknown type with taught attendance', () => {
     expect(
-      getSessionEntryTitle(makeSession({ session_type: null as never, attendance_type: 'taught' })),
+      getSessionEntryTitle(
+        makeSession({ session_type: null as never, attendance_type: 'taught' }),
+      ),
     ).toBe('PT Session')
   })
 

@@ -18,7 +18,6 @@ import { useIsDesktop } from '../../utils/useMediaQuery'
 import { TEMPLATE_EXERCISES_KEY } from '../../constants/storageKeys'
 import { createWorkoutTemplate } from '../../features/workoutTemplates/services/workoutTemplatesService'
 
-
 function WorkoutTemplateCreatePage() {
   const [selectedExercises, setSelectedExercises] = useState<
     { id: string; name: string }[]
@@ -82,7 +81,10 @@ function WorkoutTemplateCreatePage() {
   // Effect to save selectedExercises to local storage whenever it changes
   useEffect(() => {
     if (typeof window !== 'undefined') {
-      localStorage.setItem(TEMPLATE_EXERCISES_KEY, JSON.stringify(selectedExercises))
+      localStorage.setItem(
+        TEMPLATE_EXERCISES_KEY,
+        JSON.stringify(selectedExercises),
+      )
     }
   }, [selectedExercises]) // Dependency array includes selectedExercises
 

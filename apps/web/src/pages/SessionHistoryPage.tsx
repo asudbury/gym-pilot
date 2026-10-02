@@ -14,10 +14,11 @@ import {
   isReadyToDelete,
   resetDeletionState,
 } from '../features/session-history/domain/sessionDeletion'
+import { sortSessionEntries } from '../features/session-history/domain/sessionHistoryViewModel'
 import {
-  sortSessionEntries,
-} from '../features/session-history/domain/sessionHistoryViewModel'
-import { canAccessTimetable, canAccessPTSessions } from '../features/dashboard/domain/capabilityResolution'
+  canAccessTimetable,
+  canAccessPTSessions,
+} from '../features/dashboard/domain/capabilityResolution'
 
 export function SessionHistoryPage() {
   const { user } = useAuth()

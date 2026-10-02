@@ -21,6 +21,15 @@ export function normalizeSessionTypeForPersistence(
   return "solo";
 }
 
+function getErrorMessage(error: unknown) {
+  if (typeof error === "object" && error !== null && "message" in error) {
+    const { message } = error as { message?: unknown };
+    return typeof message === "string" ? message : undefined;
+  }
+
+  return undefined;
+}
+
 function normalizeSessionRating(value: number | string | null | undefined) {
   if (
     typeof value === "number" &&
@@ -259,9 +268,10 @@ export async function saveTimetableAttendance(input: {
   const { error } = dbResult;
 
   if (error) {
+    const errorMessage = getErrorMessage(error);
     const isMissingTableError =
-      error.message?.includes("Could not find the table") ||
-      error.message?.includes("does not exist");
+      errorMessage?.includes("Could not find the table") ||
+      errorMessage?.includes("does not exist");
 
     if (isMissingTableError) {
       logger.warn(

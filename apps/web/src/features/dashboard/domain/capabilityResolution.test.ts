@@ -1,5 +1,9 @@
 import { describe, it, expect } from 'vitest'
-import { canAccessTimetable, canAccessPTSessions, type UserCapabilityLike } from './capabilityResolution'
+import {
+  canAccessTimetable,
+  canAccessPTSessions,
+  type UserCapabilityLike,
+} from './capabilityResolution'
 
 describe('canAccessTimetable', () => {
   it('returns false for null or undefined user', () => {

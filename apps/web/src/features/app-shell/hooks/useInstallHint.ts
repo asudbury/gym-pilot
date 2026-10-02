@@ -13,8 +13,7 @@ export function useInstallHint() {
       return
     }
 
-    const dismissed =
-      window.localStorage.getItem(INSTALL_HINT_KEY) === 'true'
+    const dismissed = window.localStorage.getItem(INSTALL_HINT_KEY) === 'true'
 
     if (isInstalled || !isApple || dismissed) {
       setShowInstallHint(false)

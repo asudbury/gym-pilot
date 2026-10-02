@@ -122,7 +122,8 @@ export function buildUserSession(params: BuildSessionParams): UserSession {
     session_type: sessionType,
     start_at: toUtcIsoStringFromLocalInputValue(startAt),
     status: null,
-    trainer_id: sessionType === 'personal_training' ? (trainerId ?? null) : null,
+    trainer_id:
+      sessionType === 'personal_training' ? (trainerId ?? null) : null,
     trainer_name:
       sessionType === 'personal_training' ? (trainerName ?? null) : null,
     energy: activeKwh ? Number(activeKwh) : null,

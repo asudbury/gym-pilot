@@ -1,4 +1,8 @@
-import type { Exercise, WorkoutTemplate, WorkoutTemplateExercise } from '@gym-pilot/shared'
+import type {
+  Exercise,
+  WorkoutTemplate,
+  WorkoutTemplateExercise,
+} from '@gym-pilot/shared'
 import { getSupabaseClient, logger } from '@gym-pilot/shared'
 import type { TablesInsert } from '@gym-pilot/shared/src/dataServices/databaseTypes'
 import { TableNames } from '@gym-pilot/shared/src/dataServices/tableNames'
@@ -27,11 +31,17 @@ export async function loadWorkoutTemplates(): Promise<{
     .order('created_at', { ascending: false })
 
   if (error) {
-    logger.error('[workoutTemplatesService] Could not load workout templates', error)
+    logger.error(
+      '[workoutTemplatesService] Could not load workout templates',
+      error,
+    )
     return { data: [], error: error.message }
   }
 
-  return { data: Array.isArray(data) ? (data as WorkoutTemplateWithExercises[]) : [], error: null }
+  return {
+    data: Array.isArray(data) ? (data as WorkoutTemplateWithExercises[]) : [],
+    error: null,
+  }
 }
 
 /**
@@ -65,7 +75,10 @@ export async function loadWorkoutTemplate(id: string): Promise<{
     : []
 
   return {
-    data: { ...data, workout_template_exercise: sortedExercises } as WorkoutTemplateWithExercises,
+    data: {
+      ...data,
+      workout_template_exercise: sortedExercises,
+    } as WorkoutTemplateWithExercises,
     error: null,
   }
 }
@@ -104,7 +117,10 @@ export async function saveWorkoutTemplate(
       }),
     )
   } catch (posErr) {
-    logger.warn('[workoutTemplatesService] Could not persist exercise positions', posErr)
+    logger.warn(
+      '[workoutTemplatesService] Could not persist exercise positions',
+      posErr,
+    )
   }
 
   return { error: null }
@@ -113,7 +129,9 @@ export async function saveWorkoutTemplate(
 /**
  * Deletes a workout template by id.
  */
-export async function deleteWorkoutTemplate(id: string): Promise<{ error: string | null }> {
+export async function deleteWorkoutTemplate(
+  id: string,
+): Promise<{ error: string | null }> {
   const client = getSupabaseClient()
   if (!client) {
     return { error: 'Supabase client not available.' }
@@ -147,12 +165,18 @@ export async function copyWorkoutTemplate(id: string): Promise<{
     .single()
 
   if (error || !data) {
-    return { newTemplateId: null, error: error?.message ?? 'Could not copy template' }
+    return {
+      newTemplateId: null,
+      error: error?.message ?? 'Could not copy template',
+    }
   }
 
   const { data: authData, error: authErr } = await client.auth.getUser()
   if (authErr || !authData?.user) {
-    return { newTemplateId: null, error: 'Unable to determine current user for template copy' }
+    return {
+      newTemplateId: null,
+      error: 'Unable to determine current user for template copy',
+    }
   }
 
   const { data: newTemplate, error: insertError } = await client
@@ -166,24 +190,30 @@ export async function copyWorkoutTemplate(id: string): Promise<{
     .single()
 
   if (insertError || !newTemplate) {
-    return { newTemplateId: null, error: insertError?.message ?? 'Could not copy template' }
+    return {
+      newTemplateId: null,
+      error: insertError?.message ?? 'Could not copy template',
+    }
   }
 
   if (data.workout_template_exercise?.length) {
-    const exerciseRows = (data.workout_template_exercise as WorkoutTemplateExercise[]).map(
-      (ex, idx) => ({
-        template_id: newTemplate.id,
-        exercise_id: ex.exercise_id,
-        exercise_name: ex.exercise_name,
-        position: idx,
-      }),
-    )
+    const exerciseRows = (
+      data.workout_template_exercise as WorkoutTemplateExercise[]
+    ).map((ex, idx) => ({
+      template_id: newTemplate.id,
+      exercise_id: ex.exercise_id,
+      exercise_name: ex.exercise_name,
+      position: idx,
+    }))
     const { error: exerciseError } = await client
       .from(TableNames.WorkoutTemplateExercise)
       .insert(exerciseRows)
     if (exerciseError) {
       // Clean up the orphaned template record before returning the error
-      await client.from(TableNames.WorkoutTemplate).delete().eq('id', newTemplate.id)
+      await client
+        .from(TableNames.WorkoutTemplate)
+        .delete()
+        .eq('id', newTemplate.id)
       return { newTemplateId: null, error: exerciseError.message }
     }
   }
@@ -194,7 +224,9 @@ export async function copyWorkoutTemplate(id: string): Promise<{
 /**
  * Removes a single exercise row from a template.
  */
-export async function removeTemplateExercise(rowId: string): Promise<{ error: string | null }> {
+export async function removeTemplateExercise(
+  rowId: string,
+): Promise<{ error: string | null }> {
   const client = getSupabaseClient()
   if (!client) {
     return { error: 'Supabase client not available.' }
@@ -221,16 +253,17 @@ export async function addExercisesToTemplate(
     return { error: 'Supabase client not available.' }
   }
 
-  const rows: TablesInsert<typeof TableNames.WorkoutTemplateExercise>[] = exercises.map(
-    (ex, idx) => ({
+  const rows: TablesInsert<typeof TableNames.WorkoutTemplateExercise>[] =
+    exercises.map((ex, idx) => ({
       template_id: templateId,
       exercise_id: ex.id,
       exercise_name: formatLabel(ex.name) || null,
       position: startIndex + idx,
-    }),
-  )
+    }))
 
-  const { error } = await client.from(TableNames.WorkoutTemplateExercise).insert(rows)
+  const { error } = await client
+    .from(TableNames.WorkoutTemplateExercise)
+    .insert(rows)
 
   return { error: error?.message ?? null }
 }
@@ -251,8 +284,14 @@ export async function createWorkoutTemplate(
 
   const { data: authData, error: authErr } = await client.auth.getUser()
   if (authErr || !authData?.user) {
-    logger.error('[workoutTemplatesService] Unable to determine current user for template save', authErr)
-    return { templateId: null, error: 'Unable to determine current user for template save' }
+    logger.error(
+      '[workoutTemplatesService] Unable to determine current user for template save',
+      authErr,
+    )
+    return {
+      templateId: null,
+      error: 'Unable to determine current user for template save',
+    }
   }
 
   const { data: insertedTemplate, error: insertError } = await client
@@ -267,17 +306,20 @@ export async function createWorkoutTemplate(
     .single()
 
   if (insertError || !insertedTemplate) {
-    return { templateId: null, error: insertError?.message ?? 'Error inserting template' }
+    return {
+      templateId: null,
+      error: insertError?.message ?? 'Error inserting template',
+    }
   }
 
-  const exerciseRows: TablesInsert<typeof TableNames.WorkoutTemplateExercise>[] = exercises.map(
-    (ex, idx) => ({
-      template_id: insertedTemplate.id,
-      exercise_id: ex.id,
-      position: idx,
-      exercise_name: formatLabel(ex.name) || null,
-    }),
-  )
+  const exerciseRows: TablesInsert<
+    typeof TableNames.WorkoutTemplateExercise
+  >[] = exercises.map((ex, idx) => ({
+    template_id: insertedTemplate.id,
+    exercise_id: ex.id,
+    position: idx,
+    exercise_name: formatLabel(ex.name) || null,
+  }))
 
   const { error: exInsertErr } = await client
     .from(TableNames.WorkoutTemplateExercise)
@@ -285,7 +327,10 @@ export async function createWorkoutTemplate(
 
   if (exInsertErr) {
     // Clean up the orphaned template record before returning the error
-    await client.from(TableNames.WorkoutTemplate).delete().eq('id', insertedTemplate.id)
+    await client
+      .from(TableNames.WorkoutTemplate)
+      .delete()
+      .eq('id', insertedTemplate.id)
     return { templateId: null, error: exInsertErr.message }
   }
 

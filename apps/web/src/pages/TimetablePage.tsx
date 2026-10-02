@@ -7,6 +7,7 @@ import { RatingSelector } from '../components/RatingSelector'
 import { Button } from '../components/ui/Button'
 import { StatusMessageNotification } from '../components/ui/StatusMessageNotification'
 import { DesktopOnly } from '../components/visibility/DeviceVisibility'
+import { TIMETABLE_ATTENDANCE_KEY } from '../constants/storageKeys'
 import { appTokens } from '../constants/tokens'
 import {
   createAttendanceFormState,
@@ -31,7 +32,6 @@ import { PageCardLayout } from '../layouts/PageCardLayout'
 import { PageLayout } from '../layouts/PageLayout'
 import { reportUiError } from '../utils/uiErrorLogging'
 import { loadVirginActiveClubs } from '../utils/virginActiveClubs'
-import { TIMETABLE_ATTENDANCE_KEY } from '../constants/storageKeys'
 
 export function TimetablePage() {
   const { user, updateGymName } = useAuth()
@@ -370,8 +370,16 @@ export function TimetablePage() {
         setAttendanceSelection('attended') // StatusMessage will handle parsing
         navigate('/sessions', { replace: true }) // StatusMessage will handle parsing
       } else {
-        // StatusMessage will handle parsing
-        setAttendanceMessage(result.error ?? 'Could not save session.') // StatusMessage will handle parsing
+        const errorMessage =
+          result.error instanceof Error
+            ? result.error.message
+            : typeof result.error === 'object' &&
+                result.error !== null &&
+                'message' in result.error &&
+                typeof result.error.message === 'string'
+              ? result.error.message
+              : 'Could not save session.'
+        setAttendanceMessage(errorMessage)
       }
     } catch (err: unknown) {
       const rawMessage =

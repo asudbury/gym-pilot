@@ -1,4 +1,7 @@
-import type { TimetableAttendanceAction, TimetableSession } from './timetableView'
+import type {
+  TimetableAttendanceAction,
+  TimetableSession,
+} from './timetableView'
 
 /** Attendance form state used in the TimetablePage attendance modal. */
 export type AttendanceFormState = {
@@ -44,8 +47,7 @@ export function openAttendanceForm(
     rating: null,
     saving: false,
     message: null,
-    selection:
-      action.options.length > 1 ? 'attended' : action.kind,
+    selection: action.options.length > 1 ? 'attended' : action.kind,
   }
 }
 

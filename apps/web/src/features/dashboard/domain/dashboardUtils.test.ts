@@ -1,5 +1,8 @@
 import { describe, it, expect } from 'vitest'
-import { formatDashboardTimestamp, renderDashboardTimestamp } from './dashboardUtils'
+import {
+  formatDashboardTimestamp,
+  renderDashboardTimestamp,
+} from './dashboardUtils'
 
 describe('formatDashboardTimestamp', () => {
   it('returns null for undefined or null input', () => {
@@ -13,7 +16,7 @@ describe('formatDashboardTimestamp', () => {
     expect(formatDashboardTimestamp('2024-13-45')).toBeNull()
   })
 
-  it('formats today\'s dates with time', () => {
+  it("formats today's dates with time", () => {
     const now = new Date()
     const isoNow = now.toISOString()
     const result = formatDashboardTimestamp(isoNow)
@@ -21,7 +24,7 @@ describe('formatDashboardTimestamp', () => {
     expect(result).toContain('Today,')
   })
 
-  it('formats yesterday\'s dates correctly', () => {
+  it("formats yesterday's dates correctly", () => {
     const yesterday = new Date()
     yesterday.setDate(yesterday.getDate() - 1)
     yesterday.setHours(14, 30, 0)
@@ -65,7 +68,7 @@ describe('renderDashboardTimestamp', () => {
     expect(renderDashboardTimestamp('invalid')).toBeNull()
   })
 
-  it('wraps today\'s timestamp in span element', () => {
+  it("wraps today's timestamp in span element", () => {
     const now = new Date()
     const isoNow = now.toISOString()
     const result = renderDashboardTimestamp(isoNow)

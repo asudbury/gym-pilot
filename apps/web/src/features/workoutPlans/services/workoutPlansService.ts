@@ -5,7 +5,11 @@ import {
   buildPersistedPlanRows,
   buildPlanSessionsFromRows,
 } from '../../planBuilder/domain/workoutPlanState'
-import type { PlanExerciseRow, PlanSessionRow, PlanSessionState } from '../../planBuilder/domain/workoutPlanState'
+import type {
+  PlanExerciseRow,
+  PlanSessionRow,
+  PlanSessionState,
+} from '../../planBuilder/domain/workoutPlanState'
 
 export type { PlanSessionState, PlanSessionRow, PlanExerciseRow }
 
@@ -71,7 +75,8 @@ export async function loadWorkoutPlan(id: string): Promise<{
       error: null,
     }
   } catch (err: unknown) {
-    const message = err instanceof Error ? err.message : 'Failed to load plan for editing.'
+    const message =
+      err instanceof Error ? err.message : 'Failed to load plan for editing.'
     logger.error('[workoutPlansService] Error loading plan:', err)
     return { data: null, error: message }
   }
@@ -100,7 +105,10 @@ export async function persistWorkoutPlan(
 
   const { data: authData, error: authErr } = await client.auth.getUser()
   if (authErr || !authData?.user) {
-    return { planId: null, error: 'Unable to determine current user for plan save.' }
+    return {
+      planId: null,
+      error: 'Unable to determine current user for plan save.',
+    }
   }
 
   const planNameValue = planName.trim()
@@ -114,7 +122,10 @@ export async function persistWorkoutPlan(
       .maybeSingle()
 
     if (createPlanError || !createdPlan?.id) {
-      return { planId: null, error: createPlanError?.message ?? 'Failed to create plan' }
+      return {
+        planId: null,
+        error: createPlanError?.message ?? 'Failed to create plan',
+      }
     }
 
     resolvedPlanId = createdPlan.id
@@ -158,7 +169,8 @@ export async function persistWorkoutPlan(
     resolvedPlanId,
   )
 
-  const sessionsToInsert: TablesInsert<typeof TableNames.WorkoutPlanSession>[] = persistedSessions
+  const sessionsToInsert: TablesInsert<typeof TableNames.WorkoutPlanSession>[] =
+    persistedSessions
 
   if (sessionsToInsert.length > 0) {
     const { error: insertSessionsError } = await client
@@ -192,7 +204,9 @@ export async function persistWorkoutPlan(
 /**
  * Deletes a workout plan and all its associated sessions and exercises.
  */
-export async function deleteWorkoutPlan(id: string): Promise<{ error: string | null }> {
+export async function deleteWorkoutPlan(
+  id: string,
+): Promise<{ error: string | null }> {
   const client = getSupabaseClient()
   if (!client) {
     return { error: 'Supabase client not available.' }
@@ -228,7 +242,10 @@ export async function deleteWorkoutPlan(id: string): Promise<{ error: string | n
 
     return { error: null }
   } catch (err: unknown) {
-    const message = err instanceof Error ? err.message : 'An unexpected error occurred while deleting the plan.'
+    const message =
+      err instanceof Error
+        ? err.message
+        : 'An unexpected error occurred while deleting the plan.'
     logger.error('[workoutPlansService] Error deleting plan:', err)
     return { error: message }
   }
@@ -255,7 +272,10 @@ export async function copyWorkoutPlan(
       .maybeSingle()
 
     if (planError || !planData) {
-      return { newPlanId: null, error: planError?.message ?? 'Could not load plan to copy.' }
+      return {
+        newPlanId: null,
+        error: planError?.message ?? 'Could not load plan to copy.',
+      }
     }
 
     const { data: sessionsData, error: sessionsError } = await client
@@ -282,10 +302,14 @@ export async function copyWorkoutPlan(
 
     const { data: authData, error: authErr } = await client.auth.getUser()
     if (authErr || !authData?.user) {
-      return { newPlanId: null, error: 'Unable to determine current user for plan copy.' }
+      return {
+        newPlanId: null,
+        error: 'Unable to determine current user for plan copy.',
+      }
     }
 
-    const sourceName = currentPlanName.trim() || planData.plan_name || 'Workout Plan'
+    const sourceName =
+      currentPlanName.trim() || planData.plan_name || 'Workout Plan'
     const { data: newPlan, error: insertPlanError } = await client
       .from(TableNames.WorkoutPlan)
       .insert({ user_id: authData.user.id, plan_name: `${sourceName} Copy` })
@@ -293,22 +317,24 @@ export async function copyWorkoutPlan(
       .maybeSingle()
 
     if (insertPlanError || !newPlan?.id) {
-      return { newPlanId: null, error: insertPlanError?.message ?? 'Could not create copied plan.' }
+      return {
+        newPlanId: null,
+        error: insertPlanError?.message ?? 'Could not create copied plan.',
+      }
     }
 
     const sessionIdMap = new Map<string, string>()
-    const copiedSessions: TablesInsert<typeof TableNames.WorkoutPlanSession>[] = (
-      sessionsData ?? []
-    ).map((session) => {
-      const newId = crypto.randomUUID()
-      sessionIdMap.set(session.id, newId)
-      return {
-        id: newId,
-        plan_id: newPlan.id,
-        name: session.name,
-        position: session.position,
-      }
-    })
+    const copiedSessions: TablesInsert<typeof TableNames.WorkoutPlanSession>[] =
+      (sessionsData ?? []).map((session) => {
+        const newId = crypto.randomUUID()
+        sessionIdMap.set(session.id, newId)
+        return {
+          id: newId,
+          plan_id: newPlan.id,
+          name: session.name,
+          position: session.position,
+        }
+      })
 
     if (copiedSessions.length > 0) {
       const { error: insertSessionsError } = await client
@@ -321,12 +347,14 @@ export async function copyWorkoutPlan(
       }
     }
 
-    const copiedExercises: TablesInsert<typeof TableNames.WorkoutPlanExercise>[] = (
-      exercisesData ?? []
-    ).map((exercise) => ({
+    const copiedExercises: TablesInsert<
+      typeof TableNames.WorkoutPlanExercise
+    >[] = (exercisesData ?? []).map((exercise) => ({
       id: crypto.randomUUID(),
       plan_id: newPlan.id,
-      session_id: exercise.session_id ? (sessionIdMap.get(exercise.session_id) ?? null) : null,
+      session_id: exercise.session_id
+        ? (sessionIdMap.get(exercise.session_id) ?? null)
+        : null,
       exercise_id: exercise.exercise_id,
       exercise_name: exercise.exercise_name ?? null,
       position: exercise.position,
@@ -345,7 +373,10 @@ export async function copyWorkoutPlan(
 
     return { newPlanId: newPlan.id, error: null }
   } catch (err: unknown) {
-    const message = err instanceof Error ? err.message : 'An unexpected error occurred while copying the plan.'
+    const message =
+      err instanceof Error
+        ? err.message
+        : 'An unexpected error occurred while copying the plan.'
     logger.error('[workoutPlansService] Error copying plan:', err)
     return { newPlanId: null, error: message }
   }

@@ -1,4 +1,8 @@
-import type { Exercise, WorkoutTemplate, WorkoutTemplateExercise } from '@gym-pilot/shared'
+import type {
+  Exercise,
+  WorkoutTemplate,
+  WorkoutTemplateExercise,
+} from '@gym-pilot/shared'
 import { clsx } from 'clsx'
 import { useEffect, useState } from 'react'
 import { Link, useNavigate, useParams } from 'react-router-dom'
@@ -29,7 +33,9 @@ export default function WorkoutTemplateEditPage() {
   const [loading, setLoading] = useState(false)
   const [name, setName] = useState('')
   const [description, setDescription] = useState('')
-  const [localExercises, setLocalExercises] = useState<WorkoutTemplateExercise[]>([])
+  const [localExercises, setLocalExercises] = useState<
+    WorkoutTemplateExercise[]
+  >([])
   const [showExercisePicker, setShowExercisePicker] = useState(false)
   const [moved, setMoved] = useState<string | null>(null)
   const isDesktop = useIsDesktop()
@@ -62,7 +68,12 @@ export default function WorkoutTemplateEditPage() {
   async function handleSave() {
     if (!id) return
     setStatusMessage(null)
-    const { error } = await saveWorkoutTemplate(id, name, description, localExercises)
+    const { error } = await saveWorkoutTemplate(
+      id,
+      name,
+      description,
+      localExercises,
+    )
     if (error) {
       setStatusTone('error')
       setStatusMessage(error)
@@ -120,7 +131,11 @@ export default function WorkoutTemplateEditPage() {
 
   const addExercises = async (exercises: Exercise[]) => {
     if (!id) return
-    const { error } = await addExercisesToTemplate(id, exercises, localExercises.length)
+    const { error } = await addExercisesToTemplate(
+      id,
+      exercises,
+      localExercises.length,
+    )
     if (error) {
       setStatusTone('error')
       setStatusMessage(error)

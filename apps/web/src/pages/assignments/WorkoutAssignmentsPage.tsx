@@ -34,7 +34,10 @@ export function WorkoutAssignmentsPage() {
       .order('created_at', { ascending: false })
 
     if (error) {
-      logger.error('[WorkoutAssignmentsPage] Could not load workout assignments', error)
+      logger.error(
+        '[WorkoutAssignmentsPage] Could not load workout assignments',
+        error,
+      )
       setAssignments([])
       setLoading(false)
       return

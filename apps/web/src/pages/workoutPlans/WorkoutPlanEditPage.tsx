@@ -1,7 +1,5 @@
 import { logger } from '@gym-pilot/shared'
-import type {
-  Tables,
-} from '@gym-pilot/shared/src/dataServices/databaseTypes'
+import type { Tables } from '@gym-pilot/shared/src/dataServices/databaseTypes'
 import { TableNames } from '@gym-pilot/shared/src/dataServices/tableNames'
 import clsx from 'clsx'
 import { useEffect, useState } from 'react'
@@ -233,12 +231,13 @@ export default function WorkoutPlanEditPage() {
   const persistPlanSessions = async (
     sessionsToPersist: PlanSession[],
   ): Promise<string | null> => {
-    const { planId: resolvedPlanId, error: persistError } = await persistWorkoutPlan({
-      planId: id,
-      planName,
-      isEditMode,
-      sessions: sessionsToPersist,
-    })
+    const { planId: resolvedPlanId, error: persistError } =
+      await persistWorkoutPlan({
+        planId: id,
+        planName,
+        isEditMode,
+        sessions: sessionsToPersist,
+      })
     if (persistError) {
       setError(persistError)
       return null
@@ -263,7 +262,10 @@ export default function WorkoutPlanEditPage() {
       sessions: nextSessions,
     })
     if (persistError) {
-      logger.error('[WorkoutPlanEditPage] Error clearing session exercises:', persistError)
+      logger.error(
+        '[WorkoutPlanEditPage] Error clearing session exercises:',
+        persistError,
+      )
       setError(persistError)
     }
   }
@@ -300,7 +302,10 @@ export default function WorkoutPlanEditPage() {
 
       navigate('/workout-plans')
     } catch (err: unknown) {
-      const message = err instanceof Error ? err.message : 'An unexpected error occurred while saving the plan.'
+      const message =
+        err instanceof Error
+          ? err.message
+          : 'An unexpected error occurred while saving the plan.'
       logger.error('[WorkoutPlanEditPage] Error saving plan:', err)
       setError(message)
     } finally {

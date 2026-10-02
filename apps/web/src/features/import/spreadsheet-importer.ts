@@ -27,9 +27,7 @@ export function parseMultiExerciseNames(name: string): string[] {
     return [trimmed]
   }
 
-  return matches
-    .map((match) => match[1].trim())
-    .filter((n) => n.length > 0)
+  return matches.map((match) => match[1].trim()).filter((n) => n.length > 0)
 }
 
 function parseEnergy(value: string): { energy?: number; unit?: string } {

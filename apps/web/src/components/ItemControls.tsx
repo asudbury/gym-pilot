@@ -54,10 +54,7 @@ export const ItemControls = ({
       ) : (
         <>
           {isFirst ? (
-            <span
-              aria-hidden="true"
-              className={spacerClassName}
-            />
+            <span aria-hidden="true" className={spacerClassName} />
           ) : (
             <Button
               tone="default"
@@ -71,10 +68,7 @@ export const ItemControls = ({
           )}
 
           {isLast ? (
-            <span
-              aria-hidden="true"
-              className={spacerClassName}
-            />
+            <span aria-hidden="true" className={spacerClassName} />
           ) : (
             <Button
               tone="default"

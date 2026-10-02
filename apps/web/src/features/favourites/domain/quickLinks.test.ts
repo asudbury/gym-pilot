@@ -139,7 +139,9 @@ describe('groupFavoritesByFolder', () => {
 })
 
 describe('getQuickLinkForPath', () => {
-  const lookup = new Map([['bench-press', { id: 'bench-press', name: 'Bench Press' }]])
+  const lookup = new Map([
+    ['bench-press', { id: 'bench-press', name: 'Bench Press' }],
+  ])
 
   it('returns a home link for "/"', () => {
     const link = getQuickLinkForPath('/', lookup)

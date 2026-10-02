@@ -1,4 +1,5 @@
 import { TableNames } from "@gym-pilot/shared/src/dataServices/tableNames";
+import type { Assignment, PlanItem, PlanSession } from "@gym-pilot/types";
 import type { Plan, WorkoutPlanSession } from "../dataServices/types";
 import { logger } from "../logging"; // Assuming logger is defined elsewhere
 import { getSupabaseClient } from "../supabase";
@@ -505,9 +506,7 @@ export async function saveSupabaseJsonRecord<T>(key: string, value: T) {
   }
 
   if (key === "gym-pilot-assignments") {
-    const assignments = Array.isArray(value)
-      ? (value as Array<Record<string, unknown>>)
-      : [];
+    const assignments = Array.isArray(value) ? (value as Assignment[]) : [];
 
     const { error: deleteAssignmentsError } = await client
       .from(TableNames.WorkoutAssignment)
@@ -544,14 +543,16 @@ export async function saveSupabaseJsonRecord<T>(key: string, value: T) {
 
       const sessionPayload = assignments.flatMap((assignment) =>
         Array.isArray(assignment.planSessions)
-          ? assignment.planSessions.map((session: WorkoutPlanSession, index: number) => ({
-              id: session.id,
-              assignment_id: assignment.id,
-              name: session.name ?? session.title ?? `Day ${index + 1}`,
-              position: session.position ?? index + 1,
-              goal: session.goal ?? null,
-              notes: session.notes ?? null,
-            }))
+          ? assignment.planSessions.map(
+              (session: PlanSession, index: number) => ({
+                id: session.id,
+                assignment_id: assignment.id,
+                name: session.name ?? session.title ?? `Day ${index + 1}`,
+                position: session.position ?? index + 1,
+                goal: session.goal ?? null,
+                notes: session.notes ?? null,
+              }),
+            )
           : [],
       );
 
@@ -567,9 +568,9 @@ export async function saveSupabaseJsonRecord<T>(key: string, value: T) {
 
       const exercisePayload = assignments.flatMap((assignment) =>
         Array.isArray(assignment.planSessions)
-          ? assignment.planSessions.flatMap((session: WorkoutPlanSession) =>
+          ? assignment.planSessions.flatMap((session: PlanSession) =>
               Array.isArray(session.planItems)
-                ? session.planItems.map((item: WorkoutPlanExercise, index: number) => ({
+                ? session.planItems.map((item: PlanItem, index: number) => ({
                     id: item.id,
                     assignment_id: assignment.id,
                     assignment_session_id: session.id,

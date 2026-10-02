@@ -8,7 +8,9 @@ import {
   type SessionType,
 } from './sessionConstruction'
 
-const makeSession = (overrides: Partial<BuildSessionParams> = {}): BuildSessionParams => ({
+const makeSession = (
+  overrides: Partial<BuildSessionParams> = {},
+): BuildSessionParams => ({
   sessionId: 'session-1',
   userId: 'user-1',
   sessionType: 'solo',
@@ -22,7 +24,10 @@ const makeSession = (overrides: Partial<BuildSessionParams> = {}): BuildSessionP
   ...overrides,
 })
 
-const makePlanSession = (id: string, items: PlanSession['planItems'] = []): PlanSession => ({
+const makePlanSession = (
+  id: string,
+  items: PlanSession['planItems'] = [],
+): PlanSession => ({
   id,
   planItems: items,
 })
@@ -37,8 +42,12 @@ describe('resolveInitialSessionType', () => {
   })
 
   it('defaults to "personal_training" for unrecognised values', () => {
-    expect(resolveInitialSessionType(null)).toBe<SessionType>('personal_training')
-    expect(resolveInitialSessionType('unknown')).toBe<SessionType>('personal_training')
+    expect(resolveInitialSessionType(null)).toBe<SessionType>(
+      'personal_training',
+    )
+    expect(resolveInitialSessionType('unknown')).toBe<SessionType>(
+      'personal_training',
+    )
   })
 })
 
@@ -50,8 +59,20 @@ describe('buildWorkoutItemsFromPlanSessions', () => {
   it('builds one workout item per plan item preserving order', () => {
     const sessions: PlanSession[] = [
       makePlanSession('s1', [
-        { id: 'item-1', exercise_id: 'ex-1', exercise_name: 'Squat', reps: '10', workingSets: '3' },
-        { id: 'item-2', exercise_id: 'ex-2', exercise_name: 'Bench Press', reps: '8', workingSets: '4' },
+        {
+          id: 'item-1',
+          exercise_id: 'ex-1',
+          exercise_name: 'Squat',
+          reps: '10',
+          workingSets: '3',
+        },
+        {
+          id: 'item-2',
+          exercise_id: 'ex-2',
+          exercise_name: 'Bench Press',
+          reps: '8',
+          workingSets: '4',
+        },
       ]),
     ]
     const items = buildWorkoutItemsFromPlanSessions(sessions)
@@ -75,7 +96,9 @@ describe('buildWorkoutItemsFromPlanSessions', () => {
 
 describe('buildUserSession', () => {
   it('includes session_id for solo sessions', () => {
-    const session = buildUserSession(makeSession({ sessionType: 'solo', sessionId: 'abc' }))
+    const session = buildUserSession(
+      makeSession({ sessionType: 'solo', sessionId: 'abc' }),
+    )
     expect(session.session_id).toBe('abc')
   })
 
@@ -87,7 +110,9 @@ describe('buildUserSession', () => {
   })
 
   it('omits session_id for class sessions', () => {
-    const session = buildUserSession(makeSession({ sessionType: 'class', sessionId: 'abc' }))
+    const session = buildUserSession(
+      makeSession({ sessionType: 'class', sessionId: 'abc' }),
+    )
     expect(session.session_id).toBeNull()
   })
 
@@ -103,7 +128,11 @@ describe('buildUserSession', () => {
     expect(ptSession.trainer_name).toBe('Alice')
 
     const soloSession = buildUserSession(
-      makeSession({ sessionType: 'solo', trainerId: 't1', trainerName: 'Alice' }),
+      makeSession({
+        sessionType: 'solo',
+        trainerId: 't1',
+        trainerName: 'Alice',
+      }),
     )
     expect(soloSession.trainer_id).toBeNull()
     expect(soloSession.trainer_name).toBeNull()
