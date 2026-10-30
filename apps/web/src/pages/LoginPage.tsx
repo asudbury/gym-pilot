@@ -9,6 +9,7 @@ import { Button } from '../components/ui/Button'
 import { DecorativeIcon } from '../components/ui/DecorativeIcon'
 import { appTokens } from '../constants/tokens'
 import { resolvePostLoginRedirectPath } from '../features/auth/domain/authUtils'
+import { resolveLoginFailureMessage } from '../features/auth/domain/loginErrorMessages'
 import {
   persistRememberEmailPreference,
   persistRememberedEmail,
@@ -119,13 +120,7 @@ export function LoginPage() {
         email.trim() || null,
       )
       setAuthMessageTone('error')
-      if (error instanceof Error) {
-        setAuthMessage(
-          error.message || 'An unexpected error occurred during login.',
-        )
-      } else {
-        setAuthMessage('An unexpected error occurred during login.')
-      }
+      setAuthMessage(resolveLoginFailureMessage(error))
     } finally {
       setIsLoading(false)
     }
