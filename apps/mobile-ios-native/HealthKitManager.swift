@@ -253,7 +253,7 @@ final class HealthKitManager: ObservableObject {
         var request = URLRequest(url: backendConfiguration.endpoint)
         request.httpMethod = "POST"
         request.setValue("application/json", forHTTPHeaderField: "Content-Type")
-        request.setValue("Bearer \(backendConfiguration.anonKey)", forHTTPHeaderField: "Authorization")
+        request.setValue(backendConfiguration.anonKey, forHTTPHeaderField: "apikey")
         request.httpBody = jsonData
 
         URLSession.shared.dataTask(with: request) { [weak self] _, response, error in
