@@ -26,6 +26,9 @@ jobs:
       - name: Lint code
         run: npm run lint:web
 
+      - name: Typecheck shared package
+        run: npm run typecheck:shared
+
       - name: Run tests
         run: npm run test:coverage
 
