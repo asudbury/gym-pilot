@@ -159,9 +159,6 @@ export function useAppShell() {
           assignedTrainer.name?.trim())
       ? assignedTrainer.applicationName?.trim() || assignedTrainer.name?.trim()
       : 'Gym-Pilot'
-  const hasTimetableAccess = Boolean(
-    user?.gymName?.trim() && /^\d+$/.test(user.gymName.trim()),
-  )
 
   const userRoles = Array.isArray(user?.roles)
     ? user.roles
@@ -173,7 +170,6 @@ export function useAppShell() {
     plansCount,
     assignmentsCount: visibleAssignments.length,
     isAuthenticated: Boolean(user),
-    showTimetable: hasTimetableAccess,
     itemClassName: 'px-2 py-1.5 text-sm font-medium',
     userRoles,
     tier: currentTier,
@@ -184,7 +180,6 @@ export function useAppShell() {
     plansCount,
     assignmentsCount: visibleAssignments.length,
     isAuthenticated: Boolean(user),
-    showTimetable: hasTimetableAccess,
     onItemClick: () => setMobileMenuOpen(false),
     itemClassName:
       'rounded-xl px-3 py-2 text-sm font-medium text-slate-700 transition hover:bg-slate-50',
@@ -216,7 +211,6 @@ export function useAppShell() {
   const timetableMeta = navigationMeta.find((item) => item.key === 'timetable')
   if (
     timetableMeta &&
-    hasTimetableAccess &&
     isVisibleForTierAndDevice(currentTier, 'mobile', timetableMeta.visibility)
   ) {
     bottomNavigationItems.push({

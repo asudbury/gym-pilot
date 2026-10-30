@@ -23,6 +23,9 @@ const HelpPage = lazy(async () => ({
   default: (await import('../pages/help/HelpPage')).HelpPage,
 }))
 const InstallOnIOSPage = lazy(() => import('../pages/help/InstallOnIOSPage'))
+const TimetablePage = lazy(async () => ({
+  default: (await import('../pages/TimetablePage')).TimetablePage,
+}))
 
 interface PublicRoutesProps {
   user: AuthUser | null
@@ -37,6 +40,7 @@ export function createPublicRoutes({ user }: PublicRoutesProps) {
       <Route path="/help/install-ios" element={<InstallOnIOSPage />} />
 
       <Route path="/favourites" element={<FavouritesPage />} />
+      <Route path="/timetable" element={<TimetablePage />} />
       {createProtectedRoutes()}
       {createAdminRoutes()}
       <Route path="*" element={<NotFoundPage />} />
