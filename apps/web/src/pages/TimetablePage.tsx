@@ -37,6 +37,7 @@ export function TimetablePage() {
   const { user, updateGymName } = useAuth()
   const navigate = useNavigate()
   const savingRef = useRef(false)
+  const isLoggedIn = Boolean(user)
   const [sessions, setSessions] = useState<TimetableSession[]>([])
   const [isLoading, setIsLoading] = useState(true)
   const [errorMessage, setErrorMessage] = useState<string | null>(null)
@@ -84,34 +85,45 @@ export function TimetablePage() {
     setAttendanceForm((current) => ({ ...current, selection }))
 
   const rawGymBrand = user?.gymBrand?.trim() ?? ''
+  const effectiveGymBrand = rawGymBrand || (isLoggedIn ? '' : 'Virgin')
   const rawGymName = user?.gymName?.trim() ?? ''
-  const isVirginBrand = rawGymBrand.toLowerCase() === 'virgin'
+  const effectiveGymName = rawGymName || selectedClubId.trim()
+  const activeGymName = effectiveGymName || rawGymName
+  const isVirginBrand = effectiveGymBrand.toLowerCase() === 'virgin'
+  const canSaveAttendance = isLoggedIn && Boolean(attendanceAction.canShow)
   const headerViewModel = useMemo(
     () =>
       resolveTimetableHeaderViewModel({
-        gymBrand: rawGymBrand,
-        gymName: rawGymName,
+        gymBrand: effectiveGymBrand,
+        gymName: activeGymName,
         resolvedClubName,
       }),
-    [rawGymBrand, rawGymName, resolvedClubName],
+    [effectiveGymBrand, activeGymName, resolvedClubName],
   )
   const clubSelectionViewModel = useMemo(
     () =>
       resolveTimetableClubSelectionViewModel({
-        gymBrand: rawGymBrand,
-        gymName: rawGymName,
+        gymBrand: effectiveGymBrand,
+        gymName: activeGymName,
       }),
-    [rawGymBrand, rawGymName],
+    [effectiveGymBrand, activeGymName],
   )
 
   useEffect(() => {
-    setSelectedClubId(user?.gymName?.trim() ?? '')
-  }, [user?.gymName])
+    if (user?.gymName?.trim()) {
+      setSelectedClubId(user.gymName.trim())
+      return
+    }
+
+    if (!isLoggedIn && !selectedClubId) {
+      setSelectedClubId('')
+    }
+  }, [isLoggedIn, user?.gymName, selectedClubId])
 
   const clubId = useMemo(() => {
-    const storedClubId = user?.gymName?.trim() ?? ''
+    const storedClubId = selectedClubId.trim()
     return /^\d+$/.test(storedClubId) ? storedClubId : null
-  }, [user?.gymName])
+  }, [selectedClubId])
 
   const attendanceAction = useMemo(
     () => resolveTimetableAttendanceAction(user?.role, user?.roles),
@@ -174,7 +186,9 @@ export function TimetablePage() {
   useEffect(() => {
     let cancelled = false
 
-    if (!isVirginBrand || !/^\d+$/.test(rawGymName)) {
+    const clubLookupName = rawGymName || selectedClubId.trim()
+
+    if (!isVirginBrand || !/^\d+$/.test(clubLookupName)) {
       setResolvedClubName(null)
       return () => {
         cancelled = true
@@ -187,15 +201,15 @@ export function TimetablePage() {
       }
 
       const matchingClub = clubs.find(
-        (club) => String(club.clubId) === rawGymName,
+        (club) => String(club.clubId) === clubLookupName,
       )
-      setResolvedClubName(matchingClub?.name ?? rawGymName)
+      setResolvedClubName(matchingClub?.name ?? clubLookupName)
     })
 
     return () => {
       cancelled = true
     }
-  }, [isVirginBrand, rawGymName])
+  }, [isVirginBrand, rawGymName, selectedClubId])
 
   useEffect(() => {
     let cancelled = false
@@ -261,7 +275,7 @@ export function TimetablePage() {
         null)
 
   const handleAttendanceAction = (session: TimetableSession) => {
-    if (!attendanceAction.canShow) {
+    if (!canSaveAttendance) {
       return
     }
 
@@ -296,7 +310,9 @@ export function TimetablePage() {
     setClubChangeMessage(null)
 
     try {
-      await updateGymName(nextClubId, rawGymBrand || 'Virgin')
+      if (isLoggedIn) {
+        await updateGymName(nextClubId, rawGymBrand || 'Virgin')
+      }
       timetableCache.delete(nextClubId)
       if (clubId) {
         timetableCache.delete(clubId)

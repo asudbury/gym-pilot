@@ -59,6 +59,13 @@ export function resolveTimetableClubSelectionViewModel(input: {
   const rawGymBrand = input.gymBrand?.trim() ?? ''
   const isVirginBrand = rawGymBrand.toLowerCase() === 'virgin'
 
+  if (!rawGymBrand) {
+    return {
+      showPicker: true,
+      helperText: 'Select a Virgin Active club to view the timetable.',
+    }
+  }
+
   if (!isVirginBrand) {
     return {
       showPicker: false,
