@@ -2,16 +2,15 @@ import { describe, expect, it } from 'vitest'
 import { buildNavigationMenuItems } from './navigationUtils'
 
 describe('buildNavigationMenuItems', () => {
-  it('omits the timetable link when timetable is disabled', () => {
+  it('shows the timetable link when not authenticated', () => {
     const items = buildNavigationMenuItems({
       plansCount: 0,
       assignmentsCount: 0,
-      isAuthenticated: true,
-      showTimetable: false,
+      isAuthenticated: false,
       itemClassName: 'test',
     })
 
-    expect(items.some((item) => item.label === 'Timetable')).toBe(false)
+    expect(items.some((item) => item.label === 'Timetable')).toBe(true)
   })
 
   it('hides navigation items that are not visible for the current tier and device', () => {

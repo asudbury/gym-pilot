@@ -54,8 +54,7 @@ export const navigationMeta: NavMetaItem[] = [
     label: 'Timetable',
     to: '/timetable',
     icon: 'calendar',
-    requireAuth: true,
-    requireClubId: true,
+    requireAuth: false,
     visibility: {
       minTier: 'free',
       visibleOn: ['desktop', 'tablet', 'mobile'],

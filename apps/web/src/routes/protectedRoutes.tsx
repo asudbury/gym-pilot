@@ -52,9 +52,6 @@ const SessionEditPage = lazy(async () => ({
 const SessionHistoryPage = lazy(async () => ({
   default: (await import('../pages/SessionHistoryPage')).SessionHistoryPage,
 }))
-const TimetablePage = lazy(async () => ({
-  default: (await import('../pages/TimetablePage')).TimetablePage,
-}))
 const WorkoutPlanEditPage = lazy(
   () => import('../pages/workoutPlans/WorkoutPlanEditPage'),
 )
@@ -78,7 +75,6 @@ export function createProtectedRoutes() {
     <Route element={<RequireAuth />}>
       <Route path="/exercises" element={<HomePage />} />
       <Route element={<RequireAuth requireClubId />}>
-        <Route path="/timetable" element={<TimetablePage />} />
         <Route path="/record-session" element={<RecordSessionPage />} />
         <Route path="/sessions" element={<SessionHistoryPage />} />
         <Route path="/sessions/:entryId/edit" element={<SessionEditPage />} />
