@@ -27,17 +27,20 @@ export type FavoriteStorageValue = {
 
 export function buildPlanSessionsWithExercises<
   TSession extends { id: string; planItems?: TExercise[] },
-  TExercise,
+  TExercise extends { session_id?: string | null },
 >(sessions: TSession[], exercises: TExercise[]): TSession[] {
   if (sessions.length === 0) {
     return sessions;
   }
 
   const exercisesBySessionId = new Map<string, TExercise[]>();
-  const sessionOrder = sessions.map((session) => session.id);
+  const fallbackSessionId = sessions[0].id;
 
-  exercises.forEach((exercise, index) => {
-    const sessionId = sessionOrder[index % sessionOrder.length];
+  exercises.forEach((exercise) => {
+    const sessionId =
+      typeof exercise.session_id === "string" && exercise.session_id.length > 0
+        ? exercise.session_id
+        : fallbackSessionId;
     const sessionExercises = exercisesBySessionId.get(sessionId) || [];
     sessionExercises.push(exercise);
     exercisesBySessionId.set(sessionId, sessionExercises);
