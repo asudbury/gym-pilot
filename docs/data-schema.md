@@ -129,11 +129,6 @@
 
 ### Workout plan exercise — workout_plan_exercise
 
-| Field      | Type   | Notes               |
-| ---------- | ------ | ------------------- |
-| exerciseId | string | Referenced exercise |
-| note       | string | Optional note       |
-
 | Field         | Type   | Notes                               |
 | ------------- | ------ | ----------------------------------- |
 | id            | string | Primary key                         |
