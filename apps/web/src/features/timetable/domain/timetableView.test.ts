@@ -31,9 +31,10 @@ describe('resolveTimetableClubSelectionViewModel', () => {
     expect(result.showPicker).toBe(true)
   })
 
-  it('hides picker when gymBrand is null', () => {
+  it('shows picker when gymBrand is null so guests can choose a club', () => {
     const result = resolveTimetableClubSelectionViewModel({ gymBrand: null })
-    expect(result.showPicker).toBe(false)
+    expect(result.showPicker).toBe(true)
+    expect(result.helperText).toContain('Select a Virgin Active club')
   })
 
   it('is case-insensitive for virgin brand check', () => {

@@ -1,4 +1,4 @@
-const PUBLIC_PATH_PREFIXES = ['/exercise/', '/help']
+const PUBLIC_PATH_PREFIXES = ['/exercise/', '/help', '/timetable']
 
 export function isPublicRoute(pathname: string) {
   if (!pathname) {
@@ -6,6 +6,10 @@ export function isPublicRoute(pathname: string) {
   }
 
   if (pathname === '/' || pathname === '/login') {
+    return true
+  }
+
+  if (pathname === '/timetable' || pathname.startsWith('/timetable/')) {
     return true
   }
 
