@@ -14,6 +14,10 @@ import {
   openAttendanceForm,
   type AttendanceFormState,
 } from '../features/timetable/domain/attendanceState'
+import {
+  readTimetableAttendanceState,
+  writeTimetableAttendanceState,
+} from '../features/timetable/domain/timetableAttendanceStorage'
 import { timetableCache } from '../features/timetable/domain/timetableCache'
 import {
   formatTimetableAvailability,
@@ -150,26 +154,12 @@ export function TimetablePage() {
       return
     }
 
-    try {
-      const storedAttendance = window.localStorage.getItem(
+    setAttendanceState(
+      readTimetableAttendanceState(
+        window.localStorage,
         TIMETABLE_ATTENDANCE_KEY,
-      )
-
-      if (!storedAttendance) {
-        return
-      }
-
-      const parsedAttendance = JSON.parse(storedAttendance) as Record<
-        string,
-        'attended' | 'taught'
-      >
-
-      if (parsedAttendance && typeof parsedAttendance === 'object') {
-        setAttendanceState(parsedAttendance)
-      }
-    } catch {
-      // Ignore invalid stored attendance state.
-    }
+      ),
+    )
   }, [])
 
   useEffect(() => {
@@ -177,9 +167,10 @@ export function TimetablePage() {
       return
     }
 
-    window.localStorage.setItem(
+    writeTimetableAttendanceState(
+      window.localStorage,
       TIMETABLE_ATTENDANCE_KEY,
-      JSON.stringify(attendanceState),
+      attendanceState,
     )
   }, [attendanceState])
 
