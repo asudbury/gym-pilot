@@ -27,7 +27,58 @@ describe("json record data helpers", () => {
     expect(normalized.folders).toEqual(["A", "B"]);
   });
 
-  it("attaches plan exercises to the first session when the schema no longer exposes session ids", () => {
+  it("groups plan exercises by their session_id", () => {
+    const sessions = [
+      {
+        id: "session-1",
+        name: "Day 1",
+        plan_id: "plan-1",
+        position: 0,
+        created_at: "2026-01-01T00:00:00.000Z",
+        updated_at: "2026-01-01T00:00:00.000Z",
+        planItems: [],
+      },
+      {
+        id: "session-2",
+        name: "Day 2",
+        plan_id: "plan-1",
+        position: 1,
+        created_at: "2026-01-01T00:00:00.000Z",
+        updated_at: "2026-01-01T00:00:00.000Z",
+        planItems: [],
+      },
+    ];
+
+    const exercises = [
+      {
+        id: "exercise-1",
+        plan_id: "plan-1",
+        session_id: "session-2",
+        exercise_id: "bench-press",
+        exercise_name: "Bench Press",
+        position: 0,
+        created_at: "2026-01-01T00:00:00.000Z",
+        updated_at: "2026-01-01T00:00:00.000Z",
+      },
+      {
+        id: "exercise-2",
+        plan_id: "plan-1",
+        session_id: "session-1",
+        exercise_id: "squat",
+        exercise_name: "Squat",
+        position: 1,
+        created_at: "2026-01-01T00:00:00.000Z",
+        updated_at: "2026-01-01T00:00:00.000Z",
+      },
+    ];
+
+    const result = buildPlanSessionsWithExercises(sessions, exercises);
+
+    expect(result[0].planItems).toEqual([exercises[1]]);
+    expect(result[1].planItems).toEqual([exercises[0]]);
+  });
+
+  it("falls back to the first session when a plan exercise has no session_id", () => {
     const sessions = [
       {
         id: "session-1",
@@ -44,6 +95,7 @@ describe("json record data helpers", () => {
       {
         id: "exercise-1",
         plan_id: "plan-1",
+        session_id: null,
         exercise_id: "bench-press",
         exercise_name: "Bench Press",
         position: 0,
@@ -52,10 +104,7 @@ describe("json record data helpers", () => {
       },
     ];
 
-    const result = buildPlanSessionsWithExercises(
-      sessions as any,
-      exercises as any,
-    );
+    const result = buildPlanSessionsWithExercises(sessions, exercises);
 
     expect(result[0].planItems).toEqual(exercises);
   });
