@@ -13,7 +13,7 @@
     "lint": "eslint . && prettier --check \"src/**/*.{ts,tsx}\" && npm run typecheck",
     "typecheck": "tsc --noEmit",
     "test": "vitest run",
-    "test:coverage": "vitest run --coverage"
+    "test:coverage": "vitest run --coverage --coverage.thresholds.lines=60 --coverage.thresholds.functions=60 --coverage.thresholds.branches=50 --coverage.thresholds.statements=60"
   },
   "dependencies": {
     "@gym-pilot/shared": "^1.0.0",
