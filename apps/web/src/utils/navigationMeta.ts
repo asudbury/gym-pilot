@@ -1,11 +1,12 @@
 import type { UserRole } from '@gym-pilot/types'
 import type { TierVisibilityRules } from '../features/visibility/domain/tierDeviceVisibility'
+import type { DecorativeIconProps } from '../components/ui/DecorativeIcon'
 
 export type NavMetaItem = {
   key: string
   label: string
   to: string
-  icon?: string
+  icon?: DecorativeIconProps['icon']
   requireAuth?: boolean
   requiredRole?: UserRole | UserRole[]
   requireClubId?: boolean
