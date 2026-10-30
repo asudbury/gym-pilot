@@ -1,3 +1,5 @@
+import { logger } from "../logging";
+
 /**
  * The shape returned when a remote persistence layer has already stored a value.
  */
@@ -31,6 +33,18 @@ export interface PersistenceRepository<TListResponse = unknown> {
   save<T>(key: string, value: T): Promise<void>;
   remove(key: string): Promise<void>;
   list<TResponse = TListResponse>(): Promise<TResponse>;
+}
+
+function logPersistenceWarning(
+  operation: string,
+  key: string,
+  error: unknown,
+): void {
+  logger.warn("[persistenceRepository] Non-fatal persistence error", {
+    operation,
+    key,
+    error,
+  });
 }
 
 function areValuesEqual(a: unknown, b: unknown): boolean {
@@ -83,13 +97,14 @@ export function createPersistenceRepository<TListResponse = unknown>(
             if (remote.found && remote.value !== null) {
               return remote.value as T;
             }
-          } catch {
-            // fall back to the fallback value
+          } catch (error) {
+            logPersistenceWarning("load-remote-after-local-miss", key, error);
           }
         }
 
         return fallback;
-      } catch {
+      } catch (error) {
+        logPersistenceWarning("load-local", key, error);
         if (isRemoteEnabled() && shouldUseRemoteForKey(key)) {
           try {
             const remote = await loadRemote<T>(key);
@@ -97,8 +112,12 @@ export function createPersistenceRepository<TListResponse = unknown>(
             if (remote.found && remote.value !== null) {
               return remote.value as T;
             }
-          } catch {
-            // fall back to the fallback value
+          } catch (remoteError) {
+            logPersistenceWarning(
+              "load-remote-after-local-error",
+              key,
+              remoteError,
+            );
           }
         }
 
@@ -123,8 +142,8 @@ export function createPersistenceRepository<TListResponse = unknown>(
           ) {
             shouldSkipRemoteSave = true;
           }
-        } catch {
-          // fall back to attempting the local save and remote save
+        } catch (error) {
+          logPersistenceWarning("load-local-before-save", key, error);
         }
       }
 
@@ -138,9 +157,9 @@ export function createPersistenceRepository<TListResponse = unknown>(
       if (isRemoteEnabled() && shouldUseRemoteForKey(key)) {
         try {
           await saveRemote(key, value);
-        } catch {
+        } catch (error) {
+          logPersistenceWarning("save-remote", key, error);
           lastSavedValues.delete(key);
-          // keep local persistence authoritative
         }
       }
     },
@@ -148,8 +167,8 @@ export function createPersistenceRepository<TListResponse = unknown>(
       if (isRemoteEnabled() && shouldUseRemoteForKey(key)) {
         try {
           await removeRemote(key);
-        } catch {
-          // keep local persistence authoritative
+        } catch (error) {
+          logPersistenceWarning("remove-remote", key, error);
         }
       }
 
