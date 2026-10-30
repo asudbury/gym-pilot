@@ -110,9 +110,6 @@ export function usePlanBuilderFeature(existingSessions?: PlanSession[] | null) {
   const [selectedExerciseName, setSelectedExerciseName] = useState(
     initialState.selectedExerciseName,
   )
-  const [favoriteExerciseIds, setFavoriteExerciseIds] = useState<string[]>(
-    initialState.favoriteExerciseIds,
-  )
   const [favoriteLinks, setFavoriteLinks] = useState<
     Array<{ id: string; label: string; path: string; folder?: string }>
   >(initialState.favoriteLinks)
@@ -125,6 +122,15 @@ export function usePlanBuilderFeature(existingSessions?: PlanSession[] | null) {
     [activeTabId, tabs],
   )
   const activeRows = activeTab?.rows ?? []
+  const favoriteExerciseIds = useMemo(
+    () =>
+      buildFavoritePlanBuilderState(
+        { favorites: favoriteLinks, folders: [] },
+        activeRows,
+        exercises,
+      ).favoriteExerciseIds,
+    [activeRows, favoriteLinks],
+  )
 
   const favoriteExercises = useMemo(() => {
     const selectedExerciseIds = new Set(
@@ -151,19 +157,15 @@ export function usePlanBuilderFeature(existingSessions?: PlanSession[] | null) {
         return
       }
 
-      const state = buildFavoritePlanBuilderState(
-        storedValue,
-        activeRows,
-        exercises,
+      setFavoriteLinks(
+        buildFavoritePlanBuilderState(storedValue, [], exercises).favoriteLinks,
       )
-      setFavoriteExerciseIds(state.favoriteExerciseIds)
-      setFavoriteLinks(state.favoriteLinks)
     })
 
     return () => {
       cancelled = true
     }
-  }, [activeRows])
+  }, [])
 
   const handleAddTab = useCallback(() => {
     const nextState = resolvePlanBuilderTabState(
