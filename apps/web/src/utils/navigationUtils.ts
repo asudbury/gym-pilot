@@ -73,7 +73,7 @@ export function buildNavigationMenuItems({
       label: meta.label,
       onClick: onItemClick,
       className: itemClassName,
-      icon: meta.icon as any,
+      icon: meta.icon,
     })
   }
 
