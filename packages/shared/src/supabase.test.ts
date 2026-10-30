@@ -1,5 +1,6 @@
 import { describe, expect, it, vi } from 'vitest'
 import { ensureAuthenticatedSupabaseSession } from './supabase'
+import type { SupabaseClient } from '@supabase/supabase-js'
 
 describe('ensureAuthenticatedSupabaseSession', () => {
   it('uses a sign-in session when signup does not return one', async () => {
@@ -39,7 +40,7 @@ describe('ensureAuthenticatedSupabaseSession', () => {
           session: null,
         },
         error: null,
-      },
+      } as Awaited<ReturnType<SupabaseClient['auth']['signUp']>>,
     )
 
     expect(signInWithPassword).toHaveBeenCalledWith({
