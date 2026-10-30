@@ -20,6 +20,7 @@
     "test:all": "npm run test:web && npm run test:shared",
     "test:coverage": "npm --workspace apps/web run test:coverage && npm --workspace packages/shared run test:coverage",
     "knip": "knip || true",
+    "knip:ci": "knip --include dependencies",
     "verify": "npm run format:web && npm run lint:web && npm run test:all && npm run build && npm run knip",
     "verify:precommit": "npm run format:web && npm run lint:web && npm run test:all && npm run build",
     "sonar:up": "bash scripts/run-sonar-local.sh",
@@ -28,8 +29,7 @@
     "build": "npm run build:web"
   },
   "dependencies": {
-    "clsx": "^2.1.1",
-    "dexie": "^4.4.4"
+    "clsx": "^2.1.1"
   },
   "devDependencies": {
     "knip": "^6.27.0"

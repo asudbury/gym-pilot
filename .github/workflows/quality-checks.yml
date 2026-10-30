@@ -30,7 +30,7 @@ jobs:
         run: npm run test:coverage
 
       - name: Run Knip
-        run: npm run knip
+        run: npm run knip:ci
 
       - name: Build app
         run: npm run build
