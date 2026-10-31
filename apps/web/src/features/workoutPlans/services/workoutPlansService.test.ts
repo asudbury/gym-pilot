@@ -1,8 +1,8 @@
-import { describe, expect, it, vi, beforeEach } from 'vitest'
 import { getSupabaseClient } from '@gym-pilot/shared'
 import { TableNames } from '@gym-pilot/shared/src/dataServices/tableNames'
-import { persistWorkoutPlan } from './workoutPlansService'
+import { beforeEach, describe, expect, it, vi } from 'vitest'
 import { buildPersistedPlanRows } from '../../planBuilder/domain/workoutPlanState'
+import { persistWorkoutPlan } from './workoutPlansService'
 
 vi.mock('@gym-pilot/shared', () => ({
   getSupabaseClient: vi.fn(),
@@ -45,9 +45,7 @@ function createPersistClientMock() {
     .mockReturnValue({ eq: workoutPlanSessionDeleteEq })
   const workoutPlanSessionInsert = vi.fn().mockResolvedValue({ error: null })
 
-  const workoutPlanExerciseDeleteEq = vi
-    .fn()
-    .mockResolvedValue({ error: null })
+  const workoutPlanExerciseDeleteEq = vi.fn().mockResolvedValue({ error: null })
   const workoutPlanExerciseDelete = vi
     .fn()
     .mockReturnValue({ eq: workoutPlanExerciseDeleteEq })
@@ -127,7 +125,7 @@ describe('persistWorkoutPlan', () => {
   })
 
   it('returns a client error when Supabase is unavailable', async () => {
-    vi.mocked(getSupabaseClient).mockReturnValue(null)
+    vi.mocked(getSupabaseClient).mockReturnValue(null as never)
 
     await expect(
       persistWorkoutPlan({

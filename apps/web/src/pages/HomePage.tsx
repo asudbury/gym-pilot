@@ -1,15 +1,15 @@
-import { Link } from 'react-router-dom'
-import { PageCard } from '../components/PageCard'
-import { Button } from '../components/ui/Button'
-import { DecorativeIcon } from '../components/ui/DecorativeIcon'
-import { PageLayout } from '../layouts/PageLayout'
+import { Link } from 'react-router-dom';
+import { PageCard } from '../components/PageCard';
+import { Button } from '../components/ui/Button';
+import { DecorativeIcon } from '../components/ui/DecorativeIcon';
+import { PageLayout } from '../layouts/PageLayout';
 
 export function HomePage() {
   return (
     <PageLayout className="gap-6">
       <PageCard
         as="section"
-        className="relative overflow-hidden border-blue-200/70 bg-gradient-to-br from-white via-blue-50/70 to-violet-100/70 dark:border-blue-700/70 dark:from-slate-900 dark:via-slate-900 dark:to-violet-950/40"
+        className="relative overflow-hidden border-blue-200/70 bg-linear-to-br from-white via-blue-50/70 to-violet-100/70 dark:border-blue-700/70 dark:from-slate-900 dark:via-slate-900 dark:to-violet-950/40"
       >
         <div className="pointer-events-none absolute -right-16 -top-16 h-44 w-44 rounded-full bg-blue-300/35 blur-3xl dark:bg-blue-600/30" />
         <div className="pointer-events-none absolute -bottom-20 -left-20 h-52 w-52 rounded-full bg-violet-300/30 blur-3xl dark:bg-violet-700/30" />
@@ -21,7 +21,7 @@ export function HomePage() {
                 Gym Pilot
               </p>
               <h1 className="text-3xl font-semibold tracking-tight text-slate-900 dark:text-slate-100 sm:text-4xl">
-                Train smarter with plans, sessions, and guided exercises.
+                Train smarter with plans, sessions, and guided exercises
               </h1>
             </div>
           </div>
@@ -42,45 +42,52 @@ export function HomePage() {
             </Button>
             <Button
               as={Link}
+              to="/timetable"
+              tone="blue"
+              className="px-5 py-2.5 text-sm sm:text-base"
+            >
+              View timetable
+            </Button>
+            <Button
+              as={Link}
               to="/help"
-              tone="white"
+              tone="blue"
               className="px-5 py-2.5 text-sm sm:text-base"
             >
               Learn more
             </Button>
           </div>
         </div>
-      </PageCard>
-
-      <PageCard as="section" className="grid gap-4 sm:grid-cols-3">
-        <div className="rounded-2xl border border-slate-200/80 bg-white/80 p-4 dark:border-slate-700 dark:bg-slate-900/70">
-          <div className="mb-2 flex items-center gap-2">
-            <DecorativeIcon icon="dumbbell" />
-            <p className="font-semibold">Exercise library</p>
+        <div className="mt-4 grid gap-4 sm:grid-cols-3" role="region" aria-label="Features">
+          <div className="rounded-2xl border border-slate-200/80 bg-white/80 p-4 dark:border-slate-700 dark:bg-slate-900/70">
+            <div className="mb-2 flex items-center gap-2">
+              <DecorativeIcon icon="dumbbell" />
+              <p className="font-semibold text-slate-600">Exercise library</p>
+            </div>
+            <p className="text-sm text-slate-600 dark:text-slate-300">
+              Search movements quickly and open clear step-by-step instructions.
+            </p>
           </div>
-          <p className="text-sm text-slate-600 dark:text-slate-300">
-            Search movements quickly and open clear step-by-step instructions.
-          </p>
-        </div>
-        <div className="rounded-2xl border border-slate-200/80 bg-white/80 p-4 dark:border-slate-700 dark:bg-slate-900/70">
-          <div className="mb-2 flex items-center gap-2">
-            <DecorativeIcon icon="calendar" />
-            <p className="font-semibold">Session flow</p>
+          <div className="rounded-2xl border border-slate-200/80 bg-white/80 p-4 dark:border-slate-700 dark:bg-slate-900/70">
+            <div className="mb-2 flex items-center gap-2">
+              <DecorativeIcon icon="calendar" />
+              <p className="font-semibold text-slate-600">Session flow</p>
+            </div>
+            <p className="text-sm text-slate-600 dark:text-slate-300">
+              Keep your routine organized with plans, sessions, and timetable
+              support.
+            </p>
           </div>
-          <p className="text-sm text-slate-600 dark:text-slate-300">
-            Keep your routine organized with plans, sessions, and timetable
-            support.
-          </p>
-        </div>
-        <div className="rounded-2xl border border-slate-200/80 bg-white/80 p-4 dark:border-slate-700 dark:bg-slate-900/70">
-          <div className="mb-2 flex items-center gap-2">
-            <DecorativeIcon icon="star" />
-            <p className="font-semibold">Built for consistency</p>
+          <div className="rounded-2xl border border-slate-200/80 bg-white/80 p-4 dark:border-slate-700 dark:bg-slate-900/70">
+            <div className="mb-2 flex items-center gap-2">
+              <DecorativeIcon icon="star" />
+              <p className="font-semibold text-slate-600">Built for consistency</p>
+            </div>
+            <p className="text-sm text-slate-600 dark:text-slate-300">
+              Save favourites and keep momentum with fast access to what you use
+              most.
+            </p>
           </div>
-          <p className="text-sm text-slate-600 dark:text-slate-300">
-            Save favourites and keep momentum with fast access to what you use
-            most.
-          </p>
         </div>
       </PageCard>
     </PageLayout>

@@ -1,41 +1,41 @@
-import { saveTimetableAttendance } from '@gym-pilot/shared'
-import { useEffect, useMemo, useRef, useState } from 'react'
-import { useNavigate } from 'react-router-dom'
-import { useAuth } from '../auth/AuthContext'
-import { GymClubSelector } from '../components/GymClubSelector'
-import { RatingSelector } from '../components/RatingSelector'
-import { Button } from '../components/ui/Button'
-import { StatusMessageNotification } from '../components/ui/StatusMessageNotification'
-import { DesktopOnly } from '../components/visibility/DeviceVisibility'
-import { TIMETABLE_ATTENDANCE_KEY } from '../constants/storageKeys'
-import { appTokens } from '../constants/tokens'
+import { saveTimetableAttendance } from '@gym-pilot/shared';
+import { useEffect, useMemo, useRef, useState } from 'react';
+import { useNavigate } from 'react-router-dom';
+import { useAuth } from '../auth/AuthContext';
+import { GymClubSelector } from '../components/GymClubSelector';
+import { RatingSelector } from '../components/RatingSelector';
+import { Button } from '../components/ui/Button';
+import { StatusMessageNotification } from '../components/ui/StatusMessageNotification';
+import { DesktopOnly } from '../components/visibility/DeviceVisibility';
+import { TIMETABLE_ATTENDANCE_KEY } from '../constants/storageKeys';
+import { appTokens } from '../constants/tokens';
 import {
-  createAttendanceFormState,
-  openAttendanceForm,
-  type AttendanceFormState,
-} from '../features/timetable/domain/attendanceState'
+    createAttendanceFormState,
+    openAttendanceForm,
+    type AttendanceFormState,
+} from '../features/timetable/domain/attendanceState';
 import {
-  readTimetableAttendanceState,
-  writeTimetableAttendanceState,
-} from '../features/timetable/domain/timetableAttendanceStorage'
-import { timetableCache } from '../features/timetable/domain/timetableCache'
+    readTimetableAttendanceState,
+    writeTimetableAttendanceState,
+} from '../features/timetable/domain/timetableAttendanceStorage';
+import { timetableCache } from '../features/timetable/domain/timetableCache';
 import {
-  formatTimetableAvailability,
-  formatTimetableDateLabel,
-  formatTimetableTimeLabel,
-  isPastTimetableSession,
-  resolveNextActiveDayKey,
-  resolveTimetableAttendanceAction,
-  resolveTimetableClubSelectionViewModel,
-  resolveTimetableHeaderViewModel,
-  resolveTimetableViewModel,
-  type TimetableSession,
-} from '../features/timetable/domain/timetableView'
-import { loadTimetable } from '../features/timetable/services/timetableService'
-import { PageCardLayout } from '../layouts/PageCardLayout'
-import { PageLayout } from '../layouts/PageLayout'
-import { reportUiError } from '../utils/uiErrorLogging'
-import { loadVirginActiveClubs } from '../utils/virginActiveClubs'
+    formatTimetableAvailability,
+    formatTimetableDateLabel,
+    formatTimetableTimeLabel,
+    isPastTimetableSession,
+    resolveNextActiveDayKey,
+    resolveTimetableAttendanceAction,
+    resolveTimetableClubSelectionViewModel,
+    resolveTimetableHeaderViewModel,
+    resolveTimetableViewModel,
+    type TimetableSession,
+} from '../features/timetable/domain/timetableView';
+import { loadTimetable } from '../features/timetable/services/timetableService';
+import { PageCardLayout } from '../layouts/PageCardLayout';
+import { PageLayout } from '../layouts/PageLayout';
+import { reportUiError } from '../utils/uiErrorLogging';
+import { loadVirginActiveClubs } from '../utils/virginActiveClubs';
 
 export function TimetablePage() {
   const { user, updateGymName } = useAuth()
@@ -94,6 +94,17 @@ export function TimetablePage() {
   const effectiveGymName = rawGymName || selectedClubId.trim()
   const activeGymName = effectiveGymName || rawGymName
   const isVirginBrand = effectiveGymBrand.toLowerCase() === 'virgin'
+
+  const clubId = useMemo(() => {
+    const storedClubId = selectedClubId.trim()
+    return /^\d+$/.test(storedClubId) ? storedClubId : null
+  }, [selectedClubId])
+
+  const attendanceAction = useMemo(
+    () => resolveTimetableAttendanceAction(user?.role, user?.roles),
+    [user?.role, user?.roles],
+  )
+
   const canSaveAttendance = isLoggedIn && Boolean(attendanceAction.canShow)
   const headerViewModel = useMemo(
     () =>
@@ -123,16 +134,6 @@ export function TimetablePage() {
       setSelectedClubId('')
     }
   }, [isLoggedIn, user?.gymName, selectedClubId])
-
-  const clubId = useMemo(() => {
-    const storedClubId = selectedClubId.trim()
-    return /^\d+$/.test(storedClubId) ? storedClubId : null
-  }, [selectedClubId])
-
-  const attendanceAction = useMemo(
-    () => resolveTimetableAttendanceAction(user?.role, user?.roles),
-    [user?.role, user?.roles],
-  )
 
   useEffect(() => {
     // Prefill handling from query params (e.g. ?prefill=class)

@@ -1,42 +1,40 @@
-import { useEffect, useState } from 'react'
-import { useLocation, useNavigate } from 'react-router-dom'
 import {
   findExerciseById,
   getSupabaseClient,
   logger,
   usePlan,
 } from '@gym-pilot/shared'
+import { useEffect, useState } from 'react'
+import { useLocation, useNavigate } from 'react-router-dom'
 import { useAuth } from '../../../auth/AuthContext'
 import { useDeviceType } from '../../../components/visibility/TierDeviceVisibility'
-import { isVisibleForTierAndDevice } from '../../../features/visibility/domain/tierDeviceVisibility'
-import { routeVisibilityRules } from './routeVisibility'
 import { HOME_FILTER_KEY } from '../../../constants/storageKeys'
+import { isVisibleForTierAndDevice } from '../../../features/visibility/domain/tierDeviceVisibility'
 import { getExercisePath } from '../../../utils/exerciseRouteUtils'
 import { formatLabel } from '../../../utils/formatUtils'
-import { getHashHomeUrl } from '../../auth/domain/authUtils'
-import {
-  normalizeHomeFilters,
-  type HomeFilters,
-} from '../../favourites/domain/quickLinks'
+import { navigationMeta } from '../../../utils/navigationMeta'
 import {
   buildNavigationMenuItems,
   type NavigationMenuListItem,
 } from '../../../utils/navigationUtils'
-import { useFavouritesFeature } from '../../favourites/hooks/useFavouritesFeature'
+import { getHashHomeUrl } from '../../auth/domain/authUtils'
 import {
+  normalizeHomeFilters,
   sortQuickLinks,
+  type HomeFilters,
   type QuickLink,
 } from '../../favourites/domain/quickLinks'
+import { useFavouritesFeature } from '../../favourites/hooks/useFavouritesFeature'
+import { routeVisibilityRules } from './routeVisibility'
 import { useBroadcastMessage } from './useBroadcastMessage'
 import { useInstallHint } from './useInstallHint'
 import { useMustChangePassword } from './useMustChangePassword'
-import { navigationMeta } from '../../../utils/navigationMeta'
 
 export function useAppShell() {
   const { pathname, search } = useLocation()
   const navigate = useNavigate()
   const { user, logout } = useAuth()
-  const { users, visiblePlans, visibleAssignments } = usePlan()
+  const { users } = usePlan()
   const deviceType = useDeviceType()
   const currentTier = user?.accountTier ?? 'free'
   const { favorites, folders, setFavorites, setFolders } =
