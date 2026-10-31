@@ -14,6 +14,8 @@
   --app-text: #0f172a;
   --app-text-muted: #475569;
   --app-text-subtle: #64748b;
+  --app-accent: #6366f1;
+  --app-focus-ring: rgba(99, 102, 241, 0.28);
 
   font-family:
     'Plus Jakarta Sans',
@@ -58,15 +60,15 @@ body {
   background:
     radial-gradient(
       circle at top left,
-      rgba(59, 130, 246, 0.16),
-      transparent 30%
+      rgba(59, 130, 246, 0.18),
+      transparent 34%
     ),
     radial-gradient(
       circle at top right,
-      rgba(167, 139, 250, 0.16),
-      transparent 28%
+      rgba(168, 85, 247, 0.14),
+      transparent 32%
     ),
-    linear-gradient(135deg, #f8fafc 0%, #eff6ff 100%);
+    linear-gradient(145deg, #f8fafc 0%, #eef2ff 100%);
 
   background-attachment: fixed;
   color: var(--app-text);
@@ -75,6 +77,19 @@ body {
   transition:
     background-color 200ms ease,
     color 200ms ease;
+}
+
+a {
+  color: var(--app-accent);
+  text-underline-offset: 0.18em;
+}
+
+a:hover {
+  text-decoration-thickness: 2px;
+}
+
+::selection {
+  background-color: rgba(99, 102, 241, 0.18);
 }
 
 /* React root */
@@ -106,6 +121,8 @@ html.dark {
   --app-text: #f8fafc;
   --app-text-muted: #cbd5e1;
   --app-text-subtle: #94a3b8;
+  --app-accent: #818cf8;
+  --app-focus-ring: rgba(129, 140, 248, 0.34);
 }
 
 html.dark body {
@@ -113,14 +130,14 @@ html.dark body {
     radial-gradient(
       circle at top left,
       rgba(59, 130, 246, 0.24),
-      transparent 30%
+      transparent 33%
     ),
     radial-gradient(
       circle at top right,
-      rgba(236, 72, 153, 0.18),
-      transparent 28%
+      rgba(217, 70, 239, 0.17),
+      transparent 30%
     ),
-    linear-gradient(135deg, #020617 0%, #0f172a 100%);
+    linear-gradient(145deg, #020617 0%, #0f172a 100%);
 }
 
 /* Buttons */
@@ -135,6 +152,22 @@ button[disabled] {
 
 button {
   @apply px-2 py-1 text-sm font-medium transition-colors;
+  transition:
+    border-color 200ms ease,
+    background-color 200ms ease,
+    color 200ms ease,
+    box-shadow 200ms ease,
+    transform 120ms ease;
+}
+
+button:not(:disabled):active {
+  transform: translateY(0.5px);
+}
+
+:is(button, a, input, textarea, select):focus-visible {
+  outline: none;
+  box-shadow: 0 0 0 3px var(--app-focus-ring);
+  border-color: var(--app-accent);
 }
 
 /* Destructive button */
