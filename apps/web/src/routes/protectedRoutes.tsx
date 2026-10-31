@@ -33,9 +33,6 @@ const WorkoutAssignmentsPage = lazy(async () => ({
     .WorkoutAssignmentsPage,
 }))
 const HelpPage = lazy(() => import('../pages/HelpPage'))
-const HomePage = lazy(async () => ({
-  default: (await import('../pages/HomePage')).HomePage,
-}))
 const IconShowcasePage = lazy(async () => ({
   default: (await import('../pages/IconShowcasePage')).IconShowcasePage,
 }))
@@ -73,7 +70,6 @@ const WorkoutTemplatesPage = lazy(async () => ({
 export function createProtectedRoutes() {
   return (
     <Route element={<RequireAuth />}>
-      <Route path="/exercises" element={<HomePage />} />
       <Route element={<RequireAuth requireClubId />}>
         <Route path="/record-session" element={<RecordSessionPage />} />
         <Route path="/sessions" element={<SessionHistoryPage />} />

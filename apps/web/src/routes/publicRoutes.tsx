@@ -10,6 +10,9 @@ const DashboardPage = lazy(async () => ({
 const ExercisePage = lazy(async () => ({
   default: (await import('../pages/ExercisePage')).ExercisePage,
 }))
+const ExercisesPage = lazy(async () => ({
+  default: (await import('../pages/ExercisesPage')).ExercisesPage,
+}))
 const FavouritesPage = lazy(async () => ({
   default: (await import('../pages/FavouritesPage')).FavouritesPage,
 }))
@@ -35,6 +38,7 @@ export function createPublicRoutes({ user }: PublicRoutesProps) {
   return (
     <>
       <Route path="/" element={user ? <DashboardPage /> : <HomePage />} />
+      <Route path="/exercises" element={<ExercisesPage />} />
       <Route path="/exercise/:slug" element={<ExercisePage />} />
       <Route path="/help" element={<HelpPage />} />
       <Route path="/help/install-ios" element={<InstallOnIOSPage />} />
