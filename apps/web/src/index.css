@@ -151,7 +151,7 @@ button[disabled] {
 }
 
 button {
-  @apply px-2 py-1 text-sm font-medium transition-colors;
+  @apply px-2 py-1 text-sm font-medium;
   transition:
     border-color 200ms ease,
     background-color 200ms ease,
