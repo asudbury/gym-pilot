@@ -22,6 +22,10 @@ import {
   loadWorkoutPlan,
   persistWorkoutPlan,
 } from '../../features/workoutPlans/services/workoutPlansService'
+import {
+  resolveRemovedSessionState,
+  resolveReorderedSessionState,
+} from '../../features/workoutPlans/domain/workoutPlanEditState'
 
 type PlanItem = Tables<typeof TableNames.WorkoutPlanExercise> & {
   exercise_name?: string | null
@@ -121,32 +125,28 @@ export default function WorkoutPlanEditPage() {
       setError('A plan must have at least one session.')
       return
     }
-    setPlanSessions((prev) => prev.filter((_, idx) => idx !== indexToRemove))
-    // Adjust active session index if the removed session was active or if it affects the active index
-    if (activeSessionIndex >= indexToRemove && activeSessionIndex > 0) {
-      setActiveSessionIndex(activeSessionIndex - 1)
-    } else if (activeSessionIndex === 0 && planSessions.length > 1) {
-      setActiveSessionIndex(0) // Stay on the first if it's the only one left
-    }
+
+    const nextState = resolveRemovedSessionState(
+      planSessions,
+      activeSessionIndex,
+      indexToRemove,
+    )
+    setPlanSessions(nextState.sessions)
+    setActiveSessionIndex(nextState.activeSessionIndex)
   }
 
   const handleReorderSession = (index: number, direction: 'up' | 'down') => {
-    setPlanSessions((prev) => {
-      const reordered = reorder(prev, index, direction)
-      const moved = reordered[direction === 'up' ? index - 1 : index + 1]
-      if (moved) {
-        setMovedSession(moved.id)
-      }
-      // Adjust active session index if the active session was moved
-      if (index === activeSessionIndex) {
-        setActiveSessionIndex(direction === 'up' ? index - 1 : index + 1)
-      } else if (direction === 'up' && index - 1 === activeSessionIndex) {
-        setActiveSessionIndex(activeSessionIndex + 1)
-      } else if (direction === 'down' && index + 1 === activeSessionIndex) {
-        setActiveSessionIndex(activeSessionIndex - 1)
-      }
-      return reordered
-    })
+    const nextState = resolveReorderedSessionState(
+      planSessions,
+      activeSessionIndex,
+      index,
+      direction,
+    )
+    setPlanSessions(nextState.sessions)
+    setActiveSessionIndex(nextState.activeSessionIndex)
+    if (nextState.movedSessionId) {
+      setMovedSession(nextState.movedSessionId)
+    }
   }
 
   const handleSessionNameChange = (newName: string) => {
