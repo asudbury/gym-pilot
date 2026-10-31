@@ -29,8 +29,6 @@ export type NavigationMenuListProps = {
 }
 
 export type BuildNavigationMenuItemsOptions = {
-  plansCount: number
-  assignmentsCount: number
   onItemClick?: () => void
   itemClassName?: string
   isAuthenticated?: boolean
