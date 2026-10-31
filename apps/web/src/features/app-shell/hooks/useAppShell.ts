@@ -199,7 +199,7 @@ export function useAppShell() {
     bottomNavigationItems.push({
       to: exercisesMeta.to,
       label: exercisesMeta.label,
-      icon: exercisesMeta.icon as NavigationMenuListItem['icon'],
+      icon: exercisesMeta.icon,
     })
   }
 
@@ -211,7 +211,7 @@ export function useAppShell() {
     bottomNavigationItems.push({
       to: timetableMeta.to,
       label: timetableMeta.label,
-      icon: timetableMeta.icon as NavigationMenuListItem['icon'],
+      icon: timetableMeta.icon,
     })
   }
 
