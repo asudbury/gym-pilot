@@ -1,8 +1,8 @@
-import { Link } from 'react-router-dom';
-import { PageCard } from '../components/PageCard';
-import { Button } from '../components/ui/Button';
-import { DecorativeIcon } from '../components/ui/DecorativeIcon';
-import { PageLayout } from '../layouts/PageLayout';
+import { Link } from 'react-router-dom'
+import { PageCard } from '../components/PageCard'
+import { Button } from '../components/ui/Button'
+import { DecorativeIcon } from '../components/ui/DecorativeIcon'
+import { PageLayout } from '../layouts/PageLayout'
 
 export function HomePage() {
   return (
@@ -58,7 +58,11 @@ export function HomePage() {
             </Button>
           </div>
         </div>
-        <div className="mt-4 grid gap-4 sm:grid-cols-3" role="region" aria-label="Features">
+        <div
+          className="mt-4 grid gap-4 sm:grid-cols-3"
+          role="region"
+          aria-label="Features"
+        >
           <div className="rounded-2xl border border-slate-200/80 bg-white/80 p-4 dark:border-slate-700 dark:bg-slate-900/70">
             <div className="mb-2 flex items-center gap-2">
               <DecorativeIcon icon="dumbbell" />
@@ -81,7 +85,9 @@ export function HomePage() {
           <div className="rounded-2xl border border-slate-200/80 bg-white/80 p-4 dark:border-slate-700 dark:bg-slate-900/70">
             <div className="mb-2 flex items-center gap-2">
               <DecorativeIcon icon="star" />
-              <p className="font-semibold text-slate-600">Built for consistency</p>
+              <p className="font-semibold text-slate-600">
+                Built for consistency
+              </p>
             </div>
             <p className="text-sm text-slate-600 dark:text-slate-300">
               Save favourites and keep momentum with fast access to what you use

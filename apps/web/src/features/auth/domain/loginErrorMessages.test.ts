@@ -7,10 +7,12 @@ import {
 
 describe('login error messages', () => {
   it('maps invalid credential errors to a safe message', () => {
-    expect(resolveLoginFailureReason(new Error('Invalid login credentials'))).toBe(
-      'invalid_credentials',
-    )
-    expect(resolveLoginFailureMessage(new Error('Invalid login credentials'))).toBe(
+    expect(
+      resolveLoginFailureReason(new Error('Invalid login credentials')),
+    ).toBe('invalid_credentials')
+    expect(
+      resolveLoginFailureMessage(new Error('Invalid login credentials')),
+    ).toBe(
       'Your email or password is incorrect. Please try again or reset your password.',
     )
   })

@@ -16,7 +16,10 @@ export function resolveRemovedSessionState<TSession>(
   const nextSessions = sessions.filter((_, idx) => idx !== indexToRemove)
 
   if (activeSessionIndex >= indexToRemove && activeSessionIndex > 0) {
-    return { sessions: nextSessions, activeSessionIndex: activeSessionIndex - 1 }
+    return {
+      sessions: nextSessions,
+      activeSessionIndex: activeSessionIndex - 1,
+    }
   }
 
   return { sessions: nextSessions, activeSessionIndex }
@@ -29,8 +32,7 @@ export function resolveReorderedSessionState<TSession extends { id: string }>(
   direction: ReorderDirection,
 ): SessionReorderState<TSession> {
   const reordered = reorder(sessions, index, direction)
-  const moved =
-    reordered[direction === 'up' ? index - 1 : index + 1] ?? null
+  const moved = reordered[direction === 'up' ? index - 1 : index + 1] ?? null
 
   if (index === activeSessionIndex) {
     return {

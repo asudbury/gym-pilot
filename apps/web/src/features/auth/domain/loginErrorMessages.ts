@@ -57,7 +57,11 @@ export function resolveLoginFailureReason(input: unknown): LoginFailureReason {
     return 'too_many_requests'
   }
 
-  if (/jwt|token|session.*expired|refresh.*token|session.*invalid|expired.*session/i.test(message)) {
+  if (
+    /jwt|token|session.*expired|refresh.*token|session.*invalid|expired.*session/i.test(
+      message,
+    )
+  ) {
     return 'session_expired'
   }
 
