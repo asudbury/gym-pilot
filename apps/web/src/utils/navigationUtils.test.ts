@@ -4,8 +4,6 @@ import { buildNavigationMenuItems } from './navigationUtils'
 describe('buildNavigationMenuItems', () => {
   it('shows the timetable link when not authenticated', () => {
     const items = buildNavigationMenuItems({
-      plansCount: 0,
-      assignmentsCount: 0,
       isAuthenticated: false,
       itemClassName: 'test',
     })
@@ -15,8 +13,6 @@ describe('buildNavigationMenuItems', () => {
 
   it('hides navigation items that are not visible for the current tier and device', () => {
     const items = buildNavigationMenuItems({
-      plansCount: 0,
-      assignmentsCount: 0,
       isAuthenticated: true,
       showTimetable: true,
       itemClassName: 'test',

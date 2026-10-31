@@ -141,7 +141,6 @@ export function useAppShell() {
     )
   }
 
-  const plansCount = visiblePlans.length
   const isTrainer = Boolean(
     user && (user.role === 'trainer' || user.roles?.includes('trainer')),
   )
@@ -167,8 +166,6 @@ export function useAppShell() {
       : []
 
   const desktopMenuItems = buildNavigationMenuItems({
-    plansCount,
-    assignmentsCount: visibleAssignments.length,
     isAuthenticated: Boolean(user),
     itemClassName: 'px-2 py-1.5 text-sm font-medium',
     userRoles,
@@ -177,8 +174,6 @@ export function useAppShell() {
     onItemClick: () => setMobileMenuOpen(false),
   })
   const tabletMenuItems = buildNavigationMenuItems({
-    plansCount,
-    assignmentsCount: visibleAssignments.length,
     isAuthenticated: Boolean(user),
     onItemClick: () => setMobileMenuOpen(false),
     itemClassName:
