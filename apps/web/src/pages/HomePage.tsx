@@ -1,194 +1,87 @@
-import { logger } from '@gym-pilot/shared'
-import { useDeferredValue, useEffect, useMemo, useState } from 'react'
-import { ExerciseFilterPanel } from '../components/exercises/ExerciseFilterPanel'
-import { ExerciseList } from '../components/exercises/ExerciseList'
-import { ExerciseResultsHeader } from '../components/exercises/ExerciseResultsHeader'
+import { Link } from 'react-router-dom'
 import { PageCard } from '../components/PageCard'
+import { Button } from '../components/ui/Button'
 import { DecorativeIcon } from '../components/ui/DecorativeIcon'
-import { MIN_SEARCH_CHARS } from '../constants/home'
-import { useAppShell } from '../features/app-shell/hooks/useAppShell'
-import {
-  filterExercises,
-  resolveHomeViewModel,
-} from '../features/home/domain/homeView'
 import { PageLayout } from '../layouts/PageLayout'
-import { copyExerciseLinkToClipboard } from '../utils/navigationUtils'
 
 export function HomePage() {
-  const {
-    homeFilters: filters,
-    setHomeFilters: onFiltersChange,
-    handleToggleFavoriteExercise: onToggleFavoriteExercise,
-    isExerciseFavorite,
-  } = useAppShell()
-  logger.debug('Rendering HomePage with filters:', filters)
-
-  const { selectedCategory } = filters
-  const [copiedId, setCopiedId] = useState<string | null>(null)
-  const [draftSearchTerm, setDraftSearchTerm] = useState(filters.searchTerm)
-  const [showExerciseImages, setShowExerciseImages] = useState(
-    filters.showImages,
-  )
-  const [isLargeScreen, setIsLargeScreen] = useState(() => {
-    if (typeof window === 'undefined') {
-      return true
-    }
-
-    return window.matchMedia('(min-width: 1024px)').matches
-  })
-  const deferredSearchTerm = useDeferredValue(draftSearchTerm)
-  const trimmedSearchTerm = draftSearchTerm.trim()
-  const viewModel = useMemo(() => resolveHomeViewModel(filters), [filters])
-  const normalizedCategory = viewModel.normalizedCategory
-  const hasExplicitAll = viewModel.hasExplicitAll
-  const shouldShowResults = viewModel.shouldShowResults
-
-  useEffect(() => {
-    setDraftSearchTerm(filters.searchTerm)
-  }, [filters.searchTerm])
-
-  useEffect(() => {
-    setShowExerciseImages(filters.showImages)
-  }, [filters.showImages])
-
-  useEffect(() => {
-    if (typeof window === 'undefined') {
-      return
-    }
-
-    const mediaQuery = window.matchMedia('(min-width: 1024px)')
-    const updateViewport = () => setIsLargeScreen(mediaQuery.matches)
-
-    updateViewport()
-    mediaQuery.addEventListener?.('change', updateViewport)
-
-    return () => mediaQuery.removeEventListener?.('change', updateViewport)
-  }, [])
-
-  useEffect(() => {
-    if (draftSearchTerm === filters.searchTerm) {
-      return
-    }
-
-    if (
-      trimmedSearchTerm.length > 0 &&
-      trimmedSearchTerm.length < MIN_SEARCH_CHARS
-    ) {
-      return
-    }
-
-    const timeoutId = window.setTimeout(() => {
-      onFiltersChange({ ...filters, searchTerm: draftSearchTerm })
-    }, 80)
-
-    return () => window.clearTimeout(timeoutId)
-  }, [draftSearchTerm, filters, onFiltersChange, trimmedSearchTerm])
-
-  const { exerciseList, categories, totalExercises } = viewModel
-
-  const handleCopyUrl = async (exerciseId: string) => {
-    logger.debug(`Copying URL for exercise: ${exerciseId}`)
-
-    try {
-      await copyExerciseLinkToClipboard(exerciseId)
-      setCopiedId(exerciseId)
-      window.setTimeout(
-        () =>
-          setCopiedId((current) => (current === exerciseId ? null : current)),
-        1500,
-      )
-    } catch {
-      setCopiedId(null)
-    }
-  }
-
-  const filteredExercises = useMemo(() => {
-    return filterExercises(
-      exerciseList,
-      filters,
-      normalizedCategory,
-      hasExplicitAll,
-      deferredSearchTerm,
-    )
-  }, [
-    exerciseList,
-    deferredSearchTerm,
-    filters,
-    hasExplicitAll,
-    normalizedCategory,
-  ])
-
   return (
     <PageLayout className="gap-6">
-      <PageCard as="section">
-        <div className="mb-4 flex items-start gap-3">
-          <DecorativeIcon icon="dumbbell" />
-          <div>
-            <p className="text-sm font-semibold uppercase tracking-[0.24em] text-slate-500">
-              Discover exercises
-            </p>
-            <p className="text-sm text-slate-600 dark:text-slate-300">
-              Browse by category or search for the movement you need.
-            </p>
+      <PageCard
+        as="section"
+        className="relative overflow-hidden border-blue-200/70 bg-gradient-to-br from-white via-blue-50/70 to-violet-100/70 dark:border-blue-700/70 dark:from-slate-900 dark:via-slate-900 dark:to-violet-950/40"
+      >
+        <div className="pointer-events-none absolute -right-16 -top-16 h-44 w-44 rounded-full bg-blue-300/35 blur-3xl dark:bg-blue-600/30" />
+        <div className="pointer-events-none absolute -bottom-20 -left-20 h-52 w-52 rounded-full bg-violet-300/30 blur-3xl dark:bg-violet-700/30" />
+        <div className="relative space-y-6">
+          <div className="flex items-start gap-3">
+            <DecorativeIcon icon="spark" />
+            <div>
+              <p className="text-sm font-semibold uppercase tracking-[0.24em] text-slate-500">
+                Gym Pilot
+              </p>
+              <h1 className="text-3xl font-semibold tracking-tight text-slate-900 dark:text-slate-100 sm:text-4xl">
+                Train smarter with plans, sessions, and guided exercises.
+              </h1>
+            </div>
+          </div>
+
+          <p className="max-w-2xl text-base text-slate-700 dark:text-slate-200">
+            Build better workouts with a clean workflow for browsing exercise
+            cues, tracking sessions, and staying consistent week to week.
+          </p>
+
+          <div className="flex flex-wrap gap-3">
+            <Button
+              as={Link}
+              to="/exercises"
+              tone="blue"
+              className="px-5 py-2.5 text-sm sm:text-base"
+            >
+              Explore exercises
+            </Button>
+            <Button
+              as={Link}
+              to="/help"
+              tone="white"
+              className="px-5 py-2.5 text-sm sm:text-base"
+            >
+              Learn more
+            </Button>
           </div>
         </div>
-        <ExerciseFilterPanel
-          draftSearchTerm={draftSearchTerm}
-          selectedCategory={selectedCategory}
-          categories={categories}
-          normalizedCategory={normalizedCategory ?? null}
-          showExerciseImages={showExerciseImages}
-          usePlainInput={true}
-          onSearchChange={(nextValue) => setDraftSearchTerm(nextValue)}
-          onSelectExercise={(nextSearchTerm) =>
-            onFiltersChange({
-              ...filters,
-              searchTerm: nextSearchTerm,
-              selectedCategory: null,
-              showImages: showExerciseImages,
-            })
-          }
-          onCategoryChange={(nextCategory) =>
-            onFiltersChange({
-              ...filters,
-              searchTerm: draftSearchTerm,
-              selectedCategory: nextCategory,
-              showImages: showExerciseImages,
-            })
-          }
-          onToggleImages={() => {
-            const nextShowExerciseImages = !showExerciseImages
-            setShowExerciseImages(nextShowExerciseImages)
-            onFiltersChange({
-              ...filters,
-              searchTerm: draftSearchTerm,
-              selectedCategory,
-              showImages: nextShowExerciseImages,
-            })
-          }}
-        />
       </PageCard>
 
-      <PageCard as="section">
-        <ExerciseResultsHeader
-          filteredExercisesCount={filteredExercises.length}
-          totalExercises={totalExercises}
-          shouldShowResults={shouldShowResults}
-          searchText={trimmedSearchTerm}
-          normalizedCategory={normalizedCategory ?? null}
-        />
-
-        {shouldShowResults ? (
-          <ExerciseList
-            exercises={filteredExercises}
-            isLargeScreen={isLargeScreen}
-            showExerciseImages={showExerciseImages}
-            copiedId={copiedId}
-            isExerciseFavorite={isExerciseFavorite}
-            onToggleFavoriteExercise={onToggleFavoriteExercise}
-            onCopyUrl={handleCopyUrl}
-          />
-        ) : null}
+      <PageCard as="section" className="grid gap-4 sm:grid-cols-3">
+        <div className="rounded-2xl border border-slate-200/80 bg-white/80 p-4 dark:border-slate-700 dark:bg-slate-900/70">
+          <div className="mb-2 flex items-center gap-2">
+            <DecorativeIcon icon="dumbbell" />
+            <p className="font-semibold">Exercise library</p>
+          </div>
+          <p className="text-sm text-slate-600 dark:text-slate-300">
+            Search movements quickly and open clear step-by-step instructions.
+          </p>
+        </div>
+        <div className="rounded-2xl border border-slate-200/80 bg-white/80 p-4 dark:border-slate-700 dark:bg-slate-900/70">
+          <div className="mb-2 flex items-center gap-2">
+            <DecorativeIcon icon="calendar" />
+            <p className="font-semibold">Session flow</p>
+          </div>
+          <p className="text-sm text-slate-600 dark:text-slate-300">
+            Keep your routine organized with plans, sessions, and timetable
+            support.
+          </p>
+        </div>
+        <div className="rounded-2xl border border-slate-200/80 bg-white/80 p-4 dark:border-slate-700 dark:bg-slate-900/70">
+          <div className="mb-2 flex items-center gap-2">
+            <DecorativeIcon icon="star" />
+            <p className="font-semibold">Built for consistency</p>
+          </div>
+          <p className="text-sm text-slate-600 dark:text-slate-300">
+            Save favourites and keep momentum with fast access to what you use
+            most.
+          </p>
+        </div>
       </PageCard>
     </PageLayout>
   )
