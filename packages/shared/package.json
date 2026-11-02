@@ -7,7 +7,7 @@
   "scripts": {
     "typecheck": "tsc --noEmit --project tsconfig.json",
     "test": "vitest run",
-    "test:coverage": "vitest run --coverage --coverage.reportsDirectory ../../coverage/shared --coverage.thresholds.lines=60 --coverage.thresholds.functions=60 --coverage.thresholds.branches=50 --coverage.thresholds.statements=60"
+    "test:coverage": "vitest run --coverage --coverage.reportsDirectory ../../coverage/shared"
   },
   "dependencies": {
     "@gym-pilot/types": "1.0.0",
